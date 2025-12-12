@@ -43,7 +43,6 @@ import {
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 
 export { getESQLStatsQueryMeta };
-export { useGetGroupBySelectorRenderer as useGroupBySelectorRenderer } from './blocks/use_table_header_components';
 
 export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {
   defaultFilters?: Filter[];
@@ -156,7 +155,7 @@ const ESQLDataCascade = React.memo(
   }
 );
 
-interface CascadedDocumentsLayoutProps
+export interface CascadedDocumentsLayoutProps
   extends Omit<ESQLDataCascadeProps, 'togglePopover' | 'queryMeta'> {
   onUpdateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
 }

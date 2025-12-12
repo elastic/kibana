@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, useCallback, useMemo, Suspense } from 'react';
+import React, { useCallback, useMemo, Suspense } from 'react';
 import {
   DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
@@ -19,7 +19,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
-import { useGroupBySelectorRenderer } from '../../application/main/components/layout/cascaded_documents';
+import {
+  useGroupBySelectorRenderer,
+  LazyCascadedDocumentsLayout,
+} from '../../application/main/components/layout/cascaded_documents';
 import { type CascadedDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/cascaded_documents_restorable_state';
 
 export type DiscoverGridProps = UnifiedDataTableProps & {
@@ -39,16 +42,6 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
         viewModeToggle: React.ReactElement | undefined;
       }
   );
-
-const LazyCascadedDocumentsLayout = lazy(() =>
-  import(
-    '../../application/main/components/layout/cascaded_documents/cascaded_document_layout'
-  ).then(({ CascadedDocumentsLayout }) => {
-    return {
-      default: CascadedDocumentsLayout,
-    };
-  })
-);
 
 /**
  * Customized version of the UnifiedDataTable

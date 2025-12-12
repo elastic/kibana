@@ -7,5 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CascadedDocumentsLayout, useGroupBySelectorRenderer } from './cascaded_document_layout';
+import { lazy } from 'react';
+
+export { useGetGroupBySelectorRenderer as useGroupBySelectorRenderer } from './blocks/use_table_header_components';
 export type { ESQLDataCascadeProps } from './cascaded_document_layout';
+
+/**
+ * exported as a lazy component to avoid loading the component until it is needed,
+ * especially that it only renders for specific use cases (when cascade grouping is enabled).
+ */
+export const LazyCascadedDocumentsLayout = lazy(() =>
+  import('./cascaded_document_layout').then(({ CascadedDocumentsLayout }) => {
+    return {
+      default: CascadedDocumentsLayout,
+    };
+  })
+);
