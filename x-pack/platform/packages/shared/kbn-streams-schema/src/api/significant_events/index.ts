@@ -31,8 +31,13 @@ type ChangePointsValue = Partial<{
   trend: string;
 }>;
 
+interface SignificantEventOccurrence {
+  date: string;
+  count: number;
+}
+
 type SignificantEventsResponse = StreamQueryKql & {
-  occurrences: Array<{ date: string; count: number }>;
+  occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
@@ -40,7 +45,7 @@ type SignificantEventsResponse = StreamQueryKql & {
 
 interface SignificantEventsGetResponse {
   significant_events: SignificantEventsResponse[];
-  all: Array<{ date: string; count: number }>;
+  aggregated_occurrences: SignificantEventOccurrence[];
 }
 
 type SignificantEventsPreviewResponse = Pick<

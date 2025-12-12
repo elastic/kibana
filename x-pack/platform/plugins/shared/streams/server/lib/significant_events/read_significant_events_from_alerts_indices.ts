@@ -33,7 +33,7 @@ export async function readSignificantEventsFromAlertsIndices(
     ? assetClient.findQueries(name, query)
     : assetClient.getAssetLinks([name], ['query']).then(({ [name]: links }) => links));
   if (isEmpty(queryLinks)) {
-    return { significant_events: [], all: [] };
+    return { significant_events: [], aggregated_occurrences: [] };
   }
 
   const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
@@ -43,7 +43,7 @@ export async function readSignificantEventsFromAlertsIndices(
     .search<
       unknown,
       {
-        occurrences: AggregationsMultiBucketAggregateBase<{
+        aggregated_occurrences: AggregationsMultiBucketAggregateBase<{
           key_as_string: string;
           key: number;
           doc_count: number;
@@ -85,7 +85,7 @@ export async function readSignificantEventsFromAlertsIndices(
         },
       },
       aggs: {
-        occurrences: {
+        aggregated_occurrences: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: bucketSize,
@@ -143,16 +143,13 @@ export async function readSignificantEventsFromAlertsIndices(
           },
         },
       })),
-      all: [],
+      aggregated_occurrences: [],
     };
   }
 
-  const allBuckets = response.aggregations.occurrences.buckets;
-  const allOccurrences = isArray(allBuckets)
-    ? allBuckets.map((bucket) => ({
-        date: bucket.key_as_string,
-        count: bucket.doc_count,
-      }))
+  const aggregatedBuckets = response.aggregations.aggregated_occurrences.buckets;
+  const aggregatedOccurrences = isArray(aggregatedBuckets)
+    ? aggregatedBuckets.map((bucket) => ({ date: bucket.key_as_string, count: bucket.doc_count }))
     : [];
 
   const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
@@ -188,7 +185,7 @@ export async function readSignificantEventsFromAlertsIndices(
 
   return {
     significant_events: [...significantEvents, ...notFoundSignificantEvents],
-    all: allOccurrences,
+    aggregated_occurrences: aggregatedOccurrences,
   };
 }
 

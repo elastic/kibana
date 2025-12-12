@@ -251,10 +251,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   {
                     defaultMessage: 'Detected event occurrences ({count})',
                     values: {
-                      count: (significantEventsFetchState.value?.all ?? []).reduce(
-                        (acc, point) => acc + point.y,
-                        0
-                      ),
+                      count: (
+                        significantEventsFetchState.value?.aggregated_occurrences ?? []
+                      ).reduce((acc, point) => acc + point.y, 0),
                     },
                   }
                 )}
@@ -264,7 +263,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             <EuiFlexItem grow={false}>
               <SignificantEventsHistogramChart
                 id={'all-events'}
-                occurrences={significantEventsFetchState.value?.all ?? []}
+                occurrences={significantEventsFetchState.value?.aggregated_occurrences ?? []}
                 changes={compact(
                   (significantEventsFetchState.value?.significant_events ?? []).map((item) =>
                     formatChangePoint({

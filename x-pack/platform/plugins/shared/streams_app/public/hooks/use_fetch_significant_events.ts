@@ -41,7 +41,11 @@ export const useFetchSignificantEvents = ({
     async ({
       signal,
     }): Promise<
-      undefined | { significant_events: SignificantEventItem[]; all: { x: number; y: number }[] }
+      | undefined
+      | {
+          significant_events: SignificantEventItem[];
+          aggregated_occurrences: { x: number; y: number }[];
+        }
     > => {
       const isoFrom = new Date(start).toISOString();
       const isoTo = new Date(end).toISOString();
@@ -75,26 +79,31 @@ export const useFetchSignificantEvents = ({
           },
           signal,
         })
-        .then(({ significant_events: events, all }) => {
-          return {
-            significant_events: events.map((series) => {
-              const { occurrences, change_points: changePoints, ...query } = series;
-              return {
-                title: query.title,
-                query,
-                change_points: changePoints,
-                occurrences: occurrences.map((occurrence) => ({
-                  x: new Date(occurrence.date).getTime(),
-                  y: occurrence.count,
-                })),
-              };
-            }),
-            all: all.map((occurrence) => ({
-              x: new Date(occurrence.date).getTime(),
-              y: occurrence.count,
-            })),
-          };
-        });
+        .then(
+          ({
+            significant_events: significantEvents,
+            aggregated_occurrences: aggregatedOccurrences,
+          }) => {
+            return {
+              significant_events: significantEvents.map((series) => {
+                const { occurrences, change_points: changePoints, ...query } = series;
+                return {
+                  title: query.title,
+                  query,
+                  change_points: changePoints,
+                  occurrences: occurrences.map((occurrence) => ({
+                    x: new Date(occurrence.date).getTime(),
+                    y: occurrence.count,
+                  })),
+                };
+              }),
+              aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
+                x: new Date(occurrence.date).getTime(),
+                y: occurrence.count,
+              })),
+            };
+          }
+        );
 
       return response;
     },
