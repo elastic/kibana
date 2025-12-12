@@ -63,6 +63,7 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 - [x] Cluster Listing API endpoint (`GET /internal/kubernetes_poc/cluster_listing`)
 - [x] Cluster Listing table with EuiDataGrid and custom cell renderers
 - [x] Custom cell renderers for health status, cloud provider, pod statuses, and utilization metrics
+- [x] Cluster overview cards with Lens visualizations (Total Clusters, Healthy/Unhealthy Clusters, CPU Usage by Cluster)
 
 ### 🚧 In Progress
 - None currently
@@ -80,6 +81,10 @@ x-pack/solutions/observability/plugins/kubernetes-poc/
 ├── public/              # Client-side code
 │   ├── application/     # React components
 │   │   ├── app.tsx      # Main app with React Router
+│   │   ├── components/  # Reusable components
+│   │   │   ├── cluster_overview_cards/  # Lens-based metric cards
+│   │   │   ├── cluster_table/           # Cluster listing table
+│   │   │   └── kubernetes_page_template/ # Page template wrapper
 │   │   └── pages/       # Page components
 │   │       ├── cluster_listing/  # Cluster listing page
 │   │       └── overview/         # Overview page
@@ -95,9 +100,68 @@ x-pack/solutions/observability/plugins/kubernetes-poc/
 - **Route Factory**: `createKubernetesPocServerRoute` in `server/routes/create_kubernetes_poc_server_route.ts`
 - **Route Repository**: Routes aggregated in `server/routes/index.ts`
 - **API Client**: Type-safe client in `public/services/rest/create_call_api.ts`
+- **Lens Embeddable**: Using `LensEmbeddableComponent` for ES|QL-powered visualizations
+
+### Lens Embeddable Pattern
+
+The plugin uses Lens embeddables for rendering ES|QL-powered visualizations. Key configuration:
+
+```typescript
+// Access Lens via plugin context
+const { plugins } = usePluginContext();
+const LensComponent = plugins.lens.EmbeddableComponent;
+
+// Define attributes with ES|QL query
+const attributes: TypedLensByValueInput['attributes'] = {
+  title: 'My Chart',
+  visualizationType: 'lnsMetric', // or 'lnsXY'
+  type: 'lens',
+  references: [],
+  state: {
+    visualization: { /* visualization-specific config */ },
+    query: { esql: 'FROM index | STATS count = COUNT(*)' },
+    filters: [],
+    datasourceStates: {
+      textBased: {
+        layers: {
+          layer_0: {
+            columns: [
+              {
+                columnId: 'metric_0',
+                fieldName: 'count',
+                label: 'Total Count',      // Custom display label
+                customLabel: true,          // Enable custom label
+                meta: { type: 'number' },
+                params: { format: { id: 'percent' } }, // Optional formatter
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
+};
+
+// Render with minimal chrome
+<LensComponent
+  id="uniqueId"
+  attributes={attributes}
+  timeRange={timeRange}
+  viewMode="view"
+  noPadding
+  withDefaultActions={false}
+  disableTriggers
+  showInspector={false}
+/>
+```
+
+**Key Column Properties**:
+- `fieldName`: The ES|QL result column name
+- `label`: Custom display label (requires `customLabel: true`)
+- `params.format.id`: Value formatter (`'percent'`, `'number'`, etc.)
 
 ### Dependencies
-- **Required Plugins**: `data`, `observability`, `observabilityShared`
+- **Required Plugins**: `data`, `dataViews`, `lens`, `observability`, `observabilityShared`, `unifiedSearch`
 - **Required Bundles**: None (removed unused `kibanaReact`)
 
 ## Development Workflow
@@ -216,21 +280,62 @@ This section catalogs the ES|QL queries used for each visual element in the UI. 
 
 > **Note**: Queries use `?_tstart` and `?_tend` as named parameters for time range filtering, which should be passed from the UI's time picker.
 
-### Cluster Listing Page
+### Cluster Listing Page - Overview Cards
 
-#### CPU Usage Trend by Cluster
-Shows average CPU usage over time for each cluster (used in the sparkline/trend chart).
+#### Total Clusters (Metric Card)
+Total number of monitored clusters displayed as a Lens metric visualization.
 
 ```esql
 FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
-| STATS avg_cpu = AVG(k8s.node.cpu.usage) BY k8s.cluster.name, bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+| STATS cluster_count = COUNT_DISTINCT(k8s.cluster.name)
 ```
 
-**Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver)
-**Dimensions**: `k8s.cluster.name`, `@timestamp` (bucketed)
+**Visualization**: `lnsMetric` with vertical progress bar
+**Metrics Used**: None (count of distinct attribute values)
+**Dimensions**: `k8s.cluster.name`
 
 ---
+
+#### Healthy/Unhealthy Clusters (Metric Cards)
+Counts clusters by health status displayed as Lens metric visualizations with progress bars. A cluster is considered "unhealthy" if any node has `condition_ready` <= 0.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL AND k8s.node.condition_ready IS NOT NULL
+| STATS 
+    total_nodes = COUNT_DISTINCT(k8s.node.name),
+    ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0
+  BY k8s.cluster.name
+| EVAL health_status = CASE(ready_nodes < total_nodes, "unhealthy", "healthy")
+| STATS 
+    healthy_count = COUNT(*) WHERE health_status == "healthy",
+    total_count = COUNT(*)
+```
+
+**Visualization**: `lnsMetric` with vertical progress bar (max = total_count)
+**Metrics Used**: `k8s.node.condition_ready` (from k8sclusterreceiver)
+**Dimensions**: `k8s.cluster.name`, `k8s.node.name`
+
+---
+
+#### CPU Usage by Cluster (Line Chart)
+Shows average CPU usage over time for each cluster as a multi-series line chart.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL AND k8s.node.cpu.usage IS NOT NULL
+| STATS avg_cpu = AVG(k8s.node.cpu.usage) BY @timestamp = BUCKET(@timestamp, 1 minute), k8s.cluster.name
+```
+
+**Visualization**: `lnsXY` line chart with `splitAccessor` for cluster breakdown
+**Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver)
+**Dimensions**: `k8s.cluster.name`, `@timestamp` (bucketed by 1 minute)
+**Formatting**: Percent formatter on Y-axis
+
+---
+
+### Cluster Listing Page - Table
 
 #### Cluster Count
 Total number of monitored clusters.
@@ -243,26 +348,6 @@ FROM remote_cluster:metrics-*
 
 **Metrics Used**: None (count of distinct attribute values)
 **Dimensions**: `k8s.cluster.name`
-
----
-
-#### Healthy vs Unhealthy Cluster Counts
-Counts clusters by health status. A cluster is considered "unhealthy" if any node has `condition_ready` <= 0.
-
-```esql
-FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name IS NOT NULL AND k8s.node.condition_ready IS NOT NULL
-| STATS 
-    total_nodes = COUNT_DISTINCT(k8s.node.name),
-    ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0
-  BY k8s.cluster.name
-| EVAL health_status = CASE(ready_nodes < total_nodes, "unhealthy", "healthy")
-| STATS cluster_count = COUNT(*) BY health_status
-```
-
-**Metrics Used**: `k8s.node.condition_ready` (from k8sclusterreceiver)
-**Dimensions**: `k8s.cluster.name`, `k8s.node.name`
-**Output**: `health_status` ("healthy" | "unhealthy"), `cluster_count`
 
 ---
 

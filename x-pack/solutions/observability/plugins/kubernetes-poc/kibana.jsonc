@@ -12,6 +12,7 @@
     "requiredPlugins": [
       "data",
       "dataViews",
+      "lens",
       "observability",
       "observabilityShared",
       "unifiedSearch"

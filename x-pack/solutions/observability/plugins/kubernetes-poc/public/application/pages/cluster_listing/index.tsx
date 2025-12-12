@@ -12,12 +12,19 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { KubernetesPageTemplate } from '../../components/kubernetes_page_template';
 import { KubernetesOverviewTabs, KubernetesPage } from '../../components/kubernetes_overview_tabs';
 import { ClusterTable } from '../../components/cluster_table';
+import {
+  ClusterCountCard,
+  HealthyClustersCard,
+  UnhealthyClustersCard,
+  CpuUsageTrendCard,
+} from '../../components/cluster_overview_cards';
 import { useFetchClusterListing } from '../../../hooks/use_fetch_cluster_listing';
 
 const DEFAULT_TIME_RANGE: TimeRange = {
@@ -113,7 +120,33 @@ export const ClusterListingPage: React.FC = () => {
       appliedTimeRange={appliedTimeRange}
     >
       <KubernetesOverviewTabs activePage={KubernetesPage.Clusters} />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
+
+      {/* Overview Cards with Lens Visualizations */}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder paddingSize="none">
+            <ClusterCountCard timeRange={appliedTimeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder paddingSize="none">
+            <HealthyClustersCard timeRange={appliedTimeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder paddingSize="none">
+            <UnhealthyClustersCard timeRange={appliedTimeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiPanel hasBorder paddingSize="none">
+            <CpuUsageTrendCard timeRange={appliedTimeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
       {renderContent()}
     </KubernetesPageTemplate>
   );

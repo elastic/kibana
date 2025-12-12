@@ -354,7 +354,7 @@ export const ClusterTable: React.FC<ClusterTableProps> = ({ clusters, onExpandCl
   }, []);
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder paddingSize="s">
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.kubernetesPoc.clusterTable.h2.clustersLabel', {
