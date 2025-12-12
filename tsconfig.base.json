@@ -1708,6 +1708,8 @@
       "@kbn/remote-clusters-plugin/*": ["x-pack/platform/plugins/private/remote_clusters/*"],
       "@kbn/rendering-plugin": ["src/platform/test/plugin_functional/plugins/rendering_plugin"],
       "@kbn/rendering-plugin/*": ["src/platform/test/plugin_functional/plugins/rendering_plugin/*"],
+      "@kbn/renovate-codeowners-generator": ["packages/kbn-renovate-codeowners-generator"],
+      "@kbn/renovate-codeowners-generator/*": ["packages/kbn-renovate-codeowners-generator/*"],
       "@kbn/repo-file-maps": ["packages/kbn-repo-file-maps"],
       "@kbn/repo-file-maps/*": ["packages/kbn-repo-file-maps/*"],
       "@kbn/repo-info": ["src/platform/packages/shared/kbn-repo-info"],

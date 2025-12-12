@@ -7934,6 +7934,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/renovate-codeowners-generator@link:packages/kbn-renovate-codeowners-generator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/repo-file-maps@link:packages/kbn-repo-file-maps":
   version "0.0.0"
   uid ""

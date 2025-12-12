@@ -1673,6 +1673,7 @@
     "@kbn/product-doc-artifact-builder": "link:x-pack/packages/ai-infra/product-doc-artifact-builder",
     "@kbn/profiler": "link:src/platform/packages/shared/kbn-profiler",
     "@kbn/relocate": "link:packages/kbn-relocate",
+    "@kbn/renovate-codeowners-generator": "link:packages/kbn-renovate-codeowners-generator",
     "@kbn/repo-file-maps": "link:packages/kbn-repo-file-maps",
     "@kbn/repo-linter": "link:packages/kbn-repo-linter",
     "@kbn/repo-path": "link:src/platform/packages/private/kbn-repo-path",
