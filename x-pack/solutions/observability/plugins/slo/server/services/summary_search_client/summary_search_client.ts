@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import type { SLOSettings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { createEsParams, typedSearch } from '../../utils/queries';
-import { getSummaryIndices, getSloSettings } from '../slo_settings';
 import type { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from '../transform_generators';
-import { excludeStaleSummaryFilter } from '../summary_utils';
 import { fromRemoteSummaryDocumentToSloDefinition } from '../unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from '../utils';
+import { getSummaryIndices } from '../utils/get_summary_indices';
+import { excludeStaleSummaryFilter } from '../utils/summary_stale_filter';
 import type {
   Paginated,
   Pagination,
@@ -32,9 +33,9 @@ import { isCursorPagination } from './types';
 export class DefaultSummarySearchClient implements SummarySearchClient {
   constructor(
     private scopedClusterClient: IScopedClusterClient,
-    private soClient: SavedObjectsClientContract,
     private logger: Logger,
-    private spaceId: string
+    private spaceId: string,
+    private settings: SLOSettings
   ) {}
 
   async search(
@@ -42,11 +43,14 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     filters: string,
     sort: Sort,
     pagination: Pagination,
-    hideStale?: boolean
+    hideStale: boolean = false
   ): Promise<Paginated<SummaryResult>> {
     const parsedFilters = parseStringFilters(filters, this.logger);
-    const settings = await getSloSettings(this.soClient);
-    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
+
+    const { indices } = await getSummaryIndices(
+      this.scopedClusterClient.asInternalUser,
+      this.settings
+    );
 
     const esParams = createEsParams({
       index: indices,
@@ -55,7 +59,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            ...excludeStaleSummaryFilter(settings, kqlQuery, hideStale),
+            ...excludeStaleSummaryFilter({
+              settings: this.settings,
+              kqlFilter: kqlQuery,
+              forceExclude: hideStale,
+            }),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
@@ -185,8 +193,6 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     });
   }
 }
-
-// excludeStaleSummaryFilter moved to ../summary_utils.ts
 
 function getRemoteClusterName(index: string) {
   if (isCCSRemoteIndexName(index)) {

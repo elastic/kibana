@@ -16,7 +16,7 @@ import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
-import { initSpacesNavControl, TourManager } from './nav_control';
+import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
 import { SpacesManager } from './spaces_manager';
 import type { SpacesApi } from './types';
@@ -47,7 +47,6 @@ export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
-  private solutionViewTourManager!: TourManager;
   private eventTracker!: EventTracker;
 
   private managementService?: ManagementService;
@@ -67,10 +66,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
 
     this.spacesManager = new SpacesManager(core.http);
-    this.solutionViewTourManager = new TourManager(
-      () => core.getStartServices().then(([coreStart]) => coreStart),
-      this.spacesManager
-    );
     this.spacesApi = {
       ui: getUiApi({
         spacesManager: this.spacesManager,
@@ -80,7 +75,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
       hasOnlyDefaultSpace,
       isSolutionViewEnabled: this.config.allowSolutionVisibility,
-      solutionViewTourManager: this.solutionViewTourManager,
     };
 
     registerSpacesEventTypes(core);
@@ -171,13 +165,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   public start(core: CoreStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(
-        this.spacesManager,
-        core,
-        this.config,
-        this.eventTracker,
-        this.solutionViewTourManager
-      );
+      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
 
     return this.spacesApi;

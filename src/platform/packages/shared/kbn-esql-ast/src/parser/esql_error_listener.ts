@@ -13,7 +13,7 @@ import type { EditorError } from '../types';
 
 // These will need to be manually updated whenever the relevant grammar changes.
 const SYNTAX_ERRORS_TO_IGNORE = [
-  `mismatched input '<EOF>' expecting {'row', 'from', 'ts', 'show'}`,
+  `mismatched input '<EOF>' expecting {'row', 'from', 'ts', 'set', 'show'}`,
 ];
 
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;

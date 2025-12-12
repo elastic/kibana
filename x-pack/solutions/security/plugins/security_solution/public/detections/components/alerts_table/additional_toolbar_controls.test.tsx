@@ -15,6 +15,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { PageScope } from '../../../data_view_manager/constants';
+import * as useGetGroupSelectorHook from '@kbn/grouping/src/hooks/use_get_group_selector';
 
 const mockDispatch = jest.fn();
 const mockedUseKibana = mockUseKibana();
@@ -102,5 +103,45 @@ describe('AdditionalToolbarControls', () => {
         tableId,
       });
     });
+  });
+
+  test('Should pass settings to useGetGroupSelectorStateless', () => {
+    const settings = {
+      hideNoneOption: true,
+      hideCustomFieldOption: true,
+      hideOptionsTitle: true,
+      popoverButtonLabel: 'Custom Label',
+    };
+    (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      ...groups[tableId],
+      settings,
+    }));
+
+    const useGetGroupSelectorStatelessSpy = jest.spyOn(
+      useGetGroupSelectorHook,
+      'useGetGroupSelectorStateless'
+    );
+
+    const store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [tableId]: {
+          ...groups[tableId],
+          settings,
+        },
+      },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <AdditionalToolbarControls tableType={tableId} pageScope={PageScope.alerts} />
+      </TestProviders>
+    );
+
+    expect(useGetGroupSelectorStatelessSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        settings,
+      })
+    );
   });
 });

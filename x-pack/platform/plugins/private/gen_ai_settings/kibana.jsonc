@@ -9,8 +9,8 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "genAiSettings"],
-    "requiredPlugins": ["management", "actions", "inference", "licensing"],
+    "requiredPlugins": ["management", "actions", "inference", "licensing", "productDocBase"],
     "optionalPlugins": ["spaces"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "productDocBase"]
   }
 }

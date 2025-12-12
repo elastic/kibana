@@ -11,7 +11,7 @@ import { type ESQLFunction } from '@kbn/esql-ast';
 import {
   getFunctionDefinition,
   getFormattedFunctionSignature,
-} from '@kbn/esql-ast/src/definitions/utils';
+} from '@kbn/esql-ast/src/commands/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 

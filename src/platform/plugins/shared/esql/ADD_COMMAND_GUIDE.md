@@ -48,9 +48,9 @@ Depending on the command you are adding, it may be required or not to do an adju
 
 We need to register the new command in the `kbn-esql-ast` [package](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md) in order to activate the autocomplete and validation features.
 
-All commands are registered in our commands registry. Read [the doc](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/commands_registry/README.md) for context.
+All commands are registered in our commands registry. Read [the doc](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/commands/registry/README.md) for context.
 
-- [ ] First, create a new folder with the same name as the command under `kbn-esql-ast/src/commands_registry/commands`. This will house all command logic that gets sent to the registry.
+- [ ] First, create a new folder with the same name as the command under `kbn-esql-ast/src/commands/registry/commands`. This will house all command logic that gets sent to the registry.
 - [ ] Create an `index.ts` file within the folder. This is where you create your command definition (`ICommand`).
 
   If the command is not ready to be advertised, use `hidden: true`.
@@ -59,9 +59,9 @@ All commands are registered in our commands registry. Read [the doc](https://git
 
   If the command is ready for GA, don’t use either of the above properties.
 
-- [ ] Import your new command definition in `commands_registry/index.ts`.
+- [ ] Import your new command definition in `commands/registry/index.ts`.
 
-If you get stuck, check the many examples in `commands_registry/commands`.
+If you get stuck, check the many examples in `commands/registry/commands`.
 
 ### Example ⭐
 

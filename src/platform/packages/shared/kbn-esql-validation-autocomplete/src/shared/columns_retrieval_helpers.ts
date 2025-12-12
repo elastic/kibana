@@ -8,9 +8,9 @@
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast';
-import type { ESQLColumnData, GetColumnsByTypeFn } from '@kbn/esql-ast/src/commands_registry/types';
-import { buildFieldsDefinitionsWithMetadata } from '@kbn/esql-ast/src/definitions/utils';
+import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast/src/commands/registry/constants';
+import type { ESQLColumnData, GetColumnsByTypeFn } from '@kbn/esql-ast/src/commands/registry/types';
+import { buildFieldsDefinitionsWithMetadata } from '@kbn/esql-ast/src/commands/definitions/utils';
 import { QueryColumns } from '../query_columns_service';
 
 export type ColumnsMap = Map<string, ESQLColumnData>;

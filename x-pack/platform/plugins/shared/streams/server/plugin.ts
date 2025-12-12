@@ -46,6 +46,7 @@ import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_st
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { getDefaultFeatureRegistry } from './lib/streams/feature/feature_type_registry';
+import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -103,6 +104,7 @@ export class StreamsPlugin
     }));
 
     registerRules({ plugins, logger: this.logger.get('rules') });
+    registerStreamsSavedObjects(core.savedObjects);
 
     const assetService = new AssetService(core, this.logger);
     const attachmentService = new AttachmentService(core, this.logger);

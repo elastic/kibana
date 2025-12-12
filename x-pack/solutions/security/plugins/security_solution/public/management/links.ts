@@ -283,6 +283,7 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
+
   const {
     canReadActionsLogManagement,
     canAccessHostIsolationExceptions,

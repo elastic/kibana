@@ -30,6 +30,7 @@ interface Props {
     label?: string;
   };
   showButtonTitle?: boolean;
+  'aria-label'?: string;
 }
 
 const Wrapper = ({
@@ -70,6 +71,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   defaultValue,
   wrapField = false,
   showButtonTitle,
+  'aria-label': ariaLabel,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
 
@@ -107,6 +109,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
     <Wrapper wrapField={wrapField} formRowProps={formRowProps} button={VariableButton}>
       <EuiFieldText
         fullWidth
+        aria-label={ariaLabel}
         name={paramsProperty}
         id={`${paramsProperty}Id`}
         isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}

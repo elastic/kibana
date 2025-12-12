@@ -8,7 +8,7 @@
  */
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '@kbn/esql-ast';
-import type { ESQLColumnData, ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLColumnData, ESQLPolicy } from '@kbn/esql-ast/src/commands/registry/types';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 
