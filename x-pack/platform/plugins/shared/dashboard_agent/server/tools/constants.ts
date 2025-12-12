@@ -13,7 +13,7 @@ export const LARGE_PANEL_WIDTH = 24; // XY & other charts (2 per row)
 // Markdown panel dimensions
 export const MARKDOWN_PANEL_WIDTH = 48; // Full width
 export const MARKDOWN_MIN_HEIGHT = 6;
-export const MARKDOWN_MAX_HEIGHT = 12;
+export const MARKDOWN_MAX_HEIGHT = 9;
 
 // Chart types that use smaller panel widths
 export const SMALL_CHART_TYPES = new Set(['metric', 'legacy_metric', 'gauge']);
