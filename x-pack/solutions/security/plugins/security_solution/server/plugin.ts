@@ -128,6 +128,7 @@ import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks
 import {
   registerEntityStoreFieldRetentionEnrichTask,
   registerEntityStoreSnapshotTask,
+  registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
@@ -344,7 +345,21 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreSnapshotTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
+        telemetry: core.analytics,
         taskManager: plugins.taskManager,
+      });
+
+      registerEntityStoreHealthTask({
+        getStartServices: core.getStartServices,
+        appClientFactory,
+        logger: this.logger,
+        telemetry: core.analytics,
+        taskManager: plugins.taskManager,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        entityStoreConfig: config.entityAnalytics.entityStore,
+        experimentalFeatures,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        isServerless: this.isServerless,
       });
     }
 
