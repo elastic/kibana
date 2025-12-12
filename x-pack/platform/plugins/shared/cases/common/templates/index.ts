@@ -7,4 +7,9 @@
 
 export interface Template {
   name: string;
+
+  /**
+   * Yaml definition for the template
+   */
+  definition: string;
 }

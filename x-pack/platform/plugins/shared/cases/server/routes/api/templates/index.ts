@@ -6,13 +6,33 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ISavedObjectsSerializer, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Template } from '../../../../common/templates';
-import { CASES_INTERNAL_URL } from '../../../../common/constants';
+import { CASE_TEMPLATE_SAVED_OBJECT, CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 // TODO: split this into multiple files, add rbac, security, make this api internal etc etc
+
+// Services
+
+export class TemplatesService {
+  constructor(
+    private readonly dependencies: {
+      unsecuredSavedObjectsClient: SavedObjectsClientContract;
+      savedObjectsSerializer: ISavedObjectsSerializer;
+    }
+  ) {}
+
+  async hello() {
+    const findResult = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
+      type: CASE_TEMPLATE_SAVED_OBJECT,
+    });
+    // eslint-disable-next-line no-console
+    console.log('world', findResult.saved_objects);
+  }
+}
 
 // Routes
 
@@ -53,6 +73,8 @@ export const getTemplatesRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
+
+      casesClient.templates.hello();
 
       return response.ok({
         body: templates,
