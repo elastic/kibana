@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { Case, CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
@@ -160,21 +161,6 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
-}
-
-/**
- * Encodes the version from Elasticsearch hit's _seq_no and _primary_term.
- * This matches the format used by Kibana's saved objects version encoding.
- */
-function encodeHitVersion(hit: estypes.SearchHit): string | undefined {
-  const seqNo = (hit as { _seq_no?: number })._seq_no;
-  const primaryTerm = (hit as { _primary_term?: number })._primary_term;
-
-  if (seqNo == null || primaryTerm == null) {
-    return undefined;
-  }
-
-  return Buffer.from(JSON.stringify([seqNo, primaryTerm]), 'utf8').toString('base64');
 }
 
 export function transformESModelToCase(

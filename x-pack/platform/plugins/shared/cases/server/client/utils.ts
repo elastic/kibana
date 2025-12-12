@@ -429,7 +429,7 @@ export const buildCustomFieldsFilter = ({
  */
 export const removeAttributesFromFilter = (node: KueryNode): KueryNode => {
   // Create a deep copy to avoid mutating the original
-  const modifiedNode = JSON.parse(JSON.stringify(node)) as KueryNode;
+  const modifiedNode = structuredClone(node);
 
   const traverse = (ast: KueryNode): void => {
     // Handle literal nodes with string values (field paths)

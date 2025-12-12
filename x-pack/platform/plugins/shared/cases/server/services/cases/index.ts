@@ -206,7 +206,7 @@ export class CasesService {
       },
     });
 
-    const references = response.hits.hits.map((hit) => hit?._source?.references).flat();
+    const references = response?.hits?.hits?.map((hit) => hit?._source?.references).flat();
     if (!references) {
       return [];
     }
@@ -292,7 +292,7 @@ export class CasesService {
       ...convertFindQueryParams(caseOptions),
     });
 
-    const casesMap = cases.hits.hits.reduce((accMap, caseInfo) => {
+    const casesMap = cases?.hits?.hits?.reduce((accMap, caseInfo) => {
       // Extract UUID from _id format: "cases:uuid"
       if (caseInfo._id && caseInfo._id.startsWith(`${CASE_SAVED_OBJECT}:`)) {
         const caseId = caseInfo._id.split(':')[1];
