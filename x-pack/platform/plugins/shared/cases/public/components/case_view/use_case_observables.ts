@@ -10,7 +10,7 @@ import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants';
 import type { CaseUI } from '../../../common';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
-export const useCaseObservables = (caseData: CaseUI) => {
+export const useCaseObservables = (caseData: CaseUI, searchTerm?: string) => {
   const { data: currentConfiguration, isLoading: loadingCaseConfigure } = useGetCaseConfiguration();
 
   return useMemo(() => {
@@ -27,8 +27,17 @@ export const useCaseObservables = (caseData: CaseUI) => {
     ]);
 
     return {
-      observables: caseData.observables.filter(({ typeKey }) => availableTypesSet.has(typeKey)),
+      observables: caseData.observables.filter(
+        ({ typeKey, value }) =>
+          availableTypesSet.has(typeKey) &&
+          (!searchTerm || value.toLowerCase().includes(searchTerm.toLowerCase()))
+      ),
       isLoading: loadingCaseConfigure,
     };
-  }, [caseData.observables, currentConfiguration.observableTypes, loadingCaseConfigure]);
+  }, [
+    caseData.observables,
+    currentConfiguration.observableTypes,
+    loadingCaseConfigure,
+    searchTerm,
+  ]);
 };
