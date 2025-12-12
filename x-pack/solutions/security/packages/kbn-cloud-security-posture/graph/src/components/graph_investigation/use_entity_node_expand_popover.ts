@@ -81,6 +81,55 @@ export const useEntityNodeExpandPopover = (
     (
       node: NodeProps
     ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
+      const nodeMode = getNodeDocumentMode(node.data);
+
+      // Check if this is a grouped entity node:
+      // 1. nodeMode is explicitly 'grouped-entities', OR
+      // 2. nodeMode is 'na' (no documentsData) but count > 0 (indicating grouped entities)
+      const isGroupedEntity =
+        nodeMode === 'grouped-entities' ||
+        (nodeMode === 'na' && typeof node.data.count === 'number' && node.data.count > 0);
+
+      const shouldDisableEntityDetailsListItem =
+        !onShowEntityDetailsClick || !['single-entity', 'grouped-entities'].includes(nodeMode);
+
+      const entityDetailsItem: ItemExpandPopoverListItemProps = {
+        type: 'item',
+        iconType: 'expand',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        label: i18n.translate(
+          'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+          {
+            defaultMessage: 'Show entity details',
+          }
+        ),
+        disabled: shouldDisableEntityDetailsListItem,
+        onClick: () => {
+          onShowEntityDetailsClick?.(node);
+        },
+        showToolTip: shouldDisableEntityDetailsListItem,
+        toolTipText: shouldDisableEntityDetailsListItem
+          ? i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+              {
+                defaultMessage: 'Details not available',
+              }
+            )
+          : undefined,
+        toolTipProps: shouldDisableEntityDetailsListItem
+          ? {
+              position: 'bottom',
+              'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+            }
+          : undefined,
+      };
+
+      // For grouped entities, only show "Show entity details" action
+      if (isGroupedEntity) {
+        return [entityDetailsItem];
+      }
+
+      // For single entities, show all actions
       const actionsByEntityAction = containsFilter(searchFilters, ACTOR_ENTITY_ID, node.id)
         ? 'hide'
         : 'show';
@@ -90,10 +139,6 @@ export const useEntityNodeExpandPopover = (
       const relatedEntitiesAction = containsFilter(searchFilters, RELATED_ENTITY, node.id)
         ? 'hide'
         : 'show';
-
-      const shouldDisableEntityDetailsListItem =
-        !onShowEntityDetailsClick ||
-        !['single-entity', 'grouped-entities'].includes(getNodeDocumentMode(node.data));
 
       return [
         {
@@ -165,36 +210,7 @@ export const useEntityNodeExpandPopover = (
         {
           type: 'separator',
         },
-        {
-          type: 'item',
-          iconType: 'expand',
-          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-          label: i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-            {
-              defaultMessage: 'Show entity details',
-            }
-          ),
-          disabled: shouldDisableEntityDetailsListItem,
-          onClick: () => {
-            onShowEntityDetailsClick?.(node);
-          },
-          showToolTip: shouldDisableEntityDetailsListItem,
-          toolTipText: shouldDisableEntityDetailsListItem
-            ? i18n.translate(
-                'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
-                {
-                  defaultMessage: 'Details not available',
-                }
-              )
-            : undefined,
-          toolTipProps: shouldDisableEntityDetailsListItem
-            ? {
-                position: 'bottom',
-                'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
-              }
-            : undefined,
-        },
+        entityDetailsItem,
       ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
     },
     [
