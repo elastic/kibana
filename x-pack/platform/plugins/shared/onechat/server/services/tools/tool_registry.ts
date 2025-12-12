@@ -153,8 +153,8 @@ class ToolRegistryImpl implements ToolRegistry {
     for (const provider of this.orderedProviders) {
       const toolsFromType = await provider.list();
       for (const tool of toolsFromType) {
-        if (!(await this.isAvailable(tool))) {
-          continue;
+        if (await this.isAvailable(tool)) {
+          allTools.push(tool);
         }
       }
     }
