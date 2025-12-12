@@ -8,6 +8,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHeader } from './chat_header';
+
+jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
+  AIAgentTourCallout: jest.fn(({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="ai-agent-tour-callout">{children}</div>
+  )),
+  useAIAgentTourDismissed: jest.fn(),
+}));
+
+import * as ObservabilityAIAssistantPublic from '@kbn/observability-ai-assistant-plugin/public';
+
 jest.mock('./chat_actions_menu', () => ({
   ChatActionsMenu: () => <div data-test-subj="chat-actions-menu" />,
 }));
@@ -21,6 +31,11 @@ jest.mock('./chat_context_menu', () => ({
 }));
 
 describe('ChatHeader', () => {
+  const useAIAgentTourDismissedMock =
+    ObservabilityAIAssistantPublic.useAIAgentTourDismissed as unknown as jest.Mock;
+  const aiAgentTourCalloutMock =
+    ObservabilityAIAssistantPublic.AIAgentTourCallout as unknown as jest.Mock;
+
   const baseProps = {
     conversationId: 'abc',
     conversation: {
@@ -54,6 +69,7 @@ describe('ChatHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useAIAgentTourDismissedMock.mockReturnValue([true, jest.fn()]);
   });
 
   it('renders the chat actions menu', () => {
@@ -74,5 +90,52 @@ describe('ChatHeader', () => {
     );
 
     expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
+  });
+
+  it('wraps the chat actions menu with the AI agent tour callout when not dismissed', () => {
+    useAIAgentTourDismissedMock.mockReturnValue([false, jest.fn()]);
+
+    render(
+      <ChatHeader
+        {...baseProps}
+        connectors={{
+          connectors: [],
+          selectedConnector: undefined,
+          loading: false,
+          error: undefined,
+          selectConnector: (id: string) => {},
+          reloadConnectors: () => {},
+          getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('ai-agent-tour-callout')).toBeInTheDocument();
+    expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
+  });
+
+  it('passes isConversationApp to the AI agent tour callout', () => {
+    useAIAgentTourDismissedMock.mockReturnValue([false, jest.fn()]);
+
+    render(
+      <ChatHeader
+        {...baseProps}
+        isConversationApp={true}
+        connectors={{
+          connectors: [],
+          selectedConnector: undefined,
+          loading: false,
+          error: undefined,
+          selectConnector: (id: string) => {},
+          reloadConnectors: () => {},
+          getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
+        }}
+      />
+    );
+
+    expect(aiAgentTourCalloutMock).toHaveBeenCalled();
+    expect(aiAgentTourCalloutMock.mock.calls[0][0]).toMatchObject({ isConversationApp: true });
   });
 });
