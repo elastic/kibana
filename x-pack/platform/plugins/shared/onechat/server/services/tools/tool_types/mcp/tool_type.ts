@@ -98,31 +98,6 @@ async function getMcpToolInputSchema({
 }
 
 /**
- * Retrieves the description for a specific MCP tool by calling listTools on the connector.
- * Returns undefined if the connector or tool is not found.
- */
-async function getMcpToolDescription({
-  actions,
-  request,
-  connectorId,
-  toolName,
-}: {
-  actions: ActionsPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
-  toolName: string;
-}): Promise<string | undefined> {
-  try {
-    const { tools } = await listMcpTools({ actions, request, connectorId });
-    const tool = tools.find((t) => t.name === toolName);
-    return tool?.description;
-  } catch (error) {
-    // Connector not found or other error - return undefined
-    return undefined;
-  }
-}
-
-/**
  * Executes an MCP tool via the connector's callTool sub-action
  */
 async function executeMcpTool({
@@ -307,15 +282,6 @@ export const getMcpToolType = (): ToolTypeDefinition<
       });
 
       return mergedConfig;
-    },
-
-    getAutoDescription: async (config, { request, actions }) => {
-      return getMcpToolDescription({
-        actions,
-        request,
-        connectorId: config.connector_id,
-        toolName: config.tool_name,
-      });
     },
 
     isAvailable: async (config, { request, actions }) => {
