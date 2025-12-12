@@ -23,7 +23,7 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from './list_group_graph_popover';
-import { RELATED_ENTITY, ACTOR_ENTITY_ID, TARGET_ENTITY_ID } from '../../common/constants';
+import { RELATED_ENTITY } from '../../common/constants';
 import { addFilter, containsFilter, removeFilter } from './search_filters';
 
 type NodeToggleAction = 'show' | 'hide';
@@ -45,11 +45,11 @@ const getSourceNamespaceFromNode = (node: NodeProps): string | undefined => {
 /**
  * Helper function to derive the actor field name based on the source namespace.
  * Maps namespace to the appropriate ECS actor field (e.g., 'user' -> 'user.entity.id').
- * Falls back to legacy ACTOR_ENTITY_ID if no namespace is provided.
+ * Falls back to default entity.id if no namespace is provided.
  */
 const getActorFieldFromNamespace = (sourceNamespace: string | undefined): string => {
   if (!sourceNamespace) {
-    return ACTOR_ENTITY_ID;
+    return 'entity.id';
   }
   return sourceNamespace === 'entity' ? 'entity.id' : `${sourceNamespace}.entity.id`;
 };
@@ -57,11 +57,11 @@ const getActorFieldFromNamespace = (sourceNamespace: string | undefined): string
 /**
  * Helper function to derive the target field name based on the source namespace.
  * Maps namespace to the appropriate ECS target field (e.g., 'user' -> 'user.target.entity.id').
- * Falls back to legacy TARGET_ENTITY_ID if no namespace is provided.
+ * Falls back to default entity.target.id if no namespace is provided.
  */
 const getTargetFieldFromNamespace = (sourceNamespace: string | undefined): string => {
   if (!sourceNamespace) {
-    return TARGET_ENTITY_ID;
+    return 'entity.target.id';
   }
   return sourceNamespace === 'entity' ? 'entity.target.id' : `${sourceNamespace}.target.entity.id`;
 };

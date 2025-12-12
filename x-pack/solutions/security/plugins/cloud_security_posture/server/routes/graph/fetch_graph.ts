@@ -20,6 +20,7 @@ import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
+import { generateFieldHintCases, concatPropIfExists } from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
@@ -179,23 +180,6 @@ const buildEsqlQuery = ({
 
   const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
 
-  // Helper function to extract namespace from field name (e.g., "user.entity.id" -> "user")
-  const getFieldNamespace = (field: string): string => {
-    // Special case: "entity.id" or "entity.target.id" -> "entity"
-    if (field.startsWith('entity.')) {
-      return 'entity';
-    }
-    // Otherwise, extract the first part before the first dot
-    return field.split('.')[0];
-  };
-
-  // Helper function to generate field hint CASE statements
-  const generateFieldHintCases = (fields: readonly string[], entityIdVar: string): string => {
-    return fields
-      .map((field) => `    MV_CONTAINS(${field}, ${entityIdVar}), "${getFieldNamespace(field)}"`)
-      .join(',\n');
-  };
-
   // Generate target entity ID collection logic
   // All fields use the same pattern: only append if not null
   // This ensures we filter out null values and only collect actual target entity IDs
@@ -253,23 +237,9 @@ ${
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      CASE(actorEntityName IS NOT NULL, CONCAT("\\"name\\":\\"", actorEntityName, "\\""), ""),
-      CASE(
-        actorEntityType IS NOT NULL,
-        CONCAT(
-          CASE(actorEntityName IS NOT NULL, ",", ""),
-          "\\"type\\":\\"", actorEntityType, "\\""
-        ),
-        ""
-      ),
-      CASE(
-        actorEntitySubType IS NOT NULL,
-        CONCAT(
-          CASE(actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL, ",", ""),
-          "\\"sub_type\\":\\"", actorEntitySubType, "\\""
-        ),
-        ""
-      ),
+      ${concatPropIfExists('name', 'actorEntityName', false)},
+      ${concatPropIfExists('type', 'actorEntityType')},
+      ${concatPropIfExists('sub_type', 'actorEntitySubType')},
       CASE(
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
@@ -286,23 +256,9 @@ ${
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      CASE(targetEntityName IS NOT NULL, CONCAT("\\"name\\":\\"", targetEntityName, "\\""), ""),
-      CASE(
-        targetEntityType IS NOT NULL,
-        CONCAT(
-          CASE(targetEntityName IS NOT NULL, ",", ""),
-          "\\"type\\":\\"", targetEntityType, "\\""
-        ),
-        ""
-      ),
-      CASE(
-        targetEntitySubType IS NOT NULL,
-        CONCAT(
-          CASE(targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL, ",", ""),
-          "\\"sub_type\\":\\"", targetEntitySubType, "\\""
-        ),
-        ""
-      ),
+      ${concatPropIfExists('name', 'targetEntityName', false)},
+      ${concatPropIfExists('type', 'targetEntityType')},
+      ${concatPropIfExists('sub_type', 'targetEntitySubType')},
       CASE(
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),

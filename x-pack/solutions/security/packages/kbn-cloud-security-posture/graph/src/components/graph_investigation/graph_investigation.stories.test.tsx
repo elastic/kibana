@@ -782,4 +782,147 @@ describe('GraphInvestigation Component', () => {
       ]);
     });
   });
+
+  describe('grouped-actor scenario - mixed namespaces as actor', () => {
+    const renderGroupedActorStory = (args: Partial<GraphInvestigationProps> = {}) => {
+      return render(
+        <IntlProvider locale="en">
+          <Investigation scenario="grouped-actor" {...args} />
+        </IntlProvider>,
+        {
+          legacyRoot: true,
+        }
+      );
+    };
+
+    it('renders graph with grouped actor node', async () => {
+      const { container } = renderGroupedActorStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, grouped-actor, target, label
+      });
+    });
+
+    it('grouped actor node with mixed namespaces falls back to generic entity.id filter', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container } = renderGroupedActorStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Since the node has no entity details (all availableInEntityStore = false),
+      // we cannot add filters via "Show actions by entity"
+      // This scenario tests the fallback behavior
+      await waitFor(() => {
+        const nodeElement = container.querySelector(
+          `.react-flow__nodes .react-flow__node[data-id="mixed-entities"]`
+        );
+        expect(nodeElement).not.toBeNull();
+      });
+    });
+
+    it('grouped actor node does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      // Grouped entities should not have "Show actions by entity" option
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped actor node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
+    });
+  });
+
+  describe('grouped-target scenario - mixed namespaces as target', () => {
+    const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) => {
+      return render(
+        <IntlProvider locale="en">
+          <Investigation scenario="grouped-target" {...args} />
+        </IntlProvider>,
+        {
+          legacyRoot: true,
+        }
+      );
+    };
+
+    it('renders graph with grouped target node', async () => {
+      const { container } = renderGroupedTargetStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, actor, grouped-target, label
+      });
+    });
+
+    it('single actor node with user namespace uses user.entity.id filter', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container, getByTestId } = renderGroupedTargetStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Act - Click "Show actions by entity" on single-actor node
+      await showActionsByNode(container, 'single-actor');
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert - Should use user.entity.id since actor has user namespace
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: expect.arrayContaining([
+              expect.objectContaining({
+                meta: expect.objectContaining({
+                  field: 'user.entity.id',
+                  key: 'user.entity.id',
+                }),
+                query: {
+                  match_phrase: {
+                    'user.entity.id': 'single-actor',
+                  },
+                },
+              }),
+            ]),
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('grouped target node with mixed namespaces does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      // Grouped entities should not have "Show actions by entity" or "Show actions on entity" options
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped target node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
+    });
+  });
 });

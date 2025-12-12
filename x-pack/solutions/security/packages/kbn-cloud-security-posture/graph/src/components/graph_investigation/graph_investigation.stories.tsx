@@ -21,6 +21,7 @@ import {
   USE_FETCH_GRAPH_DATA_ACTION,
   USE_FETCH_GRAPH_DATA_REFRESH_ACTION,
 } from '../mock/constants';
+import type { MockScenario } from '../mock/use_fetch_graph_data.mock';
 
 const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
 const defaultProps: GraphInvestigationProps = {
@@ -50,6 +51,7 @@ type GraphInvestigationPropsAndCustomArgs = React.ComponentProps<typeof GraphInv
   shouldShowSearchBarTour: boolean;
   isLoading: boolean;
   supportNodePreviewPopover: boolean;
+  scenario: MockScenario;
 };
 
 const meta = {
@@ -87,6 +89,12 @@ const meta = {
       description:
         'Enable or disable the support for node preview popover (When disabled `Show event details` list item is not shown)',
     },
+    scenario: {
+      control: { type: 'select' },
+      options: ['single-actor', 'grouped-actor', 'grouped-target'],
+      description:
+        'Select graph scenario: single-actor (default), grouped-actor (mixed namespaces as actor), or grouped-target (mixed namespaces as target)',
+    },
   },
   args: {
     showToggleSearch: false,
@@ -94,13 +102,14 @@ const meta = {
     shouldShowSearchBarTour: true,
     isLoading: false,
     supportNodePreviewPopover: true,
+    scenario: 'single-actor',
   },
   decorators: [
     ReactQueryStorybookDecorator,
     KibanaReactStorybookDecorator,
     GlobalStylesStorybookDecorator,
     (StoryComponent, context) => {
-      const { shouldShowSearchBarTour, isLoading } = context.args;
+      const { shouldShowSearchBarTour, isLoading, scenario } = context.args;
       localStorage.setItem(
         SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
         shouldShowSearchBarTour?.toString() || 'true'
@@ -110,6 +119,7 @@ const meta = {
           isFetching: isLoading,
           refresh: action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION),
           log: action(USE_FETCH_GRAPH_DATA_ACTION),
+          scenario,
         },
       };
 
