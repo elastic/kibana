@@ -11,4 +11,7 @@ export type CliSupportedServerModes =
   | 'stateful'
   | 'serverless=es'
   | 'serverless=oblt'
-  | 'serverless=security';
+  | 'serverless=oblt-logs-essentials'
+  | 'serverless=security'
+  | 'serverless=security-essentials'
+  | 'serverless=security-ease';
