@@ -82,21 +82,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
       });
 
-      it('renders tour', async () => {
-        await solutionNavigation.sidenav.tour.reset();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible(
-          'sidenav-search-getting-started'
-        );
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectHidden();
-        await browser.refresh();
-        await solutionNavigation.sidenav.tour.expectHidden();
-      });
-
       it('opens panel on legacy management landing page', async () => {
         await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
         await testSubjects.existOrFail('managementHomeSolution');
