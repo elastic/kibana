@@ -48,8 +48,8 @@ export const getCategoryCountRequest = (
   });
 
   const categoryFilters = categories.reduce<Record<string, estypes.QueryDslQueryContainer>>(
-    (acc, category) => {
-      acc[category.key] = getCategoryQuery(fieldName, [category]);
+    (acc, category, i) => {
+      acc[`category_${i}`] = getCategoryQuery(fieldName, [category]);
       return acc;
     },
     {}
@@ -146,8 +146,8 @@ export const fetchCategoryCounts = async (
     response.aggregations
   ) as CategoryCountsBuckets;
 
-  for (const category of updatedCategories.categories) {
-    category.count = categoryCounts.buckets[category.key]?.doc_count ?? 0;
+  for (const [i, category] of updatedCategories.categories.entries()) {
+    category.count = categoryCounts.buckets[`category_${i}`]?.doc_count ?? 0;
   }
 
   return updatedCategories;

@@ -42,7 +42,7 @@ describe('getCategoryCountRequest', () => {
         category_counts: {
           filters: {
             filters: {
-              'runTask ended no files to process': {
+              category_0: {
                 bool: {
                   should: [
                     {
@@ -90,10 +90,7 @@ describe('getCategoryCountRequest', () => {
       (query.aggs?.category_counts as unknown as { filters: { filters: Record<string, unknown> } })
         ?.filters.filters ?? {};
 
-    expect(Object.keys(filters)).toEqual([
-      'SLO summary transforms installed and started',
-      'Trusted Apps',
-    ]);
+    expect(Object.keys(filters)).toEqual(['category_0', 'category_1']);
   });
 
   describe('with sampling', () => {
