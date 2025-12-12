@@ -13,7 +13,6 @@ export const PIT_KEEP_ALIVE = '10m';
 
 /**
  * Maximum offset allowed for PIT-based deep pagination.
- * Prevents excessive batch fetching that could exhaust memory.
  * 100,000 documents = 1000 pages of 100 results each.
  */
 export const MAX_PIT_OFFSET = 100000;

@@ -147,6 +147,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
+  const sort = useMemo(
+    () =>
+      sortingColumns.map((sortedColumn) => ({
+        field: sortedColumn.id,
+        direction: sortedColumn.direction as Direction,
+      })),
+    [sortingColumns]
+  );
+
   const {
     data: allResultsData,
     isLoading,
@@ -158,10 +167,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     isLive,
-    sort: sortingColumns.map((sortedColumn) => ({
-      field: sortedColumn.id,
-      direction: sortedColumn.direction as Direction,
-    })),
+    sort,
   });
 
   const onChangePage = useCallback((newPageIndex: number) => {

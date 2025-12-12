@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -72,8 +72,6 @@ export const useAllResults = ({
   // Track pages that have been successfully fetched (to avoid showing overlay on refetches)
   const [fetchedPages, setFetchedPages] = useState<Set<number>>(new Set());
 
-  const prevDepsRef = useRef({ sort, kuery, startDate, actionId, limit });
-
   const closePit = useCallback(
     async (pitId: string) => {
       try {
@@ -89,26 +87,14 @@ export const useAllResults = ({
   );
 
   useEffect(() => {
-    const prev = prevDepsRef.current;
-    const depsChanged =
-      prev.actionId !== actionId ||
-      prev.limit !== limit ||
-      JSON.stringify(prev.sort) !== JSON.stringify(sort) ||
-      prev.kuery !== kuery ||
-      prev.startDate !== startDate;
+    setPitPaginationState((prevState) => {
+      if (prevState.pitId) {
+        closePit(prevState.pitId);
+      }
 
-    if (depsChanged) {
-      // Close old PIT before resetting state to avoid resource leak
-      setPitPaginationState((prevState) => {
-        if (prevState.pitId) {
-          closePit(prevState.pitId);
-        }
-
-        return { searchAfterByPage: new Map() };
-      });
-      setFetchedPages(new Set());
-      prevDepsRef.current = { sort, kuery, startDate, actionId, limit };
-    }
+      return { searchAfterByPage: new Map() };
+    });
+    setFetchedPages(new Set());
   }, [sort, kuery, startDate, actionId, limit, closePit]);
 
   useEffect(() => {
