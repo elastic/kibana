@@ -31,12 +31,6 @@ export const StreamFeaturesAccordion = ({
   loading: boolean;
   refresh: () => void;
 }) => {
-  const last24Hrs: AbsoluteTimeRange = useMemo(() => {
-    const now = Date.now();
-    const start = new Date(now - 24 * 60 * 60 * 1000);
-    return { from: start.toISOString(), to: new Date(now).toISOString(), mode: 'absolute' };
-  }, []);
-
   return (
     <EuiAccordion
       initialIsOpen={true}
@@ -61,7 +55,6 @@ export const StreamFeaturesAccordion = ({
         features={features}
         definition={definition}
         refreshFeatures={refresh}
-        timeRange={last24Hrs}
       />
     </EuiAccordion>
   );

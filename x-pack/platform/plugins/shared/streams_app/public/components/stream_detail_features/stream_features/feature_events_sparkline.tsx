@@ -49,3 +49,35 @@ export const FeatureEventsSparkline = ({
     />
   );
 };
+
+export const FeatureEventsSparklineLast24hrs = ({
+  feature,
+  definition,
+  hideAxis = true,
+  height = 100,
+}: {
+  feature: Feature;
+  definition: Streams.all.Definition;
+  hideAxis?: boolean;
+  height?: number;
+}) => {
+  const timeRange: AbsoluteTimeRange = useMemo(() => {
+    const now = new Date();
+    const from = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    return {
+      from: from.toISOString(),
+      to: now.toISOString(),
+      mode: 'absolute',
+    };
+  }, []);
+
+  return (
+    <FeatureEventsSparkline
+      feature={feature}
+      definition={definition}
+      hideAxis={hideAxis}
+      height={height}
+      timeRange={timeRange}
+    />
+  );
+};

@@ -19,7 +19,6 @@ import {
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, isFeatureWithFilter, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import type { AbsoluteTimeRange } from '@kbn/es-query';
 import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
 import { ConditionPanel } from '../../data_management/shared';
 import {
@@ -29,7 +28,7 @@ import {
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
-import { FeatureEventsSparkline } from './feature_events_sparkline';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
 
@@ -38,13 +37,11 @@ export function StreamExistingFeaturesTable({
   features,
   definition,
   refreshFeatures,
-  timeRange,
 }: {
   isLoading?: boolean;
   features: Feature[];
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
-  timeRange: AbsoluteTimeRange;
 }) {
   const router = useStreamsAppRouter();
 
@@ -90,13 +87,7 @@ export function StreamExistingFeaturesTable({
       width: '15%',
       render: (feature: Feature) => {
         if (isFeatureWithFilter(feature)) {
-          return (
-            <FeatureEventsSparkline
-              feature={feature}
-              definition={definition}
-              timeRange={timeRange}
-            />
-          );
+          return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
         }
       },
     },

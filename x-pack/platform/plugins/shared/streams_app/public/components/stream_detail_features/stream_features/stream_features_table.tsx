@@ -14,12 +14,11 @@ import {
 } from '@elastic/eui';
 import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import type { AbsoluteTimeRange } from '@kbn/es-query';
 import { ConditionPanel } from '../../data_management/shared';
 import { FeatureDetailExpanded } from './feature_detail_expanded';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
-import { FeatureEventsSparkline } from './feature_events_sparkline';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 
 // Helper function to generate unique copy name
 const generateCopyName = (originalName: string, existingFeatures: Feature[]) => {
@@ -49,11 +48,6 @@ export function StreamFeaturesTable({
   setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
 }) {
   const [expandedFeatureNames, setExpandedFeatureNames] = useState<Set<string>>(new Set());
-  const last24hrs: AbsoluteTimeRange = useMemo(() => {
-    const now = Date.now();
-    const start = new Date(now - 24 * 60 * 60 * 1000);
-    return { from: start.toISOString(), to: new Date(now).toISOString(), mode: 'absolute' };
-  }, []);
 
   const itemIdToExpandedRowMap = useMemo(() => {
     const map: Record<string, ReactNode> = {};
@@ -107,13 +101,7 @@ export function StreamFeaturesTable({
       width: '20%',
       render: (feature: Feature) => {
         if (isFeatureWithFilter(feature)) {
-          return (
-            <FeatureEventsSparkline
-              feature={feature}
-              definition={definition}
-              timeRange={last24hrs}
-            />
-          );
+          return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
         }
       },
     },
