@@ -125,7 +125,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   const externalAdditionalControls = useMemo(() => {
     const additionalControls = [
       customExternalAdditionalControls,
-      Boolean(cascadeConfig?.availableCascadeGroups?.length)
+      Boolean(cascadeConfig?.availableCascadeGroups?.length) && props.isPlainRecord
         ? groupBySelectorRenderer(
             cascadeConfig!.availableCascadeGroups,
             cascadeConfig!.selectedCascadeGroups
@@ -134,7 +134,12 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     ].filter(Boolean);
 
     return additionalControls.length ? <React.Fragment>{additionalControls}</React.Fragment> : null;
-  }, [cascadeConfig, customExternalAdditionalControls, groupBySelectorRenderer]);
+  }, [
+    cascadeConfig,
+    customExternalAdditionalControls,
+    groupBySelectorRenderer,
+    props.isPlainRecord,
+  ]);
 
   return props.isPlainRecord && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (
     <Suspense fallback={<EuiLoadingSpinner />}>

@@ -175,7 +175,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
-      <div css={customCascadeGridBodyStyle.headerRow}>{headerRow}</div>
+      <>{headerRow}</>
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}

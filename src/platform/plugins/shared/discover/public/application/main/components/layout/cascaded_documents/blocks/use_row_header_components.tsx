@@ -429,9 +429,9 @@ export function useEsqlDataCascadeRowHeaderComponents(
           <EuiTextTruncate
             truncation="end"
             text={
-              (rowData[rowGroup] ??
+              (rowData[rowGroup] ||
                 i18n.translate('discover.dataCascade.row.action.noValue', {
-                  defaultMessage: '(null)',
+                  defaultMessage: '(blank)',
                 })) as string
             }
           >
