@@ -45,6 +45,11 @@ export const ManagementLandingPage = ({
   // AutoOps promotion callout should only be shown for self-managed instances with an enterprise license
   const shouldShowAutoOpsPromotion = !isCloudEnabled && hasEnterpriseLicense;
   const learnMoreLink = coreStart.docLinks.links.cloud.connectToAutoops;
+  const cloudConnectUrl = coreStart.application.getUrlForApp('cloud_connect');
+  const handleConnectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    coreStart.application.navigateToApp('cloud_connect');
+  };
 
   useEffect(() => {
     onAppMounted('');
@@ -81,6 +86,8 @@ export const ManagementLandingPage = ({
             >
               <AutoOpsPromotionCallout
                 learnMoreLink={learnMoreLink}
+                cloudConnectUrl={cloudConnectUrl}
+                onConnectClick={handleConnectClick}
                 overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
               />
             </div>

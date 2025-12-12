@@ -55,6 +55,11 @@ export function NoData(props) {
   const isCloudEnabled = props.isCloudEnabled;
   const { services } = useKibana();
   const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
+  const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
+  const handleConnectClick = (e) => {
+    e.preventDefault();
+    services.application.navigateToApp('cloud_connect');
+  };
 
   async function startSetup() {
     setIsLoading(true);
@@ -126,6 +131,8 @@ export function NoData(props) {
             <>
               <AutoOpsPromotionCallout
                 learnMoreLink={learnMoreLink}
+                cloudConnectUrl={cloudConnectUrl}
+                onConnectClick={handleConnectClick}
                 overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
               />
               <EuiSpacer size="m" />
@@ -178,6 +185,8 @@ export function NoData(props) {
           <>
             <AutoOpsPromotionCallout
               learnMoreLink={learnMoreLink}
+              cloudConnectUrl={cloudConnectUrl}
+              onConnectClick={handleConnectClick}
               overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
             />
             <EuiSpacer size="m" />

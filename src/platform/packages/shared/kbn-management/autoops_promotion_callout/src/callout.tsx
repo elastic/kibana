@@ -14,6 +14,8 @@ import { EuiCallOut, EuiButton } from '@elastic/eui';
 
 export interface AutoOpsPromotionCalloutProps {
   learnMoreLink: string;
+  cloudConnectUrl?: string;
+  onConnectClick?: (e: React.MouseEvent) => void;
   overrideCalloutProps?: Partial<Omit<EuiCallOutProps, 'children' | 'title' | 'onDismiss'>>;
 }
 
@@ -21,6 +23,8 @@ const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed'
 
 export const AutoOpsPromotionCallout = ({
   learnMoreLink,
+  cloudConnectUrl = '/app/cloud_connect',
+  onConnectClick,
   overrideCalloutProps = {},
 }: AutoOpsPromotionCalloutProps) => {
   const [isDismissed, setIsDismissed] = useState(false);
@@ -61,11 +65,7 @@ export const AutoOpsPromotionCallout = ({
           defaultMessage="Connect this cluster to AutoOps in Elastic Cloud for simplified monitoring, real-time issue detection, and performance recommendations. {learnMoreLink}"
           values={{
             learnMoreLink: (
-              <a
-                href={learnMoreLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={learnMoreLink} target="_blank" rel="noopener noreferrer">
                 <FormattedMessage
                   id="management.autoOpsPromotionCallout.learnMore"
                   defaultMessage="Learn more"
@@ -79,9 +79,9 @@ export const AutoOpsPromotionCallout = ({
         color="accent"
         fill
         size="s"
-        href="https://cloud.elastic.co/connect-cluster-services-portal"
-        target="_blank"
-        rel="noopener noreferrer"
+        href={cloudConnectUrl}
+        onClick={onConnectClick}
+        data-test-subj="autoOpsPromotionCalloutConnectButton"
       >
         <FormattedMessage
           id="management.autoOpsPromotionCallout.openButton"

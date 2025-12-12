@@ -67,6 +67,11 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
   const { services } = useKibana();
   const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
+  const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
+  const handleConnectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    services.application.navigateToApp('cloud_connect');
+  };
 
   const getPageDataResponseHandler = useCallback(
     (result: any) => {
@@ -138,7 +143,13 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
         )}
         <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
         <EuiSpacer size="m" />
-        {shouldShowAutoOpsPromotion && <AutoOpsPromotionCallout learnMoreLink={learnMoreLink} />}
+        {shouldShowAutoOpsPromotion && (
+          <AutoOpsPromotionCallout
+            learnMoreLink={learnMoreLink}
+            cloudConnectUrl={cloudConnectUrl}
+            onConnectClick={handleConnectClick}
+          />
+        )}
         <EuiSpacer size="m" />
         {tabs && (
           <EuiTabs size="l">
