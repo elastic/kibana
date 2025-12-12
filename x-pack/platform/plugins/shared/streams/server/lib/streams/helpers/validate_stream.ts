@@ -29,6 +29,7 @@ import {
   isFilterCondition,
   isNotCondition,
   isOrCondition,
+  isConditionBlock,
 } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
@@ -75,8 +76,8 @@ export function validateNoManualIngestPipelineUsage(steps: StreamlangStep[]) {
     if ('action' in step && step.action === 'manual_ingest_pipeline') {
       throw new MalformedStreamError('Manual ingest pipelines are not allowed');
     }
-    if ('where' in step && step.where && 'steps' in step.where) {
-      validateNoManualIngestPipelineUsage(step.where.steps);
+    if ('condition' in step && step.condition && 'steps' in step.condition) {
+      validateNoManualIngestPipelineUsage(step.condition.steps);
     }
   }
 }
@@ -147,10 +148,10 @@ const actionStepValidators: {
 
 function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
   for (const step of steps) {
-    if ('where' in step && step.where && 'steps' in step.where) {
-      validateCondition(step.where as Condition);
+    if (isConditionBlock(step)) {
+      validateCondition(step.condition as Condition);
       // Nested steps are within a where block
-      validateSteps(step.where.steps, true);
+      validateSteps(step.condition.steps, true);
     } else if (isActionBlock(step)) {
       // Check if remove_by_prefix is being used within a where block
       if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {

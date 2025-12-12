@@ -24,7 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Standard Product intercept', () => {
     const interceptTestId = `intercept-${TRIGGER_DEF_ID}`;
 
-    describe('on initial page load', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/245800
+    describe.skip('on initial page load', () => {
       it('presents all available navigable steps', async () => {
         await PageObjects.common.navigateToUrl('home');
 
@@ -87,7 +88,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('page transitions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/245943
+    describe.skip('page transitions', () => {
       it('transitions from one tab to another and back again will cause the intercept to be displayed if the intercept interval has elapsed on transitioning', async () => {
         // navigate the home journey to set a record for new intercept journey
         await PageObjects.common.navigateToUrl('home');
