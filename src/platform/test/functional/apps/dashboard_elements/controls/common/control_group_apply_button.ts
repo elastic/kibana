@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const queryBar = getService('queryBar');
   const dashboardSettings = getService('dashboardSettings');
+  const retry = getService('retry');
 
   const { dashboard, header, dashboardControls } = getPageObjects([
     'dashboardControls',
@@ -23,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('Dashboard control group apply button', () => {
+  describe.only('Dashboard control group apply button', () => {
     const optionsListId = '41827e70-5285-4d44-8375-4c498449b9a7';
     const rangeSliderId = '515e7b9f-4f1b-4a06-beec-763810e4951a';
 

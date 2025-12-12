@@ -405,8 +405,8 @@ export class DashboardPageControls extends FtrService {
   public async optionsListGetSelectionsString(controlId: string) {
     this.log.debug(`Getting selections string for Options List: ${controlId}`);
     await this.optionsListWaitForLoading(controlId);
-    const controlElement = await this.getControlElementById(controlId);
-    return (await controlElement.getVisibleText()).split('\n')[0];
+    const controlButton = await this.testSubjects.find(`optionsList-control-${controlId}`);
+    return await controlButton.getVisibleText();
   }
 
   public async isOptionsListPopoverOpen(controlId: string) {
