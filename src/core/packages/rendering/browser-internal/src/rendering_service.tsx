@@ -38,6 +38,7 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  chrome: InternalChromeStart;
   coreEnv: CoreEnv;
 }
 
@@ -111,7 +112,7 @@ export class RenderingService implements IRenderingService {
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
-        <Layout />
+        {chrome.wrapInChromeProvider(<Layout />)}
       </KibanaRootContextProvider>,
       targetDomElement
     );
@@ -140,7 +141,7 @@ export class RenderingService implements IRenderingService {
         userProfile={deps.userProfile}
         coreEnv={deps.coreEnv}
       >
-        {children}
+        {deps.chrome.wrapInChromeProvider(children)}
       </KibanaRenderContextProvider>
     );
   });

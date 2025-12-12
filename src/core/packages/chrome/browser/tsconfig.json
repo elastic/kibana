@@ -28,7 +28,8 @@
     "@kbn/projects-solutions-groups",
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-agent-builder",
-    "@kbn/deeplinks-data-connectors"
+    "@kbn/deeplinks-data-connectors",
+    "@kbn/core-chrome-sidebar"
   ],
   "exclude": [
     "target/**/*",

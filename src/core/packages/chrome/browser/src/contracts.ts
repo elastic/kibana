@@ -22,6 +22,14 @@ import type {
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
+import type { SidebarServiceSetup, SidebarServiceStart } from './sidebar';
+
+export interface ChromeSetup {
+  /**
+   * {@link SidebarServiceSetup}
+   */
+  sidebar: SidebarServiceSetup;
+}
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -202,6 +210,11 @@ export interface ChromeStart {
      */
     setIsFeedbackBtnVisible: (isVisible: boolean) => void;
   };
+
+  /**
+   * {@link SidebarServiceStart}
+   */
+  sidebar: SidebarServiceStart;
 
   /**
    * Get the id of the currently active project navigation or `null` otherwise.

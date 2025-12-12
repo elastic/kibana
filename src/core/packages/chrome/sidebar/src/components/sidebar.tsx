@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { useObservable } from '@kbn/use-observable';
+import { SidebarPanel } from './sidebar_panel';
+import { useSidebar } from './use_sidebar';
+import { useSidebarService } from './sidebar_provider';
+import { SidebarAppRenderer } from './sidebar_app_renderer';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SidebarProps {}
+
+export function Sidebar(props: SidebarProps) {
+  const { close, isOpen } = useSidebar();
+  const sidebarService = useSidebarService();
+
+  const currentAppId = useObservable(
+    sidebarService.state.currentAppId$,
+    sidebarService.state.getCurrentAppId()
+  );
+
+  if (!isOpen) {
+    return null;
+  }
+
+  if (!currentAppId) {
+    return null;
+  }
+
+  const currentApp = sidebarService.registry.getApp(currentAppId);
+
+  if (!currentApp) {
+    return null;
+  }
+
+  return (
+    <SidebarPanel title={currentApp.app.title} onClose={close}>
+      <SidebarAppRenderer key={currentAppId} loadComponent={currentApp.app.loadComponent} />
+    </SidebarPanel>
+  );
+}

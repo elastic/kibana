@@ -80,7 +80,7 @@ export async function handleSystemColorModeChange({
   stop$,
   http,
 }: {
-  notifications: NotificationsStart;
+  notifications: () => Promise<NotificationsStart>;
   http: InternalHttpStart;
   uiSettings: IUiSettingsClient;
   coreStart: {
@@ -103,40 +103,42 @@ export async function handleSystemColorModeChange({
       // we actually apply set the dark/light color mode of the page.
       currentDarkModeValue = isDarkMode;
     } else if (currentDarkModeValue !== isDarkMode) {
-      notifications.toasts.addInfo(
-        {
-          title: i18n.translate('core.ui.chrome.appearanceChange.successNotificationTitle', {
-            defaultMessage: 'System color mode updated',
-          }),
-          text: mountReactNode(
-            <>
-              <p>
-                {i18n.translate('core.ui.chrome.appearanceChange.successNotificationText', {
-                  defaultMessage: 'Reload the page to see the changes',
-                })}
-              </p>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    onClick={() => window.location.reload()}
-                    data-test-subj="windowReloadButton"
-                    autoFocus
-                  >
-                    {i18n.translate(
-                      'core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel',
-                      {
-                        defaultMessage: 'Reload page',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ),
-        },
-        { toastLifeTimeMs: Infinity } // leave it on until discard or page reload
-      );
+      notifications().then(({ toasts }) => {
+        toasts.addInfo(
+          {
+            title: i18n.translate('core.ui.chrome.appearanceChange.successNotificationTitle', {
+              defaultMessage: 'System color mode updated',
+            }),
+            text: mountReactNode(
+              <>
+                <p>
+                  {i18n.translate('core.ui.chrome.appearanceChange.successNotificationText', {
+                    defaultMessage: 'Reload the page to see the changes',
+                  })}
+                </p>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      onClick={() => window.location.reload()}
+                      data-test-subj="windowReloadButton"
+                      autoFocus
+                    >
+                      {i18n.translate(
+                        'core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel',
+                        {
+                          defaultMessage: 'Reload page',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            ),
+          },
+          { toastLifeTimeMs: Infinity } // leave it on until discard or page reload
+        );
+      });
     }
   };
 

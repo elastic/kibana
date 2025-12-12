@@ -52,11 +52,13 @@ import type {
   ChromeUserBanner,
   NavigationTreeDefinition,
   SolutionId,
+  ChromeSetup,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
+import { SidebarService } from '@kbn/core-chrome-sidebar';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';
@@ -65,7 +67,7 @@ import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
-import { Header, LoadingIndicator, ProjectHeader } from './ui';
+import { Header, LoadingIndicator, ProjectHeader, Sidebar } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
@@ -94,7 +96,6 @@ export interface StartDeps {
   docLinks: DocLinksStart;
   http: InternalHttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
-  notifications: NotificationsStart;
   customBranding: CustomBrandingStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
@@ -102,6 +103,9 @@ export interface StartDeps {
   uiSettings: IUiSettingsClient;
   analytics: AnalyticsServiceStart;
   featureFlags: FeatureFlagsStart;
+
+  // working around circular dependency
+  notifications: () => Promise<NotificationsStart>;
 }
 
 /** @internal */
@@ -114,6 +118,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
+  private readonly sidebar: SidebarService;
   private readonly isSideNavCollapsed$ = new BehaviorSubject(
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
   );
@@ -125,6 +130,7 @@ export class ChromeService {
     this.logger = params.coreContext.logger.get('chrome-browser');
     this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.projectNavigation = new ProjectNavigationService(this.isServerless);
+    this.sidebar = new SidebarService();
   }
 
   /**
@@ -161,9 +167,13 @@ export class ChromeService {
 
   private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
 
-  public setup({ analytics }: SetupDeps) {
+  public setup({ analytics }: SetupDeps): ChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
+
+    return {
+      sidebar: this.sidebar.setup(),
+    };
   }
 
   public async start({
@@ -272,6 +282,8 @@ export class ChromeService {
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
 
+    const sidebar = this.sidebar.start();
+
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
       helpExtension$.next(undefined);
@@ -336,13 +348,15 @@ export class ChromeService {
     };
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.legacyBrowserWarning"
-            defaultMessage="Your browser does not meet the security requirements for Kibana."
-          />
-        ),
+      notifications().then(({ toasts }) => {
+        toasts.addWarning({
+          title: mountReactNode(
+            <FormattedMessage
+              id="core.chrome.legacyBrowserWarning"
+              defaultMessage="Your browser does not meet the security requirements for Kibana."
+            />
+          ),
+        });
       });
     }
 
@@ -573,6 +587,15 @@ export class ChromeService {
         return <AppMenuBar appMenuActions$={application.currentActionMenu$} isFixed={false} />;
       },
 
+      getSidebarComponent: () => {
+        return <Sidebar />;
+      },
+
+      wrapInChromeProvider: (children: ReactNode) => {
+        // TODO: we can have more chrome context values here in the future
+        return this.sidebar.wrapInProvider(children);
+      },
+
       // chrome APIs
       navControls,
       navLinks,
@@ -688,6 +711,7 @@ export class ChromeService {
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
         navigationTourManager: projectNavigation.tourManager,
       },
+      sidebar,
     };
   }
 

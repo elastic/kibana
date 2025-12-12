@@ -31,6 +31,7 @@ export type {
   ChromeNavLinks,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeSetup,
   ChromeStart,
   ChromeStyle,
   ChromeUserBanner,
@@ -50,4 +51,10 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,
+  SidebarApp,
+  SidebarAppContent,
+  SidebarAppButton,
+  SidebarSize,
+  SidebarServiceStart,
+  SidebarServiceSetup,
 } from './src';

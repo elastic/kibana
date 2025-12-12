@@ -80,6 +80,7 @@ export function createPluginSetupContext<
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
+    chrome: deps.chrome,
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
     featureFlags: deps.featureFlags,

@@ -101,6 +101,12 @@ export interface InternalChromeStart extends ChromeStart {
   getProjectAppMenuComponent(): JSX.Element;
 
   /**
+   * Used only by the rendering service to render the sidebar UI
+   * @internal
+   */
+  getSidebarComponent(): JSX.Element;
+
+  /**
    * Used only by the rendering service to retrieve the set of classNames
    * that will be set on the body element.
    * @internal
@@ -112,6 +118,12 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getGlobalFooter$(): Observable<ReactNode>;
+
+  /**
+   * Used only by the rendering service to wrap the rendering tree in the Chrome context providers
+   * @internal
+   */
+  wrapInChromeProvider(component: ReactNode): ReactNode;
 
   /**
    * Used only by the serverless plugin to customize project-style chrome.
