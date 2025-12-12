@@ -180,6 +180,12 @@ describe('MCP tool_type', () => {
       expect(toolType.validateForUpdate).toBeDefined();
       expect(toolType.getDynamicProps).toBeDefined();
     });
+
+    it('should have trackHealth enabled for external service monitoring', () => {
+      const toolType = getMcpToolType();
+
+      expect(toolType.trackHealth).toBe(true);
+    });
   });
 
   describe('getDynamicProps', () => {

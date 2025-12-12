@@ -338,5 +338,8 @@ export const getMcpToolType = (): ToolTypeDefinition<
         };
       }
     },
+
+    // Track execution health for MCP tools since they depend on external MCP servers
+    trackHealth: true,
   };
 };

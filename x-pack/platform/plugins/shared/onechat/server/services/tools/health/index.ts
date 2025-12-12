@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-export { ToolsService } from './tools_service';
-export type { ToolsServiceSetup, ToolsServiceStart } from './types';
-export type { ToolRegistry, ToolWithAvailability } from './tool_registry';
 export {
-  createToolHealthClient,
+  createClient as createToolHealthClient,
   type ToolHealthClient,
+  toolHealthIndexName,
+  type ToolHealthProperties,
+  type ToolHealthDocument,
   type ToolHealthState,
   type ToolHealthStatus,
-} from './health';
+  type ToolHealthUpdateParams,
+} from './client';
+

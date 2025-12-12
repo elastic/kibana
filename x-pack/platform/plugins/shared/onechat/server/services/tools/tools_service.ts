@@ -24,8 +24,10 @@ import {
 } from './builtin';
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
+import { isEnabledDefinition } from './tool_types/definitions';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
+import { createToolHealthClient } from './health';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
@@ -77,6 +79,14 @@ export class ToolsService {
 
     const toolTypes = getToolTypeDefinitions({ workflowsManagement });
 
+    // Compute the set of tool types that have health tracking enabled
+    const healthTrackedToolTypes = new Set(
+      toolTypes
+        .filter(isEnabledDefinition)
+        .filter((def) => def.trackHealth === true)
+        .map((def) => def.toolType)
+    );
+
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
@@ -93,6 +103,11 @@ export class ToolsService {
       const space = getCurrentSpaceId({ request, spaces });
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
+      const healthClient = createToolHealthClient({
+        space,
+        logger,
+        esClient: elasticsearch.client.asInternalUser,
+      });
 
       return createToolRegistry({
         getRunner,
@@ -102,12 +117,24 @@ export class ToolsService {
         persistedProvider,
         uiSettings,
         savedObjects,
+        healthClient,
+        healthTrackedToolTypes,
+      });
+    };
+
+    const getHealthClient: ToolsServiceStart['getHealthClient'] = ({ request }) => {
+      const space = getCurrentSpaceId({ request, spaces });
+      return createToolHealthClient({
+        space,
+        logger,
+        esClient: elasticsearch.client.asInternalUser,
       });
     };
 
     return {
       getRegistry,
       getToolDefinitions: () => toolTypes,
+      getHealthClient,
     };
   }
 }

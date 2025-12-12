@@ -10,6 +10,8 @@ export enum AgentExecutionErrorCode {
   contextLengthExceeded = 'context_length_exceeded',
   /** agent called a tool not currently available */
   toolNotFound = 'tool_not_found',
+  /** tool exists but is currently unavailable (e.g., connector missing or inaccessible) */
+  toolUnavailable = 'tool_unavailable',
   /** agent called a tool with invalid arguments */
   toolValidationError = 'tool_validation_error',
   /** agent replied with an empty response */
@@ -36,8 +38,18 @@ export interface TooValidationErrorMeta {
   validationError?: string;
 }
 
+export interface ToolUnavailableErrorMeta {
+  /** name/id of the tool which is unavailable */
+  toolName: string;
+  /** arguments the tool was called with, if any */
+  toolArgs?: string | Record<string, any>;
+  /** reason why the tool is unavailable */
+  reason: string;
+}
+
 interface ExecutionErrorMetaMap {
   [AgentExecutionErrorCode.toolNotFound]: ToolNotFoundErrorMeta;
+  [AgentExecutionErrorCode.toolUnavailable]: ToolUnavailableErrorMeta;
   [AgentExecutionErrorCode.toolValidationError]: TooValidationErrorMeta;
   [AgentExecutionErrorCode.contextLengthExceeded]: {};
   [AgentExecutionErrorCode.unknownError]: {};
