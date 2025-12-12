@@ -10,8 +10,7 @@ import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
-import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
-import { getSpaceIdFromRequest } from './helpers';
+import { getSecurityLabsIndexName } from '@kbn/product-doc-common';
 import { securityTool } from './constants';
 
 const securityLabsSearchSchema = z.object({
@@ -24,8 +23,9 @@ const securityLabsSearchSchema = z.object({
 
 export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search');
 
-const getKnowledgeBaseIndex = (spaceId: string): string =>
-  `.kibana-elastic-ai-assistant-knowledge-base-${spaceId}`;
+// Security Labs artifacts are installed to a global, hidden index.
+// When called without an `inferenceId`, this resolves to the default (ELSER) index name.
+const SECURITY_LABS_INDEX = getSecurityLabsIndexName();
 
 export const securityLabsSearchTool = (
   core: CoreSetup
@@ -33,31 +33,21 @@ export const securityLabsSearchTool = (
   return {
     id: SECURITY_LABS_SEARCH_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze Security Labs knowledge base content. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Automatically filters to Security Labs content only and limits results to 10 articles.`,
+    description: `Search and analyze Security Labs content installed via the AI knowledge base artifacts. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Limits results to 10 articles.`,
     schema: securityLabsSearchSchema,
     availability: {
-      cacheMode: 'space',
-      handler: async ({ spaceId }: ToolAvailabilityContext) => {
+      // Security Labs artifacts are installed in a global (non-space) index.
+      cacheMode: 'global',
+      handler: async (_ctx: ToolAvailabilityContext) => {
         try {
           const [coreStart] = await core.getStartServices();
           const esClient = coreStart.elasticsearch.client.asInternalUser;
-          const knowledgeBaseIndex = getKnowledgeBaseIndex(spaceId);
 
           const response = await esClient.search({
-            index: knowledgeBaseIndex,
+            index: SECURITY_LABS_INDEX,
             size: 1,
             terminate_after: 1,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      kb_resource: SECURITY_LABS_RESOURCE,
-                    },
-                  },
-                ],
-              },
-            },
+            query: { match_all: {} },
           });
 
           if (response.hits.hits.length > 0) {
@@ -66,12 +56,12 @@ export const securityLabsSearchTool = (
 
           return {
             status: 'unavailable',
-            reason: 'Security Labs content not found in knowledge base',
+            reason: 'Security Labs content not installed',
           };
         } catch (error) {
           return {
             status: 'unavailable',
-            reason: `Failed to check Security Labs knowledge base availability: ${
+            reason: `Failed to check Security Labs content availability: ${
               error instanceof Error ? error.message : 'Unknown error'
             }`,
           };
@@ -82,17 +72,16 @@ export const securityLabsSearchTool = (
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {
-        const spaceId = getSpaceIdFromRequest(request);
-        const knowledgeBaseIndex = getKnowledgeBaseIndex(spaceId);
-
-        // Enhance query to filter by Security Labs resource and limit results
-        const enhancedQuery = `${nlQuery} Filter to only Security Labs content (kb_resource: ${SECURITY_LABS_RESOURCE}). Limit to 3 results.`;
+        // Enhance query and limit results
+        const enhancedQuery = `${nlQuery} Limit to 3 results.`;
 
         const results = await runSearchTool({
           nlQuery: enhancedQuery,
-          index: knowledgeBaseIndex,
+          index: SECURITY_LABS_INDEX,
           model: await modelProvider.getDefaultModel(),
-          esClient: esClient.asCurrentUser,
+          // Security Labs is stored in a restricted, hidden index.
+          // Use an internal client for the search.
+          esClient: esClient.asInternalUser,
           logger,
           events,
         });

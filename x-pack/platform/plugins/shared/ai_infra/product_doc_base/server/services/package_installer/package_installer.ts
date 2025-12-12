@@ -10,6 +10,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   getArtifactName,
   getProductDocIndexName,
+  getSecurityLabsArtifactName,
+  getSecurityLabsIndexName,
   DocumentationProduct,
   type ProductName,
 } from '@kbn/product-doc-common';
@@ -19,6 +21,7 @@ import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/
 import { i18n } from '@kbn/i18n';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductDocInstallClient } from '../doc_install_status';
+import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 import {
   downloadToDisk,
   openZipArchive,
@@ -32,6 +35,7 @@ import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
   fetchArtifactVersions,
+  fetchSecurityLabsVersions,
   createIndex,
   populateIndex,
 } from './steps';
@@ -292,6 +296,156 @@ export class PackageInstaller {
     for (const productName of allProducts) {
       await this.productDocClient.setUninstallationStarted(productName, inferenceId);
       await this.uninstallPackage({ productName, inferenceId });
+    }
+  }
+
+  // Security Labs methods
+
+  /**
+   * Install Security Labs content from the CDN.
+   */
+  async installSecurityLabs({
+    version,
+    inferenceId,
+  }: {
+    version?: string;
+    inferenceId?: string;
+  }): Promise<void> {
+    const effectiveInferenceId = inferenceId || this.elserInferenceId;
+
+    this.log.info(
+      `Starting Security Labs installation${
+        version ? ` for version [${version}]` : ''
+      } with inference ID [${effectiveInferenceId}]`
+    );
+
+    // Uninstall existing Security Labs content first
+    await this.uninstallSecurityLabs({ inferenceId: effectiveInferenceId });
+
+    let zipArchive: ZipArchive | undefined;
+    try {
+      // Ensure ELSER is deployed
+      await ensureDefaultElserDeployed({
+        client: this.esClient,
+      });
+
+      // Determine version to install
+      let selectedVersion = version;
+      if (!selectedVersion) {
+        const availableVersions = await fetchSecurityLabsVersions({
+          artifactRepositoryUrl: this.artifactRepositoryUrl,
+        });
+        if (availableVersions.length === 0) {
+          throw new Error('No Security Labs versions available');
+        }
+        // Select the latest version
+        selectedVersion = availableVersions.sort().reverse()[0];
+      }
+
+      const artifactFileName = getSecurityLabsArtifactName({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+
+      this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
+      await downloadToDisk(artifactUrl, artifactPath);
+
+      zipArchive = await openZipArchive(artifactPath);
+      validateArtifactArchive(zipArchive);
+
+      const [manifest, mappings] = await Promise.all([
+        loadManifestFile(zipArchive),
+        loadMappingFile(zipArchive),
+      ]);
+
+      const manifestVersion = manifest.formatVersion;
+      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
+
+      const modifiedMappings = cloneDeep(mappings);
+      overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
+
+      await createIndex({
+        indexName,
+        mappings: modifiedMappings,
+        manifestVersion,
+        esClient: this.esClient,
+        log: this.log,
+      });
+
+      await populateIndex({
+        indexName,
+        manifestVersion,
+        archive: zipArchive,
+        esClient: this.esClient,
+        log: this.log,
+        inferenceId: effectiveInferenceId,
+      });
+
+      this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
+    } catch (e) {
+      let message = e.message;
+      if (message.includes('End of central directory record signature not found.')) {
+        message = i18n.translate(
+          'aiInfra.productDocBase.packageInstaller.noSecurityLabsArtifactAvailable',
+          {
+            values: { inferenceId: effectiveInferenceId },
+            defaultMessage:
+              'No Security Labs artifact available for Inference ID [{inferenceId}]. Please contact your administrator.',
+          }
+        );
+      }
+      this.log.error(`Error during Security Labs installation: ${message}`);
+      throw e;
+    } finally {
+      zipArchive?.close();
+    }
+  }
+
+  /**
+   * Uninstall Security Labs content.
+   */
+  async uninstallSecurityLabs({ inferenceId }: { inferenceId?: string }): Promise<void> {
+    const indexName = getSecurityLabsIndexName(inferenceId);
+    await this.esClient.indices.delete(
+      {
+        index: indexName,
+      },
+      { ignore: [404] }
+    );
+    this.log.info(`Security Labs content uninstalled from index [${indexName}]`);
+  }
+
+  /**
+   * Get the installation status of Security Labs content.
+   */
+  async getSecurityLabsStatus({
+    inferenceId,
+  }: {
+    inferenceId?: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    const indexName = getSecurityLabsIndexName(inferenceId);
+
+    try {
+      const exists = await this.esClient.indices.exists({ index: indexName });
+      if (!exists) {
+        return { status: 'uninstalled' };
+      }
+
+      // Check if index has documents
+      const countResponse = await this.esClient.count({ index: indexName });
+      if (countResponse.count === 0) {
+        return { status: 'uninstalled' };
+      }
+
+      return { status: 'installed' };
+    } catch (error) {
+      this.log.error(`Error checking Security Labs status: ${error.message}`);
+      return {
+        status: 'error',
+        failureReason: error.message,
+      };
     }
   }
 }

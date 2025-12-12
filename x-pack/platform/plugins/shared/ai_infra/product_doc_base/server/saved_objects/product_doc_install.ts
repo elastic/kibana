@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import type { ProductName } from '@kbn/product-doc-common';
+import type { ProductName, ResourceType } from '@kbn/product-doc-common';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { productDocInstallStatusSavedObjectTypeName } from '../../common/consts';
 import type { InstallationStatus } from '../../common/install_status';
@@ -24,13 +24,30 @@ export interface ProductDocInstallStatusAttributes {
   last_installation_failure_reason?: string;
   index_name?: string;
   inference_id?: string;
+  /**
+   * Resource type: 'product_doc' for product documentation, 'security_labs' for Security Labs content.
+   * Defaults to 'product_doc' for backwards compatibility.
+   */
+  resource_type?: ResourceType;
 }
+
 const modelVersion1: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
         inference_id: { type: 'keyword' },
+      },
+    },
+  ],
+};
+
+const modelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        resource_type: { type: 'keyword' },
       },
     },
   ],
@@ -50,10 +67,11 @@ export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDoc
         last_installation_date: { type: 'date' },
         index_name: { type: 'keyword' },
         inference_id: { type: 'keyword' },
+        resource_type: { type: 'keyword' },
       },
     },
     management: {
       importableAndExportable: false,
     },
-    modelVersions: { '1': modelVersion1 },
+    modelVersions: { '1': modelVersion1, '2': modelVersion2 },
   };

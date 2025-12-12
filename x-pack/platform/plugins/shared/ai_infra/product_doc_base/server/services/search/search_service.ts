@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getIndicesForProductNames, mapResult } from './utils';
+import { getIndicesWithSecurityLabs, mapResult } from './utils';
 import { performSearch } from './perform_search';
 import type { DocSearchOptions, DocSearchResponse } from './types';
 
@@ -21,9 +21,11 @@ export class SearchService {
   }
 
   async search(options: DocSearchOptions): Promise<DocSearchResponse> {
-    const { query, max = 3, highlights = 3, products, inferenceId } = options;
-    const index = getIndicesForProductNames(products, inferenceId);
-    this.log.debug(`performing search - query=[${query}] at index=[${index}] `);
+    const { query, max = 3, highlights = 3, products, inferenceId, includeSecurityLabs } = options;
+    const index = getIndicesWithSecurityLabs(products, inferenceId, includeSecurityLabs);
+    this.log.debug(
+      `performing search - query=[${query}] at index=[${index}] includeSecurityLabs=[${includeSecurityLabs}]`
+    );
     const results = await performSearch({
       searchQuery: query,
       size: max,

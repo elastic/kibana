@@ -48,6 +48,54 @@ export interface DocumentationManagerAPI {
   }: {
     inferenceIds: string[];
   }): Promise<Record<string, PerformUpdateResponse>>;
+
+  // Security Labs methods
+
+  /**
+   * Install Security Labs content from the CDN.
+   */
+  installSecurityLabs(options: SecurityLabsInstallOptions): Promise<void>;
+  /**
+   * Uninstall Security Labs content.
+   */
+  uninstallSecurityLabs(options: SecurityLabsUninstallOptions): Promise<void>;
+  /**
+   * Returns the installation status of Security Labs content.
+   */
+  getSecurityLabsStatus({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<SecurityLabsStatusResponse>;
+}
+
+/**
+ * Response for Security Labs status
+ */
+export interface SecurityLabsStatusResponse {
+  status: InstallationStatus;
+  version?: string;
+  failureReason?: string;
+}
+
+/**
+ * Options for installing Security Labs content
+ */
+export interface SecurityLabsInstallOptions {
+  request?: KibanaRequest;
+  wait?: boolean;
+  inferenceId: string;
+  /** Optional specific version to install (YYYY.MM.DD format) */
+  version?: string;
+}
+
+/**
+ * Options for uninstalling Security Labs content
+ */
+export interface SecurityLabsUninstallOptions {
+  request?: KibanaRequest;
+  wait?: boolean;
+  inferenceId: string;
 }
 
 /**

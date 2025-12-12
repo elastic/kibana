@@ -21,6 +21,8 @@ export interface DocSearchOptions {
   products?: ProductName[];
   /** optional inference ID to filter search */
   inferenceId?: string;
+  /** include Security Labs content in search results. Defaults to false */
+  includeSecurityLabs?: boolean;
 }
 
 /**

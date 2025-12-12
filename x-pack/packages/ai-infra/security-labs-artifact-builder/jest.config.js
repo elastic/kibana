@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export {
-  getIndicesForProductNames,
-  getIndicesWithSecurityLabs,
-} from './get_indices_for_product_names';
-export { mapResult } from './map_result';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ai-infra/security-labs-artifact-builder'],
+};
+

@@ -16,3 +16,23 @@ export const getProductDocIndexName = (productName: ProductName, inferenceId?: s
     !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
   }`;
 };
+
+/**
+ * Index name prefix for Security Labs content.
+ */
+export const securityLabsIndexPrefix = '.kibana_ai_security_labs';
+
+/**
+ * Index pattern for Security Labs content.
+ */
+export const securityLabsIndexPattern = `${securityLabsIndexPrefix}*`;
+
+/**
+ * Returns the index name for Security Labs content.
+ * Format: .kibana_ai_security_labs[-{inferenceId}]
+ */
+export const getSecurityLabsIndexName = (inferenceId?: string): string => {
+  return `${securityLabsIndexPrefix}${
+    !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
+  }`;
+};
