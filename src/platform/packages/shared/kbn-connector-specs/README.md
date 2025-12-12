@@ -20,7 +20,7 @@ The `@kbn/connector-specs` package provides a simplified, declarative way to def
 Use the generator to create the folder structure and wire everything up:
 
 ```bash
-node scripts/generate connector my_connector --id ".myConnector" --owner "@elastic/workflows-eng"
+node scripts/generate connector my_connector --id ".myConnector" --owner "@elastic/<team-name>"
 ```
 
 This will:
