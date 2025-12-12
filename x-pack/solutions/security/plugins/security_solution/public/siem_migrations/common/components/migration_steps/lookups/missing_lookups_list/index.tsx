@@ -148,6 +148,9 @@ const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
       copy();
       onCopied();
     }, [copy, onCopied]);
+
+    const testId =
+      migrationSource === MigrationSource.QRADAR ? 'referenceSetNameCopy' : 'lookupNameCopy';
     return (
       <EuiToolTip content={CONFIGS[migrationSource].tooltip} disableScreenReaderOutput>
         <EuiButtonIcon
@@ -155,7 +158,7 @@ const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
           iconType="copy"
           color="text"
           aria-label={`${CONFIGS[migrationSource].tooltip} ${lookupName}`}
-          data-test-subj={`${migrationSource}NameCopy`}
+          data-test-subj={testId}
         />
       </EuiToolTip>
     );
@@ -176,6 +179,8 @@ const OmitLookupButton = React.memo<OmitLookupButtonProps>(
       setIsDisabled(true);
       omitLookup(lookupName);
     }, [omitLookup, lookupName]);
+    const testId =
+      migrationSource === MigrationSource.QRADAR ? 'referenceSetNameClear' : 'lookupNameClear';
 
     const button = useMemo(
       () => (
@@ -184,11 +189,11 @@ const OmitLookupButton = React.memo<OmitLookupButtonProps>(
           iconType="cross"
           color="text"
           aria-label={CONFIGS[migrationSource].label}
-          data-test-subj={`${migrationSource}NameClear`}
+          data-test-subj={testId}
           isDisabled={isDisabled}
         />
       ),
-      [onClick, migrationSource, isDisabled]
+      [onClick, migrationSource, testId, isDisabled]
     );
     if (isDisabled) {
       return button;
