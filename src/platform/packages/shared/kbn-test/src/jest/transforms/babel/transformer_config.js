@@ -23,7 +23,21 @@ module.exports = () => ({
   plugins: [
     [
       require.resolve('babel-plugin-transform-barrels'),
-      { executorName: 'jest', isCacheEnabled: true },
+      {
+        executorName: 'jest',
+        moduleIgnorePatterns: [
+          'react',
+          'React',
+          '@jest/globals',
+          '@testing-library/*',
+          '@elastic/eui/lib/test/*',
+          '@elastic/eui/test-env/test/*',
+          '@emotion/*',
+          'styled-components',
+          'enzyme',
+          'chalk',
+        ],
+      },
     ],
   ],
   overrides: [
