@@ -12,31 +12,27 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
     await browserAuth.loginAsAdmin();
   });
 
-  spaceTest(
-    'enables risk score followed by the store',
-    { timeout: 180000 },
-    async ({ pageObjects }) => {
-      const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
+  spaceTest('enables risk score followed by the store', async ({ pageObjects }) => {
+    const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
 
-      await dashboardPage.navigate();
+    await dashboardPage.navigate();
 
-      await expect(dashboardPage.entityStoreEnablementPanel, { timeout: 60000 }).toContainText(
-        'Enable entity store and risk score'
-      );
+    await expect(dashboardPage.entityStoreEnablementPanel, { timeout: 30000 }).toContainText(
+      'Enable entity store and risk score'
+    );
 
-      await dashboardPage.openEntityStoreEnablementModal();
+    await dashboardPage.openEntityStoreEnablementModal();
 
-      await expect(dashboardPage.entityStoreEnablementModal).toContainText(
-        'Entity Analytics Enablement'
-      );
-      await expect(dashboardPage.enablementRiskScoreSwitch).toBeVisible();
-      await expect(dashboardPage.enablementEntityStoreSwitch).toBeVisible();
+    await expect(dashboardPage.entityStoreEnablementModal).toContainText(
+      'Entity Analytics Enablement'
+    );
+    await expect(dashboardPage.enablementRiskScoreSwitch).toBeVisible();
+    await expect(dashboardPage.enablementEntityStoreSwitch).toBeVisible();
 
-      await dashboardPage.confirmEntityStoreEnablement();
-      await dashboardPage.waitForEntitiesListToAppear();
-      await dashboardPage.entitiesListPanel.waitFor({ state: 'visible' });
+    await dashboardPage.confirmEntityStoreEnablement();
+    await dashboardPage.waitForEntitiesListToAppear();
+    await dashboardPage.entitiesListPanel.waitFor({ state: 'visible' });
 
-      await expect(dashboardPage.entitiesListPanel, { timeout: 120000 }).toContainText('Entities');
-    }
-  );
+    await expect(dashboardPage.entitiesListPanel).toContainText('Entities');
+  });
 });
