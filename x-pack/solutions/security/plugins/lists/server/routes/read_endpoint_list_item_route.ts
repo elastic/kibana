@@ -58,7 +58,10 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
                 statusCode: 404,
               });
             } else {
-              return response.ok({ body: ReadEndpointListItemResponse.parse(exceptionListItem) });
+              // API schema expects an array of items
+              return response.ok({
+                body: ReadEndpointListItemResponse.parse([exceptionListItem]),
+              });
             }
           } else {
             return siemResponse.error({ body: 'id or item_id required', statusCode: 400 });
