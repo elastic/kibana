@@ -625,7 +625,48 @@
         "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.WorkflowsExtensionsServerPluginStartDeps.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.PluginStartContract",
+                "text": "PluginStartContract"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.WorkflowsExtensionsServerPluginStartDeps.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -719,7 +760,7 @@
             "\nRegister server-side definition for a workflow step.\nThis should be called during the plugin's setup phase.\n"
           ],
           "signature": [
-            "(definition: ",
+            "<TInput, TOutput>(definition: ",
             {
               "pluginId": "workflowsExtensions",
               "scope": "server",
@@ -727,7 +768,7 @@
               "section": "def-server.ServerStepDefinition",
               "text": "ServerStepDefinition"
             },
-            "<any, any>) => void"
+            "<TInput, TOutput>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
           "deprecated": false,
@@ -750,7 +791,7 @@
                   "section": "def-server.ServerStepDefinition",
                   "text": "ServerStepDefinition"
                 },
-                "<any, any>"
+                "<TInput, TOutput>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
               "deprecated": false,

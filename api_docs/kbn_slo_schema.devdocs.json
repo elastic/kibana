@@ -16658,6 +16658,24 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.serverlessSloSettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "serverlessSloSettingsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ staleThresholdInHours: ",
+          "NumberC",
+          "; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.settingsSchema",
         "type": "Object",
         "tags": [],
@@ -20084,24 +20102,6 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.sloServerlessSettingsSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "sloServerlessSettingsSchema",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ staleThresholdInHours: ",
-          "NumberC",
-          "; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.sloSettingsSchema",
         "type": "Object",
         "tags": [],
@@ -23434,6 +23434,34 @@
           "; }>>; }>; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.storedSloSettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "storedSloSettingsSchema",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ useAllRemoteClusters: ",
+          "BooleanC",
+          "; selectedRemoteClusters: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>, ",
+          "PartialC",
+          "<{ staleThresholdInHours: ",
+          "NumberC",
+          "; }>]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
