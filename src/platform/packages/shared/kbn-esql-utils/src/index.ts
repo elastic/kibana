@@ -60,11 +60,8 @@ export {
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
 export {
-  getUserDefinedColumns,
   getAllUserDefinedColumnNames,
   isUserDefinedColumn,
-  type UserDefinedColumn,
-  type UserDefinedColumnsPerCommand,
 } from './utils/get_user_defined_columns';
 
 // Callback functions
