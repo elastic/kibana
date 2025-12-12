@@ -68,6 +68,18 @@ export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "
 export const USER_AVATAR_MAX_INITIALS = 2;
 
 /**
+ * Validates if the provided color string is a valid hex color.
+ * @param color - The color to validate.
+ * @returns True if the color is a valid hex color, false otherwise.
+ */
+export function isValidHexColor(color?: string) {
+  if (!color || typeof color !== 'string') {
+    return false;
+  }
+  return color != null && color !== '' && /^#/.test(color) && chroma.valid(color);
+}
+
+/**
  * Determines the color for the provided user profile.
  * If a color is present on the user profile itself, then that is used.
  * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
@@ -81,11 +93,7 @@ export function getUserAvatarColor(
 ) {
   const firstCodePoint = getUserDisplayName(user).codePointAt(0) || USER_AVATAR_FALLBACK_CODE_POINT;
   const avatarColor = avatar?.color;
-  const isValidColor =
-    avatarColor != null &&
-    avatarColor !== '' &&
-    /^#/.test(avatarColor) &&
-    chroma.valid(avatarColor);
+  const isValidColor = isValidHexColor(avatarColor);
   if (isValidColor) {
     return avatarColor;
   }

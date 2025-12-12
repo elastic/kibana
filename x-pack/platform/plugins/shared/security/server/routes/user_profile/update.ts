@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import chroma from 'chroma-js';
-
 import { schema } from '@kbn/config-schema';
+import { isValidHexColor } from '@kbn/user-profile-components';
 
 import type { RouteDefinitionParams } from '..';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -120,11 +119,7 @@ export function defineUpdateUserProfileDataRoute({
 
       const avatarColor = userProfileData.avatar?.color;
       if (avatarColor) {
-        const isValidColor =
-          avatarColor != null &&
-          avatarColor !== '' &&
-          /^#/.test(avatarColor) &&
-          chroma.valid(avatarColor);
+        const isValidColor = isValidHexColor(avatarColor);
         if (!isValidColor) {
           return response.customError({
             body: 'Invalid hex color',
