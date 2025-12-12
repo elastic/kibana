@@ -34,7 +34,7 @@ export function initSpacesOnRequestInterceptor({
     // and rewrite the request to not include the space identifier in the URL.
     const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(path, serverBasePath);
 
-    executionContext.append({ space: spaceId });
+    // executionContext.append({ space: spaceId });
 
     if (pathHasExplicitSpaceIdentifier) {
       const reqBasePath = `/s/${spaceId}`;

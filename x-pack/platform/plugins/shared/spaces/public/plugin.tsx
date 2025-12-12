@@ -56,7 +56,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private config: ConfigType;
   private readonly isServerless: boolean;
 
-  private spaceAndExecutionContextSyncSubscription!: Subscription;
+  private spaceAndExecutionContextSyncSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -202,6 +202,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService.stop();
       this.managementService = undefined;
     }
-    this.spaceAndExecutionContextSyncSubscription.unsubscribe();
+    this.spaceAndExecutionContextSyncSubscription?.unsubscribe();
   }
 }
