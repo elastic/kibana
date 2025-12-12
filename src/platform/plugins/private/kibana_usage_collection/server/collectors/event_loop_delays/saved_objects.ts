@@ -52,7 +52,7 @@ export async function deleteHistogramSavedObjects(
 ) {
   const { saved_objects: savedObjects } = await internalRepository.find<EventLoopDelaysDaily>({
     type: SAVED_OBJECTS_DAILY_TYPE,
-    filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.lastUpdatedAt < "now-${daysTimeRange}d/d"`,
+    filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.lastUpdatedAt < "now-${daysTimeRange}d"`,
   });
 
   return await Promise.allSettled(
