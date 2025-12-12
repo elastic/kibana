@@ -10,7 +10,7 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { inlineSuggest } from './inline_suggest';
 import type { InlineSuggestionItem } from './types';
 
-jest.mock('@kbn/esql-ast/src/commands_registry/options/recommended_queries', () => ({
+jest.mock('@kbn/esql-ast/src/commands/registry/options/recommended_queries', () => ({
   getRecommendedQueriesTemplates: jest.fn(),
   getTimeAndCategorizationFields: jest.fn(),
 }));
@@ -27,7 +27,7 @@ jest.mock('./inline_suggestions_cache', () => ({
 import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,
-} from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+} from '@kbn/esql-ast/src/commands/registry/options/recommended_queries';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { setToCache } from './inline_suggestions_cache';
 
