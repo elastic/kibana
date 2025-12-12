@@ -41,8 +41,13 @@ import {
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../../../common/components/user_privileges');
+
+jest.mock('../../../../../common/experimental_features_service');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When using scan action from response actions console', () => {
   let user: UserEvent;
@@ -67,6 +72,8 @@ describe('When using scan action from response actions console', () => {
   });
 
   beforeEach(() => {
+    mockedExperimentalFeaturesService.get.mockReturnValue(allowedExperimentalValues);
+
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();

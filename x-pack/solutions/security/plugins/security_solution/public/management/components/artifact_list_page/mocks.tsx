@@ -87,7 +87,6 @@ export interface ArtifactListPageRenderingSetup {
   ) => ReturnType<AppContextTestRender['render']>;
   history: AppContextTestRender['history'];
   coreStart: AppContextTestRender['coreStart'];
-  setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
   mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   FormComponentMock: ReturnType<typeof getFormComponentMock>['FormComponentMock'];
   getLastFormComponentProps: ReturnType<typeof getFormComponentMock>['getLastFormComponentProps'];
@@ -142,6 +141,5 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
     FormComponentMock,
     getLastFormComponentProps,
     getFirstCard: getCard,
-    setExperimentalFlag: mockedContext.setExperimentalFlag,
   };
 };
