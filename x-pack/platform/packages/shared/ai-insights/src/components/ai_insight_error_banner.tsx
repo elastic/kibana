@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
 export interface AiInsightErrorBannerProps {
-  error?: string;
+  error: string;
   onRetry?: () => void;
 }
 
