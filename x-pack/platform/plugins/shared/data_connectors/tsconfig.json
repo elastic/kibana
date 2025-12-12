@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["index.ts", "common/**/*.ts", "public/**/*.ts", "public/**/*.tsx", "server/**/*.ts"],
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
