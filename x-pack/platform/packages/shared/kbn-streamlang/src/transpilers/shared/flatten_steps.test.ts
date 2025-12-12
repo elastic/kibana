@@ -23,13 +23,13 @@ describe('flattenSteps', () => {
   it('should flatten nested where blocks', () => {
     const steps = [
       {
-        where: {
+        condition: {
           field: 'foo',
           eq: 'bar',
           steps: [
             { action: 'set', to: 'baz', value: 'qux' },
             {
-              where: {
+              condition: {
                 field: 'baz',
                 eq: 'qux',
                 steps: [{ action: 'rename', from: 'baz', to: 'final' }],
@@ -76,7 +76,7 @@ describe('flattenSteps', () => {
         customIdentifier: 'i31b51cb0-d1c9-11f0-a523-ed186b43cf76',
       },
       {
-        where: {
+        condition: {
           field: 'sdfds',
           eq: 'dsfsdf',
           steps: [

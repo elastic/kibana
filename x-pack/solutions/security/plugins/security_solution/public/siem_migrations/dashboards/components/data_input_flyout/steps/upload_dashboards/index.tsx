@@ -8,27 +8,19 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
-import { DashboardUploadSteps } from '../constants';
 import * as i18n from '../translations';
 import { DashboardsUploadSubSteps } from './sub_steps';
-import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
-import type { DashboardMigrationStats } from '../../../../types';
-
-interface DashboardsUploadStepProps {
-  dataInputStep?: number;
-  migrationStats?: DashboardMigrationStats;
-  onMigrationCreated: OnMigrationCreated;
-  onMissingResourcesFetched: OnMissingResourcesFetched;
-}
+import type { MigrationStepProps } from '../../../../../common/types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 export const DashboardsUploadStep = ({
   dataInputStep = 1, // Default value if not provided
   migrationStats,
   onMigrationCreated,
   onMissingResourcesFetched,
-}: DashboardsUploadStepProps) => {
+}: MigrationStepProps) => {
   const dataInputStatus = useMemo(
-    () => getEuiStepStatus(DashboardUploadSteps.DashboardsUpload, dataInputStep),
+    () => getEuiStepStatus(SplunkDataInputStep.Upload, dataInputStep),
     [dataInputStep]
   );
 
