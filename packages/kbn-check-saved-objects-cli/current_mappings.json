@@ -3400,7 +3400,32 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "mapped_params": {
+        "properties": {
+          "severity": {
+            "type": "keyword"
+          }
+        }
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "risk_score": {
+        "type": "float"
+      },
       "rule_id": {
+        "type": "keyword"
+      },
+      "severity": {
+        "type": "keyword"
+      },
+      "tags": {
         "type": "keyword"
       },
       "version": {
