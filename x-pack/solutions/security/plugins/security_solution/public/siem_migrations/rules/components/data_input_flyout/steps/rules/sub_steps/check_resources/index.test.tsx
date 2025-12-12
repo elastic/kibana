@@ -11,6 +11,7 @@ import { useCheckResourcesStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
 import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
+import { MigrationSource } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../../common/hooks/use_get_missing_resources');
 
@@ -129,7 +130,7 @@ describe('useCheckResourcesStep', () => {
           status: 'incomplete',
           migrationStats: mockMigrationStats,
           onMissingResourcesFetched: jest.fn(),
-          resourceType: 'reference_data',
+          migrationSource: MigrationSource.QRADAR,
         }),
       { wrapper: TestProviders }
     );

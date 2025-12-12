@@ -13,6 +13,7 @@ import type { SiemMigrationResourceData } from '../../../../../../../../../commo
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
+import { MigrationSource } from '../../../../../../../common/types';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
@@ -55,7 +56,7 @@ export const useReferencesFileUploadStep = ({
         createResources={upsertMigrationResources}
         isLoading={isLoading}
         apiError={error?.message}
-        resourceType={'reference_data'}
+        migrationSource={MigrationSource.QRADAR}
       />
     ),
   };

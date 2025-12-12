@@ -6,7 +6,6 @@
  */
 
 import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
-import type { SiemMigrationResourceData } from '../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/model/rule_migration.gen';
 import type { MigrationSettingsBase, StatusFilterBase } from '../common/types';
 
@@ -18,8 +17,6 @@ export enum AuthorFilter {
   ELASTIC = 'elastic',
   CUSTOM = 'custom',
 }
-
-export type ResourceType = SiemMigrationResourceData['type'];
 
 export enum RulesSpecificStatusFilter {
   INDEX_PATTERN_MISSING = 'index_pattern_missing',

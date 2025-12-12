@@ -168,7 +168,7 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       status: getEuiStepStatus(4, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
-      resourceType: migrationSource === MigrationSource.QRADAR ? 'reference_data' : undefined,
+      migrationSource,
     });
 
     const steps = useMemo<EuiStepProps[]>(

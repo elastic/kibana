@@ -69,7 +69,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
       setDataInputStep,
-      resourceType: migrationSource === MigrationSource.QRADAR ? 'reference_data' : undefined,
+      migrationSource,
     });
 
     const onMigrationCreated = useCallback(

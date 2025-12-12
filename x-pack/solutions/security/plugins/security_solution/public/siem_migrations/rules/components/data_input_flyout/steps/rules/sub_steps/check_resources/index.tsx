@@ -10,19 +10,18 @@ import { EuiText, type EuiStepProps, type EuiStepStatus } from '@elastic/eui';
 import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import type { OnMissingResourcesFetched } from '../../../../../../../common/types';
-import type { ResourceType } from '../../../../../../types';
+import { MigrationSource, type OnMissingResourcesFetched } from '../../../../../../../common/types';
 
 export interface CheckResourcesStepProps {
   status: EuiStepStatus;
   migrationStats: RuleMigrationTaskStats | undefined;
   onMissingResourcesFetched: OnMissingResourcesFetched;
-  resourceType?: ResourceType;
+  migrationSource?: MigrationSource;
 }
 export const useCheckResourcesStep = ({
   status,
   migrationStats,
-  resourceType,
+  migrationSource,
   onMissingResourcesFetched,
 }: CheckResourcesStepProps): EuiStepProps => {
   const { getMissingResources, isLoading, error } = useGetMissingResources(
@@ -46,7 +45,7 @@ export const useCheckResourcesStep = ({
     return status;
   }, [isLoading, error, status]);
 
-  if (resourceType === 'reference_data') {
+  if (migrationSource === MigrationSource.QRADAR) {
     return {
       title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_TITLE,
       status: uploadStepStatus,

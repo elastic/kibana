@@ -8,16 +8,15 @@
 import { useCallback, useState } from 'react';
 import type { SiemMigrationResourceBase } from '../../../../../../../common/siem_migrations/model/common.gen';
 import type { MigrationStepProps, MissingResourcesIndexed } from '../../../../../common/types';
-import { SplunkDataInputStep } from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 import { QradarDataInputStep } from '../../types';
-import type { ResourceType } from '../../../../types';
 
 export const useMissingResources = ({
   setDataInputStep,
-  resourceType,
+  migrationSource,
 }: {
   setDataInputStep: MigrationStepProps['setDataInputStep'];
-  resourceType?: ResourceType;
+  migrationSource?: MigrationSource;
 }) => {
   const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
     MissingResourcesIndexed | undefined
@@ -38,7 +37,7 @@ export const useMissingResources = ({
       );
       setMissingResourcesIndexed(newMissingResourcesIndexed);
 
-      if (resourceType === 'reference_data') {
+      if (migrationSource === MigrationSource.QRADAR) {
         if (newMissingResourcesIndexed.lookups.length) {
           setDataInputStep(QradarDataInputStep.ReferenceSet);
           return;
@@ -60,7 +59,7 @@ export const useMissingResources = ({
 
       setDataInputStep(SplunkDataInputStep.End);
     },
-    [setDataInputStep, resourceType]
+    [setDataInputStep, migrationSource]
   );
 
   return { missingResourcesIndexed, onMissingResourcesFetched };

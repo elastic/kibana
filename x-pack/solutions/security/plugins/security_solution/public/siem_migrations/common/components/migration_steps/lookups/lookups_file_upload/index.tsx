@@ -15,29 +15,29 @@ import { UploadFileButton } from '../..';
 import { FILE_UPLOAD_ERROR } from '../../../../translations/file_upload_error';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
-import type { ResourceType } from '../../../../../rules/types';
 import { convertQradarReferenceSetToLookup } from '../utils';
+import { MigrationSource } from '../../../../types';
 
 export interface LookupsFileUploadProps {
   createResources: (resources: SiemMigrationResourceData[]) => void;
   apiError?: string;
   isLoading?: boolean;
-  resourceType?: ResourceType;
+  migrationSource: MigrationSource;
 }
 
-const CONFIGS: Record<string, { prompt: string; label: string }> = {
-  lookup: {
+const CONFIGS: Record<MigrationSource, { prompt: string; label: string }> = {
+  [MigrationSource.SPLUNK]: {
     prompt: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT,
     label: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_LABEL,
   },
-  reference_data: {
+  [MigrationSource.QRADAR]: {
     prompt: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_PROMPT,
     label: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_LABEL,
   },
 };
 
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
-  ({ createResources, apiError, isLoading, resourceType = 'lookup' }) => {
+  ({ createResources, apiError, isLoading, migrationSource }) => {
     const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
@@ -87,7 +87,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
                 const name = file.name.replace(/\.[^/.]+$/, '').trim();
 
-                if (resourceType === 'reference_data') {
+                if (migrationSource === MigrationSource.QRADAR) {
                   resolve(
                     convertQradarReferenceSetToLookup({
                       fileContent: content,
@@ -120,7 +120,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
         // Set the loaded lookups to the state
         setLookupResources((current) => [...current, ...lookups]);
       },
-      [addError, resourceType]
+      [addError, migrationSource]
     );
 
     const errors = useMemo(() => {
@@ -132,7 +132,8 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
     const showLoader = isParsing || isLoading;
     const isButtonDisabled = showLoader || lookupResources.length === 0;
-    const id = resourceType === 'reference_data' ? 'referenceSetsFilePicker' : 'lookupsFilePicker';
+    const id =
+      migrationSource === MigrationSource.QRADAR ? 'referenceSetsFilePicker' : 'lookupsFilePicker';
 
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -153,14 +154,14 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {CONFIGS[resourceType].prompt}
+                  {CONFIGS[migrationSource].prompt}
                 </EuiText>
               }
               accept="application/text"
               onChange={parseFile}
               multiple
               display="large"
-              aria-label={CONFIGS[resourceType].label}
+              aria-label={CONFIGS[migrationSource].label}
               isLoading={showLoader}
               disabled={showLoader}
               data-test-subj={id}
