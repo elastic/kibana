@@ -11,7 +11,6 @@ import type { McpToolConfig } from '@kbn/onechat-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Tool, ListToolsResponse } from '@kbn/mcp-client';
-import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
@@ -282,27 +281,6 @@ export const getMcpToolType = (): ToolTypeDefinition<
       });
 
       return mergedConfig;
-    },
-
-    isAvailable: async (config, { request, actions }) => {
-      try {
-        const actionsClient = await actions.getActionsClientWithRequest(request);
-        const connector = await actionsClient.get({ id: config.connector_id });
-
-        if (connector.actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
-          return {
-            status: 'unavailable',
-            reason: `Connector '${config.connector_id}' is not an MCP connector`,
-          };
-        }
-
-        return { status: 'available' };
-      } catch (error) {
-        return {
-          status: 'unavailable',
-          reason: `MCP connector '${config.connector_id}' not found or not accessible`,
-        };
-      }
     },
 
     // Track execution health for MCP tools since they depend on external MCP servers

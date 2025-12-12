@@ -9,17 +9,16 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createToolNotFoundError,
   createBadRequestError,
-  createToolUnavailableError,
   validateToolId,
-  isErrorResult,
+  ToolResultType,
   type ToolType,
+  type ErrorResult,
 } from '@kbn/onechat-common';
 import type {
   Runner,
   RunToolReturn,
   ScopedRunnerRunToolsParams,
   ToolAvailabilityContext,
-  ToolAvailabilityResult,
   InternalToolDefinition,
 } from '@kbn/onechat-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -42,24 +41,10 @@ export interface ToolListParams {
   // tags?: string[];
 }
 
-/**
- * Tool definition with availability status.
- * Used by listWithAvailability to return tools with their current availability state.
- */
-export interface ToolWithAvailability {
-  tool: InternalToolDefinition;
-  availability: ToolAvailabilityResult;
-}
-
 export interface ToolRegistry {
   has(toolId: string): Promise<boolean>;
   get(toolId: string): Promise<InternalToolDefinition>;
   list(opts?: ToolListParams): Promise<InternalToolDefinition[]>;
-  /**
-   * Lists all tools with their availability status.
-   * Unlike `list()`, this includes unavailable tools so the UI can display them with error states.
-   */
-  listWithAvailability(opts?: ToolListParams): Promise<ToolWithAvailability[]>;
   create(tool: ToolCreateParams): Promise<InternalToolDefinition>;
   update(toolId: string, update: ToolUpdateParams): Promise<InternalToolDefinition>;
   delete(toolId: string): Promise<boolean>;
@@ -126,12 +111,8 @@ class ToolRegistryImpl implements ToolRegistry {
   ): Promise<RunToolReturn> {
     const { toolId, ...otherParams } = params;
     const tool = await this.get(toolId);
-    const availability = await this.getAvailability(tool);
-    if (availability.status !== 'available') {
-      throw createToolUnavailableError({
-        toolId,
-        reason: availability.reason ?? 'Tool is not available',
-      });
+    if (!(await this.isAvailable(tool))) {
+      throw createBadRequestError(`Tool ${toolId} is not available`);
     }
     const executable = toExecutableTool({ tool, runner: this.getRunner(), request: this.request });
     const result = (await executable.execute(otherParams)) as RunToolReturn;
@@ -158,12 +139,8 @@ class ToolRegistryImpl implements ToolRegistry {
     for (const provider of this.orderedProviders) {
       if (await provider.has(toolId)) {
         const tool = await provider.get(toolId);
-        const availability = await this.getAvailability(tool);
-        if (availability.status !== 'available') {
-          throw createToolUnavailableError({
-            toolId,
-            reason: availability.reason ?? 'Tool is not available',
-          });
+          if (!(await this.isAvailable(tool))) {
+            throw createBadRequestError(`Tool ${toolId} is not available`);
         }
         return tool;
       }
@@ -176,22 +153,9 @@ class ToolRegistryImpl implements ToolRegistry {
     for (const provider of this.orderedProviders) {
       const toolsFromType = await provider.list();
       for (const tool of toolsFromType) {
-        const availability = await this.getAvailability(tool);
-        if (availability.status === 'available') {
-          allTools.push(tool);
+        if (!(await this.isAvailable(tool))) {
+          continue;
         }
-      }
-    }
-    return allTools;
-  }
-
-  async listWithAvailability(opts?: ToolListParams | undefined): Promise<ToolWithAvailability[]> {
-    const allTools: ToolWithAvailability[] = [];
-    for (const provider of this.orderedProviders) {
-      const toolsFromType = await provider.list();
-      for (const tool of toolsFromType) {
-        const availability = await this.getAvailability(tool);
-        allTools.push({ tool, availability });
       }
     }
     return allTools;
@@ -240,7 +204,7 @@ class ToolRegistryImpl implements ToolRegistry {
     throw createToolNotFoundError({ toolId });
   }
 
-  private async getAvailability(tool: InternalToolDefinition): Promise<ToolAvailabilityResult> {
+  private async isAvailable(tool: InternalToolDefinition): Promise<boolean> {
     const soClient = this.savedObjects.getScopedClient(this.request);
     const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
 
@@ -249,7 +213,8 @@ class ToolRegistryImpl implements ToolRegistry {
       request: this.request,
       uiSettings: uiSettingsClient,
     };
-    return tool.isAvailable(context);
+    const toolStatus = await tool.isAvailable(context);
+    return toolStatus.status === 'available';
   }
 
   /**
@@ -257,7 +222,16 @@ class ToolRegistryImpl implements ToolRegistry {
    * Records success if no error results are present, otherwise records failure.
    */
   private async trackToolHealth(toolId: string, result: RunToolReturn): Promise<void> {
-    const errorResult = result.results.find(isErrorResult);
+    // Guard against missing or non-array results
+    if (!result?.results || !Array.isArray(result.results)) {
+      // Treat as success if we got a result but no valid results array
+      await this.healthClient.recordSuccess(toolId);
+      return;
+    }
+
+    const errorResult = result.results.find(
+      (r): r is ErrorResult => r.type === ToolResultType.error
+    );
 
     if (errorResult) {
       await this.healthClient.recordFailure(toolId, errorResult.data.message);
