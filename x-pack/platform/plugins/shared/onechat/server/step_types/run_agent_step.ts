@@ -8,10 +8,7 @@
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { ServiceManager } from '../services';
-import {
-  runAgentStepCommonDefinition,
-  type RunAgentStepInput,
-} from '../../common/step_types/run_agent_step';
+import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
 /**
  * Server step definition for the onechat.runAgent step.
@@ -22,7 +19,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { agent_id: agentId, message, schema } = context.input as RunAgentStepInput;
+        const { agent_id: agentId, message, schema } = context.input;
 
         context.logger.debug('onechat.runAgent step started');
         const request = context.contextManager.getFakeRequest();
