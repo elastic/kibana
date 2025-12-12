@@ -664,7 +664,10 @@ export const getXyVisualization = ({
     }
     if (groupId === 'breakdown') {
       if (newLayer.splitAccessors) {
-        newLayer.splitAccessors = [...newLayer.splitAccessors, columnId];
+        newLayer.splitAccessors = [
+          ...newLayer.splitAccessors.filter((a) => a !== columnId),
+          columnId,
+        ];
       } else {
         newLayer.splitAccessors = [columnId];
       }
