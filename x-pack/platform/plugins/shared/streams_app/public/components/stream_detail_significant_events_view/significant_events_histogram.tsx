@@ -48,7 +48,7 @@ export function SignificantEventsHistogramChart({
         xFormatter,
       })
     );
-  }, [changes, id, theme, xFormatter]);
+  }, [changes, theme, xFormatter]);
 
   return (
     <SparkPlot
