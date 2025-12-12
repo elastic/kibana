@@ -35,7 +35,7 @@ export const ConditionsTable = <T extends object>({ badge, ...props }: Condition
       )}
       <EuiFlexItem grow={1}>
         <EuiBasicTable
-          tableCaption={i18n.translate('conditionsTable.table.caption', {
+          tableCaption={i18n.translate('xpack.securitySolution.conditionsTable.caption', {
             defaultMessage: 'Conditions',
           })}
           {...props}
