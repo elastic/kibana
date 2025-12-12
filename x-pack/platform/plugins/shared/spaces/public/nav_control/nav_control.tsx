@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import type { TourManager } from './solution_view_tour';
+import { initTour } from './solution_view_tour';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
@@ -23,9 +23,10 @@ export function initSpacesNavControl(
   spacesManager: SpacesManager,
   core: CoreStart,
   config: ConfigType,
-  eventTracker: EventTracker,
-  tour: TourManager
+  eventTracker: EventTracker
 ) {
+  const { showTour$, onFinishTour } = initTour(core, spacesManager);
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -71,8 +72,8 @@ export function initSpacesNavControl(
                 navigateToUrl={core.application.navigateToUrl}
                 allowSolutionVisibility={config.allowSolutionVisibility}
                 eventTracker={eventTracker}
-                showTour$={tour.showTour$}
-                onFinishTour={() => tour.finishTour()}
+                showTour$={showTour$}
+                onFinishTour={onFinishTour}
                 manageSpacesDocsLink={core.docLinks.links.spaces.kibanaManageSpaces}
                 manageSpacesLink={core.http.basePath.prepend('/app/management/kibana/spaces')}
               />

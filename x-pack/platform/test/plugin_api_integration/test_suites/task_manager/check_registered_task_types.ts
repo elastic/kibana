@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import type { Response as SupertestResponse } from 'supertest';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const actionTypeIdsFromSpecs = new Set(
+  Object.values(connectorsSpecs).map(({ metadata }) => `actions:${metadata.id}`)
+);
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -46,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('check_registered_task_types', () => {
     it('should check changes on all registered task types', async () => {
       const types = (await getRegisteredTypes())
-        .filter((t: string) => !TEST_TYPES.includes(t))
+        .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
       expect(types).to.eql([
         'Fleet-Metrics-Task',
@@ -179,6 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:policy-revisions-cleanup-task',
         'fleet:privilege_level_change:retry',
         'fleet:reassign_action:retry',
+        'fleet:reindex_integration_knowledge',
         'fleet:request_diagnostics:retry',
         'fleet:setup',
         'fleet:setup:upgrade_managed_package_policies',
