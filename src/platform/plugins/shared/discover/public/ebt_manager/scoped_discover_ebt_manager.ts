@@ -91,9 +91,9 @@ export class ScopedDiscoverEBTManager {
     [ContextualProfileLevel.documentLevel]: undefined,
   };
   private queryAnalysisCache = new LRUCache<
-    string,
+    string, // cache analysis per request id
     MultiMatchAnalysis,
-    { request: InspectedRequest }
+    { request: InspectedRequest } // pass full request via context
   >({
     max: 10,
     memoMethod: (requestId, _previousValue, { context: { request } }) =>
