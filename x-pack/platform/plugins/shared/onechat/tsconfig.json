@@ -94,6 +94,9 @@
     "@kbn/core-notifications-browser",
     "@kbn/ai-assistant-common",
     "@kbn/ui-theme",
-    "@kbn/ai-assistant-management-plugin"
+    "@kbn/ai-assistant-management-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/connector-schemas",
+    "@kbn/mcp-client"
   ]
 }
