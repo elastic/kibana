@@ -8,6 +8,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import type {
   CreateAutoImportIntegrationResponse,
@@ -149,34 +150,55 @@ const createIntegrationRoute = (
       },
       async (context, request, response) => {
         try {
-          const automaticImportv2 = await context.automaticImportv2;
-          const automaticImportService = automaticImportv2.automaticImportService;
-          const integrationRequestBody = request.body;
-          const authenticatedUser = await automaticImportv2.getCurrentUser();
-          const integrationId = integrationRequestBody.integrationId;
+          const { automaticImportService, getCurrentUser, esClient, inference } =
+            await context.automaticImportv2;
+          const { integrationId, title, logo, description, connectorId, dataStreams } =
+            request.body;
+          const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+          const authenticatedUser = await getCurrentUser();
 
           const integrationParams: IntegrationParams = {
             integrationId,
-            title: integrationRequestBody.title,
-            logo: integrationRequestBody.logo,
-            description: integrationRequestBody.description,
+            title,
+            logo,
+            description,
           };
+
+          const model = await inference.getChatModel({
+            request,
+            connectorId,
+            chatModelOptions: {
+              // not passing specific `model`, we'll always use the connector default model
+              // temperature may need to be parametrized in the future
+              temperature: 0.05,
+              // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+              maxRetries: 1,
+              // Disable streaming explicitly
+              disableStreaming: true,
+              // Set a hard limit of 50 concurrent requests
+              maxConcurrency: 50,
+              telemetryMetadata: { pluginId: 'automatic_import_v2' },
+              signal: abortSignal,
+            },
+          });
 
           await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
 
-          if (integrationRequestBody.dataStreams) {
-            const dataStreamsParams: DataStreamParams[] = integrationRequestBody.dataStreams.map(
-              (dataStream) => ({
-                ...dataStream,
-                integrationId,
-                metadata: { createdAt: new Date().toISOString() },
-              })
-            );
+          if (dataStreams) {
+            const dataStreamsParams: DataStreamParams[] = dataStreams.map((dataStream) => ({
+              ...dataStream,
+              integrationId,
+              esClient,
+              model,
+              metadata: { createdAt: new Date().toISOString() },
+            }));
             await Promise.all(
               dataStreamsParams.map((dataStreamParams) =>
                 automaticImportService.createDataStream({
                   authenticatedUser,
                   dataStreamParams,
+                  esClient,
+                  model,
                 })
               )
             );

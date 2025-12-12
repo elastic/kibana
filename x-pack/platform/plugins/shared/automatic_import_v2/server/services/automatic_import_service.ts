@@ -34,6 +34,7 @@ import { TaskManagerService } from './task_manager/task_manager_service';
 import type { CreateDataStreamParams, CreateIntegrationParams } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
+import { AgentService } from './agents/agent_service';
 
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
@@ -43,6 +44,7 @@ export class AutomaticImportService {
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
+  private agentService: AgentService;
 
   constructor(
     logger: LoggerFactory,
@@ -59,11 +61,16 @@ export class AutomaticImportService {
 
     this.taskManagerSetup = taskManagerSetup;
     this.taskManagerService = new TaskManagerService(this.logger, this.taskManagerSetup);
+    this.agentService = new AgentService(this.samplesIndexService);
   }
 
   private processDataStreamWorkflow = async (params: DataStreamTaskParams): Promise<void> => {
-    // TODO: Implement the actual AI agent workflow here that uses AgentService
-    // Will use params.integrationId and params.dataStreamId
+    await this.agentService.invokeAutomaticImportAgent(
+      params.integrationId,
+      params.dataStreamId,
+      params.esClient,
+      params.model
+    );
   };
 
   // Run initialize in the start phase of plugin
@@ -177,6 +184,8 @@ export class AutomaticImportService {
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
+      esClient: params.esClient,
+      model: params.model,
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
       dataStreamTaskParams

@@ -154,6 +154,8 @@ describe('TaskManagerService Integration Tests', () => {
       const taskParams = {
         integrationId: integrationSavedObject.id,
         dataStreamId: 'test-ds-456', // Use the ID we plan to create
+        esClient,
+        model: {} as any, // Mock InferenceChatModel
       };
 
       const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(taskParams);
@@ -241,6 +243,8 @@ describe('TaskManagerService Integration Tests', () => {
           const taskParams = {
             integrationId: integration.id,
             dataStreamId,
+            esClient,
+            model: {} as any, // Mock InferenceChatModel
           };
 
           const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(taskParams);
@@ -287,6 +291,8 @@ describe('TaskManagerService Integration Tests', () => {
         const duplicateTaskParams = {
           integrationId: firstObject.integration.id,
           dataStreamId: firstObject.dataStream.attributes.data_stream_id,
+          esClient,
+          model: {} as any, // Mock InferenceChatModel
         };
 
         const duplicateTaskResponse = await taskManagerService.scheduleDataStreamCreationTask(

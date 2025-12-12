@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient } from '@kbn/core/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InputType } from '../../common';
 
 export interface CreateIntegrationParams {
@@ -16,6 +17,8 @@ export interface CreateIntegrationParams {
 export interface CreateDataStreamParams {
   dataStreamParams: DataStreamParams;
   authenticatedUser: AuthenticatedUser;
+  esClient: ElasticsearchClient;
+  model: InferenceChatModel;
 }
 
 export interface IntegrationParams {
