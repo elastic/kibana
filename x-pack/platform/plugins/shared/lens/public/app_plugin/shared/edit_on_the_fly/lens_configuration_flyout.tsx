@@ -309,11 +309,11 @@ export function LensEditConfigurationFlyout({
   }, [textBasedMode, isSingleLayerVisualization]);
 
   // The button is disabled when the visualization cannot be converted to ES|QL
-  const { isConvertToEsqlButtonDisbaled, esqlPreview } = useMemo(() => {
+  const { isConvertToEsqlButtonDisbaled } = useMemo(() => {
     const layers = datasourceStates[datasourceId].state?.layers;
 
     if (!isSingleLayerVisualization || textBasedMode || !layers) {
-      return { isConvertToEsqlButtonDisbaled: true, esqlPreview: '' };
+      return { isConvertToEsqlButtonDisbaled: true };
     }
 
     // Take the first (and only) layer
@@ -339,7 +339,7 @@ export function LensEditConfigurationFlyout({
       startDependencies.data.nowProvider.get()
     );
 
-    return { isConvertToEsqlButtonDisbaled: !esqlLayer, esqlPreview: esqlLayer?.esql ?? '' };
+    return { isConvertToEsqlButtonDisbaled: !esqlLayer };
   }, [
     coreStart.uiSettings,
     datasourceId,
@@ -361,7 +361,24 @@ export function LensEditConfigurationFlyout({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
       {showConvertToEsqlButton ? (
-        <EuiToolTip position="top" content={esqlPreview}>
+        <EuiToolTip
+          position="top"
+          content={
+            isConvertToEsqlButtonDisbaled ? (
+              <p>
+                {i18n.translate('xpack.lens.config.cannotConvertToEsqlDescription', {
+                  defaultMessage: 'This visualization cannot be converted to ES|QL',
+                })}
+              </p>
+            ) : (
+              <p>
+                {i18n.translate('xpack.lens.config.convertToEsqlDescription', {
+                  defaultMessage: 'Convert visualization to ES|QL',
+                })}
+              </p>
+            )
+          }
+        >
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               color="success"
@@ -371,7 +388,6 @@ export function LensEditConfigurationFlyout({
               aria-label={i18n.translate('xpack.lens.config.convertToEsqlLabel', {
                 defaultMessage: 'Convert to ES|QL',
               })}
-              // onClick={() => {}}
               isDisabled={isConvertToEsqlButtonDisbaled}
             />
           </EuiFlexItem>
