@@ -71,16 +71,18 @@ export interface KubernetesSearchBarProps {
   placeholder?: string;
   /** Initial time range */
   initialTimeRange?: TimeRange;
-  /** Callback when search is submitted */
+  /** Callback when search is submitted (Update button clicked) */
   onQuerySubmit?: (payload: { query?: Query; dateRange: TimeRange }) => void;
-  /** Callback when refresh button is clicked */
+  /** Callback when refresh button is clicked (re-fetch with current time range) */
   onRefresh?: (dateRange: TimeRange) => void;
-  /** Callback when time range changes */
+  /** Callback when time range changes in the picker (before submit) */
   onTimeRangeChange?: (dateRange: TimeRange) => void;
   /** Show the filter button group */
   showFilterButtons?: boolean;
   /** Whether the search bar is loading */
   isLoading?: boolean;
+  /** The currently applied time range (used to detect pending changes) */
+  appliedTimeRange?: TimeRange;
 }
 
 export const KubernetesSearchBar: React.FC<KubernetesSearchBarProps> = ({
@@ -91,6 +93,7 @@ export const KubernetesSearchBar: React.FC<KubernetesSearchBarProps> = ({
   onTimeRangeChange,
   showFilterButtons = false,
   isLoading = false,
+  appliedTimeRange,
 }) => {
   const { plugins } = usePluginContext();
   const { unifiedSearch } = plugins;
@@ -99,6 +102,12 @@ export const KubernetesSearchBar: React.FC<KubernetesSearchBarProps> = ({
   const [dateRange, setDateRange] = useState<TimeRange>(initialTimeRange);
   const [isPaused, setIsPaused] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(10000);
+
+  // Determine if there are pending time range changes that haven't been applied
+  const hasPendingChanges = useMemo(() => {
+    if (!appliedTimeRange) return false;
+    return dateRange.from !== appliedTimeRange.from || dateRange.to !== appliedTimeRange.to;
+  }, [dateRange, appliedTimeRange]);
 
   const searchBarPlaceholder = useMemo(
     () =>
@@ -151,6 +160,18 @@ export const KubernetesSearchBar: React.FC<KubernetesSearchBarProps> = ({
     onRefresh?.(dateRange);
   }, [onRefresh, dateRange]);
 
+  const handleUpdateClick = useCallback(() => {
+    onQuerySubmit?.({ dateRange });
+  }, [onQuerySubmit, dateRange]);
+
+  const handleButtonClick = useCallback(() => {
+    if (hasPendingChanges) {
+      handleUpdateClick();
+    } else {
+      handleRefreshClick();
+    }
+  }, [hasPendingChanges, handleUpdateClick, handleRefreshClick]);
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       {/* Filter buttons on the left */}
@@ -200,18 +221,24 @@ export const KubernetesSearchBar: React.FC<KubernetesSearchBarProps> = ({
         />
       </EuiFlexItem>
 
-      {/* Refresh button */}
+      {/* Refresh/Update button */}
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="kubernetesPocKubernetesSearchBarRefreshButton"
-          iconType="refresh"
-          onClick={handleRefreshClick}
+          iconType={hasPendingChanges ? 'kqlFunction' : 'refresh'}
+          onClick={handleButtonClick}
           isLoading={isLoading}
-          size="m"
+          size="s"
+          color={hasPendingChanges ? 'success' : 'primary'}
+          fill={false}
         >
-          {i18n.translate('xpack.kubernetesPoc.searchBar.refresh', {
-            defaultMessage: 'Refresh',
-          })}
+          {hasPendingChanges
+            ? i18n.translate('xpack.kubernetesPoc.searchBar.update', {
+                defaultMessage: 'Update',
+              })
+            : i18n.translate('xpack.kubernetesPoc.searchBar.refresh', {
+                defaultMessage: 'Refresh',
+              })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

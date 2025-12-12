@@ -60,12 +60,14 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 - [x] Deep links for navigation system integration (overview, clusters)
 - [x] Kubernetes entry added to Infrastructure section in Observability navigation tree
 - [x] Plugin registered in i18nrc.json for translations
+- [x] Cluster Listing API endpoint (`GET /internal/kubernetes_poc/cluster_listing`)
+- [x] Cluster Listing table with EuiDataGrid and custom cell renderers
+- [x] Custom cell renderers for health status, cloud provider, pod statuses, and utilization metrics
 
 ### 🚧 In Progress
 - None currently
 
 ### 📋 Next Steps / TODO
-- [ ] Implement Kubernetes Cluster Listing Page (data fetching and display)
 - [ ] Add Kubernetes Cluster Detail Flyout (builds on listing page patterns)
 - [ ] Implement Kubernetes Overview Page features (most complex, builds on established patterns) 
 
@@ -181,6 +183,30 @@ FROM remote_cluster:metrics-*
   {
     "message": "Hello World from kubernetes-poc plugin!",
     "timestamp": "2025-12-10T..."
+  }
+  ```
+
+### Cluster Listing
+
+- **Endpoint**: `GET /internal/kubernetes_poc/cluster_listing`
+- **Security**: Requires `kibana_read` privilege
+- **Description**: Returns a list of all monitored Kubernetes clusters with health status, node counts, pod statuses, and resource utilization.
+- **Response**: 
+  ```json
+  {
+    "clusters": [
+      {
+        "clusterName": "production-cluster",
+        "healthStatus": "healthy",
+        "cloudProvider": "gcp",
+        "totalNodes": 12,
+        "failedPods": 2,
+        "pendingPods": 5,
+        "runningPods": 150,
+        "cpuUtilization": 45.23,
+        "memoryUtilization": 62.18
+      }
+    ]
   }
   ```
 

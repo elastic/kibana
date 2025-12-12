@@ -6,6 +6,7 @@
  */
 
 import type {
+  CoreRequestHandlerContext,
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -13,8 +14,12 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+export interface KubernetesPocRequestHandlerContext {
+  core: Promise<CoreRequestHandlerContext>;
+}
+
 export interface KubernetesPocRouteHandlerResources {
-  context: any; // Will be properly typed later
+  context: KubernetesPocRequestHandlerContext;
   logger: Logger;
   request: KibanaRequest;
   response: KibanaResponseFactory;

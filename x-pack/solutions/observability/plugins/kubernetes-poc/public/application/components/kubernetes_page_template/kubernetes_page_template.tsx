@@ -16,16 +16,18 @@ export interface KubernetesPageTemplateProps extends LazyObservabilityPageTempla
   /** Props to pass to the search bar */
   searchBarProps?: Omit<
     KubernetesSearchBarProps,
-    'onQuerySubmit' | 'onRefresh' | 'onTimeRangeChange'
+    'onQuerySubmit' | 'onRefresh' | 'onTimeRangeChange' | 'appliedTimeRange'
   >;
-  /** Callback when search is submitted */
+  /** Callback when search is submitted (Update button clicked) */
   onQuerySubmit?: (payload: { query?: Query; dateRange: TimeRange }) => void;
   /** Callback when refresh button is clicked */
   onRefresh?: (dateRange: TimeRange) => void;
-  /** Callback when time range changes */
+  /** Callback when time range changes in the picker */
   onTimeRangeChange?: (dateRange: TimeRange) => void;
   /** Hide the search bar */
   hideSearchBar?: boolean;
+  /** The currently applied time range (used to show Update vs Refresh button) */
+  appliedTimeRange?: TimeRange;
 }
 
 /**
@@ -39,6 +41,7 @@ export const KubernetesPageTemplate: React.FC<KubernetesPageTemplateProps> = ({
   onRefresh,
   onTimeRangeChange,
   hideSearchBar = false,
+  appliedTimeRange,
   ...pageTemplateProps
 }) => {
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -51,6 +54,7 @@ export const KubernetesPageTemplate: React.FC<KubernetesPageTemplateProps> = ({
           onQuerySubmit={onQuerySubmit}
           onRefresh={onRefresh}
           onTimeRangeChange={onTimeRangeChange}
+          appliedTimeRange={appliedTimeRange}
         />
       )}
       {children}
