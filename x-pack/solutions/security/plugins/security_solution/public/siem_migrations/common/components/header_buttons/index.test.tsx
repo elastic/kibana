@@ -22,7 +22,6 @@ describe('HeaderButtons', () => {
           migrationsStats={getMigrationsStatsMock()}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
-          migrationVendor={'splunk'}
         />
       </TestProviders>
     );
@@ -37,7 +36,6 @@ describe('HeaderButtons', () => {
           migrationsStats={getMigrationsStatsMock()}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
-          migrationVendor={'splunk'}
         />
       </TestProviders>
     );
@@ -60,7 +58,6 @@ describe('HeaderButtons', () => {
           migrationsStats={getMigrationsStatsMock()}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
-          migrationVendor={'splunk'}
         />
       </TestProviders>
     );
@@ -73,13 +70,13 @@ describe('HeaderButtons', () => {
         <HeaderButtons
           migrationType="dashboard"
           migrationsStats={getMigrationsStatsMock()}
-          selectedMigrationId="1"
+          selectedMigrationId="2"
           onMigrationIdChange={onMigrationIdChange}
-          migrationVendor={'splunk'}
         />
       </TestProviders>
     );
 
     expect(getByTestId('migrationVendorBadge')).toBeInTheDocument();
+    expect(getByTestId('migrationVendorBadge')).toHaveTextContent('QRADAR');
   });
 });

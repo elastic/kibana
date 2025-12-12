@@ -115,7 +115,6 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
         <EuiFlexItem grow={false}>
           <EuiBadge
             color={MIGRATION_VENDOR_COLOR_CONFIG[migrationStats.vendor]}
-            size="s"
             data-test-subj="migrationVendorBadge"
           >
             {migrationStats.vendor.toUpperCase()}

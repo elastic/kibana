@@ -114,10 +114,6 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       );
     }, [dashboardMigrationsStats, migrationId, refetchData]);
 
-    const currentMigrationStats = useMemo(() => {
-      return dashboardMigrationsStats.find((stats) => stats.id === migrationId);
-    }, [dashboardMigrationsStats, migrationId]);
-
     return (
       <SecuritySolutionPageWrapper>
         <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} isBeta={true} />} border>
@@ -126,7 +122,6 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
             migrationsStats={dashboardMigrationsStats}
             selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}
-            migrationVendor={currentMigrationStats?.vendor}
           />
         </HeaderPage>
         <EuiSkeletonLoading
