@@ -24,7 +24,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.observability}.get_alerts`,
   `${internalNamespaces.observability}.get_services`,
   `${internalNamespaces.observability}.get_downstream_dependencies`,
-  `${internalNamespaces.observability}.get_correlated_error_logs`,
+  `${internalNamespaces.observability}.get_correlated_logs`,
 
   // Dashboards
   'platform.dashboard.create_dashboard',
