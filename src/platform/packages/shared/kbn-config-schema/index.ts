@@ -33,6 +33,7 @@ import type {
   TypeOptions,
   URIOptions,
   UnionTypeOptions,
+  PropsWithDiscriminator,
 } from './src/types';
 import {
   AnyType,
@@ -54,6 +55,7 @@ import {
   StringType,
   Type,
   UnionType,
+  DiscriminatedUnionType,
   URIType,
   StreamType,
   Lazy,
@@ -222,6 +224,251 @@ function oneOf<RTS extends Array<Type<any>>>(
   options?: UnionTypeOptions<any>
 ): Type<any> {
   return new UnionType(types, options);
+}
+
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  F extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  G extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  H extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  I extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  J extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  K extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  L extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>,
+    ObjectType<K>,
+    ObjectType<L>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L>
+): Type<ObjectResultType<A | B | C | D | E | F | G | H | I | J | K | L>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  F extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  G extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  H extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  I extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  J extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  K extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>,
+    ObjectType<K>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
+): Type<ObjectResultType<A | B | C | D | E | F | G | H | I | J | K>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  F extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  G extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  H extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  I extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  J extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J>
+): Type<ObjectResultType<A | B | C | D | E | F | G | H | I | J>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  F extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  G extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  H extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  I extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I>
+): Type<ObjectResultType<A | B | C | D | E | F | G | H | I>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  F extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  G extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  H extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H>
+): Type<ObjectResultType<A | B | C | D | E | F | G | H>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  F extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  G extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G>
+): Type<ObjectResultType<A | B | C | D | E | F | G>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  F extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>, ObjectType<F>],
+  options?: UnionTypeOptions<A | B | C | D | E | F>
+): Type<ObjectResultType<A | B | C | D | E | F>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  E extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>],
+  options?: UnionTypeOptions<A | B | C | D | E>
+): Type<ObjectResultType<A | B | C | D | E>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  D extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>],
+  options?: UnionTypeOptions<A | B | C | D>
+): Type<ObjectResultType<A | B | C | D>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  C extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>],
+  options?: UnionTypeOptions<A | B | C>
+): Type<ObjectResultType<A | B | C>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>,
+  B extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>],
+  options?: UnionTypeOptions<A | B>
+): Type<ObjectResultType<A | B>>;
+function oneOfKind<
+  Discriminator extends string,
+  DiscriminatorType extends Type<string>,
+  A extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>],
+  options?: UnionTypeOptions<A>
+): Type<ObjectResultType<A>>;
+function oneOfKind<Discriminator extends string, RTS extends Array<ObjectType<any>>>(
+  discriminator: Discriminator,
+  types: RTS,
+  options?: UnionTypeOptions<any>
+): Type<ObjectResultType<any>> {
+  return new DiscriminatedUnionType(discriminator, types, options);
 }
 
 function allOf<
@@ -428,6 +675,7 @@ export const schema = {
   number,
   object,
   oneOf,
+  oneOfKind,
   recordOf,
   stream,
   siblingRef,
