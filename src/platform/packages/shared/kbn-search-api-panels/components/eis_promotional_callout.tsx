@@ -43,12 +43,11 @@ export const EisPromotionalCallout = ({
 }: EisPromotionalCalloutProps) => {
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}Callout`,
-    isCloudEnabled,
   });
 
   const dataId = `${promoId}-eis-promo-callout`;
 
-  if (!isPromoVisible) {
+  if (!isPromoVisible || !isCloudEnabled) {
     return null;
   }
 
