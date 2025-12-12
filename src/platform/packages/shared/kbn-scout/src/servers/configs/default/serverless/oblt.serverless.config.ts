@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../types';
 import { defaultConfig } from './serverless.base.config';
+import type { ScoutServerConfig } from '../../../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -16,21 +16,18 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.esTestCluster,
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
-      'xpack.security.authc.api_key.cache.max_keys=70000',
+      'xpack.apm_data.enabled=true',
+      // for ML, data frame analytics are not part of this project type
+      'xpack.ml.dfa.enabled=false',
     ],
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=security',
+      '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
-      `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
-      `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
-        { product_line: 'security', product_tier: 'essentials' },
-        { product_line: 'endpoint', product_tier: 'essentials' },
-        { product_line: 'cloud', product_tier: 'essentials' },
-      ])}`,
+      '--xpack.uptime.service.manifestUrl=mockDevUrl',
     ],
   },
 };
