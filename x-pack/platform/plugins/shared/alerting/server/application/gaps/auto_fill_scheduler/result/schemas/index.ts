@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { gapAutoFillSchedulerLimits } from '../../../../../common/constants';
+import { gapAutoFillSchedulerLimits } from '../../../../../../common/constants';
 
 const { maxBackfills, numRetries } = gapAutoFillSchedulerLimits;
 
