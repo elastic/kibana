@@ -350,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "avatar": Object {
-                "color": "some-color",
+                "color": "#f3f3f3",
                 "imageUrl": null,
                 "initials": "some-initials",
               },
