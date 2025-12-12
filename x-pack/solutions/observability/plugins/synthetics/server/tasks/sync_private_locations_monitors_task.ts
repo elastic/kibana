@@ -288,6 +288,9 @@ export class SyncPrivateLocationMonitorsTask {
       const updatedAt = mw.updatedAt;
       return moment(updatedAt).isAfter(moment(lastStartedAt));
     });
+
+    this.debugLog('Updated MWs: ' + JSON.stringify(updatedMWs));
+
     // check if any MWs are missing
     const missingMWIds = monitorMwsIds.filter((mwId) => {
       return !maintenanceWindows.find((mw) => mw.id === mwId);
