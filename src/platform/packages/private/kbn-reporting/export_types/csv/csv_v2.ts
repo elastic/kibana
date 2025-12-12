@@ -176,6 +176,7 @@ export class CsvV2ExportType extends ExportType<
       cancellationToken,
       logger,
       stream,
+      this.isServerless,
       jobId
     );
     return await csv.generateData();

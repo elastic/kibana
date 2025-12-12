@@ -14,6 +14,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "aiAssistantManagementSelection",
       "data",
       "dataViews",
       "uiActions",
@@ -36,6 +37,7 @@
     "optionalPlugins": [
       "cloud",
       "licenseManagement",
+      "workflowsExtensions",
       "workflowsManagement",
       "usageCollection"
     ],

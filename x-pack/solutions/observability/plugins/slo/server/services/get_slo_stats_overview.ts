@@ -7,29 +7,31 @@
 
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
 import moment from 'moment';
+import type { SLOSettings } from '../domain/models';
 import { typedSearch } from '../utils/queries';
-import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
+import { getSummaryIndices } from './utils/get_summary_indices';
 
 export class GetSLOStatsOverview {
   constructor(
-    private soClient: SavedObjectsClientContract,
     private scopedClusterClient: IScopedClusterClient,
     private spaceId: string,
     private logger: Logger,
     private rulesClient: RulesClientApi,
-    private racClient: AlertsClient
+    private racClient: AlertsClient,
+    private settings: SLOSettings
   ) {}
 
   public async execute(params: GetSLOStatsOverviewParams): Promise<GetSLOStatsOverviewResponse> {
-    const settings = await getSloSettings(this.soClient);
-    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
+    const { indices } = await getSummaryIndices(
+      this.scopedClusterClient.asInternalUser,
+      this.settings
+    );
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
@@ -53,7 +55,7 @@ export class GetSLOStatsOverview {
           filter: {
             range: {
               summaryUpdatedAt: {
-                lt: `now-${settings.staleThresholdInHours}h`,
+                lt: `now-${this.settings.staleThresholdInHours}h`,
               },
             },
           },
@@ -62,7 +64,7 @@ export class GetSLOStatsOverview {
           filter: {
             range: {
               summaryUpdatedAt: {
-                gte: `now-${settings.staleThresholdInHours}h`,
+                gte: `now-${this.settings.staleThresholdInHours}h`,
               },
             },
           },
