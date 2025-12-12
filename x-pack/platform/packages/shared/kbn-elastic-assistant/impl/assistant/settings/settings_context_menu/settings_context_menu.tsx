@@ -170,21 +170,53 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         ...(assistantAvailability.isAiAgentsEnabled
           ? [
               <EuiContextMenuItem key="try-ai-agent">
-                <EuiButton
-                  aria-label={i18n.TRY_AI_AGENT}
-                  onClick={handleOpenAIAgentModal}
-                  iconType={robotIconType}
-                  color="accent"
-                  size="s"
-                  fullWidth
-                  isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
-                  data-test-subj="try-ai-agent"
-                  css={css`
-                    font-weight: 500;
-                  `}
-                >
-                  {i18n.TRY_AI_AGENT}
-                </EuiButton>
+                {!assistantAvailability.hasAgentBuilderManagePrivilege ? (
+                  <EuiToolTip
+                    display="block"
+                    content={i18n.AI_AGENT_MANAGE_PRIVILEGE_REQUIRED}
+                    anchorClassName="euiToolTipAnchor-try-ai-agent"
+                  >
+                    <span
+                      tabIndex={0}
+                      css={css`
+                        display: block;
+                        width: 100%;
+                      `}
+                    >
+                      <EuiButton
+                        aria-label={i18n.TRY_AI_AGENT}
+                        onClick={handleOpenAIAgentModal}
+                        iconType={robotIconType}
+                        color="accent"
+                        size="s"
+                        fullWidth
+                        isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
+                        data-test-subj="try-ai-agent"
+                        css={css`
+                          font-weight: 500;
+                        `}
+                      >
+                        {i18n.TRY_AI_AGENT}
+                      </EuiButton>
+                    </span>
+                  </EuiToolTip>
+                ) : (
+                  <EuiButton
+                    aria-label={i18n.TRY_AI_AGENT}
+                    onClick={handleOpenAIAgentModal}
+                    iconType={robotIconType}
+                    color="accent"
+                    size="s"
+                    fullWidth
+                    isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
+                    data-test-subj="try-ai-agent"
+                    css={css`
+                      font-weight: 500;
+                    `}
+                  >
+                    {i18n.TRY_AI_AGENT}
+                  </EuiButton>
+                )}
               </EuiContextMenuItem>,
             ]
           : []),
