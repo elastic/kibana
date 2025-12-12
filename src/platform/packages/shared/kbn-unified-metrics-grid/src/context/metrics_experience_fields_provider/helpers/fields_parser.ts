@@ -31,7 +31,11 @@ const FILTER_OUT_FIELDS = new Set([
 const shouldSkipField = (fieldName: string) => FILTER_OUT_FIELDS.has(fieldName);
 
 /**
- * Creates metric field specs from field caps.
+ * Extracts metric fields and dimensions from a data view and esql result columns.
+ * @param index - The index pattern to use for the metric fields.
+ * @param dataViewFieldMap - The data view field map to use for the metric fields.
+ * @param columns - The columns to use for the metric fields.
+ * @returns The metric fields and dimensions.
  */
 export const extractFields = ({
   index,
@@ -52,39 +56,30 @@ export const extractFields = ({
     columns?.map((column) => [column.name, column]) ?? []
   );
 
-  if (Object.keys(dataViewFieldMap).length === 0) {
-    return {
-      metricFields,
-      dimensions,
-    };
-  }
-
-  for (const [fieldName, fieldSpec] of Object.entries(dataViewFieldMap)) {
-    if (!Object.hasOwn(dataViewFieldMap, fieldName)) {
+  for (const [columnName, column] of columnByName) {
+    if (shouldSkipField(columnName) || !Object.hasOwn(dataViewFieldMap, columnName)) {
       continue;
     }
 
-    if (shouldSkipField(fieldName)) {
+    const dataViewField = dataViewFieldMap[columnName];
+    const fieldType = (column?.meta?.esType || dataViewField.esTypes?.[0]) as ES_FIELD_TYPES;
+
+    if (fieldType === undefined) {
       continue;
     }
 
-    const esqlColumn = columnByName.get(fieldName);
-
-    if (Boolean(fieldSpec.timeSeriesMetric)) {
+    if (Boolean(dataViewField.timeSeriesMetric)) {
       metricFields.push({
-        index,
-        name: fieldName,
-        type: esqlColumn?.meta?.esType || 'unknown',
-        instrument: fieldSpec.timeSeriesMetric,
+        index: column.meta?.index ?? index,
+        name: columnName,
+        type: fieldType,
+        instrument: dataViewField.timeSeriesMetric,
         dimensions: [],
       });
-    } else if (
-      Boolean(fieldSpec.timeSeriesDimension) ||
-      DIMENSION_TYPES.includes(esqlColumn?.meta?.esType as ES_FIELD_TYPES)
-    ) {
+    } else if (Boolean(dataViewField.timeSeriesDimension) || DIMENSION_TYPES.includes(fieldType)) {
       dimensions.push({
-        name: fieldName,
-        type: esqlColumn?.meta?.esType as ES_FIELD_TYPES,
+        name: columnName,
+        type: fieldType,
       });
     }
   }
@@ -100,6 +95,12 @@ export interface RowMappings {
   fieldSpecsByRow: WeakMap<DatatableRow, MetricField>;
 }
 
+/**
+ * Creates a map of metric field name → (value → row).
+ * @param rows - The rows to use for the sample rows.
+ * @param fieldSpecs - The field specs to use for the sample rows.
+ * @returns The sample rows by metric field name.
+ */
 export const createSampleRowByMetric = ({
   rows = [],
   fieldSpecs,
@@ -141,6 +142,11 @@ export const createSampleRowByMetric = ({
 
 /**
  * Creates a map of dimension name → (value → Set<metricFieldKey>).
+ * @param rows - The rows to use for the values.
+ * @param specByRow - The spec by row to use for the values.
+ * @param requiredFields - The required fields to use for the values.
+ * @param dimensions - The dimensions to use for the values.
+ * @returns The values by dimension name.
  */
 export const createValuesByDimensions = ({
   rows,
