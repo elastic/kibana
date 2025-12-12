@@ -197,7 +197,7 @@ export const DiscoverTopNav = ({
     [dataView.id, dispatch, services, stateContainer]
   );
 
-  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
+  const { topNavMenu } = useDiscoverTopNav({
     stateContainer,
     persistedDiscoverSession,
   });
@@ -264,7 +264,7 @@ export const DiscoverTopNav = ({
 
   return (
     <span>
-      <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
+      <DiscoverTopNavMenu topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
           stateContainer.customizationContext.displayMode !== 'embedded' &&
