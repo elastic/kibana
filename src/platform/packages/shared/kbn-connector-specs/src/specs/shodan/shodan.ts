@@ -20,13 +20,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const ShodanConnector: ConnectorSpec = {
   metadata: {
     id: '.shodan',
     displayName: 'Shodan',
-    description: 'Internet-wide asset discovery and vulnerability scanning',
+    description: i18n.translate('connectorSpecs.shodan.metadata.description', {
+      defaultMessage: 'Internet-wide asset discovery and vulnerability scanning',
+    }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows'],
   },
@@ -142,6 +145,8 @@ export const ShodanConnector: ConnectorSpec = {
         };
       }
     },
-    description: 'Verifies Shodan API key',
+    description: i18n.translate('connectorSpecs.shodan.test.description', {
+      defaultMessage: 'Verifies Shodan API key',
+    }),
   },
 };

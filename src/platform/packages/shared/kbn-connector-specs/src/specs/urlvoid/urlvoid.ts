@@ -20,6 +20,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -27,7 +28,9 @@ export const URLVoidConnector: ConnectorSpec = {
   metadata: {
     id: '.urlvoid',
     displayName: 'URLVoid',
-    description: 'Domain and URL reputation checking via multi-engine scanning',
+    description: i18n.translate('connectorSpecs.urlvoid.metadata.description', {
+      defaultMessage: 'Domain and URL reputation checking via multi-engine scanning',
+    }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows'],
   },
@@ -135,6 +138,8 @@ export const URLVoidConnector: ConnectorSpec = {
         };
       }
     },
-    description: 'Verifies URLVoid API key',
+    description: i18n.translate('connectorSpecs.urlvoid.test.description', {
+      defaultMessage: 'Verifies URLVoid API key',
+    }),
   },
 };
