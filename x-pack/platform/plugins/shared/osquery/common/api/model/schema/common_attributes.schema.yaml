@@ -259,6 +259,24 @@ components:
       additionalProperties:
         type: number
 
+    StartDateOrUndefined:
+      description: 'ISO 8601 date string to filter results from a specific start time.'
+      example: '2024-01-15T10:00:00.000Z'
+      type: string
+      nullable: true
+
+    PitIdOrUndefined:
+      description: 'Point in Time identifier for cursor-based pagination. Used together with searchAfter when navigating beyond 10,000 results.'
+      example: 'g-XXXXX...'
+      type: string
+      nullable: true
+
+    SearchAfterOrUndefined:
+      description: 'JSON-encoded cursor position for the next page in cursor-based pagination. Used together with pitId.'
+      example: '[1234567890, "doc_id"]'
+      type: string
+      nullable: true
+
     DefaultSuccessResponse:
       type: object
       properties: { }

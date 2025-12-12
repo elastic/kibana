@@ -1,0 +1,56 @@
+openapi: 3.0.0
+info:
+  title: Close PIT Schema
+  version: '2023-10-31'
+  description: Internal API for closing Point in Time search contexts
+paths:
+  /internal/osquery/live_queries/pit/close:
+    post:
+      summary: Close Point in Time context
+      description: |
+        Closes an Elasticsearch Point in Time search context to free server resources.
+        PITs are opened lazily when pagination exceeds 10,000 results and should be closed
+        when the client navigates away or unmounts the results view.
+      operationId: OsqueryClosePit
+      x-codegen-enabled: false
+      x-labels: [serverless, ess]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClosePitRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClosePitResponse'
+components:
+  schemas:
+    ClosePitRequestBody:
+      type: object
+      required:
+        - pitId
+      properties:
+        pitId:
+          type: string
+          description: 'The Point in Time identifier to close. This should be a PIT ID returned from a previous get_live_query_results response.'
+          example: 'g-XXXXX...'
+
+    ClosePitResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: 'Whether the PIT was successfully closed.'
+        error:
+          type: string
+          nullable: true
+          description: 'Error message if the close operation failed.'
+      example:
+        success: true
+
