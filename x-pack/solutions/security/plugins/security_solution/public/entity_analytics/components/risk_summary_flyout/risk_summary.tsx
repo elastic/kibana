@@ -274,7 +274,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   tableCaption={i18n.translate(
                     'xpack.securitySolution.flyout.entityDetails.riskSummaryTableCaption',
                     {
-                      defaultMessage: 'Risk summary table for {entity}',
+                      defaultMessage: 'Risk summary for {entity}',
                       values: {
                         entity: capitalize(entityType),
                       },
