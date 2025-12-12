@@ -21,14 +21,6 @@ export interface ExecutionContextSetup {
    **/
   withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 
-  /**
-   * Appends additional context to the current execution context.
-   * Currently only supports adding the space id. We expose this instead of `set`
-   * because it's safer, this way we are only appending a property instead
-   * of changing the whole object
-   **/
-  append(context: { space?: string }): void;
-
   getAsLabels(): apm.Labels;
 }
 

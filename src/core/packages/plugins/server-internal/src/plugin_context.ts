@@ -218,7 +218,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
-      append: deps.executionContext.append,
       getAsLabels: deps.executionContext.getAsLabels,
     },
     featureFlags: {

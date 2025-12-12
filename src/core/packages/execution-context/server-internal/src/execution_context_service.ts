@@ -29,8 +29,6 @@ export interface IExecutionContext {
 
   set(context: KibanaExecutionContext): void;
 
-  append(context: { space?: string }): void;
-
   /**
    * The sole purpose of this imperative internal API is to be used by the http service.
    * The event-based nature of Hapi server doesn't allow us to wrap a request handler with "withContext".
@@ -88,7 +86,6 @@ export class ExecutionContextService
     return {
       getParentContextFrom,
       set: this.set.bind(this),
-      append: this.append.bind(this),
       withContext: this.withContext.bind(this),
       setRequestId: this.setRequestId.bind(this),
       get: this.get.bind(this),
@@ -101,7 +98,6 @@ export class ExecutionContextService
     return {
       getParentContextFrom,
       set: this.set.bind(this),
-      append: this.append.bind(this),
       setRequestId: this.setRequestId.bind(this),
       withContext: this.withContext.bind(this),
       get: this.get.bind(this),
@@ -127,15 +123,6 @@ export class ExecutionContextService
     if (this.log.isLevelEnabled('debug')) {
       this.log.debug(JSON.stringify(contextContainer));
     }
-  }
-
-  private append(context: { space?: string }) {
-    if (!this.enabled) return;
-    const currentContext = this.contextStore.getStore();
-    if (!currentContext) return;
-
-    const updatedContext = { ...currentContext.toJSON(), ...context };
-    this.set(updatedContext);
   }
 
   private withContext<R>(

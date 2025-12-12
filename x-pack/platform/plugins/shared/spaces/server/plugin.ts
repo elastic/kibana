@@ -195,7 +195,6 @@ export class SpacesPlugin
 
     initSpacesRequestInterceptors({
       http: core.http,
-      executionContext: core.executionContext,
       log: this.log,
       getSpacesService,
       getFeatures: async () => (await core.getStartServices())[1].features,
