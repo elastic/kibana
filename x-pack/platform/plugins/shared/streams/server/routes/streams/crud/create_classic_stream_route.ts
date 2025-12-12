@@ -80,16 +80,6 @@ export const createClassicStreamRoute = createServerRoute({
       });
     } catch (error) {
       logger.error(`Failed to register classic stream ${name}: ${error.message}`);
-      // If registration fails, we should try to clean up the data stream
-      try {
-        await scopedClusterClient.asCurrentUser.indices.deleteDataStream({
-          name,
-        });
-      } catch (cleanupError) {
-        logger.error(
-          `Failed to cleanup data stream ${name} after registration error: ${cleanupError.message}`
-        );
-      }
       throw badData(`Failed to register classic stream: ${error.message}`);
     }
   },
