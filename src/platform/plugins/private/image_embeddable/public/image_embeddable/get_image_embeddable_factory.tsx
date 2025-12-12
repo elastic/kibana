@@ -33,7 +33,7 @@ export const getImageEmbeddableFactory = ({
   const imageEmbeddableFactory: EmbeddableFactory<ImageEmbeddableState, ImageEmbeddableApi> = {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
 
       const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
@@ -44,17 +44,14 @@ export const getImageEmbeddableFactory = ({
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
-      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.rawState.imageConfig);
+      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...(dynamicActionsManager?.getLatestState() ?? {}),
-            imageConfig: imageConfig$.getValue(),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          ...(dynamicActionsManager?.getLatestState() ?? {}),
+          imageConfig: imageConfig$.getValue(),
         };
       }
 
@@ -75,9 +72,9 @@ export const getImageEmbeddableFactory = ({
           };
         },
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          if (lastSaved) imageConfig$.next(lastSaved.rawState.imageConfig);
+          titleManager.reinitializeState(lastSaved);
+          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          if (lastSaved) imageConfig$.next(lastSaved.imageConfig);
         },
       });
 

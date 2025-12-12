@@ -81,7 +81,6 @@ const projectRoutingManagerMock = {
       new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
   },
 } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
-const getReferences = () => [];
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
 const viewMode$ = new BehaviorSubject<ViewMode>('edit');
 
@@ -114,7 +113,6 @@ describe('unsavedChangesManager', () => {
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          getReferences,
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -140,7 +138,6 @@ describe('unsavedChangesManager', () => {
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          getReferences,
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -202,7 +199,6 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        getReferences,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -237,7 +233,6 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        getReferences,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {

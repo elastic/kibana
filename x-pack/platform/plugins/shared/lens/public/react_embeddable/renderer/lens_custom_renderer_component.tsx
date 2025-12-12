@@ -159,10 +159,7 @@ export function LensRenderer({
           settings,
           // make sure to provide the initial state (useful for the comparison check)
           getSerializedStateForChild: () => {
-            const transformedState = transformToApiConfig(initialStateRef.current);
-            return {
-              rawState: transformedState,
-            };
+            return transformToApiConfig(initialStateRef.current);
           },
           forceDSL,
           esqlVariables$,

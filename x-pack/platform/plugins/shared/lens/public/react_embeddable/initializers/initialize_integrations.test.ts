@@ -29,14 +29,12 @@ describe('Dashboard services API', () => {
     it('should work for a by-value panel', async () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({ attributes });
-      const { rawState, references } = api.serializeState();
+      const state = api.serializeState();
       // make sure of 3 things:
       // * attributes are sent back
-      expect(rawState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
+      expect(state).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
       // * savedObjectId is cleaned up
-      expect(rawState).not.toHaveProperty('savedObjectId');
-      // * references should be at root level
-      expect(references).toBeUndefined();
+      expect(state).not.toHaveProperty('savedObjectId');
     });
     it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
@@ -44,10 +42,9 @@ describe('Dashboard services API', () => {
         savedObjectId: '123',
         attributes,
       });
-      const { rawState, references } = api.serializeState();
+      const state = api.serializeState();
       // check the same 3 things as above
-      expect(rawState).not.toEqual(expect.objectContaining({ attributes: expect.anything() }));
-      expect(references).toBeUndefined();
+      expect(state).not.toEqual(expect.objectContaining({ attributes: expect.anything() }));
     });
 
     it('should remove the searchSessionId from the serializedState', async () => {
@@ -56,8 +53,8 @@ describe('Dashboard services API', () => {
         attributes,
         searchSessionId: faker.string.uuid(),
       });
-      const { rawState } = api.serializeState();
-      expect('searchSessionId' in rawState).toBeFalsy();
+      const state = api.serializeState();
+      expect('searchSessionId' in state).toBeFalsy();
     });
   });
 });

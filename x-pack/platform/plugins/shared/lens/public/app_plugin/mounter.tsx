@@ -228,9 +228,7 @@ export async function mountApp(
             {
               embeddableId: isCopied ? undefined : embeddableId,
               type: LENS_EMBEDDABLE_TYPE,
-              serializedState: {
-                rawState,
-              },
+              serializedState: rawState,
               searchSessionId: data.search.session.getSessionId(),
             },
           ],

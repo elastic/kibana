@@ -53,11 +53,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
 
       function serializeState() {
         return {
-          rawState: {
-            ...defaultControlManager.getLatestState(),
-            ...selections.getLatestState(),
-          },
-          references: [],
+          ...defaultControlManager.getLatestState(),
+          ...selections.getLatestState(),
         };
       }
 
@@ -73,8 +70,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
           };
         },
         onReset: (lastSaved) => {
-          defaultControlManager.reinitializeState(lastSaved?.rawState);
-          selections.reinitializeState(lastSaved?.rawState);
+          defaultControlManager.reinitializeState(lastSaved);
+          selections.reinitializeState(lastSaved);
         },
       });
 

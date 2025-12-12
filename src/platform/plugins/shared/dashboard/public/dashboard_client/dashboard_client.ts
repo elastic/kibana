@@ -10,7 +10,6 @@
 import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
 import {
   DASHBOARD_API_PATH,
@@ -34,7 +33,7 @@ const cache = new LRUCache<string, DashboardReadResponseBody>({
 });
 
 export const dashboardClient = {
-  create: async (dashboardState: DashboardState, references: Reference[]) => {
+  create: async (dashboardState: DashboardState) => {
     return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
       query: {
@@ -43,7 +42,6 @@ export const dashboardClient = {
       body: JSON.stringify({
         data: {
           ...dashboardState,
-          references,
         },
       }),
     });
@@ -95,7 +93,7 @@ export const dashboardClient = {
       }
     );
   },
-  update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
+  update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       `${DASHBOARD_API_PATH}/${id}`,
       {
@@ -106,7 +104,6 @@ export const dashboardClient = {
         body: JSON.stringify({
           data: {
             ...dashboardState,
-            references,
           },
         }),
       }

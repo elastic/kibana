@@ -147,7 +147,7 @@ describe('addControlsFromSavedSession', () => {
       addControlsFromSavedSession(mockContainer, savedObject);
 
       const addedPanels = mockControlGroupApi.addNewPanel.mock.calls.map(
-        (call) => (call[0]?.serializedState?.rawState as { variableName?: string })?.variableName
+        (call) => (call[0]?.serializedState as { variableName?: string })?.variableName
       );
 
       expect(addedPanels).not.toContain(['var1', 'var2']);

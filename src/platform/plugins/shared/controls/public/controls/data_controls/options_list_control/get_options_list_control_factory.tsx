@@ -253,20 +253,17 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...dataControlManager.getLatestState(),
-            ...selectionsManager.getLatestState(),
-            ...editorStateManager.getLatestState(),
-            sort: sort$.getValue(),
+          ...dataControlManager.getLatestState(),
+          ...selectionsManager.getLatestState(),
+          ...editorStateManager.getLatestState(),
+          sort: sort$.getValue(),
 
-            // serialize state that cannot be changed to keep it consistent
-            placeholder,
-            hideActionBar,
-            hideExclude,
-            hideExists,
-            hideSort,
-          },
-          references: dataControlManager.internalApi.extractReferences('optionsListDataView'),
+          // serialize state that cannot be changed to keep it consistent
+          placeholder,
+          hideActionBar,
+          hideExclude,
+          hideExists,
+          hideSort,
         };
       }
 
@@ -301,13 +298,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
-          if (isOptionsListESQLControlState(lastSaved?.rawState)) {
+          if (isOptionsListESQLControlState(lastSaved)) {
             throw new Error('ES|QL control state handling not yet implemented');
           }
-          dataControlManager.reinitializeState(lastSaved?.rawState);
-          selectionsManager.reinitializeState(lastSaved?.rawState);
-          editorStateManager.reinitializeState(lastSaved?.rawState);
-          sort$.next(lastSaved?.rawState.sort ?? OPTIONS_LIST_DEFAULT_SORT);
+          dataControlManager.reinitializeState(lastSaved);
+          selectionsManager.reinitializeState(lastSaved);
+          editorStateManager.reinitializeState(lastSaved);
+          sort$.next(lastSaved?.sort ?? OPTIONS_LIST_DEFAULT_SORT);
         },
       });
 

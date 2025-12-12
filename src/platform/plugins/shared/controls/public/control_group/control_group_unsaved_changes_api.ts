@@ -16,7 +16,7 @@ import {
   initializeUnsavedChanges,
   type PresentationContainer,
 } from '@kbn/presentation-containers';
-import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
@@ -45,7 +45,7 @@ export function initializeControlGroupUnsavedChanges({
   layout$: PublishingSubject<ControlsInOrder>;
   parentApi: unknown;
   resetControlsUnsavedChanges: (lastSavedControlsState: ControlPanelsState) => void;
-  serializeControlGroupState: () => SerializedPanelState<ControlsGroupState>;
+  serializeControlGroupState: () => ControlsGroupState;
 }) {
   function getLastSavedControlsState() {
     if (!apiHasLastSavedChildState<ControlsGroupState>(parentApi)) {
@@ -74,7 +74,7 @@ export function initializeControlGroupUnsavedChanges({
     getComparators: () => editorStateComparators,
     defaultState: defaultEditorState,
     onReset: (lastSaved) => {
-      editorStateManager.reinitializeState(lastSaved?.rawState);
+      editorStateManager.reinitializeState(lastSaved);
     },
   });
 

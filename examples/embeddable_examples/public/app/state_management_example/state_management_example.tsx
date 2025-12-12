@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, of } from 'rxjs';
 import type { BookApi } from '../../react_embeddables/saved_book/types';
@@ -59,7 +59,7 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
               references: [],
             };
       },
-      setLastSavedBookState: (savedState: SerializedPanelState<BookEmbeddableState>) => {
+      setLastSavedBookState: (savedState: BookEmbeddableState) => {
         lastSavedBookState$.next(savedState);
       },
     };

@@ -65,7 +65,7 @@ describe('serializeLayout', () => {
       },
     };
 
-    const { panels, references } = serializeLayout(layout, childState);
+    const panels = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -103,15 +103,6 @@ describe('serializeLayout', () => {
           ],
           "title": "Section One",
           "uid": "section1",
-        },
-      ]
-    `);
-    expect(references).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "ref1",
-          "name": "1:myRef",
-          "type": "testRefType",
         },
       ]
     `);

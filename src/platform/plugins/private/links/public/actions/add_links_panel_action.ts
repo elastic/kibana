@@ -52,26 +52,16 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
 
             const { layout, links, savedObjectId } = newState;
 
-            function serializeState() {
-              if (savedObjectId !== undefined) {
-                return {
-                  rawState: {
-                    savedObjectId,
-                  },
-                };
-              }
-
-              return {
-                rawState: {
-                  layout,
-                  links: serializeResolvedLinks(links ?? []),
-                },
-              };
-            }
-
             await embeddable.addNewPanel<LinksEmbeddableState>({
               panelType: LINKS_EMBEDDABLE_TYPE,
-              serializedState: serializeState(),
+              serializedState: savedObjectId
+                ? {
+                    savedObjectId,
+                  }
+                : {
+                    layout,
+                    links: serializeResolvedLinks(links ?? []),
+                  },
             });
           },
         });

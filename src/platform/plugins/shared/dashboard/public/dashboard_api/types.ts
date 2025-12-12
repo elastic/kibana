@@ -42,7 +42,6 @@ import type {
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
-  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -135,7 +134,7 @@ export type DashboardApi = CanExpandPanels &
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid: GridData;
-      serializedState: SerializedPanelState;
+      serializedState: object;
     };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -168,12 +167,9 @@ export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
+  serializeLayout: () => DashboardState['panels'];
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
-  serializeControls: () => {
-    controlGroupInput: ControlsGroupState | undefined;
-    controlGroupReferences: Reference[];
-  };
+  serializeControls: () => ControlsGroupState | undefined;
 }

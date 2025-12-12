@@ -30,11 +30,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import type {
-  PublishesDataLoading,
-  SerializedPanelState,
-  ViewMode,
-} from '@kbn/presentation-publishing';
+import type { PublishesDataLoading, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiPublishesDataLoading,
   useBatchedPublishingSubjects,
@@ -145,7 +141,7 @@ export const ReactControlExample = ({
               references: [],
             };
       },
-      setLastSavedControlGroupState: (savedState: SerializedPanelState<ControlsGroupState>) => {
+      setLastSavedControlGroupState: (savedState: ControlsGroupState) => {
         lastSavedControlGroupState$.next(savedState);
       },
     };

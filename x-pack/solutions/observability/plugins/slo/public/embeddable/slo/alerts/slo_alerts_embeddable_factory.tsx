@@ -23,6 +23,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { createInitialState } from '@kbn/core-saved-objects-migration-server-internal/src/zdt/state';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
@@ -65,23 +66,18 @@ export function getAlertsEmbeddableFactory({
         }
       }
 
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(
-        initialState.rawState,
-        {
-          slos: [],
-          showAllGroupByInstances: false,
-        }
-      );
+      const titleManager = initializeTitleManager(initialState);
+      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(createInitialState, {
+        slos: [],
+        showAllGroupByInstances: false,
+      });
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloAlertsStateManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloAlertsStateManager.getLatestState(),
         };
       }
 
@@ -96,8 +92,8 @@ export function getAlertsEmbeddableFactory({
           showAllGroupByInstances: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          sloAlertsStateManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
+          sloAlertsStateManager.reinitializeState(lastSaved);
         },
       });
 

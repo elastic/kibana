@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { DashboardPanel, DashboardSection } from '../../../server';
 
@@ -28,5 +27,5 @@ export interface DashboardLayout {
 }
 
 export interface DashboardChildState {
-  [uuid: string]: SerializedPanelState<object>;
+  [uuid: string]: object;
 }

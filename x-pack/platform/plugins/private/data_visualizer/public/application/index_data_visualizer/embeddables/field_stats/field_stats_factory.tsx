@@ -128,10 +128,10 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
-      const state = initialState.rawState;
+      const state = initialState;
 
       const {
         fieldStatsControlsApi,
@@ -196,12 +196,9 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const serializeState = () => {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...serializeFieldStatsChartState(),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializeFieldStatsChartState(),
         };
       };
 
@@ -220,9 +217,9 @@ export const getFieldStatsChartEmbeddableFactory = (
           ...timeRangeComparators,
         }),
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          fieldStatsStateManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
+          timeRangeManager.reinitializeState(lastSaved);
+          fieldStatsStateManager.reinitializeState(lastSaved);
         },
       });
 

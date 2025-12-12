@@ -39,7 +39,6 @@ describe('Save dashboard state', () => {
     const result = await saveDashboard({
       dashboardState,
       lastSavedId: 'Boogaloo',
-      references,
       saveOptions: {},
     });
 
@@ -60,7 +59,6 @@ describe('Save dashboard state', () => {
         title: 'BooToo',
       },
       lastSavedId: 'Boogaloonie',
-      references: [],
       saveOptions: { saveAsCopy: true },
     });
 
@@ -78,7 +76,6 @@ describe('Save dashboard state', () => {
         title: 'BooThree',
       },
       lastSavedId: 'Boogatoonie',
-      references: [],
       saveOptions: { saveAsCopy: true },
     });
 
