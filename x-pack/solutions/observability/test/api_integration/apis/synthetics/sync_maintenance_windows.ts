@@ -42,11 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
     let _browserMonitorJson: HTTPFields;
     let browserMonitorJson: HTTPFields;
 
-    let _httpMonitorJson: HTTPFields;
-    let httpMonitorJson: HTTPFields;
+    let mwObject: any;
 
     let newBrowserMonitorId: string;
-    let newHttpMonitorId: string;
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const monitorTestService = new SyntheticsMonitorTestService(getService);
@@ -58,13 +56,24 @@ export default function ({ getService }: FtrProviderContext) {
       await testPrivateLocations.installSyntheticsPackage();
 
       _browserMonitorJson = getFixtureJson('browser_monitor');
-      _httpMonitorJson = getFixtureJson('http_monitor');
       await kServer.savedObjects.clean({ types: [syntheticsParamType] });
     });
 
     beforeEach(() => {
       browserMonitorJson = _browserMonitorJson;
-      httpMonitorJson = _httpMonitorJson;
+    });
+
+    it('adds a test maintenance windows', async () => {
+      mwObject = await monitorTestService.createMaintenanceWindow();
+      mwObject.rRule = mwObject.r_rule;
+    });
+    it('adds a test param', async () => {
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'test', value: 'http://proxy.com' });
+
+      expect(apiResponse.status).eql(200);
     });
 
     it('create test private location', async () => {
@@ -121,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       newMonitor.locations.push(pvtLoc);
+      newMonitor.maintenance_windows = [mwObject.id];
 
       const apiResponse = await monitorTestService.createMonitor({ monitor: newMonitor });
 
@@ -136,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
       newBrowserMonitorId = apiResponse.rawBody.id;
     });
 
-    it('added an integration for previously added monitor', async () => {
+    it('verify integration for previously added monitor', async () => {
       const packagePolicy = await testPrivateLocations.getPackagePolicy({
         monitorId: newBrowserMonitorId,
         locId: loc.id,
@@ -151,15 +161,12 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: testFleetPolicyID },
+          mws: [mwObject],
         })
       );
     });
 
-    it('adds a test maintenance windows', async () => {
-      const apiResponse = await monitorTestService.createMaintenanceWindow();
-    });
-
-    it('added params to for previously added integration', async () => {
+    it('added mw to  previously added integration', async () => {
       const apiResponse = await supertestAPI.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
       );
@@ -179,123 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
           params,
           isBrowser: true,
           location: { id: testFleetPolicyID },
-        })
-      );
-    });
-
-    it('add a http monitor using param', async () => {
-      const newMonitor = httpMonitorJson;
-      const pvtLoc = {
-        id: loc.id,
-        agentPolicyId: testFleetPolicyID,
-        label: 'Test private location 0',
-        isServiceManaged: false,
-        geo: {
-          lat: 0,
-          lon: 0,
-        },
-      };
-      newMonitor.locations.push(pvtLoc);
-
-      newMonitor.proxy_url = '${test}';
-
-      const apiResponse = await monitorTestService.createMonitor({ monitor: newMonitor });
-
-      expect(apiResponse.body).eql(
-        omitMonitorKeys({
-          ...newMonitor,
-          [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-          [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          locations: [LOCAL_LOCATION, pvtLoc],
-          spaces: ['default'],
-        })
-      );
-      newHttpMonitorId = apiResponse.rawBody.id;
-    });
-
-    it('parsed params for previously added http monitors', async () => {
-      const packagePolicy = await testPrivateLocations.getPackagePolicy({
-        monitorId: newHttpMonitorId,
-        locId: loc.id,
-      });
-
-      expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-
-      const pPolicy = getTestSyntheticsPolicy({
-        name: httpMonitorJson.name,
-        id: newHttpMonitorId,
-        isTLSEnabled: false,
-        namespace: 'testnamespace',
-        location: { id: loc.id },
-      });
-
-      comparePolicies(packagePolicy, pPolicy);
-    });
-
-    it('delete all params and sync again', async () => {
-      await supertestAPI
-        .post(SYNTHETICS_API_URLS.PARAMS)
-        .set('kbn-xsrf', 'true')
-        .send({ key: 'get', value: 'test' });
-      const getResponse = await supertestAPI
-        .get(SYNTHETICS_API_URLS.PARAMS)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
-      expect(getResponse.body.length).eql(2);
-
-      const paramsResponse = getResponse.body || [];
-      const ids = paramsResponse.map((param: any) => param.id);
-
-      const deleteResponse = await supertestAPI
-        .delete(SYNTHETICS_API_URLS.PARAMS)
-        .set('kbn-xsrf', 'true')
-        .send({ ids });
-
-      expect(deleteResponse.status).eql(200);
-
-      expect(deleteResponse.body).to.have.length(2);
-
-      const getResponseAfterDelete = await supertestAPI
-        .get(SYNTHETICS_API_URLS.PARAMS)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
-      expect(getResponseAfterDelete.body.length).eql(0);
-
-      const packagePolicy = await testPrivateLocations.getPackagePolicy({
-        monitorId: newBrowserMonitorId,
-        locId: loc.id,
-      });
-
-      expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-
-      comparePolicies(
-        packagePolicy,
-        getTestSyntheticsPolicy({
-          name: browserMonitorJson.name,
-          id: newBrowserMonitorId,
-          isBrowser: true,
-          location: { id: loc.id },
-        })
-      );
-    });
-
-    it('check browser monitor again after deleting params', async () => {
-      const packagePolicy = await testPrivateLocations.getPackagePolicy({
-        monitorId: newBrowserMonitorId,
-        locId: loc.id,
-      });
-
-      expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-
-      comparePolicies(
-        packagePolicy,
-        getTestSyntheticsPolicy({
-          name: browserMonitorJson.name,
-          id: newBrowserMonitorId,
-          isBrowser: true,
-          location: { id: loc.id },
+          mws: [mwObject],
         })
       );
     });

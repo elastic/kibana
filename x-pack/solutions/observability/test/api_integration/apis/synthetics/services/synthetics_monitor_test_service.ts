@@ -174,6 +174,6 @@ export class SyntheticsMonitorTestService {
 
     expect(response.status).to.equal(200);
 
-    return response.body.id;
+    return response.body;
   }
 }
