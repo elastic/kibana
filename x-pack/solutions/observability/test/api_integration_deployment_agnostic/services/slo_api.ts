@@ -247,5 +247,27 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
 
       return body;
     },
+
+    async getSettings(roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/slo/settings`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async updateSettings(settings: Record<string, unknown>, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .put(`/internal/slo/settings`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(settings)
+        .expect(200);
+
+      return body;
+    },
   };
 }
