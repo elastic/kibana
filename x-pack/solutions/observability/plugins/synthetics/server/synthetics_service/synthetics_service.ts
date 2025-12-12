@@ -217,7 +217,7 @@ export class SyntheticsService {
 
                 if (service.isAllowed && service.config.manifestUrl) {
                   void service.setupIndexTemplates();
-                  await service.pushConfigs();
+                  await service.pushAllConfigs();
                 } else {
                   if (!service.isAllowed) {
                     service.logger.debug('User is not allowed to access Synthetics service.');
@@ -430,7 +430,7 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs() {
+  private async pushAllConfigs() {
     const license = await this.getLicense();
     const service = this;
 
