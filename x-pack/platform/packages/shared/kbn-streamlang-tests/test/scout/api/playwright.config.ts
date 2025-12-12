@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// Needed for Math processor related tests where the math expression language is based on .peggy grammar files.
-import '../../../peggy_loader';
-
 import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
