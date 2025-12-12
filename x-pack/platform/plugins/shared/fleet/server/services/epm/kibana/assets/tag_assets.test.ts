@@ -885,9 +885,7 @@ describe('tagKibanaAssets', () => {
       expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalled();
     });
 
-    it(
-      'should give up after multiple retries on persistent conflict errors',
-      async () => {
+    it('should give up after multiple retries on persistent conflict errors', async () => {
       savedObjectTagClient.get.mockImplementation(async (id: string) => {
         // Managed and package tags exist
         if (id === 'fleet-managed-default' || id === 'fleet-pkg-test-pkg-default') {
@@ -924,9 +922,7 @@ describe('tagKibanaAssets', () => {
 
       // Should have retried 5 times (initial + 5 retries = 6 total)
       expect(savedObjectTagClient.create).toHaveBeenCalledTimes(6);
-    },
-      35000
-    ); // Increase timeout for retry test (pRetry uses exponential backoff: 1s, 2s, 4s, 8s, 16s = ~31s)
+    }, 35000); // Increase timeout for retry test (pRetry uses exponential backoff: 1s, 2s, 4s, 8s, 16s = ~31s)
 
     it('should not retry on non-conflict errors', async () => {
       savedObjectTagClient.get.mockImplementation(async (id: string) => {
@@ -940,9 +936,7 @@ describe('tagKibanaAssets', () => {
 
       // Simulate a non-conflict error
       savedObjectTagClient.create.mockImplementation(() => {
-        throw SavedObjectsErrorHelpers.decorateGeneralError(
-          new Error('Internal Server Error')
-        );
+        throw SavedObjectsErrorHelpers.decorateGeneralError(new Error('Internal Server Error'));
       });
 
       const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
