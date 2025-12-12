@@ -6,12 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { pickBy } from 'lodash';
+
 import type {
   FormBasedLayer,
   GaugeVisualizationState,
   MetricVisualizationState,
   TextBasedLayer,
 } from '@kbn/lens-common';
+
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
 import { isTextBasedLayer } from '../utils';
@@ -72,4 +76,20 @@ export function getLensStateLayer(
   const visLayer = visLayerId ? mainLayers.find(([id, l]) => id === visLayerId) : undefined;
 
   return visLayer ?? mainLayers[0];
+}
+
+type OptionalProperties<T extends Record<string, any> | undefined> = Pick<
+  T,
+  { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T]
+>;
+
+/**
+ * Strips out undefined properties from an object.
+ *
+ * Pass only properties that can be undefined.
+ */
+export function stripUndefined<T extends Record<string, any> | undefined>(
+  obj: OptionalProperties<T>
+): OptionalProperties<T> {
+  return pickBy(obj, (value) => value !== undefined) as OptionalProperties<T>;
 }
