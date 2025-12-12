@@ -55,7 +55,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
     const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
     const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
-
     const [isAIAgentModalVisible, setIsAIAgentModalVisible] = useState(false);
 
     const onButtonClick = useCallback(() => {
@@ -176,6 +175,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             color="accent"
             size="s"
             fullWidth
+            isDisabled={!assistantAvailability.hasAgentBuilderPrivilege}
             data-test-subj="try-ai-agent"
             css={css`
               font-weight: 500;
@@ -192,14 +192,18 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         handleOpenAIAgentModal,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
+        assistantAvailability.hasAgentBuilderPrivilege,
       ]
     );
+    const isAgentUpgradeDisabled = useMemo(() => {
+      return isDisabled || !assistantAvailability.hasAgentBuilderPrivilege;
+    }, [assistantAvailability.hasAgentBuilderPrivilege, isDisabled]);
 
     return (
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
           <AgentBuilderTourStep
-            isDisabled={isDisabled}
+            isDisabled={isAgentUpgradeDisabled}
             storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
             onContinue={handleOpenAIAgentModal}
           >

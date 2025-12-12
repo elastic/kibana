@@ -280,4 +280,40 @@ describe('AssistantSettingsContextMenu', () => {
       );
     });
   });
+
+  describe('hasAgentBuilderPrivilege', () => {
+    it('enables try-ai-agent button when hasAgentBuilderPrivilege is true', async () => {
+      render(
+        <TestProviders
+          assistantAvailability={{
+            ...mockAssistantAvailability,
+            hasAgentBuilderPrivilege: true,
+          }}
+        >
+          <AssistantSettingsContextMenu {...props} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('chat-context-menu'));
+      const tryAiAgentButton = screen.getByTestId('try-ai-agent');
+      expect(tryAiAgentButton).not.toBeDisabled();
+    });
+
+    it('disables try-ai-agent button when hasAgentBuilderPrivilege is false', async () => {
+      render(
+        <TestProviders
+          assistantAvailability={{
+            ...mockAssistantAvailability,
+            hasAgentBuilderPrivilege: false,
+          }}
+        >
+          <AssistantSettingsContextMenu {...props} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('chat-context-menu'));
+      const tryAiAgentButton = screen.getByTestId('try-ai-agent');
+      expect(tryAiAgentButton).toBeDisabled();
+    });
+  });
 });

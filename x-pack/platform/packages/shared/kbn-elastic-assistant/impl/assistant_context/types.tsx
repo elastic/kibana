@@ -82,6 +82,8 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // When true, user has privilege to access Agent Builder feature
+  hasAgentBuilderPrivilege: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {
