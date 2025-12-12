@@ -16,12 +16,6 @@ import type {
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  legacyMonitorAttributes,
-  syntheticsMonitorAttributes,
-  syntheticsMonitorSOTypes,
-} from '../../common/types/saved_objects';
 import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
 import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
 import type { HeartbeatConfig } from '../../common/runtime_types';
@@ -35,6 +29,7 @@ const TASK_SCHEDULE = '60m';
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
+  lastTotalMWs: number;
   hasAlreadyDoneCleanup: boolean;
   maxCleanUpRetries: number;
   disableAutoSync?: boolean;
@@ -100,78 +95,43 @@ export class SyncPrivateLocationMonitorsTask {
 
     const taskState = this.getNewTaskState({ taskInstance });
 
-    const defaultState = {
-      state: taskState,
-      schedule: {
-        interval: TASK_SCHEDULE,
-      },
-    };
-
     try {
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
+
       const { performCleanupSync } = await this.cleanUpDuplicatedPackagePolicies(
         soClient,
         taskState
       );
 
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      if (allPrivateLocations.length === 0) {
-        this.debugLog(`No private locations found, skipping sync of private location monitors`);
-        return {
-          state: taskState,
-          schedule: {
-            interval: TASK_SCHEDULE,
-          },
-        };
-      }
-      if (performCleanupSync) {
-        this.debugLog(`Syncing private location monitors because cleanup performed a change`);
+      const { hasMWsChanged } = await this.hasMWsChanged({
+        soClient,
+        taskState,
+        lastStartedAt,
+      });
 
-        await this.deployPackagePolicies.syncAllPackagePolicies({
-          allPrivateLocations,
-          soClient,
-          encryptedSavedObjects,
-        });
-        return defaultState;
-      }
-
-      if (taskState.disableAutoSync) {
-        this.debugLog(`Auto sync is disabled, skipping sync of private location monitors`);
-        return defaultState;
-      }
-
-      const monitorMwsIds = await this.fetchMonitorMwsIds(soClient);
-      if (monitorMwsIds.length === 0) {
-        this.debugLog(
-          `No monitors with maintenance windows found, skipping sync of private location monitors`
-        );
-        return defaultState;
-      }
-
-      const { hasMWsChanged, updatedMWs, missingMWIds, maintenanceWindows } =
-        await this.hasMWsChanged({
-          soClient,
-          taskState,
-          lastStartedAt,
-          monitorMwsIds,
-        });
-
+      // Only perform syncGlobalParams if:
+      // - hasMWsChanged and disableAutoSync is false
+      // - OR performCleanupSync is true (from cleanup), regardless of disableAutoSync
       const dataChangeSync = hasMWsChanged && !taskState.disableAutoSync;
-      if (dataChangeSync) {
-        this.debugLog(`Syncing private location monitors because data has changed`);
+      if (dataChangeSync || performCleanupSync) {
+        if (dataChangeSync) {
+          this.debugLog(`Syncing private location monitors because data has changed`);
+        } else if (performCleanupSync) {
+          this.debugLog(`Syncing private location monitors because cleanup performed a change`);
+        }
 
-        await this.deployPackagePolicies.syncPackagePoliciesForMws({
-          allPrivateLocations,
-          soClient,
-          encryptedSavedObjects,
-          updatedMWs,
-          missingMWIds,
-          // this is passed so we don't have to fetch them again in the method
-          maintenanceWindows,
-        });
-
+        if (allPrivateLocations.length > 0) {
+          await this.deployPackagePolicies.syncPackagePolicies({
+            allPrivateLocations,
+            soClient,
+            encryptedSavedObjects,
+          });
+        } else {
+          this.debugLog(`No private locations found, skipping sync`);
+        }
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
         if (taskState.disableAutoSync) {
@@ -192,7 +152,6 @@ export class SyncPrivateLocationMonitorsTask {
         },
       };
     }
-
     return {
       state: taskState,
       schedule: {
@@ -239,83 +198,45 @@ export class SyncPrivateLocationMonitorsTask {
     return { privateLocations, publicLocations };
   }
 
-  async fetchMonitorMwsIds(soClient: SavedObjectsClientContract) {
-    const monitorsWithMws = await soClient.find<
-      unknown,
-      {
-        monitorMws: {
-          buckets: Array<{ key: string; doc_count: number }>;
-        };
-        legacyMonitorsMws: {
-          buckets: Array<{ key: string; doc_count: number }>;
-        };
-      }
-    >({
-      type: syntheticsMonitorSOTypes,
-      perPage: 0,
-      namespaces: [ALL_SPACES_ID],
-      fields: [],
-      aggs: {
-        monitorMws: {
-          terms: { field: `${syntheticsMonitorAttributes}.maintenance_windows`, size: 1000 },
-        },
-        legacyMonitorsMws: {
-          terms: { field: `${legacyMonitorAttributes}.maintenance_windows`, size: 1000 },
-        },
-      },
-    });
-    const { monitorMws, legacyMonitorsMws } = monitorsWithMws.aggregations || {};
-    const monitorMwsIds = monitorMws?.buckets.map((b) => b.key) || [];
-    const legacyMonitorMwsIds = legacyMonitorsMws?.buckets.map((b) => b.key) || [];
-
-    this.debugLog(`Fetched monitor MWs IDs: ${JSON.stringify(monitorMwsIds)}`);
-    this.debugLog(`Fetched legacy monitor MWs IDs: ${JSON.stringify(legacyMonitorMwsIds)}`);
-
-    return Array.from(new Set([...monitorMwsIds, ...legacyMonitorMwsIds]));
-  }
-
   async hasMWsChanged({
+    soClient,
     lastStartedAt,
-    monitorMwsIds,
+    taskState,
   }: {
     soClient: SavedObjectsClientContract;
     lastStartedAt: string;
     taskState: SyncTaskState;
-    monitorMwsIds: string[];
   }) {
-    const maintenanceWindowClient = this.serverSetup.getMaintenanceWindowClientInternal(
-      {} as KibanaRequest
+    const { logger } = this.serverSetup;
+    const { lastTotalMWs } = taskState;
+
+    const [editedMWs, totalMWs] = await Promise.all([
+      soClient.find({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        filter: `${MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE}.updated_at > "${lastStartedAt}"`,
+        fields: [],
+      }),
+      soClient.find({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        fields: [],
+      }),
+    ]);
+    logger.debug(
+      `Found ${editedMWs.total} maintenance windows updated and ${totalMWs.total} total maintenance windows`
     );
+    const updatedMWs = editedMWs.total;
+    const noOfMWs = totalMWs.total;
 
-    if (!maintenanceWindowClient) {
-      return {
-        hasMWsChanged: false,
-        updatedMWs: [],
-        missingMWIds: [],
-        maintenanceWindows: [],
-      };
-    }
+    const hasMWsChanged = updatedMWs > 0 || noOfMWs !== lastTotalMWs;
 
-    const { maintenanceWindows } = await maintenanceWindowClient.bulkGet({
-      ids: monitorMwsIds,
-    });
-    // check if any of the MWs were updated since the last run
-    const updatedMWs = maintenanceWindows.filter((mw) => {
-      const updatedAt = mw.updatedAt;
-      return moment(updatedAt).isAfter(moment(lastStartedAt));
-    });
-    // check if any MWs are missing
-    const missingMWIds = monitorMwsIds.filter((mwId) => {
-      return !maintenanceWindows.find((mw) => mw.id === mwId);
-    });
-
-    this.debugLog('Missing MW IDs: ' + JSON.stringify(missingMWIds));
+    taskState.lastTotalMWs = noOfMWs;
 
     return {
-      hasMWsChanged: updatedMWs.length > 0 || missingMWIds.length > 0,
-      updatedMWs,
-      missingMWIds,
-      maintenanceWindows,
+      hasMWsChanged,
     };
   }
 
