@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { isAlwaysCondition } from '@kbn/streamlang';
 import type { ConvertFormState } from '../../../../types';
 import { isStepUnderEdit } from '../../../../state_management/steps_state_machine';
-import { useStreamEnrichmentSelector } from '../../../../state_management/stream_enrichment_state_machine';
+import { useInteractiveModeSelector } from '../../../../state_management/stream_enrichment_state_machine';
 
 export const TargetFieldSelector = () => {
   const {
@@ -20,7 +20,7 @@ export const TargetFieldSelector = () => {
     formState: { errors },
   } = useFormContext<ConvertFormState>();
 
-  const isWithinWhereBlock = useStreamEnrichmentSelector((state) => {
+  const isWithinWhereBlock = useInteractiveModeSelector((state) => {
     const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
       isStepUnderEdit(stepRef.getSnapshot())
     );
