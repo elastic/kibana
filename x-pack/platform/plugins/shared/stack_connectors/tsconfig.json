@@ -52,7 +52,10 @@
     "@kbn/zod",
     "@kbn/connector-schemas",
     "@kbn/connector-specs",
+    "@kbn/actions-utils",
     "@kbn/response-ops-form-generator",
+    "@kbn/mcp-client",
+    "@kbn/actions-types",
   ],
   "exclude": [
     "target/**/*",

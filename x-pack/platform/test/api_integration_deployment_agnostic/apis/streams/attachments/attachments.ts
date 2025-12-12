@@ -107,7 +107,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
 
         expect(response.attachments.length).to.eql(1);
@@ -123,7 +123,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists only rules when type filter is rule', async () => {
-        const response = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
+        const response = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['rule'] },
+        });
 
         expect(response.attachments.length).to.eql(1);
         const rule = response.attachments[0];
@@ -134,6 +138,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(rule.streamNames).to.contain('logs');
         expect(rule.createdAt).to.be.a('string');
         expect(rule.updatedAt).to.be.a('string');
+      });
+
+      it('lists multiple types when types array contains dashboard and rule', async () => {
+        const response = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard', 'rule'] },
+        });
+
+        expect(response.attachments.length).to.eql(2);
+        const types = response.attachments.map((a) => a.type).sort();
+        expect(types).to.eql(['dashboard', 'rule']);
+
+        // Verify both types are present
+        const dashboard = response.attachments.find((a) => a.type === 'dashboard');
+        const rule = response.attachments.find((a) => a.type === 'rule');
+        expect(dashboard).to.not.be(undefined);
+        expect(rule).to.not.be(undefined);
       });
     });
 
@@ -159,7 +181,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const listResponse = await getAttachments({
             apiClient,
             stream: 'logs',
-            type: 'dashboard',
+            filters: { types: ['dashboard'] },
           });
           expect(listResponse.attachments.length).to.eql(1);
           expect(listResponse.attachments[0].id).to.eql(SEARCH_DASHBOARD_ID);
@@ -192,7 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const listResponse = await getAttachments({
             apiClient,
             stream: 'logs',
-            type: 'dashboard',
+            filters: { types: ['dashboard'] },
           });
           expect(listResponse.attachments.length).to.eql(0);
         });
@@ -234,12 +256,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const logsResponse = await getAttachments({
             apiClient,
             stream: 'logs',
-            type: 'dashboard',
+            filters: { types: ['dashboard'] },
           });
           const childResponse = await getAttachments({
             apiClient,
             stream: 'logs.child',
-            type: 'dashboard',
+            filters: { types: ['dashboard'] },
           });
 
           expect(logsResponse.attachments.length).to.eql(1);
@@ -284,7 +306,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(linkResponse.acknowledged).to.eql(true);
 
-          const listResponse = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
+          const listResponse = await getAttachments({
+            apiClient,
+            stream: 'logs',
+            filters: { types: ['rule'] },
+          });
           expect(listResponse.attachments.length).to.eql(1);
           expect(listResponse.attachments[0].id).to.eql(FIRST_RULE_ID);
 
@@ -303,7 +329,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(unlinkResponse.acknowledged).to.eql(true);
 
-          const listResponse = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
+          const listResponse = await getAttachments({
+            apiClient,
+            stream: 'logs',
+            filters: { types: ['rule'] },
+          });
           expect(listResponse.attachments.length).to.eql(0);
         });
       });
@@ -333,7 +363,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const listResponse = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
         expect(listResponse.attachments.length).to.eql(2);
 
@@ -370,7 +400,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const listResponse = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
         expect(listResponse.attachments.length).to.eql(0);
       });
@@ -393,11 +423,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const dashboards = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
         expect(dashboards.attachments.length).to.eql(2);
 
-        const rules = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
+        const rules = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['rule'] },
+        });
         expect(rules.attachments.length).to.eql(2);
 
         // Clean up
@@ -479,7 +513,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const linkedAttachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
         expect(linkedAttachments.attachments.length).to.eql(1);
         expect(linkedAttachments.attachments[0].id).to.eql(SEARCH_DASHBOARD_ID);
@@ -500,7 +534,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const unlinkedAttachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
         expect(unlinkedAttachments.attachments.length).to.eql(0);
 
@@ -521,7 +555,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const linkedAttachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
         expect(linkedAttachments.attachments.length).to.eql(1);
         expect(linkedAttachments.attachments[0].id).to.eql(BASIC_DASHBOARD_ID);
@@ -540,7 +574,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const unlinkedAttachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
         expect(unlinkedAttachments.attachments.length).to.eql(0);
 
@@ -576,7 +610,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachmentSuggestions({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
         });
 
         expect(response.suggestions.length).to.be.greaterThan(0);
@@ -589,7 +623,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachmentSuggestions({
           apiClient,
           stream: 'logs',
-          type: 'rule',
+          filters: { types: ['rule'] },
         });
 
         expect(response.suggestions.length).to.be.greaterThan(0);
@@ -602,8 +636,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachmentSuggestions({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
-          query: BASIC_DASHBOARD_TITLE,
+          filters: {
+            types: ['dashboard'],
+            query: BASIC_DASHBOARD_TITLE,
+          },
         });
 
         expect(response.suggestions.length).to.eql(1);
@@ -615,13 +651,110 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachmentSuggestions({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
-          tags: [TAG_ID],
+          filters: {
+            types: ['dashboard'],
+            tags: [TAG_ID],
+          },
         });
 
         expect(response.suggestions.length).to.eql(1);
         response.suggestions.forEach((suggestion) => {
           expect(suggestion.type).to.eql('dashboard');
+        });
+      });
+
+      it('suggests multiple types when types array contains dashboard and rule', async () => {
+        const response = await getAttachmentSuggestions({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard', 'rule'] },
+        });
+
+        expect(response.suggestions.length).to.be.greaterThan(0);
+        const types = response.suggestions.map((s) => s.type);
+        expect(types).to.contain('dashboard');
+        expect(types).to.contain('rule');
+
+        // Verify at least one of each type exists
+        const hasDashboard = response.suggestions.some((s) => s.type === 'dashboard');
+        const hasRule = response.suggestions.some((s) => s.type === 'rule');
+        expect(hasDashboard).to.eql(true);
+        expect(hasRule).to.eql(true);
+      });
+
+      it('excludes already linked attachments from suggestions', async () => {
+        // First, get suggestions before linking to verify the attachments exist
+        const beforeResponse = await getAttachmentSuggestions({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard', 'rule'] },
+        });
+
+        // Verify the attachments we're about to link are in the suggestions
+        const dashboardInSuggestionsBefore = beforeResponse.suggestions.some(
+          (s) => s.id === SEARCH_DASHBOARD_ID && s.type === 'dashboard'
+        );
+        const ruleInSuggestionsBefore = beforeResponse.suggestions.some(
+          (s) => s.id === FIRST_RULE_ID && s.type === 'rule'
+        );
+        expect(dashboardInSuggestionsBefore).to.eql(true);
+        expect(ruleInSuggestionsBefore).to.eql(true);
+
+        // Link the dashboard and rule to the stream
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+        });
+
+        // Get suggestions after linking
+        const afterResponse = await getAttachmentSuggestions({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard', 'rule'] },
+        });
+
+        // Verify the linked dashboard is NOT in the suggestions
+        const dashboardInSuggestionsAfter = afterResponse.suggestions.some(
+          (s) => s.id === SEARCH_DASHBOARD_ID && s.type === 'dashboard'
+        );
+        expect(dashboardInSuggestionsAfter).to.eql(false);
+
+        // Verify the linked rule is NOT in the suggestions
+        const ruleInSuggestionsAfter = afterResponse.suggestions.some(
+          (s) => s.id === FIRST_RULE_ID && s.type === 'rule'
+        );
+        expect(ruleInSuggestionsAfter).to.eql(false);
+
+        // Verify other attachments are still suggested (the other dashboard and rule)
+        const otherDashboardInSuggestions = afterResponse.suggestions.some(
+          (s) => s.id === BASIC_DASHBOARD_ID && s.type === 'dashboard'
+        );
+        const otherRuleInSuggestions = afterResponse.suggestions.some(
+          (s) => s.id === SECOND_RULE_ID && s.type === 'rule'
+        );
+        expect(otherDashboardInSuggestions).to.eql(true);
+        expect(otherRuleInSuggestions).to.eql(true);
+
+        // Clean up
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
         });
       });
     });
@@ -689,7 +822,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const attachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
           spaceId: TEST_SPACE_ID,
         });
         expect(attachments.attachments.length).to.eql(1);
@@ -718,7 +851,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const attachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'rule',
+          filters: { types: ['rule'] },
           spaceId: TEST_SPACE_ID,
         });
         expect(attachments.attachments.length).to.eql(1);
@@ -920,7 +1053,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const linkedAttachments = await getAttachments({
           apiClient,
           stream: 'logs',
-          type: 'dashboard',
+          filters: { types: ['dashboard'] },
           spaceId: TEST_SPACE_ID,
         });
         expect(linkedAttachments.attachments.length).to.eql(1);
