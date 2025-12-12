@@ -8,7 +8,6 @@
 import { getSLOGroupingsParamsSchema } from '@kbn/slo-schema';
 import { GetSLOGroupings } from '../../services/get_slo_groupings';
 import { SloDefinitionClient } from '../../services/slo_definition_client';
-import { getSloSettings } from '../../services/slo_settings';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
@@ -23,12 +22,11 @@ export const getSLOGroupingsRoute = createSloServerRoute({
   params: getSLOGroupingsParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, repository, soClient, spaceId } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, repository, spaceId, settingsRepository } = await getScopedClients(
+      { request, logger }
+    );
 
-    const settings = await getSloSettings(soClient);
+    const settings = await settingsRepository.get();
 
     const definitionClient = new SloDefinitionClient(
       repository,
