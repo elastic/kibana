@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
@@ -29,17 +30,18 @@ import { from, concatMap } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
-import { defaultQuery } from './utils/default_query';
+import { defaultQuery, NO_FEATURE } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { FeaturesSelector } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
-import { useAIFeatures } from './generated_flow_form/use_ai_features';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 
 interface Props {
   onClose: () => void;
@@ -155,6 +157,8 @@ export function AddSignificantEventFlyout({
                     kql: { query: nextQuery.kql },
                     title: nextQuery.title,
                     feature: nextQuery.feature,
+                    severity_score: nextQuery.severity_score,
+                    evidence: nextQuery.evidence,
                   })),
               ]);
 
@@ -285,25 +289,22 @@ export function AddSignificantEventFlyout({
                       selectedFeatures={selectedFeatures}
                       onFeaturesChange={setSelectedFeatures}
                     />
-                    <EuiButton
-                      iconType="sparkles"
-                      fill
-                      isLoading={isGenerating}
-                      disabled={
-                        isSubmitting ||
-                        selectedFeatures.length === 0 ||
-                        !aiFeatures?.genAiConnectors?.selectedConnector
-                      }
-                      onClick={generateQueries}
-                      data-test-subj="significant_events_flyout_generate_suggestions_button"
-                    >
-                      {i18n.translate(
-                        'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
-                        {
-                          defaultMessage: 'Generate suggestions',
-                        }
-                      )}
-                    </EuiButton>
+                    <EuiSpacer size="m" />
+                    <ConnectorListButton
+                      buttonProps={{
+                        iconType: 'sparkles',
+                        isLoading: isGenerating,
+                        isDisabled: isSubmitting || selectedFeatures.length === 0,
+                        onClick: generateQueries,
+                        'data-test-subj': 'significant_events_flyout_generate_suggestions_button',
+                        children: i18n.translate(
+                          'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
+                          {
+                            defaultMessage: 'Generate suggestions',
+                          }
+                        ),
+                      }}
+                    />
                   </>
                 )}
               </EuiPanel>
@@ -410,14 +411,29 @@ export function AddSignificantEventFlyout({
                         case 'manual':
                           onSave({
                             type: 'single',
-                            query: queries[0],
+                            query: {
+                              ...queries[0],
+                              feature: queries[0].feature
+                                ? queries[0].feature.name === NO_FEATURE.name
+                                  ? undefined
+                                  : omit(queries[0].feature, 'description')
+                                : undefined,
+                            },
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
                           break;
                         case 'ai':
-                          onSave({ type: 'multiple', queries }).finally(() =>
-                            setIsSubmitting(false)
-                          );
+                          onSave({
+                            type: 'multiple',
+                            queries: queries.map((nextQuery) => ({
+                              ...nextQuery,
+                              feature: nextQuery.feature
+                                ? nextQuery.feature.name === NO_FEATURE.name
+                                  ? undefined
+                                  : omit(nextQuery.feature, 'description')
+                                : undefined,
+                            })),
+                          }).finally(() => setIsSubmitting(false));
                           break;
                       }
                     }}

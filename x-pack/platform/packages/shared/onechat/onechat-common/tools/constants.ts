@@ -25,6 +25,9 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
+  productDocumentation: platformCoreTool('product_documentation'),
+  cases: platformCoreTool('cases'),
+  integrationKnowledge: platformCoreTool('integration_knowledge'),
 } as const;
 
 /**

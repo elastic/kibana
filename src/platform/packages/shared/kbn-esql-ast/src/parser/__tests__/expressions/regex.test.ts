@@ -510,4 +510,77 @@ describe('regular expressions', () => {
       });
     });
   });
+
+  describe('parameters', () => {
+    it('LIKE with named parameter', () => {
+      const text = 'ROW name LIKE ?pattern';
+      const { root, errors } = Parser.parse(text);
+      const expression = root.commands[0].args[0];
+
+      expect(errors.length).toBe(0);
+      expect(expression).toMatchObject({
+        type: 'function',
+        name: 'like',
+        args: [
+          { type: 'column', name: 'name' },
+          { type: 'literal', literalType: 'param', paramType: 'named', value: 'pattern' },
+        ],
+      });
+    });
+
+    it('LIKE with positional parameter', () => {
+      const text = 'ROW name LIKE ?1';
+      const { root, errors } = Parser.parse(text);
+      const expression = root.commands[0].args[0];
+
+      expect(errors.length).toBe(0);
+      expect(expression).toMatchObject({
+        type: 'function',
+        name: 'like',
+        args: [
+          { type: 'column', name: 'name' },
+          { type: 'literal', literalType: 'param', paramType: 'positional', value: 1 },
+        ],
+      });
+    });
+
+    it('LIKE with unnamed parameter', () => {
+      const text = 'ROW name LIKE ?';
+      const { root, errors } = Parser.parse(text);
+      const expression = root.commands[0].args[0];
+
+      expect(errors.length).toBe(0);
+      expect(expression).toMatchObject({
+        type: 'function',
+        name: 'like',
+        args: [
+          { type: 'column', name: 'name' },
+          { type: 'literal', literalType: 'param', paramType: 'unnamed' },
+        ],
+      });
+    });
+
+    it('LIKE list with mixed strings and parameters', () => {
+      const text = 'ROW name LIKE ("test*", ?pattern, ?1)';
+      const { root, errors } = Parser.parse(text);
+      const expression = root.commands[0].args[0] as any;
+
+      expect(errors.length).toBe(0);
+      expect(expression.args[1].values).toHaveLength(3);
+      expect(expression.args[1].values[0]).toMatchObject({
+        type: 'literal',
+        literalType: 'keyword',
+      });
+      expect(expression.args[1].values[1]).toMatchObject({
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+      });
+      expect(expression.args[1].values[2]).toMatchObject({
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+      });
+    });
+  });
 });

@@ -28,8 +28,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// Failing: See https://github.com/elastic/kibana/issues/219860
-describe.skip('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -187,11 +186,11 @@ describe.skip('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
       );
 
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL)
-        .find('select')
+        .find('input')
         .should('be.visible')
-        .as('reassignPolicySelect');
-      cy.get('@reassignPolicySelect').select(response.agentPolicies[0].name);
-      cy.get('@reassignPolicySelect').should('have.value', response.agentPolicies[0].id);
+        .as('reassignPolicyInput');
+      cy.get('@reassignPolicyInput').type('{backspace}');
+      cy.get('@reassignPolicyInput').type(`${response.agentPolicies[0].name}{enter}`);
 
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON)
         .should('be.visible')
