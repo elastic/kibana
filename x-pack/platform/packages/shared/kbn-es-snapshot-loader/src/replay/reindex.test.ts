@@ -7,8 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import { getDataStreamName } from './reindex';
-import { TEMP_INDEX_PREFIX } from '.';
+import { getDestinationInfo } from './reindex';
 import { createTimestampPipeline } from './pipeline';
 
 const createMockLogger = (): Logger =>
@@ -32,31 +31,26 @@ const createMockEsClient = (): Client =>
     },
   } as unknown as Client);
 
-describe('getDataStreamName', () => {
+describe('getDestinationInfo', () => {
   it('extracts data stream name from backing index', () => {
-    expect(getDataStreamName('.ds-logs-nginx-default-2024.01.01-000001')).toBe(
-      'logs-nginx-default'
-    );
-  });
-
-  it('removes temp prefix and extracts data stream name', () => {
-    const tempIndex = `${TEMP_INDEX_PREFIX}.ds-logs-nginx-default-2024.01.01-000001`;
-    expect(getDataStreamName(tempIndex)).toBe('logs-nginx-default');
-  });
-
-  it('removes temp prefix from regular index', () => {
-    const tempIndex = `${TEMP_INDEX_PREFIX}my-index`;
-    expect(getDataStreamName(tempIndex)).toBe('my-index');
+    expect(getDestinationInfo('.ds-logs-nginx-default-2024.01.01-000001')).toEqual({
+      destIndex: 'logs-nginx-default',
+      isDataStream: true,
+    });
   });
 
   it('returns original name for non-backing index', () => {
-    expect(getDataStreamName('logs-nginx-default')).toBe('logs-nginx-default');
+    expect(getDestinationInfo('logs-nginx-default')).toEqual({
+      destIndex: 'logs-nginx-default',
+      isDataStream: false,
+    });
   });
 
   it('handles complex data stream names with dots', () => {
-    expect(getDataStreamName('.ds-metrics-system.cpu-default-2024.12.08-000001')).toBe(
-      'metrics-system.cpu-default'
-    );
+    expect(getDestinationInfo('.ds-metrics-system.cpu-default-2024.12.08-000001')).toEqual({
+      destIndex: 'metrics-system.cpu-default',
+      isDataStream: true,
+    });
   });
 });
 
@@ -65,12 +59,13 @@ describe('createTimestampPipeline', () => {
     const esClient = createMockEsClient();
     const logger = createMockLogger();
     const maxTimestamp = '2024-01-15T12:00:00.000Z';
+    const pipelineName = 'test-pipeline';
 
-    await createTimestampPipeline({ esClient, logger, maxTimestamp });
+    await createTimestampPipeline({ esClient, logger, pipelineName, maxTimestamp });
 
     expect(esClient.ingest.putPipeline).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'snapshot-loader-timestamp-pipeline',
+        id: pipelineName,
         processors: expect.arrayContaining([
           expect.objectContaining({
             script: expect.objectContaining({
@@ -89,6 +84,7 @@ describe('createTimestampPipeline', () => {
     await createTimestampPipeline({
       esClient,
       logger,
+      pipelineName: 'test-pipeline',
       maxTimestamp: '2024-01-15T12:00:00.000Z',
     });
 

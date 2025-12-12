@@ -7,9 +7,4 @@
 
 export { restoreSnapshot } from './src/restore';
 export { replaySnapshot } from './src/replay';
-export {
-  DEFAULT_DATA_STREAM_PATTERNS,
-  type RestoreConfig,
-  type ReplayConfig,
-  type LoadResult,
-} from './src/types';
+export { type RestoreConfig, type ReplayConfig, type LoadResult } from './src/types';

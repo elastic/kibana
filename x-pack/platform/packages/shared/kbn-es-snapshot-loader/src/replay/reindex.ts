@@ -9,14 +9,18 @@ import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import pRetry from 'p-retry';
 import { extractDataStreamName, getErrorMessage } from '../utils';
-import { TEMP_INDEX_PREFIX } from '.';
-import { REPLAY_PIPELINE_NAME } from './pipeline';
 
-export function getDataStreamName(indexName: string): string {
-  const originalName = indexName.startsWith(TEMP_INDEX_PREFIX)
-    ? indexName.slice(TEMP_INDEX_PREFIX.length)
-    : indexName;
-  return extractDataStreamName(originalName) ?? originalName;
+export interface DestinationInfo {
+  destIndex: string;
+  isDataStream: boolean;
+}
+
+export function getDestinationInfo(originalIndex: string): DestinationInfo {
+  const dataStreamName = extractDataStreamName(originalIndex);
+  return {
+    destIndex: dataStreamName ?? originalIndex,
+    isDataStream: dataStreamName != null,
+  };
 }
 
 export async function reindexThroughPipeline({
@@ -25,24 +29,24 @@ export async function reindexThroughPipeline({
   sourceIndex,
   destIndex,
   isDataStream,
+  pipelineName,
 }: {
   esClient: Client;
   logger: Logger;
   sourceIndex: string;
   destIndex: string;
   isDataStream: boolean;
+  pipelineName: string;
 }): Promise<string> {
   logger.debug(`Reindexing to ${destIndex}`);
 
   try {
     const response = await esClient.reindex({
       wait_for_completion: false,
-      requests_per_second: -1,
-      slices: 'auto',
-      source: { index: sourceIndex, size: 5000 },
+      source: { index: sourceIndex },
       dest: {
         index: destIndex,
-        pipeline: REPLAY_PIPELINE_NAME,
+        pipeline: pipelineName,
         op_type: isDataStream ? 'create' : 'index',
       },
     });
@@ -132,21 +136,19 @@ export async function reindexAllIndices({
   restoredIndices,
   originalIndices,
   concurrency,
+  pipelineName,
 }: {
   esClient: Client;
   logger: Logger;
   restoredIndices: string[];
   originalIndices: string[];
   concurrency?: number;
+  pipelineName: string;
 }): Promise<string[]> {
   const successfullyReindexed: string[] = [];
 
   const jobs: ReindexJob[] = restoredIndices.map((sourceIndex, i) => {
-    const destIndex = getDataStreamName(originalIndices[i]);
-    const isDataStream =
-      destIndex.startsWith('logs-') ||
-      destIndex.startsWith('metrics-') ||
-      destIndex.startsWith('traces-');
+    const { destIndex, isDataStream } = getDestinationInfo(originalIndices[i]);
     return { sourceIndex, destIndex, isDataStream };
   });
 
@@ -165,7 +167,7 @@ export async function reindexAllIndices({
     const taskResults = await Promise.all(
       batch.map(async (job) => {
         try {
-          const taskId = await reindexThroughPipeline({ esClient, logger, ...job });
+          const taskId = await reindexThroughPipeline({ esClient, logger, pipelineName, ...job });
           return { job, taskId };
         } catch (error) {
           logger.error(`Failed to start reindex for ${job.destIndex}: ${getErrorMessage(error)}`);

@@ -25,13 +25,6 @@ node scripts/es_snapshot_loader restore \
   --snapshot-url file:///path/to/snapshot \
   --es-url http://elastic:changeme@localhost:9200 \
   --indices "my-index-*,other-index-*"
-
-# With rename
-node scripts/es_snapshot_loader restore \
-  --snapshot-url file:///path/to/snapshot \
-  --es-url http://elastic:changeme@localhost:9200 \
-  --rename-pattern "(.+)" \
-  --rename-replacement "restored-$1"
 ```
 
 ### Replay
@@ -60,11 +53,9 @@ node scripts/es_snapshot_loader replay \
 
 ### Restore-specific Options
 
-| Flag                   | Description                               |
-| ---------------------- | ----------------------------------------- |
-| `--indices`            | Comma-separated index patterns to restore |
-| `--rename-pattern`     | Regex pattern for renaming indices        |
-| `--rename-replacement` | Replacement string for rename             |
+| Flag        | Description                               |
+| ----------- | ----------------------------------------- |
+| `--indices` | Comma-separated index patterns to restore |
 
 ### Replay-specific Options
 
@@ -85,8 +76,6 @@ const result = await restoreSnapshot({
   logger,
   snapshotUrl: 'file:///path/to/snapshot',
   indices: ['my-index-*'],
-  renamePattern: '(.+)',
-  renameReplacement: 'restored-$1',
 });
 
 if (result.success) {

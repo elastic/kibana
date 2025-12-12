@@ -9,10 +9,8 @@ import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { createKibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { format, parse } from 'node:url';
 import { restoreSnapshot } from '../src/restore';
 import { replaySnapshot } from '../src/replay';
-import { DEFAULT_DATA_STREAM_PATTERNS } from '../src/types';
 
 interface CommonFlags {
   'snapshot-url'?: string;
@@ -29,11 +27,12 @@ function parseCommaSeparatedList(value: string | undefined): string[] | undefine
 }
 
 function createEsClientFromUrl(esUrl: string): Client {
-  const parsed = parse(esUrl, true);
-  const [username, password] = (parsed.auth ?? '').split(':');
+  const url = new URL(esUrl);
+  const username = url.username;
+  const password = url.password;
 
   return new Client({
-    node: format({ ...parsed, auth: null }),
+    node: `${url.protocol}//${url.host}${url.pathname}`,
     auth: username && password ? { username, password } : undefined,
   });
 }
@@ -120,7 +119,6 @@ function runRestoreCli(): void {
       log.info(`================`);
       log.info(`Snapshot URL: ${snapshotUrl}`);
       if (indices) log.info(`Index patterns: ${indices.join(', ')}`);
-      log.info('');
 
       const result = await restoreSnapshot({ esClient, logger, snapshotUrl, indices });
 
@@ -164,9 +162,12 @@ function runReplayCli(): void {
       };
 
       if (!snapshotUrl) throw new Error('--snapshot-url is required');
+      if (!parseCommaSeparatedList(patternsFlag)) {
+        throw new Error('--patterns is required');
+      }
 
       const esClient = await getEsClient(flags as CommonFlags, log);
-      const patterns = parseCommaSeparatedList(patternsFlag) ?? DEFAULT_DATA_STREAM_PATTERNS;
+      const patterns = parseCommaSeparatedList(patternsFlag)!;
       const concurrency = concurrencyFlag ? parseInt(concurrencyFlag, 10) : undefined;
       if (concurrencyFlag && (isNaN(concurrency!) || concurrency! < 1)) {
         throw new Error('--concurrency must be a positive integer');
@@ -178,7 +179,6 @@ function runReplayCli(): void {
       log.info(`Snapshot URL: ${snapshotUrl}`);
       log.info(`Index patterns: ${patterns.join(', ')}`);
       if (concurrency) log.info(`Concurrency: ${concurrency}`);
-      log.info('');
 
       const result = await replaySnapshot({ esClient, logger, snapshotUrl, patterns, concurrency });
 
@@ -201,13 +201,11 @@ function runReplayCli(): void {
         help: `
       Usage: node scripts/es_snapshot_loader replay [options]
       ${COMMON_FLAGS_HELP}
-      --patterns          Comma-separated data stream patterns to replay
-                          Default: logs-*,metrics-*,traces-*
+      --patterns          Comma-separated data stream patterns to replay (required)
 
       --concurrency       Number of indices to reindex in parallel
                           Default: all indices at once (no limit)
         `,
-        default: { patterns: DEFAULT_DATA_STREAM_PATTERNS.join(',') },
         allowUnexpected: false,
       },
     }

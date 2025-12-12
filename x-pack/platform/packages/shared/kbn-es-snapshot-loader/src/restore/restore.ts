@@ -9,15 +9,25 @@ import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { extractDataStreamName } from '../utils';
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function compileGlobPatterns(patterns: string[]): RegExp[] {
+  return patterns.map((pattern) => {
+    const escaped = escapeRegExp(pattern).replace(/\\\*/g, '.*');
+    return new RegExp(`^${escaped}$`);
+  });
+}
+
 export function filterIndicesToRestore(snapshotIndices: string[], patterns: string[]): string[] {
+  const compiledPatterns = compileGlobPatterns(patterns);
+
   return snapshotIndices.filter((index) => {
     const dataStreamName = extractDataStreamName(index);
     const namesToCheck = dataStreamName ? [index, dataStreamName] : [index];
 
-    return patterns.some((pattern) => {
-      const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
-      return namesToCheck.some((name) => regex.test(name));
-    });
+    return compiledPatterns.some((regex) => namesToCheck.some((name) => regex.test(name)));
   });
 }
 

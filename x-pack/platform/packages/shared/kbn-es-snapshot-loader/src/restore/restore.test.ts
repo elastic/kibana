@@ -48,6 +48,11 @@ describe('filterIndicesToRestore', () => {
       filterIndicesToRestore(['my-exact-index', 'my-exact-index-2'], ['my-exact-index'])
     ).toEqual(['my-exact-index']);
   });
+
+  it('treats patterns as globs (escapes regex metacharacters)', () => {
+    const indices = ['logs-a.b-1', 'logs-axb-1'];
+    expect(filterIndicesToRestore(indices, ['logs-a.b-*'])).toEqual(['logs-a.b-1']);
+  });
 });
 
 describe('extractDataStreamName', () => {

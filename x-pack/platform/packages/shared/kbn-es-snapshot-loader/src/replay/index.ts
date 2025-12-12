@@ -8,9 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ReplayConfig, LoadResult } from '../types';
-
-export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
-import { getErrorMessage } from '../utils';
+import { validateFileSnapshotUrl, getErrorMessage } from '../utils';
 import {
   registerUrlRepository,
   getSnapshotMetadata,
@@ -21,6 +19,8 @@ import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
 import { reindexAllIndices } from './reindex';
 import { verifyIndexTemplates } from './templates';
+
+export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
   const { esClient, logger, snapshotUrl, patterns, concurrency } = config;
@@ -35,8 +35,11 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
   };
 
   const repoName = generateRepoName();
+  const pipelineName = `snapshot-loader-timestamp-pipeline-${repoName}`;
 
   try {
+    validateFileSnapshotUrl(snapshotUrl);
+
     logger.info('Step 1/5: Registering snapshot repository...');
     await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
 
@@ -77,6 +80,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     await createTimestampPipeline({
       esClient,
       logger,
+      pipelineName,
       maxTimestamp: result.maxTimestamp!,
     });
 
@@ -87,6 +91,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       restoredIndices,
       originalIndices: indicesToRestore,
       concurrency,
+      pipelineName,
     });
     result.reindexedIndices = reindexedIndices;
 
@@ -100,7 +105,13 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     logger.error(`Snapshot replay failed: ${getErrorMessage(error)}`);
   } finally {
     logger.debug('Cleaning up...');
-    await cleanup({ esClient, logger, repoName, restoredIndices: result.restoredIndices });
+    await cleanup({
+      esClient,
+      logger,
+      repoName,
+      pipelineName,
+      restoredIndices: result.restoredIndices,
+    });
   }
 
   return result;
@@ -110,11 +121,13 @@ async function cleanup({
   esClient,
   logger,
   repoName,
+  pipelineName,
   restoredIndices,
 }: {
   esClient: Client;
   logger: Logger;
   repoName: string;
+  pipelineName: string;
   restoredIndices: string[];
 }): Promise<void> {
   for (const index of restoredIndices) {
@@ -124,6 +137,6 @@ async function cleanup({
       logger.debug(`Failed to delete temp index: ${index}`);
     }
   }
-  await deletePipeline({ esClient, logger });
+  await deletePipeline({ esClient, logger, pipelineName });
   await deleteRepository({ esClient, logger, repoName });
 }

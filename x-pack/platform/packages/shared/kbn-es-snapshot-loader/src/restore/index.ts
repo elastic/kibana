@@ -6,7 +6,7 @@
  */
 
 import type { RestoreConfig, LoadResult } from '../types';
-import { getErrorMessage } from '../utils';
+import { validateFileSnapshotUrl, getErrorMessage } from '../utils';
 import {
   registerUrlRepository,
   getSnapshotMetadata,
@@ -28,6 +28,8 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
   const repoName = generateRepoName();
 
   try {
+    validateFileSnapshotUrl(snapshotUrl);
+
     logger.info('Step 1/3: Registering snapshot repository...');
     await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
 
