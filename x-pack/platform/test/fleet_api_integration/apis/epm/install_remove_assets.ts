@@ -756,11 +756,6 @@ const expectAssetsInstalled = ({
         ],
         package_assets: [
           {
-            id: 'fc0a5279-e68e-5213-8f7c-d4d5b7fb55fd',
-            path: 'all_assets-0.1.0/.DS_Store',
-            type: 'epm-packages-assets',
-          },
-          {
             id: '333a22a1-e639-5af5-ae62-907ffc83d603',
             path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ilm_policy/all_assets.json',
             type: 'epm-packages-assets',
