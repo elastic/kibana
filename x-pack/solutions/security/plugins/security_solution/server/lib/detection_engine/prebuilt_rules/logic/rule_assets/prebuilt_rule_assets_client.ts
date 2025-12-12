@@ -22,9 +22,6 @@ import type { BasicRuleInfo } from '../basic_rule_info';
 import type { ReviewPrebuiltRuleInstallationFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_filter';
 import type { ReviewPrebuiltRuleInstallationSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_sort';
 
-// TODO: Remove this temporary debug variable
-const TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS = true;
-
 const MAX_PREBUILT_RULES_COUNT = 10_000;
 
 export interface IPrebuiltRuleAssetsClient {
@@ -202,17 +199,6 @@ export const createPrebuiltRuleAssetsClient = (
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
           namespaces: ['default'],
           size: MAX_PREBUILT_RULES_COUNT,
-          runtime_mappings: TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS
-            ? {
-                [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {
-                  type: 'long',
-                  script: {
-                    source: `emit(params.rank.getOrDefault(doc['${PREBUILT_RULE_ASSETS_SO_TYPE}.severity'].value, 0))`,
-                    params: { rank: { low: 20, medium: 40, high: 60, critical: 80 } },
-                  },
-                },
-              }
-            : undefined,
           query: {
             terms: {
               _id: soIds,
@@ -339,9 +325,7 @@ function transformSortParameter(
 ) {
   const soSortFields = {
     name: `${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`,
-    severity: TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS
-      ? `${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`
-      : `${PREBUILT_RULE_ASSETS_SO_TYPE}.mapped_params.severity`,
+    severity: `${PREBUILT_RULE_ASSETS_SO_TYPE}.mapped_params.severity`,
     risk_score: `${PREBUILT_RULE_ASSETS_SO_TYPE}.risk_score`,
   };
   return sort?.map((s) => {
