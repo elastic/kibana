@@ -24,6 +24,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
+
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
   usageCollection?: UsageCollectionSetup;
