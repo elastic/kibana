@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { FunctionDefinitionTypes } from '@kbn/esql-ast';
-import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
-import { Location } from '@kbn/esql-ast/src/commands_registry/types';
-import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
+import { Location } from '@kbn/esql-ast/src/commands/registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/commands/definitions/utils/test_functions';
 import { getFunctionSignaturesByReturnType, setup, createCustomCallbackMocks } from './helpers';
 import { uniq } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -20,7 +20,7 @@ import {
   nullCheckOperators,
   inOperators,
   patternMatchOperators,
-} from '@kbn/esql-ast/src/definitions/all_operators';
+} from '@kbn/esql-ast/src/commands/definitions/all_operators';
 
 const arithmeticSymbols = arithmeticOperators.map(({ name }) => name);
 const comparisonSymbols = comparisonFunctions.map(({ name }) => name);

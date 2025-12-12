@@ -28,6 +28,8 @@ import { useAssistantContext } from '../../../..';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
 import * as i18n from './translations';
+import { AgentBuilderTourStep } from '../../../tour/agent_builder';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../tour/const';
 
 interface Params {
   isDisabled?: boolean;
@@ -53,7 +55,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
     const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
     const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
-
     const [isAIAgentModalVisible, setIsAIAgentModalVisible] = useState(false);
 
     const onButtonClick = useCallback(() => {
@@ -75,6 +76,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       try {
         await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
         setIsAIAgentModalVisible(false);
+        window.location.reload();
       } catch (error) {
         if (toasts) {
           toasts.addError(error instanceof Error ? error : new Error(String(error)), {
@@ -166,58 +168,110 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        <EuiContextMenuItem key="try-ai-agent">
-          <EuiButton
-            aria-label={i18n.TRY_AI_AGENT}
-            onClick={handleOpenAIAgentModal}
-            iconType={robotIconType}
-            color="accent"
-            size="s"
-            fullWidth
-            data-test-subj="try-ai-agent"
-            css={css`
-              font-weight: 500;
-            `}
-          >
-            {i18n.TRY_AI_AGENT}
-          </EuiButton>
-        </EuiContextMenuItem>,
+        ...(assistantAvailability.isAiAgentsEnabled
+          ? [
+              <EuiContextMenuItem key="try-ai-agent">
+                {!assistantAvailability.hasAgentBuilderManagePrivilege ? (
+                  <EuiToolTip
+                    display="block"
+                    content={i18n.AI_AGENT_MANAGE_PRIVILEGE_REQUIRED}
+                    anchorClassName="euiToolTipAnchor-try-ai-agent"
+                  >
+                    <span
+                      tabIndex={0}
+                      css={css`
+                        display: block;
+                        width: 100%;
+                      `}
+                    >
+                      <EuiButton
+                        aria-label={i18n.TRY_AI_AGENT}
+                        onClick={handleOpenAIAgentModal}
+                        iconType={robotIconType}
+                        color="accent"
+                        size="s"
+                        fullWidth
+                        isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
+                        data-test-subj="try-ai-agent"
+                        css={css`
+                          font-weight: 500;
+                        `}
+                      >
+                        {i18n.TRY_AI_AGENT}
+                      </EuiButton>
+                    </span>
+                  </EuiToolTip>
+                ) : (
+                  <EuiButton
+                    aria-label={i18n.TRY_AI_AGENT}
+                    onClick={handleOpenAIAgentModal}
+                    iconType={robotIconType}
+                    color="accent"
+                    size="s"
+                    fullWidth
+                    isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
+                    data-test-subj="try-ai-agent"
+                    css={css`
+                      font-weight: 500;
+                    `}
+                  >
+                    {i18n.TRY_AI_AGENT}
+                  </EuiButton>
+                )}
+              </EuiContextMenuItem>,
+            ]
+          : []),
       ],
       [
-        handleNavigateToAnonymization,
-        handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
-        handleOpenAIAgentModal,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
+        assistantAvailability.isAiAgentsEnabled,
+        assistantAvailability.hasAgentBuilderManagePrivilege,
+        handleOpenAIAgentModal,
       ]
     );
+    const isAgentUpgradeDisabled = useMemo(() => {
+      return (
+        isDisabled ||
+        !assistantAvailability.hasAgentBuilderManagePrivilege ||
+        !assistantAvailability.isAiAgentsEnabled
+      );
+    }, [assistantAvailability, isDisabled]);
 
     return (
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                aria-label={i18n.AI_ASSISTANT_MENU}
-                isDisabled={isDisabled}
-                iconType="controls"
-                onClick={onButtonClick}
-                data-test-subj="chat-context-menu"
-              />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="leftUp"
+          <AgentBuilderTourStep
+            isDisabled={isAgentUpgradeDisabled}
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
+            onContinue={handleOpenAIAgentModal}
           >
-            <EuiContextMenuPanel
-              items={items}
-              css={css`
-                width: 280px;
-              `}
-            />
-          </EuiPopover>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  aria-label={i18n.AI_ASSISTANT_MENU}
+                  isDisabled={isDisabled}
+                  iconType="controls"
+                  onClick={onButtonClick}
+                  data-test-subj="chat-context-menu"
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="leftUp"
+            >
+              <EuiContextMenuPanel
+                items={items}
+                css={css`
+                  width: 280px;
+                `}
+              />
+            </EuiPopover>
+          </AgentBuilderTourStep>
         </EuiToolTip>
         {isAlertsSettingsModalVisible && <AlertsSettingsModal onClose={closeAlertSettingsModal} />}
         {isAnonymizationModalVisible && (

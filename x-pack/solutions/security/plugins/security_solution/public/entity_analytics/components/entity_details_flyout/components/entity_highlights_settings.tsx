@@ -107,7 +107,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       attachmentData: {
         identifierType: entityType,
         identifier: entityIdentifier,
-        attachmentLabel: entityIdentifier,
+        attachmentLabel: `${entityType}: ${entityIdentifier}`,
       },
       attachmentPrompt: ENTITY_PROMPT,
     }),

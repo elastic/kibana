@@ -62,18 +62,14 @@ export const PanelFooter = memo(() => {
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {showAssistant && (
-            <EuiFlexItem grow={false}>
-              {isAgentChatExperienceEnabled ? (
-                <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
-              ) : (
-                <NewChatByTitle
-                  showAssistantOverlay={showAssistantOverlay}
-                  text={ASK_AI_ASSISTANT}
-                />
-              )}
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            {isAgentChatExperienceEnabled && (
+              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            )}
+            {showAssistant && !isAgentChatExperienceEnabled && (
+              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
+            )}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeActionButton />
           </EuiFlexItem>

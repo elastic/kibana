@@ -6,7 +6,7 @@
  */
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ATTACKS_ALERTS_ALIGNMENT_ENABLED,
   SecurityPageName,
@@ -23,7 +23,10 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
-export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
+export const createNavigationTree = (
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'security_solution_home',
@@ -51,8 +54,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       link: 'workflows',
       badgeType: 'techPreview' as const,
     },
-    ...(services.application.capabilities.agentBuilder?.show === true &&
-    services.uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false) === true
+    ...(chatExperience === AIChatExperience.Agent
       ? [
           {
             // TODO: update icon to 'robot' once it's available in EUI

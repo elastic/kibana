@@ -7,7 +7,7 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import {
@@ -16,7 +16,6 @@ import {
 } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
-import { type Services } from '../../common/services';
 import { AiNavigationIcon } from './icon';
 
 const SOLUTION_NAME = i18n.translate(
@@ -24,7 +23,9 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (services: Services): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'ease_home',
@@ -60,10 +61,14 @@ export const createAiNavigationTree = (services: Services): NavigationTreeDefini
               id: SecurityPageName.configurationsBasicRules,
               link: securityLink(SecurityPageName.configurationsBasicRules),
             },
-            {
-              id: SecurityPageName.configurationsAiSettings,
-              link: securityLink(SecurityPageName.configurationsAiSettings),
-            },
+            ...(chatExperience !== AIChatExperience.Agent
+              ? [
+                  {
+                    id: SecurityPageName.configurationsAiSettings,
+                    link: securityLink(SecurityPageName.configurationsAiSettings),
+                  },
+                ]
+              : []),
           ],
         },
       ],
@@ -74,8 +79,7 @@ export const createAiNavigationTree = (services: Services): NavigationTreeDefini
         {
           link: 'discover',
         },
-        ...(services.application.capabilities.agentBuilder?.show === true &&
-        services.uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false) === true
+        ...(chatExperience === AIChatExperience.Agent
           ? [
               {
                 // TODO: update icon to 'robot' once it's available in EUI

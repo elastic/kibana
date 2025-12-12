@@ -112,3 +112,11 @@ export const AI_AGENT_SWITCH_ERROR = i18n.translate(
     defaultMessage: 'Failed to switch to AI Agent',
   }
 );
+
+export const AI_AGENT_MANAGE_PRIVILEGE_REQUIRED = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsContextMenu.aiAgentManagePrivilegeRequired',
+  {
+    defaultMessage:
+      'Agent builder manage permissions and advanced settings save permissions are required to upgrade to the AI agent experience',
+  }
+);
