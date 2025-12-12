@@ -62,4 +62,3 @@ describe('ConfigurationsTabs', () => {
     expect(queryByText('AI settings')).not.toBeInTheDocument();
   });
 });
-
