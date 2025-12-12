@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { URLVoidConnector } from '.';
+import { URLVoidConnector } from './urlvoid';
 
 describe('URLVoidConnector', () => {
   const mockClient = {

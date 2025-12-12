@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { AbuseIPDBConnector } from '.';
+import { AbuseIPDBConnector } from './abuseipdb';
 
 describe('AbuseIPDBConnector', () => {
   const mockClient = {

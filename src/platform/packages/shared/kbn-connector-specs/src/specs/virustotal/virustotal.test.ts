@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { VirusTotalConnector } from '.';
+import { VirusTotalConnector } from './virustotal';
 
 describe('VirusTotalConnector', () => {
   const mockClient = {

@@ -137,8 +137,8 @@ export const ConnectorCommand: GenerateCommand = {
     // create folder structure
     await Fsp.mkdir(iconDir, { recursive: true });
 
-    // write spec index.ts via template
-    const specIndexPath = Path.resolve(connectorDir, 'index.ts');
+    // write spec <connector_name>.ts via template
+    const specIndexPath = Path.resolve(connectorDir, `${connectorName}.ts`);
     await render.toFile(Path.resolve(CONNECTOR_TEMPLATE_DIR, 'index.ts.ejs'), specIndexPath, {
       connector: {
         name: connectorName,
@@ -212,7 +212,7 @@ export const ConnectorCommand: GenerateCommand = {
 
     // update all_specs.ts
     {
-      const relExport = `export * from './specs/${connectorName}';`;
+      const relExport = `export * from './specs/${connectorName}/${connectorName}';`;
       const content = await Fsp.readFile(ALL_SPECS_FILE, 'utf8');
       if (!content.includes(relExport)) {
         const updated = content.trimEnd() + '\n' + relExport + '\n';

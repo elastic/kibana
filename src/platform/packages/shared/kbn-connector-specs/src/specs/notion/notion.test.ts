@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { NotionConnector } from '.';
+import { NotionConnector } from './notion';
 
 describe('NotionConnector', () => {
   const mockClient = {

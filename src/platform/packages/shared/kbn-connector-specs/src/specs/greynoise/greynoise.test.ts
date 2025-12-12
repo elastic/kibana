@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { GreyNoiseConnector } from '.';
+import { GreyNoiseConnector } from './greynoise';
 
 describe('GreyNoiseConnector', () => {
   const mockClient = {

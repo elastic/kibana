@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { AlienVaultOTXConnector } from '.';
+import { AlienVaultOTXConnector } from './alienvault_otx';
 
 describe('AlienVaultOTXConnector', () => {
   const mockClient = {

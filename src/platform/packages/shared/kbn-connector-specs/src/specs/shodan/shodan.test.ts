@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { ShodanConnector } from '.';
+import { ShodanConnector } from './shodan';
 
 describe('ShodanConnector', () => {
   const mockClient = {
