@@ -22,7 +22,7 @@ export async function bulkGetMaintenanceWindows(
   params: BulkGetMaintenanceWindowsParams
 ): Promise<BulkGetMaintenanceWindowsResult> {
   const { savedObjectsClient, logger } = context;
-  const { ids } = params;
+  const { ids, namespace } = params;
 
   try {
     bulkGetMaintenanceWindowsParamsSchema.validate(params);
@@ -33,10 +33,13 @@ export async function bulkGetMaintenanceWindows(
   const bulkGetObjects = ids.map((id) => ({ id }));
 
   try {
-    const { saved_objects: savedObjects } = await bulkGetMaintenanceWindowSo({
-      objects: bulkGetObjects,
-      savedObjectsClient,
-    });
+    const { saved_objects: savedObjects } = await bulkGetMaintenanceWindowSo(
+      {
+        objects: bulkGetObjects,
+        savedObjectsClient,
+      },
+      namespace
+    );
 
     const maintenanceWindows: MaintenanceWindow[] = [];
     const errors: BulkGetMaintenanceWindowsError[] = [];

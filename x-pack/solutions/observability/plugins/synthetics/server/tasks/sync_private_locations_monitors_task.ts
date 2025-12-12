@@ -31,7 +31,7 @@ import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '60m';
+const TASK_SCHEDULE = '1m';
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -282,6 +282,7 @@ export class SyncPrivateLocationMonitorsTask {
     taskState: SyncTaskState;
     monitorMwsIds: string[];
   }) {
+    const { syntheticsService } = this.syntheticsMonitorClient;
     const maintenanceWindowClient = this.serverSetup.getMaintenanceWindowClientInternal(
       {} as KibanaRequest
     );
@@ -295,9 +296,7 @@ export class SyncPrivateLocationMonitorsTask {
       };
     }
 
-    const { maintenanceWindows } = await maintenanceWindowClient.bulkGet({
-      ids: monitorMwsIds,
-    });
+    const maintenanceWindows = await syntheticsService.getMaintenanceWindows();
     // check if any of the MWs were updated since the last run
     const updatedMWs = maintenanceWindows.filter((mw) => {
       const updatedAt = mw.updatedAt;
@@ -314,7 +313,7 @@ export class SyncPrivateLocationMonitorsTask {
       hasMWsChanged: updatedMWs.length > 0 || missingMWIds.length > 0,
       updatedMWs,
       missingMWIds,
-      maintenanceWindows,
+      maintenanceWindows: maintenanceWindows.filter((mw) => monitorMwsIds.includes(mw.id)),
     };
   }
 

@@ -681,6 +681,7 @@ export class SyntheticsService {
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
+      namespaces: [ALL_SPACES_ID],
     });
     return mws.data;
   }
