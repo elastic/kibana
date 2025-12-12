@@ -210,7 +210,7 @@ components:
           $ref: '#/components/schemas/MigrationLastExecution'
         vendor:
           description: The migration vendor.
-          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/SiemMigrationVendor'
 
     MigrationTaskItemsStats:
       type: object

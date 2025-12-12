@@ -22,6 +22,7 @@ describe('HeaderButtons', () => {
           migrationsStats={getMigrationsStatsMock()}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
+          migrationVendor={'splunk'}
         />
       </TestProviders>
     );
@@ -36,6 +37,7 @@ describe('HeaderButtons', () => {
           migrationsStats={getMigrationsStatsMock()}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
+          migrationVendor={'splunk'}
         />
       </TestProviders>
     );
@@ -58,9 +60,26 @@ describe('HeaderButtons', () => {
           migrationsStats={getMigrationsStatsMock()}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
+          migrationVendor={'splunk'}
         />
       </TestProviders>
     );
     expect(getByTestId('addAnotherMigrationButton')).toBeInTheDocument();
+  });
+
+  it('should render the migration vendor badge', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HeaderButtons
+          migrationType="dashboard"
+          migrationsStats={getMigrationsStatsMock()}
+          selectedMigrationId="1"
+          onMigrationIdChange={onMigrationIdChange}
+          migrationVendor={'splunk'}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('migrationVendorBadge')).toBeInTheDocument();
   });
 });

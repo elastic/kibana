@@ -265,7 +265,7 @@ export const MigrationTaskStats = z.object({
   /**
    * The migration vendor.
    */
-  vendor: NonEmptyString.optional(),
+  vendor: SiemMigrationVendor.optional(),
 });
 
 export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;

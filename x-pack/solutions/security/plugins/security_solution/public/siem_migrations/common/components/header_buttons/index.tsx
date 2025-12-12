@@ -9,13 +9,24 @@ import React, { useMemo } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { MigrationType } from '../../../../../common/siem_migrations/types';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import type {
+  MigrationTaskStats,
+  SiemMigrationVendor,
+} from '../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
+import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
 
 export const SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID = 'siemMigrationsSelectMigrationButton';
 
@@ -28,6 +39,8 @@ const migrationStatsToComboBoxOption = (
 });
 
 export interface HeaderButtonsProps {
+  /** The migration vendor name */
+  migrationVendor?: SiemMigrationVendor;
   /** The type of migrations (e.g. rule, dashboards)*/
   migrationType: MigrationType;
   /** Available migrations stats */
@@ -38,7 +51,13 @@ export interface HeaderButtonsProps {
   onMigrationIdChange: (selectedId?: string) => void;
 }
 export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
-  ({ migrationType, migrationsStats, selectedMigrationId, onMigrationIdChange }) => {
+  ({
+    migrationVendor,
+    migrationType,
+    migrationsStats,
+    selectedMigrationId,
+    onMigrationIdChange,
+  }) => {
     const migrationOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
       () => migrationsStats.map(migrationStatsToComboBoxOption),
       [migrationsStats]
@@ -76,6 +95,20 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
 
     return (
       <EuiFlexGroup alignItems="flexEnd" gutterSize="s" responsive>
+        {migrationVendor && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              color={MIGRATION_VENDOR_COLOR_CONFIG[migrationVendor]}
+              data-test-subj="migrationVendorBadge"
+              css={css`
+                // Vertically centers the badge in a flex container of arbitrary height
+                transform: translateY(-50%);
+              `}
+            >
+              {migrationVendor.toUpperCase()}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem
           grow={false}
           css={css`
