@@ -69,7 +69,7 @@ export class MaintenanceWindowClientFactory {
     return this.createMaintenanceWindowClient(request, true);
   }
 
-  public create(request: KibanaRequest, excludedExtension?: string[]) {
+  public create(request: KibanaRequest, excludedExtension?:['spaces']) {
     return this.createMaintenanceWindowClient(request, false, excludedExtension);
   }
 }
