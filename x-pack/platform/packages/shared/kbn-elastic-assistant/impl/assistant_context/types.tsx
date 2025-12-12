@@ -84,6 +84,8 @@ export interface AssistantAvailability {
   hasManageGlobalKnowledgeBase: boolean;
   // When true, user has privilege to access Agent Builder feature
   hasAgentBuilderPrivilege?: boolean;
+  // When true, use has privilege to manage Agent Builder feature
+  hasAgentBuilderManagePrivilege?: boolean;
   // When true, user has  to access Agent Builder feature
   isAiAgentsEnabled?: boolean;
 }

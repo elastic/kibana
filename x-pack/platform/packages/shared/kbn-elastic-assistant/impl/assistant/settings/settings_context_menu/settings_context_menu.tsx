@@ -177,7 +177,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
                   color="accent"
                   size="s"
                   fullWidth
-                  isDisabled={!assistantAvailability.hasAgentBuilderPrivilege}
+                  isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
                   data-test-subj="try-ai-agent"
                   css={css`
                     font-weight: 500;
@@ -196,14 +196,14 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
         assistantAvailability.isAiAgentsEnabled,
-        assistantAvailability.hasAgentBuilderPrivilege,
+        assistantAvailability.hasAgentBuilderManagePrivilege,
         handleOpenAIAgentModal,
       ]
     );
     const isAgentUpgradeDisabled = useMemo(() => {
       return (
         isDisabled ||
-        !assistantAvailability.hasAgentBuilderPrivilege ||
+        !assistantAvailability.hasAgentBuilderManagePrivilege ||
         !assistantAvailability.isAiAgentsEnabled
       );
     }, [assistantAvailability, isDisabled]);

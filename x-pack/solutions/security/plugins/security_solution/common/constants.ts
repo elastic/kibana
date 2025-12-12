@@ -580,6 +580,7 @@ export const PROMOTION_RULE_TAGS = [
  */
 export const ESSENTIAL_ALERT_FIELDS: string[] = [
   '_id',
+  '_index',
   '@timestamp',
   'message',
 
