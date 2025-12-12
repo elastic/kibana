@@ -8,14 +8,12 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, act } from '@testing-library/react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { IndexTemplate } from '../../../../types';
 import { ConfirmTemplateDetailsSection } from './confirm_template_details_section';
 import type { IlmPolicyFetcher } from '../../../../utils';
 
-const createMockTemplate = (
-  overrides: Partial<TemplateDeserialized> = {}
-): TemplateDeserialized => ({
+const createMockTemplate = (overrides: Partial<IndexTemplate> = {}): IndexTemplate => ({
   name: 'test-template',
   indexPatterns: ['test-*'],
   allowAutoCreate: 'NO_OVERWRITE',
@@ -33,11 +31,7 @@ const createMockIlmPolicy = (phases: PolicyFromES['policy']['phases'] = {}): Pol
   },
 });
 
-const renderComponent = (
-  template: TemplateDeserialized,
-  getIlmPolicy?: IlmPolicyFetcher,
-  props = {}
-) => {
+const renderComponent = (template: IndexTemplate, getIlmPolicy?: IlmPolicyFetcher, props = {}) => {
   return render(
     <IntlProvider>
       <ConfirmTemplateDetailsSection template={template} getIlmPolicy={getIlmPolicy} {...props} />

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { IndexTemplate } from '../../../../types';
 
 import type { IlmPolicyFetcher, ValidationErrorType } from '../../../../utils';
 
@@ -18,7 +18,7 @@ export interface NameAndConfirmBaseProps {
 }
 
 export interface NameAndConfirmStepProps extends NameAndConfirmBaseProps {
-  template: TemplateDeserialized;
+  template: IndexTemplate;
   getIlmPolicy?: IlmPolicyFetcher;
 }
 

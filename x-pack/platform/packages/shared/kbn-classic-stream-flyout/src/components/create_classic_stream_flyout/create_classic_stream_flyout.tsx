@@ -23,8 +23,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { css } from '@emotion/react';
+import type { IndexTemplate } from '../../types';
 import { SelectTemplateStep, NameAndConfirmStep } from './steps';
 import {
   type StreamNameValidator,
@@ -64,7 +64,7 @@ interface CreateClassicStreamFlyoutProps {
   /** Callback to navigate to create template flow */
   onCreateTemplate: () => void;
   /** Available index templates to select from */
-  templates: TemplateDeserialized[];
+  templates: IndexTemplate[];
   /** Whether there was an error loading templates */
   hasErrorLoadingTemplates?: boolean;
   /** Callback to retry loading templates */

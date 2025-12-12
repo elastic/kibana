@@ -8,10 +8,10 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { IndexTemplate } from '../../types';
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 
-const MOCK_TEMPLATES: TemplateDeserialized[] = [
+const MOCK_TEMPLATES: IndexTemplate[] = [
   {
     name: 'template-1',
     ilmPolicy: { name: '30d' },

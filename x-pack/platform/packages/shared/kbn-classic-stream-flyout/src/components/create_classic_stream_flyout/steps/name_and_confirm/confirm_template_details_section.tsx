@@ -24,8 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { IndexTemplate } from '../../../../types';
 import {
   formatDataRetention,
   indexModeLabels,
@@ -114,7 +114,7 @@ const RetentionDetails = ({
 );
 
 interface ConfirmTemplateDetailsSectionProps {
-  template: TemplateDeserialized;
+  template: IndexTemplate;
   getIlmPolicy?: IlmPolicyFetcher;
 }
 

@@ -20,13 +20,13 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { IndexTemplate } from '../../../../types';
 import { formatDataRetention } from '../../../../utils';
 import { ErrorState } from './error_state';
 import { EmptyState } from './empty_state';
 
 interface SelectTemplateStepProps {
-  templates: TemplateDeserialized[];
+  templates: IndexTemplate[];
   selectedTemplate: string | null;
   onTemplateSelect: (templateName: string | null) => void;
   onCreateTemplate: () => void;
@@ -78,12 +78,12 @@ export const SelectTemplateStep = ({
               {dataRetention}
             </EuiText>
           ) : undefined,
-        } as EuiSelectableOption<{ template: TemplateDeserialized }>;
+        } as EuiSelectableOption<{ template: IndexTemplate }>;
       }),
     [templates, selectedTemplate]
   );
 
-  const renderOption = (option: EuiSelectableOption<{ template: TemplateDeserialized }>) => {
+  const renderOption = (option: EuiSelectableOption<{ template: IndexTemplate }>) => {
     const templateData = option?.template;
     const isManaged = templateData?._kbnMeta?.type === 'managed';
 
