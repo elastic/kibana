@@ -52,6 +52,9 @@ describe('ProductDocBasePlugin', () => {
       getStatus: jest.fn().mockResolvedValue({}),
       getStatuses: jest.fn().mockResolvedValue({}),
       updateAll: jest.fn().mockResolvedValue({}),
+      installSecurityLabs: jest.fn().mockResolvedValue({}),
+      uninstallSecurityLabs: jest.fn().mockResolvedValue({}),
+      getSecurityLabsStatus: jest.fn().mockResolvedValue({}),
     });
   });
 
@@ -95,6 +98,9 @@ describe('ProductDocBasePlugin', () => {
           uninstall: expect.any(Function),
           update: expect.any(Function),
           updateAll: expect.any(Function),
+          installSecurityLabs: expect.any(Function),
+          uninstallSecurityLabs: expect.any(Function),
+          getSecurityLabsStatus: expect.any(Function),
         },
         search: expect.any(Function),
       });

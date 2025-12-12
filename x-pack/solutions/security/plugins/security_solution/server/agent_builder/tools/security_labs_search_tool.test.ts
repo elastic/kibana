@@ -7,7 +7,6 @@
 
 import { ToolResultType, type ErrorResult } from '@kbn/onechat-common';
 import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
-import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import {
   createToolAvailabilityContext,
@@ -79,7 +78,7 @@ describe('securityLabsSearchTool', () => {
             {
               _id: 'test-id',
               _index: 'test-index',
-              _source: { kb_resource: SECURITY_LABS_RESOURCE },
+              _source: {},
             },
           ],
           total: { value: 1, relation: 'eq' },
@@ -93,18 +92,8 @@ describe('securityLabsSearchTool', () => {
       expect(result.status).toBe('available');
       expect(mockEsClient.asInternalUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
-          query: expect.objectContaining({
-            bool: {
-              filter: [
-                {
-                  term: {
-                    kb_resource: SECURITY_LABS_RESOURCE,
-                  },
-                },
-              ],
-            },
-          }),
+          index: '.kibana_ai_security_labs',
+          query: { match_all: {} },
         })
       );
     });
@@ -125,7 +114,7 @@ describe('securityLabsSearchTool', () => {
       );
 
       expect(result.status).toBe('unavailable');
-      expect(result.reason).toBe('Security Labs content not found in knowledge base');
+      expect(result.reason).toBe('Security Labs content not installed');
     });
 
     it('returns unavailable when availability check throws error', async () => {
@@ -136,7 +125,7 @@ describe('securityLabsSearchTool', () => {
       );
 
       expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('Failed to check Security Labs knowledge base availability');
+      expect(result.reason).toContain('Failed to check Security Labs content availability');
     });
   });
 
@@ -164,7 +153,6 @@ describe('securityLabsSearchTool', () => {
       expect(runSearchTool).toHaveBeenCalled();
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
       expect(callArgs.nlQuery).toContain('test query');
-      expect(callArgs.nlQuery).toContain(`kb_resource: ${SECURITY_LABS_RESOURCE}`);
       expect(callArgs.nlQuery).toContain('Limit to 3 results');
     });
 
@@ -190,9 +178,9 @@ describe('securityLabsSearchTool', () => {
 
       expect(runSearchTool).toHaveBeenCalledWith({
         nlQuery: expect.stringContaining('malware analysis'),
-        index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+        index: '.kibana_ai_security_labs',
         model: { model: 'test-model' },
-        esClient: mockEsClient.asCurrentUser,
+        esClient: mockEsClient.asInternalUser,
         logger: mockLogger,
         events: mockEvents,
       });

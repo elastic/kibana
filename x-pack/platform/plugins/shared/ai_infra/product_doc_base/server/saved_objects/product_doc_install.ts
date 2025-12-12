@@ -5,11 +5,28 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { ProductName, ResourceType } from '@kbn/product-doc-common';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { productDocInstallStatusSavedObjectTypeName } from '../../common/consts';
 import type { InstallationStatus } from '../../common/install_status';
+
+const productDocInstallStatusAttributesSchemaV1 = schema.object({
+  product_name: schema.string(),
+  product_version: schema.string(),
+  installation_status: schema.string(),
+  last_installation_date: schema.maybe(schema.number()),
+  last_installation_failure_reason: schema.maybe(schema.string()),
+  index_name: schema.maybe(schema.string()),
+  inference_id: schema.maybe(schema.string()),
+});
+
+const productDocInstallStatusAttributesSchemaV2 = productDocInstallStatusAttributesSchemaV1.extends(
+  {
+    resource_type: schema.maybe(schema.string()),
+  }
+);
 
 /**
  * Interface describing the raw attributes of the product doc install SO type.
@@ -51,6 +68,13 @@ const modelVersion2: SavedObjectsModelVersion = {
       },
     },
   ],
+  schemas: {
+    forwardCompatibility: productDocInstallStatusAttributesSchemaV2.extends(
+      {},
+      { unknowns: 'ignore' }
+    ),
+    create: productDocInstallStatusAttributesSchemaV2,
+  },
 };
 
 export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDocInstallStatusAttributes> =
