@@ -4554,6 +4554,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-agent-confirmation-modal@link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -4575,6 +4579,10 @@
   uid ""
 
 "@kbn/ai-assistant@link:x-pack/platform/packages/shared/kbn-ai-assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-insights@link:x-pack/platform/packages/shared/ai-insights":
   version "0.0.0"
   uid ""
 
@@ -5207,10 +5215,6 @@
   uid ""
 
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-navigation-tour@link:src/core/packages/chrome/navigation-tour":
   version "0.0.0"
   uid ""
 
@@ -7590,10 +7594,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
-  version "0.0.0"
-  uid ""
-
 "@kbn/observability-ai-assistant-app-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_app":
   version "0.0.0"
   uid ""
@@ -7735,6 +7735,10 @@
   uid ""
 
 "@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
+  version "0.0.0"
+  uid ""
+
+"@kbn/otel-demo@link:src/platform/packages/shared/kbn-otel-demo":
   version "0.0.0"
   uid ""
 
