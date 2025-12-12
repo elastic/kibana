@@ -29,7 +29,7 @@ export const registerLookupIndexRoutes = (
           indexName: schema.string(),
         }),
         body: schema.object({
-          operations: schema.arrayOf(schema.any(), { maxSize: 100000 }),
+          operations: schema.arrayOf(schema.any(), { maxSize: 10000 }),
         }),
       },
       security: {
