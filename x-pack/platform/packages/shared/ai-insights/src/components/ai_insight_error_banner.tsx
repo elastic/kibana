@@ -28,7 +28,7 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
       <p>
         {' '}
         {i18n.translate('observabilityAgentBuilder.aiInsight.emptyResponseMessage', {
-          defaultMessage: 'The AI insight could not be generated: {error}`',
+          defaultMessage: 'The AI insight could not be generated: {error}',
           values: { error },
         })}
       </p>
