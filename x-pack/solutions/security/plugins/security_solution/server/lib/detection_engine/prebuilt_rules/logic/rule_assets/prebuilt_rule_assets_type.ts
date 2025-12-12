@@ -102,8 +102,7 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
         },
         {
           type: 'data_backfill',
-          backfillFn: (prevAttributes, context) => {
-            // NOTE: Adds a new field field to the doc, which isn't ideal
+          backfillFn: (prevAttributes) => {
             const mappedSeverity = getModifiedValue('severity', prevAttributes.attributes.severity);
             return {
               attributes: {
