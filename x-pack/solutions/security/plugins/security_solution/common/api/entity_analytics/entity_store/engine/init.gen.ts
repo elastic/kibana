@@ -15,8 +15,18 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { EntityType, IndexPattern, Interval, EngineDescriptor } from '../common.gen';
+
+export type InitEntityEngineRequestQuery = z.infer<typeof InitEntityEngineRequestQuery>;
+export const InitEntityEngineRequestQuery = z.object({
+  /**
+   * init esql poc instead of regular entity store.
+   */
+  esqlPoc: BooleanFromString.optional(),
+});
+export type InitEntityEngineRequestQueryInput = z.input<typeof InitEntityEngineRequestQuery>;
 
 export type InitEntityEngineRequestParams = z.infer<typeof InitEntityEngineRequestParams>;
 export const InitEntityEngineRequestParams = z.object({

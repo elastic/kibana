@@ -63,6 +63,7 @@ export const EntityStoreUtils = (
       {
         params: { entityType },
         body: {},
+        query: {},
       },
       namespace
     );

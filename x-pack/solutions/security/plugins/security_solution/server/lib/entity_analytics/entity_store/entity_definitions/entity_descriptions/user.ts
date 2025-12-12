@@ -6,10 +6,10 @@
  */
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
-import { collectValues as collect } from './field_utils';
+import { collectValues as collect, newestValue } from './field_utils';
 
 export const USER_DEFINITION_VERSION = '1.0.0';
-export const USER_IDENTITY_FIELD = 'user.name';
+export const USER_IDENTITY_FIELD = 'user.entity.id';
 
 const USER_ENTITY_TYPE = 'Identity';
 
@@ -38,6 +38,7 @@ export const userEntityEngineDescription: EntityDescription = {
     },
   ],
   fields: [
+    newestValue({ source: 'user.name' }),
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),
     collect({
@@ -82,5 +83,12 @@ export const userEntityEngineDescription: EntityDescription = {
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
+
+    // fields to make the mapping of host fields available
+    newestValue({ source: 'host.id' }),
+    newestValue({ source: 'host.name' }),
+    newestValue({ source: 'host.domain' }),
+    newestValue({ source: 'host.hostname' }),
+    newestValue({ source: 'host.mac' }),
   ],
 };

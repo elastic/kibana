@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newestValue } from './field_utils';
+import { collectValues, newestValue } from './field_utils';
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
@@ -51,7 +51,8 @@ export const genericEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'host.pid_ns_ino' }),
     newestValue({ source: 'host.type' }),
     newestValue({ source: 'host.uptime' }),
-    newestValue({
+    // For some reason IP is not working with latest
+    collectValues({
       source: 'host.ip',
       mapping: {
         type: 'ip',

@@ -81,6 +81,12 @@ paths:
           schema:
             type: boolean
           description: Control flag to also delete the entity data.
+        - name: esqlPoc
+          in: query
+          required: false          
+          description: delete esql poc instead of regular entity store.
+          schema:
+            type: boolean
       responses:
         '200':
           description: Successful response

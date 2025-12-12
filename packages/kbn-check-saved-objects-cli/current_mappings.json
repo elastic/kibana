@@ -1264,6 +1264,22 @@
       }
     }
   },
+  "entity-store-esql-execution-time": {
+    "dynamic": false,
+    "properties": {
+      "config": {
+        "properties": {
+          "maxPageSearchSize": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "lastExecutionTimeISO": {
+        "type": "date"
+      }
+    }
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {
