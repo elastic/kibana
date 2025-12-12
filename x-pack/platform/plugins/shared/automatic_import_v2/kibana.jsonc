@@ -23,6 +23,9 @@
       "security",
       "features",
       "taskManager"
+    ],
+    "requiredBundles": [
+      "esUiShared"
     ]
   }
 }
