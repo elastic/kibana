@@ -12,8 +12,7 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { ToolResponseFlyout } from './tool_response_flyout';
 import { useToolResultsFlyout } from '../../../../../hooks/thinking/use_tool_results_flyout';
 import { ThinkingItemLayout } from './thinking_item_layout';
@@ -54,12 +53,12 @@ const disabledToolResultIconTypes = [ToolResultType.error, ToolResultType.query]
 
 const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   if (isLastItem && isLoading) {
-    return <EuiLoadingElastic size="m" aria-label={labels.loading} />;
+    return <EuiIcon type="doubleArrowRight" color="text" />;
   }
   return <EuiIcon type="check" color="success" />;
 };
 
-type ItemFactory = (icon?: ReactNode) => ReactNode;
+type ItemFactory = (icon?: ReactNode, textColor?: string) => ReactNode;
 
 interface RoundStepsProps {
   steps: ConversationRoundStep[];
@@ -77,6 +76,8 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
     closeFlyout,
   } = useToolResultsFlyout();
 
+  const { euiTheme } = useEuiTheme();
+
   const renderedSteps = useMemo(() => {
     const itemFactories: { key: string; factory: ItemFactory }[] = [];
 
@@ -85,8 +86,13 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
       if (isToolCallStep(step)) {
         itemFactories.push({
           key: `step-${stepIndex}-tool-call`,
-          factory: (icon) => (
-            <ToolCallDisplay key={`step-${stepIndex}-tool-call`} step={step} icon={icon} />
+          factory: (icon, textColor) => (
+            <ToolCallDisplay
+              key={`step-${stepIndex}-tool-call`}
+              step={step}
+              icon={icon}
+              textColor={textColor}
+            />
           ),
         });
 
@@ -94,11 +100,12 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
         step.progression?.forEach((progress, progressIndex) => {
           itemFactories.push({
             key: `step-${stepIndex}-${step.tool_id}-progress-${progressIndex}`,
-            factory: (icon) => (
+            factory: (icon, textColor) => (
               <ToolProgressDisplay
                 key={`step-${stepIndex}-${step.tool_id}-progress-${progressIndex}`}
                 progress={progress}
                 icon={icon}
+                textColor={textColor}
               />
             ),
           });
@@ -110,12 +117,13 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
           .forEach((result: ToolResult, resultIndex) => {
             itemFactories.push({
               key: `step-${stepIndex}-${step.tool_id}-result-${resultIndex}`,
-              factory: (icon) => {
+              factory: (icon, textColor) => {
                 const shouldDisableIcon = disabledToolResultIconTypes.includes(result.type);
                 return (
                   <ThinkingItemLayout
                     key={`step-${stepIndex}-${step.tool_id}-result-${resultIndex}`}
                     icon={shouldDisableIcon ? undefined : icon}
+                    textColor={textColor}
                   >
                     <ToolResultDisplay toolResult={result} />
                   </ThinkingItemLayout>
@@ -131,7 +139,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
         if (flyoutResultItems.length > 0) {
           itemFactories.push({
             key: `step-${stepIndex}-${step.tool_id}-result-flyout`,
-            factory: (icon) => (
+            factory: (icon, textColor) => (
               <FlyoutResultItem
                 key={`step-${stepIndex}-${step.tool_id}-result-flyout`}
                 step={step}
@@ -139,6 +147,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
                 flyoutResultItems={flyoutResultItems}
                 onOpenFlyout={openFlyout}
                 icon={icon}
+                textColor={textColor}
               />
             ),
           });
@@ -146,8 +155,12 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
       } else if (isReasoningStep(step) && !step.transient) {
         itemFactories.push({
           key: `step-reasoning-${stepIndex}`,
-          factory: (icon) => (
-            <ThinkingItemLayout key={`step-reasoning-${stepIndex}`} icon={icon}>
+          factory: (icon, textColor) => (
+            <ThinkingItemLayout
+              key={`step-reasoning-${stepIndex}`}
+              icon={icon}
+              textColor={textColor}
+            >
               <div role="status" aria-live="polite" aria-label={labels.agentReasoning}>
                 {step.reasoning}
               </div>
@@ -164,10 +177,16 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
     return itemFactories.map((itemFactory, flatIndex) => {
       const isLastItem = flatIndex === totalItems - 1;
       const itemIcon = getItemIcon(isLastItem, isLoading);
-
-      return itemFactory.factory(itemIcon);
+      const getItemTextColor = () => {
+        if (isLastItem && isLoading) {
+          return euiTheme.colors.textParagraph;
+        }
+        return euiTheme.colors.textSubdued;
+      };
+      const textColor = getItemTextColor();
+      return itemFactory.factory(itemIcon, textColor);
     });
-  }, [steps, isLoading, openFlyout]);
+  }, [steps, openFlyout, isLoading, euiTheme.colors.textSubdued, euiTheme.colors.textParagraph]);
 
   return (
     <>
