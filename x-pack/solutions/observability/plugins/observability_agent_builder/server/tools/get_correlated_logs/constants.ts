@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+
 // Correlation identifier fields in priority order
 export const DEFAULT_CORRELATION_IDENTIFIER_FIELDS = [
   'trace.id',
@@ -40,7 +42,7 @@ const ERROR_SEVERITY_LEVELS = [
   'WARNING',
 ].flatMap((level) => [level.toUpperCase(), level.toLowerCase()]);
 
-export const DEFAULT_ERROR_SEVERITY_FILTER = {
+export const DEFAULT_ERROR_SEVERITY_FILTER: QueryDslQueryContainer = {
   bool: {
     minimum_should_match: 1,
     should: [
@@ -70,7 +72,7 @@ export const DEFAULT_ERROR_SEVERITY_FILTER = {
   },
 };
 
-export const DEFAULT_LOG_FIELDS = [
+export const DEFAULT_LOG_SOURCE_FIELDS = [
   '@timestamp',
   'message',
   // Correlation fields

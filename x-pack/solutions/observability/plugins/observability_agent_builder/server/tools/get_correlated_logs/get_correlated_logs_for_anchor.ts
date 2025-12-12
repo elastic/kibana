@@ -9,32 +9,32 @@ import moment from 'moment';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter } from '../../utils/dsl_filters';
-import type { ErrorLogDoc, AnchorLog } from './types';
+import type { AnchorLog } from './types';
 
 export async function getCorrelatedLogsForAnchor({
   esClient,
-  errorAnchor,
+  anchorLog,
   logsIndices,
   logger,
-  fields,
+  logSourceFields,
 }: {
   esClient: IScopedClusterClient;
-  errorAnchor: AnchorLog;
+  anchorLog: AnchorLog;
   logsIndices: string[];
   logger: Logger;
-  fields: string[];
+  logSourceFields: string[];
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
-  const { correlation, '@timestamp': timestamp } = errorAnchor;
+  const { correlation, '@timestamp': timestamp } = anchorLog;
 
-  const start = moment(timestamp).subtract(3, 'minute').valueOf();
-  const end = moment(timestamp).add(1, 'minute').valueOf();
+  const start = moment(timestamp).subtract(1, 'hour').valueOf();
+  const end = moment(timestamp).add(1, 'hour').valueOf();
   logger.debug(
     `Fetching correlated logs using ${correlation.field}=${correlation.value} between ${start} - ${end}`
   );
 
-  const res = await search<ErrorLogDoc, any>({
-    _source: fields,
+  const res = await search({
+    _source: logSourceFields,
     track_total_hits: false,
     index: logsIndices,
     size: 100,

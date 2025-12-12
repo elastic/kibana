@@ -11,9 +11,7 @@ POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
-    "termsFilter": {
-      "service.name": "payment-service"
-    }
+    "kqlQuery": "service.name: \"payment-service\""
   }
 }
 ```
@@ -40,7 +38,8 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-15m",
     "end": "now",
-    "fields": ["@timestamp", "message", "log.level", "service.name"]
+    "logSourceFields": ["@timestamp", "message", "log.level", "service.name"],
+    "maxResults": 20
   }
 }
 ```
@@ -53,6 +52,19 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
     "correlationFields": ["my_custom_correlation_identifier"]
+  }
+}
+```
+
+### Find correlated logs for non-error events (e.g. slow transactions)
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_correlated_logs",
+  "tool_params": {
+    "kqlQuery": "service.name: \"payment-service\"",
+    "anchorFilter": "event.duration > 1000000000"
   }
 }
 ```

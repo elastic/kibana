@@ -20,7 +20,7 @@ import { parseDatemath } from '../../utils/time';
 import {
   DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
   DEFAULT_TIME_RANGE,
-  DEFAULT_LOG_FIELDS,
+  DEFAULT_LOG_SOURCE_FIELDS,
 } from './constants';
 import { fetchAnchorLogs } from './fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
@@ -34,13 +34,19 @@ const getCorrelatedLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). This takes precedence over time range and other filters for finding the anchor log.'
+      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, "start", "end", "kqlQuery", and "anchorFilter" are ignored.'
     ),
-  termsFilter: z
-    .record(z.string(), z.string())
+  kqlQuery: z
+    .string()
     .optional()
     .describe(
-      'Optional field filters to narrow down results. Each key-value pair filters logs where the field exactly matches the value. Example: { "service.name": "payment", "host.name": "web-server-01" }. Multiple filters are combined with AND logic. Ignored if logId is provided.'
+      'Optional KQL query to filter logs. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
+    ),
+  anchorFilter: z
+    .string()
+    .optional()
+    .describe(
+      'Optional KQL query to define what constitutes an "anchor" log. Defaults to matching error logs. Use this to find non-error events (e.g. "event.duration > 1000000") or specific errors. Ignored if logId is provided.'
     ),
   // query: z
   //   .record(z.string(), z.unknown())
@@ -54,11 +60,17 @@ const getCorrelatedLogsSchema = z.object({
     .describe(
       'Optional list of field names to use for correlating logs. Use this when the user mentions a specific identifier (e.g., "group by session_id"). Overrides the default list of standard trace/request IDs. The first field in this list found with a value in an error log will be used to fetch the surrounding context.'
     ),
-  fields: z
+  logSourceFields: z
     .array(z.string())
     .optional()
     .describe(
       'Optional list of fields to return for each log entry. If not provided, a default set of common Observability fields is returned.'
+    ),
+  maxResults: z
+    .number()
+    .optional()
+    .describe(
+      'Optional maximum number of log groups to return. Defaults to 10. Use this to analyze a larger batch of logs.'
     ),
 });
 
@@ -75,18 +87,23 @@ export function createGetCorrelatedLogsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getCorrelatedLogsSchema> = {
     id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves logs and their surrounding context based on shared correlation identifiers (e.g. trace.id). Can start from a specific log ID or find error logs within a time range to use as anchors. Returns chronologically sorted groups of logs, providing visibility into the sequence of events leading up to and following the anchor log.`,
+    description: `Retrieves logs and their surrounding context based on shared correlation identifiers (e.g. trace.id). Can start from a specific log ID or find "anchor" logs (default: errors) within a time range. Returns chronologically sorted groups of logs.
+    
+    By default, this tool returns log sequences that contain at least one ERROR log. To find sequences based on other events (e.g. slow requests), you must provide an 'anchorFilter'.
+    If 'logId' is provided, 'start', 'end', 'kqlQuery', and 'anchorFilter' are ignored.`,
     schema: getCorrelatedLogsSchema,
     tags: ['observability', 'logs'],
     handler: async (
       {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
-        termsFilter,
+        kqlQuery,
+        anchorFilter,
         index,
         correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
         logId,
-        fields = DEFAULT_LOG_FIELDS,
+        logSourceFields = DEFAULT_LOG_SOURCE_FIELDS,
+        maxResults = 10,
       },
       { esClient }
     ) => {
@@ -95,32 +112,39 @@ export function createGetCorrelatedLogsTool({
         const startTime = parseDatemath(start);
         const endTime = parseDatemath(end, { roundUp: true });
 
-        const errorAnchors = await fetchAnchorLogs({
+        const anchorLogs = await fetchAnchorLogs({
           esClient,
           logsIndices,
           startTime,
           endTime,
-          termsFilter,
+          kqlQuery,
+          anchorFilter,
           correlationFields,
           logger,
           logId,
+          maxResults,
         });
 
         // For each anchor log, find the correlated logs
-        const correlatedLogs = await Promise.all(
-          errorAnchors.map(async (errorAnchor) => {
-            return getCorrelatedLogsForAnchor({
+        const groups = await Promise.all(
+          anchorLogs.map(async (anchorLog) => {
+            const logs = await getCorrelatedLogsForAnchor({
               esClient,
-              errorAnchor,
+              anchorLog,
               logsIndices,
               logger,
-              fields,
+              logSourceFields,
             });
+
+            return {
+              correlation: anchorLog.correlation,
+              logs,
+            };
           })
         );
 
         return {
-          results: [{ type: ToolResultType.other, data: { correlatedLogs } }],
+          results: [{ type: ToolResultType.other, data: { groups } }],
         };
       } catch (error) {
         logger.error(`Error fetching errors and surrounding logs: ${error.message}`);

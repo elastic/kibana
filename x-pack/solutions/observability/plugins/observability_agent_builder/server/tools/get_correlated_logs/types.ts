@@ -7,10 +7,15 @@
 
 import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
-export interface GetCorrelatedLogsToolResult {
+export interface CorrelatedLogGroup<T = Record<string, unknown>> {
+  correlation: AnchorLog['correlation'];
+  logs: T[];
+}
+
+export interface GetCorrelatedLogsToolResult<T = Record<string, unknown>> {
   type: ToolResultType.other;
   data: {
-    correlatedLogs: ErrorLogDoc[][];
+    groups: CorrelatedLogGroup<T>[];
   };
 }
 
@@ -20,9 +25,4 @@ export interface AnchorLog {
     field: string;
     value: string;
   };
-}
-
-export interface ErrorLogDoc {
-  '@timestamp': string;
-  message: string;
 }

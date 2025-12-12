@@ -13,15 +13,13 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 export async function createSyntheticLogsWithErrorsAndCorrelationIds({
   getService,
   logs,
-  timerangeStart,
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
   logs: Array<{ level: string; message: string; [key: string]: unknown }>;
-  timerangeStart: string;
 }): Promise<{ logsSynthtraceEsClient: LogsSynthtraceEsClient }> {
   const synthtrace = getService('synthtrace');
   const logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
-  const range = timerange(timerangeStart, 'now');
+  const range = timerange('now-5m', 'now');
 
   const synthLogs = range
     .interval('5m')
@@ -46,6 +44,7 @@ export async function createSyntheticLogsWithErrorsAndCorrelationIds({
   return { logsSynthtraceEsClient };
 }
 
+// generate some background noise logs without correlation ids
 function getLogsWithoutCorrelationId({ range }: { range: Timerange }) {
   const logEvents = [
     { level: 'info', message: 'Background task running' },

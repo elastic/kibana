@@ -9,9 +9,8 @@ import { compact, first, get, uniqBy } from 'lodash';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import { getTypedSearch } from '../../utils/get_typed_search';
-import { timeRangeFilter } from '../../utils/dsl_filters';
-import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
-import type { ErrorLogDoc, AnchorLog } from './types';
+import { kqlFilter, timeRangeFilter } from '../../utils/dsl_filters';
+import type { AnchorLog } from './types';
 import { DEFAULT_ERROR_SEVERITY_FILTER } from './constants';
 
 export async function fetchAnchorLogs({
@@ -19,19 +18,23 @@ export async function fetchAnchorLogs({
   logsIndices,
   startTime,
   endTime,
-  termsFilter,
+  kqlQuery,
+  anchorFilter,
   correlationFields,
   logger,
   logId,
+  maxResults,
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
   startTime: number;
   endTime: number;
-  termsFilter: Record<string, string> | undefined;
+  kqlQuery: string | undefined;
+  anchorFilter: string | undefined;
   correlationFields: string[];
   logger: Logger;
   logId?: string;
+  maxResults: number;
 }): Promise<AnchorLog[]> {
   if (logId) {
     const anchor = await fetchAnchorLog({
@@ -47,8 +50,8 @@ export async function fetchAnchorLogs({
   const search = getTypedSearch(esClient.asCurrentUser);
   const correlationIdentifierFields = correlationFields;
 
-  const anchorLogsResponse = await search<ErrorLogDoc, any>({
-    size: 50,
+  const anchorLogsResponse = await search({
+    size: Math.max(50, maxResults * 5), // Fetch more than needed to account for duplicate anchor logs for the same correlation id
     track_total_hits: false,
     _source: false,
     fields: ['@timestamp', ...correlationIdentifierFields],
@@ -58,7 +61,7 @@ export async function fetchAnchorLogs({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...getShouldMatchOrNotExistFilter(termsFilter),
+          ...kqlFilter(kqlQuery),
 
           // must have at least one correlation identifier
           {
@@ -68,14 +71,15 @@ export async function fetchAnchorLogs({
             },
           },
 
-          // must be an error
-          DEFAULT_ERROR_SEVERITY_FILTER, // this could be exposed as a tool parameter in the future
+          // must be an error (or match the provided anchor filter)
+          ...(anchorFilter ? kqlFilter(anchorFilter) : [DEFAULT_ERROR_SEVERITY_FILTER]),
         ],
       },
     },
   });
 
-  const errorAnchors: AnchorLog[] = uniqBy(
+  // Limit to a single anchor log per correlation identifier
+  const anchorLogs: AnchorLog[] = uniqBy(
     compact(
       anchorLogsResponse.hits.hits.map((hit) =>
         findCorrelationIdentifier(hit, correlationIdentifierFields)
@@ -85,10 +89,10 @@ export async function fetchAnchorLogs({
   );
 
   logger.debug(
-    `Found ${anchorLogsResponse.hits.hits.length} anchor logs in ${errorAnchors.length} unique sequences`
+    `Found ${anchorLogsResponse.hits.hits.length} anchor logs in ${anchorLogs.length} unique sequences`
   );
 
-  return errorAnchors.slice(0, 10); // limit to 10 anchors
+  return anchorLogs.slice(0, maxResults);
 }
 
 async function fetchAnchorLog({
@@ -105,7 +109,7 @@ async function fetchAnchorLog({
   logger: Logger;
 }): Promise<AnchorLog | undefined> {
   const search = getTypedSearch(esClient.asCurrentUser);
-  const response = await search<ErrorLogDoc, any>({
+  const response = await search({
     size: 1,
     track_total_hits: false,
     _source: false,
@@ -125,7 +129,7 @@ async function fetchAnchorLog({
 }
 
 export function findCorrelationIdentifier(
-  hit: SearchHit<ErrorLogDoc | undefined, any, any>,
+  hit: SearchHit,
   correlationFields: string[]
 ): AnchorLog | undefined {
   if (!hit) return undefined;
