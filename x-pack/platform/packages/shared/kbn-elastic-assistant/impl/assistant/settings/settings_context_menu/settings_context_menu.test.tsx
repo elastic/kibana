@@ -72,7 +72,6 @@ describe('AssistantSettingsContextMenu', () => {
     expect(screen.getByTestId('anonymization')).toBeInTheDocument();
     expect(screen.getByTestId('ai-assistant-settings')).toBeInTheDocument();
     expect(screen.getByTestId('knowledge-base')).toBeInTheDocument();
-    expect(screen.getByTestId('try-ai-agent')).toBeInTheDocument();
   });
 
   it('Navigates to AI settings for non-AI4SOC', async () => {
@@ -284,12 +283,7 @@ describe('AssistantSettingsContextMenu', () => {
   describe('hasAgentBuilderPrivilege', () => {
     it('enables try-ai-agent button when hasAgentBuilderPrivilege is true', async () => {
       render(
-        <TestProviders
-          assistantAvailability={{
-            ...mockAssistantAvailability,
-            hasAgentBuilderPrivilege: true,
-          }}
-        >
+        <TestProviders>
           <AssistantSettingsContextMenu {...props} />
         </TestProviders>
       );
@@ -314,6 +308,40 @@ describe('AssistantSettingsContextMenu', () => {
       await userEvent.click(screen.getByTestId('chat-context-menu'));
       const tryAiAgentButton = screen.getByTestId('try-ai-agent');
       expect(tryAiAgentButton).toBeDisabled();
+    });
+  });
+
+  describe('isAiAgentsEnabled', () => {
+    it('does not render try-ai-agent button when isAiAgentsEnabled is false', async () => {
+      render(
+        <TestProviders
+          assistantAvailability={{
+            ...mockAssistantAvailability,
+            isAiAgentsEnabled: false,
+          }}
+        >
+          <AssistantSettingsContextMenu {...props} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('chat-context-menu'));
+      expect(screen.queryByTestId('try-ai-agent')).not.toBeInTheDocument();
+    });
+
+    it('does not render try-ai-agent button when isAiAgentsEnabled is undefined', async () => {
+      render(
+        <TestProviders
+          assistantAvailability={{
+            ...mockAssistantAvailability,
+            isAiAgentsEnabled: undefined,
+          }}
+        >
+          <AssistantSettingsContextMenu {...props} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('chat-context-menu'));
+      expect(screen.queryByTestId('try-ai-agent')).not.toBeInTheDocument();
     });
   });
 });
