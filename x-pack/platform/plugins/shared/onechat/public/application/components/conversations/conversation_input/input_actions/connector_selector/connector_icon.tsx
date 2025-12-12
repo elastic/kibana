@@ -7,38 +7,28 @@
 
 import type { IconType } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import React, { useState } from 'react';
-import { useAssetBasePath } from '../../../../../hooks/use_asset_base_path';
+import React from 'react';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
 
-const connectorIcons: Array<{ match: string[]; icon?: IconType; src?: string }> = [
-  { match: ['gpt', 'openai'], src: 'openai.svg' },
-  { match: ['claude', 'anthropic'], src: 'anthropic.svg' },
-  { match: ['gemini'], src: 'gemini.svg' },
+const getProviderIcon = (key: ServiceProviderKeys) => SERVICE_PROVIDERS[key].icon;
+
+const connectorIcons: Array<{ match: string[]; icon: IconType }> = [
+  { match: ['gpt', 'openai'], icon: getProviderIcon(ServiceProviderKeys.openai) },
+  { match: ['claude', 'anthropic'], icon: getProviderIcon(ServiceProviderKeys.anthropic) },
+  { match: ['gemini'], icon: GeminiLogo },
   { match: ['elastic'], icon: 'logoElastic' },
 ];
 
 export const ConnectorIcon: React.FC<{ connectorName: string }> = ({ connectorName }) => {
-  const assetBasePath = useAssetBasePath();
   const normalizedName = connectorName.toLowerCase();
-  const [shouldUseFallback, setShouldUseFallback] = useState(false);
 
   const matchedIcon = connectorIcons.find((config) =>
     config.match.some((matchString) => normalizedName.includes(matchString))
   );
 
-  if (matchedIcon?.icon) {
+  if (matchedIcon) {
     return <EuiIcon type={matchedIcon.icon} />;
-  }
-
-  if (matchedIcon?.src && !shouldUseFallback) {
-    return (
-      <EuiIcon
-        type={`${assetBasePath}/${matchedIcon.src}`}
-        onError={() => {
-          setShouldUseFallback(true);
-        }}
-      />
-    );
   }
 
   // Fallback to compute icon
