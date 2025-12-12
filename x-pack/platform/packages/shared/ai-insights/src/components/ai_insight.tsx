@@ -83,7 +83,7 @@ export function AiInsight({
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={(open) => {
           setIsOpen(open);
-          if (open && onOpen && !content && !isLoading) {
+          if (open && onOpen && !error && !content && !isLoading) {
             onOpen();
           }
         }}
