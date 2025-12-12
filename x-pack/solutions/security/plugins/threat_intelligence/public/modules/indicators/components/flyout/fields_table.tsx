@@ -17,6 +17,7 @@ export interface IndicatorFieldsTableProps {
   indicator: Indicator;
   search: EuiInMemoryTableProps['search'];
   ['data-test-subj']?: string;
+  compressed?: boolean;
 }
 
 export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
