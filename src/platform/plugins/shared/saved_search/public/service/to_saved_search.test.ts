@@ -74,6 +74,7 @@ describe('toSavedSearch', () => {
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
+        "projectRouting": undefined,
         "references": Array [
           Object {
             "id": "1",
@@ -207,6 +208,7 @@ describe('toSavedSearch', () => {
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
+        "projectRouting": undefined,
         "references": Array [
           Object {
             "id": "1",

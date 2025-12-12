@@ -62,29 +62,29 @@ describe('Serialization utils', () => {
     ],
   };
 
+  const serializedByValueState: SerializedPanelState<SearchEmbeddableState> = {
+    rawState: {
+      attributes: mockedSavedSearchAttributes,
+      title: 'test panel title',
+    },
+    references: [
+      {
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        id: dataViewMock.id ?? 'test-id',
+        type: 'index-pattern',
+      },
+    ],
+  };
+
   describe('deserialize state', () => {
     test('by value', async () => {
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          attributes: mockedSavedSearchAttributes,
-          title: 'test panel title',
-        },
-        references: [
-          {
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            id: dataViewMock.id ?? 'test-id',
-            type: 'index-pattern',
-          },
-        ],
-      };
-
       const deserializedState = await deserializeState({
-        serializedState,
+        serializedState: serializedByValueState,
         discoverServices: discoverServiceMock,
       });
 
       expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toBeCalledWith(
-        serializedState.rawState,
+        serializedByValueState.rawState,
         true // should be serializable
       );
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
@@ -131,12 +131,14 @@ describe('Serialization utils', () => {
         ...mockedSavedSearchAttributes,
         managed: false,
         searchSource,
+        projectRouting: undefined,
       };
 
       const serializedState = serializeState({
         uuid,
         initialState: {
           ...mockedSavedSearchAttributes,
+          projectRouting: undefined,
           serializedSearchSource: {} as SerializedSearchSourceFields,
         },
         savedSearch,
@@ -176,6 +178,7 @@ describe('Serialization utils', () => {
         ...mockedSavedSearchAttributes,
         managed: false,
         searchSource,
+        projectRouting: undefined,
       };
 
       test('equal state', () => {

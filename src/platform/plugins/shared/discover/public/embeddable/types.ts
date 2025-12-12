@@ -10,6 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type {
   EmbeddableApiContext,
   HasEditCapabilities,
@@ -78,6 +79,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+    projectRouting?: ProjectRouting;
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &

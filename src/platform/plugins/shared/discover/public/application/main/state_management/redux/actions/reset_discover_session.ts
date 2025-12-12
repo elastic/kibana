@@ -20,6 +20,7 @@ import { setDataView } from './data_views';
 import { updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import type { DiscoverAppState } from '../types';
+import { internalStateActions } from '..';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -91,6 +92,14 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
         return tabState;
       })
     );
+
+    if (services.cps?.cpsManager && !updatedDiscoverSession) {
+      const restoredProjectRouting = discoverSession.projectRouting;
+      services.cps.cpsManager.setProjectRouting(
+        restoredProjectRouting ?? services.cps.cpsManager.getDefaultProjectRouting()
+      );
+      dispatch(internalStateActions.markNonActiveTabsForRefetch());
+    }
 
     const selectedTab = allTabs.find((tab) => tab.id === selectedTabId) ?? allTabs[0];
 

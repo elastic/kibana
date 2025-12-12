@@ -114,7 +114,8 @@ export function getDashboardApi({
   );
   const projectRoutingManager = initializeProjectRoutingManager(
     initialState,
-    settingsManager.api.projectRoutingRestore$
+    settingsManager.api.projectRoutingRestore$,
+    Boolean(incomingEmbeddables && incomingEmbeddables.length > 0)
   );
 
   const unsavedChangesManager = initializeUnsavedChangesManager({

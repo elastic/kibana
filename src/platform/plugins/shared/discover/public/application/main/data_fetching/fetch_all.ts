@@ -97,6 +97,7 @@ export function fetchAll(
         services,
         sort: sort as SortOrder[],
         inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+        projectRouting: services.cps?.cpsManager?.getProjectRouting(),
       });
     }
 
@@ -120,6 +121,7 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
+          projectRouting: services.cps?.cpsManager?.getProjectRouting(),
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
@@ -258,6 +260,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       dataView,
       services,
       sort: sort as SortOrder[],
+      projectRouting: services.cps?.cpsManager?.getProjectRouting(),
     });
 
     // Fetch more documents

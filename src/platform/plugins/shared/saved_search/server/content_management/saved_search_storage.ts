@@ -56,6 +56,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'density',
         'visContext',
         'tabs',
+        'projectRouting',
       ],
       logger,
       throwOnResultValidationError,

@@ -909,6 +909,7 @@ describe('Discover state', () => {
             services: mockServices,
           }),
         ],
+        projectRouting: savedSearchWithDefaults.projectRouting ?? undefined,
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithDefaults.id })
@@ -963,6 +964,7 @@ describe('Discover state', () => {
             services: mockServices,
           }),
         ],
+        projectRouting: savedSearchWithDefaults.projectRouting ?? undefined,
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithDefaults.id })

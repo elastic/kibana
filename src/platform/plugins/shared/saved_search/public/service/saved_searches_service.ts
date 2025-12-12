@@ -95,6 +95,7 @@ export class SavedSearchesService {
     options: SaveDiscoverSessionOptions = {}
   ) => {
     const { contentManagement, savedObjectsTaggingOss } = this.deps;
+
     return saveDiscoverSession(
       discoverSession,
       options,
