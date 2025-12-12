@@ -11216,5 +11216,80 @@ tags:
       Kibana space. Refer to the [Detections
       requirements](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html)
       for a complete list of requirements.
+
+
+      ## Security Detections API Alerting API Key Behavior
+
+
+      The following table shows how Security Solution Detections APIs map to the
+      underlying API key regeneration behavior:
+
+
+      | Security Solution API | Invalidates Old API Key | Creates New API Key |
+
+      |----------------------|------------------------|---------------------|
+
+      | Create Rule (`POST /api/detection_engine/rules`) | No | Yes |
+
+      | Update Rule (`PUT /api/detection_engine/rules`) | Yes | Yes (+
+      Conditional for enable) |
+
+      | Patch Rule (`PATCH /api/detection_engine/rules`) | Yes | Yes (+
+      Conditional for enable) |
+
+      | Delete Rule (`DELETE /api/detection_engine/rules`) | N/A (rule deleted)
+      | N/A (rule deleted) |
+
+      | Bulk Enable (`POST /api/detection_engine/rules/_bulk_action`, action:
+      enable) | No | Conditional |
+
+      | Bulk Disable (`POST /api/detection_engine/rules/_bulk_action`, action:
+      disable) | No | No |
+
+      | Bulk Delete (`POST /api/detection_engine/rules/_bulk_action`, action:
+      delete) | N/A (rule deleted) | N/A (rule deleted) |
+
+      | Bulk Duplicate (`POST /api/detection_engine/rules/_bulk_action`, action:
+      duplicate) | Yes (on update) | Yes (on create and update) |
+
+      | Bulk Edit (`POST /api/detection_engine/rules/_bulk_action`, action:
+      edit) | Conditional | Conditional |
+
+      | Bulk Export (`POST /api/detection_engine/rules/_bulk_action`, action:
+      export) | No | No |
+
+      | Bulk Run (`POST /api/detection_engine/rules/_bulk_action`, action: run)
+      | No | No |
+
+      | Import Rules - new (`POST /api/detection_engine/rules/_import`) | No |
+      Yes |
+
+      | Import Rules - overwrite (`POST /api/detection_engine/rules/_import`) |
+      Yes | Yes (+ Conditional for enable) |
+
+      | Install Prebuilt Rules (`POST
+      /api/detection_engine/rules/prepackaged/_perform`) | No | Yes |
+
+      | Upgrade Prebuilt Rules - same type (`POST
+      /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Yes | Yes |
+
+      | Upgrade Prebuilt Rules - type change (`POST
+      /api/detection_engine/prebuilt_rules/upgrade/_perform`) | N/A (deleted) |
+      Yes (new rule) |
+
+
+      ### Notes on "Conditional" API Key Behavior
+
+      - **Bulk Enable/Enable**: Creates an API key only if the rule doesn't
+      already have one. This commonly happens for rules that are exported and
+      re-imported, as rules are exported with `enabled: false` and API key
+      values are stripped.
+
+      - **Bulk Edit**: Only regenerates the API key for certain edit operations.
+      After version 9.2, editing exception list parameters will not invalidate
+      the existing API key.
+
+      - **Update/Patch**: Always invalidates the old API key and creates a new
+      one.
     name: Security Detections API
     x-displayName: Security detections
