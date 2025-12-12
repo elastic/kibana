@@ -75,13 +75,15 @@ export interface Props {
   onCategoryChange: (category: CategoryFacet) => unknown;
 }
 
+const EUI_HEADER_HEIGHT = '96px';
+
 const StickySidebar = styled(EuiFlexItem)`
   position: sticky;
-  top: var(--kbn-application--sticky-headers-offset, 96px);
-  padding-top: ${(props) => props.theme.euiTheme.size.m /* 24px */};
-  max-height: calc(100vh - 120px);
+  top: var(--kbn-application--sticky-headers-offset, ${EUI_HEADER_HEIGHT});
+  padding-top: ${(props) => props.theme.euiTheme.size.m};
+  max-height: calc(100vh - ${EUI_HEADER_HEIGHT});
   overflow: scroll;
-  padding-right: ${(props) => props.theme.euiTheme.size.l /* 32px */};
+  padding-right: ${(props) => props.theme.euiTheme.size.l};
 `;
 
 export const Sidebar: React.FC<Props> = ({

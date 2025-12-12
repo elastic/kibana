@@ -15,8 +15,6 @@ import { useStartServices } from '../../../../hooks';
 
 import { useBreadcrumbs } from '../../../../hooks';
 
-import { PackageListGrid } from '../../components/package_list_grid';
-
 import { categoryExists } from '../home';
 
 import { PackageGrid } from './components/package_grid';
@@ -141,7 +139,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     noEprCallout = <NoEprCallout statusCode={error?.statusCode} />;
   }
 
-  // Layout
   return (
     <EuiFlexGroup
       justifyContent="flexEnd"
@@ -176,26 +173,5 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-
-  return (
-    <PackageListGrid
-      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      list={filteredCards}
-      selectedCategory={selectedCategory}
-      setCategory={setCategory}
-      categories={mainCategories}
-      setUrlandReplaceHistory={setUrlandReplaceHistory}
-      setUrlandPushHistory={setUrlandPushHistory}
-      callout={noEprCallout}
-      showCardLabels={false}
-      availableSubCategories={availableSubCategories}
-      selectedSubCategory={selectedSubCategory}
-      setSelectedSubCategory={setSelectedSubCategory}
-      showMissingIntegrationMessage
-      onlyAgentlessFilter={onlyAgentlessFilter}
-    />
   );
 };
