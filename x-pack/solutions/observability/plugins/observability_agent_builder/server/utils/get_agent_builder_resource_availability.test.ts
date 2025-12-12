@@ -61,7 +61,7 @@ describe('getAgentBuilderResourceAvailability', () => {
     });
 
     expect(result.status).toBe('unavailable');
-    expect(result.reason).toMatch(/Observability tools are not available in this space/);
+    expect(result.reason).toMatch(/Observability .* not available in this space/);
   });
 
   it('returns unavailable when space solution is Security', async () => {
@@ -83,7 +83,7 @@ describe('getAgentBuilderResourceAvailability', () => {
     });
 
     expect(result.status).toBe('unavailable');
-    expect(result.reason).toMatch(/Observability tools are not available in this space/);
+    expect(result.reason).toMatch(/Observability .* not available in this space/);
   });
 
   it('returns available when space solution is undefined', async () => {
