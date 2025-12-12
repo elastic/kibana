@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/streamlang'
-  - '@kbn/peggy'
 tags:
   - test-helper
   - package
