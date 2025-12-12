@@ -33,6 +33,7 @@ import type {
   TypeOptions,
   URIOptions,
   UnionTypeOptions,
+  DiscriminatedUnionTypeOptions,
 } from './src/types';
 import {
   AnyType,
@@ -54,6 +55,7 @@ import {
   StringType,
   Type,
   UnionType,
+  DiscriminatedUnionType,
   URIType,
   StreamType,
   Lazy,
@@ -222,6 +224,21 @@ function oneOf<RTS extends Array<Type<any>>>(
   options?: UnionTypeOptions<any>
 ): Type<any> {
   return new UnionType(types, options);
+}
+
+type ExtractTypeFromObjectType<T extends Array<ObjectType<any>>> = {
+  [K in keyof T]: T[K]['type'];
+};
+
+type UnionOfObjectTypes<T extends Array<ObjectType<any>>> = ExtractTypeFromObjectType<T>[number];
+
+/** @deprecated This is an experimental feature */
+function discriminatedOneOf<T extends Array<ObjectType<any>>>(
+  discriminator: string,
+  types: T,
+  options?: DiscriminatedUnionTypeOptions<UnionOfObjectTypes<T>>
+): Type<UnionOfObjectTypes<T>> {
+  return new DiscriminatedUnionType(discriminator, types, options);
 }
 
 function allOf<
@@ -428,6 +445,7 @@ export const schema = {
   number,
   object,
   oneOf,
+  discriminatedOneOf,
   recordOf,
   stream,
   siblingRef,
