@@ -62,7 +62,7 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/inference-endpoint-plugin",
     "@kbn/spaces-utils",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": ["target/**/*"]
 }

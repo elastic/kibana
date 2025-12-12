@@ -168,9 +168,14 @@ export async function suggest(
   const lastCharacterTyped = innerText[innerText.length - 1];
   let controlSuggestions: ISuggestionItem[] = [];
   if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
+    const secondToLastCharacter = innerText[innerText.length - 2];
+    const variableType =
+      secondToLastCharacter === ESQL_VARIABLES_PREFIX
+        ? ESQLVariableType.FIELDS
+        : ESQLVariableType.VALUES;
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
-      ESQLVariableType.VALUES,
+      variableType,
       ControlTriggerSource.QUESTION_MARK,
       getVariables?.(),
       false
