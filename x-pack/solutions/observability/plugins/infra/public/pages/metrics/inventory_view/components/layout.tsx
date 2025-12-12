@@ -234,7 +234,13 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </PageContent>
-      <BottomDrawer interval={interval} formatter={formatter} view={view} nodeType={nodeType} />
+      <BottomDrawer
+        interval={interval}
+        formatter={formatter}
+        view={view}
+        nodeType={nodeType}
+        loading={loading}
+      />
     </>
   );
 });
