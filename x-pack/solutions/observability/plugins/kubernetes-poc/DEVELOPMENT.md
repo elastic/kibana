@@ -335,20 +335,25 @@ FROM remote_cluster:metrics-*
 ---
 
 #### CPU Usage by Cluster (Line Chart)
-Shows average CPU usage over time for each cluster as a multi-series line chart.
+Shows CPU utilization percentage over time for each cluster as a multi-series line chart.
 
 ```esql
-FROM remote_cluster:metrics-*
+TS remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
-  AND k8s.node.cpu.usage IS NOT NULL
-| STATS avg_cpu = AVG(k8s.node.cpu.usage) BY @timestamp = BUCKET(@timestamp, 1 minute), k8s.cluster.name
+  AND k8s.node.name IS NOT NULL
+  AND (k8s.node.cpu.usage IS NOT NULL OR k8s.node.allocatable_cpu IS NOT NULL)
+| STATS 
+    sum_cpu_usage = SUM(k8s.node.cpu.usage),
+    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
+  BY timestamp = TBUCKET(1 minute), k8s.cluster.name
+| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
+| KEEP timestamp, k8s.cluster.name, cpu_utilization
 ```
 
-**Visualization**: `lnsXY` line chart with `splitAccessor` for cluster breakdown
-**Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver)
-**Dimensions**: `k8s.cluster.name`, `@timestamp` (bucketed by 1 minute)
-**Formatting**: Percent formatter on Y-axis
-**Performance Note**: Both `k8s.cluster.name` (BY clause) and `k8s.node.cpu.usage` (metric) are required, so both must be NOT NULL.
+**Visualization**: `lnsXY` line chart with `splitAccessor` for cluster breakdown (use percent formatter on Y-axis)
+**Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver), `k8s.node.allocatable_cpu` (from k8sclusterreceiver)
+**Dimensions**: `k8s.cluster.name`, `k8s.node.name`, `timestamp` (bucketed by 1 minute via TBUCKET)
+**Output**: `cpu_utilization` - CPU usage as ratio of allocatable (Lens formats to percent)
 
 ---
 
@@ -439,7 +444,272 @@ FROM remote_cluster:metrics-*
 
 ### Cluster Detail Flyout
 
-<!-- TODO: Add queries for cluster detail metrics -->
+> **Note**: Queries in this section filter by a specific cluster using `k8s.cluster.name == "<cluster_name>"`. In implementation, this will be parameterized.
+
+#### Disk Size Total (Metric Card)
+Total disk capacity across all nodes in the cluster.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.filesystem.capacity IS NOT NULL
+| STATS 
+    disk_capacity = MAX(k8s.node.filesystem.capacity)
+  BY k8s.node.name
+| STATS total_disk_bytes = SUM(disk_capacity)
+```
+
+**Visualization**: `lnsMetric` (use bytes formatter)
+**Metrics Used**: `k8s.node.filesystem.capacity` (from kubeletstatsreceiver)
+**Dimensions**: `k8s.node.name`
+**Output**: `total_disk_bytes` - Total disk capacity in bytes (Lens formats to human-readable)
+
+---
+
+#### Memory Total (Metric Card)
+Total allocatable memory across all nodes in the cluster.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.allocatable_memory IS NOT NULL
+| STATS 
+    node_memory = MAX(k8s.node.allocatable_memory)
+  BY k8s.node.name
+| STATS total_memory_bytes = SUM(node_memory)
+```
+
+**Visualization**: `lnsMetric` (use bytes formatter)
+**Metrics Used**: `k8s.node.allocatable_memory` (from k8sclusterreceiver)
+**Dimensions**: `k8s.node.name`
+**Output**: `total_memory_bytes` - Total allocatable memory in bytes (Lens formats to human-readable)
+
+---
+
+#### Namespaces Total (Metric Card)
+Total number of namespaces in the cluster.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.namespace.name IS NOT NULL
+| STATS namespace_count = COUNT_DISTINCT(k8s.namespace.name)
+```
+
+**Visualization**: `lnsMetric`
+**Metrics Used**: None (count of distinct attribute values)
+**Dimensions**: `k8s.namespace.name`
+**Output**: `namespace_count` - Total number of namespaces
+
+---
+
+#### Pods Total, Healthy, Unhealthy (Metric Card)
+Pod counts by health status for the cluster.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.pod.uid IS NOT NULL
+  AND k8s.pod.phase IS NOT NULL
+| STATS 
+    total_pods = COUNT_DISTINCT(k8s.pod.uid),
+    healthy_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 2,
+    unhealthy_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 4
+```
+
+**Visualization**: `lnsMetric`
+**Metrics Used**: `k8s.pod.phase` (from k8sclusterreceiver)
+**Dimensions**: `k8s.pod.uid`
+**Output**: 
+- `total_pods` - Total pod count
+- `healthy_pods` - Running pods (phase = 2)
+- `unhealthy_pods` - Failed pods (phase = 4)
+
+**Pod Phase Values**:
+| Value | Phase |
+|-------|-------|
+| 1 | Pending |
+| 2 | Running (healthy) |
+| 3 | Succeeded |
+| 4 | Failed (unhealthy) |
+
+---
+
+#### Memory Util Time Series (Line Chart)
+Memory usage over time for the cluster.
+
+```esql
+TS remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.memory.usage IS NOT NULL
+| STATS memory_usage_bytes = SUM(k8s.node.memory.usage)
+  BY timestamp = TBUCKET(1 minute)
+```
+
+**Visualization**: `lnsXY` line chart (use bytes formatter on Y-axis)
+**Metrics Used**: `k8s.node.memory.usage` (from kubeletstatsreceiver)
+**Dimensions**: `timestamp` (bucketed by 1 minute via TBUCKET)
+**Output**: `memory_usage_bytes` - Memory usage in bytes over time (Lens formats to human-readable)
+
+---
+
+#### Pods Util Time Series (Line Chart)
+Pod utilization percentage over time for the cluster.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.pod.uid IS NOT NULL
+  AND k8s.pod.phase IS NOT NULL
+| STATS 
+    pod_count = COUNT_DISTINCT(k8s.pod.uid),
+    node_count = COUNT_DISTINCT(k8s.node.name)
+  BY timestamp = BUCKET(@timestamp, 1 minute)
+| EVAL max_pods = node_count * 110
+| EVAL pod_utilization = TO_DOUBLE(pod_count) / TO_DOUBLE(max_pods)
+| KEEP timestamp, pod_utilization
+```
+
+**Visualization**: `lnsXY` line chart (use percent formatter on Y-axis)
+**Metrics Used**: `k8s.pod.phase` (from k8sclusterreceiver)
+**Dimensions**: `k8s.pod.uid`, `k8s.node.name`, `timestamp` (bucketed by 1 minute)
+**Output**: `pod_utilization` - Pod utilization as ratio of capacity (Lens formats to percent)
+
+**Note**: Uses `FROM` instead of `TS` because `COUNT_DISTINCT` on keyword fields is not supported in time series mode. Uses fallback of 110 pods/node (Kubernetes default) since `k8s.node.allocatable_pods` is not available in OTel data.
+
+---
+
+#### CPU Util Time Series (Line Chart)
+CPU utilization percentage over time for the cluster.
+
+```esql
+TS remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.node.name IS NOT NULL
+  AND (k8s.node.cpu.usage IS NOT NULL OR k8s.node.allocatable_cpu IS NOT NULL)
+| STATS 
+    sum_cpu_usage = SUM(k8s.node.cpu.usage),
+    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
+  BY timestamp = TBUCKET(1 minute)
+| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
+| KEEP timestamp, cpu_utilization
+```
+
+**Visualization**: `lnsXY` line chart (use percent formatter on Y-axis)
+**Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver), `k8s.node.allocatable_cpu` (from k8sclusterreceiver)
+**Dimensions**: `k8s.node.name`, `timestamp` (bucketed by 1 minute via TBUCKET)
+**Output**: `cpu_utilization` - CPU usage as ratio of allocatable (Lens formats to percent)
+
+---
+
+#### Network Traffic Time Series (Line Chart)
+Network inbound/outbound traffic rate over time for the cluster.
+
+```esql
+TS remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.network.io IS NOT NULL
+| STATS 
+    inbound = SUM(RATE(k8s.node.network.io)) WHERE direction == "receive",
+    outbound = SUM(RATE(k8s.node.network.io)) WHERE direction == "transmit"
+  BY timestamp = TBUCKET(1 minute)
+```
+
+**Visualization**: `lnsXY` line chart with two series (use bytes formatter on Y-axis)
+**Metrics Used**: `k8s.node.network.io` (counter_long from kubeletstatsreceiver)
+**Dimensions**: `direction`, `timestamp` (bucketed by 1 minute via TBUCKET)
+**Output**: `inbound`, `outbound` - Network I/O rate in bytes/second (Lens formats to human-readable)
+
+**Note**: Uses `TS` command with `RATE()` function to calculate the rate of change for counter metrics.
+
+---
+
+#### Nodes Total, Healthy, Unhealthy (Metric Card)
+Node counts by health status for the cluster.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.condition_ready IS NOT NULL
+| STATS 
+    total_nodes = COUNT_DISTINCT(k8s.node.name),
+    healthy_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,
+    unhealthy_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready <= 0
+```
+
+**Visualization**: `lnsMetric`
+**Metrics Used**: `k8s.node.condition_ready` (from k8sclusterreceiver)
+**Dimensions**: `k8s.node.name`
+**Output**: 
+- `total_nodes` - Total node count
+- `healthy_nodes` - Nodes with condition_ready > 0
+- `unhealthy_nodes` - Nodes with condition_ready <= 0
+
+---
+
+#### Workload Resources Table
+Table showing per-node status, kubelet version, and resource utilization.
+
+```esql
+FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "<cluster_name>" 
+  AND k8s.node.name IS NOT NULL
+  AND (
+    k8s.node.condition_ready IS NOT NULL
+    OR k8s.kubelet.version IS NOT NULL
+    OR k8s.node.cpu.usage IS NOT NULL
+    OR k8s.node.memory.usage IS NOT NULL
+    OR k8s.node.allocatable_cpu IS NOT NULL
+    OR k8s.node.allocatable_memory IS NOT NULL
+    OR k8s.pod.uid IS NOT NULL
+  )
+| STATS 
+    condition_ready = MAX(k8s.node.condition_ready),
+    kubelet_version = MAX(k8s.kubelet.version),
+    sum_cpu_usage = SUM(k8s.node.cpu.usage),
+    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu),
+    sum_memory_usage = SUM(k8s.node.memory.usage),
+    sum_allocatable_memory = SUM(k8s.node.allocatable_memory),
+    pod_count = COUNT_DISTINCT(k8s.pod.uid)
+  BY k8s.node.name
+| EVAL status = CASE(
+    condition_ready > 0, "Ready",
+    condition_ready == 0, "NotReady",
+    "Unknown"
+  )
+| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
+| EVAL memory_utilization = sum_memory_usage / TO_DOUBLE(sum_allocatable_memory)
+| EVAL pod_utilization = TO_DOUBLE(pod_count) / 110.0
+| KEEP k8s.node.name, status, kubelet_version, cpu_utilization, memory_utilization, pod_utilization
+| WHERE k8s.node.name != ""
+```
+
+**Visualization**: Table (EuiDataGrid or similar)
+**Metrics Used**: 
+- `k8s.node.condition_ready` (from k8sclusterreceiver)
+- `k8s.kubelet.version` (from k8sclusterreceiver)
+- `k8s.node.cpu.usage`, `k8s.node.memory.usage` (from kubeletstatsreceiver)
+- `k8s.node.allocatable_cpu`, `k8s.node.allocatable_memory` (from k8sclusterreceiver)
+- `k8s.pod.uid` (from k8sclusterreceiver)
+
+**Output Columns**:
+| Column | Description |
+|--------|-------------|
+| `k8s.node.name` | Node name |
+| `status` | Ready/NotReady/Unknown based on condition_ready |
+| `kubelet_version` | Kubelet version |
+| `cpu_utilization` | CPU usage as ratio (Lens formats to percent) |
+| `memory_utilization` | Memory usage as ratio (Lens formats to percent) |
+| `pod_utilization` | Pod count / 110 (fallback max) as ratio (Lens formats to percent) |
+
+**Note**: Uses fallback of 110 pods/node for pod utilization since `k8s.node.allocatable_pods` is not available in OTel data.
+
+---
 
 ---
 
@@ -541,6 +811,38 @@ Verify **only the files you changed in this commit**:
 - **k8sclusterreceiver**: Collects cluster-level metrics (deployments, pods, nodes, etc.) from the Kubernetes API
 - **kubeletstatsreceiver**: Collects resource utilization metrics (CPU, memory, filesystem, network) from the Kubelet stats API
 - **kube-state-metrics**: Required component for `k8sclusterreceiver` to collect cluster-level metrics
+
+## Finding ES|QL Documentation via Semantic Code Search
+
+The Kibana codebase contains built-in ES|QL documentation that can be queried using the Semantic Code Search MCP tools. This is useful for discovering available functions, commands, and their syntax.
+
+### Quick Lookup Examples
+
+| Question | Semantic Search Query |
+|----------|----------------------|
+| What functions does TS command support? | `"Which functions does the TS time series command support?"` with `filePath: *kbn-language-documentation*` |
+| How does a specific function work? | `"How does RATE function work in ESQL?"` with `filePath: *generated*` |
+| What commands are available? | `"What source and processing commands are available?"` with `filePath: *kbn-language-documentation*` |
+
+### Documentation Locations
+
+| Path | Content |
+|------|---------|
+| `src/platform/packages/private/kbn-language-documentation/src/sections/generated/` | Auto-generated docs for functions, commands, operators |
+| `timeseries_aggregation_functions.tsx` | TS command functions (RATE, AVG_OVER_TIME, DELTA, etc.) |
+| `scalar_functions.tsx` | Scalar functions (ABS, CASE, ROUND, etc.) |
+| `source_commands.tsx` | Source commands (FROM, TS, ROW, SHOW) |
+| `processing_commands.tsx` | Processing commands (WHERE, EVAL, STATS, etc.) |
+
+### Example: Finding TS Functions
+
+```
+semantic_code_search:
+  query: "Which functions does the TS time series command support?"
+  kql: "filePath: *kbn-language-documentation* and content: TS"
+```
+
+Returns documentation showing 20 time series functions: `RATE`, `AVG_OVER_TIME`, `SUM_OVER_TIME`, `DELTA`, `INCREASE`, `IRATE`, etc.
 
 ## Notes
 

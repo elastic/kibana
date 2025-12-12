@@ -16,9 +16,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { ClusterData } from '../../../../common/cluster_listing';
 import { KubernetesPageTemplate } from '../../components/kubernetes_page_template';
 import { KubernetesOverviewTabs, KubernetesPage } from '../../components/kubernetes_overview_tabs';
 import { ClusterTable } from '../../components/cluster_table';
+import { ClusterDetailFlyout } from '../../components/cluster_detail_flyout';
 import {
   ClusterCountCard,
   HealthyClustersCard,
@@ -35,9 +37,18 @@ const DEFAULT_TIME_RANGE: TimeRange = {
 export const ClusterListingPage: React.FC = () => {
   // The applied time range is what the query actually uses
   const [appliedTimeRange, setAppliedTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const [selectedCluster, setSelectedCluster] = useState<ClusterData | null>(null);
   const { data, loading, error, refetch } = useFetchClusterListing({
     timeRange: appliedTimeRange,
   });
+
+  const handleExpandCluster = useCallback((cluster: ClusterData) => {
+    setSelectedCluster(cluster);
+  }, []);
+
+  const handleCloseFlyout = useCallback(() => {
+    setSelectedCluster(null);
+  }, []);
 
   // Handle "Update" button click - apply the new time range from the date picker
   const handleQuerySubmit = useCallback((payload: { query?: Query; dateRange: TimeRange }) => {
@@ -108,7 +119,7 @@ export const ClusterListingPage: React.FC = () => {
       );
     }
 
-    return <ClusterTable clusters={data.clusters} />;
+    return <ClusterTable clusters={data.clusters} onExpandCluster={handleExpandCluster} />;
   };
 
   return (
@@ -148,6 +159,10 @@ export const ClusterListingPage: React.FC = () => {
 
       <EuiSpacer size="s" />
       {renderContent()}
+
+      {selectedCluster && (
+        <ClusterDetailFlyout cluster={selectedCluster} onClose={handleCloseFlyout} />
+      )}
     </KubernetesPageTemplate>
   );
 };
