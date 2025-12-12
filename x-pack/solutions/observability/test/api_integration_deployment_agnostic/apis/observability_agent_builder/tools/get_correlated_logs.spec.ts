@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { times } from 'lodash';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { GetCorrelatedLogsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_correlated_logs/types';
@@ -77,16 +78,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "payment-service"',
+            logsKqlFilter: 'service.name: "payment-service"',
           },
         });
 
-        const { groups } = results[0].data;
+        const { sequences } = results[0].data;
 
-        expect(groups.length).to.be(1);
-        expect(groups[0].logs.length).to.be(5);
-        expect(groups[0].correlation.field).to.be('trace.id');
-        expect(groups[0].correlation.value).to.be('trace-123');
+        expect(sequences.length).to.be(1);
+        expect(sequences[0].logs.length).to.be(5);
+        expect(sequences[0].correlation.field).to.be('trace.id');
+        expect(sequences[0].correlation.value).to.be('trace-123');
       });
 
       it('includes the error log and surrounding logs', async () => {
@@ -95,12 +96,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "payment-service"',
+            logsKqlFilter: 'service.name: "payment-service"',
           },
         });
 
-        const { groups } = results[0].data;
-        const messages = groups[0].logs.map((log) => log.message);
+        const { sequences } = results[0].data;
+        const messages = sequences[0].logs.map((log) => log.message);
 
         expect(messages).to.eql([
           'Starting payment processing',
@@ -117,12 +118,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "non-existing-service"',
+            logsKqlFilter: 'service.name: "non-existing-service"',
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(0);
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(0);
       });
     });
 
@@ -151,12 +152,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "checkout-service"',
+            logsKqlFilter: 'service.name: "checkout-service"',
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(1);
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
       });
 
       it('includes both error logs in the same group', async () => {
@@ -165,11 +166,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "checkout-service"',
+            logsKqlFilter: 'service.name: "checkout-service"',
           },
         });
 
-        const group = results[0].data.groups[0];
+        const group = results[0].data.sequences[0];
         const errorLogs = group.logs.filter((log: any) => log.log?.level === 'ERROR');
         expect(errorLogs.length).to.be(2);
 
@@ -214,34 +215,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }));
       });
 
-      it('creates separate groups for errors with different correlation IDs', async () => {
+      it('creates separate sequences for errors with different correlation IDs', async () => {
         const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
           id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "multi-service"',
+            logsKqlFilter: 'service.name: "multi-service"',
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(2);
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(2);
       });
 
-      it('groups logs correctly by their correlation ID', async () => {
+      it('sequences logs correctly by their correlation ID', async () => {
         const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
           id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "multi-service"',
+            logsKqlFilter: 'service.name: "multi-service"',
           },
         });
 
-        const { groups } = results[0].data;
+        const { sequences } = results[0].data;
 
         // Find payment group
-        const paymentGroup = groups.find((group) =>
+        const paymentGroup = sequences.find((group) =>
           group.logs.some((log: any) => log.message === 'Payment error')
         );
         expect(paymentGroup).to.not.be(undefined);
@@ -252,7 +253,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(paymentGroup!.correlation.value).to.be('trace-payment');
 
         // Find refund group
-        const refundGroup = groups.find((group) =>
+        const refundGroup = sequences.find((group) =>
           group.logs.some((log: any) => log.message === 'Refund error')
         );
         expect(refundGroup).to.not.be(undefined);
@@ -290,12 +291,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "no-correlation-service"',
+            logsKqlFilter: 'service.name: "no-correlation-service"',
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(0);
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(0);
       });
     });
 
@@ -328,13 +329,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "service-a"',
+            logsKqlFilter: 'service.name: "service-a"',
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(1);
-        expect(groups[0].logs[0]).to.have.property('message', 'Error in service A');
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
+        expect(sequences[0].logs[0]).to.have.property('message', 'Error in service A');
       });
     });
 
@@ -403,13 +404,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              kqlQuery: `service.name: "${service}"`,
+              logsKqlFilter: `service.name: "${service}"`,
             },
           });
 
-          const { groups } = results[0].data;
-          expect(groups.length).to.be(1);
-          expect(groups[0].logs.length).to.be(2);
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(1);
+          expect(sequences[0].logs.length).to.be(2);
         });
       });
     });
@@ -439,22 +440,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "priority-service"',
+            logsKqlFilter: 'service.name: "priority-service"',
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(1);
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
 
         // Verify all logs in the group have the same trace.id (highest priority)
-        const allHaveTraceId = groups[0].logs.every(
+        const allHaveTraceId = sequences[0].logs.every(
           (log: any) => log.trace?.id === 'trace-priority-123'
         );
         expect(allHaveTraceId).to.be(true);
-        expect(groups[0].correlation.field).to.be('trace.id');
-        expect(groups[0].correlation.value).to.be('trace-priority-123');
+        expect(sequences[0].correlation.field).to.be('trace.id');
+        expect(sequences[0].correlation.value).to.be('trace-priority-123');
 
-        expect(groups[0].logs.map((log) => log.message)).to.eql([
+        expect(sequences[0].logs.map((log) => log.message)).to.eql([
           'Request with multiple IDs started',
           'Error with multiple correlation IDs',
         ]);
@@ -500,13 +501,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              kqlQuery: `service.name: "${service}"`,
+              logsKqlFilter: `service.name: "${service}"`,
             },
           });
 
-          const { groups } = results[0].data;
-          expect(groups.length).to.be(1);
-          expect(groups[0].logs[0]).to.have.property('message', message);
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(1);
+          expect(sequences[0].logs[0]).to.have.property('message', message);
         });
       });
     });
@@ -631,12 +632,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              kqlQuery: `service.name: "${service}"`,
+              logsKqlFilter: `service.name: "${service}"`,
             },
           });
 
-          const { groups } = results[0].data;
-          expect(groups.flatMap((group) => group.logs.map(({ message }) => message))).to.eql(
+          const { sequences } = results[0].data;
+          expect(sequences.flatMap((group) => group.logs.map(({ message }) => message))).to.eql(
             expectedMessages
           );
         });
@@ -692,9 +693,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(1);
-        const messages = groups[0].logs.map((log) => log.message);
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
+        const messages = sequences[0].logs.map((log) => log.message);
         expect(messages).to.eql(['Log for ID lookup', 'Error correlated with ID target']);
       });
     });
@@ -727,14 +728,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            kqlQuery: 'service.name: "fields-service"',
+            logsKqlFilter: 'service.name: "fields-service"',
             logSourceFields: ['message', 'service.name'],
           },
         });
 
-        const { groups } = results[0].data;
-        expect(groups.length).to.be(1);
-        const logs = groups[0].logs;
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
+        const logs = sequences[0].logs;
 
         expect(logs).to.eql([
           {
@@ -746,6 +747,130 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             service: { name: 'fields-service' },
           },
         ]);
+      });
+    });
+
+    describe('with limit parameters', () => {
+      describe('maxSequences', () => {
+        before(async () => {
+          const logs = times(5, (i) => ({
+            level: 'error',
+            message: `Error in trace ${i}`,
+            'service.name': 'limit-service',
+            'trace.id': `trace-limit-${i}`,
+          }));
+
+          ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
+            getService,
+            logs,
+          }));
+        });
+
+        it('limits the number of returned sequences', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              logsKqlFilter: 'service.name: "limit-service"',
+              maxSequences: 3,
+            },
+          });
+
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(3);
+        });
+      });
+
+      describe('maxLogsPerSequence', () => {
+        before(async () => {
+          const logs = [
+            // info logs
+            ...times(20, (i) => ({
+              level: 'info',
+              message: `Log ${i}`,
+              'service.name': 'limit-logs-service',
+              'trace.id': 'trace-limit-logs',
+              '@timestamp': Date.now() - (20 - i) * 1000,
+            })),
+
+            // anchor
+            {
+              level: 'error',
+              message: 'Error log',
+              'service.name': 'limit-logs-service',
+              'trace.id': 'trace-limit-logs',
+              '@timestamp': Date.now(),
+            },
+          ];
+
+          ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
+            getService,
+            logs,
+          }));
+        });
+
+        it('limits the number of logs per sequence', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              logsKqlFilter: 'service.name: "limit-logs-service"',
+              maxLogsPerSequence: 5,
+            },
+          });
+
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(1);
+          expect(sequences[0].logs.length).to.be(5);
+          expect(sequences[0].isTruncated).to.be(true);
+        });
+      });
+    });
+
+    describe('with a noisy trace causing starvation', () => {
+      before(async () => {
+        const logs = [
+          // Trace A: 60 errors (recent)
+          ...times(60, (i) => ({
+            level: 'error',
+            message: `Error A ${i}`,
+            'service.name': 'starvation-service',
+            'trace.id': 'trace-A',
+            '@timestamp': Date.now() - i * 1000, // 0s to 59s ago
+          })),
+          // Trace B: 1 error (older)
+          {
+            level: 'error',
+            message: 'Error B',
+            'service.name': 'starvation-service',
+            'trace.id': 'trace-B',
+            '@timestamp': Date.now() - 70000, // 70s ago
+          },
+        ];
+
+        ({ logsSynthtraceEsClient } = await createSyntheticLogsWithErrorsAndCorrelationIds({
+          getService,
+          logs,
+        }));
+      });
+
+      it('returns only the noisy trace due to fetch limit', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-5m',
+            end: 'now',
+            maxSequences: 10, // Default, implies fetch limit of 50
+          },
+        });
+
+        const { sequences } = results[0].data;
+
+        // We expect only 1 sequence because the top 50 logs are all from trace-A
+        expect(sequences.length).to.be(1);
+        expect(sequences[0].correlation.value).to.be('trace-A');
       });
     });
   });

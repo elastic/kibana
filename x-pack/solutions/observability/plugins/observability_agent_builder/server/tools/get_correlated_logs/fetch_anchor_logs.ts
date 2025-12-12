@@ -7,7 +7,7 @@
 
 import { compact, first, get, uniqBy } from 'lodash';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { SearchHit } from '@kbn/es-types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { kqlFilter, timeRangeFilter } from '../../utils/dsl_filters';
 import type { AnchorLog } from './types';
@@ -18,26 +18,26 @@ export async function fetchAnchorLogs({
   logsIndices,
   startTime,
   endTime,
-  kqlQuery,
-  anchorFilter,
+  logsKqlFilter,
+  anchorKqlFilter,
   correlationFields,
   logger,
   logId,
-  maxResults,
+  maxSequences,
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
   startTime: number;
   endTime: number;
-  kqlQuery: string | undefined;
-  anchorFilter: string | undefined;
+  logsKqlFilter: string | undefined;
+  anchorKqlFilter: string | undefined;
   correlationFields: string[];
   logger: Logger;
   logId?: string;
-  maxResults: number;
+  maxSequences: number;
 }): Promise<AnchorLog[]> {
   if (logId) {
-    const anchor = await fetchAnchorLog({
+    const anchor = await fetchAnchorLogById({
       esClient,
       logsIndices,
       logId,
@@ -47,11 +47,10 @@ export async function fetchAnchorLogs({
     return anchor ? [anchor] : [];
   }
 
-  const search = getTypedSearch(esClient.asCurrentUser);
   const correlationIdentifierFields = correlationFields;
 
-  const anchorLogsResponse = await search({
-    size: Math.max(50, maxResults * 5), // Fetch more than needed to account for duplicate anchor logs for the same correlation id
+  const anchorLogsResponse = await esClient.asCurrentUser.search({
+    size: Math.max(50, maxSequences * 5), // Fetch more than needed to account for duplicate anchor logs for the same correlation id
     track_total_hits: false,
     _source: false,
     fields: ['@timestamp', ...correlationIdentifierFields],
@@ -61,7 +60,7 @@ export async function fetchAnchorLogs({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...kqlFilter(kqlQuery),
+          ...kqlFilter(logsKqlFilter),
 
           // must have at least one correlation identifier
           {
@@ -72,7 +71,7 @@ export async function fetchAnchorLogs({
           },
 
           // must be an error (or match the provided anchor filter)
-          ...(anchorFilter ? kqlFilter(anchorFilter) : [DEFAULT_ERROR_SEVERITY_FILTER]),
+          ...(anchorKqlFilter ? kqlFilter(anchorKqlFilter) : [DEFAULT_ERROR_SEVERITY_FILTER]),
         ],
       },
     },
@@ -82,7 +81,7 @@ export async function fetchAnchorLogs({
   const anchorLogs: AnchorLog[] = uniqBy(
     compact(
       anchorLogsResponse.hits.hits.map((hit) =>
-        findCorrelationIdentifier(hit, correlationIdentifierFields)
+        getAnchorLogFromHit(hit, correlationIdentifierFields)
       )
     ),
     ({ correlation }) => correlation.value
@@ -92,10 +91,10 @@ export async function fetchAnchorLogs({
     `Found ${anchorLogsResponse.hits.hits.length} anchor logs in ${anchorLogs.length} unique sequences`
   );
 
-  return anchorLogs.slice(0, maxResults);
+  return anchorLogs.slice(0, maxSequences);
 }
 
-async function fetchAnchorLog({
+async function fetchAnchorLogById({
   esClient,
   logsIndices,
   logId,
@@ -125,10 +124,10 @@ async function fetchAnchorLog({
     return undefined;
   }
 
-  return findCorrelationIdentifier(hit, correlationFields);
+  return getAnchorLogFromHit(hit, correlationFields);
 }
 
-export function findCorrelationIdentifier(
+export function getAnchorLogFromHit(
   hit: SearchHit,
   correlationFields: string[]
 ): AnchorLog | undefined {
@@ -138,13 +137,11 @@ export function findCorrelationIdentifier(
     .map((correlationField) => {
       const timestamp = first(hit.fields?.['@timestamp']) as string;
       const value = first(get(hit.fields, correlationField)) as string;
+      const anchorLogId = hit._id as string;
 
       return {
         '@timestamp': timestamp,
-        correlation: {
-          field: correlationField,
-          value,
-        },
+        correlation: { field: correlationField, value, anchorLogId },
       };
     })
     .find(({ correlation }) => correlation.value != null);

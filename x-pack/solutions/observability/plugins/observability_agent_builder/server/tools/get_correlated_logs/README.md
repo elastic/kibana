@@ -11,7 +11,7 @@ POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
-    "kqlQuery": "service.name: \"payment-service\""
+    "logsKqlFilter": "service.name: \"payment-service\""
   }
 }
 ```
@@ -63,8 +63,8 @@ POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
-    "kqlQuery": "service.name: \"payment-service\"",
-    "anchorFilter": "event.duration > 1000000000"
+    "logsKqlFilter": "service.name: \"payment-service\"",
+    "anchorKqlFilter": "event.duration > 1000000000"
   }
 }
 ```

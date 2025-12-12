@@ -19,6 +19,7 @@ export async function createSyntheticLogsWithErrorsAndCorrelationIds({
 }): Promise<{ logsSynthtraceEsClient: LogsSynthtraceEsClient }> {
   const synthtrace = getService('synthtrace');
   const logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+  await logsSynthtraceEsClient.clean();
   const range = timerange('now-5m', 'now');
 
   const synthLogs = range

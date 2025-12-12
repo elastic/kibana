@@ -10,6 +10,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import type { AnchorLog } from './types';
+import { getHitsTotal } from '../../utils/get_hits_total';
 
 export async function getCorrelatedLogsForAnchor({
   esClient,
@@ -17,12 +18,14 @@ export async function getCorrelatedLogsForAnchor({
   logsIndices,
   logger,
   logSourceFields,
+  maxLogsPerSequence,
 }: {
   esClient: IScopedClusterClient;
   anchorLog: AnchorLog;
   logsIndices: string[];
   logger: Logger;
   logSourceFields: string[];
+  maxLogsPerSequence: number;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
   const { correlation, '@timestamp': timestamp } = anchorLog;
@@ -35,9 +38,9 @@ export async function getCorrelatedLogsForAnchor({
 
   const res = await search({
     _source: logSourceFields,
-    track_total_hits: false,
+    track_total_hits: maxLogsPerSequence + 1, // +1 to check if sequence is truncated
+    size: maxLogsPerSequence,
     index: logsIndices,
-    size: 100,
     sort: [{ '@timestamp': { order: 'asc' } }],
     query: {
       bool: {
@@ -49,5 +52,10 @@ export async function getCorrelatedLogsForAnchor({
     },
   });
 
-  return res.hits.hits.map((hit) => hit._source!);
+  const totalHits = getHitsTotal(res);
+
+  return {
+    logs: res.hits.hits.map((hit) => hit._source!),
+    isTruncated: totalHits > maxLogsPerSequence,
+  };
 }
