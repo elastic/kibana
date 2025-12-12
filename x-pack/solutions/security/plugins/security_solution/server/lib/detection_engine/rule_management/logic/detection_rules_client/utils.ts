@@ -16,6 +16,7 @@ import { validFields } from '@kbn/alerting-plugin/common/constants';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 
+import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type {
@@ -151,15 +152,7 @@ export const getReadAuthFieldValue = (
       }
 
     case validFields.RULE_SOURCE:
-      // camel case every nested field
-      // in rule source
-      return Object.keys(rulePatch.rule_source).reduce(
-        (acc, ruleSourceField) => ({
-          ...acc,
-          [camelCase(ruleSourceField)]: rulePatch.rule_source[ruleSourceField as keyof RuleSource],
-        }),
-        {} as RuleSource
-      );
+      return convertObjectKeysToCamelCase(rulePatch.rule_source);
   }
 };
 
@@ -209,7 +202,7 @@ export const applyPatchRuleWithReadPrivileges = async (
  * If the fields are all included in the `validFields` type
  * we can check if the user has read authz privileges for rules
  * and use the special function provided to us by the alerting
- * rules client. Otherwise the user will need `all` privilegs
+ * rules client. Otherwise the user will need `all` privileges
  * for rules.
  * properties we are patching on the rule.
  * @param rulesClient
@@ -224,11 +217,12 @@ export const patchApplicator = async (
   existingRule: RuleResponse,
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient
 ) => {
-  if (Object.keys(rulePatch).every((key) => isKeyUpdateableWithReadPermission(key))) {
+  const { rule_id: ruleId, id, ...rulePatchObjWithoutIds } = rulePatch; // Don't want to compare id keys for read auth RBAC check
+  if (Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))) {
     const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> =
       await applyPatchRuleWithReadPrivileges(
         rulesClient,
-        rulePatch,
+        rulePatchObjWithoutIds,
         existingRule,
         prebuiltRuleAssetClient
       );

@@ -89,7 +89,11 @@ export default ({ getService }: FtrProviderContext) => {
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send({ rule_id: 'rule-1', machine_learning_job_id: 'some_job_id' })
+          .send({
+            rule_id: 'rule-1',
+            machine_learning_job_id: 'some_job_id',
+            type: 'machine_learning',
+          })
           .expect(200);
 
         const outputRule = updateUsername(getSimpleMlRuleOutput(), await utils.getUsername());

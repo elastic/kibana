@@ -24,6 +24,5 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryRuleCrea
   severity: 'high',
   index: ['auditbeat-*'],
   type: 'query',
-  exceptions_list: [],
   query: 'user.name: root or user.name: admin',
 });
