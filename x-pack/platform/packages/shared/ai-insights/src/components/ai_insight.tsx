@@ -30,7 +30,6 @@ export interface AiInsightProps {
   startButtonLabel?: string;
   isLoading?: boolean;
   error?: string;
-  ['data-test-subj']?: string;
 }
 
 export function AiInsight({
@@ -42,7 +41,6 @@ export function AiInsight({
   startButtonLabel,
   isLoading,
   error,
-  'data-test-subj': dataTestSubj,
 }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +56,7 @@ export function AiInsight({
             responsive={false}
             gutterSize="m"
             alignItems="flexStart"
-            data-test-subj={dataTestSubj}
+            data-test-subj="agentBuilderAiInsight"
           >
             <EuiFlexItem grow={false}>
               <EuiIcon
