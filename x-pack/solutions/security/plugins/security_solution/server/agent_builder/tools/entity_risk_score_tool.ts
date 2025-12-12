@@ -291,7 +291,7 @@ export const entityRiskScoreTool = (
           ...(latestRiskScore.criticality_level !== undefined && {
             criticality_level: latestRiskScore.criticality_level,
           }),
-          ...(latestRiskScore.modifiers && { modifiers: latestRiskScore.modifiers || [] }),
+          ...(latestRiskScore.modifiers && { modifiers: latestRiskScore.modifiers ?? [] }),
         };
 
         return {
