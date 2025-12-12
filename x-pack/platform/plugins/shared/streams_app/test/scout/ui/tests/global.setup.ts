@@ -10,4 +10,6 @@ import { globalSetupHook } from '@kbn/scout';
 globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
   log.debug('[setup] Enabling streams...');
   await apiServices.streams.enable();
+  log.debug('[setup] Enabling significant events...');
+  await apiServices.streams.enableSignificantEvents();
 });
