@@ -22,7 +22,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server/types';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
