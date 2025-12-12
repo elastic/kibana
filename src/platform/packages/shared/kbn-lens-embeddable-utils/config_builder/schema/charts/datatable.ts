@@ -177,16 +177,21 @@ const datatableStateMetricsOptionsSchema = schema.object({
    * Summary configuration
    */
   summary: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal('none'),
-        schema.literal('sum'),
-        schema.literal('avg'),
-        schema.literal('count'),
-        schema.literal('min'),
-        schema.literal('max'),
-      ],
-      { defaultValue: 'none', meta: { description: 'Summary function to apply to the column' } }
+    schema.object(
+      {
+        type: schema.oneOf(
+          [
+            schema.literal('sum'),
+            schema.literal('avg'),
+            schema.literal('count'),
+            schema.literal('min'),
+            schema.literal('max'),
+          ],
+          { meta: { description: 'Type of summary function to apply to the column' } }
+        ),
+        label: schema.maybe(schema.string({ meta: { description: 'Summary row label' } })),
+      },
+      { meta: { description: 'Summary row configuration' } }
     )
   ),
 });
