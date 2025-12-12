@@ -103,7 +103,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     allCategories,
     initialSelectedCategory,
     selectedCategory,
-    setCategory,
     mainCategories,
     onlyAgentlessFilter,
     isLoading,
@@ -114,12 +113,8 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     eprCategoryLoadingError,
     searchTerm,
     setSearchTerm,
-    setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards,
-    availableSubCategories,
-    selectedSubCategory,
-    setSelectedSubCategory,
     onCategoryChange,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
