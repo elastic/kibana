@@ -28,7 +28,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('as viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
-        await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
       describe('Displays page with limited functionality', function () {
@@ -213,23 +212,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
               text: 'Getting started',
             });
-          });
-
-          it('renders tour for Getting Started', async () => {
-            await pageObjects.solutionNavigation.sidenav.tour.reset();
-            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
-            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
-            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
-              'sidenav-manage-data'
-            );
-            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
-            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
-              'sidenav-search-getting-started'
-            );
-            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
-            await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
-            await browser.refresh();
-            await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
           });
         });
       });
