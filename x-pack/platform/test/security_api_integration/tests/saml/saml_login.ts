@@ -197,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
     });
 
@@ -942,13 +942,13 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/authentication/app/auth_flow?statusCode=401')
           .set('Cookie', sessionCookie)
           .expect(401);
-        expect(authFlow401ResponseText).to.contain('We hit an authentication error');
+        expect(authFlow401ResponseText).to.contain('<h1>Unauthenticated</h1>');
 
         const { text: authFlow500ResponseText } = await supertest
           .get('/authentication/app/auth_flow?statusCode=500')
           .set('Cookie', sessionCookie)
           .expect(500);
-        expect(authFlow500ResponseText).to.contain('We hit an authentication error');
+        expect(authFlow500ResponseText).to.contain('<h1>Unauthenticated</h1>');
       });
     });
   });

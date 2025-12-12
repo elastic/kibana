@@ -43,8 +43,6 @@
     "@kbn/config-schema",
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-rendering-server-internal",
-    "@kbn/ui-shared-deps-src",
     "@kbn/core-saved-objects-server",
     "@kbn/utility-types-jest",
     "@kbn/es-errors",

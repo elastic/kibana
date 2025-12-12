@@ -489,7 +489,6 @@
         "@emotion/css",
         "@emotion/react",
         "@emotion/serialize",
-        "@emotion/server",
         "@emotion/styled"
       ],
       "reviewers": [
