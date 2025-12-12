@@ -148,7 +148,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           },
         },
         ...existingTab,
-        ...item,
+        ...omit(item, 'initializationState'),
       };
 
       if (existingTab) {

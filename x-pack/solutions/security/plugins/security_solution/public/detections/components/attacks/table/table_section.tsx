@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiSwitch } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { isGroupingBucket } from '@kbn/grouping/src';
+import type { ParsedGroupingAggregation } from '@kbn/grouping/src';
+import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
-  defaultGroupingOptions,
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
-  defaultGroupTitleRenderers,
 } from '../../alerts_table/grouping_settings';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -29,6 +31,10 @@ import {
 } from '../../alerts_table/default_config';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { AlertsTable } from '../../alerts_table';
+import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
+import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
+import { groupingOptions, groupingSettings } from './grouping_configs';
+import * as i18n from './translations';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -60,6 +66,44 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
 
   const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
     TableId.alertsOnAttacksPage
+  );
+
+  // for showing / hiding anonymized data:
+  const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
+  const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
+  const showAnonymizedSwitch = useMemo(() => {
+    return (
+      <EuiSwitch
+        checked={showAnonymized}
+        compressed={true}
+        data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
+        label={i18n.SHOW_ANONYMIZED_LABEL}
+        onChange={onToggleShowAnonymized}
+      />
+    );
+  }, [onToggleShowAnonymized, showAnonymized]);
+
+  const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
+  const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
+    attackIds,
+    showAnonymized,
+  });
+
+  const onAggregationsChange = useCallback(
+    (aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>, groupingLevel?: number) => {
+      if (groupingLevel != null && groupingLevel !== 0) {
+        return;
+      }
+      const attackIdsGroupBuckets = aggs.groupByFields?.buckets?.filter(
+        (bucket) =>
+          isGroupingBucket(bucket) &&
+          !bucket.isNullGroup &&
+          bucket.selectedGroup === ALERT_ATTACK_IDS
+      );
+      const groupKeys = attackIdsGroupBuckets?.flatMap(({ key }) => key);
+      setAttackIds(groupKeys);
+    },
+    []
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -115,7 +159,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         dataView={dataView}
         dataViewSpec={dataViewSpec}
         defaultFilters={defaultFilters}
-        defaultGroupingOptions={defaultGroupingOptions}
+        defaultGroupingOptions={groupingOptions}
         from={from}
         globalFilters={globalFilters}
         globalQuery={query}
@@ -124,7 +168,10 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         renderChildComponent={renderAlertTable}
         tableId={TableId.alertsOnAttacksPage}
         to={to}
+        onAggregationsChange={onAggregationsChange}
+        additionalToolbarControls={[showAnonymizedSwitch]}
         pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
+        settings={groupingSettings}
       />
     </div>
   );

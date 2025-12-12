@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  axisTitleSchemaProps,
   collapseBySchema,
   dslOnlyPanelInfoSchema,
   ignoringGlobalFiltersSchemaRaw,
@@ -25,6 +26,7 @@ import {
 import { esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
+import { builderEnums } from '../enums';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -108,13 +110,7 @@ const yScaleSchema = schema.oneOf(
  */
 const sharedAxisSchema = {
   title: schema.maybe(
-    schema.object(
-      {
-        value: schema.string({ meta: { description: 'Axis title text' } }),
-        visible: schema.maybe(schema.boolean()),
-      },
-      { meta: { description: 'Axis title configuration' } }
-    )
+    schema.object(axisTitleSchemaProps, { meta: { description: 'Axis title configuration' } })
   ),
   ticks: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to show tick marks on the axis' } })
@@ -123,10 +119,9 @@ const sharedAxisSchema = {
     schema.boolean({ meta: { description: 'Whether to show grid lines for this axis' } })
   ),
   label_orientation: schema.maybe(
-    schema.oneOf(
-      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('angled')],
-      { meta: { description: 'Orientation of the axis labels' } }
-    )
+    builderEnums.orientation({
+      meta: { description: 'Orientation of the axis labels' },
+    })
   ),
 };
 

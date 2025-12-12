@@ -11,12 +11,14 @@ import { type CoreSetup, type CoreStart, type PluginInitializerContext } from '@
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
   spaces?: SpacesPluginStart;
   licensing: LicensingPluginStart;
+  productDocBase: ProductDocBasePluginStart;
 }
 
 export interface GenAiSettingsSetupDeps {

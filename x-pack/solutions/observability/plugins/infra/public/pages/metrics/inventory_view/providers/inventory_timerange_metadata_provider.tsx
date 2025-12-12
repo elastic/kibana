@@ -22,7 +22,7 @@ export const InventoryTimeRangeMetadataProvider = ({ children }: { children: Rea
     };
   }, [currentTimeRange.from, currentTimeRange.to]);
 
-  if (nodeType !== 'host') {
+  if (nodeType !== 'host' && nodeType !== 'pod') {
     return <>{children}</>;
   }
 

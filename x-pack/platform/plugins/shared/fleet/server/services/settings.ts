@@ -41,6 +41,7 @@ function mapSettingsSO(settingsSo: SavedObject<SettingsSOAttributes>): Settings 
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
     delete_unenrolled_agents: settingsSo.attributes.delete_unenrolled_agents,
     ilm_migration_status: settingsSo.attributes.ilm_migration_status,
+    integration_knowledge_enabled: settingsSo.attributes.integration_knowledge_enabled,
   };
 }
 
@@ -78,10 +79,20 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
   try {
     const config = appContextService.getConfig();
     const settings = await getSettings(soClient);
+
+    const updatedSettings = {} as Partial<Settings>;
     if (config?.prereleaseEnabledByDefault && !settings.prerelease_integrations_enabled) {
-      await saveSettings(soClient, {
-        prerelease_integrations_enabled: config?.prereleaseEnabledByDefault,
-      });
+      updatedSettings.prerelease_integrations_enabled = config?.prereleaseEnabledByDefault;
+    }
+    if (
+      (config?.experimentalFeatures?.integrationKnowledge ??
+        appContextService.getExperimentalFeatures().installIntegrationsKnowledge) &&
+      settings.integration_knowledge_enabled === undefined
+    ) {
+      updatedSettings.integration_knowledge_enabled = true;
+    }
+    if (Object.keys(updatedSettings).length > 0) {
+      await saveSettings(soClient, updatedSettings);
     }
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
@@ -183,6 +194,13 @@ export function createDefaultSettings(): BaseSettings {
 
   if (appContextService.getExperimentalFeatures().useSpaceAwareness) {
     settings.use_space_awareness_migration_status = 'success';
+  }
+
+  if (
+    config?.experimentalFeatures?.integrationKnowledge ??
+    appContextService.getExperimentalFeatures().installIntegrationsKnowledge
+  ) {
+    settings.integration_knowledge_enabled = true;
   }
 
   return settings;
