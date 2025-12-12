@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/inference-common'
   - '@kbn/core-chrome-navigation'
+  - '@kbn/ebt-tools'
 tags:
   - plugin
   - prod
