@@ -6,7 +6,12 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { CASE_ATTACH_EVENTS_EVENT_TYPE, CASE_PAGE_VIEW_EVENT_TYPE } from '../../common/constants';
+import {
+  CASE_ATTACH_EVENTS_EVENT_TYPE,
+  CASE_PAGE_VIEW_EVENT_TYPE,
+  CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
+  CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
+} from '../../common/constants';
 
 export const registerAnalytics = ({
   analyticsService,
@@ -40,6 +45,39 @@ export const registerAnalytics = ({
         type: 'keyword',
         _meta: {
           description: 'The exact place in the app where the attachment comes from',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) in which the attachments tab is accessed',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) in which the attachments tab is accessed',
+          optional: false,
+        },
+      },
+      attachment_type: {
+        type: 'keyword',
+        _meta: {
+          description: 'Which attachments type is rendered in the sub tab',
           optional: false,
         },
       },
