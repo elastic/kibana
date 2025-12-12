@@ -62,7 +62,7 @@ const getFloatingActionItem = (
           color="text"
           onClick={() => action.execute(context)}
           aria-labelledby={tooltipKey}
-          data-test-subj={tooltipKey}
+          data-test-subj={`embeddablePanelAction-${action.id}`}
         />
       </EuiToolTip>
     );
@@ -167,7 +167,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       {children}
       {floatingActions.length > 0 && (
         <div
-          data-test-subj={`presentationUtil__floatingActions`}
+          data-test-subj="hover-actions"
           key={`presentationUtil__floatingActions__${uuid}`}
           className={classNames('presentationUtil__floatingActions', `controlFrameFloatingActions`)}
           css={styles.floatingActions}

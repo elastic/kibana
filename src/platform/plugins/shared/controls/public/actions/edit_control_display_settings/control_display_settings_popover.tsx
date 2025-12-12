@@ -105,7 +105,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
   const settingsButton = (
     <EuiToolTip disableScreenReaderOutput content={displayName}>
       <EuiButtonIcon
-        data-test-subj={`control-action-${api.uuid}-${ACTION_EDIT_CONTROL_DISPLAY_SETTINGS}`}
+        data-test-subj={`embeddablePanelAction-${ACTION_EDIT_CONTROL_DISPLAY_SETTINGS}`}
         iconType={iconType}
         color="text"
         aria-label={displayName}

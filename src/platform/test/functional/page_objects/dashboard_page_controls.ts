@@ -124,6 +124,41 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
+  public async isControlPinned(controlId: string) {
+    return this.find.existsByCssSelector(
+      `[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`
+    );
+  }
+
+  public async unpinExistingControl(controlId: string) {
+    // Ensure this control ID is in a control frame, and not just an embeddable panel
+    expect(await this.isControlPinned(controlId)).to.be(true);
+    await this.hoverOverExistingControl(controlId);
+    await this.panelActions.clickPanelAction(
+      `embeddablePanelAction-pinControl`,
+      await this.getControlElementById(controlId)
+    );
+    await this.retry.try(async () => {
+      // Ensure this control still exists but is no longer pinned
+      await this.find.existsByCssSelector(`[data-control-id='${controlId}']`);
+      expect(await this.isControlPinned(controlId)).to.be(false);
+    });
+  }
+
+  public async pinExistingControl(controlId: string) {
+    // Ensure this control ID exists, but is not pinned
+    await this.find.existsByCssSelector(`[data-control-id='${controlId}']`);
+    expect(await this.isControlPinned(controlId)).to.be(false);
+    await this.hoverOverExistingControl(controlId);
+    await this.panelActions.clickPanelAction(
+      `embeddablePanelAction-pinControl`,
+      await this.getControlElementById(controlId)
+    );
+    await this.retry.try(async () => {
+      expect(await this.isControlPinned(controlId)).to.be(true);
+    });
+  }
+
   public async deleteAllPinnedControls() {
     this.log.debug('Delete all pinned controls');
     if ((await this.getControlsCount()) === 0) return;
@@ -145,7 +180,7 @@ export class DashboardPageControls extends FtrService {
   public async setPinnedControlWidth(controlId: string, width: ControlWidth) {
     this.log.debug(`Setting control's ${controlId} width to ${width}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-editControlDisplaySettings`);
+    await this.panelActions.clickPanelAction(`embeddablePanelAction-editControlDisplaySettings`);
     await this.retry.try(async () => {
       // wait for popover to open
       await this.testSubjects.existOrFail(`controlDisplaySettings-${controlId}`);
@@ -153,7 +188,7 @@ export class DashboardPageControls extends FtrService {
 
     await this.testSubjects.click(`controlWidthOption-${width}`);
 
-    await this.testSubjects.click(`control-action-${controlId}-editControlDisplaySettings`);
+    await this.panelActions.clickPanelAction(`embeddablePanelAction-editControlDisplaySettings`);
     await this.retry.try(async () => {
       // wait for popover to close
       await this.testSubjects.missingOrFail(`controlDisplaySettings-${controlId}`);
@@ -202,7 +237,14 @@ export class DashboardPageControls extends FtrService {
       const controlsWithIds = await Promise.all(
         controls.map(async (control) => {
           const id = await control.getAttribute('data-control-id');
-          return { id, element: control };
+          if (!id) throw new Error(`Control id ${id} not found`);
+          const isPinned = await this.isControlPinned(id);
+          const element = await this.find.byCssSelector(
+            `[data-test-subj='${
+              isPinned ? 'control-frame' : 'dashboardPanel'
+            }']:has([data-control-id='${id}'])`
+          );
+          return { id, element };
         })
       );
       const foundControlFrame = controlsWithIds.find(({ id }) => id === controlId);
@@ -259,17 +301,18 @@ export class DashboardPageControls extends FtrService {
 
   public async hoverOverExistingControl(controlId: string) {
     const elementToHover = await this.getControlElementById(controlId);
+    const isPinned = await this.isControlPinned(controlId);
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
       await elementToHover.focus();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
+      expect(this.testSubjects.descendantExists('hover-actions', elementToHover));
     });
   }
 
   public async hideHoverActions() {
     await this.retry.try(async () => {
       await this.browser.clickMouseButton({ x: 0, y: 0 });
-      await this.testSubjects.missingOrFail('presentationUtil__floatingActions', {
+      await this.testSubjects.missingOrFail('hover-actions', {
         allowHidden: true,
       });
     });
@@ -279,26 +322,38 @@ export class DashboardPageControls extends FtrService {
     const elementToClick = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToClick.click();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
+      await this.panelActions.panelActionExists(
+        `embeddablePanelAction-deletePanel`,
+        elementToClick
+      );
     });
   }
 
   public async editExistingControl(controlId: string) {
     this.log.debug(`Opening control editor for control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-editPanel`);
+    await this.panelActions.clickPanelAction(
+      `embeddablePanelAction-editPanel`,
+      await this.getControlElementById(controlId)
+    );
   }
 
   public async removeExistingControl(controlId: string) {
     this.log.debug(`Removing control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-deletePanel`);
+    await this.panelActions.clickPanelAction(
+      `embeddablePanelAction-deletePanel`,
+      await this.getControlElementById(controlId)
+    );
   }
 
   public async clearControlSelections(controlId: string) {
     this.log.debug(`clearing all selections from control ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-clearControl`);
+    await this.panelActions.clickPanelAction(
+      `embeddablePanelAction-clearControl`,
+      await this.getControlElementById(controlId)
+    );
   }
 
   public async verifyControlType(controlId: string, expectedType: string) {

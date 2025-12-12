@@ -230,5 +230,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(suggestionKeys).to.not.contain('woof');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
     });
+
+    it('Chains pinned and unpinned controls with the same behavior', async () => {
+      await dashboardControls.unpinExistingControl(controlIds[2]);
+      await dashboardControls.unpinExistingControl(controlIds[0]);
+
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      await dashboardControls.optionsListPopoverSelectOption('meow');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+
+      await dashboardControls.clearControlSelections(controlIds[0]);
+      await dashboardControls.clearControlSelections(controlIds[1]);
+
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      const optionsCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
+      expect(optionsCount).to.be(1);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+    });
   });
 }
