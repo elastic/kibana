@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
@@ -55,7 +56,11 @@ const datatableStateSharedOptionsSchema = {
                   schema.object({ type: schema.literal('auto') }),
                   schema.object({
                     type: schema.literal('custom'),
-                    max_lines: schema.number({ defaultValue: 3, min: 1, max: 5 }),
+                    max_lines: schema.number({
+                      defaultValue: DEFAULT_HEADER_ROW_HEIGHT_LINES,
+                      min: 1,
+                      max: 5,
+                    }),
                   }),
                 ],
                 {
@@ -71,7 +76,11 @@ const datatableStateSharedOptionsSchema = {
                   schema.object({ type: schema.literal('auto') }),
                   schema.object({
                     type: schema.literal('custom'),
-                    lines: schema.number({ defaultValue: 1, min: 1, max: 20 }),
+                    lines: schema.number({
+                      defaultValue: DEFAULT_ROW_HEIGHT_LINES,
+                      min: 1,
+                      max: 20,
+                    }),
                   }),
                 ],
                 {
