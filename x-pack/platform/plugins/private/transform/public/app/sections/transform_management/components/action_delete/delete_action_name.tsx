@@ -18,6 +18,7 @@ import type { TransformListRow } from '../../../../common';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 import type { TransformState } from '../../../../../../common/constants';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 export const deleteActionNameText = i18n.translate(
   'xpack.transform.transformList.deleteActionNameText',
@@ -32,26 +33,22 @@ const transformCanNotBeDeleted = (i: TransformListRow) =>
 
 export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
   const disabled = items.some(transformCanNotBeDeleted);
+  const hasManagedTransforms = items.some((item) => isManagedTransform(item));
 
-  return forceDisable === true || disabled || missingTransformStats(items);
+  return forceDisable || disabled || missingTransformStats(items) || hasManagedTransforms;
 };
 
 export interface DeleteActionNameProps {
   items: TransformListRow[];
   canDeleteTransform: boolean;
-  disabled: boolean;
-  isBulkAction: boolean;
-  forceDisable: boolean;
 }
 
 export const getDeleteActionDisabledMessage = ({
   items,
   canDeleteTransform,
-  forceDisable,
 }: {
   items: TransformListRow[];
   canDeleteTransform: TransformCapabilities['canDeleteTransform'];
-  forceDisable: boolean;
 }) => {
   const isBulkAction = items.length > 1;
 
@@ -66,10 +63,26 @@ export const getDeleteActionDisabledMessage = ({
     return createCapabilityFailureMessage('canDeleteTransform');
   }
 
+  const hasManagedTransforms = items.some((item) => isManagedTransform(item));
+  if (hasManagedTransforms) {
+    return isBulkAction
+      ? i18n.translate(
+          'xpack.transform.transformList.deleteManagedBulkActionDisabledToolTipContent',
+          {
+            defaultMessage:
+              'Managed transforms cannot be deleted. They are preconfigured by Elastic and may impact other parts of the product.',
+          }
+        )
+      : i18n.translate('xpack.transform.transformList.deleteManagedActionDisabledToolTipContent', {
+          defaultMessage:
+            'This transform cannot be deleted. It is preconfigured by Elastic and may impact other parts of the product.',
+        });
+  }
+
   const disabled = items.some(transformCanNotBeDeleted);
 
   if (disabled) {
-    return isBulkAction === true
+    return isBulkAction
       ? i18n.translate('xpack.transform.transformList.deleteBulkActionDisabledToolTipContent', {
           defaultMessage: 'One or more selected transforms must be stopped in order to be deleted.',
         })
@@ -79,14 +92,9 @@ export const getDeleteActionDisabledMessage = ({
   }
 };
 
-export const DeleteActionName: FC<DeleteActionNameProps> = ({
-  items,
-  canDeleteTransform,
-  disabled,
-  isBulkAction,
-  forceDisable,
-}) => {
-  const content = getDeleteActionDisabledMessage({ items, canDeleteTransform, forceDisable });
+export const DeleteActionName: FC<DeleteActionNameProps> = ({ items, canDeleteTransform }) => {
+  const content = getDeleteActionDisabledMessage({ items, canDeleteTransform });
+
   if (content) {
     return (
       <EuiToolTip position="top" content={content}>
