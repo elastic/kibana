@@ -496,5 +496,4 @@ describe('MCP tool_type', () => {
       });
     });
   });
-
 });
