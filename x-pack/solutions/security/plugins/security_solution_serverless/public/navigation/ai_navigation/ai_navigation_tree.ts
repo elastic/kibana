@@ -61,10 +61,14 @@ export const createAiNavigationTree = (
               id: SecurityPageName.configurationsBasicRules,
               link: securityLink(SecurityPageName.configurationsBasicRules),
             },
-            {
-              id: SecurityPageName.configurationsAiSettings,
-              link: securityLink(SecurityPageName.configurationsAiSettings),
-            },
+            ...(chatExperience !== AIChatExperience.Agent
+              ? [
+                  {
+                    id: SecurityPageName.configurationsAiSettings,
+                    link: securityLink(SecurityPageName.configurationsAiSettings),
+                  },
+                ]
+              : []),
           ],
         },
       ],
