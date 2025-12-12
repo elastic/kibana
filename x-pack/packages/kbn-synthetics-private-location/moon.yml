@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/synthetics-private-location'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-management-team'
+  defaultOwner: '@elastic/actionable-obs-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/synthetics-private-location'
   description: Moon project for @kbn/synthetics-private-location
   channel: ''
-  owner: '@elastic/obs-ux-management-team'
+  owner: '@elastic/actionable-obs-team'
   metadata:
     sourceRoot: x-pack/packages/kbn-synthetics-private-location
 dependsOn:
