@@ -20,7 +20,12 @@ import {
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
+import type {
+  GetGroupStats,
+  GroupingArgs,
+  GroupPanelRenderer,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { GroupTakeActionItems } from './types';
@@ -89,6 +94,20 @@ export interface AlertsTableComponentProps {
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   tableId: TableIdLiteral;
   to: string;
+
+  /**
+   * A callback function that is invoked whenever the grouping aggregations are updated.
+   * It receives the parsed aggregation data as its only argument. This can be used to
+   * react to changes in the grouped data, for example, to extract information from
+   * the aggregation results.
+   */
+  onAggregationsChange?: (
+    aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
+    groupingLevel?: number
+  ) => void;
+
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -375,6 +394,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
           signalIndexName={dataViewTitle}
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
+          onAggregationsChange={props.onAggregationsChange}
+          additionalToolbarControls={props.additionalToolbarControls}
         />
       );
     },

@@ -21,7 +21,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
@@ -442,7 +442,6 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isSaveable={isSaveable}
         isScrollable
-        language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}

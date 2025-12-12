@@ -10,7 +10,7 @@
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, switchMap, tap } from 'rxjs';
 import { type ICPSManager, type ProjectsData, PROJECT_ROUTING } from '@kbn/cps-utils';
 import type { ProjectFetcher } from './project_fetcher';
 
@@ -36,6 +36,7 @@ export class CPSManager implements ICPSManager {
     DEFAULT_PROJECT_ROUTING
   );
   private readonly projectPickerAccess$;
+  private readonly projectPickerAccessValue$ = new BehaviorSubject<string>('editable');
 
   constructor(deps: { http: HttpSetup; logger: Logger; application: ApplicationStart }) {
     this.http = deps.http;
@@ -48,11 +49,20 @@ export class CPSManager implements ICPSManager {
     ]).pipe(
       switchMap(async ([appId, location]) => {
         // Lazy load access control only when observable is subscribed
-        const { getProjectRoutingAccess, getReadonlyMessage } = await import('./async_services');
-        const access = getProjectRoutingAccess(appId ?? '', location ?? '');
-        return { access, readonlyMessage: getReadonlyMessage(appId) };
+        const { getProjectRoutingAccess } = await import('./async_services');
+        return getProjectRoutingAccess(appId ?? '', location ?? '');
+      }),
+      tap((access) => {
+        this.projectPickerAccessValue$.next(access);
+        // Reset project routing to default when access is disabled
+        if (access === 'disabled') {
+          this.projectRouting$.next(DEFAULT_PROJECT_ROUTING);
+        }
       })
     );
+
+    // Subscribe to keep the value updated
+    this.projectPickerAccess$.subscribe();
   }
 
   /**
@@ -73,6 +83,9 @@ export class CPSManager implements ICPSManager {
    * Get the current project routing value
    */
   public getProjectRouting() {
+    if (this.projectPickerAccessValue$.value === 'disabled') {
+      return undefined;
+    }
     return this.projectRouting$.value;
   }
 

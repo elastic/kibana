@@ -131,12 +131,26 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       <>
         {/*
         The following Global CSS is needed to ensure that modal will not overlay SearchBar's
-        autocomplete popup
+        autocomplete popup. The autocomplete popup has z-index 4001, so we need to ensure
+        the modal and its overlay don't block it.
       */}
         <Global
           styles={css`
             .euiOverlayMask:has(.workflowExecuteModal) {
               z-index: 4000;
+            }
+            /* Ensure query input container allows autocomplete to overflow */
+            .workflowExecuteModal [data-test-subj='workflow-query-input'] {
+              position: relative;
+              z-index: 1;
+            }
+            /* Allow autocomplete popup to render above modal */
+            .workflowExecuteModal .kbnQueryBar__textareaWrapOuter {
+              overflow: visible;
+            }
+            .workflowExecuteModal .kbnTypeahead,
+            .workflowExecuteModal .kbnTypeahead__popover {
+              z-index: 4002 !important;
             }
           `}
         />
