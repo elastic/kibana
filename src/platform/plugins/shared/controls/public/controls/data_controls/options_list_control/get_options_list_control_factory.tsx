@@ -77,17 +77,17 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);
 
-      const dataControlManager: DataControlStateManager = initializeDataControlManager<EditorState>(
-        {
+      const dataControlManager: DataControlStateManager =
+        await initializeDataControlManager<EditorState>({
           controlId: uuid,
           controlType: OPTIONS_LIST_CONTROL,
           typeDisplayName: OptionsListStrings.control.getDisplayName(),
           state,
           parentApi,
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
+          getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
           editorStateManager,
-        }
-      );
+        });
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange

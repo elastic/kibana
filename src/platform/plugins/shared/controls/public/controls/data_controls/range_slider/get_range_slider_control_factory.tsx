@@ -49,7 +49,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 
       const editorStateManager = initializeEditorStateManager(state);
 
-      const dataControlManager = initializeDataControlManager<
+      const dataControlManager = await initializeDataControlManager<
         Pick<RangeSliderControlState, 'step'>
       >({
         controlId: uuid,
