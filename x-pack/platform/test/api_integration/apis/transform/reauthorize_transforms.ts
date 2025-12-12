@@ -45,57 +45,57 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.deleteIndices(generateDestIndex(transformId));
   }
 
-  async function expectUnauthorizedTransform(transformId: string, createdByUser: USER) {
-    const user = createdByUser;
-    const { body: getTransformBody } = await transform.api.getTransform(transformId);
-    const transformInfo = getTransformBody.transforms[0];
-    const expectedApiKeyId = apiKeysForTransformUsers?.get(user)?.id;
-
-    expect(typeof transformInfo.authorization.api_key).to.be('object');
-    expect(transformInfo.authorization.api_key.id).to.eql(
-      expectedApiKeyId,
-      `Expected authorization api_key for ${transformId} to be ${expectedApiKeyId} (got ${JSON.stringify(
-        transformInfo.authorization.api_key
-      )})`
-    );
-
-    const stats = await transform.api.getTransformStats(transformId);
-    expect(stats.state).to.eql(
-      TRANSFORM_STATE.STOPPED,
-      `Expected transform state of ${transformId} to be '${TRANSFORM_STATE.STOPPED}' (got ${stats.state})`
-    );
-    expect(stats.health?.status).to.eql(
-      'red',
-      `Expected transform health status of ${transformId} to be 'red' (got ${stats.health?.status})`
-    );
-    expect(stats.health?.issues![0].type).to.eql(
-      'privileges_check_failed',
-      `Expected transform health issue of ${transformId} to be 'privileges_check_failed' (got ${stats.health?.status})`
-    );
-  }
-
-  async function expectAuthorizedTransform(transformId: string, createdByUser: USER) {
-    const { body: getTransformBody } = await transform.api.getTransform(transformId);
-    const transformInfo = getTransformBody.transforms[0];
-
-    const expectedApiKeyId = apiKeysForTransformUsers?.get(createdByUser)?.id;
-    expect(transformInfo.authorization.api_key.id).to.not.eql(
-      expectedApiKeyId,
-      `Expected authorization api_key for ${transformId} to not be ${expectedApiKeyId} (got ${JSON.stringify(
-        transformInfo.authorization.api_key
-      )})`
-    );
-    const stats = await transform.api.getTransformStats(transformId);
-    expect(stats.health?.status).to.eql(
-      'green',
-      `Expected transform health status of ${transformId} to be 'green' (got ${stats.health?.status})`
-    );
-  }
-
   // If transform was created with sufficient permissions -> should create and start
   // If transform was created with insufficient permissions -> should create but not start
   describe('/internal/transform/reauthorize_transforms', function () {
     const apiKeysForTransformUsers = new Map<USER, SecurityCreateApiKeyResponse>();
+
+    async function expectUnauthorizedTransform(transformId: string, createdByUser: USER) {
+      const user = createdByUser;
+      const { body: getTransformBody } = await transform.api.getTransform(transformId);
+      const transformInfo = getTransformBody.transforms[0];
+      const expectedApiKeyId = apiKeysForTransformUsers?.get(user)?.id;
+
+      expect(typeof transformInfo.authorization.api_key).to.be('object');
+      expect(transformInfo.authorization.api_key.id).to.eql(
+        expectedApiKeyId,
+        `Expected authorization api_key for ${transformId} to be ${expectedApiKeyId} (got ${JSON.stringify(
+          transformInfo.authorization.api_key
+        )})`
+      );
+
+      const stats = await transform.api.getTransformStats(transformId);
+      expect(stats.state).to.eql(
+        TRANSFORM_STATE.STOPPED,
+        `Expected transform state of ${transformId} to be '${TRANSFORM_STATE.STOPPED}' (got ${stats.state})`
+      );
+      expect(stats.health?.status).to.eql(
+        'red',
+        `Expected transform health status of ${transformId} to be 'red' (got ${stats.health?.status})`
+      );
+      expect(stats.health?.issues![0].type).to.eql(
+        'privileges_check_failed',
+        `Expected transform health issue of ${transformId} to be 'privileges_check_failed' (got ${stats.health?.status})`
+      );
+    }
+
+    async function expectAuthorizedTransform(transformId: string, createdByUser: USER) {
+      const { body: getTransformBody } = await transform.api.getTransform(transformId);
+      const transformInfo = getTransformBody.transforms[0];
+
+      const expectedApiKeyId = apiKeysForTransformUsers?.get(createdByUser)?.id;
+      expect(transformInfo.authorization.api_key.id).to.not.eql(
+        expectedApiKeyId,
+        `Expected authorization api_key for ${transformId} to not be ${expectedApiKeyId} (got ${JSON.stringify(
+          transformInfo.authorization.api_key
+        )})`
+      );
+      const stats = await transform.api.getTransformStats(transformId);
+      expect(stats.health?.status).to.eql(
+        'green',
+        `Expected transform health status of ${transformId} to be 'green' (got ${stats.health?.status})`
+      );
+    }
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
