@@ -309,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', usersSessions.get('user_one')!.cookie.cookieString())
         .send({
-          avatar: { initials: 'some-initials', color: 'some-color' },
+          avatar: { initials: 'some-initials', color: '#f3f3f3' },
           userSettings: { darkMode: 'dark', contrastMode: 'high' },
         })
         .expect(200);
