@@ -134,6 +134,7 @@ exports[`Ccr that it renders normally 1`] = `
             },
           }
         }
+        tableCaption="CCR follower indices"
       />
     </EuiPanel>
   </EuiPageBody>
