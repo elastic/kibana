@@ -30,8 +30,6 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
-import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
-import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -43,15 +41,18 @@ import {
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
+import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
+import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
   dataService,
+  navigationService,
   serverlessService,
-  unifiedSearchService,
 } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
 
@@ -72,14 +73,16 @@ export function InternalDashboardTopNav({
   embedSettings,
   forceHideUnifiedSearch,
   redirectTo,
+  setCustomHeaderActionMenu,
   showBorderBottom = true,
+  showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
-  const { setHeaderActionMenuBeta, onAppLeave } = useDashboardMountContext();
+  const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
 
@@ -94,22 +97,6 @@ export function InternalDashboardTopNav({
       dashboardApi.viewMode$
     );
 
-  const maybeRedirect = useCallback(
-    (result?: SaveDashboardReturn) => {
-      if (!result) return;
-      const { redirectRequired, id } = result;
-      if (redirectRequired) {
-        redirectTo({
-          id,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-      }
-    },
-    [redirectTo]
-  );
-
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -118,20 +105,6 @@ export function InternalDashboardTopNav({
   }, [title, viewMode, lastSavedId]);
 
   const styles = useMemoCss(topNavStyles);
-
-  useEffect(() => {
-    setHeaderActionMenuBeta?.({
-      items: [
-        {
-          label: 'Test',
-          run: () => {},
-          order: 1,
-          id: 'placeholder',
-          iconType: 'gear',
-        },
-      ],
-    });
-  }, [setHeaderActionMenuBeta]);
 
   /**
    * focus on the top header when title or view mode is changed
@@ -264,21 +237,32 @@ export function InternalDashboardTopNav({
     };
   }, [embedSettings, forceHideUnifiedSearch, fullScreenMode, isChromeVisible, viewMode]);
 
-  UseUnmount(() => {
-    dashboardApi.clearOverlays();
-  });
-
-  const setFavoriteButtonMountPoint = useCallback(
-    (mountPoint: MountPoint<HTMLElement> | undefined) => {
-      if (mountPoint) {
-        return coreServices.chrome.setBreadcrumbsAppendExtension({
-          content: mountPoint,
-          order: 0,
+  const maybeRedirect = useCallback(
+    (result?: SaveDashboardReturn) => {
+      if (!result) return;
+      const { redirectRequired, id } = result;
+      if (redirectRequired) {
+        redirectTo({
+          id,
+          editMode: true,
+          useReplace: true,
+          destination: 'dashboard',
         });
       }
     },
-    []
+    [redirectTo]
   );
+
+  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
+    isLabsShown,
+    setIsLabsShown,
+    maybeRedirect,
+    showResetChange,
+  });
+
+  UseUnmount(() => {
+    dashboardApi.clearOverlays();
+  });
 
   const badges = useMemo(() => {
     const allBadges: TopNavMenuProps['badges'] = [];
@@ -344,7 +328,17 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
 
-  void badges;
+  const setFavoriteButtonMountPoint = useCallback(
+    (mountPoint: MountPoint<HTMLElement> | undefined) => {
+      if (mountPoint) {
+        return coreServices.chrome.setBreadcrumbsAppendExtension({
+          content: mountPoint,
+          order: 0,
+        });
+      }
+    },
+    []
+  );
 
   return (
     <div css={styles.container}>
@@ -354,22 +348,40 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      {viewMode !== 'print' && visibilityProps.showSearchBar && (
-        <unifiedSearchService.ui.SearchBar
-          {...visibilityProps}
-          query={query as Query | undefined}
-          screenTitle={title}
-          savedQueryId={savedQueryId}
-          indexPatterns={allDataViews ?? []}
-          appName={DASHBOARD_APP_ID}
-          onQuerySubmit={(_payload, isUpdate) => {
-            if (isUpdate === false) {
-              dashboardApi.forceRefresh();
-            }
-          }}
-          onSavedQueryIdChange={setSavedQueryId}
-        />
-      )}
+      <navigationService.ui.TopNavMenu
+        {...visibilityProps}
+        query={query as Query | undefined}
+        badges={badges}
+        screenTitle={title}
+        useDefaultBehaviors={true}
+        savedQueryId={savedQueryId}
+        indexPatterns={allDataViews ?? []}
+        allowSavingQueries
+        appName={DASHBOARD_APP_ID}
+        visible={viewMode !== 'print'}
+        setMenuMountPoint={
+          embedSettings || fullScreenMode
+            ? setCustomHeaderActionMenu ?? undefined
+            : setHeaderActionMenu
+        }
+        config={
+          visibilityProps.showTopNavMenu
+            ? viewMode === 'edit'
+              ? editModeTopNavConfig
+              : viewModeTopNavConfig
+            : undefined
+        }
+        onQuerySubmit={(_payload, isUpdate) => {
+          if (isUpdate === false) {
+            dashboardApi.forceRefresh();
+          }
+        }}
+        onSavedQueryIdChange={setSavedQueryId}
+        useBackgroundSearchButton={
+          dataService.search.isBackgroundSearchEnabled &&
+          getDashboardCapabilities().storeSearchSession
+        }
+      />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
