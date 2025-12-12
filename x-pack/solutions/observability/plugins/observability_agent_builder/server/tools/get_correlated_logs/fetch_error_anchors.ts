@@ -126,20 +126,17 @@ async function fetchAnchorLog({
 
 export function findCorrelationIdentifier(
   hit: SearchHit<ErrorLogDoc | undefined, any, any>,
-  fields: string[]
+  correlationFields: string[]
 ): ErrorAnchor | undefined {
   if (!hit) return undefined;
 
-  const correlationIdentifier = fields
+  const correlationIdentifier = correlationFields
     .map((correlationField) => {
-      // Try to get value from fields (if available) or _source
-      const timestamp =
-        (first(hit.fields?.['@timestamp']) as string) || hit._source?.['@timestamp'];
-      const value =
-        (first(get(hit.fields, correlationField)) as string) || get(hit._source, correlationField);
+      const timestamp = first(hit.fields?.['@timestamp']) as string;
+      const value = first(get(hit.fields, correlationField)) as string;
 
       return {
-        '@timestamp': timestamp!,
+        '@timestamp': timestamp,
         correlation: {
           field: correlationField,
           value,
