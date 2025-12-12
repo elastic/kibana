@@ -1094,8 +1094,17 @@
     }
   },
   "data_connector": {
-    "dynamic": false,
     "properties": {
+      "config": {
+        "enabled": false,
+        "type": "object"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "features": {
+        "type": "keyword"
+      },
       "kscIds": {
         "type": "keyword"
       },
@@ -1112,6 +1121,9 @@
       },
       "type": {
         "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
       },
       "workflowIds": {
         "type": "keyword"
