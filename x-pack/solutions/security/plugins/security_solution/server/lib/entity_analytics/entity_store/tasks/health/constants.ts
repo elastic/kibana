@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export * from './field_retention_enrichment/field_retention_enrichment_task';
-export * from './data_view_refresh/data_view_refresh_task';
-export * from './snapshot/snapshot';
-export * from './health/health';
+export const SCOPE = ['securitySolution'];
+export const TYPE = 'entity_store:health';
+export const VERSION = '1.0.0';
+export const INTERVAL = '1h';
+export const TIMEOUT = '10m';
