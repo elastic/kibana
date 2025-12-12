@@ -43,6 +43,7 @@ import {
   HelpPopover,
   ShortcutsPopover,
   ConsoleTourStep,
+  QueryDslHelpFlyout,
 } from '../../components';
 import { History } from '../history';
 import { useDataInit } from '../../hooks';
@@ -124,6 +125,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
   const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
+  const [isQueryDslHelpOpen, setIsQueryDslHelpOpen] = useState(false);
   const styles = useStyles(isEmbeddable);
 
   const {
@@ -265,6 +267,19 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiToolTip content={MAIN_PANEL_LABELS.queryDslHelpButtonTooltip}>
+                <EuiButtonEmpty
+                  iconType="documentation"
+                  onClick={() => setIsQueryDslHelpOpen(true)}
+                  size="xs"
+                  data-test-subj="consoleQueryDslHelpButton"
+                  aria-label={MAIN_PANEL_LABELS.queryDslHelpButtonTooltip}
+                >
+                  {MAIN_PANEL_LABELS.queryDslHelpButton}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
                 <>
                   <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
@@ -397,6 +412,8 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           fileContent={isConfirmImportOpen}
         />
       )}
+
+      {isQueryDslHelpOpen && <QueryDslHelpFlyout onClose={() => setIsQueryDslHelpOpen(false)} />}
     </div>
   );
 }
