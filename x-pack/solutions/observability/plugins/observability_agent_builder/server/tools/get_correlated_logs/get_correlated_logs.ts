@@ -17,7 +17,11 @@ import type {
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { parseDatemath } from '../../utils/time';
-import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_TIME_RANGE } from './constants';
+import {
+  DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_FIELDS,
+} from './constants';
 import { fetchAnchorLogs } from './fetch_error_anchors';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
 
@@ -54,7 +58,7 @@ const getCorrelatedLogsSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      'Optional list of fields to return for each log entry. If not provided, the full log document is returned.'
+      'Optional list of fields to return for each log entry. If not provided, a default set of common Observability fields is returned.'
     ),
 });
 
@@ -82,7 +86,7 @@ export function createGetCorrelatedLogsTool({
         index,
         correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
         logId,
-        fields,
+        fields = DEFAULT_FIELDS,
       },
       { esClient }
     ) => {

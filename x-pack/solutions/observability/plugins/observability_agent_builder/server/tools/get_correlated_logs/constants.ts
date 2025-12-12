@@ -70,6 +70,47 @@ export const DEFAULT_ERROR_SEVERITY_FILTER = {
   },
 };
 
+export const DEFAULT_FIELDS = [
+  '@timestamp',
+  'message',
+  // Correlation fields
+  ...DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+
+  // Error severity fields
+  'log.level',
+  'level',
+  'severity',
+  'event.severity',
+
+  // Service fields
+  'service.*',
+
+  // Host fields
+  'host.*',
+
+  // Container fields
+  'container.*',
+
+  // Kubernetes fields
+  'kubernetes.*',
+
+  // Cloud fields
+  'cloud.*',
+
+  // Error fields
+  'error.*',
+
+  // Event fields
+  'event.*',
+
+  // HTTP/URL/User Agent fields
+  'url.*',
+  'user_agent.*',
+  'http.request.method',
+  'http.response.status_code',
+  'client.ip',
+];
+
 export const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
   end: 'now',
