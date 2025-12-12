@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getExpressionType } from '../..';
+import { isFunctionExpression } from '../../../../../ast/is';
+import { within } from '../../../../../ast/location';
 import type { ISuggestionItem } from '../../../../registry/types';
+import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';
+import { isExpressionComplete } from '../../expressions';
 import { getOverlapRange } from '../../shared';
-import { dispatchStates } from './positions/dispatcher';
+import { dispatchPartialOperators } from './operators/partial/dispatcher';
+import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
 import { getPosition, type ExpressionPosition } from './position';
+import { dispatchStates } from './positions/dispatcher';
 import type {
   ExpressionContext,
   ExpressionContextOptions,
   SuggestForExpressionParams,
+  SuggestForExpressionResult,
 } from './types';
 import { isNullCheckOperator } from './utils';
-import { dispatchPartialOperators } from './operators/partial/dispatcher';
-import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
-import { nullCheckOperators, inOperators, patternMatchOperators } from '../../../all_operators';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
@@ -27,19 +32,25 @@ const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
 /** Coordinates position detection, handler selection, and range attachment */
 export async function suggestForExpression(
   params: SuggestForExpressionParams
-): Promise<ISuggestionItem[]> {
+): Promise<SuggestForExpressionResult> {
   const baseCtx = buildContext(params);
+  const computed = computeDerivedState(baseCtx);
+
   const partialSuggestions = await trySuggestForPartialOperators(baseCtx);
 
   if (partialSuggestions !== null) {
-    return attachRanges(baseCtx, partialSuggestions);
+    return {
+      suggestions: attachRanges(baseCtx, partialSuggestions),
+      computed,
+    };
   }
 
-  const position: ExpressionPosition = getPosition(baseCtx.innerText, baseCtx.expressionRoot);
+  const suggestions = await dispatchStates(baseCtx, computed.position);
 
-  const ctx = { ...baseCtx, position };
-  const suggestions = await dispatchStates(ctx, position);
-  return attachRanges(ctx, suggestions);
+  return {
+    suggestions: attachRanges(baseCtx, suggestions),
+    computed,
+  };
 }
 
 /**
@@ -105,6 +116,26 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
     context: params.context,
     callbacks: params.callbacks,
     options,
+  };
+}
+
+/** Computes derived state from the expression context */
+function computeDerivedState(ctx: ExpressionContext) {
+  const { expressionRoot, innerText, cursorPosition, context } = ctx;
+  const position: ExpressionPosition = getPosition(innerText, expressionRoot);
+  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const isComplete = isExpressionComplete(expressionType, innerText);
+  const insideFunction =
+    expressionRoot !== undefined &&
+    isFunctionExpression(expressionRoot) &&
+    within(cursorPosition, expressionRoot);
+
+  return {
+    innerText,
+    position,
+    expressionType,
+    isComplete,
+    insideFunction,
   };
 }
 
