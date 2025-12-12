@@ -14,7 +14,7 @@ const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
 test.describe(
   'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
-  { tag: ['@ess'] },
+  { tag: ['@svlOblt'] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Create a wired stream
@@ -131,7 +131,7 @@ test.describe(
 
 test.describe(
   'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
-  { tag: ['@ess'] },
+  { tag: ['@svlOblt'] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Generate logs data for a classic stream
