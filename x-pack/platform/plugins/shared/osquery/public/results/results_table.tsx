@@ -21,6 +21,7 @@ import {
   EuiSkeletonText,
   EuiProgress,
   EuiIconTip,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -60,6 +61,23 @@ const euiProgressCss = {
 const resultsTableContainerCss = {
   width: '100%',
   maxWidth: '1200px',
+};
+
+const dataGridWrapperCss = {
+  position: 'relative' as const,
+};
+
+const loadingOverlayCss = {
+  position: 'absolute' as const,
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  zIndex: 10,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };
 
 export interface ResultsTableComponentProps {
@@ -110,6 +128,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+
   const onChangeItemsPerPage = useCallback(
     (pageSize: any) =>
       setPagination((currentPagination) => ({
@@ -117,10 +136,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         pageSize,
         pageIndex: 0,
       })),
-    [setPagination]
-  );
-  const onChangePage = useCallback(
-    (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
     [setPagination]
   );
 
@@ -132,7 +147,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const { data: allResultsData, isLoading } = useAllResults({
+  const {
+    data: allResultsData,
+    isLoading,
+    isFetchingWithoutCursor,
+  } = useAllResults({
     actionId,
     liveQueryActionId,
     startDate,
@@ -144,6 +163,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       direction: sortedColumn.direction as Direction,
     })),
   });
+
+  const onChangePage = useCallback((newPageIndex: number) => {
+    setPagination((currentPagination) => ({ ...currentPagination, pageIndex: newPageIndex }));
+  }, []);
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
   const columnVisibility = useMemo(
@@ -160,12 +183,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const gridData = useContext(DataContext);
 
-        // @ts-expect-error update types
-        const value = gridData[rowIndex % pagination.pageSize]?.fields[columnId];
+        const value = gridData[rowIndex % pagination.pageSize]?.fields?.[columnId];
 
         if (columnId === 'agent.name') {
-          // @ts-expect-error update types
-          const agentIdValue = gridData[rowIndex % pagination.pageSize]?.fields['agent.id'];
+          const agentIdValue = gridData[rowIndex % pagination.pageSize]?.fields?.['agent.id'];
 
           return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
         }
@@ -411,19 +432,26 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
           <div css={resultsTableContainerCss}>
-            <EuiDataGrid
-              css={euiDataGridCss}
-              data-test-subj="osqueryResultsTable"
-              aria-label="Osquery results"
-              columns={columns}
-              columnVisibility={columnVisibility}
-              rowCount={allResultsData?.total ?? 0}
-              renderCellValue={renderCellValue}
-              leadingControlColumns={leadingControlColumns}
-              sorting={tableSorting}
-              pagination={tablePagination}
-              toolbarVisibility={toolbarVisibility}
-            />
+            <div css={dataGridWrapperCss}>
+              {isFetchingWithoutCursor && (
+                <div css={loadingOverlayCss}>
+                  <EuiLoadingSpinner size="xl" />
+                </div>
+              )}
+              <EuiDataGrid
+                css={euiDataGridCss}
+                data-test-subj="osqueryResultsTable"
+                aria-label="Osquery results"
+                columns={columns}
+                columnVisibility={columnVisibility}
+                rowCount={allResultsData?.total ?? 0}
+                renderCellValue={renderCellValue}
+                leadingControlColumns={leadingControlColumns}
+                sorting={tableSorting}
+                pagination={tablePagination}
+                toolbarVisibility={toolbarVisibility}
+              />
+            </div>
           </div>
         </DataContext.Provider>
       )}

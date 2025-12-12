@@ -11,10 +11,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@kbn/react-query';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import type { estypes } from '@elastic/elasticsearch';
-
 import { useActionResults } from './use_action_results';
-import { Direction } from '../../common/search_strategy';
+import { Direction, type ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -28,8 +26,7 @@ interface ActionResultsSummaryProps {
   error?: string;
 }
 
-// Use Elasticsearch's native SearchHit type for result edges
-type ResultEdge = estypes.SearchHit<object>;
+type ResultEdge = ResultEdges[number];
 
 const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_PAGE_INDEX = 0;
