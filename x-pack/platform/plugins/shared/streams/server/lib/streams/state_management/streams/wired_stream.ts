@@ -532,10 +532,22 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     validateSettings(this._definition, this.dependencies.isServerless);
 
-    if (this._changes.settings && existsInStartingState) {
+    const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!
+    ) as WiredStream[];
+
+    // Settings can be applied due to an upstream stream change, so validate when any stream in the chain changed.
+    if (
+      existsInStartingState &&
+      ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings())
+    ) {
       const { existsAsDataStream } = await this.getMatchingDataStream();
       if (existsAsDataStream) {
-        const inheritedSettings = getInheritedSettings(ancestors);
+        const inheritedSettings = getInheritedSettings(
+          ancestorsAndSelf.map(
+            (ancestor) => ancestor.definition
+          ) as Streams.WiredStream.Definition[]
+        );
         const settingsValidation = await validateSettingsWithDryRun({
           scopedClusterClient: this.dependencies.scopedClusterClient,
           streamName: this._definition.name,
