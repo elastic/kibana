@@ -28,11 +28,11 @@ import {
 describe(
   'Entity analytics dashboard page',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess'],
   },
   () => {
     beforeEach(() => {
-      login('admin');
+      login();
       deleteEntityStoreEngines();
       deleteRiskEngineConfiguration();
       visit(ENTITY_ANALYTICS_DASHBOARD_URL);
