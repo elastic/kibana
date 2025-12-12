@@ -99,7 +99,7 @@ const jobParamsSchema = z
     forceNow: forceNowSchema.optional(),
     pagingStrategy: pagingStrategySchema.optional(), // for CSV reports
     locatorParams: locatorParamsSchema.nullable().optional(), // this is for CSV v2 compatibility
-    searchSource: z.object({}).optional(), // this is for CSV v1 compatibility
+    searchSource: z.record(z.string(), z.any()).optional(), // this is for CSV v1 compatibility
     columns: z.array(z.string()).optional(), // this is for CSV v1 compatibility
   })
   .strict();
