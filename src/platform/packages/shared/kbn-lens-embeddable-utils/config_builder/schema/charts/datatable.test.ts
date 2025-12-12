@@ -14,7 +14,7 @@ type DefaultDatatableConfig = Pick<DatatableState, 'sampling' | 'ignore_global_f
 type DatatableWithoutDefaultsConfig = Omit<DatatableState, 'sampling' | 'ignore_global_filters'>;
 
 describe('Datatable Schema', () => {
-  const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'columns'> = {
+  const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
     type: 'datatable',
     dataset: {
       type: 'dataView',
@@ -28,10 +28,10 @@ describe('Datatable Schema', () => {
   };
 
   describe('basic configuration', () => {
-    it('validates columns with count metric operation', () => {
+    it('validates metrics with count metric operation', () => {
       const input: DatatableWithoutDefaultsConfig = {
         ...baseDatatableConfig,
-        columns: [
+        metrics: [
           {
             operation: 'count',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
@@ -43,10 +43,10 @@ describe('Datatable Schema', () => {
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
-    it('validates columns, rows and split_columns_by operations', () => {
+    it('validates metrics, rows and split_metrics_by operations', () => {
       const input: DatatableWithoutDefaultsConfig = {
         ...baseDatatableConfig,
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -70,7 +70,7 @@ describe('Datatable Schema', () => {
             size: 10,
           },
         ],
-        split_columns_by: [
+        split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
@@ -85,8 +85,8 @@ describe('Datatable Schema', () => {
   });
 
   describe('validation errors', () => {
-    it('throws on missing columns', () => {
-      const input: Omit<DatatableWithoutDefaultsConfig, 'columns'> = {
+    it('throws on missing metrics', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
         ...baseDatatableConfig,
         rows: [
           {
@@ -110,7 +110,7 @@ describe('Datatable Schema', () => {
     it('throws on empty rows', () => {
       const input: DatatableWithoutDefaultsConfig = {
         ...baseDatatableConfig,
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -121,7 +121,7 @@ describe('Datatable Schema', () => {
           },
         ],
         rows: [],
-        split_columns_by: [
+        split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
@@ -133,10 +133,10 @@ describe('Datatable Schema', () => {
       expect(() => datatableStateSchema.validate(input)).toThrow();
     });
 
-    it('throws on empty split_columns_by', () => {
+    it('throws on empty split_metrics_by', () => {
       const input: DatatableWithoutDefaultsConfig = {
         ...baseDatatableConfig,
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -146,7 +146,7 @@ describe('Datatable Schema', () => {
             field: 'bytes',
           },
         ],
-        split_columns_by: [],
+        split_metrics_by: [],
       };
 
       expect(() => datatableStateSchema.validate(input)).toThrow();
@@ -157,7 +157,7 @@ describe('Datatable Schema', () => {
         density: { height: { header: { type: 'invalid' } } };
       } = {
         ...baseDatatableConfig,
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -182,7 +182,7 @@ describe('Datatable Schema', () => {
         density: { mode: 'invalid' };
       } = {
         ...baseDatatableConfig,
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -205,7 +205,7 @@ describe('Datatable Schema', () => {
         density: { height: { header: { type: 'invalid' } } };
       } = {
         ...baseDatatableConfig,
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -228,7 +228,7 @@ describe('Datatable Schema', () => {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -256,7 +256,7 @@ describe('Datatable Schema', () => {
             value: { type: 'custom', lines: 2 },
           },
         },
-        columns: [
+        metrics: [
           {
             operation: 'median',
             field: 'bytes',
@@ -313,7 +313,7 @@ describe('Datatable Schema', () => {
             },
           },
         ],
-        split_columns_by: [
+        split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
@@ -342,7 +342,7 @@ describe('Datatable Schema', () => {
             value: { type: 'custom', lines: 2 },
           },
         },
-        columns: [
+        metrics: [
           {
             operation: 'value',
             column: 'avg_bytes',
@@ -406,7 +406,7 @@ describe('Datatable Schema', () => {
             },
           },
         ],
-        split_columns_by: [
+        split_metrics_by: [
           {
             operation: 'value',
             column: 'api',

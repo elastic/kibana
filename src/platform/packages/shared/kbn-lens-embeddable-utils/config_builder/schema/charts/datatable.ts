@@ -198,9 +198,9 @@ export const datatableStateSchemaNoESQL = schema.object({
   /**
    * Metric columns configuration, must define operation.
    */
-  columns: schema.arrayOf(
+  metrics: schema.arrayOf(
     mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateColumnsOptionsSchema),
-    { minSize: 1 }
+    { minSize: 1, meta: { description: 'Array of metrics to display as columns in the datatable' } }
   ),
   /**
    * Row configuration, optional bucket operations.
@@ -208,14 +208,16 @@ export const datatableStateSchemaNoESQL = schema.object({
   rows: schema.maybe(
     schema.arrayOf(mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsSchema), {
       minSize: 1,
+      meta: { description: 'Array of operations to split the datatable rows by' },
     })
   ),
   /**
-   * Split columns by configuration, optional bucket operations.
+   * Split metrics by configuration, optional bucket operations.
    */
-  split_columns_by: schema.maybe(
+  split_metrics_by: schema.maybe(
     schema.arrayOf(bucketOperationDefinitionSchema, {
       minSize: 1,
+      meta: { description: 'Array of operations to split the metric columns by' },
     })
   ),
 });
@@ -229,7 +231,7 @@ export const datatableStateSchemaESQL = schema.object({
   /**
    * Metric columns configuration, must define operation.
    */
-  columns: schema.arrayOf(
+  metrics: schema.arrayOf(
     schema.allOf([
       schema.object({
         ...genericOperationOptionsSchema,
@@ -237,7 +239,7 @@ export const datatableStateSchemaESQL = schema.object({
       datatableStateColumnsOptionsSchema,
       esqlColumnSchema,
     ]),
-    { minSize: 1 }
+    { minSize: 1, meta: { description: 'Array of metrics to display as columns in the datatable' } }
   ),
   /**
    * Row configuration, optional operations.
@@ -251,13 +253,13 @@ export const datatableStateSchemaESQL = schema.object({
         datatableStateRowsOptionsSchema,
         esqlColumnSchema,
       ]),
-      { minSize: 1 }
+      { minSize: 1, meta: { description: 'AArray of operations to split the datatable rows by' } }
     )
   ),
   /**
-   * Split columns by configuration, optional operations.
+   * Split metrics by configuration, optional operations.
    */
-  split_columns_by: schema.maybe(
+  split_metrics_by: schema.maybe(
     schema.arrayOf(
       schema.allOf([
         schema.object({
@@ -265,7 +267,7 @@ export const datatableStateSchemaESQL = schema.object({
         }),
         esqlColumnSchema,
       ]),
-      { minSize: 1 }
+      { minSize: 1, meta: { description: 'Array of operations to split the metric columns by' } }
     )
   ),
 });
