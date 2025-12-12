@@ -32,7 +32,7 @@ export const registerSolutionNavigation = async (
   const initialChatExperience = await firstValueFrom(chatExperience$.pipe(take(1)));
 
   const navigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(services, initialChatExperience)
+    ? createAiNavigationTree(initialChatExperience)
     : await createNavigationTree(services, initialChatExperience);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);

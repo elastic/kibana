@@ -16,7 +16,6 @@ import {
 } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
-import { type Services } from '../../common/services';
 import { AiNavigationIcon } from './icon';
 
 const SOLUTION_NAME = i18n.translate(
@@ -25,7 +24,6 @@ const SOLUTION_NAME = i18n.translate(
 );
 
 export const createAiNavigationTree = (
-  services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => ({
   body: [
@@ -77,8 +75,7 @@ export const createAiNavigationTree = (
         {
           link: 'discover',
         },
-        ...(services.application.capabilities.agentBuilder?.show === true &&
-        chatExperience === AIChatExperience.Agent
+        ...(chatExperience === AIChatExperience.Agent
           ? [
               {
                 // TODO: update icon to 'robot' once it's available in EUI

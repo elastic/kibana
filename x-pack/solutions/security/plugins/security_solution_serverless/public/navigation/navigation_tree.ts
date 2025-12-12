@@ -61,8 +61,7 @@ export const createNavigationTree = async (
       link: 'workflows',
       badgeType: 'techPreview' as const,
     },
-    ...(services.application.capabilities.agentBuilder?.show === true &&
-    chatExperience === AIChatExperience.Agent
+    ...(chatExperience === AIChatExperience.Agent
       ? [
           {
             // TODO: update icon to 'robot' once it's available in EUI
