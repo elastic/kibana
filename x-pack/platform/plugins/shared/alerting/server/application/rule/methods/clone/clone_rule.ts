@@ -161,6 +161,7 @@ export async function cloneRule<Params extends RuleParams = never>(
         references: ruleSavedObject.references,
         ruleId,
         returnRuleAttributes: true,
+        reason: 'rule cloned',
       })
   );
 

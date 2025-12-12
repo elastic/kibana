@@ -25,6 +25,7 @@ import type {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
+import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
   type Either,
@@ -40,6 +41,7 @@ import {
   rawDocExistsInNamespace,
   getSavedObjectFromSource,
   mergeForUpdate,
+  diffDocSource,
 } from './utils';
 import type { ApiExecutionContext } from './types';
 
@@ -72,6 +74,7 @@ type ExpectedBulkUpdateResult = Either<
     documentToSave: DocumentToSave;
     esRequestIndex: number;
     rawMigratedUpdatedDoc: SavedObjectsRawDoc;
+    diff?: IndexRequest;
   }
 >;
 
@@ -334,18 +337,82 @@ export const performBulkUpdate = async <T>(
         documentToSave: expectedBulkGetResult.value.documentToSave,
         rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
         migrationVersionCompatibility,
+        diff: {} as IndexRequest,
       };
+
+      const _id = serializer.generateRawId(getNamespaceId(objectNamespace), type, id);
+      const _index = commonHelper.getIndexForType(type);
 
       bulkUpdateParams.push(
         {
           index: {
-            _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
-            _index: commonHelper.getIndexForType(type),
+            _id,
+            _index,
             ...versionProperties,
           },
         },
         updatedMigratedDocumentToSave._source
       );
+
+      // Create snapshots
+      const registryType = registry.getType(type);
+      if (registryType?.snapshots) {
+        try {
+          const { _source } = updatedMigratedDocumentToSave._source;
+          // TODO: Below needs to be a bulk.get() not an individual request.
+          const current = await client.get({ id: _id, index: _index }, { ignore: [404] }); // What happens if we error out finding the current version?
+          const currentSource = current?._source as SavedObjectsRawDocSource;
+          const _diff = diffDocSource(currentSource, _source, registryType?.snapshotFilter);
+          if (_diff.stats.total > 0) {
+            // Diff detected
+            // 1. Add current version to snapshot index
+            const changeId = current?._version ?? 0;
+            const snapshotId = `${_id}:${changeId}`; // <-- deterministic id
+            const timestamp = new Date().toISOString();
+            const userId = updatedBy || 'unknown';
+            const message = options.reason ?? `item bulk_update`;
+            bulkUpdateParams.push(
+              {
+                // `index` allows us to rewrite an existing snapshot without erroring
+                index: {
+                  _id: snapshotId,
+                  _index: commonHelper.getSnapshotIndexForType(type),
+                },
+              },
+              {
+                '@timestamp': timestamp,
+                userId,
+                message,
+                changeId,
+                objectId: _id,
+                data: currentSource,
+              }
+            );
+
+            // 2. Prepare diff data so it can be stored separately
+            //    (On success)
+            expectedResult.diff = {
+              id: snapshotId,
+              index: commonHelper.getDiffIndexForType(type),
+              document: {
+                '@timestamp': timestamp,
+                userId,
+                message,
+                objectId: _id,
+                changeId,
+                snapshotId,
+                coreMigrationVersion: currentSource?.coreMigrationVersion,
+                changedFields: _diff.changedFields,
+                oldValues: _diff.oldValues,
+                newValues: _diff.newValues,
+              },
+            };
+          }
+        } catch (err) {
+          // Error?
+          // How do we recover?
+        }
+      }
 
       return right(expectedResult);
     })
@@ -361,13 +428,15 @@ export const performBulkUpdate = async <T>(
       })
     : undefined;
 
+  const diffBulkCalls: object[] = [];
+
   const result = {
     saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
       if (isLeft(expectedResult)) {
         return expectedResult.value as any;
       }
 
-      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
+      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc, diff } =
         expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
@@ -381,6 +450,18 @@ export const performBulkUpdate = async <T>(
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
+
+      if (diff?.id) {
+        diffBulkCalls.push(
+          {
+            create: {
+              _id: diff.id,
+              _index: diff.index,
+            },
+          },
+          diff.document as object
+        );
+      }
 
       const {
         originId,
@@ -403,6 +484,20 @@ export const performBulkUpdate = async <T>(
       };
     }),
   };
+
+  if (diffBulkCalls.length) {
+    // Save snapshot diffs.
+    try {
+      await client.bulk({
+        refresh,
+        require_alias: true,
+        operations: diffBulkCalls,
+      });
+    } catch (err) {
+      // How do we recover?
+      // We've already modified the saved object... do we undo the change there?
+    }
+  }
 
   return encryptionHelper.optionallyDecryptAndRedactBulkResult(
     result,

@@ -27,6 +27,7 @@ import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
 import type { ApiExecutionContext } from './types';
+import { processSingleSnapshot } from './utils/snapshot';
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;
@@ -169,6 +170,8 @@ export const executeUpdate = async <T>(
 
   let savedObjectNamespace: string | undefined;
   let savedObjectNamespaces: string[] | undefined;
+  let diff: IndexRequest | undefined;
+  const registryType = registry.getType(type);
 
   if (namespace && registry.isSingleNamespace(type)) {
     savedObjectNamespace = namespace;
@@ -195,6 +198,23 @@ export const executeUpdate = async <T>(
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
     const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
+
+    if (registryType?.snapshots) {
+      try {
+        // Are we tracking snapshots?
+        diff = await processSingleSnapshot(
+          client,
+          rawUpsert,
+          registryType,
+          commonHelper,
+          updatedBy,
+          options.reason ?? 'item updated'
+        );
+      } catch (err) {
+        // Error during snapshot creation
+        // How do we recover?
+      }
+    }
 
     const createRequestParams: CreateRequest = {
       id: rawUpsert._id,
@@ -297,6 +317,23 @@ export const executeUpdate = async <T>(
       migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
     );
 
+    if (registryType?.snapshots) {
+      try {
+        // Are we tracking snapshots?
+        diff = await processSingleSnapshot(
+          client,
+          docToSend,
+          registryType,
+          commonHelper,
+          updatedBy,
+          options.reason ?? 'item updated'
+        );
+      } catch (err) {
+        // Error during snapshot creation
+        // How do we recover?
+      }
+    }
+
     // implement creating the call params
     const indexRequestParams: IndexRequest = {
       id: docToSend._id,
@@ -360,6 +397,15 @@ export const executeUpdate = async <T>(
       references,
       attributes,
     } as SavedObject<T>;
+  }
+
+  // Success? Save snapshot diff.
+  if (diff?.id) {
+    try {
+      await client.index(diff, { meta: true });
+    } catch (err) {
+      // How do we recover?
+    }
   }
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(

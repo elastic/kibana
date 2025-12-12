@@ -20,6 +20,7 @@ export enum RuleDetailTabs {
   endpointExceptions = 'endpoint_exceptions',
   executionResults = 'execution_results',
   executionEvents = 'execution_events',
+  history = 'history',
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
@@ -28,6 +29,7 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
   [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
+  [RuleDetailTabs.history]: i18n.CHANGE_HISTORY_TAB,
 };
 
 export interface UseRuleDetailsTabsProps {
@@ -74,6 +76,12 @@ export const useRuleDetailsTabs = ({
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
         disabled: !isExistingRule,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
+      },
+      [RuleDetailTabs.history]: {
+        id: RuleDetailTabs.history,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.history],
+        disabled: rule == null,
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.history}`,
       },
     }),
     [isExistingRule, rule, ruleId]

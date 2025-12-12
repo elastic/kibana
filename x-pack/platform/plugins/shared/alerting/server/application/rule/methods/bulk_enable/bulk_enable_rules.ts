@@ -343,6 +343,7 @@ const bulkEnableRulesWithOCC = async (
         bulkCreateRuleAttributes: rulesToEnable as Array<SavedObjectsBulkCreateObject<RawRule>>,
         savedObjectsBulkCreateOptions: {
           overwrite: true,
+          reason: 'rule bulk enabled',
         },
       })
   );

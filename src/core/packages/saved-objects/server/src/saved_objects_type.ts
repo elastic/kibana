@@ -21,6 +21,17 @@ import type {
 } from './model_version';
 
 /**
+ * Defines a filter for snapshot data.
+ * Fields that we care about create a new version of the saved object.
+ * Fields that we dont care about are not tracked for changes.
+ *
+ * @public
+ */
+export interface SavedObjectsSnapshotFilter {
+  [Key: string]: boolean | SavedObjectsSnapshotFilter;
+}
+
+/**
  * Definition of a type of savedObject.
  *
  * @public
@@ -49,6 +60,17 @@ export interface SavedObjectsType<Attributes = any> {
    *
    */
   hidden: boolean;
+  /**
+   * Is the type snapshottable.
+   * If true, a snapshot index will be created alongside the main index.
+   */
+  snapshots?: boolean;
+  /**
+   * Fields that should trigger a snapshot.
+   * Note that this is both a nested hashmap of fields that trigger historical revisions
+   * as well as the structure that will be stored in each snapshot/diff for this object.
+   */
+  snapshotFilter?: SavedObjectsSnapshotFilter;
   /**
    * Is the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.
    * It is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.

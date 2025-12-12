@@ -72,4 +72,9 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   managed?: boolean;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+  /**
+   * A reason for the current change. Used in conjunction and stored with snapshots.
+   * This is either the user flow where it originated or a comment manually added by the user.
+   */
+  reason?: string;
 }

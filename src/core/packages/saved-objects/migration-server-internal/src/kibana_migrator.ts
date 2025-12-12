@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
+  SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -36,6 +37,7 @@ import {
   SavedObjectsSerializer,
   type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { createCummulativeLogger } from './create_cummulative_logger';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';
@@ -58,6 +60,11 @@ export interface KibanaMigratorOptions {
   esCapabilities: ElasticsearchCapabilities;
   /** Specify a minimum supported Kibana version, e.g. '8.18.0' */
   kibanaVersionCheck?: string;
+}
+
+enum SnapshotIndexKind {
+  snapshots = 'snapshots',
+  diffs = 'diffs',
 }
 
 /**
@@ -144,7 +151,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.documentMigrator;
   }
 
-  public runMigrations({
+  public async runMigrations({
     rerun = false,
     skipVersionCheck = false,
   }: { rerun?: boolean; skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
@@ -163,6 +170,19 @@ export class KibanaMigrator implements IKibanaMigrator {
 
         return result;
       });
+    }
+
+    try {
+      // Migration finished.
+      // Add indices for tracking SO history (snapshots + diffs).
+      for (const type of this.typeRegistry.getAllTypes()) {
+        if (type.snapshots) {
+          await this.createAdditionalIndex(type, SnapshotIndexKind.snapshots);
+          await this.createAdditionalIndex(type, SnapshotIndexKind.diffs);
+        }
+      }
+    } catch (error) {
+      this.log.error(error);
     }
 
     return this.migrationResult;
@@ -243,5 +263,58 @@ export class KibanaMigrator implements IKibanaMigrator {
     { allowDowngrade = false }: MigrateDocumentOptions = {}
   ): SavedObjectUnsanitizedDoc {
     return this.documentMigrator.migrate(doc, { allowDowngrade });
+  }
+
+  async createAdditionalIndex(type: SavedObjectsType, kind: SnapshotIndexKind) {
+    if (!type.indexPattern) {
+      throw new Error(
+        `Unable to create snapshot index for [${type.name}]. Missing [indexPattern] in type definition.`
+      );
+    }
+    const alias = `${type.indexPattern}_${String(kind)}`;
+    const index = `${alias}_001`;
+    const exists = await this.client.indices.exists({ index });
+    if (exists) {
+      this.log.debug(`Index [${index}] exists. Skipping creation..`);
+      return;
+      // Recreate the snapshot index for POC while testing/debugging.
+      // await this.client.indices.delete({ index });
+    }
+
+    const mappings: MappingTypeMapping =
+      kind === SnapshotIndexKind.snapshots
+        ? {
+            properties: {
+              '@timestamp': { type: 'date' },
+              userId: { type: 'keyword' },
+              message: { type: 'text' },
+              objectId: { type: 'keyword' },
+              changeId: { type: 'keyword' },
+              coreMigrationVersion: { type: 'keyword' },
+              data: { type: 'flattened' },
+            },
+          }
+        : {
+            properties: {
+              '@timestamp': { type: 'date' },
+              userId: { type: 'keyword' },
+              message: { type: 'text' },
+              objectId: { type: 'keyword' },
+              changeId: { type: 'keyword' },
+              snapshotId: { type: 'keyword' },
+              coreMigrationVersion: { type: 'keyword' },
+              changedFields: { type: 'keyword' },
+              oldValues: { type: 'flattened' },
+              newValues: { type: 'flattened' },
+            },
+          };
+
+    // TODO: This should really be a data stream
+    this.log.info(`Index [${index}] missing. Creating..`);
+    await this.client.indices.create({
+      index,
+      aliases: { [alias]: { is_write_index: true } },
+      mappings,
+    });
   }
 }

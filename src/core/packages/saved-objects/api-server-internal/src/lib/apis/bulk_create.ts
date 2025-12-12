@@ -23,7 +23,9 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';
+import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { Either } from './utils';
 import {
@@ -37,6 +39,7 @@ import {
   normalizeNamespace,
   setManaged,
   errorContent,
+  diffDocSource,
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
@@ -169,10 +172,18 @@ export const performBulkCreate = async <T>(
 
   let bulkRequestIndexCounter = 0;
   const bulkCreateParams: object[] = [];
-  type ExpectedBulkResult = Either<
-    { type: string; id?: string; error: Payload },
-    { esRequestIndex: number; requestedId: string; rawMigratedDoc: SavedObjectsRawDoc }
-  >;
+  interface ExpectedBulkResultLeft {
+    type: string;
+    id?: string;
+    error: Payload;
+  }
+  interface ExpectedBulkResultRight {
+    esRequestIndex: number;
+    requestedId: string;
+    rawMigratedDoc: SavedObjectsRawDoc;
+    diff?: IndexRequest;
+  }
+  type ExpectedBulkResult = Either<ExpectedBulkResultLeft, ExpectedBulkResultRight>;
   const expectedBulkResults = await Promise.all(
     expectedResults.map<Promise<ExpectedBulkResult>>(async (expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
@@ -261,22 +272,84 @@ export const performBulkCreate = async <T>(
         });
       }
 
-      const expectedResult = {
+      const expectedResult: ExpectedBulkResultRight = {
         esRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
         rawMigratedDoc: serializer.savedObjectToRaw(migrated),
       };
 
+      const _index = commonHelper.getIndexForType(object.type);
+
       bulkCreateParams.push(
         {
           [method]: {
             _id: expectedResult.rawMigratedDoc._id,
-            _index: commonHelper.getIndexForType(object.type),
+            _index,
             ...(overwrite && versionProperties),
           },
         },
         expectedResult.rawMigratedDoc._source
       );
+
+      // Create snapshots
+      const registryType = registry.getType(object.type);
+      if (registryType?.snapshots) {
+        try {
+          const { _id, _source } = expectedResult.rawMigratedDoc;
+          // TODO: Below needs to be a bulk.get(), not an individual request.
+          const current = await client.get({ id: _id, index: _index }, { ignore: [404] });
+          const currentSource = current?._source as SavedObjectsRawDocSource;
+          const _diff = diffDocSource(currentSource, _source, registryType?.snapshotFilter);
+          if (_diff.stats.total > 0) {
+            // Diff detected
+            // 1. Add current version to snapshot index
+            const changeId = current?._version ?? 0;
+            const snapshotId = `${_id}:${changeId}`; // <-- deterministic id
+            const timestamp = new Date().toISOString();
+            const userId = updatedBy || 'unknown';
+            const message = options.reason ?? `item bulk_create`;
+            bulkCreateParams.push(
+              {
+                // `index` allows us to rewrite an existing snapshot without erroring
+                index: {
+                  _id: snapshotId,
+                  _index: commonHelper.getSnapshotIndexForType(object.type),
+                },
+              },
+              {
+                '@timestamp': timestamp,
+                userId,
+                message,
+                changeId,
+                objectId: _id,
+                data: currentSource,
+              }
+            );
+
+            // 2. Prepare diff data so it can be stored separately
+            //    (On success)
+            expectedResult.diff = {
+              id: snapshotId,
+              index: commonHelper.getDiffIndexForType(object.type),
+              document: {
+                '@timestamp': timestamp,
+                userId,
+                message,
+                objectId: _id,
+                changeId,
+                snapshotId,
+                coreMigrationVersion: currentSource?.coreMigrationVersion,
+                changedFields: _diff.changedFields,
+                oldValues: _diff.oldValues,
+                newValues: _diff.newValues,
+              },
+            };
+          }
+        } catch (err) {
+          // Error?
+          // How do we recover?
+        }
+      }
 
       return right(expectedResult);
     })
@@ -290,18 +363,32 @@ export const performBulkCreate = async <T>(
       })
     : undefined;
 
+  const diffBulkCalls: object[] = [];
+
   const result = {
     saved_objects: expectedBulkResults.map((expectedResult) => {
       if (isLeft(expectedResult)) {
         return expectedResult.value as any;
       }
 
-      const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
+      const { requestedId, rawMigratedDoc, esRequestIndex, diff } = expectedResult.value;
       const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
 
       const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
       if (error) {
         return { type: rawMigratedDoc._source.type, id: requestedId, error };
+      }
+
+      if (diff?.id) {
+        diffBulkCalls.push(
+          {
+            create: {
+              _id: diff.id,
+              _index: diff.index,
+            },
+          },
+          diff.document as object
+        );
       }
 
       // When method == 'index' the bulkResponse doesn't include the indexed
@@ -316,6 +403,21 @@ export const performBulkCreate = async <T>(
       );
     }),
   };
+
+  if (diffBulkCalls.length) {
+    // Save snapshot diffs.
+    try {
+      await client.bulk({
+        refresh,
+        require_alias: true,
+        operations: diffBulkCalls,
+      });
+    } catch (err) {
+      // How do we recover?
+      // We've already modified the saved object... do we undo the change there?
+    }
+  }
+
   return encryptionHelper.optionallyDecryptAndRedactBulkResult(
     result,
     authorizationResult?.typeMap,

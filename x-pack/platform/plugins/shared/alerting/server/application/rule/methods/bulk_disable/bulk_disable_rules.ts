@@ -233,7 +233,7 @@ const bulkDisableRulesWithOCC = async (
       bulkDisableRulesSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,
         bulkDisableRuleAttributes: rulesToDisable as Array<SavedObjectsBulkCreateObject<RawRule>>,
-        savedObjectsBulkCreateOptions: { overwrite: true },
+        savedObjectsBulkCreateOptions: { overwrite: true, reason: 'rule bulk disabled' },
       })
   );
 

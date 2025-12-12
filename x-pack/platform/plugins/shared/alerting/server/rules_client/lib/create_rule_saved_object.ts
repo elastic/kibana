@@ -25,6 +25,7 @@ interface CreateRuleSavedObjectParams {
   ruleId: string;
   options?: SavedObjectOptions;
   returnRuleAttributes?: false;
+  reason?: string;
 }
 
 interface CreateRuleSavedObjectAttributeParams {
@@ -34,6 +35,7 @@ interface CreateRuleSavedObjectAttributeParams {
   ruleId: string;
   options?: SavedObjectOptions;
   returnRuleAttributes: true;
+  reason?: string;
 }
 
 // TODO (http-versioning): Remove this overload when we convert all types,
@@ -71,6 +73,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
           savedObjectsCreateOptions: {
             ...options,
             references,
+            reason: options?.reason ?? 'rule created',
             id: ruleId,
           },
         })

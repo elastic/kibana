@@ -48,9 +48,12 @@ export const createRule = async ({
     enabled: rule.enabled ?? false,
   };
 
+  const reason =
+    payload.params?.ruleSource?.type === 'external' ? 'rule installed' : 'rule created';
+
   const createdRule = await rulesClient.create<RuleParams>({
     data: payload,
-    options: { id },
+    options: { id, reason },
     allowMissingConnectorSecrets,
   });
 

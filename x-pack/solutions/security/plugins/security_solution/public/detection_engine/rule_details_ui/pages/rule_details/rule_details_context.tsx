@@ -21,6 +21,13 @@ import { invariant } from '../../../../../common/utils/invariant';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleDetailTabs } from './use_rule_details_tabs';
 
+export interface HistoryTableState {
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+  };
+}
+
 export interface ExecutionLogTableState {
   /**
    * State of the SuperDatePicker component
@@ -102,6 +109,11 @@ const DEFAULT_STATE: ExecutionLogTableState = {
   },
 };
 
+export interface HistoryTableActions {
+  setPageIndex: React.Dispatch<React.SetStateAction<number>>;
+  setPageSize: React.Dispatch<React.SetStateAction<number>>;
+}
+
 export interface ExecutionLogTableActions {
   setRecentlyUsedRanges: React.Dispatch<React.SetStateAction<DurationRange[]>>;
   setRefreshInterval: React.Dispatch<React.SetStateAction<number>>;
@@ -125,6 +137,10 @@ export interface RuleDetailsContextType {
   [RuleDetailTabs.executionResults]: {
     state: ExecutionLogTableState;
     actions: ExecutionLogTableActions;
+  };
+  [RuleDetailTabs.history]: {
+    state: HistoryTableState;
+    actions: HistoryTableActions;
   };
 }
 
@@ -156,13 +172,27 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
   );
   // Pagination state
   const [pageIndex, setPageIndex] = useState(1);
+  const [pageIndexHistory, setPageIndexHistory] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [pageSizeHistory, setPageSizeHistory] = useState(10);
   const [sortField, setSortField] = useState<keyof RuleExecutionResult>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
   // // End Execution Log Table tab
 
   const providerValue = useMemo<RuleDetailsContextType>(
     () => ({
+      [RuleDetailTabs.history]: {
+        state: {
+          pagination: {
+            pageIndex: pageIndexHistory,
+            pageSize: pageSizeHistory,
+          },
+        },
+        actions: {
+          setPageIndex: setPageIndexHistory,
+          setPageSize: setPageSizeHistory,
+        },
+      },
       [RuleDetailTabs.executionResults]: {
         state: {
           superDatePicker: {
@@ -205,20 +235,22 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
       },
     }),
     [
-      end,
-      isPaused,
-      pageIndex,
-      pageSize,
-      queryText,
+      pageIndexHistory,
+      pageSizeHistory,
       recentlyUsedRanges,
       refreshInterval,
-      showMetricColumns,
-      sortDirection,
-      sortField,
+      isPaused,
       start,
+      end,
+      queryText,
       statusFilters,
       runTypeFilters,
+      showMetricColumns,
       showSourceEventTimeRange,
+      pageIndex,
+      pageSize,
+      sortField,
+      sortDirection,
     ]
   );
 

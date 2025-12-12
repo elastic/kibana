@@ -139,6 +139,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
 
     const username = await context.getUserName();
     const now = new Date();
+    const reason = 'rule enabled';
 
     const schedule = attributes.schedule as IntervalSchedule;
 
@@ -179,6 +180,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
             overwrite: true,
             version,
             references: alert.references,
+            reason,
           }
         );
       } else {
@@ -188,6 +190,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
           updateAttributes,
           {
             version,
+            reason,
           }
         );
       }

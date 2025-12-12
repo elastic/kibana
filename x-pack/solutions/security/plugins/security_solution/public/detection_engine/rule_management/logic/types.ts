@@ -118,6 +118,13 @@ export interface FetchRuleProps {
   signal?: AbortSignal;
 }
 
+export interface FetchRuleHistoryProps {
+  id: string;
+  page: number;
+  perPage: number;
+  signal?: AbortSignal;
+}
+
 export interface FetchRuleSnoozingProps {
   ids: string[];
   signal?: AbortSignal;
