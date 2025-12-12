@@ -9,7 +9,6 @@
 
 import typeDetect from 'type-detect';
 import type {
-  ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
@@ -18,7 +17,10 @@ import type {
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
-import type { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import type {
+  ISavedObjectTypeRegistryInternal,
+  SavedObjectTypeRegistry,
+} from '../saved_objects_type_registry';
 
 /**
  * Core internal implementation of {@link ISavedObjectsSerializer}
@@ -28,12 +30,12 @@ import type { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
  * @internal
  */
 export class SavedObjectsSerializer implements ISavedObjectsSerializer {
-  private readonly registry: ISavedObjectTypeRegistry;
+  private readonly registry: ISavedObjectTypeRegistryInternal;
 
   /**
    * @internal
    */
-  constructor(registry: ISavedObjectTypeRegistry) {
+  constructor(registry: ISavedObjectTypeRegistryInternal) {
     this.registry = registry;
   }
 

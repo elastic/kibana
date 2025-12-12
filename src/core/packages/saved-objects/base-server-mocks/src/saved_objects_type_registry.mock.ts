@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { type SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { lazyObject } from '@kbn/lazy-object';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 
-const createRegistryMock = (): jest.Mocked<
-  ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
-> => {
+const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => {
   const mock = lazyObject({
     registerType: jest.fn(),
     getLegacyTypes: jest.fn().mockReturnValue([]),

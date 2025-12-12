@@ -54,6 +54,7 @@ import {
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import type { SavedObjectsRepository } from '../lib/repository';
 
@@ -401,7 +402,7 @@ export const createRegistry = () => {
   return registry;
 };
 
-export const createSpySerializer = (registry: SavedObjectTypeRegistry) => {
+export const createSpySerializer = (registry: ISavedObjectTypeRegistryInternal) => {
   const serializer = new SavedObjectsSerializer(registry);
 
   for (const method of [

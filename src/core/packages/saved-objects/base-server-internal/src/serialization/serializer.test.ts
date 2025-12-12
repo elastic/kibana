@@ -8,10 +8,11 @@
  */
 
 import _ from 'lodash';
-import type { SavedObjectsRawDoc, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { SavedObjectsSerializer } from './serializer';
 import { encodeVersion } from '../version';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
+import type { ISavedObjectTypeRegistryInternal } from '../saved_objects_type_registry';
 
 const createMockedTypeRegistry = ({
   isNamespaceAgnostic,
@@ -23,13 +24,15 @@ const createMockedTypeRegistry = ({
   isSingleNamespace: boolean;
   isMultiNamespace: boolean;
   accessControlEnabled?: boolean;
-}): ISavedObjectTypeRegistry => {
-  const typeRegistry: Partial<ISavedObjectTypeRegistry> = {
+}): ISavedObjectTypeRegistryInternal => {
+  const typeRegistry: Partial<ISavedObjectTypeRegistryInternal> = {
     isNamespaceAgnostic: jest.fn().mockReturnValue(isNamespaceAgnostic),
     isSingleNamespace: jest.fn().mockReturnValue(isSingleNamespace),
     isMultiNamespace: jest.fn().mockReturnValue(isMultiNamespace),
+    setAccessControlEnabled: jest.fn(),
+    isAccessControlEnabled: jest.fn().mockReturnValue(accessControlEnabled),
   };
-  return typeRegistry as ISavedObjectTypeRegistry;
+  return typeRegistry as ISavedObjectTypeRegistryInternal;
 };
 
 let typeRegistry = createMockedTypeRegistry({

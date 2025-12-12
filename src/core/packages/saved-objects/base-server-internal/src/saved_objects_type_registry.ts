@@ -14,12 +14,34 @@ export interface SavedObjectTypeRegistryConfig {
   legacyTypes?: string[];
 }
 
+export interface ISavedObjectTypeRegistryInternal extends ISavedObjectTypeRegistry {
+  /**
+   * Register a {@link SavedObjectsType | type} inside the registry.
+   * A type can only be registered once. subsequent calls with the same type name will throw an error.
+   *
+   * @internal
+   */
+  registerType(type: SavedObjectsType): void;
+  /**
+   * Sets whether access control is enabled
+   *
+   * @internal
+   */
+  setAccessControlEnabled(enabled: boolean): void;
+  /**
+   * Gets whether access control is enabled
+   *
+   * @internal
+   */
+  isAccessControlEnabled(): boolean;
+}
+
 /**
  * Core internal implementation of {@link ISavedObjectTypeRegistry}.
  *
  * @internal should only be used outside of Core for testing purposes.
  */
-export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
+export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypesMap: Set<string>;
 
@@ -29,30 +51,8 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     this.legacyTypesMap = new Set(legacyTypes);
   }
 
-  /**
-   * Sets whether access control is enabled
-   *
-   * @internal
-   */
-  public setAccessControlEnabled(enabled: boolean) {
-    this.accessControlEnabled = enabled;
-  }
+  /** {@inheritDoc ISavedObjectTypeRegistryInternal.registerType} */
 
-  /**
-   * Gets whether access control is enabled
-   *
-   * @internal
-   */
-  public isAccessControlEnabled() {
-    return this.accessControlEnabled;
-  }
-
-  /**
-   * Register a {@link SavedObjectsType | type} inside the registry.
-   * A type can only be registered once. subsequent calls with the same type name will throw an error.
-   *
-   * @internal
-   */
   public registerType(type: SavedObjectsType) {
     if (this.types.has(type.name)) {
       throw new Error(`Type '${type.name}' is already registered`);
@@ -162,6 +162,16 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
   public supportsAccessControl(type: string): boolean {
     return this.types.get(type)?.supportsAccessControl ?? false;
+  }
+
+  /** {@inheritDoc ISavedObjectTypeRegistryInternal.setAccessControlEnabled} */
+  public setAccessControlEnabled(enabled: boolean) {
+    this.accessControlEnabled = enabled;
+  }
+
+  /** {@inheritDoc ISavedObjectTypeRegistryInternal.isAccessControlEnabled} */
+  public isAccessControlEnabled() {
+    return this.accessControlEnabled;
   }
 }
 
