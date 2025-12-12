@@ -21,6 +21,7 @@
     "@kbn/utility-types",
     "@kbn/elastic-agent-utils",
     "@kbn/observability-utils-common",
+    "@kbn/observability-utils-server",
     "@kbn/apm-sources-access-plugin",
     "@kbn/metrics-data-access-plugin",
     "@kbn/safer-lodash-set"

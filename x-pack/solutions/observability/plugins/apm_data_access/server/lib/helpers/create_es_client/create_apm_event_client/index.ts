@@ -21,11 +21,8 @@ import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { compact, omit } from 'lodash';
 import type { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
-import {
-  unwrapEsResponse,
-  type InspectResponse,
-  type DataTier,
-} from '@kbn/observability-shared-plugin/common';
+import { type InspectResponse, type DataTier } from '@kbn/observability-shared-plugin/common';
+import { unwrapEsResponse } from '@kbn/observability-utils-server/es/unwrap_es_response';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { withApmSpan } from '../../../../utils';

@@ -170,7 +170,6 @@ export {
 export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse, type InspectResponse } from './utils/get_inspect_response';
-export { unwrapEsResponse, WrappedElasticsearchClientError } from './utils/unwrap_es_response';
 export {
   type DataTier,
   indexLifeCyclePhaseToDataTier,
