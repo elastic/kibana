@@ -35,6 +35,21 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const OAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'oauth_client_credentials',
   schema: authSchema,
+  buildSecret: (secret: AuthSchemaType) => {
+    const secretObj = {
+      tokenUrl: secret.tokenUrl,
+      clientId: secret.clientId,
+      scope: secret.scope,
+      clientSecret: secret.clientSecret,
+    };
+    try {
+      authSchema.parse(secretObj);
+      return secretObj;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      return null;
+    }
+  },
   configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,

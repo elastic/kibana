@@ -316,6 +316,17 @@
     "title",
     "version"
   ],
+  "data_connector": [
+    "config",
+    "createdAt",
+    "features",
+    "kscIds",
+    "name",
+    "toolIds",
+    "type",
+    "updatedAt",
+    "workflowIds"
+  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",

@@ -13,6 +13,10 @@ import { isString } from 'lodash';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
+interface JSONSchema {
+  [k: string]: unknown;
+}
+
 const HEADER_FIELD_DEFAULT = 'Api-Key';
 const authSchema = z
   .object({
@@ -24,12 +28,36 @@ const authSchema = z
     apiKey: z
       .string()
       .min(1, { message: i18n.API_KEY_AUTH_REQUIRED_MESSAGE })
-      .meta({ label: i18n.API_KEY_AUTH_LABEL, sensitive: true }),
+      .meta({ label: i18n.API_KEY_AUTH_LABEL, apiKey: true, sensitive: true }),
   })
   .meta({ label: i18n.API_KEY_HEADER_AUTHENTICATION_LABEL });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 type NormalizedAuthSchemaType = Record<string, string>;
+
+const normalizeSchemaFn = (defaults?: Record<string, unknown>) => {
+  const existingMeta = authSchema.meta() ?? {};
+  const schemaToUse = z.object({
+    ...authSchema.shape,
+  });
+
+  if (defaults) {
+    // get the default values for the headerField
+    const headerField: string =
+      defaults.headerField && isString(defaults.headerField)
+        ? defaults.headerField
+        : HEADER_FIELD_DEFAULT;
+    return z.object({
+      [headerField]: schemaToUse.shape.apiKey,
+    });
+  } else {
+    return z
+      .object({
+        [HEADER_FIELD_DEFAULT]: schemaToUse.shape.apiKey,
+      })
+      .meta(existingMeta);
+  }
+};
 
 /**
  * Header-based authentication (generic)
@@ -38,24 +66,30 @@ type NormalizedAuthSchemaType = Record<string, string>;
 export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_header',
   schema: authSchema,
-  normalizeSchema: (defaults?: Record<string, unknown>) => {
-    const existingMeta = authSchema.meta() ?? {};
-    const schemaToUse = z.object({
-      ...authSchema.shape,
-    });
+  normalizeSchema: normalizeSchemaFn,
+  buildSecret: (secret: AuthSchemaType, defaults?: Record<string, unknown>) => {
+    const normalizedAuthSchema = normalizeSchemaFn(defaults);
+    const properties = z.toJSONSchema(normalizedAuthSchema).properties;
 
-    if (defaults) {
-      // get the default values for the headerField
-      const headerField: string =
-        defaults.headerField && isString(defaults.headerField)
-          ? defaults.headerField
-          : HEADER_FIELD_DEFAULT;
-      return z.object({
-        [headerField]: schemaToUse.shape.apiKey,
-      });
+    let headerKey = HEADER_FIELD_DEFAULT;
+    if (properties) {
+      const def = Object.entries(properties).find(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([_, value]) => (value as JSONSchema).apiKey === true
+      );
+      if (def && def.length > 0) {
+        headerKey = def[0];
+      }
     }
 
-    return schemaToUse.meta(existingMeta);
+    const secretObj = { [headerKey]: secret.apiKey };
+    try {
+      normalizedAuthSchema.parse(secretObj);
+      return secretObj;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      return null;
+    }
   },
   configure: async (
     _: AuthContext,
