@@ -17,6 +17,7 @@ exports[`renders control with warning 1`] = `
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span
             data-euiicon-type="warning"
@@ -64,6 +65,7 @@ exports[`renders disabled control with tooltip 1`] = `
     >
       <span
         class="euiToolTipAnchor eui-displayBlock emotion-euiToolTipAnchor-inlineBlock"
+        id="controlId-wrapper"
       >
         <div>
           My Control

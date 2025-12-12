@@ -158,7 +158,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
   const service: PublicMethodsOf<AttachmentGetter> = lazyObject({
     get: jest.fn(),
     bulkGet: jest.fn(),
-    getAllAlertsAttachToCase: jest.fn(),
+    getAllDocumentsAttachedToCase: jest.fn(),
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),

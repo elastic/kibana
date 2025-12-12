@@ -452,7 +452,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     }
     if (
       dataStream.failureStoreEnabled &&
-      (dataStream.failureStoreRetention?.customRetentionPeriod ||
+      (dataStream.failureStoreRetention?.retentionDisabled ||
+        dataStream.failureStoreRetention?.customRetentionPeriod ||
         dataStream.failureStoreRetention?.defaultRetentionPeriod)
     ) {
       defaultDetails.push({
@@ -465,7 +466,9 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             defaultMessage:
               'How long failed documents are stored before being automatically deleted. {retentionType}',
             values: {
-              retentionType: dataStream.failureStoreRetention?.customRetentionPeriod
+              retentionType: dataStream.failureStoreRetention?.retentionDisabled
+                ? ''
+                : dataStream.failureStoreRetention?.customRetentionPeriod
                 ? i18n.translate(
                     'xpack.idxMgmt.dataStreamDetailPanel.failureStoreRetentionCustomTooltipLabel',
                     {
@@ -483,11 +486,18 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ),
         content: (
           <>
-            {getRetentionPeriod(
-              dataStream.failureStoreRetention?.customRetentionPeriod ||
-                dataStream.failureStoreRetention?.defaultRetentionPeriod ||
-                ''
-            )}
+            {dataStream.failureStoreRetention?.retentionDisabled
+              ? i18n.translate(
+                  'xpack.idxMgmt.dataStreamDetailPanel.failureStoreRetentionDisabledText',
+                  {
+                    defaultMessage: 'Disabled',
+                  }
+                )
+              : getRetentionPeriod(
+                  dataStream.failureStoreRetention?.customRetentionPeriod ||
+                    dataStream.failureStoreRetention?.defaultRetentionPeriod ||
+                    ''
+                )}
           </>
         ),
         dataTestSubj: 'failureStoreRetentionDetail',

@@ -5,84 +5,85 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, euiTextBreakWord, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { ConversationRound } from '@kbn/onechat-common';
+import { RoundInput } from './round_input';
+import { RoundThinking } from './round_thinking/round_thinking';
+import { RoundResponse } from './round_response/round_response';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { RoundError } from './round_error/round_error';
 
 interface RoundLayoutProps {
-  input: ReactNode;
-  outputIcon: ReactNode;
-  output: ReactNode;
-  isResponseLoading: boolean;
   isCurrentRound: boolean;
   scrollContainerHeight: number;
+  rawRound: ConversationRound;
 }
 
 const labels = {
   container: i18n.translate('xpack.onechat.round.container', {
     defaultMessage: 'Conversation round',
   }),
-  userMessage: i18n.translate('xpack.onechat.round.userInput', {
-    defaultMessage: 'User input',
-  }),
 };
 
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
-  input,
-  outputIcon,
-  output,
-  isResponseLoading,
   isCurrentRound,
   scrollContainerHeight,
+  rawRound,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
+  const { steps, response, input } = rawRound;
+
+  const { isResponseLoading, error, retry: retrySendMessage } = useSendMessage();
+
+  const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
+  const isErrorCurrentRound = Boolean(error) && isCurrentRound;
 
   useEffect(() => {
-    if (isCurrentRound && isResponseLoading) {
+    // Pending rounds and error rounds should have a min-height to match the scroll container height
+    if ((isCurrentRound && isResponseLoading) || isErrorCurrentRound) {
       setRoundContainerMinHeight(scrollContainerHeight);
-    } else if (!isCurrentRound) {
+    } else {
       setRoundContainerMinHeight(0);
     }
-  }, [isCurrentRound, isResponseLoading, scrollContainerHeight]);
-
-  const { euiTheme } = useEuiTheme();
-  const inputContainerStyles = css`
-    align-self: end;
-    max-inline-size: 80%;
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
-    ${euiTextBreakWord()}
-  `;
+  }, [isCurrentRound, isResponseLoading, scrollContainerHeight, isErrorCurrentRound]);
 
   const roundContainerStyles = css`
-    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : ''}
+    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
   `;
-
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="l"
+      gutterSize="m"
       aria-label={labels.container}
       css={roundContainerStyles}
     >
+      {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <EuiPanel
-          css={inputContainerStyles}
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          aria-label={labels.userMessage}
-        >
-          {input}
-        </EuiPanel>
+        <RoundInput input={input.message} attachments={input.attachments} />
       </EuiFlexItem>
 
+      {/* Thinking */}
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" gutterSize="m">
-          <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem>
-          <EuiFlexItem>{output}</EuiFlexItem>
-        </EuiFlexGroup>
+        {isErrorCurrentRound ? (
+          <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
+        ) : (
+          <RoundThinking steps={steps} isLoading={isLoadingCurrentRound} rawRound={rawRound} />
+        )}
+      </EuiFlexItem>
+
+      {/* Response Message */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexItem>
+          <RoundResponse
+            hasError={isErrorCurrentRound}
+            response={response}
+            steps={steps}
+            isLoading={isLoadingCurrentRound}
+          />
+        </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

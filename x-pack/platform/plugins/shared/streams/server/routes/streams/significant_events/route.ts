@@ -6,13 +6,15 @@
  */
 import {
   featureSchema,
+  featureTypeSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map, mergeMap } from 'rxjs';
+import { from as fromRxjs, map } from 'rxjs';
+import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/promps_config_service';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -36,6 +38,7 @@ const previewSignificantEventsRoute = createServerRoute({
           .object({
             name: z.string(),
             filter: conditionSchema,
+            type: featureTypeSchema,
           })
           .optional(),
         kql: z.object({
@@ -155,6 +158,12 @@ const generateSignificantEventsRoute = createServerRoute({
       currentDate: dateFromString.optional(),
       from: dateFromString,
       to: dateFromString,
+      sampleDocsSize: z
+        .number()
+        .optional()
+        .describe(
+          'Number of sample documents to use for generation from the current data of stream'
+        ),
     }),
     body: z.object({
       feature: featureSchema.optional(),
@@ -181,13 +190,26 @@ const generateSignificantEventsRoute = createServerRoute({
     server,
     logger,
   }): Promise<SignificantEventsGenerateResponse> => {
-    const { streamsClient, scopedClusterClient, licensing, inferenceClient, uiSettingsClient } =
-      await getScopedClients({ request });
+    const {
+      streamsClient,
+      scopedClusterClient,
+      licensing,
+      inferenceClient,
+      uiSettingsClient,
+      soClient,
+    } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
     const definition = await streamsClient.getStream(params.path.name);
+
+    const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
 
     return fromRxjs(
       generateSignificantEventDefinitions(
@@ -197,19 +219,21 @@ const generateSignificantEventsRoute = createServerRoute({
           connectorId: params.query.connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
+          sampleDocsSize: params.query.sampleDocsSize,
+          systemPromptOverride: significantEventsPromptOverride,
         },
         {
           inferenceClient,
           esClient: scopedClusterClient.asCurrentUser,
-          logger,
+          logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
         }
       )
     ).pipe(
-      mergeMap((queries) => fromRxjs(queries)),
-      map((query) => ({
-        query,
-        type: 'generated_query' as const,
+      map(({ queries, tokensUsed }) => ({
+        type: 'generated_queries' as const,
+        queries,
+        tokensUsed,
       }))
     );
   },

@@ -11,13 +11,26 @@ import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 import { getSchemaForAuthType } from '.';
 
-export const generateSecretsSchemaFromSpec = (authTypes: ConnectorSpec['authTypes']) => {
+interface GenerateOptions {
+  isPfxEnabled: boolean;
+}
+
+export const generateSecretsSchemaFromSpec = (
+  authSpec: ConnectorSpec['auth'],
+  { isPfxEnabled }: GenerateOptions = { isPfxEnabled: true }
+) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
-  for (const authType of authTypes || []) {
-    secretSchemas.push(getSchemaForAuthType(authType));
+  for (const authType of authSpec?.types || []) {
+    const schema = getSchemaForAuthType(authType);
+    if (schema.id === 'pfx_certificate' && !isPfxEnabled) {
+      continue;
+    }
+    secretSchemas.push(schema.schema);
   }
   return secretSchemas.length > 0
     ? // to make zod types happy
-      z.discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
-    : z.object({}).default({});
+      z
+        .discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
+        .meta({ label: 'Authentication' })
+    : z.object({});
 };

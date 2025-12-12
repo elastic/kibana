@@ -109,13 +109,24 @@ describe('transformReferencesOut', () => {
     });
   });
 
-  describe('tag references', () => {
+  describe('references', () => {
     test('should drop tag references', () => {
       const references = [
         {
           name: 'someTagRef',
           type: 'tag',
           id: '1',
+        },
+      ];
+      expect(transformReferencesOut(references, [])).toEqual([]);
+    });
+
+    test('should drop search source references', () => {
+      const references = [
+        {
+          id: 'fizzle-1234',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
         },
       ];
       expect(transformReferencesOut(references, [])).toEqual([]);

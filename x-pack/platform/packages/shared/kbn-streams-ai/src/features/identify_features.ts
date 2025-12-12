@@ -7,7 +7,7 @@
 import type { DocumentAnalysis } from '@kbn/ai-tools';
 import { formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import {
   isFeatureWithFilter,
@@ -16,10 +16,12 @@ import {
   type SystemFeature,
 } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import { IdentifySystemsPrompt } from './prompt';
+import { withSpan } from '@kbn/apm-utils';
+import { createIdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { generateStreamDescription } from '../description/generate_description';
+import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
   stream: Streams.all.Definition;
@@ -31,6 +33,7 @@ export interface IdentifyFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   analysis: DocumentAnalysis;
+  systemPromptOverride?: string;
 }
 
 /**
@@ -52,83 +55,101 @@ export async function identifySystemFeatures({
   analysis,
   dropUnmapped = false,
   maxSteps: initialMaxSteps,
+  systemPromptOverride,
 }: IdentifyFeaturesOptions & {
   dropUnmapped?: boolean;
   maxSteps?: number;
-}): Promise<{ features: SystemFeature[] }> {
-  const initialClustering = await clusterLogs({
-    start,
-    end,
-    esClient,
-    index: stream.name,
-    partitions:
-      features?.filter(isFeatureWithFilter).map((feature) => {
-        return {
-          name: feature.name,
-          condition: feature.filter,
-        };
-      }) ?? [],
-    logger,
-    dropUnmapped,
-  });
+}): Promise<{ features: SystemFeature[]; tokensUsed: ChatCompletionTokenCount }> {
+  logger.debug(`Identifying system features for stream ${stream.name}`);
 
-  const response = await executeAsReasoningAgent({
-    maxSteps: initialMaxSteps,
-    input: {
-      stream: {
-        name: stream.name,
-        description: stream.description || 'This stream has no description.',
+  logger.trace('Performing initial clustering of logs for system feature identification');
+  const initialClustering = await withSpan('initial_log_clustering', () =>
+    clusterLogs({
+      start,
+      end,
+      esClient,
+      index: stream.name,
+      partitions:
+        features?.filter(isFeatureWithFilter).map((feature) => {
+          return {
+            name: feature.name,
+            condition: feature.filter,
+          };
+        }) ?? [],
+      logger,
+      dropUnmapped,
+    })
+  );
+
+  logger.trace('Invoking reasoning agent to identify system features');
+  const response = await withSpan('invoke_reasoning_agent', () =>
+    executeAsReasoningAgent({
+      maxSteps: initialMaxSteps,
+      input: {
+        stream: {
+          name: stream.name,
+          description: stream.description || 'This stream has no description.',
+        },
+        dataset_analysis: JSON.stringify(
+          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
+        ),
+        initial_clustering: JSON.stringify(initialClustering),
+        condition_schema: conditionSchemaText,
       },
-      dataset_analysis: JSON.stringify(
-        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
-      ),
-      initial_clustering: JSON.stringify(initialClustering),
-      condition_schema: conditionSchemaText,
-    },
-    prompt: IdentifySystemsPrompt,
-    inferenceClient,
-    finalToolChoice: {
-      function: 'finalize_systems',
-    },
-    toolCallbacks: {
-      validate_systems: async (toolCall) => {
-        const clustering = await clusterLogs({
-          start,
-          end,
-          esClient,
-          index: stream.name,
-          logger,
-          partitions: toolCall.function.arguments.systems.map((system) => {
-            return {
-              name: system.name,
-              condition: system.filter as Condition,
-            };
-          }),
-          dropUnmapped,
-        });
-
-        return {
-          response: {
-            systems: clustering.map((cluster) => {
+      prompt: createIdentifySystemsPrompt({
+        systemPromptOverride,
+      }),
+      inferenceClient,
+      finalToolChoice: {
+        function: 'finalize_systems',
+      },
+      toolCallbacks: {
+        validate_systems: async (toolCall) => {
+          const clustering = await clusterLogs({
+            start,
+            end,
+            esClient,
+            index: stream.name,
+            logger,
+            partitions: toolCall.function.arguments.systems.map((system) => {
               return {
-                name: cluster.name,
-                clustering: cluster.clustering,
+                name: system.name,
+                condition: system.filter as Condition,
               };
             }),
-          },
-        };
-      },
-      finalize_systems: async (toolCall) => {
-        return {
-          response: {},
-        };
-      },
-    },
-    abortSignal: signal,
-  });
+            dropUnmapped,
+          });
 
-  return {
-    features: await Promise.all(
+          return {
+            response: {
+              systems: clustering.map((cluster) => {
+                return {
+                  name: cluster.name,
+                  clustering: cluster.clustering,
+                };
+              }),
+            },
+          };
+        },
+        finalize_systems: async (toolCall) => {
+          return {
+            response: {},
+          };
+        },
+      },
+      abortSignal: signal,
+    })
+  );
+
+  logger.trace('Generating descriptions for identified system features');
+  let tokensUsed: ChatCompletionTokenCount = {
+    prompt: 0,
+    completion: 0,
+    total: 0,
+    cached: 0,
+  };
+  const systems: SystemFeature[] = await withSpan('generate_system_feature_descriptions', () =>
+    Promise.all(
       response.toolCalls
         .flatMap((toolCall) =>
           toolCall.function.arguments.systems.map((args) => {
@@ -141,21 +162,32 @@ export async function identifySystemFeatures({
           })
         )
         .map(async (feature) => {
-          const description = await generateStreamDescription({
-            stream,
-            start,
-            end,
-            esClient,
-            inferenceClient,
-            feature: { ...feature, description: '' },
-            signal,
-          });
+          const { description, tokensUsed: descriptionTokensUsed } =
+            await generateStreamDescription({
+              stream,
+              start,
+              end,
+              esClient,
+              inferenceClient,
+              feature: { ...feature, description: '' },
+              signal,
+              logger,
+            });
+
+          tokensUsed = sumTokens(tokensUsed, descriptionTokensUsed);
 
           return {
             ...feature,
             description,
           };
         })
-    ),
+    )
+  );
+
+  logger.debug(`Identified ${systems.length} system features for stream ${stream.name}`);
+
+  return {
+    features: systems,
+    tokensUsed: sumTokens(tokensUsed, response.tokens),
   };
 }

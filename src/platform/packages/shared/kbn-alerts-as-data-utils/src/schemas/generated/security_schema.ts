@@ -142,6 +142,8 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.maintenance_window_names': schemaStringArray,
+  'kibana.alert.muted': schemaBoolean,
   'kibana.alert.new_terms': schemaStringArray,
   'kibana.alert.original_data_stream.dataset': schemaString,
   'kibana.alert.original_data_stream.namespace': schemaString,

@@ -17,8 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ml = getService('ml');
   const PageObjects = getPageObjects(['timePicker']);
 
-  // TODO: see https://github.com/elastic/kibana/pull/243499
-  describe.skip('change point detection UI', function () {
+  describe('change point detection UI', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');

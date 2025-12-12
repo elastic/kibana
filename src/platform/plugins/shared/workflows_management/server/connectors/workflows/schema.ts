@@ -14,6 +14,7 @@ const RunSubActionParamsSchema = z.object({
   workflowId: z.string(),
   inputs: z.any().optional(),
   spaceId: z.string(),
+  summaryMode: z.boolean().optional().default(true),
 });
 
 // Schema for rule configuration (what the UI saves)
@@ -22,6 +23,7 @@ export const WorkflowsRuleActionParamsSchema = schema.object({
   subActionParams: schema.object({
     workflowId: schema.string(),
     inputs: schema.maybe(schema.any()),
+    summaryMode: schema.maybe(schema.boolean()),
   }),
 });
 

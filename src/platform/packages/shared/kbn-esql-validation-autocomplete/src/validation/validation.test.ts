@@ -6,17 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import type {
-  FieldType,
   SupportedDataType,
   FunctionDefinition,
   ESQLMessage,
   EditorError,
 } from '@kbn/esql-ast';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
-import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { getFunctionSignatures } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/scalar_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/aggregation_functions';
 import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
 import { join } from 'path';
@@ -77,7 +77,7 @@ function getLiteralType(typeString: 'time_duration') {
   return `1 ${literals[typeString]}`;
 }
 
-export const fieldNameFromType = (type: FieldType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: EsqlFieldType) => `${camelCase(type)}Field`;
 
 function getFieldName(
   typeString: string,

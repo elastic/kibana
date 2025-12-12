@@ -84,6 +84,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       matchType: 'timezone',
       fullKey: timezonePrefix,
       match: timezoneFieldMatch,
+      // @ts-expect-error upgrade typescript v5.9.3
       valueStartIndex: timezoneFieldMatch.groups?.prefix.length + 1 ?? 0,
     };
   }
@@ -111,15 +112,50 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     };
   }
   // Try @ trigger first (e.g., "@const" or "@steps.step1")
+  // If we're inside {{ }} braces, extract the path before @ and use it as the context
+  const isInsideBraces =
+    (lineUpToCursor.match(/\{\{/g) || []).length > (lineUpToCursor.match(/\}\}/g) || []).length;
   const atMatch = [...lineUpToCursor.matchAll(/@(?<key>\S+?)?\.?(?=\s|$)/g)].pop();
   if (atMatch) {
-    const fullKey = cleanKey(atMatch.groups?.key ?? '');
+    let fullKey = cleanKey(atMatch.groups?.key ?? '');
+
+    // If we're inside braces and @ has no key, try to extract the path before @
+    let extractedPathBeforeAt = false;
+    if (isInsideBraces && !fullKey) {
+      // Find the last {{ before @ and extract the path segment immediately before @
+      // This allows multiple @ completions in the same expression (e.g., "{{ const.@ + inputs.@")
+      const atIndex = lineUpToCursor.lastIndexOf('@');
+      if (atIndex !== -1) {
+        const beforeAt = lineUpToCursor.substring(0, atIndex);
+        // Find the last {{ before @ to ensure we're inside braces
+        const lastBraceIndex = beforeAt.lastIndexOf('{{');
+        if (lastBraceIndex !== -1) {
+          // Extract only the path segment immediately before @ (not everything from {{ to @)
+          // Look for a valid path pattern: word.word. or word. or just word before @
+          // This handles cases like "{{ const.@ + inputs.@" where we want "inputs" not "const.@ + inputs"
+          const pathMatch = beforeAt.match(
+            /(?:^|\s|[\+\-\*\/\(\)])([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\.?\s*$/
+          );
+          if (pathMatch && pathMatch[1]) {
+            const pathBeforeAt = pathMatch[1].trim();
+            if (pathBeforeAt) {
+              fullKey = pathBeforeAt;
+              // When we extract a path before @, we want to show all properties of that path
+              extractedPathBeforeAt = true;
+            }
+          }
+        }
+      }
+    }
+
     const pathSegments = parsePath(fullKey);
     return {
       matchType: 'at',
       fullKey,
-      pathSegments: parsePath(fullKey),
-      lastPathSegment: getLastPathSegment(lineUpToCursor, pathSegments),
+      pathSegments,
+      lastPathSegment: extractedPathBeforeAt
+        ? null // When we extracted a path before @, always use null to show all properties
+        : getLastPathSegment(lineUpToCursor, pathSegments),
       match: atMatch,
     };
   }

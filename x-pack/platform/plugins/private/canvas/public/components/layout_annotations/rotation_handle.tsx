@@ -31,6 +31,7 @@ export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) =>
 );
 
 RotationHandle.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   zoomScale: PropTypes.number,
 };

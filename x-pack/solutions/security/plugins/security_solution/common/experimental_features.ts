@@ -61,14 +61,14 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Disables ESQL-based risk scoring
-   */
-  disableESQLRiskScoring: false,
-
-  /**
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: true,
+
+  /**
+   * Enable privmon modifier in risk scoring calculation
+   */
+  enableRiskScorePrivmonModifier: false,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -189,6 +189,29 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: false,
+  /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: false,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Gap Auto Fill Scheduler feature.
+   */
+  gapAutoFillSchedulerEnabled: false,
+  /**
+   * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
+   */
+  agentBuilderEnabled: false,
+  /**
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
+   */
+  linuxDnsEvents: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
