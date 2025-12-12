@@ -22,6 +22,7 @@ import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 import type {
   SavedObjectRelation,
@@ -183,6 +184,9 @@ export const RelationshipsTable = ({
       <EuiInMemoryTable<SavedObjectRelation>
         items={relationships}
         columns={columns}
+        tableCaption={i18n.translate('relationshipsTable.tableCaption', {
+          defaultMessage: 'Saved object relationships',
+        })}
         pagination={{
           pageSize,
         }}

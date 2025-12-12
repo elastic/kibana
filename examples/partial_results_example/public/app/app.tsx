@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionsContext } from './expressions_context';
+import { i18n } from '@kbn/i18n';
 
 const expression = `getEvents
   | mapColumn name="Count" expression={
@@ -57,6 +58,9 @@ export function App() {
           <EuiSpacer size={'m'} />
           {datatable ? (
             <EuiBasicTable
+              tableCaption={i18n.translate('partialResultsDemo.tableCaption', {
+                defaultMessage: 'Partial expression results',
+              })}
               data-test-subj={'example-table'}
               columns={datatable.columns?.map(({ id: field, name }) => ({
                 field,

@@ -418,6 +418,10 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           onTableChange={onTableChange}
           search={search}
           selection={dataViews.getCanSaveSync() ? selection : undefined}
+          tableCaption={i18n.translate('indexPatternManagement.dataViewTable.tableCaption', {
+            defaultMessage: 'Table of {title}',
+            values: { title },
+          })}
         />
       </ContextWrapper>
       {deleteFlyoutOpen && (

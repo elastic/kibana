@@ -46,6 +46,13 @@ const matchesDescription = i18n.translate(
   { defaultMessage: 'Language used for the field' }
 );
 
+const tableCaption = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.caption',
+  {
+    defaultMessage: 'Source filters',
+  }
+);
+
 const editAria = i18n.translate('indexPatternManagement.editIndexPattern.source.table.editAria', {
   defaultMessage: 'Edit',
 });
@@ -250,6 +257,7 @@ class TableClass extends Component<
         pagination={pagination}
         sorting={sorting}
         onTableChange={onTableChange}
+        tableCaption={tableCaption}
       />
     );
   }
