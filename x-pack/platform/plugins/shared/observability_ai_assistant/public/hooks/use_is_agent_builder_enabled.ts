@@ -6,7 +6,7 @@
  */
 
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AIChatExperience, getIsAiAgentsEnabled } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
@@ -38,10 +38,14 @@ export const useIsAgentBuilderEnabled = (): UseIsAgentBuilderEnabledResult => {
 
   const {
     application: { capabilities },
+    featureFlags,
   } = useKibana().services;
 
-  const hasAgentBuilderAccess = capabilities?.agentBuilder?.show === true;
-  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
+  const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
+
+  const hasAgentBuilderAccess = isAiAgentsEnabled && capabilities?.agentBuilder?.show === true;
+  const isAgentChatExperienceEnabled =
+    isAiAgentsEnabled && chatExperience === AIChatExperience.Agent;
 
   return {
     isAgentBuilderEnabled: hasAgentBuilderAccess && isAgentChatExperienceEnabled,
