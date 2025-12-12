@@ -17,13 +17,18 @@ const rangeKeySchema = schema.object({
   from: rangeValueSchema,
   to: rangeValueSchema,
   ranges: schema.arrayOf(
-    schema.object({ from: rangeValueSchema, to: rangeValueSchema, label: schema.string() })
+    schema.object({
+      from: rangeValueSchema,
+      to: rangeValueSchema,
+      label: schema.string(),
+    }),
+    { maxSize: 100 }
   ),
 });
 
 const multiFieldKeySchema = schema.object({
   type: schema.literal('multiFieldKey'),
-  keys: schema.arrayOf(schema.string()),
+  keys: schema.arrayOf(schema.string(), { maxSize: 100 }),
 });
 
 export const serializedValueSchema = schema.oneOf([
