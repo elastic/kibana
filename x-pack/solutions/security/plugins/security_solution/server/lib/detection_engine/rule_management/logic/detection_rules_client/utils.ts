@@ -218,7 +218,10 @@ export const patchApplicator = async (
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient
 ) => {
   const { rule_id: ruleId, id, ...rulePatchObjWithoutIds } = rulePatch; // Don't want to compare id keys for read auth RBAC check
-  if (Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))) {
+  if (
+    !isEmpty(rulePatchObjWithoutIds) &&
+    Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))
+  ) {
     const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> =
       await applyPatchRuleWithReadPrivileges(
         rulesClient,
