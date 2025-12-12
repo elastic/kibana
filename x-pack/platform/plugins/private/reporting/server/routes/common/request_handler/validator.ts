@@ -37,16 +37,7 @@ const dimensionsSchema = z.object({
   width: z.number().positive().max(14400),
 });
 
-const idSchema = z.enum([
-  'preserve_layout',
-  'print',
-  'canvas',
-  'png',
-  'pdf',
-  'csv',
-  'dashboard',
-  'preserve_layout_v2',
-]);
+const idSchema = z.enum(['preserve_layout', 'print', 'canvas', 'png', 'pdf', 'csv']);
 
 const layoutSchema = z.object({
   id: idSchema.optional(),
@@ -96,7 +87,7 @@ const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObject
 const jobParamsSchema = z.object({
   browserTimezone: timezoneSchema.optional(),
   objectType: objectTypeSchema.optional(),
-  title: titleSchema,
+  title: titleSchema.optional(),
   version: versionSchema.optional(),
   layout: layoutSchema.optional(),
   forceNow: forceNowSchema.optional(),

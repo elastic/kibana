@@ -124,6 +124,9 @@ export abstract class RequestHandler<
     try {
       validateJobParams(jobParams);
     } catch (err) {
+      this.opts.logger.error(`Job param validation failed: ${err.message}`, {
+        error: { stack_trace: err.stack },
+      });
       throw res.customError({
         statusCode: 400,
         body: `invalid params: ${err.message}`,
