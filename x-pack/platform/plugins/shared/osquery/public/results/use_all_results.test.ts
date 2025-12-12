@@ -18,7 +18,7 @@ jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn(),
 }));
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = jest.mocked(useKibana);
 
 describe('useAllResults', () => {
   let mockHttp: { get: jest.Mock; post: jest.Mock };
@@ -169,16 +169,17 @@ describe('useAllResults', () => {
         data: { edges: [], total: 0 },
       });
 
-      renderHook(() =>
-        useAllResults({
-          ...defaultHookParams,
-          activePage: 3,
-          limit: 100,
-          sort: [{ field: 'agent.id', direction: Direction.asc }],
-          kuery: 'test:query',
-          startDate: '2024-01-01T00:00:00.000Z',
-        })
-      );
+      const sort = [{ field: 'agent.id', direction: Direction.asc }];
+      const hookParams = {
+        ...defaultHookParams,
+        activePage: 3,
+        limit: 100,
+        sort,
+        kuery: 'test:query',
+        startDate: '2024-01-01T00:00:00.000Z',
+      };
+
+      renderHook(() => useAllResults(hookParams));
 
       const queryFn = mockUseQuery.mock.calls[0][1];
       await queryFn();

@@ -65,6 +65,12 @@ export const useAllResults = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const resetKey = useMemo(() => {
+    const sortKey = sort.map(({ field, direction }) => `${field}:${direction}`).join(',');
+
+    return `${actionId}|${liveQueryActionId ?? ''}|${limit}|${startDate ?? ''}|${kuery ?? ''}|${sortKey}`;
+  }, [actionId, liveQueryActionId, limit, startDate, kuery, sort]);
+
   const [pitPaginationState, setPitPaginationState] = useState<PitPaginationState>({
     searchAfterByPage: new Map(),
   });
@@ -95,7 +101,7 @@ export const useAllResults = ({
       return { searchAfterByPage: new Map() };
     });
     setFetchedPages(new Set());
-  }, [sort, kuery, startDate, actionId, limit, closePit]);
+  }, [resetKey, closePit]);
 
   useEffect(() => {
     const currentPitId = pitPaginationState.pitId;
