@@ -18,7 +18,7 @@ export type DeploymentType =
   | 'elasticsearch'
   | 'security'
   | 'observability'
-  | 'observability logs-esssentials'
+  | 'observability logs-essentials'
   | 'security essentials'
   | 'security ease';
 
