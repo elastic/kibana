@@ -140,20 +140,9 @@ export const createPersistedToolClient = ({
         );
       }
 
-      // Auto-populate description if tool type provides the hook and user didn't provide one
-      let autoDescription: string | undefined;
-      if (!createRequest.description && definition.getAutoDescription) {
-        autoDescription = await definition.getAutoDescription(
-          createRequest.configuration,
-          validationContext()
-        );
-      }
-
       const mergedRequest = {
         ...createRequest,
         configuration: updatedConfig,
-        // Use user-provided description, or auto-populated for MCP, or leave as-is
-        ...(autoDescription && { description: autoDescription }),
       };
 
       const tool = await toolClient.create(mergedRequest);
