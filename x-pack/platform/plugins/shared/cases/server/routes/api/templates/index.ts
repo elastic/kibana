@@ -25,7 +25,7 @@ export class TemplatesService {
     }
   ) {}
 
-  async hello() {
+  async getAllTemplates() {
     const findResult = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
       type: CASE_TEMPLATE_SAVED_OBJECT,
     });
@@ -68,13 +68,13 @@ export const getTemplatesRoute = createCasesRoute({
     access: 'public',
   },
   handler: async ({ context, request, response }) => {
-    const templates: Template[] = [{ name: 'Template 1' }];
+    const templates: Template[] = [{ name: 'Template 1', definition: `` }];
 
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      casesClient.templates.hello();
+      casesClient.templates.getAllTemplates();
 
       return response.ok({
         body: templates,
