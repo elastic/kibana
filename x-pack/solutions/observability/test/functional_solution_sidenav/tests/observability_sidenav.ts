@@ -51,40 +51,36 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // open application panel
         await solutionNavigation.sidenav.openPanel('applications');
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('applications');
-          expect(isOpen).to.be(true);
-        }
+        expect(await solutionNavigation.sidenav.isPanelOpen('applications')).to.be(true);
 
         // open Infrastructure popover and navigate to some link inside the panel
-        await solutionNavigation.sidenav.expandMore();
+        // Note: clickLink now automatically expands More menu if needed
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
+
         // open first link in popover to open a panel
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(true);
-        }
+        expect(await solutionNavigation.sidenav.isPanelOpen('metrics')).to.be(true);
+
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Infrastructure inventory',
         });
+
         await solutionNavigation.sidenav.clickPanelLink('metrics:hosts');
+
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Hosts',
         });
-
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(true);
-        }
+        expect(await solutionNavigation.sidenav.isPanelOpen('metrics')).to.be(true);
 
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+
         await solutionNavigation.sidenav.clickPanelLink('management:tags');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
+
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'observabilityOnboarding',
         });
