@@ -87,35 +87,43 @@ export const baseFields: FieldDefinition = {
   },
 };
 
+// Priorities match the order in NAMESPACE_PREFIXES (kbn-streamlang/src/validation/validate_streamlang.ts)
+export const NAMESPACE_PRIORITIES: Record<string, number> = {
+  'body.structured.': 10,
+  'attributes.': 20,
+  'scope.attributes.': 30,
+  'resource.attributes.': 40,
+};
+
 export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
   body: {
     type: 'object',
     properties: {
       structured: {
-        type: 'object',
-        subobjects: false,
+        type: 'passthrough',
+        priority: NAMESPACE_PRIORITIES['body.structured.'],
       },
     },
   },
   attributes: {
-    type: 'object',
-    subobjects: false,
-  },
-  resource: {
-    type: 'object',
-    properties: {
-      attributes: {
-        type: 'object',
-        subobjects: false,
-      },
-    },
+    type: 'passthrough',
+    priority: NAMESPACE_PRIORITIES['attributes.'],
   },
   scope: {
     type: 'object',
     properties: {
       attributes: {
-        type: 'object',
-        subobjects: false,
+        type: 'passthrough',
+        priority: NAMESPACE_PRIORITIES['scope.attributes.'],
+      },
+    },
+  },
+  resource: {
+    type: 'object',
+    properties: {
+      attributes: {
+        type: 'passthrough',
+        priority: NAMESPACE_PRIORITIES['resource.attributes.'],
       },
     },
   },
