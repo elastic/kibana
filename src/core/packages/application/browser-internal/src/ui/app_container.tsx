@@ -24,7 +24,7 @@ import {
   type ScopedHistory,
 } from '@kbn/core-application-browser';
 import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
-import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -37,7 +37,7 @@ interface Props {
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
-  setAppActionMenuBeta: (appId: string, config: TopNavMenuConfigBeta) => void;
+  setAppMenu: (appId: string, config: AppMenuConfig) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
   showPlainSpinner?: boolean;
@@ -49,7 +49,7 @@ export const AppContainer: FC<Props> = ({
   appPath,
   setAppLeaveHandler,
   setAppActionMenu,
-  setAppActionMenuBeta,
+  setAppMenu,
   createScopedHistory,
   appStatus,
   setIsMounting,
@@ -91,7 +91,7 @@ export const AppContainer: FC<Props> = ({
             theme$,
             onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
-            setHeaderActionMenuBeta: (config) => setAppActionMenuBeta(appId, config),
+            setAppMenu: (config) => setAppMenu(appId, config),
           })) || null;
       } catch (e) {
         setError(e);
@@ -115,7 +115,7 @@ export const AppContainer: FC<Props> = ({
     createScopedHistory,
     setAppLeaveHandler,
     setAppActionMenu,
-    setAppActionMenuBeta,
+    setAppMenu,
     appPath,
     setIsMounting,
     theme$,

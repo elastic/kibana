@@ -30,7 +30,7 @@ type BaseSplitProps = Pick<
 /**
  * Subset of SplitButtonWithNotificationProps.
  */
-export type TopNavMenuSplitButtonProps =
+export type AppMenuSplitButtonProps =
   /**
    * If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
    */
@@ -48,14 +48,14 @@ export type TopNavMenuSplitButtonProps =
       /**
        * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
        */
-      items: TopNavMenuPopoverItem[];
+      items: AppMenuPopoverItem[];
       /**
        * Function to run when the item is clicked. Only used if `items` is not provided.
        */
       run?: never;
     });
 
-interface TopNavItemBase {
+interface AppMenuItemBase {
   /**
    * A unique, internal identifier for the item.
    */
@@ -106,11 +106,11 @@ interface TopNavItemBase {
   hidden?: EuiHideForProps['sizes'];
 }
 
-export type TopNavMenuItemCommon =
+export type AppMenuItemCommon =
   /**
    * If `items` is provided then `run` shouldn't be, as having items means the button opens a popover.
    */
-  | (TopNavItemBase & {
+  | (AppMenuItemBase & {
       /**
        * Function to run when the item is clicked. Only used if `items` is not provided.
        */
@@ -124,7 +124,7 @@ export type TopNavMenuItemCommon =
        */
       popoverWidth?: never;
     })
-  | (TopNavItemBase & {
+  | (AppMenuItemBase & {
       /**
        * Function to run when the item is clicked. Only used if `items` is not provided.
        */
@@ -132,7 +132,7 @@ export type TopNavMenuItemCommon =
       /**
        * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
        */
-      items: TopNavMenuPopoverItem[];
+      items: AppMenuPopoverItem[];
       /**
        * Width of the popover in pixels.
        */
@@ -142,7 +142,7 @@ export type TopNavMenuItemCommon =
 /**
  * Full item type for use in `config.items` arrays.
  */
-export type TopNavMenuItemType = TopNavMenuItemCommon & {
+export type AppMenuItemType = AppMenuItemCommon & {
   /**
    * Order of the item in the menu. Lower numbers appear first.
    */
@@ -152,10 +152,7 @@ export type TopNavMenuItemType = TopNavMenuItemCommon & {
 /**
  * Popover item type for use in `items` arrays.
  */
-export type TopNavMenuPopoverItem = Omit<
-  TopNavMenuItemType,
-  'iconType' | 'hidden' | 'popoverWidth'
-> & {
+export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | 'popoverWidth'> & {
   /**
    * The icon type for the item.
    */
@@ -169,7 +166,7 @@ export type TopNavMenuPopoverItem = Omit<
 /**
  * Secondary action button type. Can only be a simple button.
  */
-export type TopNavMenuSecondaryActionItem = TopNavMenuItemCommon & {
+export type AppMenuSecondaryActionItem = AppMenuItemCommon & {
   /**
    * The color of the button.
    */
@@ -187,31 +184,31 @@ export type TopNavMenuSecondaryActionItem = TopNavMenuItemCommon & {
 /**
  * Primary action button type. Can be either a simple button or a split button.
  */
-export type TopNavMenuPrimaryActionItem =
+export type AppMenuPrimaryActionItem =
   /**
    * The main part of the button should never open a popover.
    */
-  Omit<TopNavMenuItemCommon, 'items'> & {
+  Omit<AppMenuItemCommon, 'items'> & {
     /**
      * Subset of SplitButtonWithNotificationProps.
      */
-    splitButtonProps?: TopNavMenuSplitButtonProps;
+    splitButtonProps?: AppMenuSplitButtonProps;
   };
 
 /**
- * Configuration object for the TopNavMenuBeta component.
+ * Configuration object for the AppMenu component.
  */
-export interface TopNavMenuConfigBeta {
+export interface AppMenuConfig {
   /**
    * List of menu items to display in the top navigation menu.
    */
-  items?: TopNavMenuItemType[];
+  items?: AppMenuItemType[];
   /**
    * Primary action button to display in the top navigation menu.
    */
-  primaryActionItem?: TopNavMenuPrimaryActionItem;
+  primaryActionItem?: AppMenuPrimaryActionItem;
   /**
    * Secondary action button to display in the top navigation menu.
    */
-  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  secondaryActionItem?: AppMenuSecondaryActionItem;
 }

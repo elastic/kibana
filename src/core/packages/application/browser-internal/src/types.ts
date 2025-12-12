@@ -17,7 +17,7 @@ import type {
   ApplicationSetup,
   ApplicationStart,
 } from '@kbn/core-application-browser';
-import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 /** @internal */
 export interface Mounter {
@@ -59,7 +59,7 @@ export interface InternalApplicationStart extends ApplicationStart {
    * @internal
    */
   currentActionMenu$: Observable<MountPoint | undefined>;
-  currentActionMenuBeta$?: Observable<TopNavMenuConfigBeta | undefined>;
+  currentAppMenu$?: Observable<AppMenuConfig | undefined>;
 
   /**
    * The global history instance, exposed only to Core.

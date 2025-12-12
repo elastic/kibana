@@ -84,9 +84,9 @@ export class GridLayout implements LayoutService {
     const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = combineLatest([
       application.currentActionMenu$,
-      application.currentActionMenuBeta$,
+      application.currentAppMenu$,
       // @ts-expect-error
-    ]).pipe(map(([menu, menuBeta]) => !!menu || !!menuBeta));
+    ]).pipe(map(([menu, appMenu]) => !!menu || !!appMenu));
 
     const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
 

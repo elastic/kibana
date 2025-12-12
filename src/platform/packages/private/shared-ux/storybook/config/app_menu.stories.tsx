@@ -15,10 +15,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeader, EuiPageTemplate, useEuiTheme } fr
 import { UnifiedTabs, useNewTabProps, type TabItem } from '@kbn/unified-tabs';
 import { TabStatus, type TabPreviewData } from '@kbn/unified-tabs';
 import { css } from '@emotion/react';
-import { TopNavMenuBeta } from '@kbn/app-menu';
-import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
+import { AppMenu } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
-interface TopNavMenuBetaWrapperProps extends ComponentProps<typeof TopNavMenuBeta> {
+interface AppMenuWrapperProps extends ComponentProps<typeof AppMenu> {
   showTabs?: boolean;
 }
 
@@ -36,7 +36,7 @@ const VerticalRule = () => {
   );
 };
 
-const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWrapperProps) => {
+const AppMenuWrapper = ({ showTabs = false, ...props }: AppMenuWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
 
@@ -119,11 +119,11 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
           flex-shrink: 0;
         `}
       >
-        <TopNavMenuBeta {...props} />
+        <AppMenu {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <TopNavMenuBeta {...props} />
+    <AppMenu {...props} />
   );
 
   return (
@@ -147,9 +147,9 @@ const TopNavMenuBetaWrapper = ({ showTabs = false, ...props }: TopNavMenuBetaWra
   );
 };
 
-const meta: Meta<TopNavMenuBetaWrapperProps> = {
-  title: 'Navigation/TopNavMenuBeta',
-  component: TopNavMenuBetaWrapper,
+const meta: Meta<AppMenuWrapperProps> = {
+  title: 'Navigation/AppMenu',
+  component: AppMenuWrapper,
   argTypes: {
     showTabs: {
       control: 'boolean',
@@ -169,7 +169,7 @@ const meta: Meta<TopNavMenuBetaWrapperProps> = {
   parameters: {
     docs: {
       description: {
-        component: 'TopNavMenuBeta is the new design of app menu.',
+        component: 'AppMenu is the new design of app menu.',
       },
     },
   },
@@ -177,9 +177,9 @@ const meta: Meta<TopNavMenuBetaWrapperProps> = {
 
 export default meta;
 
-type Story = StoryObj<TopNavMenuBetaWrapperProps>;
+type Story = StoryObj<AppMenuWrapperProps>;
 
-const dashboardEditModeConfig: TopNavMenuConfigBeta = {
+const dashboardEditModeConfig: AppMenuConfig = {
   items: [
     {
       run: action('exit-edit-clicked'),
@@ -363,7 +363,7 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
   },
 };
 
-const discoverConfig: TopNavMenuConfigBeta = {
+const discoverConfig: AppMenuConfig = {
   items: [
     {
       run: action('new-clicked'),

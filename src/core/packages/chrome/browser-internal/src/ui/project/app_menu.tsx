@@ -12,13 +12,13 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo, useLayoutEffect, useState } from 'react';
-import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
   // TODO: get rid of observable
   appMenuActions$: Observable<MountPoint | undefined>;
-  appMenuActionsBeta$?: Observable<TopNavMenuConfigBeta | undefined> | null;
+  appMenu$?: Observable<AppMenuConfig | undefined> | null;
 
   /**
    * Whether the menu bar should be fixed (sticky) or static.
@@ -57,11 +57,7 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
     return { root, fixed, static: staticStyle };
   }, [euiTheme]);
 
-export const AppMenuBar = ({
-  appMenuActions$,
-  appMenuActionsBeta$,
-  isFixed = true,
-}: AppMenuBarProps) => {
+export const AppMenuBar = ({ appMenuActions$, appMenu$, isFixed = true }: AppMenuBarProps) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$);
   const { euiTheme } = useEuiTheme();
   const [hasBetaConfig, setHasBetaConfig] = useState(false);
@@ -69,13 +65,13 @@ export const AppMenuBar = ({
   const styles = useAppMenuBarStyles(euiTheme);
 
   useLayoutEffect(() => {
-    if (appMenuActionsBeta$) {
-      const subscription = appMenuActionsBeta$.subscribe((config) => {
+    if (appMenu$) {
+      const subscription = appMenu$.subscribe((config) => {
         setHasBetaConfig(!!config && !!config.items && config.items.length > 0);
       });
       return () => subscription.unsubscribe();
     }
-  }, [appMenuActionsBeta$]);
+  }, [appMenu$]);
 
   if (!headerActionMenuMounter.mount && !hasBetaConfig) return null;
 
@@ -85,7 +81,7 @@ export const AppMenuBar = ({
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={[styles.root, isFixed ? styles.fixed : styles.static]}
     >
-      <HeaderActionMenu mounter={headerActionMenuMounter} config={appMenuActionsBeta$} />
+      <HeaderActionMenu mounter={headerActionMenuMounter} config={appMenu$} />
     </div>
   );
 };

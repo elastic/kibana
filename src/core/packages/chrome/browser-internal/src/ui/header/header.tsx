@@ -210,7 +210,7 @@ export function Header({
               <EuiHeaderSectionItem>
                 <HeaderActionMenu
                   mounter={headerActionMenuMounter}
-                  config={application.currentActionMenuBeta$}
+                  config={application.currentAppMenu$}
                 />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

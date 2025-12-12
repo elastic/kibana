@@ -1,23 +1,23 @@
-# TopNavMenuBeta
+# AppMenu
 
-`TopNavMenuBeta` is the replacement for the existing `TopNavMenu` component, providing an improved API and enhanced functionality for building top navigation menus in your application.
+`AppMenu` is the replacement for the existing `TopNavMenu` component, providing an improved API and enhanced functionality for building app menu in your application.
 
 ## Usage
 
 - Direct import:
 
 ```typescript
-import { TopNavMenuBeta} from '@kbn/navigation-plugin/public'
+import { AppMenu } from '@kbn/navigation-plugin/public'
 
-const MyComponent = (props: TopNavMenuConfigBeta) => {
+const MyComponent = (props: AppMenuConfig) => {
 
-  return <TopNavMenuBeta {...props} />
+  return <AppMenu {...props} />
 }
 ```
 
 ## API changes
 
-`TopNavMenuBeta` offers a more restricted API than `TopNavMenu`
+`AppMenu` offers a more restricted API than `TopNavMenu`
 
 1. Decoupling from `UnifiedSearch` - top nav menu will no longer be bundled with unified search. You will need to directly import unified search and render it.
 
@@ -25,7 +25,7 @@ const MyComponent = (props: TopNavMenuConfigBeta) => {
 
 3. `items` can only be `EuiHeaderLink` (a button with type `text`). For more advanced use cases, use action buttons.
 
-4. Action buttons - `TopNavMenuBeta` introduces action buttons:
+4. Action buttons - `AppMenu` introduces action buttons:
 
     - `primaryActionButton` - this is meant to be used for primary actions (e.g saving), can be either an `EuiButton` or a split button, always placed as the rightmost item
 

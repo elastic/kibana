@@ -97,8 +97,8 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
   }
   mounters={Map {}}
   setAppActionMenu={[Function]}
-  setAppActionMenuBeta={[Function]}
   setAppLeaveHandler={[Function]}
+  setAppMenu={[Function]}
   setIsMounting={[Function]}
   theme$={
     Observable {

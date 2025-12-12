@@ -455,7 +455,7 @@ export class ChromeService {
         application={application}
         globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
         actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
-        actionMenuBeta$={includeAppMenu ? application.currentActionMenuBeta$ : null}
+        appMenu$={includeAppMenu ? application.currentAppMenu$ : null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
         breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
         customBranding$={customBranding$}
@@ -573,7 +573,7 @@ export class ChromeService {
         return (
           <AppMenuBar
             appMenuActions$={application.currentActionMenu$}
-            appMenuActionsBeta$={application.currentActionMenuBeta$}
+            appMenu$={application.currentAppMenu$}
             isFixed={false}
           />
         );

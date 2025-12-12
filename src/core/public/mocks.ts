@@ -59,7 +59,7 @@ function createAppMountParametersMock(appBasePath = '') {
     theme$: themeServiceMock.createTheme$(),
     onAppLeave: jest.fn(),
     setHeaderActionMenu: jest.fn(),
-    setHeaderActionMenuBeta: jest.fn(),
+    setAppMenu: jest.fn(),
   });
 
   return params;

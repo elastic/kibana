@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TopNavMenuBeta } from './top_nav_menu_beta';
-export { TopNavMenuItem } from './top_nav_menu_item';
-export { TopNavMenuActionButton } from './top_nav_menu_action_button';
-export { TopNavMenuOverflowButton } from './top_nav_menu_overflow_button';
-export { TopNavMenuPopover } from './top_nav_menu_popover';
-export { TopNavMenuPopoverActionButtons } from './top_nav_menu_popover_action_buttons';
+export { AppMenu } from './components';
+export { AppMenuItem } from './components';
+export { AppMenuActionButton } from './components';
+export { AppMenuOverflowButton } from './components';
+export { AppMenuPopover } from './components';
+export { AppMenuPopoverActionButtons } from './components';
 
 export type {
-  TopNavMenuConfigBeta,
-  TopNavMenuItemType,
-  TopNavMenuSecondaryActionItem,
-  TopNavMenuPrimaryActionItem,
-  TopNavMenuPopoverItem,
-  TopNavMenuSplitButtonProps,
+  AppMenuConfig,
+  AppMenuItemType,
+  AppMenuSecondaryActionItem,
+  AppMenuPrimaryActionItem,
+  AppMenuPopoverItem,
+  AppMenuSplitButtonProps,
 } from './types';
 
 export {
-  TOP_NAV_MENU_ITEM_LIMIT,
-  TOP_NAV_MENU_NOTIFICATION_INDICATOR_LEFT,
-  TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP,
+  APP_MENU_ITEM_LIMIT,
+  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
+  APP_MENU_NOTIFICATION_INDICATOR_TOP,
 } from './constants';
 
 export {
@@ -34,8 +34,8 @@ export {
   getShouldOverflow,
   isDisabled,
   getTooltip,
-  mapTopNavItemToPanelItem,
-  getTopNavItems,
+  mapAppMenuItemToPanelItem,
+  getAppMenuItems,
   getPopoverPanels,
   getPopoverActionItems,
   getIsSelectedColor,

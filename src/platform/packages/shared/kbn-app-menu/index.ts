@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TopNavMenuBeta } from './src';
-export { TopNavMenuItem } from './src';
-export { TopNavMenuActionButton } from './src';
-export { TopNavMenuOverflowButton } from './src';
-export { TopNavMenuPopover } from './src';
-export { TopNavMenuPopoverActionButtons } from './src';
+export { AppMenu } from './src';
+export { AppMenuItem } from './src';
+export { AppMenuActionButton } from './src';
+export { AppMenuOverflowButton } from './src';
+export { AppMenuPopover } from './src';
+export { AppMenuPopoverActionButtons } from './src';
 
 export type {
-  TopNavMenuConfigBeta,
-  TopNavMenuItemType,
-  TopNavMenuSecondaryActionItem,
-  TopNavMenuPrimaryActionItem,
-  TopNavMenuPopoverItem,
-  TopNavMenuSplitButtonProps,
+  AppMenuConfig,
+  AppMenuItemType,
+  AppMenuSecondaryActionItem,
+  AppMenuPrimaryActionItem,
+  AppMenuPopoverItem,
+  AppMenuSplitButtonProps,
 } from './src';
 
 export {
-  TOP_NAV_MENU_ITEM_LIMIT,
-  TOP_NAV_MENU_NOTIFICATION_INDICATOR_LEFT,
-  TOP_NAV_MENU_NOTIFICATION_INDICATOR_TOP,
+  APP_MENU_ITEM_LIMIT,
+  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
+  APP_MENU_NOTIFICATION_INDICATOR_TOP,
 } from './src';
 
 export {
@@ -34,8 +34,8 @@ export {
   getShouldOverflow,
   isDisabled,
   getTooltip,
-  mapTopNavItemToPanelItem,
-  getTopNavItems,
+  mapAppMenuItemToPanelItem,
+  getAppMenuItems,
   getPopoverPanels,
   getPopoverActionItems,
   getIsSelectedColor,

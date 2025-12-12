@@ -11,12 +11,12 @@ import type { FC } from 'react';
 import React, { useRef, useLayoutEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
-import type { TopNavMenuConfigBeta } from '@kbn/app-menu';
-import { TopNavMenuBeta } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/app-menu';
+import { AppMenu } from '@kbn/app-menu';
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };
-  config?: Observable<TopNavMenuConfigBeta | undefined> | null;
+  config?: Observable<AppMenuConfig | undefined> | null;
 }
 
 export const useHeaderActionMenuMounter = (
@@ -42,7 +42,7 @@ export const useHeaderActionMenuMounter = (
 export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter, config }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
-  const [menuConfig, setMenuConfig] = useState<TopNavMenuConfigBeta | undefined>(undefined);
+  const [menuConfig, setMenuConfig] = useState<AppMenuConfig | undefined>(undefined);
 
   useLayoutEffect(() => {
     if (mounter.mount && elementRef.current) {
@@ -72,7 +72,7 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter, config })
   }, [config]);
 
   if (menuConfig) {
-    return <TopNavMenuBeta config={menuConfig} />;
+    return <AppMenu config={menuConfig} />;
   }
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;

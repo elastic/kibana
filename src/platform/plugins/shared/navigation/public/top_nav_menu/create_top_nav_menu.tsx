@@ -24,13 +24,13 @@ const LazyTopNavMenu = lazy(async () => {
  */
 export function createTopNav(
   /**
-   * @deprecated TopNavMenuBeta will decouple from UnifiedSearch, so this parameter
-   * will be removed once TopNavMenuBeta becomes the default.
+   * @deprecated AppMenu will decouple from UnifiedSearch, so this parameter
+   * will be removed once AppMenu becomes the default.
    */
   unifiedSearch: UnifiedSearchPublicPluginStart,
   /**
-   * @deprecated TopNavMenuBeta will not allow for reigstering global menu items, so this parameter
-   * will be removed once TopNavMenuBeta becomes the default.
+   * @deprecated AppMenu will not allow for reigstering global menu items, so this parameter
+   * will be removed once AppMenu becomes the default.
    */
   extraConfig: RegisteredTopNavMenuData[]
 ) {

@@ -10,9 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TopNavMenuOverflowButton } from './top_nav_menu_overflow_button';
+import { AppMenuOverflowButton } from './app_menu_overflow_button';
 
-describe('TopNavMenuOverflowButton', () => {
+describe('AppMenuOverflowButton', () => {
   const defaultItems = [
     { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
     { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'search', order: 2 },
@@ -30,14 +30,14 @@ describe('TopNavMenuOverflowButton', () => {
   });
 
   it('should render the overflow button', () => {
-    render(<TopNavMenuOverflowButton {...defaultProps} />);
+    render(<AppMenuOverflowButton {...defaultProps} />);
 
     expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
   });
 
   it('should call onPopoverToggle when clicked', async () => {
     const user = userEvent.setup();
-    render(<TopNavMenuOverflowButton {...defaultProps} />);
+    render(<AppMenuOverflowButton {...defaultProps} />);
 
     await user.click(screen.getByTestId('top-nav-menu-overflow-button'));
 
@@ -45,7 +45,7 @@ describe('TopNavMenuOverflowButton', () => {
   });
 
   it('should return null when items array is empty', () => {
-    const { container } = render(<TopNavMenuOverflowButton {...defaultProps} items={[]} />);
+    const { container } = render(<AppMenuOverflowButton {...defaultProps} items={[]} />);
 
     expect(container).toBeEmptyDOMElement();
   });

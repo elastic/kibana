@@ -11,21 +11,21 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import {
   getDisplayedItemsAllowedAmount,
   getShouldOverflow,
-  getTopNavItems,
-  mapTopNavItemToPanelItem,
+  getAppMenuItems,
+  mapAppMenuItemToPanelItem,
   getPopoverActionItems,
   getPopoverPanels,
   getIsSelectedColor,
 } from './utils';
-import { TOP_NAV_MENU_ITEM_LIMIT } from './constants';
-import type { TopNavMenuPopoverItem } from './types';
+import { APP_MENU_ITEM_LIMIT } from './constants';
+import type { AppMenuPopoverItem } from './types';
 
 describe('utils', () => {
   describe('getDisplayedItemsAllowedAmount', () => {
     it('should return full limit when no action items', () => {
       const result = getDisplayedItemsAllowedAmount({});
 
-      expect(result).toBe(TOP_NAV_MENU_ITEM_LIMIT);
+      expect(result).toBe(APP_MENU_ITEM_LIMIT);
     });
 
     it('should reduce limit by 1 when primary action item is present', () => {
@@ -33,7 +33,7 @@ describe('utils', () => {
         primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
       });
 
-      expect(result).toBe(TOP_NAV_MENU_ITEM_LIMIT - 1);
+      expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
     });
 
     it('should reduce limit by 1 when secondary action item is present', () => {
@@ -41,7 +41,7 @@ describe('utils', () => {
         secondaryActionItem: { id: 'cancel', label: 'Cancel', run: jest.fn(), iconType: 'cross' },
       });
 
-      expect(result).toBe(TOP_NAV_MENU_ITEM_LIMIT - 1);
+      expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
     });
 
     it('should reduce limit by 2 when both action items are present', () => {
@@ -50,7 +50,7 @@ describe('utils', () => {
         secondaryActionItem: { id: 'cancel', label: 'Cancel', run: jest.fn(), iconType: 'cross' },
       });
 
-      expect(result).toBe(TOP_NAV_MENU_ITEM_LIMIT - 2);
+      expect(result).toBe(APP_MENU_ITEM_LIMIT - 2);
     });
   });
 
@@ -113,9 +113,9 @@ describe('utils', () => {
     });
   });
 
-  describe('getTopNavItems', () => {
+  describe('getAppMenuItems', () => {
     it('should return empty arrays when config has no items', () => {
-      const result = getTopNavItems({ config: {} });
+      const result = getAppMenuItems({ config: {} });
 
       expect(result).toEqual({
         displayedItems: [],
@@ -130,7 +130,7 @@ describe('utils', () => {
         { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const, order: 2 },
       ];
 
-      const result = getTopNavItems({ config: { items } });
+      const result = getAppMenuItems({ config: { items } });
 
       expect(result.displayedItems).toHaveLength(2);
       expect(result.overflowItems).toHaveLength(0);
@@ -144,7 +144,7 @@ describe('utils', () => {
         { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const, order: 2 },
       ];
 
-      const result = getTopNavItems({ config: { items } });
+      const result = getAppMenuItems({ config: { items } });
 
       expect(result.displayedItems[0].id).toBe('1');
       expect(result.displayedItems[1].id).toBe('2');
@@ -160,9 +160,9 @@ describe('utils', () => {
         order: i,
       }));
 
-      const result = getTopNavItems({ config: { items } });
+      const result = getAppMenuItems({ config: { items } });
 
-      expect(result.displayedItems).toHaveLength(TOP_NAV_MENU_ITEM_LIMIT);
+      expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT);
       expect(result.overflowItems).toHaveLength(2);
       expect(result.shouldOverflow).toBe(true);
     });
@@ -176,21 +176,21 @@ describe('utils', () => {
         order: i,
       }));
 
-      const result = getTopNavItems({
+      const result = getAppMenuItems({
         config: {
           items,
           primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
         },
       });
 
-      expect(result.displayedItems).toHaveLength(TOP_NAV_MENU_ITEM_LIMIT - 1);
+      expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT - 1);
       expect(result.overflowItems).toHaveLength(1);
       expect(result.shouldOverflow).toBe(true);
     });
   });
 
-  describe('mapTopNavItemToPanelItem', () => {
-    const baseItem: TopNavMenuPopoverItem = {
+  describe('mapAppMenuItemToPanelItem', () => {
+    const baseItem: AppMenuPopoverItem = {
       id: 'test',
       label: 'test item',
       run: jest.fn(),
@@ -199,34 +199,34 @@ describe('utils', () => {
 
     it('should capitalize label', () => {
       const item = { ...baseItem, label: 'my label' };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result.name).toBe('My label');
     });
 
     it('should include icon when provided', () => {
       const item = { ...baseItem, iconType: 'gear' as const };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result.icon).toBe('gear');
     });
 
     it('should set onClick handler when no href or childPanelId', () => {
-      const result = mapTopNavItemToPanelItem(baseItem);
+      const result = mapAppMenuItemToPanelItem(baseItem);
 
       expect(result.onClick).toBeDefined();
     });
 
     it('should not set onClick when href is provided', () => {
       const item = { ...baseItem, href: 'http://example.com' };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result.onClick).toBeUndefined();
       expect(result.href).toBe('http://example.com');
     });
 
     it('should not set onClick when childPanelId is provided', () => {
-      const result = mapTopNavItemToPanelItem(baseItem, 1);
+      const result = mapAppMenuItemToPanelItem(baseItem, 1);
 
       expect(result.onClick).toBeUndefined();
       expect(result.panel).toBe(1);
@@ -234,35 +234,35 @@ describe('utils', () => {
 
     it('should set target when href is provided', () => {
       const item = { ...baseItem, href: 'http://example.com', target: '_blank' };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result.target).toBe('_blank');
     });
 
     it('should not set target when no href', () => {
       const item = { ...baseItem, target: '_blank' };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result.target).toBeUndefined();
     });
 
     it('should set disabled state', () => {
       const item = { ...baseItem, disableButton: true };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result.disabled).toBe(true);
     });
 
     it('should include testId as data-test-subj', () => {
       const item = { ...baseItem, testId: 'my-test-id' };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result['data-test-subj']).toBe('my-test-id');
     });
 
     it('should include tooltip content and title', () => {
       const item = { ...baseItem, tooltipContent: 'Content', tooltipTitle: 'Title' };
-      const result = mapTopNavItemToPanelItem(item);
+      const result = mapAppMenuItemToPanelItem(item);
 
       expect(result.toolTipContent).toBe('Content');
       expect(result.toolTipProps?.title).toBe('Title');
@@ -374,7 +374,7 @@ describe('utils', () => {
 
   describe('getPopoverPanels', () => {
     it('should create single panel for flat items', () => {
-      const items: TopNavMenuPopoverItem[] = [
+      const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1 },
         { id: '2', label: 'Item 2', run: jest.fn(), order: 2 },
       ];
@@ -387,7 +387,7 @@ describe('utils', () => {
     });
 
     it('should create nested panels for items with sub-items', () => {
-      const items: TopNavMenuPopoverItem[] = [
+      const items: AppMenuPopoverItem[] = [
         {
           id: '1',
           label: 'Parent',
@@ -408,7 +408,7 @@ describe('utils', () => {
     });
 
     it('should add separator above item when seperator is "above"', () => {
-      const items: TopNavMenuPopoverItem[] = [
+      const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1, seperator: 'above' },
       ];
 
@@ -420,7 +420,7 @@ describe('utils', () => {
     });
 
     it('should add separator below item when seperator is "below"', () => {
-      const items: TopNavMenuPopoverItem[] = [
+      const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1, seperator: 'below' },
       ];
 
@@ -432,9 +432,7 @@ describe('utils', () => {
     });
 
     it('should append action items to main panel when provided', () => {
-      const items: TopNavMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1 },
-      ];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
 
       const result = getPopoverPanels({
         items,
@@ -450,9 +448,7 @@ describe('utils', () => {
     });
 
     it('should use custom startPanelId', () => {
-      const items: TopNavMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1 },
-      ];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
 
       const result = getPopoverPanels({ items, startPanelId: 10 });
 
@@ -460,7 +456,7 @@ describe('utils', () => {
     });
 
     it('should handle deeply nested items', () => {
-      const items: TopNavMenuPopoverItem[] = [
+      const items: AppMenuPopoverItem[] = [
         {
           id: '1',
           label: 'Level 1',
