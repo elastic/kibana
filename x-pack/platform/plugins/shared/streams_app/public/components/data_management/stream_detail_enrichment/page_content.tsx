@@ -42,7 +42,6 @@ import { StepsEditor } from './steps/steps_editor';
 import { RunSimulationButton } from './yaml_mode/run_simulation_button';
 import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
 import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
-import { useKibana } from '../../../hooks/use_kibana';
 import { buildUpsertStreamRequestPayload } from './utils';
 import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
