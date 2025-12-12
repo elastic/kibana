@@ -132,6 +132,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
     const showLoader = isParsing || isLoading;
     const isButtonDisabled = showLoader || lookupResources.length === 0;
+    const id = resourceType === 'reference_data' ? 'referenceSetsFilePicker' : 'lookupsFilePicker';
 
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -147,7 +148,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           >
             <EuiFilePicker
               isInvalid={errors.length > 0}
-              id={`${resourceType}FilePicker`}
+              id={id}
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
@@ -162,7 +163,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
               aria-label={CONFIGS[resourceType].label}
               isLoading={showLoader}
               disabled={showLoader}
-              data-test-subj={`${resourceType}FilePicker`}
+              data-test-subj={id}
               data-loading={isParsing}
             />
           </EuiFormRow>

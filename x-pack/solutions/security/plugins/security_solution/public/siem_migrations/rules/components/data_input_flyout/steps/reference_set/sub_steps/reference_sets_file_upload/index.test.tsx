@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useLookupsFileUploadStep } from '.';
+import { useReferencesFileUploadStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock/test_providers';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import { getRuleMigrationStatsMock } from '../../../../../../__mocks__/migration_rule_stats';
@@ -15,7 +15,7 @@ import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_
 jest.mock('../../../../../../service/hooks/use_upsert_resources');
 const mockUseUpsertResources = useUpsertResources as jest.Mock;
 
-describe('useLookupsFileUploadStep', () => {
+describe('useReferencesFileUploadStep', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -33,14 +33,14 @@ describe('useLookupsFileUploadStep', () => {
       missingLookups: [],
       addUploadedLookups: jest.fn(),
     };
-    const { result } = renderHook(() => useLookupsFileUploadStep(props), {
+    const { result } = renderHook(() => useReferencesFileUploadStep(props), {
       wrapper: TestProviders,
     });
 
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'incomplete',
-      title: 'Update your lookups export',
+      title: 'Update your reference sets export',
     });
   });
 
@@ -57,14 +57,14 @@ describe('useLookupsFileUploadStep', () => {
       missingLookups: [],
       addUploadedLookups: jest.fn(),
     };
-    const { result } = renderHook(() => useLookupsFileUploadStep(props), {
+    const { result } = renderHook(() => useReferencesFileUploadStep(props), {
       wrapper: TestProviders,
     });
 
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'loading',
-      title: 'Update your lookups export',
+      title: 'Update your reference sets export',
     });
   });
 
@@ -81,14 +81,14 @@ describe('useLookupsFileUploadStep', () => {
       missingLookups: [],
       addUploadedLookups: jest.fn(),
     };
-    const { result } = renderHook(() => useLookupsFileUploadStep(props), {
+    const { result } = renderHook(() => useReferencesFileUploadStep(props), {
       wrapper: TestProviders,
     });
 
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'danger',
-      title: 'Update your lookups export',
+      title: 'Update your reference sets export',
     });
   });
 });

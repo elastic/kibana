@@ -26,7 +26,7 @@ import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_mi
 import { QradarDataInputStep, type OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
 import { useMissingReferenceSetsListStep } from './sub_steps/missing_reference_set_list';
-import { useLookupsFileUploadStep } from './sub_steps/reference_sets_file_upload';
+import { useReferencesFileUploadStep } from './sub_steps/reference_sets_file_upload';
 import type { MigrationStepProps } from '../../../../../common/types';
 
 interface ReferenceSetDataInputSubStepsProps {
@@ -131,7 +131,7 @@ export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSub
     });
 
     // Upload macros step
-    const uploadStep = useLookupsFileUploadStep({
+    const uploadStep = useReferencesFileUploadStep({
       status: getEuiStepStatus(2, subStep),
       migrationStats,
       missingLookups: missingReferenceSet,

@@ -20,7 +20,7 @@ export interface RulesFileUploadStepProps {
   missingLookups: string[];
   addUploadedLookups: AddUploadedLookups;
 }
-export const useLookupsFileUploadStep = ({
+export const useReferencesFileUploadStep = ({
   status,
   migrationStats,
   addUploadedLookups,
