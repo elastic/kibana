@@ -133,6 +133,9 @@ export class DeployPrivateLocationMonitors {
       const monitors = result.saved_objects.filter((monitor) => {
         // Avoid processing the same config multiple times, updating it once will update all mws on it
         if (listOfUpdatedConfigs.includes(monitor.id)) {
+          this.debugLog(
+            `Skipping monitor id: ${monitor.id} as it has already been processed for another maintenance window`
+          );
           return false;
         }
         listOfUpdatedConfigs.push(monitor.id);
