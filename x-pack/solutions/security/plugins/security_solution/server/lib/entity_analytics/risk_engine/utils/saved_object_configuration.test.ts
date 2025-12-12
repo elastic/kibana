@@ -106,6 +106,36 @@ describe('#getDefaultRiskEngineConfiguration', () => {
           "required": false,
           "type": "date",
         },
+        "host.risk.modifiers": Object {
+          "array": true,
+          "required": false,
+          "type": "object",
+        },
+        "host.risk.modifiers.contribution": Object {
+          "array": false,
+          "required": false,
+          "type": "float",
+        },
+        "host.risk.modifiers.metadata": Object {
+          "array": false,
+          "required": false,
+          "type": "flattened",
+        },
+        "host.risk.modifiers.modifier_value": Object {
+          "array": false,
+          "required": false,
+          "type": "float",
+        },
+        "host.risk.modifiers.subtype": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
+        "host.risk.modifiers.type": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
         "host.risk.notes": Object {
           "array": false,
           "required": false,
@@ -191,6 +221,36 @@ describe('#getDefaultRiskEngineConfiguration', () => {
           "required": false,
           "type": "date",
         },
+        "service.risk.modifiers": Object {
+          "array": true,
+          "required": false,
+          "type": "object",
+        },
+        "service.risk.modifiers.contribution": Object {
+          "array": false,
+          "required": false,
+          "type": "float",
+        },
+        "service.risk.modifiers.metadata": Object {
+          "array": false,
+          "required": false,
+          "type": "flattened",
+        },
+        "service.risk.modifiers.modifier_value": Object {
+          "array": false,
+          "required": false,
+          "type": "float",
+        },
+        "service.risk.modifiers.subtype": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
+        "service.risk.modifiers.type": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
         "service.risk.notes": Object {
           "array": false,
           "required": false,
@@ -275,6 +335,36 @@ describe('#getDefaultRiskEngineConfiguration', () => {
           "array": false,
           "required": false,
           "type": "date",
+        },
+        "user.risk.modifiers": Object {
+          "array": true,
+          "required": false,
+          "type": "object",
+        },
+        "user.risk.modifiers.contribution": Object {
+          "array": false,
+          "required": false,
+          "type": "float",
+        },
+        "user.risk.modifiers.metadata": Object {
+          "array": false,
+          "required": false,
+          "type": "flattened",
+        },
+        "user.risk.modifiers.modifier_value": Object {
+          "array": false,
+          "required": false,
+          "type": "float",
+        },
+        "user.risk.modifiers.subtype": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
+        "user.risk.modifiers.type": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
         },
         "user.risk.notes": Object {
           "array": false,
