@@ -19,6 +19,7 @@ import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
+import { groupingOptions, groupingSettings } from './grouping_configs';
 
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -42,13 +43,6 @@ describe('<TableSection />', () => {
     mockGroupedAlertsTable.mockImplementation((props) => (
       <div data-test-subj="mock-grouped-alerts-table">{props.additionalToolbarControls}</div>
     ));
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should render correctly', async () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -57,7 +51,13 @@ describe('<TableSection />', () => {
     (useListsConfig as jest.Mock).mockReturnValue({
       loading: false,
     });
+  });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should render correctly', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <TableSection dataView={dataView} />
@@ -70,6 +70,21 @@ describe('<TableSection />', () => {
     });
   });
 
+  it('should pass groupingOptions and groupingSettings to GroupedAlertsTable', async () => {
+    render(
+      <TestProviders>
+        <TableSection dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(GroupedAlertsTable).toHaveBeenCalled();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.defaultGroupingOptions).toEqual(groupingOptions);
+      expect(props.settings).toEqual(groupingSettings);
+    });
+  });
+
   it('should call useGetDefaultGroupTitleRenderers with attackIds from onAggregationsChange when groupingLevel is 0', async () => {
     let onAggregationsChange: (
       aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
@@ -78,15 +93,6 @@ describe('<TableSection />', () => {
     mockGroupedAlertsTable.mockImplementation((props) => {
       onAggregationsChange = props.onAggregationsChange;
       return <div data-test-subj="mock-grouped-alerts-table" />;
-    });
-
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-      },
-    ]);
-    (useListsConfig as jest.Mock).mockReturnValue({
-      loading: false,
     });
 
     render(
@@ -131,15 +137,6 @@ describe('<TableSection />', () => {
       return <div data-test-subj="mock-grouped-alerts-table" />;
     });
 
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-      },
-    ]);
-    (useListsConfig as jest.Mock).mockReturnValue({
-      loading: false,
-    });
-
     render(
       <TestProviders>
         <TableSection dataView={dataView} />
@@ -181,14 +178,15 @@ describe('<TableSection />', () => {
       loading: false,
     });
 
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
         <TableSection dataView={dataView} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(queryByTestId('mock-grouped-alerts-table')).toBeInTheDocument();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.loading).toBe(true);
     });
   });
 
@@ -202,14 +200,15 @@ describe('<TableSection />', () => {
       loading: true,
     });
 
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
         <TableSection dataView={dataView} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(queryByTestId('mock-grouped-alerts-table')).toBeInTheDocument();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.loading).toBe(true);
     });
   });
 
