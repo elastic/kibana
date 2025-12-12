@@ -278,6 +278,26 @@ export const performBulkCreate = async <T>(
         expectedResult.rawMigratedDoc._source
       );
 
+      // Create snapshots
+      if (options.snapshot) {
+        const { _id, _source } = expectedResult.rawMigratedDoc;
+        bulkCreateParams.push(
+          {
+            create: {
+              _id: SavedObjectsUtils.generateId(),
+              _index: commonHelper.getSnapshotIndexForType(object.type),
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'user.id': updatedBy || 'unknown',
+            message: options.reason || 'bulk create',
+            id: _id,
+            source: _source,
+          }
+        );
+      }
+
       return right(expectedResult);
     })
   );
