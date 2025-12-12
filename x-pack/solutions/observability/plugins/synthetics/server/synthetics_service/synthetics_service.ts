@@ -430,7 +430,7 @@ export class SyntheticsService {
     }
   }
 
-  private async pushAllConfigs() {
+  async pushAllConfigs() {
     const license = await this.getLicense();
     const service = this;
 

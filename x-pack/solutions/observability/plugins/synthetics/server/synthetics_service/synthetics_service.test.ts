@@ -254,7 +254,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushAllConfigs();
 
       expect(axios).not.toHaveBeenCalled();
 
@@ -277,7 +277,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushAllConfigs();
 
       expect(serverMock.logger.debug).toBeCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
@@ -350,7 +350,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushAllConfigs();
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -400,7 +400,7 @@ describe('SyntheticsService', () => {
 
         (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-        await expect(service.pushConfigs()).rejects.toThrow(errorMessage);
+        await expect(service.pushAllConfigs()).rejects.toThrow(errorMessage);
       }
     );
   });
@@ -566,7 +566,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushAllConfigs();
 
       expect(syncSpy).toHaveBeenCalledTimes(72);
       expect(axios).toHaveBeenCalledTimes(72);
