@@ -234,7 +234,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     validateSettings(this._definition, this.dependencies.isServerless);
 
-    // Validate settings with dry_run against ES (classic streams always have an existing data stream)
+    // Validate settings with dry_run against ES
     if (this._changes.settings) {
       const settingsValidation = await validateSettingsWithDryRun({
         scopedClusterClient: this.dependencies.scopedClusterClient,

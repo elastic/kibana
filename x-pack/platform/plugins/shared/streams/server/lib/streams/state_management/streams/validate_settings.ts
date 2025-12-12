@@ -39,11 +39,34 @@ export async function validateSettingsWithDryRun({
     return { isValid: true, errors: [] };
   }
 
-  const response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
-    name: streamName,
-    settings: settingsToValidate,
-    dry_run: true,
-  })) as DataStreamSettingsResponse;
+  let response: DataStreamSettingsResponse;
+  try {
+    response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
+      name: streamName,
+      settings: settingsToValidate,
+      dry_run: true,
+    })) as DataStreamSettingsResponse;
+  } catch (e) {
+    const statusCode = e?.meta?.statusCode;
+    if (statusCode === 404) {
+      return {
+        isValid: false,
+        errors: [
+          new Error(
+            `Cannot validate stream settings because backing Data Stream "${streamName}" was not found`
+          ),
+        ],
+      };
+    }
+    throw e;
+  }
+
+  if (!response.data_streams || response.data_streams.length === 0) {
+    return {
+      isValid: false,
+      errors: [new Error(`Failed to validate stream settings for "${streamName}"`)],
+    };
+  }
 
   const errors = response.data_streams
     .filter(({ error }) => Boolean(error))
