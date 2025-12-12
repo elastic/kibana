@@ -1039,7 +1039,13 @@
     "provider"
   ],
   "security-rule": [
+    "mapped_params",
+    "mapped_params.severity",
+    "name",
+    "risk_score",
     "rule_id",
+    "severity",
+    "tags",
     "version"
   ],
   "security-solution-signals-migration": [
