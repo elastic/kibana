@@ -35,11 +35,10 @@ export const SearchHomepageBody = () => {
             <CloudResources />
           </EuiFlexItem>
         )}
-
         <EuiFlexItem>
+          <EuiSpacer size="l" />
           <GettingStartedBanner />
         </EuiFlexItem>
-
         <EuiFlexItem>
           <EuiHorizontalRule margin="xxl" />
         </EuiFlexItem>

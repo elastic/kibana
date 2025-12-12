@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { docLinks } from '../../../common/doc_links';
 
 interface BodyLink {
   category?: string;
@@ -31,56 +32,9 @@ interface BodyLink {
     | Array<{ text: string; href: string }>;
 }
 
-const BODY_LINKS: BodyLink[] = [
-  {
-    title: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.title', {
-      defaultMessage: 'Ask an Elastic Expert',
-    }),
-    description: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.description', {
-      defaultMessage:
-        'Our team of customer engineers to discuss your specific needs and offer personalized guidance to help make the most of your Elastic trial.',
-    }),
-    link: {
-      href: '#',
-      text: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.link.text', {
-        defaultMessage: 'Contact customer engineering',
-      }),
-    },
-  },
-  {
-    title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.title', {
-      defaultMessage: 'Certified mastery of Elastic',
-    }),
-    description: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.description', {
-      defaultMessage:
-        'Unlock the full potential of Elastic through expert-led training, interactive labs, comprehensive certification programs, and flexible on-demand learning.',
-    }),
-    link: {
-      href: '',
-      text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.linkText', {
-        defaultMessage: 'Elastic Training',
-      }),
-    },
-  },
-  {
-    title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.title', {
-      defaultMessage: 'Elasticsearch Documentation',
-    }),
-    description: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.description', {
-      defaultMessage:
-        'A range of executable Python notebooks available to easily test features in a virtual environment.',
-    }),
-    link: {
-      href: '',
-      text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.link.text', {
-        defaultMessage: 'View documentation',
-      }),
-    },
-  },
-];
-
 const BodyLink: React.FC<BodyLink> = ({ title, description, link, category }: BodyLink) => {
   const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -143,6 +97,57 @@ const BodyLink: React.FC<BodyLink> = ({ title, description, link, category }: Bo
 };
 
 export const BodyLinks = () => {
+  const BODY_LINKS: BodyLink[] = [
+    {
+      title: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.title', {
+        defaultMessage: 'Ask an Elastic Expert',
+      }),
+      description: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.description', {
+        defaultMessage:
+          'Our team of customer engineers to discuss your specific needs and offer personalized guidance to help make the most of your Elastic trial.',
+      }),
+      link: {
+        href: docLinks.customerEngineerRequestForm,
+        text: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.link.text', {
+          defaultMessage: 'Contact customer engineering',
+        }),
+      },
+    },
+    {
+      title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.title', {
+        defaultMessage: 'Certified mastery of Elastic',
+      }),
+      description: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.description', {
+        defaultMessage:
+          'Unlock the full potential of Elastic through expert-led training, interactive labs, comprehensive certification programs, and flexible on-demand learning.',
+      }),
+      link: {
+        href: docLinks.elasticTraining,
+        text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.linkText', {
+          defaultMessage: 'Elastic Training',
+        }),
+      },
+    },
+    {
+      title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.title', {
+        defaultMessage: 'Elasticsearch Documentation',
+      }),
+      description: i18n.translate(
+        'xpack.searchHomepage.bodyLinks.elasticDocumentation.description',
+        {
+          defaultMessage:
+            'A range of executable Python notebooks available to easily test features in a virtual environment.',
+        }
+      ),
+      link: {
+        href: docLinks.elasticsearchDocs,
+        text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.link.text', {
+          defaultMessage: 'View documentation',
+        }),
+      },
+    },
+  ];
+
   return (
     <EuiFlexGrid columns={3} gutterSize="l">
       {BODY_LINKS.map((bodyLink, index) => (

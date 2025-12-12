@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 import { css } from '@emotion/react';
 import { FormInfoField } from '@kbn/search-shared-ui';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
-import { useKibana } from '../../hooks/use_kibana';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
-  const { share } = useKibana().services;
-  const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
-  const manageKeysLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys' });
-
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -53,17 +56,33 @@ export const ConnectToElasticsearch = () => {
       >
         <EuiButton
           data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
-          href={manageKeysLink}
           color="text"
           iconType="plusInCircle"
-          target="_blank"
           size="s"
+          onClick={() => openWiredConnectionDetails()}
         >
           <FormattedMessage
             id="xpack.searchHomepage.connectToElasticsearch.apiKeysButtonEmptyLabel"
             defaultMessage="API keys"
           />
         </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          display="base"
+          size="s"
+          iconSize="m"
+          iconType="plugs"
+          onClick={() => openWiredConnectionDetails()}
+          data-test-subj="search-homepage-context-menu-button"
+          color="text"
+          aria-label={i18n.translate(
+            'xpack.searchHomepage.searchHomepagePage.euiButtonIcon.connectionDetailsPressToLabel',
+            {
+              defaultMessage: 'Show connection details for connecting to the Elasticsearch API',
+            }
+          )}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

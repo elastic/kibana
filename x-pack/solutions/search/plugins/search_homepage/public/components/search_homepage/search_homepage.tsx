@@ -6,8 +6,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -15,17 +15,16 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { i18n } from '@kbn/i18n';
-import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
+import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
-import { SearchHomepageBody } from './search_homepage_body';
+import { BasicMetricBadges } from './basic_metric_badges';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { LicenseBadge } from './license_badge';
-import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
-import { BasicMetricBadges } from './basic_metric_badges';
-import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
+import { SearchHomepageBody } from './search_homepage_body';
 
 export const SearchHomepagePage = () => {
   const { euiTheme } = useEuiTheme();
@@ -115,24 +114,6 @@ export const SearchHomepagePage = () => {
             <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <ConnectToElasticsearch />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  size="s"
-                  iconSize="m"
-                  iconType="plugs"
-                  onClick={() => openWiredConnectionDetails()}
-                  data-test-subj="search-homepage-context-menu-button"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.searchHomepage.searchHomepagePage.euiButtonIcon.connectionDetailsPressToLabel',
-                    {
-                      defaultMessage:
-                        'Show connection details for connecting to the Elasticsearch API',
-                    }
-                  )}
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

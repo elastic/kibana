@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiImage,
-  EuiTitle,
-  EuiText,
-  useEuiTheme,
+  EuiSpacer,
   EuiSplitPanel,
-  EuiButtonEmpty,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
@@ -147,7 +147,7 @@ export const CloudResources = () => {
                 title={card.title}
                 icon={card.icon}
                 description={card.description}
-                actionHref={card.type === 'billing' ? billingUrl : ''}
+                actionHref={card.type === 'billing' ? billingUrl : cloud?.performanceUrl ?? ''}
                 actionText={card.actionText}
               />
             </EuiFlexItem>
