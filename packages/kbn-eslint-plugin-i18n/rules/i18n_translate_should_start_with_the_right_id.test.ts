@@ -163,6 +163,26 @@ const valid: RuleTester.ValidTestCase[] = [
     filename: invalid[1].filename,
     code: invalid[1].output as string,
   },
+  {
+    name: 'When a ternary is passed to i18n.translate, and the root of the i18n identifier is correct, and the branches are valid strings starting with the correct prefix, it should not mark the code as incorrect',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.ts',
+    code: `import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const isCollapsed = true;
+  const foo = i18n.translate(
+    isCollapsed
+      ? 'xpack.observability.foo.collapsedNodeAriaLabel'
+      : 'xpack.observability.foo.expandedNodeAriaLabel',
+    {
+      defaultMessage: isCollapsed
+        ? 'Collapsed node with {childCount} children'
+        : 'Expanded node with {childCount} children',
+      values: { childCount: item.children.length },
+    }
+  );
+}`,
+  },
 ];
 
 for (const [name, tester] of [tsTester, babelTester]) {
