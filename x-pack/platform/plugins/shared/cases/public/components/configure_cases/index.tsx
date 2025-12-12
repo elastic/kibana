@@ -55,7 +55,7 @@ import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
-import { TemplateForm as TemplateFormV2 } from '../templates_v2';
+import { TemplateForm as TemplateFormV2, TemplatesSection } from '../templates_v2';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
@@ -764,9 +764,21 @@ export const ConfigureCases: React.FC = React.memo(() => {
             </>
           )}
 
-          <EuiButton onClick={() => setFlyOutVisibility({ type: 'templatesV2', visible: true })}>
-            {`TODO Add template`}
-          </EuiButton>
+          <div css={sectionWrapperCss}>
+            <EuiFlexItem grow={false}>
+              <Templates
+                templates={templates}
+                isLoading={isLoadingCaseConfiguration}
+                disabled={isLoadingCaseConfiguration}
+                onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
+                onEditTemplate={onEditTemplate}
+                onDeleteTemplate={onDeleteTemplate}
+              />
+              <TemplatesSection
+                onAddTemplate={() => setFlyOutVisibility({ type: 'templatesV2', visible: true })}
+              />
+            </EuiFlexItem>
+          </div>
 
           <EuiSpacer size="xl" />
 
