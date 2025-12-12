@@ -29,6 +29,7 @@ import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button
 import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
 import { HeaderMenuPortal } from '../../components/header_menu';
 import { Legacy } from '../../legacy_shims';
+import type { MonitoringStartServices } from '../../types';
 
 export interface TabMenuItem {
   id: string;
@@ -65,7 +66,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
-  const { services } = useKibana();
+  const { services } = useKibana<MonitoringStartServices>();
   const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
