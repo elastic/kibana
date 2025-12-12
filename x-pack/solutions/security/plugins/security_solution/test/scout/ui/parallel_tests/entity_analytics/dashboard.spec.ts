@@ -9,8 +9,14 @@ import { expect, spaceTest } from '@kbn/scout-security';
 
 spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
-    await browserAuth.loginAsAdmin();
     await apiServices.entityAnalytics.deleteEntityStoreEngines();
+    await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
+    await browserAuth.loginAsAdmin();
+  });
+
+  spaceTest.afterEach(async ({ apiServices }) => {
+    await apiServices.entityAnalytics.deleteEntityStoreEngines();
+    await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
   });
 
   spaceTest('enables risk score followed by the store', async ({ pageObjects }) => {
