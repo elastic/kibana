@@ -28,7 +28,6 @@
     "@kbn/std",
     "@kbn/router-utils",
     "@kbn/split-button",
-    "@kbn/tour-queue"
   ],
   "exclude": [
     "target/**/*",
