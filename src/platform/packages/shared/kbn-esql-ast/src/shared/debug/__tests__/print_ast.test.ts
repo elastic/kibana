@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '../../parser';
+import { Parser } from '../../../parser';
 import { printAst } from '../print_ast';
 
 test('can print a basic "FROM index" query AST', () => {

@@ -9,7 +9,7 @@
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstRerankCommand, ESQLSingleAstItem, ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../shared/sorting/types';
 import { Location } from '../types';
 import { getPosition, CaretPosition } from './utils';
 import {

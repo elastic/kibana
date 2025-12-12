@@ -8,8 +8,8 @@
  */
 
 import { printTree } from 'tree-dump';
-import { childrenFoAnyNode } from '../visitor/utils';
-import type { ESQLProperNode } from '../types';
+import { childrenFoAnyNode } from '../../visitor/utils';
+import type { ESQLProperNode } from '../../types';
 
 /**
  * Options for printing an AST.
