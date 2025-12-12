@@ -36,6 +36,16 @@ describe('cascaded documents helpers utils', () => {
       expect(result.appliedFunctions).toEqual([]);
     });
 
+    it('should return an empty array of group by fields and applied functions if the query has a keep command that does not specify the current group field', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([{ aggregation: 'COUNT', identifier: 'count' }]);
+    });
+
     it('should return an array of the columns the query has been denoted to be grouped by with the STATS command', () => {
       const queryString = `
         FROM kibana_sample_data_logs, another_index

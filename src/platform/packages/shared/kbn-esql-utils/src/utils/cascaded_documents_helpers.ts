@@ -230,6 +230,32 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       groupFieldNode = groupDeclarationCommandSummary.grouping[groupFieldName];
     }
 
+    // assert that if a keep command exists after the operating stats command, it specifies the current group field
+    const keepCommand = esqlQuery.ast.commands.slice(groupDeclarationCommandIndex).find((cmd) => {
+      return cmd.name === 'keep';
+    });
+
+    if (keepCommand) {
+      let found = false;
+
+      Walker.walk(keepCommand, {
+        visitIdentifier: (node) => {
+          if (found) {
+            return;
+          }
+
+          if (node.name === groupFieldName) {
+            found = true;
+          }
+        },
+      });
+
+      if (!found) {
+        // if the keep command does not specify the current group field, then we break out of the loop
+        break;
+      }
+    }
+
     // check if there is a where command after the operating stats command targeting any of it's grouping options
     const whereCommandGroupFieldSearch = esqlQuery.ast.commands
       .slice(groupDeclarationCommandIndex)
