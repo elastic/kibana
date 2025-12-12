@@ -19,6 +19,7 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
     const nlQuery = await SELECT_INDEX_PATTERN_PROMPT.format({
       title: state.parsed_panel.title,
       description: state.description,
+      dashboard_description: state.dashboard_description,
       query: state.esql_query,
     });
 
