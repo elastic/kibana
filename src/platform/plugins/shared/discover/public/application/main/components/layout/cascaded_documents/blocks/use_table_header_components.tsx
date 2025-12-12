@@ -20,7 +20,8 @@ import {
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { ESQLDataGroupNode, DataTableRecord } from './types';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { ESQLDataGroupNode } from './types';
 
 interface UseTableHeaderProps {
   viewModeToggle: React.ReactElement | undefined;
@@ -68,8 +69,8 @@ function CascadeGroupingSelectionPopover({
     setCascadeSelectOpen(false);
   }, []);
 
-  const openSelectionPopover = useCallback(() => {
-    setCascadeSelectOpen(true);
+  const toggleSelectionPopover = useCallback(() => {
+    setCascadeSelectOpen((open) => !open);
   }, []);
 
   const onSelectionChange = useCallback<
@@ -98,7 +99,7 @@ function CascadeGroupingSelectionPopover({
             iconType="inspect"
             color="text"
             badgeColor="subdued"
-            onClick={openSelectionPopover}
+            onClick={toggleSelectionPopover}
             hasActiveFilters={true}
             numFilters={currentSelectedColumns.length}
             data-test-subj="discoverEnableCascadeLayoutSwitch"

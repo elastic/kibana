@@ -1105,7 +1105,11 @@ const InternalUnifiedDataTable = React.forwardRef<
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+          <>
+            {externalAdditionalControls && (
+              <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+            )}
+          </>
         </EuiFlexGroup>
       );
 

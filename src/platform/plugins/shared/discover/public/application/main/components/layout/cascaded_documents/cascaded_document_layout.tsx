@@ -22,6 +22,7 @@ import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@kbn/esql-ast';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 import { useCurrentTabSelector, useAppStateSelector } from '../../../state_management/redux';
@@ -30,7 +31,6 @@ import {
   useEsqlDataCascadeHeaderComponent,
   ESQLDataCascadeLeafCell,
   type ESQLDataGroupNode,
-  type DataTableRecord,
 } from './blocks';
 import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { type CascadedDocumentsRestorableState } from './cascaded_documents_restorable_state';
@@ -56,7 +56,7 @@ export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'>
 
 const ESQLDataCascade = React.memo(
   ({
-    rows: initialData,
+    rows,
     dataView,
     viewModeToggle,
     cascadeConfig,
@@ -77,7 +77,7 @@ const ESQLDataCascade = React.memo(
 
     const cascadeGroupData = useGroupedCascadeData({
       cascadeConfig,
-      rows: initialData,
+      rows,
       queryMeta,
       esqlVariables,
     });

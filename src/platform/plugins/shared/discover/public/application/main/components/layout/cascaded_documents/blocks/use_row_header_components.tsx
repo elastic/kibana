@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { MouseEventHandler } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
@@ -39,9 +38,10 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { StatsCommandSummary } from '@kbn/esql-ast/src/mutate/commands/stats';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
-import type { ESQLDataGroupNode, DataTableRecord } from './types';
+import type { ESQLDataGroupNode } from './types';
 import {
   type TabStateGlobalState,
   internalStateActions,
@@ -83,19 +83,19 @@ const contextRowActions: Array<
   }
 > = [
   {
-    name: i18n.translate('discover.esql_data_cascade.row.action.copy_to_clipboard', {
+    name: i18n.translate('discover.dataCascade.row.action.copyToClipboard', {
       defaultMessage: 'Copy to clipboard',
     }),
     icon: 'copy',
     'data-test-subj': 'dscCascadeRowContextActionCopyToClipboard',
     onClick(this: RowClickActionContext) {
-      copyToClipboard(this.rowContext.groupValue as string);
+      copyToClipboard(this.rowContext.groupValue);
       return this.closeActionMenu();
     },
   },
   {
     enabledWhenFilterable: true,
-    name: i18n.translate('discover.esql_data_cascade.row.action.filter_in', {
+    name: i18n.translate('discover.dataCascade.row.action.filterIn', {
       defaultMessage: 'Filter in',
     }),
     icon: 'plusInCircle',
@@ -106,7 +106,7 @@ const contextRowActions: Array<
         this.esqlVariables,
         this.dataView,
         this.rowContext.groupId,
-        this.rowContext.groupValue as string,
+        this.rowContext.groupValue,
         '+'
       );
 
@@ -121,7 +121,7 @@ const contextRowActions: Array<
   },
   {
     enabledWhenFilterable: true,
-    name: i18n.translate('discover.esql_data_cascade.row.action.filter_out', {
+    name: i18n.translate('discover.dataCascade.row.action.filterOut', {
       defaultMessage: 'Filter out',
     }),
     icon: 'minusInCircle',
@@ -132,7 +132,7 @@ const contextRowActions: Array<
         this.esqlVariables,
         this.dataView,
         this.rowContext.groupId,
-        this.rowContext.groupValue as string,
+        this.rowContext.groupValue,
         '-'
       );
 
@@ -145,7 +145,7 @@ const contextRowActions: Array<
     },
   },
   {
-    name: i18n.translate('discover.esql_data_cascade.row.action.view_docs', {
+    name: i18n.translate('discover.dataCascade.row.action.viewDocs', {
       defaultMessage: 'Open in new discover tab',
     }),
     icon: 'discoverApp',
@@ -154,7 +154,6 @@ const contextRowActions: Array<
       e.preventDefault();
 
       return this.openInNewTab({
-        globalState: this.globalState,
         appState: {
           query: constructCascadeQuery({
             query: this.editorQuery,
@@ -238,7 +237,7 @@ const ContextMenu = React.memo(
                     rowDataViewField &&
                     !rowDataViewField?.filterable) ||
                   !row.groupValue,
-                onClick: (action.onClick as MouseEventHandler<Element>)?.bind({
+                onClick: action.onClick?.bind({
                   rowContext: row,
                   services,
                   editorQuery,
@@ -431,7 +430,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
             truncation="end"
             text={
               (rowData[rowGroup] ??
-                i18n.translate('discover.esql_data_cascade.row.action.no_value', {
+                i18n.translate('discover.dataCascade.row.action.noValue', {
                   defaultMessage: '(null)',
                 })) as string
             }
@@ -463,11 +462,11 @@ export function useEsqlDataCascadeRowHeaderComponents(
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <FormattedMessage
-                id="discover.esql_data_cascade.grouping.function"
+                id="discover.dataCascade.grouping.function"
                 defaultMessage="<bold>{selectedColumn}: </bold><badge>{selectedColumnValue}</badge>"
                 values={{
                   selectedColumn,
-                  selectedColumnValue: rowData[selectedColumn] as string | number,
+                  selectedColumnValue: rowData[selectedColumn] as string,
                   bold: (chunks) => (
                     <EuiFlexItem grow={false} css={textSlotStyles.textWrapper}>
                       <span css={textSlotStyles.textInner}>{chunks}</span>

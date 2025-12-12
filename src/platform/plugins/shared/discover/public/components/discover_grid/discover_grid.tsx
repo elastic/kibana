@@ -123,19 +123,17 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   });
 
   const externalAdditionalControls = useMemo(() => {
-    return (
-      <React.Fragment>
-        {[
-          customExternalAdditionalControls,
-          Boolean(cascadeConfig?.availableCascadeGroups?.length)
-            ? groupBySelectorRenderer(
-                cascadeConfig!.availableCascadeGroups,
-                cascadeConfig!.selectedCascadeGroups
-              )
-            : null,
-        ].filter(Boolean)}
-      </React.Fragment>
-    );
+    const additionalControls = [
+      customExternalAdditionalControls,
+      Boolean(cascadeConfig?.availableCascadeGroups?.length)
+        ? groupBySelectorRenderer(
+            cascadeConfig!.availableCascadeGroups,
+            cascadeConfig!.selectedCascadeGroups
+          )
+        : null,
+    ].filter(Boolean);
+
+    return additionalControls.length ? <React.Fragment>{additionalControls}</React.Fragment> : null;
   }, [cascadeConfig, customExternalAdditionalControls, groupBySelectorRenderer]);
 
   return props.isPlainRecord && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (

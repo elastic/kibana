@@ -25,7 +25,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import type { CascadeRowCellNestedVirtualizationAnchorProps } from '@kbn/shared-ux-document-data-cascade';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface ESQLDataCascadeLeafCellProps
@@ -100,6 +100,8 @@ const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme']) => ({
   displayFlex: css({ display: 'flex' }),
 });
 
+const EMPTY_SORT: SortOrder[] = [];
+
 /**
  * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
  * that allows for nested cascade virtualization that's compatible with the EUI Data Grid
@@ -145,7 +147,6 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       !virtualizerScrollElementRef.current?.isSameNode(customGridBodyScrollContainerRef.current)
     ) {
       // assign the custom grid body element as scrollable element in full screen mode
-      // customCascadeGridScrollRef.current = $gridBody;
       virtualizerScrollElementRef.current = customGridBodyScrollContainerRef.current;
     } else if (
       !isFullScreenMode &&
@@ -216,7 +217,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
           </div>
         </div>
       </div>
-      <React.Fragment>{footerRow}</React.Fragment>
+      {footerRow}
     </div>
   );
 });
@@ -252,17 +253,15 @@ export const ESQLDataCascadeLeafCell = React.memo(
       () =>
         getRenderCustomToolbarWithElements({
           leftSide: (
-            <React.Fragment>
-              <EuiText size="s">
-                <b>
-                  <FormattedMessage
-                    id="discover.esql_data_cascade.row.cell.toolbar.heading"
-                    defaultMessage="{count, plural, =0 {no results} =1 {1 result} other {# results}}"
-                    values={{ count: cellData.length }}
-                  />
-                </b>
-              </EuiText>
-            </React.Fragment>
+            <EuiText size="s">
+              <b>
+                <FormattedMessage
+                  id="discover.dataCascade.row.cell.toolbar.heading"
+                  defaultMessage="{count, plural, =0 {no results} =1 {1 result} other {# results}}"
+                  values={{ count: cellData.length }}
+                />
+              </b>
+            </EuiText>
           ),
         }),
       [cellData]
@@ -310,7 +309,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           showTimeCol={showTimeCol}
           showKeyboardShortcuts={showKeyboardShortcuts}
           services={services}
-          sort={[]}
+          sort={EMPTY_SORT}
           isSortEnabled={false}
           enableInTableSearch
           ariaLabelledBy="data-cascade-leaf-cell"
