@@ -6,8 +6,7 @@
  */
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import type { ToolType } from '@kbn/onechat-common';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { docLinks } from '../../../../../../common/doc_links';
 import { ToolFormSection } from '../components/tool_form_section';
@@ -18,27 +17,19 @@ import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_
 import { ToolFormMode } from '../tool_form';
 
 interface ConfigurationProps {
-  toolType: ToolType;
-  setToolType: (toolType: ToolType) => void;
   mode: ToolFormMode;
 }
 
-export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProps) => {
+export const Configuration = ({ mode }: ConfigurationProps) => {
   const {
     formState: { errors },
     control,
   } = useFormContext<ToolFormData>();
   const type = useWatch({ control, name: 'type' });
 
-  useEffect(() => {
-    if (type && type !== toolType) {
-      setToolType(type);
-    }
-  }, [type, toolType, setToolType]);
-
   const toolConfig = getToolTypeConfig(type);
   const ConfigurationComponent = useMemo(() => {
-    return toolConfig!.getConfigurationComponent();
+    return toolConfig.getConfigurationComponent();
   }, [toolConfig]);
 
   const { toolTypes: serverToolTypes, isLoading: toolTypesLoading } = useToolTypes();
