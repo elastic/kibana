@@ -91,11 +91,15 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
 }
 
 export async function validateSimulation(
-  definition: Streams.ClassicStream.Definition,
+  definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
   scopedClusterClient: IScopedClusterClient,
   streamsClient: StreamsClient,
   fieldsMetadataClient: IFieldsMetadataClient
 ) {
+  if (definition.ingest.processing.steps.length === 0) {
+    return;
+  }
+
   const result = await simulateProcessing({
     params: {
       path: { name: definition.name },
