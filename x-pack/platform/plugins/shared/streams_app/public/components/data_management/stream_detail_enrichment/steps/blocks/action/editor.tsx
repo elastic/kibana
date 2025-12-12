@@ -71,7 +71,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
     )
   );
 
-  const typeValidationErrors = useStreamEnrichmentSelector((snapshot) => {
+  const validationErrors = useStreamEnrichmentSelector((snapshot) => {
     const errors = selectValidationErrors(snapshot.context);
     return errors.get(step.customIdentifier) || [];
   });
@@ -208,21 +208,21 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {typeValidationErrors.length > 0 && (
+            {validationErrors.length > 0 && (
               <>
                 <EuiSpacer size="m" />
                 <EuiCallOut
                   announceOnMount
                   title={i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.typeValidationErrors.title',
-                    { defaultMessage: 'Type validation errors' }
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    { defaultMessage: 'Validation errors' }
                   )}
                   color="danger"
                   iconType="warning"
                   size="s"
                 >
                   <ul>
-                    {typeValidationErrors.map((error, index: number) => (
+                    {validationErrors.map((error, index: number) => (
                       <li key={index}>{error.message}</li>
                     ))}
                   </ul>
