@@ -150,11 +150,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('adds space id (default) to execution context from x-kbn-context header', async () => {
+    it('logs contain the default space received in the execution context header', async () => {
       const executionContext = {
         type: 'test',
         name: 'status check',
         id: 'test-123',
+        space: 'default',
       };
 
       await supertest
@@ -177,11 +178,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('adds space id (myspace) to execution context from x-kbn-context header', async () => {
+    it('logs contain the myspace space received in the execution context header', async () => {
       const executionContext = {
         type: 'test',
         name: 'api call',
         id: 'test-456',
+        space: 'myspace',
       };
 
       await supertest
