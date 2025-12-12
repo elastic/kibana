@@ -25,7 +25,7 @@ export function getAnnotationFromFormattedChangePoint({
   return {
     color,
     icon: <EuiIcon type="dot" color={color} />,
-    id: `change_point_${change.query.id}`,
+    id: `change_point_${change.time}`,
     label: <ChangePointSummary xFormatter={xFormatter} changes={changes} />,
     x: change.time,
   };

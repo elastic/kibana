@@ -41,15 +41,13 @@ export function SignificantEventsHistogramChart({
       return [];
     }
 
-    return Object.entries(groupBy(changes, 'time')).map(([timestamp, changes]) => {
-      const annotation = getAnnotationFromFormattedChangePoint({
-        changes,
+    return Object.values(groupBy(changes, 'time')).map((groupedByTimestamp) =>
+      getAnnotationFromFormattedChangePoint({
+        changes: groupedByTimestamp,
         theme,
         xFormatter,
-      });
-      annotation.id = `${annotation.id}_${timestamp}`;
-      return annotation;
-    });
+      })
+    );
   }, [changes, id, theme, xFormatter]);
 
   return (
