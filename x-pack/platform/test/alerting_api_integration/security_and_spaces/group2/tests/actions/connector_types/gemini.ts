@@ -233,7 +233,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating connector type secrets: Error configuring Google Gemini secrets: Error: Invalid credential type. Only "service_account" credentials are supported. Type was "external_account".',
+                'error validating action type secrets: Error configuring Google Gemini secrets: Error: Invalid credential type. Only "service_account" credentials are supported. Type was "external_account".',
             });
           });
       });
