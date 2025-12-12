@@ -219,12 +219,7 @@ export const entityRiskScoreTool = (
                       ...(score.criticality_level !== undefined && {
                         criticality_level: score.criticality_level,
                       }),
-                      ...(score.is_privileged_user !== undefined && {
-                        is_privileged_user: score.is_privileged_user,
-                      }),
-                      ...(score.privileged_user_modifier !== undefined && {
-                        privileged_user_modifier: score.privileged_user_modifier,
-                      }),
+                      ...(score.modifiers && { modifiers: score.modifiers ?? [] }),
                     };
                   }),
                 },
@@ -296,12 +291,7 @@ export const entityRiskScoreTool = (
           ...(latestRiskScore.criticality_level !== undefined && {
             criticality_level: latestRiskScore.criticality_level,
           }),
-          ...(latestRiskScore.is_privileged_user !== undefined && {
-            is_privileged_user: latestRiskScore.is_privileged_user,
-          }),
-          ...(latestRiskScore.privileged_user_modifier !== undefined && {
-            privileged_user_modifier: latestRiskScore.privileged_user_modifier,
-          }),
+          ...(latestRiskScore.modifiers && { modifiers: latestRiskScore.modifiers ?? [] }),
         };
 
         return {
