@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { BraveSearchConnector } from '.';
+import { BraveSearchConnector } from './brave_search';
 
 describe('BraveSearchConnector', () => {
   const mockClient = {
