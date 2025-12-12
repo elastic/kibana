@@ -149,7 +149,7 @@ const datatableStateRowsOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-const datatableStateColumnsOptionsSchema = schema.object({
+const datatableStateMetricsOptionsSchema = schema.object({
   ...datatableStateCommonOptionsSchema,
   /**
    * Color configuration
@@ -193,7 +193,7 @@ export const datatableStateSchemaNoESQL = schema.object({
    * Metric columns configuration, must define operation.
    */
   metrics: schema.arrayOf(
-    mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateColumnsOptionsSchema),
+    mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateMetricsOptionsSchema),
     {
       minSize: 1,
       maxSize: 1000,
@@ -236,7 +236,7 @@ export const datatableStateSchemaESQL = schema.object({
       schema.object({
         ...genericOperationOptionsSchema,
       }),
-      datatableStateColumnsOptionsSchema,
+      datatableStateMetricsOptionsSchema,
       esqlColumnSchema,
     ]),
     {
