@@ -18,7 +18,7 @@ jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn(),
 }));
 
-const mockUseKibana = jest.mocked(useKibana);
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('useAllResults', () => {
   let mockHttp: { get: jest.Mock; post: jest.Mock };
@@ -42,11 +42,11 @@ describe('useAllResults', () => {
       post: jest.fn(),
     };
 
-    mockUseKibana.mockReturnValue({
+    useKibanaMock.mockReturnValue({
       services: {
         http: mockHttp,
       },
-    });
+    } as unknown as ReturnType<typeof useKibana>);
 
     mockUseQuery = jest.requireMock('@kbn/react-query').useQuery;
 
