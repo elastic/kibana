@@ -113,6 +113,12 @@ interface YamlValidationResultWorkflowInputsError extends YamlValidationResultBa
   owner: 'workflow-inputs-validation';
 }
 
+interface YamlValidationResultWorkflowOutputsError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-output-validation';
+}
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
   return [
     'step-name-validation',
@@ -121,6 +127,7 @@ export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidat
     'yaml',
     'connector-id-validation',
     'workflow-inputs-validation',
+    'workflow-output-validation',
   ].includes(owner);
 }
 
@@ -132,4 +139,5 @@ export type YamlValidationResult =
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
   | YamlValidationResultConnectorIdValid
-  | YamlValidationResultWorkflowInputsError;
+  | YamlValidationResultWorkflowInputsError
+  | YamlValidationResultWorkflowOutputsError;

@@ -150,5 +150,6 @@ export function buildAutocompleteContext({
       workflows: {},
       totalWorkflows: 0,
     },
+    workflowDefinition: workflowDefinition ?? null,
   };
 }

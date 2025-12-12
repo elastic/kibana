@@ -48,6 +48,7 @@ export function buildWorkflowContext(
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
     inputs: workflowExecution.context?.inputs,
+    output: workflowExecution.context?.output,
     now: new Date(),
     parent:
       parentWorkflowId && parentWorkflowExecutionId

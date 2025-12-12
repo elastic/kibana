@@ -21,6 +21,7 @@ import {
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowOutputStepSchema,
   WorkflowSchema,
 } from '../schema';
 
@@ -81,6 +82,7 @@ function createRecursiveStepSchema(
       httpSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
+      WorkflowOutputStepSchema,
       ...connectorSchemas,
     ]);
   });

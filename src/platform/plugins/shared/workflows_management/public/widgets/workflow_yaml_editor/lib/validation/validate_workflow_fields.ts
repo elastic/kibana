@@ -119,10 +119,15 @@ export function validateWorkflowFields(
       // Remove "Invalid input: " prefix if present (Zod's default prefix)
       message = message.replace(/^Invalid input:\s*/i, '');
 
-      // Enhance union errors for array types with more descriptive messages
-      if (issue.code === 'invalid_union') {
-        // Check if this is an array field that received a non-array value
-        const fieldDef = targetFields.find((f) => f.name === fieldName);
+      const fieldDef = targetFields.find((f) => f.name === fieldName);
+
+      if (
+        issue.code === 'invalid_type' &&
+        message.includes('received undefined') &&
+        fieldDef?.required
+      ) {
+        message = 'this field is required';
+      } else if (issue.code === 'invalid_union') {
         if (fieldDef?.type === 'array' && values) {
           const receivedValue = values[fieldName];
           if (receivedValue !== undefined) {

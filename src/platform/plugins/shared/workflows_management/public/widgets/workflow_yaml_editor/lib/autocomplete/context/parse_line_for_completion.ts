@@ -64,6 +64,12 @@ export interface WorkflowInputsLineParseResult extends BaseLineParseResult {
   valueStartIndex?: number;
 }
 
+export interface WorkflowOutputsLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-outputs';
+  match: RegExpMatchArray | null;
+  valueStartIndex?: number;
+}
+
 export interface TypeLineParseResult extends BaseLineParseResult {
   matchType: 'type';
   match: RegExpMatchArray;
@@ -84,6 +90,7 @@ export type LineParseResult =
   | ConnectorIdLineParseResult
   | WorkflowLineParseResult
   | WorkflowInputsLineParseResult
+  | WorkflowOutputsLineParseResult
   | TypeLineParseResult
   | TimezoneLineParseResult;
 

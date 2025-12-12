@@ -18,6 +18,7 @@ import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowInputsInYaml } from './validate_workflow_inputs_in_yaml';
+import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectConnectors,
@@ -77,6 +78,7 @@ export function useYamlValidation(
       monaco.editor.setModelMarkers(model, 'liquid-template-validation', []);
       monaco.editor.setModelMarkers(model, 'connector-id-validation', []);
       monaco.editor.setModelMarkers(model, 'workflow-inputs-validation', []);
+      monaco.editor.setModelMarkers(model, 'workflow-output-validation', []);
       setIsLoading(false);
       setError(null);
       return;
@@ -118,6 +120,7 @@ export function useYamlValidation(
       validateLiquidTemplate(model.getValue()),
       validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
       validateWorkflowInputsInYaml(workflowInputsItems, workflows, lineCounter),
+      validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
     ].flat();
 
     for (const validationResult of validationResults) {
@@ -149,6 +152,19 @@ export function useYamlValidation(
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         });
+      } else if (validationResult.owner === 'workflow-output-validation') {
+        // Handle workflow.output validation errors
+        if (validationResult.severity) {
+          markers.push({
+            severity: SEVERITY_MAP[validationResult.severity],
+            message: validationResult.message,
+            startLineNumber: validationResult.startLineNumber,
+            startColumn: validationResult.startColumn,
+            endLineNumber: validationResult.endLineNumber,
+            endColumn: validationResult.endColumn,
+            source: 'workflow-output-validation',
+          });
+        }
       } else if (validationResult.owner === 'liquid-template-validation') {
         markers.push({
           severity: SEVERITY_MAP[validationResult.severity],
@@ -291,6 +307,11 @@ export function useYamlValidation(
       model,
       'workflow-inputs-validation',
       markers.filter((m) => m.source === 'workflow-inputs-validation')
+    );
+    monaco.editor.setModelMarkers(
+      model,
+      'workflow-output-validation',
+      markers.filter((m) => m.source === 'workflow-output-validation')
     );
     setError(null);
   }, [

@@ -144,7 +144,7 @@ describe('validateWorkflowInputsInYaml', () => {
       expect(result).toHaveLength(1);
       expect(result[0].severity).toBe('error');
       expect(result[0].message).toContain('name:');
-      expect(result[0].message).toContain('expected string, received undefined');
+      expect(result[0].message).toContain('this field is required');
       expect(result[0].owner).toBe('workflow-inputs-validation');
     });
 
@@ -274,7 +274,7 @@ describe('validateWorkflowInputsInYaml', () => {
       const result2 = validateWorkflowInputsInYaml(items2, workflows, new LineCounter());
       expect(result2).toHaveLength(1);
       expect(result2[0].message).toMatch(/^name:/);
-      expect(result2[0].message).toContain('expected string, received undefined');
+      expect(result2[0].message).toContain('this field is required');
     });
   });
 

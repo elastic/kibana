@@ -128,15 +128,27 @@ export class WorkflowExecuteSyncStrategy {
           `Sub-workflow ${state.executionId} completed with status: ${execution.status}`
         );
 
-        // Extract output from step executions
-        const stepExecutions = await this.stepExecutionRepository.searchStepExecutionsByExecutionId(
-          state.executionId
-        );
-        // Convert EsWorkflowStepExecution to WorkflowStepExecutionDto (omit spaceId)
-        const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
-          omit(exec, ['spaceId'])
-        );
-        const output = this.getWorkflowOutput(stepExecutionDtos);
+        // Extract output - prioritize workflow.output step results from context
+        let output: JsonValue;
+        if (execution.context?.output) {
+          // If the child workflow used workflow.output step, use that output
+          output = execution.context.output as JsonValue;
+          this.workflowLogger.logDebug(
+            `Using workflow.output from child workflow execution ${state.executionId}`
+          );
+        } else {
+          // Fallback: Extract output from step executions (legacy behavior)
+          const stepExecutions =
+            await this.stepExecutionRepository.searchStepExecutionsByExecutionId(state.executionId);
+          // Convert EsWorkflowStepExecution to WorkflowStepExecutionDto (omit spaceId)
+          const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
+            omit(exec, ['spaceId'])
+          );
+          output = this.getWorkflowOutput(stepExecutionDtos);
+          this.workflowLogger.logDebug(
+            `Using last step output from child workflow execution ${state.executionId}`
+          );
+        }
 
         // Finish step with results
         // Use finishedAt if available, otherwise use current time (execution is terminal)

@@ -19,6 +19,8 @@ import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_sugg
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
+import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
+import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
@@ -39,6 +41,8 @@ function createAdjustedRangeForType(
 /**
  * Handles suggestions based on match type
  */
+// event complex switch/case statement is good readable and maintainable
+// eslint-disable-next-line complexity
 async function handleMatchTypeSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
 ): Promise<monaco.languages.CompletionItem[] | null> {
@@ -96,7 +100,8 @@ async function handleMatchTypeSuggestions(
         return getConnectorTypeSuggestions(
           lineParseResult.fullKey,
           adjustedRange,
-          autocompleteContext.dynamicConnectorTypes
+          autocompleteContext.dynamicConnectorTypes,
+          autocompleteContext.workflowDefinition?.outputs
         );
       }
       return null;
@@ -109,6 +114,9 @@ async function handleMatchTypeSuggestions(
         },
         lineParseResult.fullKey
       );
+
+    case 'workflow-inputs':
+      return getWorkflowInputsSuggestions(autocompleteContext);
 
     default:
       return null;
@@ -127,6 +135,12 @@ export async function getSuggestions(
   const matchTypeSuggestions = await handleMatchTypeSuggestions(autocompleteContext);
   if (matchTypeSuggestions !== null) {
     return matchTypeSuggestions;
+  }
+
+  // Check for workflow.output outputs suggestions (not based on line parsing, but on context)
+  const workflowOutputsSuggestions = await getWorkflowOutputsSuggestions(autocompleteContext);
+  if (workflowOutputsSuggestions.length > 0) {
+    return workflowOutputsSuggestions;
   }
 
   // TODO: Implement connector with block completion

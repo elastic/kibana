@@ -9,7 +9,7 @@
 
 import type { Document, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { LineParseResult } from './parse_line_for_completion';
 import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
@@ -51,6 +51,7 @@ export interface AutocompleteContext {
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
   workflows: WorkflowsResponse;
+  workflowDefinition: WorkflowYaml | null;
 }
 
 // we don't want to pass model and position, but currently it's used in getWithBlockSuggestions

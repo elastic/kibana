@@ -394,6 +394,13 @@ export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
 });
 export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
 
+export const WorkflowOutputStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.output'),
+  status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
+  with: z.record(z.string(), z.any()), // Accepts any key-value pairs
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -518,6 +525,7 @@ const StepSchema = z.lazy(() =>
     MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    WorkflowOutputStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -532,6 +540,7 @@ export const BuiltInStepTypes = [
   HttpStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowOutputStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -632,7 +641,7 @@ export const WorkflowContextSchema = z.object({
       ])
     )
     .optional(),
-  outputs: z
+  output: z
     .record(
       z.string(),
       z.union([
@@ -658,7 +667,7 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
   // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
-  outputs: z.object({}),
+  output: z.object({}),
   consts: z.object({}),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
