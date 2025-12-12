@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { TIME_SYSTEM_PARAMS, type ESQLAstItem, type ESQLFunction, within } from '@kbn/esql-ast';
-import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
+import { getFunctionDefinition } from '@kbn/esql-ast/src/commands/definitions/utils';
 import { isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
 import { fromCache, setToCache } from './hover_cache';
 
