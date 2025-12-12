@@ -15,7 +15,6 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
   },
-  indexRefreshInterval: '1s',
   kbnServerArgs: [
     `--xpack.fleet.experimentalFeatures=${JSON.stringify({
       integrationKnowledge: false,
