@@ -28,6 +28,7 @@ import type {
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
+  StreamsPartitioningSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
 } from './types';
 import {
@@ -53,6 +54,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 
@@ -179,6 +181,19 @@ export class StreamsTelemetryClient {
 
     return () => {
       this.analytics.reportEvent(STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE, {
+        ...params,
+        duration_ms: Date.now() - start,
+      });
+    };
+  }
+
+  public startTrackingPartitioningSamplesFetchLatency(
+    params: Pick<StreamsPartitioningSamplesFetchLatencyProps, 'stream_name' | 'stream_type'>
+  ) {
+    const start = Date.now();
+
+    return () => {
+      this.analytics.reportEvent(STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE, {
         ...params,
         duration_ms: Date.now() - start,
       });
