@@ -9,7 +9,7 @@ import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/dist/prebuilt';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';

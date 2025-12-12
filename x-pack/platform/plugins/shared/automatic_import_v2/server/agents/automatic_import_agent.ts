@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReactAgent } from '@langchain/langgraph/dist/prebuilt';
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import { createTaskTool } from './sub_agents';
 import { fetchCurrentPipelineTool, fetchUniqueKeysTool } from './tools';

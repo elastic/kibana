@@ -6,7 +6,7 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/dist/prebuilt';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { AnalyzeIndexPatternAnnotation } from './state';
 import {

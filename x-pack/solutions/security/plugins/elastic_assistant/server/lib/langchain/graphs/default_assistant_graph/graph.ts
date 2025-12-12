@@ -15,7 +15,7 @@ import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ToolNode } from '@langchain/langgraph/dist/prebuilt';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { AgentState, NodeParamsBase } from './types';
 
 import { stepRouter } from './nodes/step_router';

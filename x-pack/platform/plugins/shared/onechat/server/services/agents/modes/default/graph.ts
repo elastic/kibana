@@ -6,7 +6,7 @@
  */
 
 import { StateGraph, START as _START_, END as _END_ } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/dist/prebuilt';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';

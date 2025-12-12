@@ -9,7 +9,7 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
-import { createReactAgent } from '@langchain/langgraph/dist/prebuilt';
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { z } from '@kbn/zod';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { TASK_TOOL_DESCRIPTION } from '../prompts';

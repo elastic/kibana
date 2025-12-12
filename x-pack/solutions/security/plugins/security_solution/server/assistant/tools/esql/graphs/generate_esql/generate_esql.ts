@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { ToolNode } from '@langchain/langgraph/dist/prebuilt';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { GenerateEsqlAnnotation } from './state';
 
 import {

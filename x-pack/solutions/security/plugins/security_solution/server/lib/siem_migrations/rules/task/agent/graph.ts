@@ -6,7 +6,7 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/dist/prebuilt';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
