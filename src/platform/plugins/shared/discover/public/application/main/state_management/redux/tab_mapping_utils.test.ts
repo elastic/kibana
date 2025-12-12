@@ -257,7 +257,6 @@ describe('tab mapping utils', () => {
             "getId": [MockFunction],
             "getOwnField": [MockFunction],
             "getParent": [MockFunction],
-            "getQueryAnalysis": [MockFunction],
             "getSearchRequestBody": [MockFunction],
             "getSerializedFields": [MockFunction],
             "history": Array [],
