@@ -55,7 +55,7 @@ For the Elastic Security 9.2.3 release information, refer to [Elastic Security S
 
 **Kibana platform**:
 * Fixes "now" and mixed format date handling in the **Share** menu [#245539]({{kib-pull}}245539).
-* Fixes an issue with authentication multiple OIDC providers are configured [#243869]({{kib-pull}}243869).
+* Fixes an issue with authentication when multiple OIDC providers are configured [#243869]({{kib-pull}}243869).
 * Fixes an ECS incompatibility with the `kibana_started.elasticsearch.waitTime` value in logs [#245706]({{kib-pull}}245706).
 * Fixes the serialization of `meta.error` in JSON layouts: if the error is an Error instance, only `message`, `name`, and `stack` are included. Other fields are no longer returned in the logs [#244364]({{kib-pull}}244364).
 * Fixes JVM metric conflicts with explicit cast [#244151]({{kib-pull}}244151).
