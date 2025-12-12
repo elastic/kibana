@@ -6,4 +6,8 @@ fileGroups:
     - "/tsconfig.base.json"
     - "/tsconfig.browser.json"
 
-tasks: {}
+tasks:
+  source:
+    script: 'echo noop > /dev/null'
+    inputs:
+      - "@group(src)"
