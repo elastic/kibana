@@ -754,13 +754,18 @@ export const streamEnrichmentMachine = setup({
                       guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
+                        { type: 'sendClearConditionFilterToSimulator' },
                         { type: 'deleteStep', params: ({ event }) => event },
                         { type: 'computeValidation' },
                       ],
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }, { type: 'computeValidation' }],
+                      actions: [
+                        { type: 'sendClearConditionFilterToSimulator' },
+                        { type: 'reassignSteps' },
+                        { type: 'computeValidation' },
+                      ],
                     },
                   },
                 },
