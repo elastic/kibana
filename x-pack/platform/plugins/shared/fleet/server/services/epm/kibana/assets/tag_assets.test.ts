@@ -837,4 +837,136 @@ describe('tagKibanaAssets', () => {
     expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(1);
   });
+
+  describe('tag creation retry on conflict', () => {
+    // Import SavedObjectsErrorHelpers for creating proper conflict errors
+    const { SavedObjectsErrorHelpers } = jest.requireActual('@kbn/core/server');
+
+    it('should retry tag creation on conflict error and succeed', async () => {
+      savedObjectTagClient.get.mockImplementation(async (id: string) => {
+        // Managed and package tags exist
+        if (id === 'fleet-managed-default' || id === 'fleet-pkg-test-pkg-default') {
+          return { name: 'existing', description: '', color: '' };
+        }
+        // Custom tag doesn't exist
+        throw new Error('not found');
+      });
+
+      // Simulate conflict on first attempt, success on second
+      let createCallCount = 0;
+      savedObjectTagClient.create.mockImplementation(() => {
+        createCallCount++;
+        if (createCallCount === 1) {
+          throw SavedObjectsErrorHelpers.createConflictError('tag', 'foo-tag');
+        }
+        return Promise.resolve({ id: 'foo-tag', name: 'Foo' });
+      });
+
+      const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
+      const assetTags = [
+        {
+          text: 'Foo',
+          asset_types: ['dashboard'],
+        },
+      ];
+
+      await tagKibanaAssets({
+        savedObjectTagAssignmentService,
+        savedObjectTagClient,
+        importedAssets,
+        pkgTitle: 'TestPackage',
+        pkgName: 'test-pkg',
+        spaceId: 'default',
+        assetTags,
+      });
+
+      // Should have called create twice (conflict then success)
+      expect(savedObjectTagClient.create).toHaveBeenCalledTimes(2);
+      expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalled();
+    });
+
+    it(
+      'should give up after multiple retries on persistent conflict errors',
+      async () => {
+      savedObjectTagClient.get.mockImplementation(async (id: string) => {
+        // Managed and package tags exist
+        if (id === 'fleet-managed-default' || id === 'fleet-pkg-test-pkg-default') {
+          return { name: 'existing', description: '', color: '' };
+        }
+        // Custom tag doesn't exist
+        throw new Error('not found');
+      });
+
+      // Simulate persistent conflicts
+      savedObjectTagClient.create.mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.createConflictError('tag', 'foo-tag');
+      });
+
+      const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
+      const assetTags = [
+        {
+          text: 'Foo',
+          asset_types: ['dashboard'],
+        },
+      ];
+
+      await expect(
+        tagKibanaAssets({
+          savedObjectTagAssignmentService,
+          savedObjectTagClient,
+          importedAssets,
+          pkgTitle: 'TestPackage',
+          pkgName: 'test-pkg',
+          spaceId: 'default',
+          assetTags,
+        })
+      ).rejects.toThrow();
+
+      // Should have retried 5 times (initial + 5 retries = 6 total)
+      expect(savedObjectTagClient.create).toHaveBeenCalledTimes(6);
+    },
+      35000
+    ); // Increase timeout for retry test (pRetry uses exponential backoff: 1s, 2s, 4s, 8s, 16s = ~31s)
+
+    it('should not retry on non-conflict errors', async () => {
+      savedObjectTagClient.get.mockImplementation(async (id: string) => {
+        // Managed and package tags exist
+        if (id === 'fleet-managed-default' || id === 'fleet-pkg-test-pkg-default') {
+          return { name: 'existing', description: '', color: '' };
+        }
+        // Custom tag doesn't exist
+        throw new Error('not found');
+      });
+
+      // Simulate a non-conflict error
+      savedObjectTagClient.create.mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.decorateGeneralError(
+          new Error('Internal Server Error')
+        );
+      });
+
+      const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
+      const assetTags = [
+        {
+          text: 'Foo',
+          asset_types: ['dashboard'],
+        },
+      ];
+
+      await expect(
+        tagKibanaAssets({
+          savedObjectTagAssignmentService,
+          savedObjectTagClient,
+          importedAssets,
+          pkgTitle: 'TestPackage',
+          pkgName: 'test-pkg',
+          spaceId: 'default',
+          assetTags,
+        })
+      ).rejects.toThrow('Internal Server Error');
+
+      // Should have called create only once (no retries on non-conflict errors)
+      expect(savedObjectTagClient.create).toHaveBeenCalledTimes(1);
+    });
+  });
 });

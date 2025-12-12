@@ -8,7 +8,9 @@
 import { v5 as uuidv5 } from 'uuid';
 import { omit, uniqBy } from 'lodash';
 import pMap from 'p-map';
+import pRetry from 'p-retry';
 import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
 import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common/types';
@@ -218,13 +220,25 @@ async function getPackageSpecTags(
       const existingPackageSpecTag = await savedObjectTagClient.get(uniqueTagId).catch(() => {});
 
       if (!existingPackageSpecTag) {
-        await savedObjectTagClient.create(
-          {
-            name: tag.text,
-            description: 'Tag defined in package-spec',
-            color: getRandomColor(),
-          },
-          { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
+        // Retry tag creation on conflict errors to handle race conditions when multiple packages
+        // are installed in parallel
+        const onlyRetryConflictErrors = (err: Error) => {
+          if (!SavedObjectsErrorHelpers.isConflictError(err)) {
+            throw err;
+          }
+        };
+
+        await pRetry(
+          () =>
+            savedObjectTagClient.create(
+              {
+                name: tag.text,
+                description: 'Tag defined in package-spec',
+                color: getRandomColor(),
+              },
+              { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
+            ),
+          { retries: 5, onFailedAttempt: onlyRetryConflictErrors }
         );
       }
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);
