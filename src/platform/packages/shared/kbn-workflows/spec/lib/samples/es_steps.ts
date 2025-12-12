@@ -54,8 +54,8 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
-    name: 'delete-document',
-    type: 'elasticsearch.delete',
+    name: 'index-document',
+    type: 'elasticsearch.index',
     with: {
       index: 'test-index',
       id: '1',
@@ -104,6 +104,6 @@ export const ES_INVALID_SAMPLE_STEPS = [
       },
     },
     zodErrorMessage: 'Invalid input: expected record, received array',
-    diagnosticErrorMessage: /Incorrect type\. Expected "__schema\d+"\./,
+    diagnosticErrorMessage: /Incorrect type\. Expected "object"\./,
   },
 ];
