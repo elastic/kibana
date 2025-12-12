@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { StartConversationButton } from './start_conversation_button';
+import { AiInsightErrorBanner } from './ai_insight_error_banner';
 
 export interface AiInsightProps {
   title: string;
@@ -82,25 +83,23 @@ export function AiInsight({
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={(open) => {
           setIsOpen(open);
-          if (open && onOpen) {
+          if (open && onOpen && !content && !isLoading) {
             onOpen();
           }
         }}
       >
         <EuiSpacer size="m" />
-        <EuiPanel hasBorder={false} hasShadow={false} color="subdued">
+        <EuiPanel color="subdued">
           {isLoading ? (
             <EuiSkeletonText lines={3} />
           ) : error ? (
-            <EuiText size="s" color="danger">
-              <p>{error}</p>
-            </EuiText>
+            <AiInsightErrorBanner error={error} onRetry={onOpen} />
           ) : (
             <EuiMarkdownFormat textSize="s">{content ?? ''}</EuiMarkdownFormat>
           )}
         </EuiPanel>
 
-        {onStartConversation && Boolean(content && content.trim()) ? (
+        {!isLoading && onStartConversation && Boolean(content && content.trim()) ? (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
