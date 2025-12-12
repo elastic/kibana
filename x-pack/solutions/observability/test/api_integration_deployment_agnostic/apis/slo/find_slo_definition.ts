@@ -25,6 +25,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
 
   describe('Find SLOs by outdated status and tags', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/246127
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
@@ -118,6 +121,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(definitions.results.find((slo) => slo.id === outdatedResponse.id)?.id).to.be(
         outdatedSloId
       );
+    });
+
+    it('finds SLOs with health data when includeHealth is true', async () => {
+      const slo = {
+        ...DEFAULT_SLO,
+        name: 'Test SLO with health',
+      };
+
+      const createResponse = await sloApi.create(slo, adminRoleAuthc);
+
+      const definitions = await sloApi.findDefinitions(adminRoleAuthc, {
+        includeHealth: 'true',
+      });
+
+      expect(definitions.total).to.be.greaterThan(0);
+
+      const createdSlo = definitions.results.find((def) => def.id === createResponse.id);
+      expect(createdSlo).to.not.be(undefined);
+      expect(createdSlo?.health).to.not.be(undefined);
+
+      expect(createdSlo?.health?.isProblematic).eql(false);
+
+      expect(createdSlo?.health?.rollup.isProblematic).eql(false);
+      expect(createdSlo?.health?.rollup.missing).eql(false);
+      expect(createdSlo?.health?.rollup.status).eql('healthy');
+      expect(['started', 'indexing']).to.contain(createdSlo?.health?.rollup.state);
+
+      expect(createdSlo?.health?.summary.isProblematic).eql(false);
+      expect(createdSlo?.health?.summary.missing).eql(false);
+      expect(createdSlo?.health?.summary.status).eql('healthy');
+      expect(['started', 'indexing']).to.contain(createdSlo?.health?.summary.state);
     });
   });
 }
