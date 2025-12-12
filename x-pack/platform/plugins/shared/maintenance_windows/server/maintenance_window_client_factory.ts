@@ -44,7 +44,7 @@ export class MaintenanceWindowClientFactory {
   private createMaintenanceWindowClient(
     request: KibanaRequest,
     withAuth: boolean,
-    excludedExtensions: string[] = [SECURITY_EXTENSION_ID]
+    excludedExtensions?:['spaces']
   ) {
     const { securityService } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
