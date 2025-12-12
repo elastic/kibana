@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/common';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -28,6 +29,7 @@ import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { getIsObservabilityAgentEnabled } from '../../../../common/agent_builder/get_is_obs_agent_enabled';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -84,7 +86,8 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
   const { onPageReady } = usePerformanceContext();
-  const { observabilityAIAssistant } = useApmPluginContext();
+  const { observabilityAIAssistant, onechat, core } = useApmPluginContext();
+  const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
   const {
     path: { groupId },
@@ -197,6 +200,33 @@ export function ErrorGroupDetails() {
       screenDescription: `The user is looking at the error details view. The current error group name is ${groupId}. There have been ${errorSamplesData.occurrencesCount} occurrences in the currently selected time range`,
     });
   }, [observabilityAIAssistant, errorSamplesData.occurrencesCount, groupId]);
+
+  // Configure agent builder global flyout with the error attachment
+  useEffect(() => {
+    if (!onechat || !errorId || !isObservabilityAgentEnabled) {
+      return;
+    }
+
+    onechat.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      attachments: [
+        {
+          type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+          data: {
+            errorId,
+            serviceName,
+            environment,
+            start,
+            end,
+          },
+        },
+      ],
+    });
+
+    return () => {
+      onechat.clearConversationFlyoutActiveConfig();
+    };
+  }, [onechat, errorId, serviceName, environment, start, end, isObservabilityAgentEnabled]);
 
   return (
     <>
