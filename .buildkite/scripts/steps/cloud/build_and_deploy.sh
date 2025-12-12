@@ -10,6 +10,13 @@ export KBN_NP_PLUGINS_BUILT=true
 
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
 ECCTL_LOGS=$(mktemp --suffix ".json")
+KIBANA_IMAGE_FLAVOR="kibana-cloud"
+EXTRA_BUILD_ARGS=("--skip-docker-cloud-fips")
+
+if is_pr_with_label "ci:cloud-fips-deploy"; then
+  KIBANA_IMAGE_FLAVOR="kibana-cloud-fips"
+  EXTRA_BUILD_ARGS=("--skip-docker-cloud")
+fi
 
 KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
 case "$KIBANA_MEMORY_SIZE" in
@@ -54,7 +61,7 @@ ELASTICSEARCH_MANIFEST_URL="https://storage.googleapis.com/kibana-ci-es-snapshot
 ELASTICSEARCH_SHA=$(curl -s $ELASTICSEARCH_MANIFEST_URL | jq -r '.sha')
 ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$VERSION-$ELASTICSEARCH_SHA"
 
-KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
+KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/$KIBANA_IMAGE_FLAVOR:$VERSION-$GIT_COMMIT"
 
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   PR_NUMBER="$GITHUB_PR_NUMBER"
@@ -85,7 +92,8 @@ else
     --skip-docker-cloud-fips \
     --skip-docker-wolfi \
     --skip-docker-serverless \
-    --skip-docker-contexts
+    --skip-docker-contexts \
+    "${EXTRA_BUILD_ARGS[@]}"
 fi
 
 if is_pr_with_label "ci:cloud-redeploy" || is_pr_with_label "ci:entity-store-performance"; then
