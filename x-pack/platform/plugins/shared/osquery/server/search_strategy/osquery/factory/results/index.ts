@@ -18,7 +18,12 @@ import { buildResultsQuery } from './query.all_results.dsl';
 
 export const allResults: OsqueryFactory<OsqueryQueries.results> = {
   buildDsl: (options: ResultsRequestOptions) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+    const usingPitPagination = Boolean(options.pitId);
+    if (
+      !usingPitPagination &&
+      options.pagination &&
+      options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE
+    ) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
 
@@ -32,10 +37,19 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
       dsl: [inspectStringifyObject(buildResultsQuery(options))],
     };
 
+    const hits = response.rawResponse.hits.hits;
+    const searchAfter =
+      hits.length > 0 && hits[hits.length - 1].sort ? hits[hits.length - 1].sort : undefined;
+
+    const refreshedPitId = (response.rawResponse as { pit_id?: string }).pit_id ?? options.pitId;
+
     return {
       ...response,
       inspect,
-      edges: response.rawResponse.hits.hits,
+      edges: hits,
+      pitId: refreshedPitId,
+      searchAfter,
+      hasMore: hits.length === options.pagination.querySize,
     };
   },
 };
