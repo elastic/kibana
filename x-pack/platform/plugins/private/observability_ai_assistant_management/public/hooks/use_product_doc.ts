@@ -52,12 +52,15 @@ export function useProductDoc(inferenceId: string | undefined): UseProductDoc {
     refetch();
   }, [inferenceId, refetch]);
 
+  const overallStatus =
+    data && 'overall' in data && typeof data.overall === 'string' ? data.overall : undefined;
+
   // poll the status if when is installing or uninstalling
   useEffect(() => {
     if (
       !(
-        data?.overall === 'installing' ||
-        data?.overall === 'uninstalling' ||
+        overallStatus === 'installing' ||
+        overallStatus === 'uninstalling' ||
         isInstalling ||
         isUninstalling
       )
@@ -71,7 +74,7 @@ export function useProductDoc(inferenceId: string | undefined): UseProductDoc {
     return () => {
       clearInterval(interval);
     };
-  }, [refetch, data?.overall, isInstalling, isUninstalling]);
+  }, [refetch, overallStatus, isInstalling, isUninstalling]);
 
   const status: InstallationStatus | undefined = useMemo(() => {
     if (!inferenceId || data?.inferenceId !== inferenceId) {
@@ -83,8 +86,8 @@ export function useProductDoc(inferenceId: string | undefined): UseProductDoc {
     if (isUninstalling) {
       return 'uninstalling';
     }
-    return data?.overall;
-  }, [inferenceId, isInstalling, isUninstalling, data]);
+    return overallStatus;
+  }, [inferenceId, isInstalling, isUninstalling, data, overallStatus]);
 
   return {
     status,

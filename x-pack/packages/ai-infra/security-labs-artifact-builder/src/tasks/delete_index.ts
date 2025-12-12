@@ -27,6 +27,6 @@ export const deleteIndex = async ({
       await client.indices.delete({ index: indexName });
     }
   } catch (error) {
-    log.warn(`Failed to delete index [${indexName}]: ${error}`);
+    log.warning(`Failed to delete index [${indexName}]: ${error}`);
   }
 };

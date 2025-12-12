@@ -130,7 +130,9 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const documentationItems: DocumentationItem[] = useMemo(() => {
     const elasticDocsStatus: DocumentationStatus =
-      productDocsStatusResponse?.overall ?? 'uninstalled';
+      (productDocsStatusResponse && 'overall' in productDocsStatusResponse
+        ? productDocsStatusResponse.overall
+        : 'uninstalled') ?? 'uninstalled';
     const securityLabsStatus: DocumentationStatus =
       (securityLabsStatusResponse && 'status' in securityLabsStatusResponse
         ? securityLabsStatusResponse.status

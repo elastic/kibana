@@ -247,10 +247,10 @@ export const parseMarkdownFiles = async ({
         documents.push(toIndexedDocument(doc));
         log.debug(`Parsed: ${doc.title}`);
       } else {
-        log.warn(`Skipping file without required frontmatter: ${filePath}`);
+        log.warning(`Skipping file without required frontmatter: ${filePath}`);
       }
     } catch (error) {
-      log.warn(`Failed to parse ${filePath}: ${error}`);
+      log.warning(`Failed to parse ${filePath}: ${error}`);
     }
   }
 
