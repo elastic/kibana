@@ -278,7 +278,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const { body: createdAlert } = await supertest
+        const { body: matchingAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(
@@ -295,7 +295,26 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             })
           )
           .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+        objectRemover.add(Spaces.space1.id, matchingAlert.id, 'rule', 'alerting');
+
+        const { body: nonMatchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'anothermessage',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, nonMatchingAlert.id, 'rule', 'alerting');
 
         const response = await supertest.get(
           `${getUrlPrefix(
@@ -304,10 +323,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.eql(200);
-        expect(response.body.total).to.be.greaterThan(0);
-        const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
-        expect(match).not.to.be(undefined);
-        expect(match.actions[0].params.message).to.eql('test');
+        expect(response.body.total).to.equal(1);
+        const foundRule = response.body.data[0];
+        expect(foundRule.id).to.equal(matchingAlert.id);
+        expect(foundRule.actions[0].params.message).to.eql('test');
       });
 
       it('should filter on parameters', async () => {
