@@ -56,7 +56,6 @@ describe('Generated Kibana Connectors', () => {
 
     it('should maintain consistent connector count across imports', () => {
       // Ensure the connector count is consistent and doesn't change unexpectedly
-      expect(GENERATED_KIBANA_CONNECTORS.length).toBe(GENERATED_KIBANA_CONNECTORS.length);
       expect(GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0); // At least some connectors
       expect(GENERATED_KIBANA_CONNECTORS.length).toBeLessThan(100); // Current realistic maximum
     });
