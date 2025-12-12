@@ -7,13 +7,21 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import pRetry from 'p-retry';
 import { extractDataStreamName, getErrorMessage } from '../utils';
 
 export interface DestinationInfo {
   destIndex: string;
   isDataStream: boolean;
 }
+
+export interface ReindexJobResult {
+  total: number;
+  created: number;
+  failures: number;
+  timedOut: boolean;
+}
+
+export const DEFAULT_REINDEX_REQUEST_TIMEOUT_MS = 30 * 60 * 1000;
 
 export function getDestinationInfo(originalIndex: string): DestinationInfo {
   const dataStreamName = extractDataStreamName(originalIndex);
@@ -30,6 +38,7 @@ export async function reindexThroughPipeline({
   destIndex,
   isDataStream,
   pipelineName,
+  requestTimeoutMs = DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
 }: {
   esClient: Client;
   logger: Logger;
@@ -37,91 +46,53 @@ export async function reindexThroughPipeline({
   destIndex: string;
   isDataStream: boolean;
   pipelineName: string;
-}): Promise<string> {
+  requestTimeoutMs?: number;
+}): Promise<ReindexJobResult> {
   logger.debug(`Reindexing to ${destIndex}`);
 
   try {
-    const response = await esClient.reindex({
-      wait_for_completion: false,
-      source: { index: sourceIndex },
-      dest: {
-        index: destIndex,
-        pipeline: pipelineName,
-        op_type: isDataStream ? 'create' : 'index',
+    const response = await esClient.reindex(
+      {
+        wait_for_completion: true,
+        source: { index: sourceIndex },
+        dest: {
+          index: destIndex,
+          pipeline: pipelineName,
+          op_type: isDataStream ? 'create' : 'index',
+        },
       },
-    });
+      { requestTimeout: requestTimeoutMs }
+    );
 
-    if (!response.task) {
-      throw new Error(`Reindex did not return a task ID for ${sourceIndex}`);
+    const failures = (response as { failures?: unknown[] }).failures ?? [];
+    const timedOut = Boolean((response as { timed_out?: boolean }).timed_out);
+    const created = Number((response as { created?: number }).created ?? 0);
+    const total = Number((response as { total?: number }).total ?? 0);
+
+    if (timedOut) {
+      throw new Error(`Reindex timed out for ${destIndex}`);
     }
 
-    return response.task as string;
+    if (failures.length > 0) {
+      logger.warn(`Reindex had ${failures.length} failures`);
+      const sampleFailures = failures.slice(0, 3);
+      for (const failure of sampleFailures) {
+        const cause = (failure as { cause?: { type?: string; reason?: string } })?.cause;
+        const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
+        logger.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
+      }
+      if (failures.length > 3) {
+        logger.debug(`  ... and ${failures.length - 3} more`);
+      }
+      throw new Error(`Reindex had failures for ${destIndex}`);
+    }
+
+    logger.debug(`Reindexed ${created} documents to ${destIndex}`);
+    return { total, created, failures: 0, timedOut: false };
   } catch (error) {
     logger.error(`Failed to start reindex for ${destIndex}`);
     throw error;
   }
-}
-
-export async function waitForReindexTask({
-  esClient,
-  logger,
-  taskId,
-}: {
-  esClient: Client;
-  logger: Logger;
-  taskId: string;
-}): Promise<{ total: number; created: number; failures: number }> {
-  return pRetry(
-    async () => {
-      const taskResponse = await esClient.tasks.get({ task_id: taskId });
-
-      if (!taskResponse.completed) {
-        throw new Error('Task not completed');
-      }
-
-      const status = taskResponse.task?.status as {
-        total?: number;
-        created?: number;
-        failures?: unknown[];
-      };
-      const responseFailures = (taskResponse.response as { failures?: unknown[] })?.failures ?? [];
-
-      if (taskResponse.error) {
-        const err = taskResponse.error as {
-          type?: string;
-          reason?: string;
-          caused_by?: { type?: string; reason?: string };
-        };
-        const errorMsg =
-          err.reason ||
-          err.caused_by?.reason ||
-          (err.type ? `${err.type}: ${JSON.stringify(err)}` : JSON.stringify(err));
-        throw new pRetry.AbortError(`Reindex task failed: ${errorMsg}`);
-      }
-
-      const result = {
-        total: status?.total ?? 0,
-        created: status?.created ?? 0,
-        failures: (status?.failures ?? []).length + responseFailures.length,
-      };
-
-      if (result.failures > 0) {
-        logger.warn(`Reindex had ${result.failures} failures`);
-        const sampleFailures = responseFailures.slice(0, 3);
-        for (const failure of sampleFailures) {
-          const cause = (failure as { cause?: { type?: string; reason?: string } })?.cause;
-          const reason = cause?.reason?.split('\n')[0]?.slice(0, 80) ?? 'unknown';
-          logger.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
-        }
-        if (responseFailures.length > 3) {
-          logger.debug(`  ... and ${responseFailures.length - 3} more`);
-        }
-      }
-      logger.debug(`Reindexed ${result.created} documents`);
-      return result;
-    },
-    { retries: 60, minTimeout: 1000, maxTimeout: 30000, factor: 1.5 }
-  );
 }
 
 interface ReindexJob {
@@ -164,27 +135,13 @@ export async function reindexAllIndices({
       );
     }
 
-    const taskResults = await Promise.all(
+    await Promise.all(
       batch.map(async (job) => {
         try {
-          const taskId = await reindexThroughPipeline({ esClient, logger, pipelineName, ...job });
-          return { job, taskId };
+          await reindexThroughPipeline({ esClient, logger, pipelineName, ...job });
+          successfullyReindexed.push(job.destIndex);
         } catch (error) {
-          logger.error(`Failed to start reindex for ${job.destIndex}: ${getErrorMessage(error)}`);
-          return { job, taskId: null };
-        }
-      })
-    );
-
-    await Promise.all(
-      taskResults.map(async ({ job, taskId }) => {
-        if (!taskId) return;
-        try {
-          const result = await waitForReindexTask({ esClient, logger, taskId });
-          if (result.failures === 0 && result.created > 0)
-            successfullyReindexed.push(job.destIndex);
-        } catch (err) {
-          logger.error(`Failed to reindex ${job.destIndex}: ${getErrorMessage(err)}`);
+          logger.error(`Failed to reindex ${job.destIndex}: ${getErrorMessage(error)}`);
         }
       })
     );

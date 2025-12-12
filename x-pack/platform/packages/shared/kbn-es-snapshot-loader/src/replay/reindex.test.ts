@@ -6,7 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { getDestinationInfo } from './reindex';
+import {
+  DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
+  getDestinationInfo,
+  reindexAllIndices,
+} from './reindex';
 import { createTimestampPipeline } from './pipeline';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -18,6 +22,7 @@ const createMockEsClient = (): Client =>
       putPipeline: jest.fn().mockResolvedValue({}),
       deletePipeline: jest.fn().mockResolvedValue({}),
     },
+    reindex: jest.fn(),
   } as unknown as Client);
 
 describe('getDestinationInfo', () => {
@@ -76,5 +81,82 @@ describe('createTimestampPipeline', () => {
     });
 
     expect(logger.debug).toHaveBeenCalledWith('Timestamp pipeline created');
+  });
+});
+
+describe('reindexAllIndices', () => {
+  it('uus reindex API with correct parameters', async () => {
+    const esClient = createMockEsClient();
+    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+      timed_out: false,
+      total: 10,
+      created: 10,
+      failures: [],
+    });
+
+    const result = await reindexAllIndices({
+      esClient,
+      logger,
+      restoredIndices: ['snapshot-loader-temp-a'],
+      originalIndices: ['logs-nginx-default'],
+      pipelineName: 'my-pipeline',
+      concurrency: 1,
+    });
+
+    expect(esClient.reindex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        wait_for_completion: true,
+        source: { index: 'snapshot-loader-temp-a' },
+        dest: expect.objectContaining({
+          index: 'logs-nginx-default',
+          pipeline: 'my-pipeline',
+          op_type: 'index',
+        }),
+      }),
+      expect.objectContaining({ requestTimeout: DEFAULT_REINDEX_REQUEST_TIMEOUT_MS })
+    );
+    expect(result).toEqual(['logs-nginx-default']);
+  });
+
+  it('treats any failures as an error and does not count as successful', async () => {
+    const esClient = createMockEsClient();
+    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+      timed_out: false,
+      total: 10,
+      created: 9,
+      failures: [{ cause: { type: 'mapper_parsing_exception', reason: 'bad field' } }],
+    });
+
+    const result = await reindexAllIndices({
+      esClient,
+      logger,
+      restoredIndices: ['snapshot-loader-temp-a'],
+      originalIndices: ['logs-nginx-default'],
+      pipelineName: 'my-pipeline',
+      concurrency: 1,
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it('treats timed_out=true as an error and does not count as successful', async () => {
+    const esClient = createMockEsClient();
+    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+      timed_out: true,
+      total: 10,
+      created: 10,
+      failures: [],
+    });
+
+    const result = await reindexAllIndices({
+      esClient,
+      logger,
+      restoredIndices: ['snapshot-loader-temp-a'],
+      originalIndices: ['logs-nginx-default'],
+      pipelineName: 'my-pipeline',
+      concurrency: 1,
+    });
+
+    expect(result).toEqual([]);
   });
 });
