@@ -364,7 +364,7 @@ const result = await savedObjectsClient.search({
   namespaces: ['default'],
   query: { match_all: {} },
   runtime_mappings: {
-    // ❌ This accesses encrypted secrets before the search method can redact them
+    // ❌ This accesses encrypted secrets before the search method can decrypt them
     exposed_api_key: {
       type: 'keyword',
       script: {
@@ -376,7 +376,7 @@ const result = await savedObjectsClient.search({
       },
     },
   },
-  // ❌ The encrypted value is returned in the response, bypassing redaction
+  // ❌ The encrypted value is returned in the response, bypassing decryption
   fields: ['exposed_api_key'],
 });
 ```
