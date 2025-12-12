@@ -23,7 +23,7 @@ test.describe(
       await apiServices.streams.updateStreamProcessors('logs-generic-default', {
         steps: [
           {
-            where: {
+            condition: {
               field: 'test_field',
               contains: 'logs',
               steps: [
