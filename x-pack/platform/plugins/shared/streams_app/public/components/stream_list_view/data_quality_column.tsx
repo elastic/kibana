@@ -78,6 +78,7 @@ export function DataQualityColumn({
         dataTestSubj={`dataQualityIndicator-${streamName}`}
         quality={quality}
         isLoading={isLoading}
+        showTooltip={true}
       />
     </EuiLink>
   );

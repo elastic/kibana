@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
+import { EuiSkeletonRectangle, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { QualityIndicators } from '../../../common/types';
@@ -13,6 +13,9 @@ import {
   summaryPanelQualityGoodText,
   summaryPanelQualityDegradedText,
   summaryPanelQualityPoorText,
+  qualityIndicatorGoodTooltipText,
+  qualityIndicatorDegradedTooltipText,
+  qualityIndicatorPoorTooltipText,
 } from '../../../common/translations';
 import { QualityIndicator } from '.';
 
@@ -20,11 +23,13 @@ export const DatasetQualityIndicator = ({
   isLoading,
   quality,
   verbose = false,
+  showTooltip = false,
   dataTestSubj,
 }: {
   isLoading: boolean;
   quality: QualityIndicators;
   verbose?: boolean;
+  showTooltip?: boolean;
   dataTestSubj?: string;
 }) => {
   const QUALITY_LABELS: Record<QualityIndicators, string> = {
@@ -33,19 +38,33 @@ export const DatasetQualityIndicator = ({
     poor: summaryPanelQualityPoorText,
   };
 
+  const QUALITY_TOOLTIPS: Record<QualityIndicators, string> = {
+    good: qualityIndicatorGoodTooltipText,
+    degraded: qualityIndicatorDegradedTooltipText,
+    poor: qualityIndicatorPoorTooltipText,
+  };
+
   const translatedQuality = i18n.translate('xpack.datasetQuality.datasetQualityIdicator', {
     defaultMessage: '{quality}{verbose, select, true { quality} other {}}',
     values: { quality: QUALITY_LABELS[quality], verbose },
   });
 
+  const indicator = (
+    <QualityIndicator
+      dataTestSubj={dataTestSubj}
+      quality={quality}
+      description={translatedQuality}
+    />
+  );
+
   return (
     <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <QualityIndicator
-          dataTestSubj={dataTestSubj}
-          quality={quality}
-          description={translatedQuality}
-        />
+        {showTooltip ? (
+          <EuiToolTip content={QUALITY_TOOLTIPS[quality]}>{indicator}</EuiToolTip>
+        ) : (
+          indicator
+        )}
       </EuiFlexGroup>
     </EuiSkeletonRectangle>
   );
