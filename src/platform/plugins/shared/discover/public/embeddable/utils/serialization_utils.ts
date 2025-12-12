@@ -34,7 +34,8 @@ export const deserializeState = async ({
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
-  const savedObjectId = (serializedState.rawState as SearchEmbeddableByReferenceState).savedObjectId;
+  const savedObjectId = (serializedState.rawState as SearchEmbeddableByReferenceState)
+    .savedObjectId;
   if (savedObjectId) {
     // by reference
     const { get } = discoverServices.savedSearch;
