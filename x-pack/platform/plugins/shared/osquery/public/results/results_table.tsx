@@ -150,7 +150,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const {
     data: allResultsData,
     isLoading,
-    isFetchingWithoutCursor,
+    isFetchingWithoutSearchAfter,
   } = useAllResults({
     actionId,
     liveQueryActionId,
@@ -433,7 +433,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         <DataContext.Provider value={allResultsData?.edges}>
           <div css={resultsTableContainerCss}>
             <div css={dataGridWrapperCss}>
-              {isFetchingWithoutCursor && (
+              {isFetchingWithoutSearchAfter && (
                 <div css={loadingOverlayCss}>
                   <EuiLoadingSpinner size="xl" />
                 </div>

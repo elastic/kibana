@@ -47,7 +47,7 @@ interface UseAllResults {
   isLive?: boolean;
 }
 
-interface CursorState {
+interface PitPaginationState {
   pitId?: string;
   searchAfterByPage: Map<number, string>;
 }
@@ -65,7 +65,7 @@ export const useAllResults = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  const [cursorState, setCursorState] = useState<CursorState>({
+  const [pitPaginationState, setPitPaginationState] = useState<PitPaginationState>({
     searchAfterByPage: new Map(),
   });
 
@@ -99,7 +99,7 @@ export const useAllResults = ({
 
     if (depsChanged) {
       // Close old PIT before resetting state to avoid resource leak
-      setCursorState((prevState) => {
+      setPitPaginationState((prevState) => {
         if (prevState.pitId) {
           closePit(prevState.pitId);
         }
@@ -112,20 +112,20 @@ export const useAllResults = ({
   }, [sort, kuery, startDate, actionId, limit, closePit]);
 
   useEffect(() => {
-    const currentPitId = cursorState.pitId;
+    const currentPitId = pitPaginationState.pitId;
 
     return () => {
       if (currentPitId) {
         closePit(currentPitId);
       }
     };
-  }, [cursorState.pitId, closePit]);
+  }, [pitPaginationState.pitId, closePit]);
 
   const searchAfter = useMemo(() => {
     if (activePage === 0) return undefined;
 
-    return cursorState.searchAfterByPage.get(activePage - 1);
-  }, [activePage, cursorState.searchAfterByPage]);
+    return pitPaginationState.searchAfterByPage.get(activePage - 1);
+  }, [activePage, pitPaginationState.searchAfterByPage]);
 
   const queryResult = useQuery<{ data: SerializedResultsStrategyResponse }, Error, ResultsArgs>(
     [
@@ -146,7 +146,7 @@ export const useAllResults = ({
             }),
             ...(kuery && { kuery }),
             ...(startDate && { startDate }),
-            ...(cursorState.pitId && { pitId: cursorState.pitId }),
+            ...(pitPaginationState.pitId && { pitId: pitPaginationState.pitId }),
             ...(searchAfter && { searchAfter }),
           },
         }
@@ -191,7 +191,7 @@ export const useAllResults = ({
       });
 
       if (responseData.pitId || responseData.searchAfter) {
-        setCursorState((prev) => {
+        setPitPaginationState((prev) => {
           const newSearchAfterByPage = new Map(prev.searchAfterByPage);
           if (responseData.searchAfter) {
             newSearchAfterByPage.set(activePage, responseData.searchAfter);
@@ -209,11 +209,11 @@ export const useAllResults = ({
   // Show loading overlay only when:
   // 1. Fetching is in progress
   // 2. We're beyond the 10k document threshold (where ES can't use simple from/size)
-  // 3. We don't have a cached cursor for this page
+  // 3. We don't have a cached search_after position for this page
   // 4. This page hasn't been fetched before (avoid showing overlay on isLive refetches)
   const MAX_ES_FROM_SIZE = 10000;
   const isPageBeyond10k = activePage * limit >= MAX_ES_FROM_SIZE;
-  const isFetchingWithoutCursor =
+  const isFetchingWithoutSearchAfter =
     queryResult.isFetching &&
     isPageBeyond10k &&
     searchAfter === undefined &&
@@ -222,6 +222,6 @@ export const useAllResults = ({
   return {
     ...queryResult,
     isFetching: queryResult.isFetching,
-    isFetchingWithoutCursor,
+    isFetchingWithoutSearchAfter,
   };
 };

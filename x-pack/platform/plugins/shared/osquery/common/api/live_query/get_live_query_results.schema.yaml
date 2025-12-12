@@ -7,7 +7,7 @@ components:
   schemas:
     GetLiveQueryResultsResponse:
       type: object
-      description: 'The response for getting live query results. Supports hybrid pagination using offset-based pagination for results within 10,000 and cursor-based (PIT) pagination for deeper results.'
+      description: 'The response for getting live query results. Supports hybrid pagination using offset-based pagination for results within 10,000 and PIT + search_after pagination for deeper results.'
       properties:
         data:
           type: object
@@ -23,11 +23,11 @@ components:
             pitId:
               type: string
               nullable: true
-              description: 'Point in Time identifier for cursor-based pagination. Only present when offset exceeds 10,000 results and deep pagination is active. Pass this value in subsequent requests to maintain cursor position. Required together with searchAfter for continued pagination.'
+              description: 'Point in Time identifier for PIT-based pagination. Only present when offset exceeds 10,000 results and deep pagination is active. Pass this value in subsequent requests to maintain pagination context. Required together with searchAfter for continued pagination.'
             searchAfter:
               type: string
               nullable: true
-              description: 'JSON-encoded cursor position for the next page. Only present in deep pagination mode (offset >= 10,000). Used together with pitId for cursor-based pagination. Represents the sort values of the last document in the current page.'
+              description: 'JSON-encoded sort values for the next page. Only present in deep pagination mode (offset >= 10,000). Used together with pitId for PIT-based pagination. Represents the sort values of the last document in the current page.'
             hasMore:
               type: boolean
               description: 'Indicates whether more results exist beyond the current page. Always present.'

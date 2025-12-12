@@ -266,13 +266,13 @@ components:
       nullable: true
 
     PitIdOrUndefined:
-      description: 'Point in Time identifier for cursor-based pagination. Used together with searchAfter when navigating beyond 10,000 results.'
+      description: 'Point in Time identifier for PIT-based pagination. Used together with searchAfter when navigating beyond 10,000 results.'
       example: 'g-XXXXX...'
       type: string
       nullable: true
 
     SearchAfterOrUndefined:
-      description: 'JSON-encoded cursor position for the next page in cursor-based pagination. Used together with pitId.'
+      description: 'JSON-encoded sort values for the next page in PIT-based pagination. Used together with pitId. Represents the sort values of the last document from the previous page.'
       example: '[1234567890, "doc_id"]'
       type: string
       nullable: true

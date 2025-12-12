@@ -212,15 +212,15 @@ describe('getLiveQueryResultsRoute', () => {
     });
   });
 
-  describe('PIT cursor logic', () => {
-    it('should require both pitId and searchAfter for cursor continuation', () => {
-      // Both pitId and searchAfter must be provided for cursor-based pagination
+  describe('PIT pagination logic', () => {
+    it('should require both pitId and searchAfter for pagination continuation', () => {
+      // Both pitId and searchAfter must be provided for PIT-based pagination
       const hasPitId = true;
       const hasSearchAfter = true;
 
       // Only use provided PIT if searchAfter is also provided
-      const canUseCursor = hasPitId && hasSearchAfter;
-      expect(canUseCursor).toBe(true);
+      const canUsePitPagination = hasPitId && hasSearchAfter;
+      expect(canUsePitPagination).toBe(true);
     });
 
     it('should ignore pitId when searchAfter is not provided', () => {
@@ -228,16 +228,16 @@ describe('getLiveQueryResultsRoute', () => {
       const hasSearchAfter = false;
 
       // pitId alone is useless without searchAfter
-      const canUseCursor = hasPitId && hasSearchAfter;
-      expect(canUseCursor).toBe(false);
+      const canUsePitPagination = hasPitId && hasSearchAfter;
+      expect(canUsePitPagination).toBe(false);
     });
 
-    it('should not use cursor when neither is provided', () => {
+    it('should not use PIT pagination when neither is provided', () => {
       const hasPitId = false;
       const hasSearchAfter = false;
 
-      const canUseCursor = hasPitId && hasSearchAfter;
-      expect(canUseCursor).toBe(false);
+      const canUsePitPagination = hasPitId && hasSearchAfter;
+      expect(canUsePitPagination).toBe(false);
     });
   });
 });

@@ -248,10 +248,10 @@ export const getLiveQueryResultsRoute = (
 
           const needsPitPagination = offset >= MAX_OFFSET_RESULTS;
 
-          // Only use provided PIT if searchAfter is also provided (both are required for cursor-based pagination)
+          // Only use provided PIT if searchAfter is also provided (both are required for PIT-based pagination)
           // If pitId is provided without searchAfter, ignore it and start fresh
           let pitId = providedPitId && parsedSearchAfter ? providedPitId : undefined;
-          let searchAfterCursor = parsedSearchAfter;
+          let searchAfterValues = parsedSearchAfter;
 
           if (needsPitPagination && !pitId) {
             const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
@@ -315,7 +315,7 @@ export const getLiveQueryResultsRoute = (
                   }
                 }
 
-                searchAfterCursor = currentSearchAfter;
+                searchAfterValues = currentSearchAfter;
               }
             } catch (e) {
               // Clean up PIT if we opened one before the error
@@ -338,7 +338,7 @@ export const getLiveQueryResultsRoute = (
             }
           }
 
-          const usePitMode = needsPitPagination && pitId && searchAfterCursor;
+          const usePitMode = needsPitPagination && pitId && searchAfterValues;
 
           let res: ResultsStrategyResponse;
 
@@ -346,7 +346,7 @@ export const getLiveQueryResultsRoute = (
             const pitRes = await executePitSearch({
               esClient,
               pitId,
-              searchAfter: searchAfterCursor,
+              searchAfter: searchAfterValues,
               size: pageSize,
               actionId: request.params.actionId,
               kuery: request.query.kuery,
