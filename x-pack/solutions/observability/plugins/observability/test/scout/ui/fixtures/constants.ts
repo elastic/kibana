@@ -53,3 +53,25 @@ export const LOGS_TAB_TEST_SUBJECTS = {
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
   RULE_DETAILS: 'ruleDetails',
 } as const;
+
+/**
+ * Constants for data-test-subj values used in rule details page tests
+ */
+export const RULE_DETAILS_TEST_SUBJECTS = {
+  // Page elements
+  RULE_DETAILS: 'ruleDetails',
+  RULE_NAME: 'ruleName',
+  RULE_TYPE: 'ruleSummaryRuleType',
+  RULE_STATUS_PANEL: 'ruleStatusPanel',
+  RULE_DEFINITION: 'ruleSummaryRuleDefinition',
+
+  // Actions
+  ACTIONS_BUTTON: 'actions',
+  EDIT_RULE_BUTTON: 'editRuleButton',
+  DELETE_RULE_BUTTON: 'deleteRuleButton',
+
+  // Alert Summary Widget
+  ALERT_SUMMARY_WIDGET_COMPACT: 'alertSummaryWidgetCompact',
+  ACTIVE_ALERT_COUNT: 'activeAlertCount',
+  TOTAL_ALERT_COUNT: 'totalAlertCount',
+} as const;
