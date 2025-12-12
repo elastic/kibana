@@ -230,14 +230,22 @@ export function initializeEditApi(
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
       // restore the first state found when the panel opened
-      onCancel: () => updateState({ ...firstState }),
+      onCancel: () => {
+        internalApi.updateEditingState(false);
+        updateState({ ...firstState });
+      },
       // the getState() here contains the wrong filters references but the input attributes
       // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
         ? noop
-        : (attributes: LensRuntimeState['attributes']) =>
-            updateState({ ...getState(), attributes }),
-      closeFlyout,
+        : (attributes: LensRuntimeState['attributes']) => {
+            internalApi.updateEditingState(false);
+            updateState({ ...getState(), attributes });
+          },
+      closeFlyout: () => {
+        internalApi.updateEditingState(false);
+        closeFlyout?.();
+      },
     });
     return ConfigPanel ?? undefined;
   };
@@ -279,6 +287,8 @@ export function initializeEditApi(
           );
           return navigateFn();
         }
+
+        internalApi.updateEditingState(true);
 
         mountInlinePanel({
           core: startDependencies.coreStart,
