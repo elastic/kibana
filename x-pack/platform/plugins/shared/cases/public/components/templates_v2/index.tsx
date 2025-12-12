@@ -14,8 +14,12 @@ import {
   EuiDescribedFormGroup,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useQuery } from '@kbn/react-query';
+import { CASES_INTERNAL_URL } from '../../../common/constants';
+import type { Template } from '../../../common/templates';
 import type { FormState } from '../configure_cases/flyout';
 import { TitleExperimentalBadge } from '../header_page/title';
+import { KibanaServices } from '../../common/lib/kibana';
 
 const i18n = {
   TEMPLATE_TITLE: 'Templates V2',
@@ -24,19 +28,31 @@ const i18n = {
   ADD_TEMPLATE: 'Add template',
 };
 
-interface Template {
-  name: string;
-}
+// Api
+
+const fetchTemplates = async () => {
+  return KibanaServices.get().http.fetch<Template[]>(`${CASES_INTERNAL_URL}/templates`);
+};
+
+// Hooks
+
+const useTemplates = () =>
+  useQuery({
+    queryFn: fetchTemplates,
+    queryKey: ['templates'],
+  });
+
+// Components
 
 interface TemplatesSectionProps {
   onAddTemplate: VoidFunction;
 }
 
 export const TemplatesSection = ({ onAddTemplate }: TemplatesSectionProps) => {
-  const isLoading = false;
   const disabled = false;
   const error = undefined;
-  const templates: Template[] = [];
+
+  const { isFetching: isLoading, data: templates } = useTemplates();
 
   return (
     <EuiDescribedFormGroup
@@ -55,9 +71,9 @@ export const TemplatesSection = ({ onAddTemplate }: TemplatesSectionProps) => {
       css={{ alignItems: 'flex-start' }}
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
-        {templates.length ? <></> : null}
+        {templates?.length ? <></> : null}
         <EuiSpacer size="s" />
-        {!templates.length ? (
+        {!templates?.length ? (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false} data-test-subj="empty-templates">
               {i18n.NO_TEMPLATES}
