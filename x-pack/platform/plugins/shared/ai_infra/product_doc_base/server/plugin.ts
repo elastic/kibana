@@ -125,8 +125,10 @@ export class ProductDocBasePlugin
         getStatus: documentationManager.getStatus.bind(documentationManager),
         getStatuses: documentationManager.getStatuses.bind(documentationManager),
         installSecurityLabs: documentationManager.installSecurityLabs.bind(documentationManager),
-        uninstallSecurityLabs: documentationManager.uninstallSecurityLabs.bind(documentationManager),
-        getSecurityLabsStatus: documentationManager.getSecurityLabsStatus.bind(documentationManager),
+        uninstallSecurityLabs:
+          documentationManager.uninstallSecurityLabs.bind(documentationManager),
+        getSecurityLabsStatus:
+          documentationManager.getSecurityLabsStatus.bind(documentationManager),
       },
       search: searchService.search.bind(searchService),
     };

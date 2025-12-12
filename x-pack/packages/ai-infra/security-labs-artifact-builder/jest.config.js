@@ -10,4 +10,3 @@ module.exports = {
   rootDir: '../../../..',
   roots: ['<rootDir>/x-pack/packages/ai-infra/security-labs-artifact-builder'],
 };
-

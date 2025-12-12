@@ -6,4 +6,3 @@
  */
 
 export { runScript } from './src/command';
-
