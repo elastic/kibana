@@ -29,7 +29,7 @@ export const createEntityAgent = (
     avatar_icon: 'logoSecurity',
     name: 'Entity Agent',
     description: 'Agent specialized in security entities including hosts, users, and services.',
-    labels: ['security'],
+    labels: [],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {

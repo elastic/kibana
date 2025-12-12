@@ -28,7 +28,7 @@ export const createAlertsAgent = (
     name: 'Alerts Agent',
     description:
       'Agent specialized in security alert analysis tasks, including alert investigation and security documentation.',
-    labels: ['security'],
+    labels: [],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
