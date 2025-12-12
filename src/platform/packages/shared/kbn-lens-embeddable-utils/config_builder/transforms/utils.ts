@@ -240,8 +240,8 @@ export function buildDatasetState(
 }
 
 // builds Lens State references from list of dataviews
-export function buildReferences(dataviews: Record<string, string>) {
-  const references = [];
+export function buildReferences(dataviews: Record<string, string>): SavedObjectReference[] {
+  const references: SavedObjectReference[][] = [];
   for (const layerid in dataviews) {
     if (dataviews[layerid]) {
       references.push(getDefaultReferences(dataviews[layerid], layerid));
