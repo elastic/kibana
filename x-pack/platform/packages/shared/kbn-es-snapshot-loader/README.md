@@ -137,17 +137,18 @@ describe('my test suite', () => {
 ### For Replay
 
 - All prerequisites for restore, plus:
-- Index templates for the target data streams must exist (install Fleet or required integrations in Kibana)
-- Without these templates, data streams cannot be created correctly during reindex
+- Index templates for the target data streams must exist (pre-create, install Fleet or required integrations in Kibana)
+- Without these templates, replay may create regular indices instead of data streams
+- To check templates:
+  - `GET _index_template/*?filter_path=index_templates.name,index_templates.index_template.index_patterns,index_templates.index_template.data_stream`
 
 ## How Replay Works
 
 1. Register a URL-based snapshot repository
 2. Retrieve snapshot metadata (finds the most recent snapshot)
-3. Verify that required index templates exist
-4. Restore indices to temporary locations (prefixed with `snapshot-loader-temp-`)
-5. Create an ingest pipeline that transforms `@timestamp` fields:
+3. Restore indices to temporary locations (prefixed with `snapshot-loader-temp-`)
+4. Create an ingest pipeline that transforms `@timestamp` fields:
    - The most recent timestamp in the snapshot becomes "now"
    - All other timestamps are adjusted by the same offset, preserving relative timing
-6. Reindex through the pipeline to the target data streams
-7. Clean up temporary indices, pipeline, and repository
+5. Reindex through the pipeline to the target data streams
+6. Clean up temporary indices, pipeline, and repository

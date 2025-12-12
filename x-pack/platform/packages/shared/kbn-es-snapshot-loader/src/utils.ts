@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
+
 /**
  * Extracts the data stream name from a backing index name.
  * Backing indices have format: .ds-{data-stream-name}-{date}-{sequence}
@@ -26,6 +28,31 @@ export function validateFileSnapshotUrl(snapshotUrl: string): void {
   if (url.protocol !== 'file:') {
     throw new Error(`Only file:// snapshot URLs are supported (received: ${url.protocol})`);
   }
+}
+
+export async function getMissingDataStreams({
+  esClient,
+  dataStreamNames,
+}: {
+  esClient: Client;
+  dataStreamNames: Iterable<string>;
+}): Promise<string[]> {
+  const missing: string[] = [];
+
+  for (const name of dataStreamNames) {
+    try {
+      await esClient.indices.getDataStream({ name });
+    } catch (error) {
+      const statusCode = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
+      if (statusCode === 404) {
+        missing.push(name);
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  return missing;
 }
 
 export function getErrorMessage(error: unknown): string {

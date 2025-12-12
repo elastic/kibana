@@ -8,7 +8,12 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ReplayConfig, LoadResult } from '../types';
-import { validateFileSnapshotUrl, getErrorMessage } from '../utils';
+import {
+  extractDataStreamName,
+  getMissingDataStreams,
+  validateFileSnapshotUrl,
+  getErrorMessage,
+} from '../utils';
 import {
   registerUrlRepository,
   getSnapshotMetadata,
@@ -18,7 +23,6 @@ import {
 import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
 import { reindexAllIndices } from './reindex';
-import { verifyIndexTemplates } from './templates';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
@@ -40,10 +44,10 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
   try {
     validateFileSnapshotUrl(snapshotUrl);
 
-    logger.info('Step 1/5: Registering snapshot repository...');
+    logger.info('Step 1/4: Registering snapshot repository...');
     await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
 
-    logger.info('Step 2/5: Retrieving snapshot metadata...');
+    logger.info('Step 2/4: Retrieving snapshot metadata...');
     const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName });
     result.snapshotName = snapshotInfo.snapshot;
     result.maxTimestamp = snapshotInfo.endTime;
@@ -62,10 +66,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       );
     }
 
-    logger.info('Step 3/5: Verifying index templates...');
-    await verifyIndexTemplates({ esClient, logger, patterns });
-
-    logger.info('Step 4/5: Restoring to temporary indices...');
+    logger.info('Step 3/4: Restoring to temporary indices...');
     const restoredIndices = await restoreIndices({
       esClient,
       logger,
@@ -84,7 +85,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       maxTimestamp: result.maxTimestamp!,
     });
 
-    logger.info('Step 5/5: Reindexing with timestamp transformation...');
+    logger.info('Step 4/4: Reindexing with timestamp transformation...');
     const reindexedIndices = await reindexAllIndices({
       esClient,
       logger,
@@ -94,6 +95,25 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       pipelineName,
     });
     result.reindexedIndices = reindexedIndices;
+
+    const expectedDataStreams = new Set(
+      indicesToRestore
+        .map((index) => extractDataStreamName(index))
+        .filter((name): name is string => name != null)
+    );
+    const missingDataStreams = await getMissingDataStreams({
+      esClient,
+      dataStreamNames: expectedDataStreams,
+    });
+
+    if (missingDataStreams.length > 0) {
+      logger.warn(
+        `Some expected data streams were not created: ${missingDataStreams.join(', ')}. ` +
+          `Replay may have created regular indices instead. ` +
+          `Ensure the cluster contains a matching index template with data streams enabled. ` +
+          `To check: GET _index_template/*?filter_path=index_templates.name,index_templates.index_template.index_patterns,index_templates.index_template.data_stream`
+      );
+    }
 
     result.success = reindexedIndices.length > 0;
 
