@@ -92,7 +92,12 @@ export const SecretFormRow: React.FC<{
           </EuiText>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
-            onClick={() => setEditMode(true)}
+            onClick={() => {
+              setEditMode(true);
+              if (clear) {
+                clear();
+              }
+            }}
             color="primary"
             iconType="refresh"
             iconSide="left"
