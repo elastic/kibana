@@ -139,7 +139,7 @@ const CODES = Object.freeze({
   // EXECUTE CODES
   // -----------------------------------------------------------------
 
-  'ra_execute_error_canceled': i18n.translate(
+  ra_execute_error_canceled: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.execute.canceled',
     { defaultMessage: 'Response action was canceled' }
   ),
@@ -235,7 +235,7 @@ const CODES = Object.freeze({
   // UPLOAD CODES
   // -----------------------------------------------------------------
 
-  'ra_upload_error_canceled': i18n.translate(
+  ra_upload_error_canceled: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.upload.canceled',
     { defaultMessage: 'Response action was canceled' }
   ),
@@ -307,7 +307,7 @@ const CODES = Object.freeze({
   // SCAN CODES
   // -----------------------------------------------------------------
 
-  'ra_scan_error_canceled': i18n.translate(
+  ra_scan_error_canceled: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.canceled',
     { defaultMessage: 'Response action was canceled' }
   ),
