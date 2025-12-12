@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { Parser } from '../../parser/parser';
+import { Parser } from '../../parser';
 import { EsqlQuery } from '../../query';
 import type {
   ESQLColumn,

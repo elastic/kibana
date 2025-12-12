@@ -15,6 +15,7 @@ export {
   TIME_DURATION_UNITS,
   HEADER_COMMANDS,
   SOURCE_COMMANDS,
+  DATE_PERIOD_UNITS,
 } from './core/constants';
 
 export { ESQLErrorListener } from './core/esql_error_listener';
