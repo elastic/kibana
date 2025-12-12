@@ -10,7 +10,6 @@ import { z } from '@kbn/zod';
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import type { BaseParams } from '@kbn/reporting-common/types';
-import { columns } from '@kbn/data-plugin/public/search/session/sessions_mgmt/components/table';
 
 const sanitizeString = (input: string) => {
   if (typeof input !== 'string') {
