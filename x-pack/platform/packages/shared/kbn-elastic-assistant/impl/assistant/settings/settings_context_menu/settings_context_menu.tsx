@@ -167,37 +167,46 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        <EuiContextMenuItem key="try-ai-agent">
-          <EuiButton
-            aria-label={i18n.TRY_AI_AGENT}
-            onClick={handleOpenAIAgentModal}
-            iconType={robotIconType}
-            color="accent"
-            size="s"
-            fullWidth
-            isDisabled={!assistantAvailability.hasAgentBuilderPrivilege}
-            data-test-subj="try-ai-agent"
-            css={css`
-              font-weight: 500;
-            `}
-          >
-            {i18n.TRY_AI_AGENT}
-          </EuiButton>
-        </EuiContextMenuItem>,
+        ...(assistantAvailability.isAiAgentsEnabled
+          ? [
+              <EuiContextMenuItem key="try-ai-agent">
+                <EuiButton
+                  aria-label={i18n.TRY_AI_AGENT}
+                  onClick={handleOpenAIAgentModal}
+                  iconType={robotIconType}
+                  color="accent"
+                  size="s"
+                  fullWidth
+                  isDisabled={!assistantAvailability.hasAgentBuilderPrivilege}
+                  data-test-subj="try-ai-agent"
+                  css={css`
+                    font-weight: 500;
+                  `}
+                >
+                  {i18n.TRY_AI_AGENT}
+                </EuiButton>
+              </EuiContextMenuItem>,
+            ]
+          : []),
       ],
       [
-        handleNavigateToAnonymization,
-        handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
-        handleOpenAIAgentModal,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
+        assistantAvailability.isAiAgentsEnabled,
         assistantAvailability.hasAgentBuilderPrivilege,
+        handleOpenAIAgentModal,
       ]
     );
     const isAgentUpgradeDisabled = useMemo(() => {
-      return isDisabled || !assistantAvailability.hasAgentBuilderPrivilege;
-    }, [assistantAvailability.hasAgentBuilderPrivilege, isDisabled]);
+      return (
+        isDisabled ||
+        !assistantAvailability.hasAgentBuilderPrivilege ||
+        !assistantAvailability.isAiAgentsEnabled
+      );
+    }, [assistantAvailability, isDisabled]);
 
     return (
       <>
