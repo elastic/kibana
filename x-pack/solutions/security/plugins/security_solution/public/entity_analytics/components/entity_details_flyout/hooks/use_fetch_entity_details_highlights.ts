@@ -5,13 +5,50 @@
  * 2.0.
  */
 import { useCallback, useState } from 'react';
-import { useChatComplete } from '@kbn/elastic-assistant';
 import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
+import type { ToolSchema } from '@kbn/inference-common';
+import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { getAnonymizedEntityIdentifier } from '../utils/helpers';
+import type { EntityHighlightsResponse } from '../types';
+
+const entityHighlightsSchema = {
+  type: 'object',
+  properties: {
+    highlights: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          title: {
+            type: 'string',
+            description: 'The title of the highlight section',
+          },
+          text: {
+            type: 'string',
+            description: 'The detailed text content for this highlight section.',
+          },
+        },
+        required: ['title', 'text'],
+      },
+      description:
+        'A list of highlight items, each with a title and text. Only include highlights for which information is available in the context.',
+    },
+    recommendedActions: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      description:
+        'A list of actionable recommendations for the security analyst. Omit this field if no actions are available.',
+    },
+  },
+  required: ['highlights'],
+} as const satisfies ToolSchema;
 
 export const useFetchEntityDetailsHighlights = ({
   connectorId,
@@ -24,21 +61,18 @@ export const useFetchEntityDetailsHighlights = ({
   entityType: string;
   entityIdentifier: string;
 }) => {
+  const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights } = useEntityAnalyticsRoutes();
   const { addError } = useAppToasts();
   const { from, to } = useGlobalTime();
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [assistantResult, setAssistantResult] = useState<{
-    aiResponse: string;
+    response: EntityHighlightsResponse | null;
     replacements: Replacements;
-    formattedEntitySummary: string;
+    summaryAsText: string;
+    generatedAt: number;
   } | null>(null);
-  const {
-    abortStream,
-    sendMessage,
-    isLoading: isChatLoading,
-  } = useChatComplete({
-    connectorId,
-  });
 
   const fetchEntityHighlights = useCallback(async () => {
     const errorTitle = i18n.translate(
@@ -68,32 +102,41 @@ export const useFetchEntityDetailsHighlights = ({
 
     const summaryFormatted = JSON.stringify(summary);
 
-    const rawResponse = await sendMessage({
-      message: `${prompt}.      
-        Context:
+    const controller = new AbortController();
+    setAbortController(controller);
+    setIsChatLoading(true);
+
+    try {
+      const outputResponse = await inference.output({
+        id: 'entity-highlights',
+        connectorId,
+        schema: entityHighlightsSchema,
+        system: prompt,
+        input: `Context:
             EntityType: ${entityType},
             EntityIdentifier: ${getAnonymizedEntityIdentifier(entityIdentifier, replacements)},
-          ${summaryFormatted}
-        `,
-      replacements,
-      query: {
-        content_references_disabled: true,
-      },
-    });
+          ${summaryFormatted}`,
+        abortSignal: controller.signal,
+      });
+      const typedOutput = outputResponse.output as EntityHighlightsResponse;
 
-    if (rawResponse.isError) {
-      addError(new Error(rawResponse.response), {
+      setAssistantResult({
+        summaryAsText: summaryFormatted,
+        response: typedOutput,
+        replacements,
+        generatedAt: Date.now(),
+      });
+    } catch (error) {
+      if (isInferenceRequestAbortedError(error)) {
+        return;
+      }
+      addError(error instanceof Error ? error : new Error(String(error)), {
         title: errorTitle,
       });
-
-      return;
+    } finally {
+      setIsChatLoading(false);
+      setAbortController(null);
     }
-
-    setAssistantResult({
-      formattedEntitySummary: summaryFormatted,
-      aiResponse: rawResponse.response,
-      replacements,
-    });
   }, [
     fetchEntityDetailsHighlights,
     entityType,
@@ -102,9 +145,17 @@ export const useFetchEntityDetailsHighlights = ({
     from,
     to,
     connectorId,
-    sendMessage,
+    inference,
     addError,
   ]);
+
+  const abortStream = useCallback(() => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+      setIsChatLoading(false);
+    }
+  }, [abortController]);
 
   return {
     fetchEntityHighlights,
