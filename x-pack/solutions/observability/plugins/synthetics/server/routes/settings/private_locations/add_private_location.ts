@@ -9,6 +9,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -27,11 +29,7 @@ export const PrivateLocationSchema = schema.object({
       lon: schema.number(),
     })
   ),
-  spaces: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      minSize: 1,
-    })
-  ),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
@@ -47,21 +45,54 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, server } = routeContext;
+    const { response, request, server, spaceId } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+    const location = request.body as PrivateLocationObject;
+    const agentPolicy = await server.fleet?.agentPolicyService.get(
+      internalSOClient,
+      location.agentPolicyId,
+      false,
+      { spaceId }
+    );
+
+    if (!agentPolicy) {
+      return response.badRequest({
+        body: {
+          message: `Agent policy with id ${location.agentPolicyId} not found, this should never happen`,
+        },
+      });
+    }
+
+    const agentPolicySpaces = getAgentPolicySpaceIds(agentPolicy);
+
+    const newId = uuidV4();
+    const repo = new PrivateLocationRepository(routeContext);
+    const formattedLocation = toSavedObjectContract({
+      ...location,
+      id: newId,
+      spaces: repo.getLocationSpaces({ agentPolicySpaces, locationSpaces: location.spaces }),
+    });
+
+    if (
+      !agentPolicy.space_ids?.includes(ALL_SPACES_ID) &&
+      !formattedLocation.spaces!.every((s) => agentPolicySpaces.includes(s))
+    ) {
+      return response.badRequest({
+        body: {
+          message: `Invalid spaces. Private location spaces [${location.spaces?.join(
+            ', '
+          )}] must be fully contained within agent policy ${
+            location.agentPolicyId
+          } spaces [${agentPolicySpaces.join(', ')}].`,
+        },
+      });
+    }
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const repo = new PrivateLocationRepository(routeContext);
-
-    const invalidError = await repo.validatePrivateLocation();
+    const invalidError = await repo.validatePrivateLocation({ agentPolicySpaces, spaceId });
     if (invalidError) {
       return invalidError;
     }
-
-    const location = request.body as PrivateLocationObject;
-    const newId = uuidV4();
-    const formattedLocation = toSavedObjectContract({ ...location, id: newId });
-    const { spaces } = location;
 
     try {
       const result = await repo.createPrivateLocation(formattedLocation, newId);
@@ -69,13 +100,6 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       return toClientContract(result);
     } catch (error) {
       if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
-        if (spaces?.includes('*')) {
-          return response.badRequest({
-            body: {
-              message: `You do not have permission to create a location in all spaces.`,
-            },
-          });
-        }
         return response.customError({
           statusCode: error.output.statusCode,
           body: {
@@ -87,3 +111,11 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     }
   },
 });
+
+const getAgentPolicySpaceIds = (agentPolicy: AgentPolicy) => {
+  const spaceIds = agentPolicy.space_ids;
+  if (!spaceIds || spaceIds?.includes(ALL_SPACES_ID)) {
+    return [ALL_SPACES_ID];
+  }
+  return spaceIds;
+};
