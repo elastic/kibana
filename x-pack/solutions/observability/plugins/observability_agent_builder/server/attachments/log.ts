@@ -22,7 +22,7 @@ import { getLogDocumentById } from '../routes/ai_insights/get_log_document_by_id
 const GET_LOG_DETAILS_TOOL_ID = 'get_log_details';
 
 const logDataSchema = z.object({
-  is: z.string(),
+  id: z.string(),
   index: z.string(),
 });
 
