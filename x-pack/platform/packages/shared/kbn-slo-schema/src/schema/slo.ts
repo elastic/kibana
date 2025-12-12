@@ -119,8 +119,6 @@ const storedSloDefinitionTemplateSchema = t.partial({
   budgetingMethod: budgetingMethodSchema,
   objective: objectiveSchema,
   settings: settingsSchema,
-  revision: t.number,
-  enabled: t.boolean,
   tags: tagsSchema,
   groupBy: groupBySchema,
 });

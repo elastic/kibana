@@ -8,6 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { pick } from 'lodash';
 import type { StoredSLODefinitionTemplate } from '../domain/models/template';
 
 export const SO_SLO_TEMPLATE_TYPE = 'slo_template';
@@ -24,6 +25,21 @@ export const sloTemplate: SavedObjectsType = {
   modelVersions: {
     '1': {
       changes: [],
+      schemas: {
+        forwardCompatibility: (attributes) => {
+          const fields = [
+            'name',
+            'description',
+            'indicator',
+            'budgetingMethod',
+            'objective',
+            'timeWindow',
+            'tags',
+            'settings',
+          ];
+          return pick(attributes, fields);
+        },
+      },
     },
   },
   mappings: {
