@@ -22,14 +22,7 @@ export const HomepageRouter = () => {
 
   return (
     <Routes>
-      {isNewDesignEnabled && (
-        <Route exact path="/v2">
-          <SearchHomepagePageV2 />
-        </Route>
-      )}
-      <Route>
-        <SearchHomepagePage />
-      </Route>
+      <Route>{isNewDesignEnabled ? <SearchHomepagePageV2 /> : <SearchHomepagePage />}</Route>
     </Routes>
   );
 };

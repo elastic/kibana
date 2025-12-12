@@ -15,6 +15,7 @@ import { CloudResources } from './cloud_resources';
 import { BodyLinks } from './body_links';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
+import { GettingStartedBanner } from './getting_started_banner';
 
 export const SearchHomepageBody = () => {
   const {
@@ -34,6 +35,10 @@ export const SearchHomepageBody = () => {
             <CloudResources />
           </EuiFlexItem>
         )}
+
+        <EuiFlexItem>
+          <GettingStartedBanner />
+        </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiHorizontalRule margin="xxl" />
