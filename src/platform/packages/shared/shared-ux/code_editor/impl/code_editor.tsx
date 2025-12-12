@@ -38,7 +38,7 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
-  RepositionSuggestionWidget,
+  RepositionWidgets,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -628,7 +628,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <ReBroadcastMouseDownEvents>
-          <RepositionSuggestionWidget
+          <RepositionWidgets
             editor={_editor}
             enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
           >
@@ -673,7 +673,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 links,
               }}
             />
-          </RepositionSuggestionWidget>
+          </RepositionWidgets>
         </ReBroadcastMouseDownEvents>
       </FullScreenDisplay>
     </div>
