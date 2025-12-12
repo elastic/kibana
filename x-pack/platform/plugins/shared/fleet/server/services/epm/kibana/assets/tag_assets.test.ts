@@ -917,7 +917,7 @@ describe('tagKibanaAssets', () => {
 
       // Should have retried 3 times (initial + 3 retries = 4 total)
       expect(savedObjectTagClient.create).toHaveBeenCalledTimes(4);
-    }, 5000); // Timeout for retry test with minTimeout: 0, maxTimeout: 100
+    });
 
     it('should not retry on non-conflict errors', async () => {
       savedObjectTagClient.get.mockImplementation(async (id: string) => {
