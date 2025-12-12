@@ -40,6 +40,7 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
 
   const isSecurityRule =
     props.alert[ALERT_RULE_TYPE_ID] && isSiemRuleType(props.alert[ALERT_RULE_TYPE_ID].toString());
+  const { mutedAlertsEnabled = true } = props;
 
   const showModifyOption = authorizedToCreateAnyRules && !isSecurityRule;
 
@@ -48,7 +49,7 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
       <ViewRuleDetailsAlertAction {...props} />
       <ViewAlertDetailsAlertAction {...props} />
       {showModifyOption && <MarkAsUntrackedAlertAction {...props} />}
-      {showModifyOption && props.mutedAlertsEnabled && <MuteAlertAction {...props} />}
+      {showModifyOption && mutedAlertsEnabled && <MuteAlertAction {...props} />}
       {showModifyOption && <EditTagsAction {...props} />}
     </>
   );
