@@ -14,3 +14,4 @@ export * from './specs/notion';
 export * from './specs/shodan';
 export * from './specs/urlvoid';
 export * from './specs/virustotal';
+export * from './specs/jina_reader';
