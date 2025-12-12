@@ -76,10 +76,6 @@ if [ -z "$configs" ]; then
   exit 1
 fi
 
-# Define all possible serverless run modes
-# These are the serverless modes that can be run (excluding --stateful)
-RUN_MODES_SERVERLESS_ONLY="--serverless=es --serverless=security --serverless=oblt --serverless=oblt-logs-essentials --serverless=security-essentials --serverless=security-ease"
-
 # If we have module_data, we can process configs with their serverRunFlags directly
 # Otherwise, we need to handle the case where SCOUT_CONFIG is set directly
 if [[ -z "${module_data:-}" && -n "$SCOUT_CONFIG" ]]; then
@@ -156,7 +152,7 @@ while read -r config_path; do
   # If SERVERLESS_TESTS_ONLY is set, filter out --stateful and keep only serverless modes
   if [[ -n "${SERVERLESS_TESTS_ONLY:-}" ]]; then
     echo "--- Using serverless-only test modes (SERVERLESS_TESTS_ONLY is set)"
-    # Filter out --stateful and keep only serverless modes (those matching RUN_MODES_SERVERLESS_ONLY)
+    # Filter out --stateful and keep only serverless modes
     config_run_modes=$(echo "$config_run_modes" | grep -E "^--serverless=" || true)
   fi
 
