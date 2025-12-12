@@ -16,19 +16,17 @@ import type { Props } from './object_type';
 import type { ObjectType } from './object_type';
 import type { UnionTypeOptions } from './union_type';
 
-export type PropsWithDiscriminator<
-  Discriminator extends string,
-  DiscriminatorType extends Type<string>, // this should be a LiteralType but `literal('a')` returns `Type<'a'>`
-  T extends Props
-> = Omit<T, Discriminator> & {
-  [K in Discriminator]: DiscriminatorType;
+export type PropsWithDiscriminator<Discriminator extends string, T extends Props> = Omit<
+  T,
+  Discriminator
+> & {
+  [Key in Discriminator]: Type<string>; // this should only be a LiteralType
 };
 
 export class DiscriminatedUnionType<
   Discriminator extends string,
-  DiscriminatorType extends Type<string>,
   RTS extends Array<ObjectType<any>>,
-  T extends PropsWithDiscriminator<Discriminator, DiscriminatorType, Props>
+  T extends PropsWithDiscriminator<Discriminator, Props>
 > extends Type<T> {
   private readonly discriminator: Discriminator;
   private readonly discriminatedValues: string[];

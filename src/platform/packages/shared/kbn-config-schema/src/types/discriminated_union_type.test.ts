@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
+
+import type { TypeOf } from '../..';
 import { schema } from '../..';
 
 describe('DiscriminatedUnionType', () => {
@@ -107,6 +110,25 @@ describe('DiscriminatedUnionType', () => {
       expect(() =>
         forbidSchema.validate({ ...input, unknown: 'thing' })
       ).toThrowErrorMatchingInlineSnapshot(`"[unknown]: definition for this key is missing"`);
+    });
+  });
+
+  describe('types', () => {
+    type ExampleType = TypeOf<typeof exampleType>;
+
+    test('should validate correct types', () => {
+      expectType<ExampleType>({ type: 'str', string: 'test' });
+      expectType<ExampleType>({ type: 'num', number: 123 });
+      expectType<ExampleType>({ type: 'bool', boolean: true });
+    });
+
+    test('should validate incorrect types', () => {
+      // @ts-expect-error - should a string
+      expectType<ExampleType>({ type: 'str', string: 123 });
+      // @ts-expect-error - should a number
+      expectType<ExampleType>({ type: 'num', number: 'test' });
+      // @ts-expect-error - should a boolean
+      expectType<ExampleType>({ type: 'bool', boolean: 'true' });
     });
   });
 });
