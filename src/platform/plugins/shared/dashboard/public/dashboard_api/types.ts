@@ -51,6 +51,7 @@ import { type TracksOverlays } from '@kbn/presentation-util';
 import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
@@ -176,6 +177,12 @@ export type DashboardApi = CanExpandPanels &
     layout$: BehaviorSubject<DashboardLayout>;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
+
+    accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
+    changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+    createdBy?: string;
+    user?: DashboardUser;
+    isAccessControlEnabled?: boolean;
   };
 
 export interface DashboardInternalApi {
@@ -184,4 +191,9 @@ export interface DashboardInternalApi {
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
+}
+
+export interface DashboardUser {
+  uid: string;
+  hasGlobalAccessControlPrivilege: boolean;
 }

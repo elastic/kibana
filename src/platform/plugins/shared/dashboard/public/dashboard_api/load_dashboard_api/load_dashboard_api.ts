@@ -11,6 +11,7 @@ import { ContentInsightsClient } from '@kbn/content-management-content-insights-
 import { dashboardClient } from '../../dashboard_client';
 import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
 import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
+import { getAccessControlClient } from '../../services/access_control_service';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
@@ -19,6 +20,7 @@ import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
+import { getUserAccessControlData } from './get_user_access_control_data';
 import { transformPanels } from './transform_panels';
 
 export async function loadDashboardApi({
@@ -45,7 +47,13 @@ export async function loadDashboardApi({
     embeddable.size = panelPlacementSettings;
   }
 
-  const readResult = savedObjectId ? await dashboardClient.get(savedObjectId) : undefined;
+  const [readResult, user, isAccessControlEnabled] = savedObjectId
+    ? await Promise.all([
+        dashboardClient.get(savedObjectId),
+        getUserAccessControlData(),
+        getAccessControlClient().isAccessControlEnabled(),
+      ])
+    : [undefined, undefined, undefined];
 
   const validationResult = readResult && creationOptions?.validateLoadedSavedObject?.(readResult);
   if (validationResult === 'invalid') {
@@ -80,6 +88,8 @@ export async function loadDashboardApi({
     },
     readResult,
     savedObjectId,
+    user,
+    isAccessControlEnabled,
   });
 
   const performanceSubscription = startQueryPerformanceTracking(api, {

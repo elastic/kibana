@@ -100,7 +100,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
           rawState: {
-            dataViewId: 'myDataView',
+            dataViewId: 'myDataViewId',
             fieldName: 'myFieldName',
           },
         },
@@ -164,10 +164,10 @@ describe('RangeSliderControlApi', () => {
         uuid,
         parentApi,
       });
-      expect(api.appliedFilters$.value).toBeUndefined();
       expect(api.blockingError$.value?.message).toEqual(
         'no data view found for id notGonnaFindMeDataView'
       );
+      expect(api.appliedFilters$.value).toBeUndefined();
     });
   });
 
