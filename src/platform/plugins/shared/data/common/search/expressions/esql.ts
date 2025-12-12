@@ -26,7 +26,7 @@ import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/es
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
-import { buildEsQuery, sanitizeProjectRoutingForES, type Filter } from '@kbn/es-query';
+import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
@@ -241,10 +241,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             params.filter = buildEsQuery(undefined, input.query || [], filters, esQueryConfigs);
 
             if (input.projectRouting) {
-              const sanitizedProjectRouting = sanitizeProjectRoutingForES(input.projectRouting);
-              if (sanitizedProjectRouting) {
-                params.project_routing = sanitizedProjectRouting;
-              }
+              // Don't sanitize here - search_interceptor needs the raw value to distinguish explicit 'ALL' from missing value
+              params.project_routing = input.projectRouting;
             }
           }
 
