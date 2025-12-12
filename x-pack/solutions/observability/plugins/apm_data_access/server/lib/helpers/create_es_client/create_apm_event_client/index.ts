@@ -17,7 +17,7 @@ import type {
 import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferSearchResponseOf } from '@kbn/es-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
 import type { ValuesType } from 'utility-types';
