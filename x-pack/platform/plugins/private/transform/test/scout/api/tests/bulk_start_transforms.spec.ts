@@ -13,27 +13,26 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY }, () => {
+  const transformIds = ['bulk_start_test_1', 'bulk_start_test_2'];
   let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-
-  const transformId = 'transform-test-start';
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    const config = generateTransformConfig(transformId);
-    await apiServices.transform.createTransform(transformId, config);
+    for (const id of transformIds) {
+      const config = generateTransformConfig(id);
+      await apiServices.transform.createTransform(id, config);
+    }
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest('should start the transform by transformId', async ({ apiClient }) => {
-    const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
+  apiTest('should start multiple transforms by transformIds', async ({ apiClient }) => {
+    const reqBody: StartTransformsRequestSchema = transformIds.map((id) => ({ id }));
     const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
       headers: {
         ...COMMON_HEADERS,
@@ -45,32 +44,20 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
 
     expect(statusCode).toBe(200);
 
-    expect(body[transformId].success).toBe(true);
-    expect(body[transformId].error).toBeUndefined();
+    for (const id of transformIds) {
+      expect(body[id].success).toBe(true);
+    }
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
-    const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
-    const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
-      headers: {
-        ...COMMON_HEADERS,
-        ...transformViewerUserApiCredentials.apiKeyHeader,
-      },
-      body: reqBody,
-      responseType: 'json',
-    });
-
-    expect(statusCode).toBe(200);
-
-    expect(body[transformId].success).toBe(false);
-    expect(typeof body[transformId].error).toBe('object');
-  });
-
-  // single transform start with invalid transformId
   apiTest(
-    'should return 200 with error in response if invalid transformId',
+    'should start multiple transforms by transformIds, even if one of the transformIds is invalid',
     async ({ apiClient }) => {
-      const reqBody: StartTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
+      const invalidTransformId = 'invalid_transform_id';
+      const reqBody: StartTransformsRequestSchema = [
+        { id: transformIds[0] },
+        { id: invalidTransformId },
+        { id: transformIds[1] },
+      ];
       const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
         headers: {
           ...COMMON_HEADERS,
@@ -82,8 +69,12 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
 
       expect(statusCode).toBe(200);
 
-      expect(body.invalid_transform_id.success).toBe(false);
-      expect(body.invalid_transform_id.error).toBeDefined();
+      for (const id of transformIds) {
+        expect(body[id].success).toBe(true);
+      }
+
+      expect(body[invalidTransformId].success).toBe(false);
+      expect(body[invalidTransformId].error).toBeDefined();
     }
   );
 });

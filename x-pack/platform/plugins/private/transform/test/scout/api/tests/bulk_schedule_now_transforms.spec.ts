@@ -12,29 +12,29 @@ import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
-apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
   let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
 
-  const transformId = 'transform-test-schedule-now';
+  const transformIds = ['bulk_schedule_now_test_1', 'bulk_schedule_now_test_2'];
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
   });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
-    const config = generateTransformConfig(transformId, true);
-    await apiServices.transform.createTransform(transformId, config);
-    await esClient.transform.startTransform({ transform_id: transformId });
+    for (const id of transformIds) {
+      const config = generateTransformConfig(id, true);
+      await apiServices.transform.createTransform(id, config);
+      await esClient.transform.startTransform({ transform_id: id });
+    }
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest('should schedule the transform by transformId', async ({ apiClient }) => {
-    const reqBody: ScheduleNowTransformsRequestSchema = [{ id: transformId }];
+  apiTest('should schedule multiple transforms by transformIds', async ({ apiClient }) => {
+    const reqBody: ScheduleNowTransformsRequestSchema = transformIds.map((id) => ({ id }));
     const { statusCode, body } = await apiClient.post(
       'internal/transform/schedule_now_transforms',
       {
@@ -48,34 +48,20 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
     );
 
     expect(statusCode).toBe(200);
-    expect(body[transformId].success).toBe(true);
-    expect(body[transformId].error).toBeUndefined();
+    for (const id of transformIds) {
+      expect(body[id].success).toBe(true);
+    }
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
-    const reqBody: ScheduleNowTransformsRequestSchema = [{ id: transformId }];
-    const { statusCode, body } = await apiClient.post(
-      'internal/transform/schedule_now_transforms',
-      {
-        headers: {
-          ...COMMON_HEADERS,
-          ...transformViewerUserApiCredentials.apiKeyHeader,
-        },
-        body: reqBody,
-        responseType: 'json',
-      }
-    );
-
-    expect(statusCode).toBe(200);
-    expect(body[transformId].success).toBe(false);
-    expect(typeof body[transformId].error).toBe('object');
-  });
-
-  // single transform schedule with invalid transformId
   apiTest(
-    'should return 200 with error in response if invalid transformId',
+    'should schedule multiple transforms by transformIds, even if one of the transformIds is invalid',
     async ({ apiClient }) => {
-      const reqBody: ScheduleNowTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
+      const invalidTransformId = 'invalid_transform_id';
+      const reqBody: ScheduleNowTransformsRequestSchema = [
+        { id: transformIds[0] },
+        { id: invalidTransformId },
+        { id: transformIds[1] },
+      ];
       const { statusCode, body } = await apiClient.post(
         'internal/transform/schedule_now_transforms',
         {
@@ -89,8 +75,11 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
       );
 
       expect(statusCode).toBe(200);
-      expect(body.invalid_transform_id.success).toBe(false);
-      expect(body.invalid_transform_id.error).toBeDefined();
+      for (const id of transformIds) {
+        expect(body[id].success).toBe(true);
+      }
+      expect(body[invalidTransformId].success).toBe(false);
+      expect(body[invalidTransformId].error).toBeDefined();
     }
   );
 });

@@ -15,7 +15,7 @@ import { COMMON_HEADERS } from '../constants';
 
 const transformIds = ['bulk_delete_test_1', 'bulk_delete_test_2'];
 
-apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
   let transformPowerUserApiCredentials: RoleApiCredentials;
   const destinationIndices = transformIds.map(generateDestIndex);
 
