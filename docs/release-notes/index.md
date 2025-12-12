@@ -40,7 +40,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Fixes [kibana-9.2.3-fixes]
 
 **Alerting**:
-* Fixes an issue that caused the Security alerts table to not update columns correctly when switching view mode [#245253]({{kib-pull}}245253).
+* Fixes an issue that caused the Security alerts table to not update columns correctly when switching view modes [#245253]({{kib-pull}}245253).
 * Adds `consecutiveMatches` to action context [#244997]({{kib-pull}}244997).
 
 **Discover**:
