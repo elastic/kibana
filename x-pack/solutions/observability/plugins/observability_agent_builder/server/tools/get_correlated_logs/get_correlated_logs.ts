@@ -17,11 +17,7 @@ import type {
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { parseDatemath } from '../../utils/time';
-import {
-  DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
-  DEFAULT_ERROR_SEVERITY_FILTER,
-  DEFAULT_TIME_RANGE,
-} from './constants';
+import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_TIME_RANGE } from './constants';
 import { fetchAnchorLogs } from './fetch_error_anchors';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
 
