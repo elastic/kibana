@@ -5,6 +5,15 @@
 The idea behind this package is to have a reusable graph component, embedding the features available to the alert's flyout in
 security solution plugin.
 
+## License Requirements
+
+Graph Visualization requires specific license tiers depending on your deployment type:
+
+- **ESS/Self-Managed**: Platinum license or higher (Platinum, Enterprise, or Trial)
+- **Serverless**: Security Analytics Complete tier (not available in Essentials tier)
+
+The feature will not be available if the required license tier is not met.
+
 ## How to use this
 
 ### Step 1: Import the Component
