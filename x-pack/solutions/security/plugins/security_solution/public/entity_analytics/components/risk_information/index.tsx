@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import styled from '@emotion/styled';
 import {
@@ -39,6 +38,7 @@ import { AssetCriticalityBadge } from '../asset_criticality';
 import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../../common/constants';
+import { ENTITY_RISK_LEVELS } from './translations';
 
 const SpacedOrderedList = styled.ol`
   li {
@@ -237,12 +237,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 columns={getCriticalityLevelTableColumns()}
                 items={criticalityLevelTableItems}
                 data-test-subj="criticality-level-information-table"
-                tableCaption={i18n.translate(
-                  'xpack.securitySolution.riskInformation.criticalityLevelTableCaption',
-                  {
-                    defaultMessage: 'Asset criticality level modifiers',
-                  }
-                )}
+                tableCaption={i18n.CRITICALITY_LEVEL_TABLE_CAPTION}
               />
               <EuiSpacer size="s" />
             </li>
@@ -262,12 +257,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 columns={getRiskLevelTableColumns()}
                 items={riskLevelTableItems}
                 data-test-subj="risk-level-information-table"
-                tableCaption={i18n.translate(
-                  'xpack.securitySolution.riskInformation.riskLevelTableCaption',
-                  {
-                    defaultMessage: 'Entity risk levels',
-                  }
-                )}
+                tableCaption={i18n.ENTITY_RISK_LEVELS}
               />
               <EuiSpacer size="s" />
             </li>
