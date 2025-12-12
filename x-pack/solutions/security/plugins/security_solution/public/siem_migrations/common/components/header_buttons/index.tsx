@@ -24,6 +24,7 @@ import type { MigrationType } from '../../../../../common/siem_migrations/types'
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
 import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
+import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
 
 export const SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID = 'siemMigrationsSelectMigrationButton';
 
@@ -99,7 +100,7 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
                 transform: translateY(-50%);
               `}
             >
-              {migrationVendor.toUpperCase()}
+              {MIGRATION_VENDOR_DISPLAY_NAME[migrationVendor]}
             </EuiBadge>
           </EuiFlexItem>
         )}

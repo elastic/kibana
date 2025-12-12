@@ -33,6 +33,7 @@ import * as i18n from './translations';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
+import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
 
 export interface MigrationPanelTitleProps {
   migrationStats: MigrationTaskStats;
@@ -117,7 +118,7 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
             color={MIGRATION_VENDOR_COLOR_CONFIG[migrationStats.vendor]}
             data-test-subj="migrationVendorBadge"
           >
-            {migrationStats.vendor.toUpperCase()}
+            {MIGRATION_VENDOR_DISPLAY_NAME[migrationStats.vendor]}
           </EuiBadge>
         </EuiFlexItem>
       )}
