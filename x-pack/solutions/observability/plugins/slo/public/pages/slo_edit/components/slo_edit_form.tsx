@@ -21,20 +21,13 @@ import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
   initialValues?: CreateSLOForm;
-  slo?: GetSLOResponse; // change with SLODefinition
+  slo?: GetSLOResponse;
   isEditMode: boolean;
-  isFlyout?: boolean;
   onFlyoutClose?: () => void;
 }
 
-export function SloEditForm({
-  slo,
-  initialValues,
-  onFlyoutClose,
-  isFlyout = false,
-  isEditMode,
-}: Props) {
-  assertValidProps({ isEditMode, isFlyout, slo, onFlyoutClose });
+export function SloEditForm({ slo, initialValues, onFlyoutClose, isEditMode }: Props) {
+  assertValidProps({ isEditMode, slo, onFlyoutClose });
 
   const form = useForm<CreateSLOForm>({
     defaultValues: initialValues ?? SLO_EDIT_FORM_DEFAULT_VALUES,
@@ -88,29 +81,19 @@ export function SloEditForm({
           ]}
         />
 
-        <SloEditFormFooter
-          slo={slo}
-          onFlyoutClose={onFlyoutClose}
-          isFlyout={isFlyout}
-          isEditMode={isEditMode}
-        />
+        <SloEditFormFooter slo={slo} onFlyoutClose={onFlyoutClose} isEditMode={isEditMode} />
       </EuiFlexGroup>
     </FormProvider>
   );
 }
 
-function assertValidProps({ slo, onFlyoutClose, isFlyout = false, isEditMode }: Props) {
-  if (isEditMode && isFlyout) {
+function assertValidProps({ slo, onFlyoutClose, isEditMode }: Props) {
+  const isFlyout = Boolean(onFlyoutClose);
+  if ((isEditMode || !!slo) && isFlyout) {
     throw new Error('SLO Form cannot be in edit mode within a flyout');
   }
 
   if (isEditMode && !slo) {
     throw new Error('SLO must be provided when in edit mode');
-  }
-
-  if (isFlyout && !onFlyoutClose) {
-    throw new Error(
-      'onFlyoutClose callback must be provided when SLO Form is used within a flyout'
-    );
   }
 }

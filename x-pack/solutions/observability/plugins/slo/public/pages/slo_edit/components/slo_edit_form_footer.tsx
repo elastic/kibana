@@ -22,7 +22,7 @@ import {
   transformCreateSLOFormToCreateSLOInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
+import { sloEditFormFooterPortal } from '../shared_flyout/create_slo_form_flyout';
 import type { CreateSLOForm } from '../types';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
 import { SLOInspect } from './common/slo_inspect/slo_inspect';
@@ -30,16 +30,16 @@ import { SLOInspect } from './common/slo_inspect/slo_inspect';
 export interface Props {
   slo?: GetSLOResponse;
   onFlyoutClose?: () => void;
-  isFlyout: boolean;
   isEditMode: boolean;
 }
 
-export function SloEditFormFooter({ slo, onFlyoutClose, isFlyout, isEditMode }: Props) {
+export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
 
+  const isFlyout = Boolean(onFlyoutClose);
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
