@@ -401,6 +401,14 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
 }).extend(StepWithIfConditionSchema.shape);
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
+export const WorkflowFailStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.fail'),
+  with: z.object({
+    message: z.string(),
+  }),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -526,6 +534,7 @@ const StepSchema = z.lazy(() =>
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
     WorkflowOutputStepSchema,
+    WorkflowFailStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -541,6 +550,7 @@ export const BuiltInStepTypes = [
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
+  WorkflowFailStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 

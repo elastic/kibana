@@ -86,12 +86,12 @@ describe('WorkflowOutputStepImpl', () => {
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalled();
     });
 
-    it('should store outputs in workflow context', async () => {
+    it('should store output in workflow context', async () => {
       const mockExecution = mockWorkflowRuntime.getWorkflowExecution();
       await impl.run();
 
-      // Outputs should be stored directly in context
-      expect(mockExecution.context.outputs).toEqual({
+      // Output should be stored directly in context
+      expect(mockExecution.context.output).toEqual({
         result: 'success',
         count: 42,
       });
