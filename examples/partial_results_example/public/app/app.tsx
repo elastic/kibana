@@ -19,8 +19,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ExpressionsContext } from './expressions_context';
 import { i18n } from '@kbn/i18n';
+import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents
   | mapColumn name="Count" expression={
