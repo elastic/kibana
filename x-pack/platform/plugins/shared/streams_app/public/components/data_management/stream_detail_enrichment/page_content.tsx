@@ -10,13 +10,9 @@ import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-<<<<<<< HEAD
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '../../../hooks/use_kibana';
-=======
-import React from 'react';
->>>>>>> 8b86b3e2e674678131a5e1ef6e4bc8e6534e4565
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
