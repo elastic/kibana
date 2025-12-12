@@ -143,4 +143,4 @@ export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSub
     return <SubSteps steps={steps} />;
   }
 );
-ReferenceSetDataInputSubSteps.displayName = 'ReferenceSetDataInputActive';
+ReferenceSetDataInputSubSteps.displayName = 'ReferenceSetDataInputSubSteps';
