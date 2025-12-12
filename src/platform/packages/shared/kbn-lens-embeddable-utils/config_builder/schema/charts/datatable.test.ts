@@ -221,6 +221,27 @@ describe('Datatable Schema', () => {
       expect(() => datatableStateSchema.validate(input)).toThrow();
     });
 
+    it('throw when missing summary type', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> & {
+        metrics: {
+          operation: 'median';
+          field: 'bytes';
+          summary: { label: 'Average bytes' };
+        }[];
+      } = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+            summary: { label: 'Average bytes' },
+          },
+        ],
+      };
+
+      expect(() => datatableStateSchema.validate(input)).toThrow();
+    });
+
     it('throw when using term buckets operation in an esql configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'datatable',
@@ -263,7 +284,7 @@ describe('Datatable Schema', () => {
             alignment: 'left',
             apply_color_to: 'background',
             visible: true,
-            summary: 'avg',
+            summary: { type: 'avg', label: 'Average bytes' },
             color: {
               type: 'dynamic',
               range: 'absolute',
@@ -349,7 +370,7 @@ describe('Datatable Schema', () => {
             alignment: 'left',
             apply_color_to: 'background',
             visible: true,
-            summary: 'avg',
+            summary: { type: 'avg' },
             color: {
               type: 'dynamic',
               range: 'absolute',
@@ -368,7 +389,7 @@ describe('Datatable Schema', () => {
             alignment: 'center',
             apply_color_to: 'value',
             visible: true,
-            summary: 'sum',
+            summary: { type: 'sum' },
             color: {
               type: 'dynamic',
               range: 'absolute',
