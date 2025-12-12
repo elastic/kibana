@@ -11,30 +11,41 @@ import type { SearchHit } from '@kbn/es-types';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
-import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_ERROR_SEVERITY_FILTER } from './constants';
 import type { ErrorLogDoc, ErrorAnchor } from './types';
+import { DEFAULT_ERROR_SEVERITY_FILTER } from './constants';
 
-export async function fetchErrorAnchors({
+export async function fetchAnchorLogs({
   esClient,
   logsIndices,
   startTime,
   endTime,
-  terms,
-  errorSeverityFilter,
+  termsFilter,
   correlationFields,
   logger,
+  logId,
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
   startTime: number;
   endTime: number;
-  terms: Record<string, string> | undefined;
-  errorSeverityFilter: Record<string, any> | undefined;
-  correlationFields: string[] | undefined;
+  termsFilter: Record<string, string> | undefined;
+  correlationFields: string[];
   logger: Logger;
+  logId?: string;
 }): Promise<ErrorAnchor[]> {
+  if (logId) {
+    const anchor = await fetchAnchorLog({
+      esClient,
+      logsIndices,
+      logId,
+      correlationFields,
+      logger,
+    });
+    return anchor ? [anchor] : [];
+  }
+
   const search = getTypedSearch(esClient.asCurrentUser);
-  const correlationIdentifierFields = correlationFields ?? DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
+  const correlationIdentifierFields = correlationFields;
 
   const errorLogsResponse = await search<ErrorLogDoc, any>({
     size: 50,
@@ -47,7 +58,7 @@ export async function fetchErrorAnchors({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...getShouldMatchOrNotExistFilter(terms),
+          ...getShouldMatchOrNotExistFilter(termsFilter),
 
           // must have at least one correlation identifier
           {
@@ -58,7 +69,7 @@ export async function fetchErrorAnchors({
           },
 
           // must be an error
-          errorSeverityFilter ?? DEFAULT_ERROR_SEVERITY_FILTER,
+          DEFAULT_ERROR_SEVERITY_FILTER, // this could be exposed as a tool parameter in the future
         ],
       },
     },
@@ -80,20 +91,61 @@ export async function fetchErrorAnchors({
   return errorAnchors.slice(0, 10); // limit to 10 anchors
 }
 
-function findCorrelationIdentifier(
+async function fetchAnchorLog({
+  esClient,
+  logsIndices,
+  logId,
+  correlationFields,
+  logger,
+}: {
+  esClient: IScopedClusterClient;
+  logsIndices: string[];
+  logId: string;
+  correlationFields: string[];
+  logger: Logger;
+}): Promise<ErrorAnchor | undefined> {
+  const search = getTypedSearch(esClient.asCurrentUser);
+  const response = await search<ErrorLogDoc, any>({
+    size: 1,
+    track_total_hits: false,
+    _source: false,
+    fields: ['@timestamp', ...correlationFields],
+    index: logsIndices,
+    query: { ids: { values: [logId] } },
+  });
+
+  const hit = first(response.hits.hits);
+
+  if (!hit) {
+    logger.warn(`Log with ID ${logId} not found in indices: ${logsIndices.join(', ')}`);
+    return undefined;
+  }
+
+  return findCorrelationIdentifier(hit, correlationFields);
+}
+
+export function findCorrelationIdentifier(
   hit: SearchHit<ErrorLogDoc | undefined, any, any>,
   fields: string[]
 ): ErrorAnchor | undefined {
   if (!hit) return undefined;
 
   const correlationIdentifier = fields
-    .map((correlationField) => ({
-      '@timestamp': first(hit?.fields?.['@timestamp']) as string,
-      correlation: {
-        field: correlationField,
-        value: first(get(hit.fields, correlationField)) as string,
-      },
-    }))
+    .map((correlationField) => {
+      // Try to get value from fields (if available) or _source
+      const timestamp =
+        (first(hit.fields?.['@timestamp']) as string) || hit._source?.['@timestamp'];
+      const value =
+        (first(get(hit.fields, correlationField)) as string) || get(hit._source, correlationField);
+
+      return {
+        '@timestamp': timestamp!,
+        correlation: {
+          field: correlationField,
+          value,
+        },
+      };
+    })
     .find(({ correlation }) => correlation.value != null);
 
   return correlationIdentifier;

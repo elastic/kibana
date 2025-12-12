@@ -11,16 +11,18 @@ import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import type { ErrorLogDoc, ErrorAnchor } from './types';
 
-export async function fetchCorrelatedLogs({
+export async function getCorrelatedLogsForAnchor({
   esClient,
   errorAnchor,
   logsIndices,
   logger,
+  fields,
 }: {
   esClient: IScopedClusterClient;
   errorAnchor: ErrorAnchor;
   logsIndices: string[];
   logger: Logger;
+  fields?: string[];
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
   const { correlation, '@timestamp': timestamp } = errorAnchor;
@@ -32,7 +34,7 @@ export async function fetchCorrelatedLogs({
   );
 
   const res = await search<ErrorLogDoc, any>({
-    _source: true,
+    _source: fields ?? true,
     track_total_hits: false,
     index: logsIndices,
     size: 100,
