@@ -76,6 +76,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       try {
         await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
         setIsAIAgentModalVisible(false);
+        window.location.reload();
       } catch (error) {
         if (toasts) {
           toasts.addError(error instanceof Error ? error : new Error(String(error)), {

@@ -72,7 +72,7 @@ export const AskAiAssistant = <T extends EntityType>({
       attachmentData: {
         identifierType: entityType,
         identifier: entityName,
-        attachmentLabel: entityName,
+        attachmentLabel: `${entityType}: ${entityName}`,
       },
       attachmentPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
     }),
