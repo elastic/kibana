@@ -51,13 +51,4 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
     i18n.translate('controls.timeSlider.displayNameAriaLabel', {
       defaultMessage: 'Time slider',
     }),
-
-  getDisplayNameTooltip: ({ embeddable }) =>
-    compatibilityCheck(embeddable)
-      ? i18n.translate('controls.timeSlider.tooltip', {
-          defaultMessage: 'Add a time slider control to your dashboard.',
-        })
-      : i18n.translate('controls.timeSlider.disabledTooltip', {
-          defaultMessage: 'Only one time slider control can be added per dashboard.',
-        }),
 });
