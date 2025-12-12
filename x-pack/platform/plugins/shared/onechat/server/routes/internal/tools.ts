@@ -16,6 +16,8 @@ import type {
   ListWorkflowsResponse,
   GetWorkflowResponse,
   GetToolTypeInfoResponse,
+  GetToolHealthResponse,
+  ListToolHealthResponse,
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
@@ -223,6 +225,56 @@ export function registerInternalToolsRoutes({
           id: workflow!.id,
           name: workflow!.name,
           description: workflow!.description,
+        },
+      });
+    })
+  );
+
+  // list all tool health statuses for the current space (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_health`,
+      validate: false,
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { tools } = getInternalServices();
+      const healthClient = tools.getHealthClient({ request });
+      const healthStates = await healthClient.listBySpace();
+
+      return response.ok<ListToolHealthResponse>({
+        body: {
+          results: healthStates,
+        },
+      });
+    })
+  );
+
+  // get health status for a specific tool (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/{toolId}/_health`,
+      validate: {
+        params: schema.object({
+          toolId: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { tools } = getInternalServices();
+      const healthClient = tools.getHealthClient({ request });
+      const health = await healthClient.get(request.params.toolId);
+
+      return response.ok<GetToolHealthResponse>({
+        body: {
+          health: health ?? null,
         },
       });
     })

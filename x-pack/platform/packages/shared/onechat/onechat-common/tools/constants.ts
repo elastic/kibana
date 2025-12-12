@@ -37,6 +37,7 @@ export const editableToolTypes: ToolType[] = [
   ToolType.esql,
   ToolType.index_search,
   ToolType.workflow,
+  ToolType.mcp,
 ];
 
 export const defaultAgentToolIds = [

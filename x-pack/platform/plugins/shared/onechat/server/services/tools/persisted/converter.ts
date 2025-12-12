@@ -20,10 +20,10 @@ export const convertPersistedDefinition = ({
   context: ToolTypeConversionContext;
 }): InternalToolDefinition => {
   const { id, type, description, tags, configuration } = tool;
-  const { request, spaceId } = context;
+  const { request, spaceId, actions } = context;
 
   const getDynamicProps = () => {
-    return definition.getDynamicProps(configuration, { request, spaceId });
+    return definition.getDynamicProps(configuration, { request, spaceId, actions });
   };
 
   return {
@@ -33,8 +33,7 @@ export const convertPersistedDefinition = ({
     tags,
     configuration,
     readonly: false,
-    isAvailable: () => {
-      // persisted tools are always available atm (space check is done via the persistence client)
+    isAvailable: async () => {
       return { status: 'available' };
     },
     getSchema: async () => {
