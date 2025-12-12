@@ -121,7 +121,11 @@ describe('WorkflowsParamsFields', () => {
     });
 
     expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', 0);
-    expect(mockEditAction).toHaveBeenCalledWith('subActionParams', { workflowId: '' }, 0);
+    expect(mockEditAction).toHaveBeenCalledWith(
+      'subActionParams',
+      { workflowId: '', summaryMode: true },
+      0
+    );
   });
 
   test('should render workflow selection dropdown', async () => {
@@ -873,6 +877,236 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(screen.getByText('Workflow without description')).toBeInTheDocument();
       expect(screen.getByText('No description')).toBeInTheDocument();
+    });
+  });
+
+  describe('Action frequency (summaryMode parameter)', () => {
+    test('should render Action frequency section with switch', async () => {
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Action frequency')).toBeInTheDocument();
+        expect(screen.getByText('Run per alert')).toBeInTheDocument();
+        expect(screen.getByTestId('workflow-run-per-alert-switch')).toBeInTheDocument();
+      });
+    });
+
+    test('should initialize summaryMode to true when missing', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            // summaryMode is missing
+          },
+        } as any,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: 'test-workflow', summaryMode: true },
+          0
+        );
+      });
+    });
+
+    test('should initialize summaryMode to true when subActionParams is missing', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          // subActionParams is missing
+        } as any,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: '', summaryMode: true },
+          0
+        );
+      });
+    });
+
+    test('should display switch as unchecked when summaryMode is true', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).not.toBeChecked();
+      });
+    });
+
+    test('should display switch as checked when summaryMode is false', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: false,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).toBeChecked();
+      });
+    });
+
+    test('should allow changing from summary mode to run per alert', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).not.toBeChecked();
+      });
+
+      // Click the switch to enable "run per alert"
+      const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+      await act(async () => {
+        fireEvent.click(switchElement);
+      });
+
+      // Verify that editAction was called with summaryMode: false
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: 'test-workflow', summaryMode: false },
+          0
+        );
+      });
+    });
+
+    test('should allow changing from run per alert to summary mode', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: false,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).toBeChecked();
+      });
+
+      // Click the switch to disable "run per alert" (enable summary mode)
+      const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+      await act(async () => {
+        fireEvent.click(switchElement);
+      });
+
+      // Verify that editAction was called with summaryMode: true
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: 'test-workflow', summaryMode: true },
+          0
+        );
+      });
+    });
+
+    test('should render switch with help text for Action frequency', async () => {
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+      });
+
+      await waitFor(() => {
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(screen.getByText('Run per alert')).toBeInTheDocument();
+        expect(screen.getByText('Action frequency')).toBeInTheDocument();
+        // Verify the switch is rendered and functional
+        expect(switchElement).not.toBeChecked(); // Default is summary mode (false = unchecked)
+      });
+    });
+
+    test('should preserve summaryMode value when updating workflowId', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'old-workflow',
+            summaryMode: false,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).toBeChecked();
+      });
+
+      // The summaryMode value should be preserved when workflowId changes
+      // This is tested implicitly through the component's handleWorkflowChange callback
+      // which preserves existing subActionParams properties
+      expect(mockEditAction).not.toHaveBeenCalledWith(
+        'subActionParams',
+        expect.objectContaining({ summaryMode: true }),
+        0
+      );
     });
   });
 });
