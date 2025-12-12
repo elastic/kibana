@@ -39,15 +39,20 @@ describe('initializeDataControlManager', () => {
 
   describe('dataViewId subscription', () => {
     describe('no blocking errors', () => {
-      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
-      beforeAll(() => {
-        dataControlManager = initializeDataControlManager({
+      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
+      beforeAll((done) => {
+        initializeDataControlManager({
           controlId: 'myControlId',
           controlType: 'myControlType',
           state: dataControlState,
           editorStateManager: initializeStateManager({}, {}),
           parentApi: {},
           typeDisplayName: 'My Control Type',
+        }).then((controlManager) => {
+          dataControlManager = controlManager;
+          dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+            done();
+          });
         });
       });
 
@@ -66,9 +71,9 @@ describe('initializeDataControlManager', () => {
     });
 
     describe('data view does not exist', () => {
-      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
-      beforeAll(() => {
-        dataControlManager = initializeDataControlManager({
+      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
+      beforeAll((done) => {
+        initializeDataControlManager({
           controlId: 'myControlId',
           controlType: 'myControlType',
           state: {
@@ -78,6 +83,11 @@ describe('initializeDataControlManager', () => {
           editorStateManager: initializeStateManager({}, {}),
           parentApi: {},
           typeDisplayName: 'My Control Type',
+        }).then((controlManager) => {
+          dataControlManager = controlManager;
+          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+            done();
+          });
         });
       });
 
@@ -100,9 +110,9 @@ describe('initializeDataControlManager', () => {
     });
 
     describe('field does not exist', () => {
-      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
-      beforeAll(() => {
-        dataControlManager = initializeDataControlManager({
+      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
+      beforeAll((done) => {
+        initializeDataControlManager({
           controlId: 'myControlId',
           controlType: 'myControlType',
           state: {
@@ -112,6 +122,11 @@ describe('initializeDataControlManager', () => {
           editorStateManager: initializeStateManager({}, {}),
           parentApi: {},
           typeDisplayName: 'My Control Type',
+        }).then((controlManager) => {
+          dataControlManager = controlManager;
+          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+            done();
+          });
         });
       });
 
