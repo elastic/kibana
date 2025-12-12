@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/ai-insights';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LogAIAssistantDocument } from './log_ai_assistant';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
 
@@ -16,6 +16,8 @@ import { explainLogMessageButtonLabel, explainLogMessageDescription } from './tr
 // Illegal import statement: "@kbn/logs-shared-plugin" (platform) is importing "@kbn/observability-agent-builder-plugin" (observability/private).
 const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 const OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID = 'observability.log';
+const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
+const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
 export function LogEntryAgentBuilderAiInsight({
   doc,
@@ -25,9 +27,11 @@ export function LogEntryAgentBuilderAiInsight({
   onechat?: OnechatPluginStart;
 }) {
   const {
-    services: { http, core },
-  } = useKibanaContextForPlugin();
-  // const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
+    services: {
+      http,
+      core: { featureFlags },
+    },
+  } = useKibana();
 
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
@@ -62,10 +66,6 @@ export function LogEntryAgentBuilderAiInsight({
   };
 
   const attachments = useMemo(() => {
-    // if (!onechat || !isObservabilityAgentEnabled) {
-    //   return [];
-    // }
-
     return [
       {
         type: 'screen_context',
@@ -92,6 +92,14 @@ export function LogEntryAgentBuilderAiInsight({
     ];
   }, [summary, context, index, id]);
 
+  const isObservabilityAgentEnabled = featureFlags.getBooleanValue(
+    OBSERVABILITY_AGENT_FEATURE_FLAG,
+    OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
+  );
+
+  if (!onechat || !isObservabilityAgentEnabled) {
+    return null;
+  }
   return (
     <>
       <AiInsight

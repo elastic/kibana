@@ -77,8 +77,6 @@ export const LogAIAssistant = ({
   }, [getContextualInsightMessages, doc]);
 
   const hasAtLeastOnePrompt = Boolean(explainLogMessageMessages || similarLogMessageMessages);
-  // TODO: Add isObservabilityAgentEnabled check
-  // if (onechat && isObservabilityAgentEnabled) {
   if (onechat) {
     return <LogEntryAgentBuilderAiInsight doc={doc} onechat={onechat} />;
   }
