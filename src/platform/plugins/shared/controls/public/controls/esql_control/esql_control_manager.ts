@@ -31,11 +31,12 @@ import {
   type PublishingSubject,
   type StateComparators,
 } from '@kbn/presentation-publishing';
+import { hasStartEndParams } from '@kbn/esql-utils';
 
 import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
-import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
+import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -139,7 +140,10 @@ export function initializeESQLControlManager(
   const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      filter(({ esqlVariables }) => {
+      filter(({ esqlVariables, timeRange }) => {
+        if (hasStartEndParams(esqlQuery$.getValue()) && !timeRange) {
+          return false;
+        }
         const variablesInQuery = getESQLQueryVariables(esqlQuery$.getValue());
         const variablesInParent = esqlVariables || [];
 

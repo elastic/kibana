@@ -67,6 +67,9 @@ export {
 export {
   apiPublishesProjectRouting,
   type PublishesProjectRouting,
+  apiPublishesProjectRoutingOverrides,
+  type ProjectRoutingOverrides,
+  type PublishesProjectRoutingOverrides,
 } from './interfaces/fetch/publishes_project_routing';
 export {
   apiHasAppContext,
