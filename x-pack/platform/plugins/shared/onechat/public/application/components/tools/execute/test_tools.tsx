@@ -141,6 +141,95 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
   });
 };
 
+/**
+ * Transforms form data to convert array string inputs to arrays
+ * The form UI only has text inputs, so array fields come through as strings (JSON or comma-separated)
+ */
+const transformFormDataToSchemaTypes = (
+  formData: Record<string, any>,
+  tool?: ToolDefinitionWithSchema
+): Record<string, any> => {
+  if (!tool?.schema?.properties) return formData;
+
+  const transformed: Record<string, any> = {};
+
+  // Iterate over all schema properties to handle missing keys and apply defaults
+  for (const [key, paramSchema] of Object.entries(tool.schema.properties)) {
+    const value = formData[key];
+
+    // Check if value is missing/empty and schema has a default - apply default
+    const hasDefault = 'default' in paramSchema && paramSchema.default !== undefined;
+    const isEmpty = value == null || value === '' || !(key in formData);
+
+    if (isEmpty && hasDefault) {
+      transformed[key] = paramSchema.default;
+      continue;
+    }
+
+    // If value is missing and no default, skip (will be handled by Zod schema validation)
+    if (!(key in formData) && !hasDefault) {
+      continue;
+    }
+
+    let schemaType: string | string[] | undefined;
+    if (paramSchema && 'type' in paramSchema) {
+      schemaType = paramSchema.type as string | string[] | undefined;
+    }
+
+    // Only transform arrays and objects - numbers and booleans are handled by form components
+    if (schemaType === 'array' || (Array.isArray(schemaType) && schemaType.includes('array'))) {
+      if (value == null || value === '') {
+        // Null, undefined, or empty string for array becomes empty array
+        transformed[key] = [];
+      } else if (Array.isArray(value)) {
+        transformed[key] = value;
+      } else if (typeof value === 'string') {
+        // Try to parse as JSON array first
+        try {
+          const parsed = JSON.parse(value);
+          transformed[key] = Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          // If not valid JSON, split by comma or wrap single value
+          const trimmed = value.trim();
+          if (trimmed.includes(',')) {
+            transformed[key] = trimmed
+              .split(',')
+              .map((v) => v.trim())
+              .filter((v) => v.length > 0);
+          } else {
+            transformed[key] = [trimmed];
+          }
+        }
+      } else {
+        transformed[key] = value;
+      }
+    } else if (
+      schemaType === 'object' ||
+      (Array.isArray(schemaType) && schemaType.includes('object'))
+    ) {
+      // Handle object types - parse JSON strings
+      if (typeof value === 'string' && value.trim() !== '') {
+        try {
+          transformed[key] = JSON.parse(value);
+        } catch {
+          // If not valid JSON, keep as string (will fail validation, but that's expected)
+          transformed[key] = value;
+        }
+      } else if (value === '' || value == null) {
+        // Empty string or null for object should be undefined (optional) or empty object
+        transformed[key] = undefined;
+      } else {
+        transformed[key] = value;
+      }
+    } else {
+      // Pass through other types as-is (form components handle numbers/booleans)
+      transformed[key] = value;
+    }
+  }
+
+  return transformed;
+};
+
 const renderFormField = ({
   parameter,
   control,
@@ -203,7 +292,7 @@ const renderFormField = ({
             <EuiFieldText
               {...field}
               inputRef={ref}
-              value={value as string}
+              value={(value as string) ?? ''}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />
@@ -228,6 +317,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
 
   const form = useForm<Record<string, any>>({
     mode: 'onChange',
+    defaultValues: {},
   });
 
   const {
@@ -252,9 +342,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
   });
 
   const onSubmit = async (formData: Record<string, any>) => {
+    // Transform form data to match schema types (strings -> arrays, numbers, booleans)
+    const transformedParams = transformFormDataToSchemaTypes(formData, tool);
+
     await executeTool({
       toolId: tool!.id,
-      toolParams: formData,
+      toolParams: transformedParams,
     });
   };
 

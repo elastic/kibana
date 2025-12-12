@@ -13,6 +13,7 @@ import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
+import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
@@ -72,31 +73,24 @@ export function useYamlValidation(
       monaco.editor.setModelMarkers(model, 'step-name-validation', []);
       monaco.editor.setModelMarkers(model, 'liquid-template-validation', []);
       monaco.editor.setModelMarkers(model, 'connector-id-validation', []);
+      monaco.editor.setModelMarkers(model, 'json-schema-default-validation', []);
       setIsLoading(false);
       setError(null);
       return;
     }
 
-    if (!yamlDocument || !workflowGraph || !workflowDefinition) {
-      let errorMessage = 'Error validating variables';
-      if (!yamlDocument) {
-        errorMessage += '. Yaml document is not loaded';
-      }
-      if (!workflowGraph) {
-        errorMessage += '. Workflow graph is not loaded';
-      }
-      if (!workflowDefinition) {
-        errorMessage += '. Workflow definition is not loaded';
-      }
+    // Allow Monaco YAML's native validation to work even when workflowDefinition is null
+    // Only require yamlDocument for basic validations - yamlDocument is parsed from YAML string
+    // and should exist even if schema validation fails
+    if (!yamlDocument) {
       setIsLoading(false);
-      setError(new Error(errorMessage));
+      setError(new Error('Error validating: YAML document is not loaded'));
       return;
     }
 
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
     const markers: monaco.editor.IMarkerData[] = [];
 
-    const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
     const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
@@ -106,12 +100,27 @@ export function useYamlValidation(
       absolute: true,
     });
 
+    // Build validation results - only include validations that don't require workflowDefinition
+    // Monaco YAML's schema validation will show errors independently
     const validationResults: YamlValidationResult[] = [
-      validateStepNameUniqueness(yamlDocument),
-      validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
-      validateLiquidTemplate(model.getValue()),
-      validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-    ].flat();
+      ...validateStepNameUniqueness(yamlDocument),
+      ...validateLiquidTemplate(model.getValue()),
+      ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+    ];
+
+    // Only run validations that require workflowDefinition if it's available
+    if (workflowGraph && workflowDefinition) {
+      const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+      validationResults.push(
+        ...validateVariablesInternal(
+          variableItems,
+          workflowGraph,
+          workflowDefinition,
+          yamlDocument
+        ),
+        ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+      );
+    }
 
     for (const validationResult of validationResults) {
       if (validationResult.owner === 'variable-validation') {
@@ -142,6 +151,18 @@ export function useYamlValidation(
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         });
+      } else if (validationResult.owner === 'json-schema-default-validation') {
+        if (validationResult.severity !== null) {
+          markers.push({
+            severity: SEVERITY_MAP[validationResult.severity],
+            message: validationResult.message,
+            startLineNumber: validationResult.startLineNumber,
+            startColumn: validationResult.startColumn,
+            endLineNumber: validationResult.endLineNumber,
+            endColumn: validationResult.endColumn,
+            source: 'json-schema-default-validation',
+          });
+        }
       } else if (validationResult.owner === 'liquid-template-validation') {
         markers.push({
           severity: SEVERITY_MAP[validationResult.severity],
@@ -254,6 +275,11 @@ export function useYamlValidation(
       model,
       'connector-id-validation',
       markers.filter((m) => m.source === 'connector-id-validation')
+    );
+    monaco.editor.setModelMarkers(
+      model,
+      'json-schema-default-validation',
+      markers.filter((m) => m.source === 'json-schema-default-validation')
     );
     setError(null);
   }, [

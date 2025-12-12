@@ -17,7 +17,6 @@ import type {
   StepPropInfo,
 } from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
-// TODO: see if we can reduce the number of properties in this interface and group them into smaller interfaces
 export interface AutocompleteContext {
   // what triggered the completion
   triggerCharacter: string | null;
@@ -49,10 +48,15 @@ export interface AutocompleteContext {
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
+
+  // workflow definition (for JSON Schema autocompletion)
+  workflowDefinition: {
+    inputs?: unknown;
+    [key: string]: unknown;
+  } | null;
 }
 
-// we don't want to pass model and position, but currently it's used in getWithBlockSuggestions
-// TODO: refactor this to not pass model and position
+// Extended context includes Monaco editor model and position for advanced autocompletion features
 export interface ExtendedAutocompleteContext extends AutocompleteContext {
   model: monaco.editor.ITextModel;
   position: monaco.Position;

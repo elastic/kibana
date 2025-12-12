@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
@@ -17,14 +18,28 @@ import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
+// Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
+type WorkflowDefinitionForContext =
+  | WorkflowYaml
+  | (Omit<WorkflowYaml, 'inputs'> & {
+      inputs?:
+        | WorkflowYaml['inputs']
+        | Array<{ name: string; type: string; [key: string]: unknown }>;
+    });
+
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
 // src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts
 export function getContextSchemaForPath(
-  definition: WorkflowYaml,
+  definition: WorkflowDefinitionForContext,
   workflowGraph: WorkflowGraph,
-  path: Array<string | number>
+  path: Array<string | number>,
+  yamlDocument?: Document | null
 ): typeof DynamicStepContextSchema {
-  let schema = DynamicStepContextSchema.merge(getWorkflowContextSchema(definition));
+  // getWorkflowContextSchema normalizes inputs internally, so it can handle both formats
+  // Pass yamlDocument to allow extraction of inputs if definition.inputs is undefined
+  let schema = DynamicStepContextSchema.merge(
+    getWorkflowContextSchema(definition as WorkflowYaml, yamlDocument)
+  );
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
