@@ -115,7 +115,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 18999
+  navigation: 15639
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
@@ -125,7 +125,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 28638
+  onechat: 88464
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
