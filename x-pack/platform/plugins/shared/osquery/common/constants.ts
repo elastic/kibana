@@ -7,6 +7,34 @@
 
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const OSQUERY_INTEGRATION_NAME = 'osquery_manager';
+
+export const MAX_OFFSET_RESULTS = 10000;
+export const PIT_KEEP_ALIVE = '10m';
+
+/**
+ * Maximum offset allowed for PIT-based deep pagination.
+ * Prevents excessive batch fetching that could exhaust memory.
+ * 100,000 documents = 1000 pages of 100 results each.
+ */
+export const MAX_PIT_OFFSET = 100000;
+
+/**
+ * Maximum length of pitId parameter (PIT IDs are typically ~200-500 chars base64).
+ * Prevents abuse through extremely large request payloads.
+ */
+export const MAX_PIT_ID_LENGTH = 2048;
+
+/**
+ * Maximum size of searchAfter parameter in bytes.
+ * Sort values should be compact primitives, 1KB is generous.
+ */
+export const MAX_SEARCH_AFTER_SIZE = 1024;
+
+/**
+ * Maximum number of sort fields in searchAfter array.
+ * Typical sorts have 1-3 fields, 10 is generous.
+ */
+export const MAX_SORT_FIELDS = 10;
 export const BASE_PATH = '/app/osquery';
 
 export const OSQUERY_LOGS_BASE = `.logs-${OSQUERY_INTEGRATION_NAME}`;

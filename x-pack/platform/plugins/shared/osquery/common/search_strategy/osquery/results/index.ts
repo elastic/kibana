@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type { SearchResponse, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { Inspect, Maybe, SortField } from '../../common';
 import type { RequestOptionsPaginated } from '../..';
 
-export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
+export type ResultEdges = SearchResponse<unknown>['hits']['hits'];
 
 export interface ResultsStrategyResponse extends IEsSearchResponse {
   edges: ResultEdges;
   inspect?: Maybe<Inspect>;
+  pitId?: string;
+  searchAfter?: SortResults;
+  hasMore?: boolean;
 }
 
 export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
@@ -24,4 +27,6 @@ export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'so
   startDate?: string;
   sort: SortField[];
   integrationNamespaces?: string[];
+  pitId?: string;
+  searchAfter?: SortResults;
 }
