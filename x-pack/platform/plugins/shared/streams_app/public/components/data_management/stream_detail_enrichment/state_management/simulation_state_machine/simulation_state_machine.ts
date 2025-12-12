@@ -13,6 +13,7 @@ import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xst
 import { assign, setup } from 'xstate5';
 import type { MappedSchemaField } from '../../../schema_editor/types';
 import { getValidSteps } from '../../utils';
+import { selectSamplesForSimulation } from './selectors';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
   createSimulationRunFailureNotifier,
@@ -27,7 +28,6 @@ import type {
   SimulationMachineDeps,
 } from './types';
 import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
-import { selectSamplesForSimulation } from './selectors';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -115,19 +115,22 @@ export const simulationMachine = setup({
       simulation: undefined,
       baseSimulation: undefined,
       previewDocsFilter: 'outcome_filter_all',
-      selectedConditionId: undefined,
     }),
     resetSteps: assign({ steps: [] }),
     resetSamples: assign({
       samples: [],
       selectedConditionId: undefined,
     }),
-    applyConditionFilter: assign((_, params: { conditionId: string }) => ({
-      selectedConditionId: params.conditionId,
-    })),
-    clearConditionFilter: assign(() => ({
-      selectedConditionId: undefined,
-    })),
+    applyConditionFilter: assign((_, params: { conditionId: string }) => {
+      return {
+        selectedConditionId: params.conditionId,
+      };
+    }),
+    clearConditionFilter: assign(() => {
+      return {
+        selectedConditionId: undefined,
+      };
+    }),
   },
   delays: {
     processorChangeDebounceTime: 300,

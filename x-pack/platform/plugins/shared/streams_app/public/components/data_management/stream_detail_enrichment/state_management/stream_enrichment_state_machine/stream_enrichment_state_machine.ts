@@ -56,7 +56,7 @@ import {
   simulationMachine,
 } from '../simulation_state_machine';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
-import { stepMachine } from '../steps_state_machine';
+import { isStepUnderEdit, stepMachine } from '../steps_state_machine';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { createSuggestPipelineActor } from './suggest_pipeline_actor';
@@ -295,11 +295,6 @@ export const streamEnrichmentMachine = setup({
       });
     },
     sendClearConditionFilterToSimulator: ({ context }) => {
-      const simulatorSnapshot = context.simulatorRef?.getSnapshot();
-      if (!simulatorSnapshot?.context.selectedConditionId) {
-        return;
-      }
-
       context.simulatorRef?.send({ type: 'simulation.clearConditionFilter' });
     },
     /* Data sources actions */
@@ -340,6 +335,7 @@ export const streamEnrichmentMachine = setup({
 
         const simulationMode = getActiveSimulationMode(context);
         const isPartialSimulation = simulationMode === 'partial';
+        const selectedConditionId = context.simulatorRef?.getSnapshot().context.selectedConditionId;
         /**
          * When any processor is before persisted, we need to reset the simulator
          * because the processors are not in a valid order.
@@ -353,7 +349,7 @@ export const streamEnrichmentMachine = setup({
             steps: getStepsForSimulation({
               stepRefs: context.stepRefs,
               isPartialSimulation,
-              selectedConditionId: context.simulatorRef?.getSnapshot().context.selectedConditionId,
+              selectedConditionId,
             }),
           });
         }
@@ -364,6 +360,31 @@ export const streamEnrichmentMachine = setup({
       samples: getActiveDataSourceSamples(context),
     })),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+    /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
+    setAutomaticFilteringForEditedStep: enqueueActions(
+      ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
+        const stepUnderEdit = context.stepRefs
+          .find((stepRef) => isStepUnderEdit(stepRef.getSnapshot()))
+          ?.getSnapshot().context.step;
+
+        if (stepUnderEdit?.parentId) {
+          enqueue({
+            type: 'sendConditionFilterToSimulator',
+            params: { conditionId: stepUnderEdit.parentId },
+          });
+        } else {
+          enqueue('sendClearConditionFilterToSimulator');
+        }
+      }
+    ),
+    /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
+    resetDeletedConditionFilter: enqueueActions(({ context, enqueue }, params: { id: string }) => {
+      const currentConditionId = context.simulatorRef?.getSnapshot().context.selectedConditionId;
+
+      if (currentConditionId === params.id) {
+        enqueue('sendClearConditionFilterToSimulator');
+      }
+    }),
   },
   guards: {
     hasStagedChanges: ({ context }) => {
@@ -545,7 +566,11 @@ export const streamEnrichmentMachine = setup({
               ],
             },
             'simulation.clearConditionFilter': {
-              actions: forwardTo('simulator'),
+              actions: [
+                {
+                  type: 'sendClearConditionFilterToSimulator',
+                },
+              ],
             },
           },
           states: {
@@ -623,7 +648,6 @@ export const streamEnrichmentMachine = setup({
                     'step.edit': {
                       guard: 'hasSimulatePrivileges',
                       target: 'editing',
-                      actions: [{ type: 'sendClearConditionFilterToSimulator' }],
                     },
                     'step.reorder': {
                       guard: 'hasSimulatePrivileges',
@@ -639,6 +663,7 @@ export const streamEnrichmentMachine = setup({
                       guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
+                        { type: 'resetDeletedConditionFilter', params: ({ event }) => event },
                         { type: 'deleteStep', params: ({ event }) => event },
                         { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
@@ -709,7 +734,10 @@ export const streamEnrichmentMachine = setup({
                 },
                 editing: {
                   id: 'editingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                  entry: [
+                    { type: 'setAutomaticFilteringForEditedStep' },
+                    { type: 'sendStepsEventToSimulator' },
+                  ],
                   on: {
                     'step.change': {
                       actions: [
@@ -717,7 +745,10 @@ export const streamEnrichmentMachine = setup({
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
-                    'step.cancel': 'idle',
+                    'step.cancel': {
+                      target: 'idle',
+                      actions: [{ type: 'sendClearConditionFilterToSimulator' }],
+                    },
                     'step.delete': {
                       target: 'idle',
                       guard: 'hasManagePrivileges',

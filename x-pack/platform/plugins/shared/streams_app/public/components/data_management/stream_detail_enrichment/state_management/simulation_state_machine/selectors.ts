@@ -77,7 +77,7 @@ export const selectSamplesForSimulation = createSelector(
     (context: SimulationContext) => context.selectedConditionId,
   ],
   (samples, baseSimulationDocuments = [], steps, selectedConditionId) => {
-    if (!selectedConditionId) {
+    if (!selectedConditionId || baseSimulationDocuments.length === 0) {
       return samples;
     }
 
