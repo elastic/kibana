@@ -30,6 +30,7 @@ import type {
 } from '@kbn/saved-search-plugin/common';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { CascadedDocumentsRestorableState } from '../../components/layout/cascaded_documents/cascaded_documents_restorable_state';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 
 export interface InternalStateDataRequestParams {
@@ -165,6 +166,7 @@ export interface TabState extends TabItem {
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
+    cascadedDocuments?: CascadedDocumentsRestorableState;
   };
 }
 

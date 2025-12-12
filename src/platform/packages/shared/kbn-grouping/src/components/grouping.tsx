@@ -222,13 +222,16 @@ const GroupingComponent = <T,>({
   );
 
   return (
-    <>
+    <div css={() => ({ padding: `0 8px` })}>
       {groupingLevel > 0 ? null : (
         <EuiFlexGroup
           data-test-subj="grouping-table"
           justifyContent="spaceBetween"
           alignItems="center"
-          style={{ paddingBottom: 20, paddingTop: 20 }}
+          css={() => ({
+            paddingBottom: 20,
+            paddingTop: 20,
+          })}
         >
           <EuiFlexItem grow={false}>
             {groupCount > 0 && unitCount > 0 ? (
@@ -298,7 +301,7 @@ const GroupingComponent = <T,>({
           <EmptyGroupingComponent />
         )}
       </div>
-    </>
+    </div>
   );
 };
 

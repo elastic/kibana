@@ -36,6 +36,16 @@ describe('cascaded documents helpers utils', () => {
       expect(result.appliedFunctions).toEqual([]);
     });
 
+    it('should return an empty array of group by fields and applied functions if the query has a keep command that does not specify the current group field', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([{ aggregation: 'COUNT', identifier: 'count' }]);
+    });
+
     it('should return an array of the columns the query has been denoted to be grouped by with the STATS command', () => {
       const queryString = `
         FROM kibana_sample_data_logs, another_index
@@ -179,6 +189,31 @@ describe('cascaded documents helpers utils', () => {
       const nodeType = 'leaf';
 
       describe('record field column group operations', () => {
+        it('should not include the stats command in the cascade query if it does not have any aggregates', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS BY clientip
+            `,
+          };
+
+          const nodePath = ['clientip'];
+          const nodePathMap = { clientip: '192.168.1.1' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"'
+          );
+        });
+
         it('should construct a valid cascade leaf query for a query with just one column', () => {
           const editorQuery: AggregateQuery = {
             esql: `
@@ -340,7 +375,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | INLINE STATS count = COUNT(bytes), average = AVG(memory) BY tags | WHERE MATCH_PHRASE(tags, "some random pattern")'
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(tags, "some random pattern")'
           );
         });
       });

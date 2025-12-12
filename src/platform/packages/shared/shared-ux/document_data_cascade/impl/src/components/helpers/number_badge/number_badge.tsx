@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiText, type EuiTextProps } from '@elastic/eui';
 
 const SI_PREFIXES_CENTER_INDEX = 8;
 
@@ -54,41 +54,40 @@ export const getSiPrefixedNumber = (number: number): string => {
   return `${baseNumber}${prefix}`;
 };
 
-interface NumberBadgeProps {
+interface NumberBadgeProps extends Pick<EuiTextProps, 'textAlign'> {
   value: number;
   /**
    * If provided, shortens the number at the given length and adds ellipsis.
    * For example, a value of 1000 with shortenAt=3 will display as "1K".
    */
   shortenAtExpSize: number;
-  /**
-   * Defines the alignment of the number within its container. Defaults to 'end'.
-   */
-  align?: 'start' | 'end';
 }
 
 /**
  * A badge component to display numbers in a consistent way.
  */
-export function NumberBadge({ value, shortenAtExpSize, align = 'end' }: NumberBadgeProps) {
+export function NumberBadge({ value, shortenAtExpSize, textAlign = 'right' }: NumberBadgeProps) {
   return (
-    <EuiBadge
-      color="hollow"
+    <EuiText
       title={String(value)}
+      textAlign={textAlign}
       css={{
-        '& > .euiBadge__content': {
-          // width is 7ch accounts for at most 3 digits, a decimal point, possibly a SI prefix and floating point numbers fixed at 2
-          width: '7ch',
-          justifyContent: align,
-        },
-        '& > .euiBadge__content > *': {
+        // width is 7ch accounts for at most 3 digits, a decimal point, possibly a SI prefix and floating point numbers fixed at 2
+        width: '7ch',
+        '& > *': {
           // force all numbers to have the same size, in turn ensuring that the defined width above
           // is always respected for all instance of this component that specify the same shortenAtExpSize value
           fontVariantNumeric: 'tabular-nums',
         },
       }}
     >
-      {Math.floor(value / Math.pow(10, shortenAtExpSize)) >= 1 ? getSiPrefixedNumber(value) : value}
-    </EuiBadge>
+      <h5>
+        {Math.floor(value / Math.pow(10, shortenAtExpSize)) >= 1
+          ? getSiPrefixedNumber(value)
+          : Number.isInteger(value)
+          ? value
+          : value.toFixed(2)}
+      </h5>
+    </EuiText>
   );
 }

@@ -52,6 +52,8 @@ export {
   constructCascadeQuery,
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
   getESQLSources,
   getEsqlColumns,
   getEsqlPolicies,

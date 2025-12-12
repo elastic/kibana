@@ -884,6 +884,16 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('confirmSaveSavedObjectButton');
   }
 
+  public async isShowingCascadeLayout() {
+    return await this.retry.try(async () => {
+      const [exists1, exists2] = await Promise.all([
+        this.testSubjects.exists('data-cascade'),
+        this.testSubjects.exists('discoverEnableCascadeLayoutSwitch'),
+      ]);
+      return exists1 && exists2;
+    });
+  }
+
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {

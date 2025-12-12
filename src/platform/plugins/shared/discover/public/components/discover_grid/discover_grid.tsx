@@ -7,21 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { lazy, useCallback, useMemo, Suspense } from 'react';
 import {
   DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import type { AggregateQuery } from '@kbn/es-query';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+import { useGroupBySelectorRenderer } from '../../application/main/components/layout/cascaded_documents';
+import { type CascadedDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/cascaded_documents_restorable_state';
 
-export interface DiscoverGridProps extends UnifiedDataTableProps {
+export type DiscoverGridProps = UnifiedDataTableProps & {
   query?: DiscoverAppState['query'];
-  onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-}
+} & (
+    | {
+        cascadeConfig?: never;
+        onCascadeGroupingChange?: undefined;
+        onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+        viewModeToggle?: never;
+      }
+    | {
+        cascadeConfig: CascadedDocumentsRestorableState | undefined;
+        // when cascade on grouping change handler config is passed to the discover grid component, we expect that all it's supporting props are passed along
+        onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
+        onUpdateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
+        viewModeToggle: React.ReactElement | undefined;
+      }
+  );
+
+const LazyCascadedDocumentsLayout = lazy(() =>
+  import(
+    '../../application/main/components/layout/cascaded_documents/cascaded_document_layout'
+  ).then(({ CascadedDocumentsLayout }) => {
+    return {
+      default: CascadedDocumentsLayout,
+    };
+  })
+);
 
 /**
  * Customized version of the UnifiedDataTable
@@ -29,9 +56,13 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
  */
 export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
+  onCascadeGroupingChange,
   query,
+  viewModeToggle,
+  externalAdditionalControls: customExternalAdditionalControls,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   onFullScreenChange,
+  cascadeConfig,
   ...props
 }) => {
   const { dataView, setExpandedDoc, renderDocumentView } = props;
@@ -70,11 +101,53 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   }, [getPaginationConfigAccessor]);
 
   const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
+
   const customGridColumnsConfiguration = useMemo(() => {
     return getColumnsConfigurationAccessor(() => ({}))();
   }, [getColumnsConfigurationAccessor]);
 
-  return (
+  /**
+   * For the discover use case we use this function to hook into the app state container,
+   * so that we can respond to changes in the cascade grouping.
+   * We don't have to, but doing it this way means we get all the error handling and loading utils already existing there.
+   */
+  const cascadeGroupingChangeHandler = useCallback(
+    (cascadeGrouping: string[]) => {
+      return onCascadeGroupingChange?.({ query: query as AggregateQuery, cascadeGrouping });
+    },
+    [onCascadeGroupingChange, query]
+  );
+
+  const groupBySelectorRenderer = useGroupBySelectorRenderer({
+    cascadeGroupingChangeHandler,
+  });
+
+  const externalAdditionalControls = useMemo(() => {
+    const additionalControls = [
+      customExternalAdditionalControls,
+      Boolean(cascadeConfig?.availableCascadeGroups?.length)
+        ? groupBySelectorRenderer(
+            cascadeConfig!.availableCascadeGroups,
+            cascadeConfig!.selectedCascadeGroups
+          )
+        : null,
+    ].filter(Boolean);
+
+    return additionalControls.length ? <React.Fragment>{additionalControls}</React.Fragment> : null;
+  }, [cascadeConfig, customExternalAdditionalControls, groupBySelectorRenderer]);
+
+  return props.isPlainRecord && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <LazyCascadedDocumentsLayout
+        {...props}
+        dataView={dataView}
+        viewModeToggle={viewModeToggle}
+        cascadeConfig={cascadeConfig!}
+        onUpdateESQLQuery={onUpdateESQLQuery!}
+        cascadeGroupingChangeHandler={cascadeGroupingChangeHandler}
+      />
+    </Suspense>
+  ) : (
     <UnifiedDataTable
       showColumnTokens
       canDragAndDropColumns
@@ -87,6 +160,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       paginationMode={paginationModeConfig.paginationMode}
       customGridColumnsConfiguration={customGridColumnsConfiguration}
       shouldKeepAdHocDataViewImmutable
+      externalAdditionalControls={externalAdditionalControls}
       onFullScreenChange={onFullScreenChange}
       {...props}
     />

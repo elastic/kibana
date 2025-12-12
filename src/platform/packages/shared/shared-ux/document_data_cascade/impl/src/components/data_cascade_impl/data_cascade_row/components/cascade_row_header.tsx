@@ -28,6 +28,7 @@ import {
 import type { CascadeRowHeaderPrimitiveProps } from '../../types';
 import { CascadeRowActions } from './cascade_row_actions';
 import { styles as cascadeRowHeaderStyles, flexHelper } from './cascade_row_header.styles';
+import { CascadeRowHeaderSlotsRenderer } from './cascade_row_header_slots_renderer';
 
 /**
  * @internal
@@ -180,28 +181,30 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={flexHelper}>
-          <EuiFlexGroup justifyContent="spaceBetween" direction="row" responsive={false}>
+          <EuiFlexGroup
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            direction="row"
+            responsive={false}
+          >
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
               <RowTitleSlot rowData={rowInstance.original} nodePath={nodePath} />
             </EuiFlexItem>
             <EuiFlexItem grow={6} css={styles.rowHeaderSlotContainer}>
               <EuiFlexGroup
                 direction="row"
-                gutterSize={size}
+                gutterSize="s"
                 alignItems="center"
                 justifyContent="flexEnd"
                 css={styles.rowHeaderSlotContainerInner}
               >
                 <React.Fragment>
                   {Boolean(headerMetaSlots?.length) && (
-                    <EuiFlexItem>
-                      <EuiFlexGroup gutterSize={size}>
-                        {headerMetaSlots?.map((metaSlot, index) => (
-                          <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index}>
-                            {metaSlot}
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
+                    <EuiFlexItem css={flexHelper} grow>
+                      <CascadeRowHeaderSlotsRenderer
+                        headerMetaSlots={headerMetaSlots!}
+                        size={size}
+                      />
                     </EuiFlexItem>
                   )}
                 </React.Fragment>
