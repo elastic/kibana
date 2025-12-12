@@ -27,7 +27,7 @@ import { reindexAllIndices } from './reindex';
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, logger, snapshotUrl, patterns, concurrency } = config;
+  const { esClient, logger, snapshotUrl, snapshotName, patterns, concurrency } = config;
 
   const result: LoadResult = {
     success: false,
@@ -48,7 +48,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
 
     logger.info('Step 2/4: Retrieving snapshot metadata...');
-    const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName });
+    const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName, snapshotName });
     result.snapshotName = snapshotInfo.snapshot;
     result.maxTimestamp = snapshotInfo.endTime;
 

@@ -36,44 +36,57 @@ export async function getSnapshotMetadata({
   esClient,
   logger,
   repoName,
+  snapshotName,
 }: {
   esClient: Client;
   logger: Logger;
   repoName: string;
+  snapshotName?: string;
 }): Promise<SnapshotInfo> {
   logger.debug('Reading snapshot metadata...');
 
-  const response = await esClient.snapshot.get({ repository: repoName, snapshot: '*' });
+  const response = await esClient.snapshot.get({
+    repository: repoName,
+    snapshot: snapshotName || '*',
+  });
   const snapshots = response.snapshots ?? [];
 
   if (snapshots.length === 0) {
+    if (snapshotName) {
+      throw new Error(`Snapshot "${snapshotName}" was not found in repository ${repoName}`);
+    }
     throw new Error(`No snapshots found in repository ${repoName}`);
   }
 
-  const sortedSnapshots = [...snapshots].sort((a, b) => {
-    const aTime = a.end_time ? new Date(a.end_time).getTime() : 0;
-    const bTime = b.end_time ? new Date(b.end_time).getTime() : 0;
-    return bTime - aTime;
+  const successfulSnapshots = snapshots.filter((s) => {
+    return s.state === 'SUCCESS' && s.end_time != null;
   });
 
-  const snapshot = sortedSnapshots[0];
-
-  if (!snapshot.end_time) {
-    throw new Error(`Snapshot ${snapshot.snapshot} has no end_time - it may still be in progress`);
+  if (successfulSnapshots.length === 0) {
+    if (snapshotName) {
+      throw new Error(
+        `No restorable snapshots found for snapshot "${snapshotName}" in repository ${repoName}`
+      );
+    }
+    throw new Error(`No restorable snapshots found in repository ${repoName}`);
   }
 
-  if (snapshot.state !== 'SUCCESS') {
-    throw new Error(
-      `Snapshot ${snapshot.snapshot} is not in SUCCESS state (current: ${snapshot.state})`
-    );
+  const selected = [...successfulSnapshots].sort((a, b) => {
+    const aTime = a.end_time_in_millis ?? 0;
+    const bTime = b.end_time_in_millis ?? 0;
+    return bTime - aTime;
+  })[0];
+
+  if (!selected.snapshot) {
+    throw new Error(`Snapshot has no name in repository ${repoName}`);
   }
 
   const info: SnapshotInfo = {
-    snapshot: snapshot.snapshot!,
-    indices: snapshot.indices ?? [],
-    startTime: String(snapshot.start_time ?? ''),
-    endTime: String(snapshot.end_time),
-    state: snapshot.state,
+    snapshot: selected.snapshot,
+    indices: selected.indices ?? [],
+    startTime: String(selected.start_time ?? ''),
+    endTime: String(selected.end_time!),
+    state: selected.state ?? 'unknown',
   };
 
   logger.info(`Found snapshot: ${info.snapshot} with ${info.indices.length} indices`);

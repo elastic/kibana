@@ -20,6 +20,12 @@ node scripts/es_snapshot_loader restore \
   --snapshot-url file:///path/to/snapshot \
   --es-url http://elastic:changeme@localhost:9200
 
+# Restore a specific snapshot by name
+node scripts/es_snapshot_loader restore \
+  --snapshot-url file:///path/to/snapshot \
+  --snapshot-name my-snapshot-2025-12-01 \
+  --es-url http://elastic:changeme@localhost:9200
+
 # With index filtering
 node scripts/es_snapshot_loader restore \
   --snapshot-url file:///path/to/snapshot \
@@ -36,6 +42,13 @@ node scripts/es_snapshot_loader replay \
   --snapshot-url file:///path/to/snapshot \
   --es-url http://elastic:changeme@localhost:9200
 
+# Replay a specific snapshot by name
+node scripts/es_snapshot_loader replay \
+  --snapshot-url file:///path/to/snapshot \
+  --snapshot-name my-snapshot-2025-12-01 \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --patterns "logs-*,metrics-*,traces-*"
+
 # With custom data stream patterns
 node scripts/es_snapshot_loader replay \
   --snapshot-url file:///path/to/snapshot \
@@ -45,11 +58,12 @@ node scripts/es_snapshot_loader replay \
 
 ### Common Options
 
-| Flag             | Description                                                                            |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| `--snapshot-url` | URL to the snapshot directory (required). Only `file://` URLs are currently supported. |
-| `--es-url`       | Elasticsearch URL with credentials (e.g., `http://elastic:changeme@localhost:9200`)    |
-| `--kibana-url`   | Kibana URL for ES requests proxied through Kibana (e.g., `http://localhost:5601`)      |
+| Flag              | Description                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| `--snapshot-url`  | URL to the snapshot directory (required). Only `file://` URLs are currently supported. |
+| `--snapshot-name` | Snapshot name to restore/replay (default: latest SUCCESS snapshot in the repository)   |
+| `--es-url`        | Elasticsearch URL with credentials (e.g., `http://elastic:changeme@localhost:9200`)    |
+| `--kibana-url`    | Kibana URL for ES requests proxied through Kibana (e.g., `http://localhost:5601`)      |
 
 ### Restore-specific Options
 
@@ -75,6 +89,7 @@ const result = await restoreSnapshot({
   esClient,
   logger,
   snapshotUrl: 'file:///path/to/snapshot',
+  snapshotName: 'my-snapshot-2025-12-01',
   indices: ['my-index-*'],
 });
 
@@ -92,6 +107,7 @@ const result = await replaySnapshot({
   esClient,
   logger,
   snapshotUrl: 'file:///path/to/snapshot',
+  snapshotName: 'my-snapshot-2025-12-01',
   patterns: ['logs-*', 'metrics-*', 'traces-*'],
   concurrency: 5, // optional: limit parallel reindex operations
 });
@@ -119,6 +135,7 @@ describe('my test suite', () => {
       esClient,
       logger: console, // or your test logger
       snapshotUrl: 'file:///fixtures/otel-demo-snapshot',
+      snapshotName: 'otel-demo-snapshot-2025-12-01',
       patterns: ['logs-*', 'metrics-*', 'traces-*'],
     });
   });
@@ -145,7 +162,7 @@ describe('my test suite', () => {
 ## How Replay Works
 
 1. Register a URL-based snapshot repository
-2. Retrieve snapshot metadata (finds the most recent snapshot)
+2. Retrieve snapshot metadata (uses `--snapshot-name` if provided; otherwise picks the latest SUCCESS snapshot)
 3. Restore indices to temporary locations (prefixed with `snapshot-loader-temp-`)
 4. Create an ingest pipeline that transforms `@timestamp` fields:
    - The most recent timestamp in the snapshot becomes "now"

@@ -14,6 +14,7 @@ import { replaySnapshot } from '../src/replay';
 
 interface CommonFlags {
   'snapshot-url'?: string;
+  'snapshot-name'?: string;
   'kibana-url'?: string;
   'es-url'?: string;
 }
@@ -68,6 +69,9 @@ const COMMON_FLAGS_HELP = `
                         Currently only file:// URLs are supported
                         Example: file:///path/to/snapshot
 
+    --snapshot-name     Snapshot name to restore/replay
+                        Default: latest SUCCESS snapshot in the repository
+
     --es-url            Elasticsearch URL with credentials
                         Example: http://elastic:changeme@localhost:9200
 
@@ -105,9 +109,11 @@ function runRestoreCli(): void {
 
   run(
     async ({ log, flags }) => {
-      const { 'snapshot-url': snapshotUrl, indices: indicesFlag } = flags as CommonFlags & {
-        indices?: string;
-      };
+      const {
+        'snapshot-url': snapshotUrl,
+        'snapshot-name': snapshotName,
+        indices: indicesFlag,
+      } = flags as CommonFlags & { indices?: string };
 
       if (!snapshotUrl) throw new Error('--snapshot-url is required');
 
@@ -118,9 +124,16 @@ function runRestoreCli(): void {
       log.info(`Snapshot Restore`);
       log.info(`================`);
       log.info(`Snapshot URL: ${snapshotUrl}`);
+      if (snapshotName) log.info(`Snapshot name: ${snapshotName}`);
       if (indices) log.info(`Index patterns: ${indices.join(', ')}`);
 
-      const result = await restoreSnapshot({ esClient, logger, snapshotUrl, indices });
+      const result = await restoreSnapshot({
+        esClient,
+        logger,
+        snapshotUrl,
+        snapshotName,
+        indices,
+      });
 
       if (result.success) {
         log.success(`Snapshot restore completed successfully`);
@@ -135,7 +148,7 @@ function runRestoreCli(): void {
     {
       description: 'Restore an Elasticsearch snapshot directly',
       flags: {
-        string: ['snapshot-url', 'kibana-url', 'es-url', 'indices'],
+        string: ['snapshot-url', 'snapshot-name', 'kibana-url', 'es-url', 'indices'],
         help: `
       Usage: node scripts/es_snapshot_loader restore [options]
       ${COMMON_FLAGS_HELP}
@@ -154,6 +167,7 @@ function runReplayCli(): void {
     async ({ log, flags }) => {
       const {
         'snapshot-url': snapshotUrl,
+        'snapshot-name': snapshotName,
         patterns: patternsFlag,
         concurrency: concurrencyFlag,
       } = flags as CommonFlags & {
@@ -177,10 +191,18 @@ function runReplayCli(): void {
       log.info(`Snapshot Replay`);
       log.info(`===============`);
       log.info(`Snapshot URL: ${snapshotUrl}`);
+      if (snapshotName) log.info(`Snapshot name: ${snapshotName}`);
       log.info(`Index patterns: ${patterns.join(', ')}`);
       if (concurrency) log.info(`Concurrency: ${concurrency}`);
 
-      const result = await replaySnapshot({ esClient, logger, snapshotUrl, patterns, concurrency });
+      const result = await replaySnapshot({
+        esClient,
+        logger,
+        snapshotUrl,
+        snapshotName,
+        patterns,
+        concurrency,
+      });
 
       if (result.success) {
         log.success(`Snapshot replay completed successfully`);
@@ -197,7 +219,14 @@ function runReplayCli(): void {
       description:
         'Replay an Elasticsearch snapshot with timestamp transformation for data streams',
       flags: {
-        string: ['snapshot-url', 'kibana-url', 'es-url', 'patterns', 'concurrency'],
+        string: [
+          'snapshot-url',
+          'snapshot-name',
+          'kibana-url',
+          'es-url',
+          'patterns',
+          'concurrency',
+        ],
         help: `
       Usage: node scripts/es_snapshot_loader replay [options]
       ${COMMON_FLAGS_HELP}

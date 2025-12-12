@@ -16,7 +16,7 @@ import {
 import { filterIndicesToRestore, restoreIndices } from './restore';
 
 export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
-  const { esClient, logger, snapshotUrl, indices } = config;
+  const { esClient, logger, snapshotUrl, snapshotName, indices } = config;
 
   const result: LoadResult = {
     success: false,
@@ -34,7 +34,7 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
     await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
 
     logger.info('Step 2/3: Retrieving snapshot metadata...');
-    const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName });
+    const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName, snapshotName });
     result.snapshotName = snapshotInfo.snapshot;
 
     const indicesToRestore = indices

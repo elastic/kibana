@@ -24,6 +24,8 @@ interface BaseConfig {
   esClient: Client;
   logger: Logger;
   snapshotUrl: string;
+  // If omitted, the loader will select the latest SUCCESS snapshot in the repository.
+  snapshotName?: string;
 }
 
 // Restore configuration

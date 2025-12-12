@@ -6,22 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
 import { getDestinationInfo } from './reindex';
 import { createTimestampPipeline } from './pipeline';
+import { loggerMock } from '@kbn/logging-mocks';
 
-const createMockLogger = (): Logger =>
-  ({
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    log: jest.fn(),
-    isLevelEnabled: jest.fn().mockReturnValue(true),
-    get: jest.fn().mockReturnThis(),
-  } as unknown as Logger);
+const logger = loggerMock.create();
 
 const createMockEsClient = (): Client =>
   ({
@@ -57,7 +46,6 @@ describe('getDestinationInfo', () => {
 describe('createTimestampPipeline', () => {
   it('creates pipeline with correct timestamp parameter', async () => {
     const esClient = createMockEsClient();
-    const logger = createMockLogger();
     const maxTimestamp = '2024-01-15T12:00:00.000Z';
     const pipelineName = 'test-pipeline';
 
@@ -79,7 +67,6 @@ describe('createTimestampPipeline', () => {
 
   it('logs success message', async () => {
     const esClient = createMockEsClient();
-    const logger = createMockLogger();
 
     await createTimestampPipeline({
       esClient,
