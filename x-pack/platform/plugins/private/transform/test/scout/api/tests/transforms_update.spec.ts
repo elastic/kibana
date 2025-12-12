@@ -9,7 +9,7 @@ import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 const TRANSFORM_ID = 'transform-test-update-1';
 

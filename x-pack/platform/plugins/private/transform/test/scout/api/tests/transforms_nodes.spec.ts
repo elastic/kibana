@@ -8,7 +8,7 @@
 import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }, () => {
   let transformPowerUserApiCredentials: RoleApiCredentials;

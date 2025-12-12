@@ -11,7 +11,7 @@ import type { ResetTransformsRequestSchema } from '../../../../server/routes/api
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 // single transform reset
 apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY }, () => {

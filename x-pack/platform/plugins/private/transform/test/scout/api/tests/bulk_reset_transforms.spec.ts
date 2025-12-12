@@ -11,7 +11,7 @@ import type { ResetTransformsRequestSchema } from '../../../../server/routes/api
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('bulk reset', { tag: tags.ESS_ONLY }, () => {
   const transformIds = ['bulk_reset_test_1', 'bulk_reset_test_2'];

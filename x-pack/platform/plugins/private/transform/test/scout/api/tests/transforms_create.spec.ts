@@ -9,7 +9,7 @@ import { expect, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 // use Scout data views API service when available
 const deleteDataViewByTitle = async (title: string) => {

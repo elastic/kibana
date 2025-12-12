@@ -12,7 +12,7 @@ import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
 
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 const transformId = 'transform-test-stop';
 

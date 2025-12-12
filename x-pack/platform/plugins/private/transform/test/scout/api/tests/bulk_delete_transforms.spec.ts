@@ -11,7 +11,7 @@ import type { DeleteTransformsRequestSchema } from '../../../../server/routes/ap
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 const transformIds = ['bulk_delete_test_1', 'bulk_delete_test_2'];
 
