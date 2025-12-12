@@ -83,7 +83,7 @@ export const RiskScorePreviewTable = ({
       tableCaption={i18n.translate(
         'xpack.securitySolution.riskScore.previewTable.caption',
         {
-          defaultMessage: 'Entity risk score preview table',
+          defaultMessage: 'Entity risk score preview',
         }
       )}
     />
