@@ -49,7 +49,7 @@ export class MaintenanceWindowClientFactory {
     const { securityService } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
       includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
-      ...(withAuth ? {} : { excludedExtensions }),
+      ...(withAuth ? {} : { excludedExtensions: [....excludedExtensions, SECURITY_EXTENSION_ID] }),
     });
 
     const uiSettingClient = this.uiSettings.asScopedToClient(savedObjectsClient);
