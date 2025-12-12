@@ -8,10 +8,11 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { CliSupportedServerModes } from '../../types';
-import { getConfigFilePath } from './get_config_file';
-import { readConfigFile } from '../loader';
+import fs from 'fs';
+import type { CliSupportedServerModes } from '../../../types';
 import type { Config } from '../config';
+import { readConfigFile } from '../loader';
+import { getConfigFilePath } from './get_config_file';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
 
 /**
@@ -20,15 +21,21 @@ import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
  * to the disk.
  * @param mode server local run mode
  * @param log Logger instance to report errors or debug information.
+ * @param configRootDir The root directory where the config file is located (e.g., 'servers/configs/default/serverless' or 'servers/configs/custom/uiam_local/serverless')
  * @returns "kbn-test" compatible Config instance
  */
 export async function loadServersConfig(
   mode: CliSupportedServerModes,
-  log: ToolingLog
+  log: ToolingLog,
+  configRootDir: string
 ): Promise<Config> {
-  // get path to one of the predefined config files
-  const configPath = getConfigFilePath(mode);
-  // load config that is compatible with kbn-test input format
+  const configPath = getConfigFilePath(configRootDir, mode);
+
+  // Validate that the config file exists
+  if (!fs.existsSync(configPath)) {
+    throw new Error(`Config file not found: ${configPath}`);
+  }
+
   const clusterConfig = await readConfigFile(configPath);
   // construct config for Playwright Test
   const scoutServerConfig = clusterConfig.getScoutTestConfig();
