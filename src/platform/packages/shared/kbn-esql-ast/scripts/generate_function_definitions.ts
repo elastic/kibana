@@ -53,6 +53,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   if (ESFunctionDefinition.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     locationsAvailable = [Location.STATS_TIMESERIES];
   }
+
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
@@ -71,7 +72,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           ...param,
           type: convertDateTime(param.type),
           license: param.license?.toLowerCase(),
-          description: undefined,
+          description: param.description,
           ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
               param.name === 'field'

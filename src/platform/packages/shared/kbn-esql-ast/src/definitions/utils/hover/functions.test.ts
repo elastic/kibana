@@ -29,7 +29,7 @@ describe('getFormattedFunctionSignature', () => {
       };
 
       const result = getFormattedFunctionSignature(functionDef);
-      expect(result).toBe(`now(): date`);
+      expect(result).toBe(`NOW(): date`);
     });
 
     it('should format a function with a single parameter', () => {
@@ -53,8 +53,8 @@ describe('getFormattedFunctionSignature', () => {
       };
 
       const result = getFormattedFunctionSignature(functionDef);
-      expect(result).toBe(`abs (
-  number: double
+      expect(result).toBe(`ABS(
+  number:double
 ): double`);
     });
 
@@ -90,10 +90,10 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef);
       expect(result).toBe(
-        `substring (
-  string: keyword,  
-  start: integer,  
-  length?: integer
+        `SUBSTRING(
+  string:keyword,  
+  start:integer,  
+  length?:integer
 ): keyword`
       );
     });
@@ -127,9 +127,9 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef);
       expect(result).toBe(
-        `test_func (
-  required: keyword,  
-  optional?: integer
+        `TEST_FUNC(
+  required:keyword,  
+  optional?:integer
 ): keyword`
       );
     });
@@ -171,9 +171,9 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef);
       expect(result).toBe(
-        `test_func (
-  field: keyword,  
-  extra?: integer
+        `TEST_FUNC(
+  field:keyword,  
+  extra?:integer
 ): keyword`
       );
     });
@@ -212,9 +212,9 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef);
       expect(result).toBe(
-        `coalesce (
-  first: integer | keyword
-): integer | keyword`
+        `COALESCE(
+  first:integer|keyword
+): integer|keyword`
       );
     });
 
@@ -260,10 +260,10 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef);
       expect(result).toBe(
-        `test_func (
-  param1: keyword,  
-  param2?: integer,  
-  param3?: boolean
+        `TEST_FUNC(
+  param1:keyword,  
+  param2?:integer,  
+  param3?:boolean
 ): keyword`
       );
     });
@@ -300,9 +300,9 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef);
       expect(result).toBe(
-        `test_func (
-  input: integer | keyword
-): double | keyword`
+        `TEST_FUNC(
+  input:integer|keyword
+): double|keyword`
       );
     });
   });
@@ -350,8 +350,8 @@ describe('getFormattedFunctionSignature', () => {
       const result = getFormattedFunctionSignature(functionDef, fnNode, columns);
 
       // Should only show the integer signature since we passed an integer literal
-      expect(result).toBe(`math_function (
-  input: integer
+      expect(result).toBe(`MATH_FUNCTION(
+  input:integer
 ): integer`);
     });
 
@@ -383,16 +383,16 @@ describe('getFormattedFunctionSignature', () => {
       );
 
       // This should  show only integer signature
-      expect(resultWithLiteral).toBe(`test_function (
-  input: integer
+      expect(resultWithLiteral).toBe(`TEST_FUNCTION(
+  input:integer
 ): integer`);
 
       // Test without fnNode and columns - should show all signatures
       const resultWithoutFiltering = getFormattedFunctionSignature(functionDef);
 
-      expect(resultWithoutFiltering).toBe(`test_function (
-  input: integer | keyword
-): integer | keyword`);
+      expect(resultWithoutFiltering).toBe(`TEST_FUNCTION(
+  input:integer|keyword
+): integer|keyword`);
     });
 
     it('should filter signatures based on column types when using a field', () => {
@@ -425,9 +425,9 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef, fnNode, columns);
 
-      expect(result).toBe(`string_function (
-  input: keyword | text
-): keyword | text`);
+      expect(result).toBe(`STRING_FUNCTION(
+  input:keyword|text
+): keyword|text`);
     });
 
     it('should filter signatures based on multiple arguments', () => {
@@ -467,9 +467,9 @@ describe('getFormattedFunctionSignature', () => {
       const result = getFormattedFunctionSignature(functionDef, fnNode, columns);
 
       // Should only show the signature that matches integer + keyword
-      expect(result).toBe(`multi_arg_function (
-  first: integer,  
-  second: keyword
+      expect(result).toBe(`MULTI_ARG_FUNCTION(
+  first:integer,  
+  second:keyword
 ): keyword`);
     });
 
@@ -492,9 +492,109 @@ describe('getFormattedFunctionSignature', () => {
 
       const result = getFormattedFunctionSignature(functionDef, fnNode, columns);
 
-      expect(result).toBe(`strict_function (
-  input: boolean
+      expect(result).toBe(`STRICT_FUNCTION(
+  input:boolean
 ): boolean`);
+    });
+  });
+
+  describe('type list formatting with maxTypesToShow', () => {
+    it('should limit types and show "+X more" when maxTypesToShow is exceeded by more than 1', () => {
+      const functionDef: FunctionDefinition = {
+        type: FunctionDefinitionTypes.SCALAR,
+        name: 'test_func',
+        description: 'Test function',
+        locationsAvailable: [],
+        signatures: [
+          {
+            params: [{ name: 'input', type: 'boolean', optional: false }],
+            returnType: 'boolean',
+          },
+          {
+            params: [{ name: 'input', type: 'date', optional: false }],
+            returnType: 'date',
+          },
+          {
+            params: [{ name: 'input', type: 'double', optional: false }],
+            returnType: 'double',
+          },
+          {
+            params: [{ name: 'input', type: 'integer', optional: false }],
+            returnType: 'integer',
+          },
+          {
+            params: [{ name: 'input', type: 'keyword', optional: false }],
+            returnType: 'keyword',
+          },
+        ],
+      };
+
+      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, 3);
+      // Should show first 3 types + "+2 more"
+      expect(result).toContain('boolean|date|double');
+      expect(result).toContain('+2 more');
+      expect(result).not.toContain('integer');
+      expect(result).not.toContain('keyword');
+    });
+
+    it('should show the actual type instead of "+1 more" when only 1 type remains', () => {
+      const functionDef: FunctionDefinition = {
+        type: FunctionDefinitionTypes.SCALAR,
+        name: 'test_func',
+        description: 'Test function',
+        locationsAvailable: [],
+        signatures: [
+          {
+            params: [{ name: 'input', type: 'boolean', optional: false }],
+            returnType: 'boolean',
+          },
+          {
+            params: [{ name: 'input', type: 'date', optional: false }],
+            returnType: 'date',
+          },
+          {
+            params: [{ name: 'input', type: 'double', optional: false }],
+            returnType: 'double',
+          },
+          {
+            params: [{ name: 'input', type: 'integer', optional: false }],
+            returnType: 'integer',
+          },
+        ],
+      };
+
+      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, 3);
+      // Should show all 4 types instead of "boolean | date | double|…+1 more"
+      expect(result).toContain('boolean|date|double|integer');
+      expect(result).not.toContain('+1 more');
+    });
+
+    it('should show exact count when maxTypesToShow equals the number of types', () => {
+      const functionDef: FunctionDefinition = {
+        type: FunctionDefinitionTypes.SCALAR,
+        name: 'test_func',
+        description: 'Test function',
+        locationsAvailable: [],
+        signatures: [
+          {
+            params: [{ name: 'input', type: 'boolean', optional: false }],
+            returnType: 'boolean',
+          },
+          {
+            params: [{ name: 'input', type: 'date', optional: false }],
+            returnType: 'date',
+          },
+          {
+            params: [{ name: 'input', type: 'double', optional: false }],
+            returnType: 'double',
+          },
+        ],
+      };
+
+      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, 3);
+      // Should show all types without "+more" indicator
+      expect(result).toContain('boolean|date|double');
+      expect(result).not.toContain('more');
     });
   });
 });

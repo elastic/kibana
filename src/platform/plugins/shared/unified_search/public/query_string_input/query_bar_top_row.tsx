@@ -37,7 +37,9 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  EuiIconTip,
   useEuiTheme,
+  type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
@@ -607,6 +609,20 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
+      const timeZoneName = uiSettings.get('dateFormat:tz');
+      const timeZoneSettingTip = i18n.translate(
+        'unifiedSearch.queryBarTopRow.datePicker.timeZoneSettingTip',
+        {
+          defaultMessage: 'Time zone is set in space settings by administrators',
+        }
+      );
+      const timeZoneCustomRender: EuiTimeZoneDisplayProps['customRender'] = ({ nameDisplay }) => (
+        <>
+          {nameDisplay}
+          <EuiIconTip content={timeZoneSettingTip} color="subdued" />
+        </>
+      );
+
       const datePicker = (
         <SuperDatePicker
           isDisabled={isDisabled}
@@ -628,6 +644,11 @@ export const QueryBarTopRow = React.memo(
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
           compressed
+          showTimeWindowButtons
+          timeZoneDisplayProps={{
+            timeZone: timeZoneName,
+            customRender: timeZoneCustomRender,
+          }}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);

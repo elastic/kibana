@@ -16,13 +16,16 @@
  * 2. Get approval from the workflows-eng team
  *
  * If the handler implementation changes, the handler hash must be updated, and get the approval again.
+ *
+ * Example of an approved step definition entry:
+ * {
+ *   id: 'example.setVariable',
+ *   handlerHash: '3af06ca579302a96b18923de3ce7d04433519528e6eec309cb8a937be6514cda',
+ * },
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
-  /**
-   * Example:
-   * {
-   *   id: 'example.setVariable',
-   *   handlerHash: '3af06ca579302a96b18923de3ce7d04433519528e6eec309cb8a937be6514cda',
-   * },
-   */
+  {
+    id: 'ai.prompt',
+    handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
+  },
 ];

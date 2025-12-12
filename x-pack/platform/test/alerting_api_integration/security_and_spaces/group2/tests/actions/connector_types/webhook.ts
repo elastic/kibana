@@ -75,7 +75,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     return createdAction.id;
   }
 
-  describe('webhook action', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240923
+  describe.skip('webhook action', () => {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';

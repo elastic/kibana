@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import type { GroupingBucket, ParsedGroupingAggregation } from '@kbn/grouping/src';
 
@@ -39,8 +39,8 @@ describe('<TableSection />', () => {
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
     });
-    mockGroupedAlertsTable.mockImplementation(() => (
-      <div data-test-subj="mock-grouped-alerts-table" />
+    mockGroupedAlertsTable.mockImplementation((props) => (
+      <div data-test-subj="mock-grouped-alerts-table">{props.additionalToolbarControls}</div>
     ));
   });
 
@@ -116,6 +116,7 @@ describe('<TableSection />', () => {
     await waitFor(() => {
       expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
         attackIds: ['attack-id-1'],
+        showAnonymized: false,
       });
     });
   });
@@ -209,6 +210,172 @@ describe('<TableSection />', () => {
 
     await waitFor(() => {
       expect(queryByTestId('mock-grouped-alerts-table')).toBeInTheDocument();
+    });
+  });
+
+  describe('showAnonymizedSwitch', () => {
+    beforeEach(() => {
+      (useUserData as jest.Mock).mockReturnValue([
+        {
+          loading: false,
+        },
+      ]);
+      (useListsConfig as jest.Mock).mockReturnValue({
+        loading: false,
+      });
+    });
+
+    it('should render the show anonymized switch', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <TableSection dataView={dataView} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId(`${TABLE_SECTION_TEST_ID}-show-anonymized`)).toBeInTheDocument();
+      });
+    });
+
+    it('should render the switch as unchecked by default', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <TableSection dataView={dataView} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        const switchElement = getByTestId(
+          `${TABLE_SECTION_TEST_ID}-show-anonymized`
+        ) as HTMLButtonElement;
+        expect(switchElement).toHaveAttribute('aria-checked', 'false');
+      });
+    });
+
+    it('should toggle the switch state when clicked', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <TableSection dataView={dataView} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        const switchElement = getByTestId(
+          `${TABLE_SECTION_TEST_ID}-show-anonymized`
+        ) as HTMLButtonElement;
+        expect(switchElement).toHaveAttribute('aria-checked', 'false');
+      });
+
+      const switchElement = getByTestId(
+        `${TABLE_SECTION_TEST_ID}-show-anonymized`
+      ) as HTMLButtonElement;
+
+      await act(async () => {
+        switchElement.click();
+      });
+
+      await waitFor(() => {
+        expect(switchElement).toHaveAttribute('aria-checked', 'true');
+      });
+    });
+
+    it('should pass the switch in additionalToolbarControls to GroupedAlertsTable', async () => {
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockGroupedAlertsTable).toHaveBeenCalled();
+      });
+
+      const lastCall =
+        mockGroupedAlertsTable.mock.calls[mockGroupedAlertsTable.mock.calls.length - 1][0];
+      expect(lastCall.additionalToolbarControls).toBeDefined();
+      expect(Array.isArray(lastCall.additionalToolbarControls)).toBe(true);
+      expect(lastCall.additionalToolbarControls).toHaveLength(1);
+    });
+
+    it('should pass showAnonymized=false to useGetDefaultGroupTitleRenderers by default', async () => {
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
+          attackIds: undefined,
+          showAnonymized: false,
+        });
+      });
+    });
+
+    it('should pass showAnonymized=true to useGetDefaultGroupTitleRenderers when switch is toggled on', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <TableSection dataView={dataView} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
+          attackIds: undefined,
+          showAnonymized: false,
+        });
+      });
+
+      const switchElement = getByTestId(
+        `${TABLE_SECTION_TEST_ID}-show-anonymized`
+      ) as HTMLButtonElement;
+
+      await act(async () => {
+        switchElement.click();
+      });
+
+      await waitFor(() => {
+        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
+          attackIds: undefined,
+          showAnonymized: true,
+        });
+      });
+    });
+
+    it('should update showAnonymized back to false when switch is toggled off', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <TableSection dataView={dataView} />
+        </TestProviders>
+      );
+
+      const switchElement = getByTestId(
+        `${TABLE_SECTION_TEST_ID}-show-anonymized`
+      ) as HTMLButtonElement;
+
+      // Toggle on
+      await act(async () => {
+        switchElement.click();
+      });
+
+      await waitFor(() => {
+        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
+          attackIds: undefined,
+          showAnonymized: true,
+        });
+      });
+
+      // Toggle off
+      await act(async () => {
+        switchElement.click();
+      });
+
+      await waitFor(() => {
+        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
+          attackIds: undefined,
+          showAnonymized: false,
+        });
+      });
     });
   });
 });
