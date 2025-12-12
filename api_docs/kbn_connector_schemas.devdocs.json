@@ -180,6 +180,21 @@
         "label": "CONNECTOR_ID",
         "description": [],
         "signature": [
+          "\".mcp\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/mcp/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
           "\".microsoft_defender_endpoint\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/microsoft_defender_endpoint/constants.ts",

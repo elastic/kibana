@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/es-query",
+    "@kbn/ui-actions-plugin",
+    "@kbn/esql"
+  ]
+}
