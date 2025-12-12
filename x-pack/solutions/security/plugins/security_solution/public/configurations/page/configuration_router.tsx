@@ -9,7 +9,6 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { AISettings } from '../tabs/ai_settings';
 import { PromotionRules } from '../tabs/promotion_rules';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { ConfigurationTabs } from '../constants';
