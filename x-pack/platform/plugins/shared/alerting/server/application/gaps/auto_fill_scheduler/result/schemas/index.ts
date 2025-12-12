@@ -10,25 +10,25 @@ import { gapAutoFillSchedulerLimits } from '../../../../../../common/constants';
 
 const { maxBackfills, numRetries } = gapAutoFillSchedulerLimits;
 
-export const updateGapAutoFillSchedulerSchema = schema.object({
+export const gapAutoFillSchedulerSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
   enabled: schema.boolean(),
-  gapFillRange: schema.string(),
-  maxBackfills: schema.number(maxBackfills),
-  numRetries: schema.number(numRetries),
   schedule: schema.object({
     interval: schema.string(),
   }),
-  scope: schema.arrayOf(schema.string()),
   ruleTypes: schema.arrayOf(
     schema.object({
       type: schema.string(),
       consumer: schema.string(),
-    }),
-    {
-      minSize: 1,
-    }
+    })
   ),
-  request: schema.any(),
+  scope: schema.arrayOf(schema.string()),
+  gapFillRange: schema.string(),
+  maxBackfills: schema.number(maxBackfills),
+  numRetries: schema.number(numRetries),
+  createdBy: schema.maybe(schema.string()),
+  updatedBy: schema.maybe(schema.string()),
+  createdAt: schema.string(),
+  updatedAt: schema.string(),
 });

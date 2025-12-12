@@ -6,29 +6,29 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { gapAutoFillSchedulerLimits } from '../../../../../common/constants';
+import { gapAutoFillSchedulerLimits } from '../../../../../../../common/constants';
 
 const { maxBackfills, numRetries } = gapAutoFillSchedulerLimits;
 
-export const gapAutoFillSchedulerSchema = schema.object({
-  id: schema.string(),
+export const createGapAutoFillSchedulerSchema = schema.object({
+  id: schema.maybe(schema.string()),
   name: schema.string(),
   enabled: schema.boolean(),
+  maxBackfills: schema.number(maxBackfills),
+  numRetries: schema.number(numRetries),
+  gapFillRange: schema.string(),
   schedule: schema.object({
     interval: schema.string(),
   }),
+  request: schema.any(),
+  scope: schema.arrayOf(schema.string()),
   ruleTypes: schema.arrayOf(
     schema.object({
       type: schema.string(),
       consumer: schema.string(),
-    })
+    }),
+    {
+      minSize: 1,
+    }
   ),
-  scope: schema.arrayOf(schema.string()),
-  gapFillRange: schema.string(),
-  maxBackfills: schema.number(maxBackfills),
-  numRetries: schema.number(numRetries),
-  createdBy: schema.maybe(schema.string()),
-  updatedBy: schema.maybe(schema.string()),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
 });

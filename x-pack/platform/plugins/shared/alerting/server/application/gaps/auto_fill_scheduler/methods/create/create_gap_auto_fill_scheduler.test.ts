@@ -7,9 +7,9 @@
 
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import type { AlertingAuthorization } from '../../../../../authorization';
+import { alertingAuthorizationMock } from '../../../../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../../rule_type_registry.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   savedObjectsClientMock,
@@ -19,11 +19,11 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ConstructorOptions } from '../../../../rules_client';
-import { RulesClient } from '../../../../rules_client';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
+import type { ConstructorOptions } from '../../../../../rules_client';
+import { RulesClient } from '../../../../../rules_client';
+import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
+import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
+import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
 import type { SavedObject, KibanaRequest } from '@kbn/core/server';
 import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
