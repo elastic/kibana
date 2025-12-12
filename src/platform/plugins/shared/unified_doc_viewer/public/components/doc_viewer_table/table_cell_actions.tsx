@@ -299,12 +299,12 @@ const ToggleColumn: React.FC<
     return null;
   }
 
-  const isAddedColumn = columns?.includes(name);
+  const isColumnAdded = columns?.includes(name);
 
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType={isAddedColumn ? 'minusInCircle' : 'plusInCircle'}
+      iconType={isColumnAdded ? 'minusInCircle' : 'plusInCircle'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}
