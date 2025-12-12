@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,7 @@ export const sloTemplate: SavedObjectsType = {
           ];
           return pick(attributes, fields);
         },
+        create: schema.object({}, { unknowns: 'allow' }),
       },
     },
   },
