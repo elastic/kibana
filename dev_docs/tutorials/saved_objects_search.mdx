@@ -103,7 +103,7 @@ const result = await savedObjectsClient.search({
   namespaces: ['my-namespace'],
   query: {
     bool: {
-      filter: [{ term: { 'index-pattern.title': 'logs-*' } }],
+      filter: [{ term: { 'index-pattern.title': 'logs' } }],
     },
   },
 });
@@ -132,7 +132,7 @@ The following Elasticsearch query is created that wraps your query with namespac
       },
       {
         "bool": {
-          "filter": [{ "term": { "index-pattern.title": "logs-*" } }]
+          "filter": [{ "term": { "index-pattern.title": "logs" } }]
         }
       }
     ]
@@ -144,17 +144,21 @@ The following Elasticsearch query is created that wraps your query with namespac
 
 When a user has partial authorization (access to some but not all requested namespaces or types), a query is created that restricts each type to only the namespaces the user is authorized to access.
 
-For example, if a user requests:
-- Types: `['index-pattern', 'dashboard', 'customIndex', 'multiNamespaceTypeCustomIndex']`
+For example, if a user searches for:
+- Type: `index-pattern`
 - Namespaces: `['foo-namespace', 'bar-namespace']`
 
-But they are only authorized to:
-- `index-pattern` in `foo-namespace`
-- `dashboard` globally (all requested namespaces)
-- `customIndex` in `bar-namespace`
-- `multiNamespaceTypeCustomIndex` with no find permissions
+But they are only authorized to access `foo-namespace`:
 
-A query like this is generated:
+```ts
+const result = await savedObjectsClient.search({
+  type: ['index-pattern'],
+  namespaces: ['foo-namespace', 'bar-namespace'],
+  query: { match_all: {} },
+});
+```
+
+The generated query will only include `foo-namespace`, excluding `bar-namespace`:
 
 ```json
 {
@@ -171,31 +175,6 @@ A query like this is generated:
                 "must_not": [{ "exists": { "field": "namespaces" } }],
                 "should": [{ "terms": { "namespace": ["foo-namespace"] } }]
               }
-            },
-            {
-              "bool": {
-                "minimum_should_match": 1,
-                "must": [{ "term": { "type": "dashboard" } }],
-                "must_not": [{ "exists": { "field": "namespaces" } }],
-                "should": [{ "terms": { "namespace": ["foo-namespace", "bar-namespace"] } }]
-              }
-            },
-            {
-              "bool": {
-                "minimum_should_match": 1,
-                "must": [{ "term": { "type": "customIndex" } }],
-                "must_not": [{ "exists": { "field": "namespaces" } }],
-                "should": [{ "terms": { "namespace": ["bar-namespace"] } }]
-              }
-            },
-            {
-              "bool": {
-                "must": [
-                  { "term": { "type": "multiNamespaceTypeCustomIndex" } },
-                  { "terms": { "namespaces": ["default", "*"] } }
-                ],
-                "must_not": [{ "exists": { "field": "namespace" } }]
-              }
             }
           ]
         }
@@ -207,7 +186,7 @@ A query like this is generated:
 
 ## Response structure
 
-The `search` method returns raw Elasticsearch search results.
+The `search` method returns raw Elasticsearch search results. Before returning results, migrations are ran on saved object attributes to ensure they are up to date with the current schema version.
 
 ### Example response
 
@@ -230,7 +209,7 @@ The `search` method returns raw Elasticsearch search results.
     "hits": [
       {
         "_index": ".kibana_8.0.0",
-        "_id": "index-pattern:logs-*",
+        "_id": "index-pattern:logs",
         "_score": 1.0,
         "_source": {
           "type": "index-pattern",
@@ -238,7 +217,7 @@ The `search` method returns raw Elasticsearch search results.
           "updated_at": "2024-01-15T10:30:00.000Z",
           "created_at": "2024-01-10T08:00:00.000Z",
           "index-pattern": {
-            "title": "logs-*",
+            "title": "logs",
             "timeFieldName": "@timestamp",
             "fields": "[]"
           },
@@ -261,11 +240,10 @@ The `search` method returns raw Elasticsearch search results.
             "title": "My Dashboard",
             "description": "A sample dashboard",
             "panelsJSON": "[]",
-            "optionsJSON": "{}",
-            "version": 1
+            "optionsJSON": "{}"
           },
           "references": [
-            { "id": "logs-*", "name": "indexpattern-datasource", "type": "index-pattern" }
+            { "id": "logs", "name": "indexpattern-datasource", "type": "index-pattern" }
           ],
           "managed": false,
           "coreMigrationVersion": "8.8.0",
