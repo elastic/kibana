@@ -31,7 +31,7 @@ import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '1m';
+const TASK_SCHEDULE = '60m';
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;

@@ -19,8 +19,7 @@ export interface BulkGetMaintenanceWindowSoParams {
 }
 
 export const bulkGetMaintenanceWindowSo = (
-  params: BulkGetMaintenanceWindowSoParams,
-  namespace?: string
+  params: BulkGetMaintenanceWindowSoParams
 ): Promise<SavedObjectsBulkResponse<MaintenanceWindowAttributes>> => {
   const { objects, savedObjectsClient } = params;
 
@@ -28,9 +27,6 @@ export const bulkGetMaintenanceWindowSo = (
     objects.map((object) => ({
       id: object.id,
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-    })),
-    {
-      namespace,
-    }
+    }))
   );
 };

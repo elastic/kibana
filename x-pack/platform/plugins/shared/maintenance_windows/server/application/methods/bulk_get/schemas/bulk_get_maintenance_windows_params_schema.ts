@@ -9,5 +9,4 @@ import { schema } from '@kbn/config-schema';
 
 export const bulkGetMaintenanceWindowsParamsSchema = schema.object({
   ids: schema.arrayOf(schema.string()),
-  namespace: schema.maybe(schema.string()),
 });
