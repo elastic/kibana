@@ -42,7 +42,7 @@ export const PanelFooter = memo(() => {
     isAlert,
   });
 
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
@@ -63,10 +63,10 @@ export const PanelFooter = memo(() => {
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            {isAgentBuilderEnabled && (
+            {isAgentChatExperienceEnabled && (
               <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
             )}
-            {showAssistant && !isAgentBuilderEnabled && (
+            {showAssistant && !isAgentChatExperienceEnabled && (
               <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
             )}
           </EuiFlexItem>
