@@ -32507,10 +32507,10 @@ swagger2openapi@^7.0.8:
     yaml "^1.10.0"
     yargs "^17.0.1"
 
-swr@^2.3.3:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/swr/-/swr-2.3.3.tgz#9d6a703355f15f9099f45114db3ef75764444788"
-  integrity sha512-dshNvs3ExOqtZ6kJBaAsabhPdHyeY4P2cKwRCniDVifBMoG/SVI7tfLWqPXriVspf2Rg4tPzXJTnwaihIeFw2A==
+swr@^2.3.7:
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/swr/-/swr-2.3.7.tgz#93ca89c9c06a6a8dab72e9d8e85a687123f40356"
+  integrity sha512-ZEquQ82QvalqTxhBVv/DlAg2mbmUjF4UgpPg9wwk4ufb9rQnZXh1iKyyKBqV6bQGu1Ie7L1QwSYO07qFIa1p+g==
   dependencies:
     dequal "^2.0.3"
     use-sync-external-store "^1.4.0"
