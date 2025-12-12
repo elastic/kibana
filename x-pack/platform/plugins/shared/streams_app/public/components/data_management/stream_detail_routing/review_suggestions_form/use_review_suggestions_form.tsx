@@ -121,6 +121,11 @@ export function useReviewSuggestionsForm() {
 
   return {
     suggestions,
+    /**
+     * Directly set suggestions from external source (e.g., Agent Builder).
+     * This allows the AI agent to populate partition suggestions in the UI.
+     */
+    setSuggestions,
     removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,

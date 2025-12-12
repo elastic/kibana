@@ -47,6 +47,7 @@ import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { getDefaultFeatureRegistry } from './lib/streams/feature/feature_type_registry';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
+import { registerAgentBuilderIntegration } from './agent_builder';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -238,6 +239,15 @@ export class StreamsPlugin
       plugins.globalSearch.registerResultProvider(
         createStreamsGlobalSearchResultProvider(core, this.logger)
       );
+    }
+
+    // Register Agent Builder / Onechat integration if available
+    if (plugins.onechat) {
+      registerAgentBuilderIntegration({
+        core,
+        onechat: plugins.onechat,
+        logger: this.logger,
+      });
     }
 
     return {};

@@ -27,6 +27,7 @@ export async function partitionStream({
   end,
   maxSteps,
   signal,
+  guidance,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -36,6 +37,11 @@ export async function partitionStream({
   end: number;
   maxSteps?: number | undefined;
   signal: AbortSignal;
+  /**
+   * Optional guidance string to influence the partitioning suggestions.
+   * This is passed to the LLM as additional context to help guide the partition generation.
+   */
+  guidance?: string;
 }): Promise<Array<{ name: string; condition: Condition }>> {
   const initialClusters = await clusterLogs({
     esClient,
@@ -64,6 +70,7 @@ export async function partitionStream({
       stream: definition,
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
+      guidance,
     },
     maxSteps,
     toolCallbacks: {
