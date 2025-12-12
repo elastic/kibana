@@ -57,6 +57,27 @@ describe('<TYPE> JOIN command', () => {
       });
     });
 
+    it('can parse target with AS alias', () => {
+      const text = `FROM employees | LOOKUP JOIN languages_lookup AS ll ON language_code`;
+      const query = EsqlQuery.fromSrc(text);
+
+      expect(query.ast.commands[1]).toMatchObject({
+        commandType: 'lookup',
+        args: [
+          {
+            type: 'function',
+            subtype: 'binary-expression',
+            name: 'as',
+            args: [
+              { type: 'source', name: 'languages_lookup' },
+              { type: 'identifier', name: 'll' },
+            ],
+          },
+          {},
+        ],
+      });
+    });
+
     it('can parse out a single "ON" predicate expression', () => {
       const text = `FROM employees | LOOKUP JOIN languages_lookup ON language_code`;
       const query = EsqlQuery.fromSrc(text);

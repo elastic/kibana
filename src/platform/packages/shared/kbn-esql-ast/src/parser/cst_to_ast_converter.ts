@@ -1230,9 +1230,26 @@ export class CstToAstConverter {
     return command;
   }
 
-  private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
+  private fromJoinTarget(
+    ctx: cst.JoinTargetContext
+  ): ast.ESQLSource | ast.ESQLBinaryExpression<'as'> {
     if (ctx._index) {
-      return this.toSource(ctx._index);
+      const source = this.toSource(ctx._index);
+
+      if (ctx._qualifier) {
+        const alias = Builder.identifier(
+          { name: ctx._qualifier.text },
+          this.createParserFieldsFromToken(ctx._qualifier)
+        );
+
+        return Builder.expression.func.binary('as', [source, alias], undefined, {
+          location: getPosition(ctx.start, ctx.stop),
+          text: ctx.getText(),
+          incomplete: Boolean(ctx.exception),
+        });
+      }
+
+      return source;
     } else {
       return Builder.expression.source.node(
         {

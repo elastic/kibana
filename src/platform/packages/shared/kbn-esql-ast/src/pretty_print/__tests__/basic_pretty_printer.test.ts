@@ -232,6 +232,12 @@ describe('single line query', () => {
       test('supports binary expressions', () => {
         reprint('FROM employees | LEFT JOIN a ON b, c > d, d.e.f == 42 AND NOT MATCH(g, "hallo")');
       });
+
+      test('with AS alias', () => {
+        const { text } = reprint('FROM a | LOOKUP JOIN b AS bb ON c');
+
+        expect(text).toBe('FROM a | LOOKUP JOIN b AS bb ON c');
+      });
     });
 
     describe('ENRICH', () => {

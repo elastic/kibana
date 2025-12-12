@@ -602,6 +602,15 @@ FROM index
               /*7*/ dddddddddddddddddddddddddddddddddddddddd /*8*/`
       );
     });
+
+    test('with AS alias, comments, and long identifiers', () => {
+      const query = `FROM index | LOOKUP JOIN /* 1 */ aaaaaaaaaaaaaaaaaaaaaaaaa AS aaaaaaaaaaaaaaaaalias ON ccccccccccccccccccccccc`;
+      const text = reprint(query).text;
+      expect('\n' + text).toBe(`
+FROM index
+  | LOOKUP JOIN /* 1 */ aaaaaaaaaaaaaaaaaaaaaaaaa AS aaaaaaaaaaaaaaaaalias
+        ON ccccccccccccccccccccccc`);
+    });
   });
 
   describe('function call expressions', () => {
