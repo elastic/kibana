@@ -7,7 +7,7 @@
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 
 import pMap from 'p-map';
 
@@ -34,14 +34,18 @@ function getRuleId({
 }
 
 export async function createAlertingRuleFromTemplate(
-  deps: { rulesClient?: RulesClientApi; logger: InstallContext['logger'] },
+  deps: {
+    rulesClient?: RulesClientApi;
+    esClient: ElasticsearchClient;
+    logger: InstallContext['logger'];
+  },
   params: {
     alertTemplateArchiveAsset: ArchiveAsset;
     spaceId?: string;
     pkgName: string;
   }
 ): Promise<KibanaAssetReference> {
-  const { rulesClient, logger } = deps;
+  const { rulesClient, esClient, logger } = deps;
   const { pkgName, alertTemplateArchiveAsset, spaceId } = params;
   const ruleId = getRuleId({ pkgName, templateId: alertTemplateArchiveAsset.id, spaceId });
   try {
@@ -78,6 +82,25 @@ export async function createAlertingRuleFromTemplate(
 
     const { ruleTypeId, id: _id, ...rest } = template;
 
+    const { params: ruleParams } = rest;
+
+    const esql = ruleParams?.esqlQuery?.esql;
+
+    if (esql) {
+      const validationResult = await validateEsqlQuery(esClient, esql);
+
+      if (!validationResult.isValid) {
+        logger.debug(
+          `Rule: ${ruleId} failed validation for package ${pkgName}, installation will be deferred`
+        );
+        return {
+          id: ruleId,
+          type: KibanaSavedObjectType.alert,
+          deferred: true,
+        };
+      }
+    }
+
     logger.debug(`Creating rule: ${ruleId} for package ${pkgName}`);
     await rulesClient.create({
       data: {
@@ -86,7 +109,7 @@ export async function createAlertingRuleFromTemplate(
         enabled: true,
         actions: [],
         consumer: 'alerts',
-      }, // what value for consumer will make sense?
+      },
       options: { id: ruleId },
     });
 
@@ -112,7 +135,19 @@ export async function stepCreateAlertingRules(
     'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'authorizationHeader'
   >
 ) {
-  const { logger, savedObjectsClient, packageInstallContext, spaceId } = context;
+  const { logger, savedObjectsClient, packageInstallContext, authorizationHeader, spaceId } =
+    context;
+
+  if (!authorizationHeader) {
+    logger.debug('No authorization header provided, skipping alerting rule creation step');
+    return;
+  }
+
+  // User scoped ES client is required to ensure the ESQL that is validated is authorized to the indexes used
+  // An internal ES client will fail on non managed indexes.
+  const userRequest = createKibanaRequestFromAuth(authorizationHeader);
+  const userEsClient = appContextService.getUserScopedESClient(userRequest);
+
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -145,7 +180,7 @@ export async function stepCreateAlertingRules(
       alertTemplateAssets,
       async (alertTemplate) => {
         const ref = await createAlertingRuleFromTemplate(
-          { rulesClient, logger },
+          { rulesClient, esClient: userEsClient, logger },
           { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
         );
 
@@ -156,4 +191,20 @@ export async function stepCreateAlertingRules(
 
     await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
   });
+}
+
+async function validateEsqlQuery(esClient: ElasticsearchClient, esql: string) {
+  try {
+    // We do an async request here since validation failures will fail the query quickly
+    // If it is valid, we don't want to wait around for the results.
+    await esClient.esql.asyncQuery({
+      query: esql,
+    });
+    return { isValid: true };
+  } catch (e) {
+    return {
+      isValid: false,
+      error: e,
+    };
+  }
 }

@@ -22,6 +22,7 @@ import { MessageSigningError } from '../../common/errors';
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 import { scheduleSetupTask } from '../tasks/setup/schedule';
 
 import { appContextService } from './app_context';
@@ -64,6 +65,7 @@ import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+import { ensureDeferredAlertingRules } from './setup/ensure_deferred_alerting_rules';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -95,16 +97,24 @@ export async function setupFleet(
   esClient: ElasticsearchClient,
   options: {
     useLock: boolean;
+    requestContext?: {
+      authorizationHeader: HTTPAuthorizationHeader | null;
+      spaceId: string;
+    };
   } = { useLock: false }
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
   try {
     if (options.useLock) {
       return _runSetupWithLock(() =>
-        awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
+        awaitIfPending(async () =>
+          createSetupSideEffects(soClient, esClient, options?.requestContext)
+        )
       );
     } else {
-      return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+      return await awaitIfPending(async () =>
+        createSetupSideEffects(soClient, esClient, options?.requestContext)
+      );
     }
   } catch (error) {
     apm.captureError(error);
@@ -117,7 +127,11 @@ export async function setupFleet(
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  requestContext?: {
+    authorizationHeader: HTTPAuthorizationHeader | null;
+    spaceId: string;
+  }
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
@@ -279,6 +293,20 @@ async function createSetupSideEffects(
   logger.debug('Create CCS index patterns for remote clusters');
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
+
+  if (requestContext?.authorizationHeader) {
+    logger.debug('Ensuring deferred alerting rules are installed');
+    // Install alerting rules
+    ensureDeferredAlertingRules(
+      logger,
+      soClient,
+      requestContext.spaceId,
+      requestContext.authorizationHeader
+    ).catch((error) => {
+      apm.captureError(error);
+      logger.error('Error installing deferred alerting rules', { error });
+    });
+  }
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,

@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchServiceStart } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
@@ -28,6 +29,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type { LockManagerService } from '@kbn/lock-manager';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { FleetConfigType } from '../../common/types';
 import {
@@ -54,14 +57,13 @@ import type { FleetUsage } from '../collectors/register';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart | undefined;
   private data: DataPluginStart | undefined;
+  private es: ElasticsearchServiceStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private experimentalFeatures: ExperimentalFeatures = allowedExperimentalValues;
   private securityCoreStart: SecurityServiceStart | undefined;
@@ -90,6 +92,7 @@ class AppContextService {
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
+    this.es = appContext.elasticsearch;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjectsStart = appContext.encryptedSavedObjectsStart;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
@@ -266,6 +269,14 @@ class AppContextService {
     }
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return this.esClient;
+  }
+
+  public getUserScopedESClient(request: KibanaRequest) {
+    if (!this.es) {
+      throw new Error('Elasticsearch start service not set.');
+    }
+
+    return this.es.client.asScoped(request).asCurrentUser;
   }
 
   public getIsProductionMode() {
