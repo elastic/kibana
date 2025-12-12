@@ -180,7 +180,6 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
               breadcrumbStatus: 'hidden',
             },
             { link: 'maps' },
-            { link: 'visualize' },
           ],
         },
         {

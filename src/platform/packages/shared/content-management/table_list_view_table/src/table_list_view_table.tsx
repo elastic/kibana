@@ -101,6 +101,7 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
+      tabId?: string;
     }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
@@ -733,9 +734,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   }, [
     titleColumnName,
     customTableColumn,
-    hasUpdatedAtMetadata,
     hasCreatedByMetadata,
     createdByEnabled,
+    hasUpdatedAtMetadata,
     editItem,
     contentEditor.enabled,
     listingId,
@@ -965,24 +966,27 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     dispatch({ type: 'onItemsDeleted' });
   }, [deleteItems, entityName, fetchItems, isDeletingItems, notifyError, selectedItems]);
 
-  const renderCreateButton = useCallback(() => {
-    if (createItem) {
-      return (
-        <EuiButton
-          onClick={createItem}
-          data-test-subj="newItemButton"
-          iconType="plusInCircleFilled"
-          fill
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.listing.createNewItemButtonLabel"
-            defaultMessage="Create {entityName}"
-            values={{ entityName }}
-          />
-        </EuiButton>
-      );
-    }
-  }, [createItem, entityName]);
+  const renderCreateButton = useCallback(
+    (options?: { fill?: boolean }) => {
+      if (createItem) {
+        return (
+          <EuiButton
+            onClick={() => createItem()}
+            data-test-subj="newItemButton"
+            iconType="plusInCircleFilled"
+            fill={options?.fill ?? true}
+          >
+            <FormattedMessage
+              id="contentManagement.tableList.listing.createNewItemButtonLabel"
+              defaultMessage="Create {entityName}"
+              values={{ entityName }}
+            />
+          </EuiButton>
+        );
+      }
+    },
+    [createItem, entityName]
+  );
 
   const renderNoItemsMessage = useCallback(() => {
     if (emptyPrompt) {
@@ -1203,6 +1207,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
+          emptyPrompt={emptyPrompt}
         />
 
         {/* Delete modal */}

@@ -7,83 +7,117 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
-/**
- * Mock Table List view. This dashboard component is a wrapper around the shared UX table List view. We
- * need to ensure we're passing down the correct props, but the table list view itself doesn't need to be rendered
- * in our tests because it is covered in its package.
- */
-import { TableListView } from '@kbn/content-management-table-list-view';
+import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
 
 import { DashboardListing } from './dashboard_listing';
 import type { DashboardListingProps } from './types';
-import { coreServices } from '../services/kibana_services';
 import { render } from '@testing-library/react';
+import { coreServices } from '../services/kibana_services';
 
-jest.mock('@kbn/content-management-table-list-view-table', () => {
-  const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
-  return {
-    __esModule: true,
-    ...originalModule,
-    TableListViewKibanaProvider: jest
-      .fn()
-      .mockImplementation(({ children }: PropsWithChildren<unknown>) => {
-        return <>{children}</>;
-      }),
-  };
-});
-jest.mock('@kbn/content-management-table-list-view', () => {
-  const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
-  return {
-    __esModule: true,
-    ...originalModule,
-    TableListView: jest.fn().mockReturnValue(null),
-  };
+jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
+  __esModule: true,
+  TabbedTableListView: jest.fn().mockReturnValue(null),
+}));
+
+jest.mock('../services/kibana_services', () => ({
+  coreServices: {
+    executionContext: {
+      set: jest.fn(),
+      clear: jest.fn(),
+    },
+    application: {
+      navigateToUrl: jest.fn(),
+    },
+  },
+}));
+
+const renderDashboardListing = (
+  props: Partial<DashboardListingProps> = {},
+  { initialEntries = ['/list'] }: { initialEntries?: string[] } = {}
+) =>
+  render(
+    <I18nProvider>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Route path={['/list/:activeTab', '/list']}>
+          <DashboardListing
+            goToDashboard={jest.fn()}
+            getDashboardUrl={jest.fn()}
+            listingViewRegistry={new Set()}
+            {...props}
+          />
+        </Route>
+      </MemoryRouter>
+    </I18nProvider>
+  );
+
+const mockTabbedTableListView = TabbedTableListView as jest.Mock;
+
+const getLastCalledProps = () => {
+  expect(mockTabbedTableListView).toHaveBeenCalled();
+  const lastCallIndex = mockTabbedTableListView.mock.calls.length - 1;
+  return mockTabbedTableListView.mock.calls[lastCallIndex][0];
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 
-const renderDashboardListing = (props: Partial<DashboardListingProps> = {}) =>
-  render(<DashboardListing goToDashboard={jest.fn()} getDashboardUrl={jest.fn()} {...props} />, {
-    wrapper: I18nProvider,
+test('renders TabbedTableListView with correct title and tabs', () => {
+  renderDashboardListing();
+
+  const props = getLastCalledProps();
+  expect(props).toMatchObject({
+    title: 'Dashboards',
+    headingId: 'dashboardListingHeading',
   });
-
-test('initial filter is passed through', async () => {
-  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
-
-  renderDashboardListing({ initialFilter: 'kibanana' });
-
-  expect(TableListView).toHaveBeenCalledWith(
-    expect.objectContaining({ initialFilter: 'kibanana' }),
-    expect.any(Object) // react context
-  );
+  expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });
+  expect(props.tabs[1]).toMatchObject({ id: 'visualizations', title: 'Visualizations' });
 });
 
-test('when showWriteControls is true, table list view is passed editing functions', async () => {
-  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
-
+test('defaults to dashboards tab when no activeTab in URL', () => {
   renderDashboardListing();
 
-  expect(TableListView).toHaveBeenCalledWith(
-    expect.objectContaining({
-      createItem: expect.any(Function),
-      deleteItems: expect.any(Function),
-      editItem: expect.any(Function),
-    }),
-    expect.any(Object) // react context
-  );
+  expect(getLastCalledProps().activeTabId).toBe('dashboards');
 });
 
-test('when showWriteControls is false, table list view is not passed editing functions', async () => {
-  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
+test('reads activeTab from URL path param', () => {
+  renderDashboardListing({}, { initialEntries: ['/list/visualizations'] });
+
+  expect(getLastCalledProps().activeTabId).toBe('visualizations');
+});
+
+test('appends registry tabs after built-in tabs and preserves getTableList', () => {
+  const mockGetTableList = jest.fn();
+  const mockRegistryTab = {
+    id: 'annotations',
+    title: 'Annotations',
+    getTableList: mockGetTableList,
+  };
+  const registry = new Set([mockRegistryTab]);
+
+  renderDashboardListing({ listingViewRegistry: registry });
+
+  const props = getLastCalledProps();
+  const lastTab = props.tabs[props.tabs.length - 1];
+  expect(lastTab).toMatchObject({ id: 'annotations', title: 'Annotations' });
+  expect(lastTab.getTableList).toBe(mockGetTableList);
+});
+
+test('changeActiveTab navigates to the correct URL', () => {
   renderDashboardListing();
 
-  expect(TableListView).toHaveBeenCalledWith(
-    expect.objectContaining({
-      createItem: undefined,
-      deleteItems: undefined,
-      editItem: undefined,
-    }),
-    expect.any(Object) // react context
-  );
+  const { changeActiveTab } = getLastCalledProps();
+  changeActiveTab('visualizations');
+
+  expect(coreServices.application.navigateToUrl).toHaveBeenCalledWith('#/list/visualizations');
+});
+
+test('falls back to dashboards tab when URL has invalid activeTab', () => {
+  renderDashboardListing({}, { initialEntries: ['/list/invalid-tab'] });
+
+  expect(getLastCalledProps().activeTabId).toBe('dashboards');
 });

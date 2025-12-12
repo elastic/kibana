@@ -14,6 +14,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "eventAnnotation",
       "fieldFormats",
       "controls",
       "inspector",
@@ -26,7 +27,8 @@
       "uiActions",
       "urlForwarding",
       "presentationUtil",
-      "unifiedSearch"
+      "unifiedSearch",
+      "visualizations"
     ],
     "optionalPlugins": [
       "home",

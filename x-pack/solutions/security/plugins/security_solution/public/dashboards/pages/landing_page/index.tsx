@@ -35,6 +35,8 @@ import { trackLandingLinkClick } from '../../../common/lib/telemetry/trackers';
 import type { TagReference } from '../../context/dashboard_context';
 import { useSecurityTags } from '../../context/dashboard_context';
 
+const EMPTY_LISTING_VIEW_REGISTRY = new Set();
+
 const getInitialFilterString = (securityTags: TagReference[] | null | undefined) => {
   if (!securityTags) {
     return;
@@ -150,6 +152,7 @@ export const DashboardsLandingPage = () => {
             initialFilter={initialFilter}
             urlStateEnabled={false}
             showCreateDashboardButton={false}
+            listingViewRegistry={EMPTY_LISTING_VIEW_REGISTRY}
           />
         </>
       )}

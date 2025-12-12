@@ -110,7 +110,6 @@ export interface TableListViewKibanaDependencies {
       capabilities: {
         [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>;
       };
-      getUrlForApp: (app: string, options: { path: string }) => string;
       currentAppId$: Observable<string | undefined>;
       navigateToUrl: (url: string) => Promise<void> | void;
     };

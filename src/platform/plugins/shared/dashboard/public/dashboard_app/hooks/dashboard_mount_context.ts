@@ -19,6 +19,7 @@ export const DashboardMountContext = createContext<DashboardMountContextProps>({
   scopedHistory: () => ({} as ScopedHistory),
   onAppLeave: (handler) => {},
   setHeaderActionMenu: (mountPoint) => {},
+  listingViewRegistry: new Set(),
 });
 
 export const useDashboardMountContext = () => {

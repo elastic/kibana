@@ -28,6 +28,8 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { EventAnnotationService } from '@kbn/event-annotation-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 
 import type { DashboardStartDependencies } from '../plugin';
@@ -38,6 +40,7 @@ export let contentManagementService: ContentManagementPublicStart;
 export let dataService: DataPublicPluginStart;
 export let dataViewEditorService: DataViewEditorStart;
 export let embeddableService: EmbeddableStart;
+export let eventAnnotationService: EventAnnotationService;
 export let fieldFormatService: FieldFormatsStart;
 export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
@@ -52,6 +55,7 @@ export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
+export let visualizationsService: VisualizationsStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -62,6 +66,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   dataService = deps.data;
   dataViewEditorService = deps.dataViewEditor;
   embeddableService = deps.embeddable;
+  eventAnnotationService = deps.eventAnnotation;
   fieldFormatService = deps.fieldFormats;
   navigationService = deps.navigation;
   noDataPageService = deps.noDataPage;
@@ -76,6 +81,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   uiActionsService = deps.uiActions;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
+  visualizationsService = deps.visualizations;
 
   servicesReady$.next(true);
 };

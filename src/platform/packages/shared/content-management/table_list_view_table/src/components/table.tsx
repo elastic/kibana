@@ -17,14 +17,15 @@ import type {
   Direction,
   Query,
   Search,
+  EuiTableSelectionType,
 } from '@elastic/eui';
 import {
   EuiButton,
   EuiInMemoryTable,
-  type EuiTableSelectionType,
   useEuiTheme,
   EuiCode,
   EuiText,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -53,9 +54,6 @@ import {
 } from './user_filter_panel';
 import { FavoritesFilterButton } from './favorites_filter_panel';
 
-// Temporarily hiding tabs filter because we now have favorite filter as a button, and will rework tabs filter later
-// import { TabbedTableFilter } from './tabbed_filter';
-
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
   'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination' | 'tableFilter'
@@ -80,7 +78,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   customSortingOptions?: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
-  renderCreateButton: () => React.ReactElement | undefined;
+  renderCreateButton: (options?: { fill?: boolean }) => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
@@ -88,6 +86,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
+  emptyPrompt?: JSX.Element;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -119,6 +118,7 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
+  emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
@@ -292,21 +292,29 @@ export function Table<T extends UserContentCommonSchema>({
     searchQuery.error,
   ]);
 
-  const hasQueryOrFilters = Boolean(searchQuery.text || tableFilter.createdBy.length > 0);
+  const hasQueryOrFilters = Boolean(
+    searchQuery.text || tableFilter.favorites || tableFilter.createdBy.length > 0
+  );
 
-  const noItemsMessage = tableFilter.favorites ? (
-    <FavoritesEmptyState
-      emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
-      entityName={entityName}
-      entityNamePlural={entityNamePlural}
+  const emptyPromptTitle = (
+    <FormattedMessage
+      id="contentManagement.tableList.listing.noItemsTitle"
+      defaultMessage="No {entityNamePlural} to display"
+      values={{ entityNamePlural }}
     />
-  ) : (
+  );
+
+  const emptyPromptBody = (
     <FormattedMessage
       id="contentManagement.tableList.listing.noMatchedItemsMessage"
       defaultMessage="No {entityNamePlural} matched your search."
       values={{ entityNamePlural }}
     />
   );
+
+  const emptyPromptActions = useMemo(() => {
+    return renderCreateButton({ fill: !hasQueryOrFilters });
+  }, [renderCreateButton, hasQueryOrFilters]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
@@ -353,16 +361,6 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  // const favoritesFilter =
-  //   favoritesEnabled && !favoritesError ? (
-  //     <TabbedTableFilter
-  //       selectedTabId={tableFilter.favorites ? 'favorite' : 'all'}
-  //       onSelectedTabChanged={(newTab) => {
-  //         onFilterChange({ favorites: newTab === 'favorite' });
-  //       }}
-  //     />
-  //   ) : undefined;
-
   return (
     <UserFilterContextProvider
       enabled={createdByEnabled}
@@ -390,7 +388,24 @@ export function Table<T extends UserContentCommonSchema>({
           columns={tableColumns}
           pagination={pagination}
           loading={isFetchingItems}
-          noItemsMessage={noItemsMessage}
+          noItemsMessage={
+            (items?.length ?? 0) === 0 && !hasQueryOrFilters && emptyPrompt ? (
+              emptyPrompt
+            ) : tableFilter.favorites ? (
+              <FavoritesEmptyState
+                emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
+                entityName={entityName}
+                entityNamePlural={entityNamePlural}
+              />
+            ) : (
+              <EuiEmptyPrompt
+                title={<h3>{emptyPromptTitle}</h3>}
+                titleSize="xs"
+                body={emptyPromptBody}
+                actions={emptyPromptActions}
+              />
+            )
+          }
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}
@@ -400,7 +415,6 @@ export function Table<T extends UserContentCommonSchema>({
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          // childrenBetween={favoritesFilter}
         />
       </TagFilterContextProvider>
     </UserFilterContextProvider>

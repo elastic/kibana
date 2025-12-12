@@ -242,7 +242,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             { link: 'management:search_sessions' },
             { link: 'management:spaces' },
             { link: 'maps' },
-            { link: 'visualize' },
             { link: 'graph' },
             { link: 'canvas' },
             { link: 'management:settings' },

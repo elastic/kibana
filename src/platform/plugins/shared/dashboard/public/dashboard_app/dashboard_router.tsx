@@ -168,7 +168,11 @@ export async function mountApp({
               ]}
               render={renderDashboard}
             />
-            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route
+              exact
+              path={[LANDING_PAGE_PATH, `${LANDING_PAGE_PATH}/:activeTab`]}
+              render={renderListingPage}
+            />
             <Route exact path="/">
               <Redirect to={LANDING_PAGE_PATH} />
             </Route>
