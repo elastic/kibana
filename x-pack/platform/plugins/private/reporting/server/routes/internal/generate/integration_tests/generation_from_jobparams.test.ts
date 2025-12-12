@@ -219,7 +219,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       })
@@ -236,7 +236,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
               forceNow: expect.any(String),
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',
@@ -260,7 +260,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            layout: { id: 'test' },
+            layout: { id: 'preserve_layout' },
             objectType: 'canvas workpad',
           }),
         })
@@ -284,7 +284,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       });

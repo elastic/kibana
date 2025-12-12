@@ -37,7 +37,16 @@ const dimensionsSchema = z.object({
   width: z.number().positive().max(14400),
 });
 
-const idSchema = z.enum(['preserve_layout', 'print', 'canvas']);
+const idSchema = z.enum([
+  'preserve_layout',
+  'print',
+  'canvas',
+  'png',
+  'pdf',
+  'csv',
+  'dashboard',
+  'preserve_layout_v2',
+]);
 
 const layoutSchema = z.object({
   id: idSchema.optional(),

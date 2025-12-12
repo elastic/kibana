@@ -121,7 +121,6 @@ export abstract class RequestHandler<
         body: `invalid rison: ${jobParamsRison}`,
       });
     }
-
     try {
       validateJobParams(jobParams);
     } catch (err) {

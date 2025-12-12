@@ -364,7 +364,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
         notification: {
@@ -384,7 +384,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
             payload: {
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',

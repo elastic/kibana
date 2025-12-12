@@ -218,7 +218,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       })
@@ -235,7 +235,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
               forceNow: expect.any(String),
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',
@@ -258,7 +258,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           relativeUrls: ['test'],
           objectType: 'canvas workpad',
         }),
@@ -276,7 +276,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
               forceNow: expect.any(String),
               isDeprecated: true,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',
@@ -300,7 +300,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            layout: { id: 'test' },
+            layout: { id: 'preserve_layout' },
             objectType: 'canvas workpad',
           }),
         })
@@ -323,7 +323,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            layout: { id: 'test' },
+            layout: { id: 'preserve_layout' },
             objectType: 'canvas workpad',
           }),
         });
