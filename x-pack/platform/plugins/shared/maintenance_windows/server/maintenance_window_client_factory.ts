@@ -12,7 +12,6 @@ import type {
   SecurityServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { MaintenanceWindowClient } from './client';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
@@ -42,11 +41,15 @@ export class MaintenanceWindowClientFactory {
     this.uiSettings = options.uiSettings;
   }
 
-  private createMaintenanceWindowClient(request: KibanaRequest, withAuth: boolean) {
+  private createMaintenanceWindowClient(
+    request: KibanaRequest,
+    withAuth: boolean,
+    excludedExtensions: string[] = [SECURITY_EXTENSION_ID]
+  ) {
     const { securityService } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
       includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
-      ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID] }),
+      ...(withAuth ? {} : { excludedExtensions }),
     });
 
     const uiSettingClient = this.uiSettings.asScopedToClient(savedObjectsClient);
@@ -66,7 +69,7 @@ export class MaintenanceWindowClientFactory {
     return this.createMaintenanceWindowClient(request, true);
   }
 
-  public create(request: KibanaRequest) {
-    return this.createMaintenanceWindowClient(request, false);
+  public create(request: KibanaRequest, excludedExtension?: string[]) {
+    return this.createMaintenanceWindowClient(request, false, excludedExtension);
   }
 }

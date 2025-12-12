@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
@@ -129,7 +130,10 @@ export class Plugin implements PluginType {
         return;
       }
 
-      return pluginsStart.maintenanceWindows?.getMaintenanceWindowClientInternal(request);
+      return pluginsStart.maintenanceWindows?.getMaintenanceWindowClientInternal(request, [
+        SECURITY_EXTENSION_ID,
+        SPACES_EXTENSION_ID,
+      ]);
     };
 
     if (this.server) {
