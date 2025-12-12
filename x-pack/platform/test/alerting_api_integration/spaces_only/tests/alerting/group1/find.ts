@@ -266,6 +266,50 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body.data[0].params.severity).to.eql('medium');
       });
 
+      it('should search by actions.params', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Test connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'test',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rules/_find?search=test&search_fields=actions.params`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.be.greaterThan(0);
+        const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+        expect(match).not.to.be(undefined);
+        expect(match.actions[0].params.message).to.eql('test');
+      });
+
       it('should filter on parameters', async () => {
         const response = await supertest.get(
           `${getUrlPrefix(
