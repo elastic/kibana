@@ -10,7 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import type { StartTransformsRequestSchema } from '../../../../server/routes/api_schemas/start_transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from './constants';
+import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY }, () => {
   let transformPowerUserApiCredentials: RoleApiCredentials;
