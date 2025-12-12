@@ -203,6 +203,7 @@ export abstract class SiemMigrationsDataItemClient<
       status: { terms: { field: 'status' } },
       createdAt: { min: { field: '@timestamp' } },
       lastUpdatedAt: { max: { field: 'updated_at' } },
+      vendor: { terms: { field: 'original_item.vendor' } },
     };
     const result = await this.esClient
       .search({ index, query, aggregations, _source: false })
@@ -220,6 +221,7 @@ export abstract class SiemMigrationsDataItemClient<
       },
       created_at: (aggs.createdAt as AggregationsMinAggregate)?.value_as_string ?? '',
       last_updated_at: (aggs.lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string ?? '',
+      vendor: this.getVendorFromAggs(aggs.vendor as AggregationsStringTermsAggregate),
     };
   }
 
@@ -332,6 +334,11 @@ export abstract class SiemMigrationsDataItemClient<
       this.logger.error(`Error updating migration ${this.type} status: ${error.message}`);
       throw error;
     });
+  }
+
+  protected getVendorFromAggs(vendorAgg: AggregationsStringTermsAggregate): string {
+    const buckets = vendorAgg.buckets as AggregationsStringTermsBucket[];
+    return buckets[0]?.key?.toString() ?? 'unknown';
   }
 
   protected statusAggCounts(

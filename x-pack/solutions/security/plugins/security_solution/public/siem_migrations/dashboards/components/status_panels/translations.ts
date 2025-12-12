@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const START_DASHBOARD_MIGRATION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.dashboards.startMigration.title',
-  { defaultMessage: 'Migrate your existing Splunk® SIEM dashboards to Elastic' }
+  { defaultMessage: 'Migrate your existing SIEM dashboards to Elastic' }
 );
 export const START_DASHBOARD_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.dashboards.startMigration.upload.title',
