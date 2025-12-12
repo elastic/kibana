@@ -9,6 +9,7 @@ import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
   AggregationsTopHitsAggregate,
+  SearchHitsMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -89,7 +90,6 @@ export const createPrebuiltRuleAssetsClient = (
 
     fetchLatestVersions: ({ ruleIds, sort, filter } = {}): Promise<BasicRuleInfo[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
-        // TODO: Check if we need to check for an empty ruleIds array.
         if (ruleIds && ruleIds.length === 0) {
           return [];
         }
@@ -124,12 +124,20 @@ export const createPrebuiltRuleAssetsClient = (
           });
         }
 
-        const latestRuleIdsSearchResult = await savedObjectsClient.search<
+        const latestVersionSpecifiersResult = await savedObjectsClient.search<
           SavedObjectsRawDocSource,
-          unknown
+          {
+            rules: AggregationsMultiBucketAggregateBase<{
+              latest_version: {
+                hits: SearchHitsMetadata<{
+                  [PREBUILT_RULE_ASSETS_SO_TYPE]: RuleVersionSpecifier;
+                }>;
+              };
+            }>;
+          }
         >({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
-          namespaces: ['default'], // TODO: Check if this parameter has to change depending on space
+          namespaces: ['default'],
           _source: false,
           size: 0,
           query: {
@@ -163,24 +171,36 @@ export const createPrebuiltRuleAssetsClient = (
           },
         });
 
-        const latestRuleIds = latestRuleIdsSearchResult.aggregations.rules.buckets.map((bucket) => {
+        const buckets = latestVersionSpecifiersResult.aggregations?.rules?.buckets;
+
+        invariant(Array.isArray(buckets), 'Expected buckets to be an array');
+
+        const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.map((bucket) => {
           const hit = bucket.latest_version.hits.hits[0];
-          const soAttributes = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
+          const hitSource = hit?._source;
+
+          invariant(hitSource, 'Expected hit source to be defined');
+
+          const soAttributes = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
           return {
             rule_id: soAttributes.rule_id,
             version: soAttributes.version,
           };
         });
 
-        const soIds = latestRuleIds.map(
+        const soIds = latestVersionSpecifiers.map(
           (rule) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${rule.rule_id}_${rule.version}`
         );
 
         const savedObjectSortParameter = transformSortParameter(sort);
 
-        const searchResult = await savedObjectsClient.search<SavedObjectsRawDocSource, unknown>({
+        const searchResult = await savedObjectsClient.search<
+          SavedObjectsRawDocSource & {
+            [PREBUILT_RULE_ASSETS_SO_TYPE]: BasicRuleInfo;
+          }
+        >({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
-          namespaces: ['default'], // TODO: Check if this parameter is applicable
+          namespaces: ['default'],
           size: MAX_PREBUILT_RULES_COUNT,
           runtime_mappings: TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS
             ? {
@@ -204,11 +224,15 @@ export const createPrebuiltRuleAssetsClient = (
           _source: [
             `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
             `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+            `${PREBUILT_RULE_ASSETS_SO_TYPE}.type`,
           ],
         });
 
         const latestVersions = searchResult.hits.hits.map((hit) => {
-          const soAttributes = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
+          const hitSource = hit?._source;
+          invariant(hitSource, 'Expected hit source to be defined');
+
+          const soAttributes = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
           const versionInfo: BasicRuleInfo = {
             rule_id: soAttributes.rule_id,
             version: soAttributes.version,
@@ -232,9 +256,13 @@ export const createPrebuiltRuleAssetsClient = (
           (version) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${version.rule_id}_${version.version}`
         );
 
-        const searchResult = await savedObjectsClient.search<SavedObjectsRawDocSource, unknown>({
+        const searchResult = await savedObjectsClient.search<
+          SavedObjectsRawDocSource & {
+            [PREBUILT_RULE_ASSETS_SO_TYPE]: PrebuiltRuleAsset;
+          }
+        >({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
-          namespaces: ['default'], // TODO: Check if this parameter is applicable
+          namespaces: ['default'],
           size: MAX_PREBUILT_RULES_COUNT,
           query: {
             terms: {
@@ -244,7 +272,10 @@ export const createPrebuiltRuleAssetsClient = (
         });
 
         const ruleAssets = searchResult.hits.hits.map((hit) => {
-          const savedObject = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
+          const hitSource = hit?._source;
+          invariant(hitSource, 'Expected hit source to be defined');
+
+          const savedObject = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
           return savedObject;
         });
 
@@ -257,7 +288,7 @@ export const createPrebuiltRuleAssetsClient = (
         // Preserve the input order by mapping over the input versions array
         const orderedRuleAssets = soIds
           .map((soId) => ruleAssetsMap.get(soId))
-          .filter((asset): asset is PrebuiltRuleAsset => asset !== undefined); // TODO: Decide if we need to handle this
+          .filter((asset) => asset !== undefined);
 
         return validatePrebuiltRuleAssets(orderedRuleAssets);
       });
@@ -274,7 +305,7 @@ export const createPrebuiltRuleAssetsClient = (
           { unique_tags: AggregationsTermsAggregateBase<{ key: string; doc_count: number }> }
         >({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
-          namespaces: ['default'], // TODO: Check if this parameter has to change depending on space
+          namespaces: ['default'],
           _source: false,
           size: 0,
           query: {
@@ -303,7 +334,9 @@ export const createPrebuiltRuleAssetsClient = (
   };
 };
 
-function transformSortParameter(sort?: { field: string; order: 'asc' | 'desc' }[]) {
+function transformSortParameter(
+  sort?: { field: 'name' | 'severity' | 'risk_score'; order: 'asc' | 'desc' }[]
+) {
   const soSortFields = {
     name: `${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`,
     severity: TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS
