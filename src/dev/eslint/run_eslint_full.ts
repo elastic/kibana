@@ -11,6 +11,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import execa from 'execa';
 import path from 'path';
+import os from 'os';
 
 const IS_CI = !!process.env.CI;
 
@@ -35,6 +36,7 @@ run(
         CI_STATS_DISABLED: 'true',
         PATH: process.env.PATH + `:${path.join('node_modules', '.bin')}`,
         MOON_NO_ACTIONS: 'true',
+        MOON_CONCURRENCY: '' + (os.availableParallelism() - 1),
       },
       stdio: 'inherit',
       reject: bail, // Don't throw on non-zero exit code
