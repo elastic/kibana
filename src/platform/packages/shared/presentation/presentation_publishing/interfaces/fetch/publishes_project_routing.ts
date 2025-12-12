@@ -21,3 +21,23 @@ export const apiPublishesProjectRouting = (
     unknownApi && (unknownApi as PublishesProjectRouting)?.projectRouting$ !== undefined
   );
 };
+
+export type ProjectRoutingOverrides =
+  | {
+      name?: string;
+      value: string;
+    }[]
+  | undefined;
+
+export interface PublishesProjectRoutingOverrides {
+  projectRoutingOverrides$: PublishingSubject<ProjectRoutingOverrides>;
+}
+
+export const apiPublishesProjectRoutingOverrides = (
+  unknownApi: unknown
+): unknownApi is PublishesProjectRoutingOverrides => {
+  return Boolean(
+    unknownApi &&
+      (unknownApi as PublishesProjectRoutingOverrides)?.projectRoutingOverrides$ !== undefined
+  );
+};

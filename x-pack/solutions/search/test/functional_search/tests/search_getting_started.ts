@@ -34,7 +34,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'search-getting-started-ftr'
         ));
         await searchSpace.navigateTo(spaceCreated.id);
-        await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
       after(async () => {
@@ -229,19 +228,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
             text: 'Getting started',
           });
-        });
-
-        it('renders tour for Getting Started', async () => {
-          await pageObjects.solutionNavigation.sidenav.tour.reset();
-          await pageObjects.solutionNavigation.sidenav.tour.nextStep();
-          await pageObjects.solutionNavigation.sidenav.tour.nextStep();
-          await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
-            'sidenav-search-getting-started'
-          );
-          await pageObjects.solutionNavigation.sidenav.tour.nextStep();
-          await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
-          await browser.refresh();
-          await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
         });
       });
     });

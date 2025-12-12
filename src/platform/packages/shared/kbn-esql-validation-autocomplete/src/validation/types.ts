@@ -8,8 +8,8 @@
  */
 
 import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
-import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLColumnData } from '@kbn/esql-ast/src/commands/registry/types';
+import type { ESQLPolicy } from '@kbn/esql-ast/src/commands/registry/types';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 
 export interface ReferenceMaps {
