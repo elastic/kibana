@@ -202,9 +202,11 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 stateStorage.set('controlPanels', input.initialChildControlState);
             });
 
-            const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.actions.fetchData();
-            });
+            const filterSubscription = controlGroupAPI.appliedFilters$.subscribe(
+              (newFilters = []) => {
+                stateContainer.actions.fetchData();
+              }
+            );
 
             return () => {
               stateSubscription.unsubscribe();

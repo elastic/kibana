@@ -61,7 +61,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.filters$.subscribe((newFilters) => {
+    const subscription = controlGroupAPI.appliedFilters$.subscribe((newFilters) => {
       setControlFilters(newFilters ?? []);
     });
     return () => {

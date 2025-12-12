@@ -36,7 +36,7 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
     }
 
     let canceled = false;
-    const subscription = api.timeslice$
+    const subscription = api.appliedTimeslice$
       .pipe(
         tap(() => {
           if (!canceled) setDataLoading(true);

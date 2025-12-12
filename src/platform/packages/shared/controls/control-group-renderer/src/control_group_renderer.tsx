@@ -159,8 +159,8 @@ export const ControlGroupRenderer = ({
     const publicApi = {
       ...parentApi,
       esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
-      filters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
-      timeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
+      appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
+      appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
       reload: () => {
         parentApi.reload$.next();
       },

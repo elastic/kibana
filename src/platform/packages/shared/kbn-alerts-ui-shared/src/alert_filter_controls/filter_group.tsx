@@ -207,7 +207,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     if (!controlGroup) {
       return;
     }
-    const filterSubscription = controlGroup.filters$.subscribe({ next: debouncedFilterUpdates });
+    const filterSubscription = controlGroup.appliedFilters$.subscribe({
+      next: debouncedFilterUpdates,
+    });
     return () => {
       filterSubscription.unsubscribe();
     };

@@ -103,7 +103,7 @@ export const ControlsContent = ({
       );
 
       subscriptions.current.add(
-        controlGroup.filters$.subscribe((newFilters = []) => {
+        controlGroup.appliedFilters$.subscribe((newFilters = []) => {
           onFiltersChange(newFilters);
         })
       );
