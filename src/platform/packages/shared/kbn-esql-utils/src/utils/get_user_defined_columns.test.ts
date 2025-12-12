@@ -14,7 +14,7 @@ import {
 } from './get_user_defined_columns';
 
 describe('getUserDefinedColumns', () => {
-  describe('EVAL commands', () => {
+  describe('EVAL command', () => {
     it('identifies user-defined columns from EVAL command', () => {
       const query = 'FROM logs* | EVAL col = ABS(x)';
       const result = getUserDefinedColumns(query);
@@ -37,7 +37,7 @@ describe('getUserDefinedColumns', () => {
     });
   });
 
-  describe('RENAME commands', () => {
+  describe('RENAME command', () => {
     it('identifies user-defined columns from RENAME command', () => {
       const query = 'FROM logs* | RENAME AvgTicketPrice AS ss';
       const result = getUserDefinedColumns(query);
@@ -62,7 +62,7 @@ describe('getUserDefinedColumns', () => {
     });
   });
 
-  describe('STATS commands', () => {
+  describe('STATS command', () => {
     it('identifies user-defined columns from STATS command', () => {
       const query = 'FROM logs* | STATS count = count() BY host.name';
       const result = getUserDefinedColumns(query);
@@ -76,6 +76,35 @@ describe('getUserDefinedColumns', () => {
       });
     });
 
+    it('identifies automatically created columns from STATS command', () => {
+      const query = 'FROM logs* | STATS count() BY host.name';
+      const result = getUserDefinedColumns(query);
+
+      expect(result).toEqual({
+        1: [
+          {
+            name: 'count()',
+          },
+        ],
+      });
+    });
+
+    it('identifies user-defined columns from STATS BY option', () => {
+      const query = 'FROM logs* | STATS count = count() BY col = host.name';
+      const result = getUserDefinedColumns(query);
+
+      expect(result).toEqual({
+        1: [
+          {
+            name: 'count',
+          },
+          {
+            name: 'col',
+          },
+        ],
+      });
+    });
+
     it('identifies multiple aggregations in STATS command', () => {
       const query =
         'FROM logs* | STATS count = count(), avg_price = avg(price), max_date = max(@timestamp) BY category';
@@ -83,6 +112,14 @@ describe('getUserDefinedColumns', () => {
 
       expect(result[1]).toHaveLength(3);
       expect(result[1].map((c) => c.name)).toEqual(['count', 'avg_price', 'max_date']);
+    });
+
+    it('identifies multiple automatically created aggregations in STATS command', () => {
+      const query = 'FROM logs* | STATS count(), avg(price), max(@timestamp) BY category';
+      const result = getUserDefinedColumns(query);
+
+      expect(result[1]).toHaveLength(3);
+      expect(result[1].map((c) => c.name)).toEqual(['count()', 'avg(price)', 'max(@timestamp)']);
     });
   });
 

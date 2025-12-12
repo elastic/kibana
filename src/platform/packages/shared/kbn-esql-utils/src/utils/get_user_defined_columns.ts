@@ -61,7 +61,7 @@ export function getUserDefinedColumns(query: string): UserDefinedColumnsPerComma
 function getUserDefinedColumnsFromCommand(command: ESQLCommand): UserDefinedColumn[] {
   const userDefinedColumns: UserDefinedColumn[] = [];
 
-  command.args.forEach((arg) => {
+  const processArgument = (arg: any) => {
     // Handle assignment (=) - creates new columns in EVAL, STATS etc.
     if (isAssignment(arg) && isColumn(arg.args[0])) {
       const leftColumn = arg.args[0] as ESQLColumn;
@@ -83,7 +83,28 @@ function getUserDefinedColumnsFromCommand(command: ESQLCommand): UserDefinedColu
         });
       }
     }
-  });
+
+    // Handle standalone function calls that automatically create columns (e.g., STATS count())
+    // Only consider variadic-call functions, not binary expressions (operators like >, =, etc.)
+    else if (
+      isFunctionExpression(arg) &&
+      arg.subtype === 'variadic-call' &&
+      arg.text &&
+      arg.name !== 'as'
+    ) {
+      // Use the text representation (e.g., "count()") as the column name
+      userDefinedColumns.push({
+        name: arg.text,
+      });
+    }
+
+    // Handle option arguments (like BY clauses) that can contain assignments
+    else if (arg.type === 'option' && arg.args) {
+      arg.args.forEach(processArgument);
+    }
+  };
+
+  command.args.forEach(processArgument);
 
   return userDefinedColumns;
 }
