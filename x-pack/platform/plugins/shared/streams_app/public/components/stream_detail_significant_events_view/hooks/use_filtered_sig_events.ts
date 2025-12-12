@@ -18,7 +18,7 @@ export const useFilteredSigEvents = (
       const lowerCaseQuery = queryString.toLowerCase();
       return values.filter(
         (item) =>
-          item.title.toLowerCase().includes(lowerCaseQuery) ||
+          item.query.title.toLowerCase().includes(lowerCaseQuery) ||
           item.query.feature?.name.toLowerCase().includes(lowerCaseQuery) ||
           item.query.feature?.name?.toLowerCase().includes(lowerCaseQuery) ||
           item.query.kql.query.toLowerCase().includes(lowerCaseQuery)
