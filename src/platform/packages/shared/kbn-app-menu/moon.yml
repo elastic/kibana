@@ -19,7 +19,6 @@ project:
     sourceRoot: src/platform/packages/shared/kbn-app-menu
 dependsOn:
   - '@kbn/split-button'
-  - '@kbn/unified-tabs'
   - '@kbn/i18n'
 tags:
   - shared-browser
