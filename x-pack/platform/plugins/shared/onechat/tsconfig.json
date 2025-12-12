@@ -94,6 +94,8 @@
     "@kbn/core-notifications-browser",
     "@kbn/ai-assistant-common",
     "@kbn/ui-theme",
-    "@kbn/ai-assistant-management-plugin"
+    "@kbn/ai-assistant-management-plugin",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/stack-connectors-plugin"
   ]
 }
