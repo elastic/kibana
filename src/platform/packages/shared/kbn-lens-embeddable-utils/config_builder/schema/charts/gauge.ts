@@ -9,7 +9,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, metricOperationDefinitionSchema } from '../metric_ops';
+import {
+  esqlColumnSchema,
+  genericOperationOptionsSchema,
+  metricOperationDefinitionSchema,
+} from '../metric_ops';
 import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
@@ -132,6 +136,7 @@ export const gaugeStateSchemaESQL = schema.object({
    */
   metric: schema.allOf([
     schema.object({
+      ...genericOperationOptionsSchema,
       ...gaugeStateMetricOptionsSchema,
       ...gaugeStateMetricInnerESQLOpsSchema,
     }),
