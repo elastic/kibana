@@ -915,9 +915,9 @@ describe('tagKibanaAssets', () => {
         })
       ).rejects.toThrow();
 
-      // Should have retried 5 times (initial + 5 retries = 6 total)
-      expect(savedObjectTagClient.create).toHaveBeenCalledTimes(6);
-    }, 35000); // Increase timeout for retry test (pRetry uses exponential backoff: 1s, 2s, 4s, 8s, 16s = ~31s)
+      // Should have retried 3 times (initial + 3 retries = 4 total)
+      expect(savedObjectTagClient.create).toHaveBeenCalledTimes(4);
+    }, 5000); // Timeout for retry test with minTimeout: 0, maxTimeout: 100
 
     it('should not retry on non-conflict errors', async () => {
       savedObjectTagClient.get.mockImplementation(async (id: string) => {

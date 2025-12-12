@@ -40,6 +40,7 @@ const MANAGED_TAG_NAME = 'Managed';
 const LEGACY_MANAGED_TAG_ID = 'managed';
 const SECURITY_SOLUTION_TAG_NAME = 'Security Solution';
 const SECURITY_SOLUTION_TAG_ID_BASE = 'security-solution';
+const TAG_CREATION_CONFLICT_RETRIES = 3;
 
 // the tag service only accepts 6-digits hex colors
 const TAG_COLORS = [
@@ -238,7 +239,12 @@ async function getPackageSpecTags(
               },
               { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
             ),
-          { retries: 5, onFailedAttempt: onlyRetryConflictErrors }
+          {
+            retries: TAG_CREATION_CONFLICT_RETRIES,
+            minTimeout: 0,
+            maxTimeout: 100,
+            onFailedAttempt: onlyRetryConflictErrors,
+          }
         );
       }
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);
