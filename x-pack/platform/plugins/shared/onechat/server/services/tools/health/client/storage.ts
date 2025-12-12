@@ -25,7 +25,7 @@ const storageSettings = {
       status: types.keyword({}),
       last_check: types.date({}),
       error_message: types.text({}),
-      consecutive_failures: types.integer({}),
+      consecutive_failures: types.long({}),
       updated_at: types.date({}),
     },
   },
