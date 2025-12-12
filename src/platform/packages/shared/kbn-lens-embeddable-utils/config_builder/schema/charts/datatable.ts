@@ -38,9 +38,9 @@ const datatableStateSharedOptionsSchema = {
          */
         mode: schema.maybe(
           schema.oneOf(
-            [schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')],
+            [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
             {
-              defaultValue: 'normal',
+              defaultValue: 'default',
               meta: { description: 'Density mode' },
             }
           )
