@@ -7,8 +7,9 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
+import type { DownloadScriptRequestParams } from '../../../../common/api/endpoint/scripts_library';
+import { GetOneScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
 import { errorHandler } from '../error_handler';
-import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { EndpointAppContext } from '../../types';
@@ -16,21 +17,21 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import { CreateScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
 
-export const getCreateScriptRequestHandler = (
+export const getOneScriptRequestHandler = (
   endpointAppServices: EndpointAppContextService
 ): RequestHandler<
-  unknown,
-  unknown,
-  CreateScriptRequestBody,
+  DownloadScriptRequestParams,
+  undefined,
+  undefined,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointAppServices.createLogger('createScriptRouteHandler');
+  const logger = endpointAppServices.createLogger('getScriptRouteHandler');
 
   return async (context, req, res) => {
-    logger.debug(`creating new script [${req.body.name}]`);
+    const scriptId = req.params.script_id;
+    logger.debug(() => `Get script id: ${scriptId}`);
 
     try {
       const spaceId = (await context.securitySolution).getSpaceId();
@@ -39,7 +40,8 @@ export const getCreateScriptRequestHandler = (
         spaceId,
         user?.username || 'unknown'
       );
-      const response: EndpointScriptApiResponse = { data: await scriptsClient.create(req.body) };
+
+      const response: EndpointScriptApiResponse = { data: await scriptsClient.get(scriptId) };
 
       return res.ok({ body: response });
     } catch (err) {
@@ -48,24 +50,19 @@ export const getCreateScriptRequestHandler = (
   };
 };
 
-export const registerCreateScriptRoute = (
+export const registerGetScriptRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) => {
   router.versioned
-    .post({
+    .get({
       access: 'public',
-      path: SCRIPTS_LIBRARY_ROUTE,
+      path: SCRIPTS_LIBRARY_ROUTE_ITEM,
       security: {
         authz: { requiredPrivileges: ['securitySolution'] },
         authc: { enabled: true },
       },
       options: {
-        body: {
-          accepts: ['multipart/form-data'],
-          output: 'stream',
-          maxBytes: endpointContext.serverConfig.maxEndpointScriptFileSize,
-        },
         availability: {
           since: '9.4.0',
           stability: 'stable',
@@ -76,13 +73,13 @@ export const registerCreateScriptRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: CreateScriptRequestSchema,
+          request: GetOneScriptRequestSchema,
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteScriptsLibrary'] },
-        endpointContext.logFactory.get('createScriptRoute'),
-        getCreateScriptRequestHandler(endpointContext.service)
+        { all: ['canReadScriptsLibrary'] },
+        endpointContext.logFactory.get('getScriptRoute'),
+        getOneScriptRequestHandler(endpointContext.service)
       )
     );
 };
