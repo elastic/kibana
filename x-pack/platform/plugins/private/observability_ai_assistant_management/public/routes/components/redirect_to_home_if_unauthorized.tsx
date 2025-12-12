@@ -6,7 +6,8 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { CoreStart } from '@kbn/core/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -24,19 +25,26 @@ export function RedirectToHomeIfUnauthorized({
     settings,
   } = coreStart;
 
-  const chatExperience = settings.client.get<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+  const chatExperience$ = useMemo(
+    () => settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic),
+    [settings.client]
+  );
+  const chatExperience = useObservable(
+    chatExperience$,
+    settings.client.get(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
   );
 
   const allowed =
     (capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false) &&
     chatExperience !== AIChatExperience.Agent;
 
-  if (!allowed) {
-    navigateToApp('home');
-    return null;
-  }
+  useEffect(() => {
+    if (!allowed) {
+      navigateToApp('home');
+    }
+  }, [allowed, navigateToApp]);
+
+  if (!allowed) return null;
 
   return <>{children}</>;
 }
