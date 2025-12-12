@@ -44,11 +44,7 @@ export interface MigrationDataInputFlyoutProps {
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
 
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({
-    onClose,
-    migrationStats: initialMigrationSats,
-    migrationSource: initialMigrationSource = MigrationSource.SPLUNK,
-  }) => {
+  ({ onClose, migrationStats: initialMigrationStats }) => {
     const modalTitleId = useGeneratedHtmlId({
       prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
@@ -59,10 +55,10 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       migrationSourceDisabled,
       setMigrationSourceDisabled,
       migrationSourceOptions,
-    } = useMigrationSourceStep(initialMigrationSource);
+    } = useMigrationSourceStep(initialMigrationStats?.vendor ?? MigrationSource.SPLUNK);
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
-      initialMigrationSats
+      initialMigrationStats
     );
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
@@ -130,34 +126,30 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiFlexGroup direction="column" gutterSize="m" justifyContent="spaceBetween">
+            <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="m">
-                  <EuiFlexItem>
-                    <MigrationSourceDropdown
+                <MigrationSourceDropdown
+                  migrationSource={migrationSource}
+                  setMigrationSource={setMigrationSource}
+                  disabled={!!migrationStats?.id || migrationSourceDisabled}
+                  migrationSourceOptions={migrationSourceOptions}
+                />
+              </EuiFlexItem>
+              <>
+                {STEP_COMPONENTS[migrationSource].map((step: Step<MigrationStepProps>) => (
+                  <EuiFlexItem key={step.id}>
+                    <step.Component
+                      dataInputStep={dataInputStep}
                       migrationSource={migrationSource}
-                      setMigrationSource={setMigrationSource}
-                      disabled={migrationSourceDisabled}
-                      migrationSourceOptions={migrationSourceOptions}
+                      migrationStats={migrationStats}
+                      missingResourcesIndexed={missingResourcesIndexed}
+                      onMigrationCreated={onMigrationCreated}
+                      onMissingResourcesFetched={onMissingResourcesFetched}
+                      setDataInputStep={setDataInputStep}
                     />
                   </EuiFlexItem>
-                  <>
-                    {STEP_COMPONENTS[migrationSource].map((step: Step<MigrationStepProps>) => (
-                      <EuiFlexItem key={step.id}>
-                        <step.Component
-                          dataInputStep={dataInputStep}
-                          migrationSource={migrationSource}
-                          migrationStats={migrationStats}
-                          missingResourcesIndexed={missingResourcesIndexed}
-                          onMigrationCreated={onMigrationCreated}
-                          onMissingResourcesFetched={onMissingResourcesFetched}
-                          setDataInputStep={setDataInputStep}
-                        />
-                      </EuiFlexItem>
-                    ))}
-                  </>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+                ))}
+              </>
               <EuiFlexItem>
                 <PanelText size="xs" subdued cursive>
                   <p>{getCopyrightNoticeByVendor(migrationSource)}</p>
