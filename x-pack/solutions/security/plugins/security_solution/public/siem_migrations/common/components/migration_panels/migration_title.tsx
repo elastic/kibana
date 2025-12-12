@@ -22,6 +22,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
   useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import { PanelText } from '../../../../common/components/panel_text';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
@@ -31,6 +32,7 @@ import { useUpdateSiemMigration } from '../../hooks/use_update_siem_migration';
 import * as i18n from './translations';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
+import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
 
 export interface MigrationPanelTitleProps {
   migrationStats: MigrationTaskStats;
@@ -109,6 +111,17 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
       gutterSize="xs"
       data-test-subj="migrationPanelTitle"
     >
+      {migrationStats.vendor && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color={MIGRATION_VENDOR_COLOR_CONFIG[migrationStats.vendor]}
+            size="s"
+            data-test-subj="migrationVendorBadge"
+          >
+            {migrationStats.vendor.toUpperCase()}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       {isEditing ? (
         <EuiFlexItem grow={false} onClick={stopPropagation}>
           <EuiInlineEditText

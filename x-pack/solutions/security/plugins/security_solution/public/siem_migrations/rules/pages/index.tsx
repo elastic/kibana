@@ -129,10 +129,15 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       );
     }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
 
+    const selectedMigrationStats = useMemo(() => {
+      return ruleMigrationsStats.find((stats) => stats.id === migrationId);
+    }, [ruleMigrationsStats, migrationId]);
+
     return (
       <SecuritySolutionPageWrapper>
         <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} />} border>
           <HeaderButtons
+            migrationVendor={selectedMigrationStats?.vendor}
             migrationType="rule"
             migrationsStats={ruleMigrationsStats}
             selectedMigrationId={migrationId}
