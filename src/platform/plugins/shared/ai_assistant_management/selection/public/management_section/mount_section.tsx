@@ -61,7 +61,7 @@ export const mountManagementSection = async ({
               kibanaBranch,
               buildFlavor,
               securityAIAssistantEnabled,
-              chatExperience: coreStart.settings.client.get<AIChatExperience>(
+              chatExperience$: coreStart.settings.client.get$<AIChatExperience>(
                 AI_CHAT_EXPERIENCE_TYPE,
                 AIChatExperience.Classic
               ),

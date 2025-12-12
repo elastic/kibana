@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -35,8 +36,10 @@ export function AiAssistantSelectionPage() {
     buildFlavor,
     kibanaBranch,
     securityAIAssistantEnabled,
-    chatExperience,
+    chatExperience$,
   } = useAppContext();
+
+  const chatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
 
   const observabilityAIAssistantEnabled =
     capabilities.observabilityAIAssistant?.show && chatExperience !== AIChatExperience.Agent;
