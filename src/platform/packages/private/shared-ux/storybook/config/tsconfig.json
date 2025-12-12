@@ -14,6 +14,8 @@
   ],
   "kbn_references": [
     "@kbn/storybook",
+    "@kbn/unified-tabs",
+    "@kbn/app-menu",
   ],
   "exclude": [
     "target/**/*",
