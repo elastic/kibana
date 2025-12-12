@@ -8,8 +8,9 @@
 import { transformMapAttributesOut } from './transform_map_attributes_out';
 
 describe('transformMapOut', () => {
+  const findReference = () => undefined;
   test('should only return provided values', () => {
-    expect(transformMapAttributesOut({ title: 'my map' }, [])).toMatchInlineSnapshot(`
+    expect(transformMapAttributesOut({ title: 'my map' }, findReference)).toMatchInlineSnapshot(`
       Object {
         "title": "my map",
       }
@@ -17,8 +18,12 @@ describe('transformMapOut', () => {
   });
 
   test('descrption', () => {
-    expect(transformMapAttributesOut({ title: 'my map', description: 'this is a great map' }, []))
-      .toMatchInlineSnapshot(`
+    expect(
+      transformMapAttributesOut(
+        { title: 'my map', description: 'this is a great map' },
+        findReference
+      )
+    ).toMatchInlineSnapshot(`
       Object {
         "description": "this is a great map",
         "title": "my map",
@@ -34,13 +39,11 @@ describe('transformMapOut', () => {
           layerListJSON:
             '[{"sourceDescriptor":{"type":"ES_GEO_GRID","indexPatternRefName":"layer_0_source_index_pattern"}}]',
         },
-        [
-          {
-            id: 'c698b940-e149-11e8-a35a-370a8516603a',
-            name: 'layer_0_source_index_pattern',
-            type: 'index-pattern',
-          },
-        ]
+        () => ({
+          id: 'c698b940-e149-11e8-a35a-370a8516603a',
+          name: 'layer_0_source_index_pattern',
+          type: 'index-pattern',
+        })
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -65,7 +68,7 @@ describe('transformMapOut', () => {
           mapStateJSON:
             '{"center":{"lat":60,"lon":120},"refreshConfig":{"isPaused":false,"interval":500}}',
         },
-        []
+        findReference
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -89,7 +92,7 @@ describe('transformMapOut', () => {
           title: 'my map',
           uiStateJSON: '{"isLayerTOCOpen":false,"openTOCDetails":["layer1"]}',
         },
-        []
+        findReference
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -110,7 +113,7 @@ describe('transformMapOut', () => {
           mapStateJSON: '{"idDarkMode":false}',
           uiStateJSON: '{"idDarkMode":false}',
         },
-        []
+        findReference
       )
     ).toMatchInlineSnapshot(`
       Object {
