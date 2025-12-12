@@ -38,26 +38,6 @@ Object {
               "category_1_score": Object {
                 "type": "float",
               },
-              "modifiers": Object {
-                "properties": Object {
-                  "contribution": Object {
-                    "type": "float",
-                  },
-                  "metadata": Object {
-                    "type": "flattened",
-                  },
-                  "modifier_value": Object {
-                    "type": "float",
-                  },
-                  "subtype": Object {
-                    "type": "keyword",
-                  },
-                  "type": Object {
-                    "type": "keyword",
-                  },
-                },
-                "type": "object",
-              },
               "id_field": Object {
                 "type": "keyword",
               },
@@ -83,6 +63,26 @@ Object {
                   },
                   "timestamp": Object {
                     "type": "date",
+                  },
+                },
+                "type": "object",
+              },
+              "modifiers": Object {
+                "properties": Object {
+                  "contribution": Object {
+                    "type": "float",
+                  },
+                  "metadata": Object {
+                    "type": "flattened",
+                  },
+                  "modifier_value": Object {
+                    "type": "float",
+                  },
+                  "subtype": Object {
+                    "type": "keyword",
+                  },
+                  "type": Object {
+                    "type": "keyword",
                   },
                 },
                 "type": "object",
@@ -117,26 +117,6 @@ Object {
               "category_1_score": Object {
                 "type": "float",
               },
-              "modifiers": Object {
-                "properties": Object {
-                  "contribution": Object {
-                    "type": "float",
-                  },
-                  "metadata": Object {
-                    "type": "flattened",
-                  },
-                  "modifier_value": Object {
-                    "type": "float",
-                  },
-                  "subtype": Object {
-                    "type": "keyword",
-                  },
-                  "type": Object {
-                    "type": "keyword",
-                  },
-                },
-                "type": "object",
-              },
               "id_field": Object {
                 "type": "keyword",
               },
@@ -162,6 +142,26 @@ Object {
                   },
                   "timestamp": Object {
                     "type": "date",
+                  },
+                },
+                "type": "object",
+              },
+              "modifiers": Object {
+                "properties": Object {
+                  "contribution": Object {
+                    "type": "float",
+                  },
+                  "metadata": Object {
+                    "type": "flattened",
+                  },
+                  "modifier_value": Object {
+                    "type": "float",
+                  },
+                  "subtype": Object {
+                    "type": "keyword",
+                  },
+                  "type": Object {
+                    "type": "keyword",
                   },
                 },
                 "type": "object",
@@ -196,26 +196,6 @@ Object {
               "category_1_score": Object {
                 "type": "float",
               },
-              "modifiers": Object {
-                "properties": Object {
-                  "contribution": Object {
-                    "type": "float",
-                  },
-                  "metadata": Object {
-                    "type": "flattened",
-                  },
-                  "modifier_value": Object {
-                    "type": "float",
-                  },
-                  "subtype": Object {
-                    "type": "keyword",
-                  },
-                  "type": Object {
-                    "type": "keyword",
-                  },
-                },
-                "type": "object",
-              },
               "id_field": Object {
                 "type": "keyword",
               },
@@ -241,6 +221,26 @@ Object {
                   },
                   "timestamp": Object {
                     "type": "date",
+                  },
+                },
+                "type": "object",
+              },
+              "modifiers": Object {
+                "properties": Object {
+                  "contribution": Object {
+                    "type": "float",
+                  },
+                  "metadata": Object {
+                    "type": "flattened",
+                  },
+                  "modifier_value": Object {
+                    "type": "float",
+                  },
+                  "subtype": Object {
+                    "type": "keyword",
+                  },
+                  "type": Object {
+                    "type": "keyword",
                   },
                 },
                 "type": "object",
