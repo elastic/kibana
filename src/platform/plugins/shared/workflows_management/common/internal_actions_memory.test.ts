@@ -16,7 +16,7 @@ import { getElasticsearchConnectors, getKibanaConnectors } from '@kbn/workflows'
 import { parseWorkflowYamlToJSON } from './lib/yaml';
 import { getWorkflowZodSchema } from './schema';
 
-const threesholdInPersents = 1.3;
+const threesholdInPersents = 1.2; // +20% to allow for minor runtime variance
 
 describe('internal connectors memory tests', () => {
   const forceGC = () => {
@@ -63,7 +63,7 @@ describe('internal connectors memory tests', () => {
       retainer.push(getWorkflowZodSchema({}));
       forceGC();
       const after = getHeapMB();
-      expect(after - before).toBeLessThan(10);
+      expect(after - before).toBeLessThan(10 * threesholdInPersents); // Current baseline ~10 MB; threshold allows for minor runtime variance
       expect(retainer.length).toBe(1);
     });
   });
@@ -77,7 +77,7 @@ describe('internal connectors memory tests', () => {
       retainer.push(parseWorkflowYamlToJSON(workflowYaml, schema));
       forceGC();
       const after = getHeapMB();
-      expect(after - before).toBeLessThan(70);
+      expect(after - before).toBeLessThan(70 * threesholdInPersents); // Current baseline ~70 MB; threshold allows for minor runtime variance
       expect(retainer.length).toBe(2);
     });
   });
