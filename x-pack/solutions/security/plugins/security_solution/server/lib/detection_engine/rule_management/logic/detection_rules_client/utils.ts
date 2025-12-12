@@ -151,7 +151,15 @@ export const getReadAuthFieldValue = (
       }
 
     case validFields.RULE_SOURCE:
-      return rulePatch.rule_source;
+      // camel case every nested field
+      // in rule source
+      return Object.keys(rulePatch.rule_source).reduce(
+        (acc, ruleSourceField) => ({
+          ...acc,
+          [camelCase(ruleSourceField)]: rulePatch.rule_source[ruleSourceField],
+        }),
+        {}
+      );
   }
 };
 
