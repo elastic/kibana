@@ -42,7 +42,7 @@ describe('useMissingReferenceSetsListStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'incomplete',
-      title: 'Lookups found in your rules',
+      title: 'Reference sets found in your rules',
     });
   });
 
@@ -68,7 +68,7 @@ describe('useMissingReferenceSetsListStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'loading',
-      title: 'Lookups found in your rules',
+      title: 'Reference sets found in your rules',
     });
   });
 
@@ -94,7 +94,7 @@ describe('useMissingReferenceSetsListStep', () => {
     expect(result.current).toEqual({
       children: expect.anything(),
       status: 'danger',
-      title: 'Lookups found in your rules',
+      title: 'Reference sets found in your rules',
     });
   });
 });
