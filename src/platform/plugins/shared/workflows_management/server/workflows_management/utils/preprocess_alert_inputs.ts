@@ -9,6 +9,7 @@
 
 import { get, isString } from 'lodash';
 import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
@@ -107,34 +108,23 @@ async function fetchAlerts(
       docs: alertIds.map(({ _id, _index }) => ({ _id, _index })),
     };
 
-    const response = await esClient.mget<AlertHit>(body);
+    const response = await esClient.mget<Alert>(body);
 
     const alerts: AlertHit[] = [];
     for (let i = 0; i < response.docs.length; i++) {
       const doc = response.docs[i];
       if ('found' in doc && doc.found && '_source' in doc && doc._source) {
-        const source = doc._source;
+        let alert = doc._source;
 
-        const ruleTypeId = get(source, 'kibana.alert.rule.rule_type_id') as string;
+        const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
 
         const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
-        if (!registeredRuleType) {
-          logger.error(`Unregistered rule type: ${ruleTypeId} for alert ID: ${doc._id}`);
-        } else if (registeredRuleType?.alerts?.formatAlert == null) {
-          logger.warn(
-            `Missing formatAlert function for rule type: ${ruleTypeId} for alert ID: ${doc._id}`
-          );
-        } else {
-          const alert = registeredRuleType.alerts.formatAlert(source);
-
-          const formattedAlert: AlertHit = {
-            _id: doc._id,
-            _index: doc._index,
-            ...alert,
-          } as AlertHit;
-
-          alerts.push(formattedAlert);
+        // Format alert using the registered rule type's formatAlert function if available, use the raw source otherwise
+        if (registeredRuleType?.alerts?.formatAlert) {
+          alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
         }
+
+        alerts.push({ _id: doc._id, _index: doc._index, ...alert });
       } else {
         logger.warn(`Alert not found: ${alertIds[i]._id} in index ${alertIds[i]._index}`);
       }
