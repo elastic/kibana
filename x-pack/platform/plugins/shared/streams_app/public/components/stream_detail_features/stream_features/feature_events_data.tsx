@@ -46,12 +46,12 @@ export const FeatureEventsData = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems='center'>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3>
-                {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
-              defaultMessage: 'Detected feature events',
+              {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
+                defaultMessage: 'Detected feature events',
               })}
             </h3>
           </EuiTitle>
