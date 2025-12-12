@@ -96,7 +96,7 @@ export const TopCategoriesTable = styled(
 
     const tableCaption =
       topCategories.length === 0
-        ? i18n.translate('xpack.infra.logs.logEntryCategories.noCategoriesMessage', {
+        ? i18n.translate('xpack.infra.logs.logEntryCategories.noCategoriesTableCaption', {
             defaultMessage: 'Table has no data',
           })
         : '';
