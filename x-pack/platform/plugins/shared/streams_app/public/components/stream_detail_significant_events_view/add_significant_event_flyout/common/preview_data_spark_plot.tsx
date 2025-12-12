@@ -76,7 +76,7 @@ export function PreviewDataSparkPlot({
 
   const sparkPlotData = useSparkplotDataFromSigEvents({
     previewFetch,
-    queryValues: query,
+    query,
     xFormatter,
   });
 

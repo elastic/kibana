@@ -43,16 +43,18 @@ export function SparkPlot({
   xFormatter: givenXFormatter,
   hideAxis = false,
   height,
+  maxYValue = NaN,
 }: {
   id: string;
   name?: string;
   type: 'line' | 'bar';
   timeseries: Array<{ x: number; y: number | null }>;
-  annotations?: SparkPlotAnnotation[];
+  annotations: SparkPlotAnnotation[];
   compressed?: boolean;
   xFormatter?: TickFormatter;
   hideAxis?: boolean;
   height?: number;
+  maxYValue?: number;
 }) {
   const {
     dependencies: {
@@ -131,7 +133,7 @@ export function SparkPlot({
         id="y_axis"
         position="left"
         hide={compressed || hideAxis}
-        domain={{ min: 0, max: NaN }}
+        domain={{ min: 0, max: maxYValue }}
       />
       <Axis id="x_axis" position="bottom" hide={compressed || hideAxis} />
       <Settings
@@ -172,7 +174,7 @@ export function SparkPlot({
           curve={CurveType.CURVE_MONOTONE_X}
         />
       )}
-      {annotations?.map((annotation) => {
+      {annotations.map((annotation) => {
         return (
           <LineAnnotation
             key={annotation.id}

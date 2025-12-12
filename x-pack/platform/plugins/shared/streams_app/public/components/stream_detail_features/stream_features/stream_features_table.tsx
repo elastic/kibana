@@ -15,10 +15,10 @@ import {
 import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../data_management/shared';
-import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 import { FeatureDetailExpanded } from './feature_detail_expanded';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 
 // Helper function to generate unique copy name
 const generateCopyName = (originalName: string, existingFeatures: Feature[]) => {
