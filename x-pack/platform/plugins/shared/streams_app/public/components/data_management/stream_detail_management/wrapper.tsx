@@ -160,6 +160,7 @@ export function Wrapper({
                       quality={quality}
                       isLoading={isQualityLoading}
                       verbose={true}
+                      showTooltip={true}
                     />
                   </EuiFlexGroup>
                 </EuiFlexItem>
