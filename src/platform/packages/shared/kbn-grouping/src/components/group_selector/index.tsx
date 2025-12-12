@@ -20,6 +20,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { CustomFieldPanel } from './custom_field_panel';
 import * as i18n from '../translations';
 import { StyledContextMenu } from '../styles';
+import type { GroupSettings } from '../../hooks/types';
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
@@ -35,6 +36,7 @@ export interface GroupSelectorProps {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  settings?: GroupSettings;
 }
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
@@ -45,7 +47,10 @@ const GroupSelectorComponent = ({
   title = i18n.GROUP_BY,
   maxGroupingLevels = 1,
   onOpenTracker,
+  settings,
 }: GroupSelectorProps) => {
+  const { hideNoneOption, hideCustomFieldOption, hideOptionsTitle, popoverButtonLabel } =
+    settings ?? {};
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isGroupSelected = useCallback(
     (groupKey: string) =>
@@ -65,18 +70,24 @@ const GroupSelectorComponent = ({
       return groupsSelected.length === maxGroupingLevels && (key ? !isGroupSelected(key) : true);
     };
 
+    const topLevelTitle =
+      maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels);
+
     return [
       {
         id: 'firstPanel',
-        title:
-          maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels),
+        title: hideOptionsTitle ? null : topLevelTitle,
         items: [
-          {
-            'data-test-subj': 'panel-none',
-            name: i18n.NONE,
-            icon: isGroupSelected('none') ? 'check' : 'empty',
-            onClick: () => onGroupChange('none'),
-          },
+          ...(hideNoneOption
+            ? []
+            : [
+                {
+                  'data-test-subj': 'panel-none',
+                  name: i18n.NONE,
+                  icon: isGroupSelected('none') ? 'check' : 'empty',
+                  onClick: () => onGroupChange('none'),
+                } as EuiContextMenuPanelItemDescriptor,
+              ]),
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
             disabled: isOptionDisabled(o.key),
@@ -84,14 +95,18 @@ const GroupSelectorComponent = ({
             onClick: () => onGroupChange(o.key),
             icon: isGroupSelected(o.key) ? 'check' : 'empty',
           })),
-          {
-            'data-test-subj': `panel-custom`,
-            name: i18n.CUSTOM_FIELD,
-            icon: 'empty',
-            disabled: isOptionDisabled(),
-            panel: 'customPanel',
-            hasPanel: true,
-          },
+          ...(hideCustomFieldOption
+            ? []
+            : [
+                {
+                  'data-test-subj': `panel-custom`,
+                  name: i18n.CUSTOM_FIELD,
+                  icon: 'empty',
+                  disabled: isOptionDisabled(),
+                  panel: 'customPanel',
+                  hasPanel: true,
+                } as EuiContextMenuPanelItemDescriptor,
+              ]),
         ],
       },
       {
@@ -110,7 +125,17 @@ const GroupSelectorComponent = ({
         ),
       },
     ];
-  }, [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]);
+  }, [
+    fields,
+    groupsSelected.length,
+    isGroupSelected,
+    maxGroupingLevels,
+    onGroupChange,
+    options,
+    hideNoneOption,
+    hideCustomFieldOption,
+    hideOptionsTitle,
+  ]);
   const selectedOptions = useMemo(
     () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
     [isGroupSelected, options]
@@ -150,10 +175,10 @@ const GroupSelectorComponent = ({
         title={buttonLabel}
         size="xs"
       >
-        {`${title}: ${buttonLabel}`}
+        {popoverButtonLabel ?? `${title}: ${buttonLabel}`}
       </EuiButtonEmpty>
     );
-  }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title]);
+  }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title, popoverButtonLabel]);
 
   return (
     <EuiPopover
