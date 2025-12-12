@@ -6,6 +6,7 @@
  */
 
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
+import type { BaseMessage } from '@langchain/core/messages';
 import { uniq } from 'lodash/fp';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
@@ -40,7 +41,7 @@ export const migrateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  messages: Annotation({
+  messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),
