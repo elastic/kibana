@@ -23,6 +23,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
 import type { MoonProjectConfig } from './moon_project_type';
 import {
+  compactFilePathsToGlobs,
   filterPackages,
   readFile,
   readJsonWithComments,
@@ -182,6 +183,14 @@ function applyTsConfigSettings(
 ) {
   if (!fs.existsSync(tsConfigPath)) {
     projectConfig.language = 'javascript';
+    projectConfig.fileGroups = {
+      src: compactFilePathsToGlobs(
+        fs.globSync('**/{*.js,*.ts,*.jsx,*.tsx}', {
+          exclude: (f) => f.endsWith('config.js') || f.includes('__fixtures__'),
+          cwd: projectConfig.project?.metadata?.sourceRoot,
+        })
+      ),
+    };
     logger.warning(`Skipping ${projectConfig.id} - no tsconfig.json found.`);
     return;
   }
