@@ -74,8 +74,17 @@ export const OsqueryGetLiveQueryResultsRequestQuery = z.object({
   pageSize: PageSizeOrUndefined.optional(),
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
+  /**
+   * ISO 8601 date string to filter results from a specific start time.
+   */
   startDate: StartDateOrUndefined.optional(),
+  /**
+   * Point in Time identifier for PIT-based pagination. Used together with searchAfter when navigating beyond 10,000 results.
+   */
   pitId: PitIdOrUndefined.optional(),
+  /**
+   * JSON-encoded sort values for the next page in PIT-based pagination. Used together with pitId. Represents the sort values of the last document from the previous page.
+   */
   searchAfter: SearchAfterOrUndefined.optional(),
 });
 export type OsqueryGetLiveQueryResultsRequestQueryInput = z.input<

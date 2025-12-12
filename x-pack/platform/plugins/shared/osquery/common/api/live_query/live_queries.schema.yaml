@@ -136,16 +136,23 @@ paths:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
         - name: startDate
           in: query
+          description: ISO 8601 date string to filter results from a specific start time.
           required: false
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/StartDateOrUndefined'
         - name: pitId
           in: query
+          description: >-
+            Point in Time identifier for PIT-based pagination. Used together with searchAfter when
+            navigating beyond 10,000 results.
           required: false
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PitIdOrUndefined'
         - name: searchAfter
           in: query
+          description: >-
+            JSON-encoded sort values for the next page in PIT-based pagination. Used together with
+            pitId. Represents the sort values of the last document from the previous page.
           required: false
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SearchAfterOrUndefined'
