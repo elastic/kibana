@@ -14,6 +14,7 @@ import { getAnonymizedValue } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
 import type { AnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { EntityType } from '../../../../../../common/search_strategy';
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
@@ -35,7 +36,7 @@ export const AskAiAssistant = <T extends EntityType>({
   const entityField = EntityTypeToIdentifierField[entityType];
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const { isAgentBuilderEnabled, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const { anonymizedValues, replacements }: AnonymizedValues = useMemo(() => {
     if (!anonymizationFields.data) {
@@ -71,7 +72,7 @@ export const AskAiAssistant = <T extends EntityType>({
       attachmentData: {
         identifierType: entityType,
         identifier: entityName,
-        attachmentLabel: entityName,
+        attachmentLabel: `${entityType}: ${entityName}`,
       },
       attachmentPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
     }),
@@ -79,7 +80,7 @@ export const AskAiAssistant = <T extends EntityType>({
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
 
-  if (aiAssistantDisable || isAssistantToolDisabled) {
+  if ((aiAssistantDisable || isAssistantToolDisabled) && !isAgentBuilderEnabled) {
     return null;
   }
 
@@ -88,7 +89,7 @@ export const AskAiAssistant = <T extends EntityType>({
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          {isAgentBuilderEnabled ? (
+          {isAgentChatExperienceEnabled ? (
             <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
           ) : (
             <EuiButton

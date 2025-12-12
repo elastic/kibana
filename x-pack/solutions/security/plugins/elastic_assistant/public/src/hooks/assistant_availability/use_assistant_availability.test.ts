@@ -66,7 +66,7 @@ describe('useAssistantAvailability', () => {
           aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(undefined),
+          getBooleanValue: jest.fn().mockReturnValue(true),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -76,6 +76,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: true,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -83,6 +84,7 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
+      isAiAgentsEnabled: true,
     });
   });
 
@@ -124,7 +126,7 @@ describe('useAssistantAvailability', () => {
           aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(undefined),
+          getBooleanValue: jest.fn().mockReturnValue(true),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -134,6 +136,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: true,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -141,6 +144,7 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
+      isAiAgentsEnabled: true,
     });
   });
 
@@ -175,7 +179,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(undefined),
+          getBooleanValue: jest.fn().mockReturnValue(false),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -185,6 +189,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: false,
@@ -192,6 +197,7 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
+      isAiAgentsEnabled: false,
     });
   });
 
@@ -221,7 +227,7 @@ describe('useAssistantAvailability', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(undefined),
+          getBooleanValue: jest.fn().mockReturnValue(true),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -231,6 +237,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -238,6 +245,7 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
+      isAiAgentsEnabled: true,
     });
   });
 
@@ -252,7 +260,7 @@ describe('useAssistantAvailability', () => {
           capabilities: {},
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(undefined),
+          getBooleanValue: jest.fn().mockReturnValue(false),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -262,6 +270,7 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
+      hasAgentBuilderPrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: true,
@@ -269,6 +278,7 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
+      isAiAgentsEnabled: false,
     });
   });
 });

@@ -32,7 +32,7 @@ import { UpdateAlertsModal } from './update_alerts_modal';
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
 
 interface Props {
@@ -207,9 +207,8 @@ const TakeActionComponent: React.FC<Props> = ({
     showAssistantOverlay?.();
   }, [closePopover, showAssistantOverlay]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
-
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
 
   const onViewInAgentBuilder = useCallback(() => {
@@ -256,16 +255,18 @@ const TakeActionComponent: React.FC<Props> = ({
         </EuiContextMenuItem>,
 
         attackDiscoveries.length === 1
-          ? isAgentBuilderEnabled
-            ? [
-                <EuiContextMenuItem
-                  data-test-subj="viewInAgentBuilder"
-                  key="viewInAgentBuilder"
-                  onClick={onViewInAgentBuilder}
-                >
-                  {i18n.ADD_TO_CHAT}
-                </EuiContextMenuItem>,
-              ]
+          ? isAgentChatExperienceEnabled
+            ? hasAgentBuilderPrivilege
+              ? [
+                  <EuiContextMenuItem
+                    data-test-subj="viewInAgentBuilder"
+                    key="viewInAgentBuilder"
+                    onClick={onViewInAgentBuilder}
+                  >
+                    {i18n.ADD_TO_CHAT}
+                  </EuiContextMenuItem>,
+                ]
+              : []
             : [
                 <EuiContextMenuItem
                   data-test-subj="viewInAiAssistant"
@@ -281,7 +282,8 @@ const TakeActionComponent: React.FC<Props> = ({
     [
       addToCaseDisabled,
       attackDiscoveries.length,
-      isAgentBuilderEnabled,
+      hasAgentBuilderPrivilege,
+      isAgentChatExperienceEnabled,
       onClickAddToExistingCase,
       onClickAddToNewCase,
       onViewInAgentBuilder,

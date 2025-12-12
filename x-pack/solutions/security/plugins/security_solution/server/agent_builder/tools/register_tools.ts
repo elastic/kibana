@@ -6,18 +6,23 @@
  */
 
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { Logger } from '@kbn/logging';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { alertsTool } from './alerts_tool';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
  * Registers all security agent builder tools with the onechat plugin
  */
-export const registerTools = async (onechat: OnechatPluginSetup, core: CoreSetup) => {
-  onechat.tools.register(entityRiskScoreTool(core));
-  onechat.tools.register(attackDiscoverySearchTool(core));
-  onechat.tools.register(securityLabsSearchTool(core));
-  onechat.tools.register(alertsTool());
+export const registerTools = async (
+  onechat: OnechatPluginSetup,
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+) => {
+  onechat.tools.register(entityRiskScoreTool(core, logger));
+  onechat.tools.register(attackDiscoverySearchTool(core, logger));
+  onechat.tools.register(securityLabsSearchTool(core, logger));
+  onechat.tools.register(alertsTool(core, logger));
 };
