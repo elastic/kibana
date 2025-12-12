@@ -12,17 +12,24 @@ import { Direction } from '../../common/search_strategy';
 
 // Mock the buildResultsQuery function
 jest.mock('../search_strategy/osquery/factory/results/query.all_results.dsl', () => ({
-  buildResultsQuery: jest.fn((options: { pitId?: string; searchAfter?: unknown; pagination: { querySize: number } }) => ({
-    pit: options.pitId ? { id: options.pitId, keep_alive: '10m' } : undefined,
-    search_after: options.searchAfter,
-    size: options.pagination.querySize,
-    query: { bool: { filter: [] } },
-  })),
+  buildResultsQuery: jest.fn(
+    (options: { pitId?: string; searchAfter?: unknown; pagination: { querySize: number } }) => ({
+      pit: options.pitId ? { id: options.pitId, keep_alive: '10m' } : undefined,
+      search_after: options.searchAfter,
+      size: options.pagination.querySize,
+      query: { bool: { filter: [] } },
+    })
+  ),
 }));
 
 const createMockSearchResponse = (
   overrides: {
-    hits?: Array<{ _id: string; _index: string; sort?: number[]; fields?: Record<string, unknown> }>;
+    hits?: Array<{
+      _id: string;
+      _index: string;
+      sort?: number[];
+      fields?: Record<string, unknown>;
+    }>;
     total?: number | { value: number; relation: SearchTotalHitsRelation };
     pit_id?: string;
   } = {}

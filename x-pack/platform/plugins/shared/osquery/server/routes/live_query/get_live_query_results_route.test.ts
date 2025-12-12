@@ -32,10 +32,7 @@ describe('getLiveQueryResultsRoute', () => {
 
   describe('route registration', () => {
     it('should register the get live query results route', () => {
-      getLiveQueryResultsRoute(
-        mockRouter,
-        mockOsqueryContext as unknown as OsqueryAppContext
-      );
+      getLiveQueryResultsRoute(mockRouter, mockOsqueryContext as unknown as OsqueryAppContext);
 
       const route = mockRouter.versioned.getRoute(
         'get',

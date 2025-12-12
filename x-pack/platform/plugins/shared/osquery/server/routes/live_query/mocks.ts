@@ -58,6 +58,7 @@ export const createMockOsqueryContext = () => {
  */
 export const createMockRouter = () => {
   const httpService = httpServiceMock.createSetupContract();
+
   return httpService.createRouter();
 };
 
@@ -94,17 +95,15 @@ export const createMockResultsResponse = (options: MockResultsOptions = {}) => {
  */
 export const createMockActionDetailsResponse = (
   queries = [{ action_id: 'action-123', agents: ['agent-1'] }]
-) => {
-  return {
-    actionDetails: {
-      _id: 'action-id',
-      _index: '.fleet-actions',
-      _source: {
-        queries,
-      },
+) => ({
+  actionDetails: {
+    _id: 'action-id',
+    _index: '.fleet-actions',
+    _source: {
+      queries,
     },
-  };
-};
+  },
+});
 
 interface MockLiveQueryResultsRequestParams {
   id: string;
@@ -131,30 +130,29 @@ export const createMockEsClientWithPit = () => {
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
   });
   mockEsClient.closePointInTime.mockResolvedValue({ succeeded: true, num_freed: 1 });
+
   return mockEsClient;
 };
 
 /**
  * Factory to create mock action results response (for getActionResponses).
  */
-export const createMockActionResultsResponse = () => {
-  return {
-    edges: [],
-    total: 0,
-    rawResponse: {
-      aggregations: {
-        aggs: {
-          responses_by_action_id: {
-            doc_count: 0,
-            rows_count: { value: 0 },
-            responses: { buckets: [] },
-          },
+export const createMockActionResultsResponse = () => ({
+  edges: [],
+  total: 0,
+  rawResponse: {
+    aggregations: {
+      aggs: {
+        responses_by_action_id: {
+          doc_count: 0,
+          rows_count: { value: 0 },
+          responses: { buckets: [] },
         },
       },
     },
-    inspect: { dsl: [] },
-  };
-};
+  },
+  inspect: { dsl: [] },
+});
 
 interface MockSearchStrategyOptions {
   actionDetailsResponse?: ReturnType<typeof createMockActionDetailsResponse>;

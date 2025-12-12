@@ -17,7 +17,32 @@
 import { z } from '@kbn/zod';
 
 /**
- * The response for getting live query results.
+ * The response for getting live query results. Supports hybrid pagination using offset-based pagination for results within 10,000 and PIT + search_after pagination for deeper results.
  */
 export type GetLiveQueryResultsResponse = z.infer<typeof GetLiveQueryResultsResponse>;
-export const GetLiveQueryResultsResponse = z.object({});
+export const GetLiveQueryResultsResponse = z.object({
+  data: z
+    .object({
+      /**
+       * Total number of results matching the query.
+       */
+      total: z.number().int().optional(),
+      /**
+       * Array of result documents for the current page.
+       */
+      edges: z.array(z.object({})).optional(),
+      /**
+       * Point in Time identifier for PIT-based pagination. Only present when offset exceeds 10,000 results and deep pagination is active. Pass this value in subsequent requests to maintain pagination context. Required together with searchAfter for continued pagination.
+       */
+      pitId: z.string().nullable().optional(),
+      /**
+       * JSON-encoded sort values for the next page. Only present in deep pagination mode (offset >= 10,000). Used together with pitId for PIT-based pagination. Represents the sort values of the last document in the current page.
+       */
+      searchAfter: z.string().nullable().optional(),
+      /**
+       * Indicates whether more results exist beyond the current page. Always present.
+       */
+      hasMore: z.boolean().optional(),
+    })
+    .optional(),
+});

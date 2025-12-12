@@ -22,6 +22,9 @@ import {
   PageSizeOrUndefined,
   SortOrUndefined,
   SortOrderOrUndefined,
+  StartDateOrUndefined,
+  PitIdOrUndefined,
+  SearchAfterOrUndefined,
 } from '../model/schema/common_attributes.gen';
 import { FindLiveQueryResponse, FindLiveQueryDetailsResponse } from './find_live_query.gen';
 import { CreateLiveQueryRequestBody, CreateLiveQueryResponse } from './create_live_query.gen';
@@ -71,6 +74,9 @@ export const OsqueryGetLiveQueryResultsRequestQuery = z.object({
   pageSize: PageSizeOrUndefined.optional(),
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
+  startDate: StartDateOrUndefined.optional(),
+  pitId: PitIdOrUndefined.optional(),
+  searchAfter: SearchAfterOrUndefined.optional(),
 });
 export type OsqueryGetLiveQueryResultsRequestQueryInput = z.input<
   typeof OsqueryGetLiveQueryResultsRequestQuery

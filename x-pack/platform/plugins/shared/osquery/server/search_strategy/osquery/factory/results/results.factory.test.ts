@@ -6,7 +6,7 @@
  */
 
 import type { SearchTotalHitsRelation } from '@elastic/elasticsearch/lib/api/types';
-import { allResults } from './index';
+import { allResults } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
 // Mock the buildResultsQuery function

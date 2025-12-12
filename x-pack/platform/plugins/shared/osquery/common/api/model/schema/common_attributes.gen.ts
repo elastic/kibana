@@ -236,5 +236,23 @@ export const SortOrderOrUndefinedEnum = SortOrderOrUndefined.enum;
 export type Shards = z.infer<typeof Shards>;
 export const Shards = z.object({}).catchall(z.number());
 
+/**
+ * ISO 8601 date string to filter results from a specific start time.
+ */
+export type StartDateOrUndefined = z.infer<typeof StartDateOrUndefined>;
+export const StartDateOrUndefined = z.string().nullable();
+
+/**
+ * Point in Time identifier for PIT-based pagination. Used together with searchAfter when navigating beyond 10,000 results.
+ */
+export type PitIdOrUndefined = z.infer<typeof PitIdOrUndefined>;
+export const PitIdOrUndefined = z.string().nullable();
+
+/**
+ * JSON-encoded sort values for the next page in PIT-based pagination. Used together with pitId. Represents the sort values of the last document from the previous page.
+ */
+export type SearchAfterOrUndefined = z.infer<typeof SearchAfterOrUndefined>;
+export const SearchAfterOrUndefined = z.string().nullable();
+
 export type DefaultSuccessResponse = z.infer<typeof DefaultSuccessResponse>;
 export const DefaultSuccessResponse = z.object({});
