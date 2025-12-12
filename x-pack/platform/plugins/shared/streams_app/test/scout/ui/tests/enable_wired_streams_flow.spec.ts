@@ -15,7 +15,7 @@ const DISABLE_MODAL = 'streamsWiredDisableModal';
 const DISABLE_CHECKBOX = 'streamsWiredDisableConfirmCheckbox';
 const DISABLE_BUTTON = 'streamsWiredDisableConfirmButton';
 
-test.describe('Enable Wired Streams - Success flow', { tag: ['@ess'] }, () => {
+test.describe('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
 
@@ -140,7 +140,7 @@ test.describe('Enable Wired Streams - Success flow', { tag: ['@ess'] }, () => {
   });
 });
 
-test.describe('Enable Wired Streams - Permissions', { tag: ['@ess'] }, () => {
+test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ esClient, apiServices, browserAuth }) => {
     // Disable wired streams to get clean state
     await browserAuth.loginAsAdmin();
