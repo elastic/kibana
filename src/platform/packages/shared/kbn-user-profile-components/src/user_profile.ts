@@ -72,7 +72,7 @@ export const USER_AVATAR_MAX_INITIALS = 2;
  * @param color - The color to validate.
  * @returns True if the color is a valid hex color, false otherwise.
  */
-export function isValidHexColor(color?: string) {
+export function isValidUserProfileAvatarColor(color?: string) {
   if (!color || typeof color !== 'string') {
     return false;
   }
@@ -93,7 +93,7 @@ export function getUserAvatarColor(
 ) {
   const firstCodePoint = getUserDisplayName(user).codePointAt(0) || USER_AVATAR_FALLBACK_CODE_POINT;
   const avatarColor = avatar?.color;
-  const isValidColor = isValidHexColor(avatarColor);
+  const isValidColor = isValidUserProfileAvatarColor(avatarColor);
   if (isValidColor) {
     return avatarColor;
   }
