@@ -125,7 +125,7 @@ class ToolHealthClientImpl implements ToolHealthClient {
         status: params.status,
         last_check: params.lastCheck ?? now,
         error_message: params.errorMessage ?? '',
-        consecutive_failures: params.consecutiveFailures ?? (existing?.consecutiveFailures ?? 0),
+        consecutive_failures: params.consecutiveFailures ?? existing?.consecutiveFailures ?? 0,
         updated_at: now,
       };
 

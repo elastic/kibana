@@ -13,4 +13,3 @@ export type {
   ToolHealthStatus,
   ToolHealthUpdateParams,
 } from './types';
-

@@ -15,4 +15,3 @@ export {
   type ToolHealthStatus,
   type ToolHealthUpdateParams,
 } from './client';
-

@@ -20,4 +20,3 @@ export const fromEs = (doc: ToolHealthDocument): ToolHealthState => {
     consecutiveFailures: source.consecutive_failures,
   };
 };
-

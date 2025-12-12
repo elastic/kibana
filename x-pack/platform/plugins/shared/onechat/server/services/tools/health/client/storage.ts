@@ -43,7 +43,10 @@ export interface ToolHealthProperties {
 
 export type ToolHealthStorageSettings = typeof storageSettings;
 
-export type ToolHealthStorage = StorageIndexAdapter<ToolHealthStorageSettings, ToolHealthProperties>;
+export type ToolHealthStorage = StorageIndexAdapter<
+  ToolHealthStorageSettings,
+  ToolHealthProperties
+>;
 
 export const createStorage = ({
   logger,
@@ -58,4 +61,3 @@ export const createStorage = ({
     storageSettings
   );
 };
-
