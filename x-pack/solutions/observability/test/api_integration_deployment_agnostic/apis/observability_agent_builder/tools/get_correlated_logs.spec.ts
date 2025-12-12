@@ -167,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         const group = results[0].data.correlatedLogs[0];
-        const errorLogs = group.filter((log) => log.log?.level === 'ERROR');
+        const errorLogs = group.filter((log: any) => log.log?.level === 'ERROR');
         expect(errorLogs.length).to.be(2);
 
         const messages = errorLogs.map((log: any) => log.message);
