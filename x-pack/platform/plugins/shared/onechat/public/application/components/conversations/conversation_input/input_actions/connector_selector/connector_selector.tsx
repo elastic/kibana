@@ -208,6 +208,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
           id: connectorListId,
           css: selectorListStyles,
           rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
+          onFocusBadge: false,
         }}
       >
         {(list) => <div>{list}</div>}
