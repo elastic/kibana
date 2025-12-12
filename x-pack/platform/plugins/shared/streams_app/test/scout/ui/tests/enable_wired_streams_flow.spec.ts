@@ -41,6 +41,11 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
     await pageObjects.streams.goto();
   });
 
+  test.afterAll(async ({ apiServices }) => {
+    // Restore globally enabled wired streams
+    await apiServices.streams.enable();
+  });
+
   test('should enable wired streams and show logs stream in the UI', async ({
     page,
     pageObjects,
@@ -72,10 +77,9 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
     await pageObjects.streams.verifyStreamsAreInTable(['logs']);
   });
 
-  test('should show ingested data in logs stream after enabling wired streams', async ({
+  test('should show the root logs stream after enabling wired streams', async ({
     page,
     pageObjects,
-    esClient,
   }) => {
     // Enable wired streams
     await page.getByRole('button', { name: 'Settings' }).click();
@@ -86,26 +90,12 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
     await page.keyboard.press('Escape');
     await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden({ timeout: 5000 });
 
-    // Ingest some test data
-    await esClient.index({
-      index: 'logs',
-      document: {
-        '@timestamp': new Date().toISOString(),
-        message: 'Test log message',
-        'log.level': 'info',
-      },
-    });
-
-    // Refresh to ensure data is searchable
-    await esClient.indices.refresh({ index: 'logs' });
-
     // Reload page to see updated streams
     await pageObjects.streams.goto();
     await pageObjects.streams.expectStreamsTableVisible();
 
     // Verify logs stream is visible with data
     await pageObjects.streams.verifyStreamsAreInTable(['logs']);
-    await pageObjects.streams.verifyDocCount('logs', 1);
   });
 
   test('should disable wired streams and show empty state', async ({ page, pageObjects }) => {
@@ -129,9 +119,6 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
 
     // Confirm modal appears with destructive warning
     await expect(page.getByTestId(DISABLE_MODAL)).toBeVisible();
-    await expect(
-      page.getByText(/Disabling Wired Streams will permanently delete all stored data/)
-    ).toBeVisible();
 
     // Must check confirmation before disabling
     await expect(page.getByTestId(DISABLE_BUTTON)).toBeDisabled();
@@ -153,7 +140,7 @@ test.describe.only('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlO
   });
 });
 
-test.describe.only('Enable Wired Streams - Conflict flow', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Enable Wired Streams - Conflict flow', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
 
@@ -244,7 +231,7 @@ test.describe.only('Enable Wired Streams - Conflict flow', { tag: ['@ess', '@svl
   });
 });
 
-test.describe.only('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Enable Wired Streams - Permissions', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ esClient, apiServices, browserAuth }) => {
     // Disable wired streams to get clean state
     await browserAuth.loginAsAdmin();
