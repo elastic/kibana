@@ -9,9 +9,14 @@
 
 import type { PluginInitializerContext, CoreSetup } from '@kbn/core/server';
 import type { AIAssistantManagementSelectionPluginServerDependenciesSetup } from './types';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
+import { chatExperienceSetting } from './src/settings/chat_experience_setting';
 import { AIAssistantManagementSelectionPlugin } from './plugin';
 
 describe('plugin', () => {
@@ -20,7 +25,7 @@ describe('plugin', () => {
   });
 
   describe('stateful', () => {
-    it('uses the correct setting key to get the correct value from uiSettings', async () => {
+    it('uses the correct setting keys to register both AI assistant type and chat experience settings', async () => {
       const initializerContext = {
         env: {
           packageInfo: {
@@ -30,6 +35,7 @@ describe('plugin', () => {
         config: {
           get: jest.fn().mockReturnValue({
             preferredAIAssistantType: AIAssistantType.Observability,
+            preferredChatExperience: AIChatExperience.Classic,
           }),
         },
       } as unknown as PluginInitializerContext;
@@ -56,11 +62,21 @@ describe('plugin', () => {
 
       aiAssistantManagementSelectionPlugin.setup(coreSetup, setupDeps);
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(2);
+
+      // First call: AI Assistant Type setting
+      expect(coreSetup.uiSettings.register).toHaveBeenNthCalledWith(1, {
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...classicSetting,
           value: AIAssistantType.Observability,
+        },
+      });
+
+      // Second call: Chat Experience setting
+      expect(coreSetup.uiSettings.register).toHaveBeenNthCalledWith(2, {
+        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
+          ...chatExperienceSetting,
+          value: AIChatExperience.Classic,
         },
       });
     });

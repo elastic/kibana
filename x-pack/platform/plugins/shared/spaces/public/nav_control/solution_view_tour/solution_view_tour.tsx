@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 import type { SolutionView } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
@@ -55,6 +54,11 @@ export const SolutionViewTour: FC<Props> = ({
     return children;
   }
 
+  const handleSpaceSettingsClick = () => {
+    onFinishTour();
+    navigateToUrl(manageSpacesLink);
+  };
+
   return (
     <EuiTourStep
       content={
@@ -62,33 +66,9 @@ export const SolutionViewTour: FC<Props> = ({
           <p>
             <FormattedMessage
               id="xpack.spaces.navControl.tour.content"
-              defaultMessage="Only {solution} features are visible.{br}To access feature from other solutions, edit your {spacesLink} or create new spaces.{br}{learnMore}"
+              defaultMessage="Only {solution} features are visible. To access features from other solutions, edit your Space settings to select a Solution view."
               values={{
                 solution: solutionLabel,
-                spacesLink: (
-                  <EuiLink
-                    href={manageSpacesLink}
-                    onClick={(e) => {
-                      if (!hasActiveModifierKey(e)) {
-                        e.preventDefault();
-                        onFinishTour();
-                        navigateToUrl(manageSpacesLink);
-                      }
-                    }}
-                  >
-                    {i18n.translate('xpack.spaces.navControl.tour.spaceSettingsLink', {
-                      defaultMessage: 'space settings',
-                    })}
-                  </EuiLink>
-                ),
-                learnMore: (
-                  <EuiLink href={manageSpacesDocsLink} target="_blank" external>
-                    {i18n.translate('xpack.spaces.navControl.tour.learnMore', {
-                      defaultMessage: 'Learn more',
-                    })}
-                  </EuiLink>
-                ),
-                br: <br />,
               }}
             />
           </p>
@@ -102,7 +82,7 @@ export const SolutionViewTour: FC<Props> = ({
       stepsTotal={1}
       repositionOnScroll
       title={i18n.translate('xpack.spaces.navControl.tour.title', {
-        defaultMessage: 'This space uses the {solution} solution view',
+        defaultMessage: 'This space uses the {solution} Solution view',
         values: { solution: solutionLabel },
       })}
       anchorPosition="downCenter"
@@ -112,6 +92,16 @@ export const SolutionViewTour: FC<Props> = ({
             defaultMessage: 'Close',
           })}
         </EuiButtonEmpty>,
+        <EuiButton
+          size="s"
+          color="text"
+          onClick={handleSpaceSettingsClick}
+          data-test-subj="spaceSettingsTourBtn"
+        >
+          {i18n.translate('xpack.spaces.navControl.tour.spaceSettingsBtn', {
+            defaultMessage: 'Space settings',
+          })}
+        </EuiButton>,
       ]}
       panelProps={{
         'data-test-subj': 'spaceSolutionTour',
