@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import type { Streams } from '@kbn/streams-schema';
+import { EuiSpacer } from '@elastic/eui';
+import { StreamDescription } from '../../../stream_detail_features/stream_description';
+import { DeleteStreamPanel } from './delete_stream';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
+import { StreamFeatureConfiguration } from '../../../stream_detail_features/stream_feature_configuration';
+
+export function ClassicAdvancedView({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.ClassicStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
+  const {
+    features: { significantEvents },
+  } = useStreamsPrivileges();
+
+  return (
+    <>
+      {significantEvents?.enabled ? (
+        <>
+          <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+          <EuiSpacer />
+          <StreamFeatureConfiguration definition={definition.stream} />
+          <EuiSpacer />
+        </>
+      ) : null}
+      <UnmanagedElasticsearchAssets definition={definition} refreshDefinition={refreshDefinition} />
+      <EuiSpacer />
+      <DeleteStreamPanel definition={definition} />
+      <EuiSpacer />
+    </>
+  );
+}

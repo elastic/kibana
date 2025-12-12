@@ -7,21 +7,20 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import { StreamDescription } from '../../stream_detail_features/stream_description';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
-import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../stream_detail_attachments';
+import { ClassicAdvancedView } from './advanced_view/classic_advanced_view';
 
 const classicStreamManagementSubTabs = [
   'processing',
@@ -159,7 +158,7 @@ export function ClassicStreamDetailManagement({
     ),
   };
 
-  if (attachments?.enabled) {
+  if (attachments.enabled) {
     tabs.attachments = {
       content: <StreamDetailAttachments definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
@@ -175,18 +174,7 @@ export function ClassicStreamDetailManagement({
   if (definition.privileges.manage) {
     tabs.advanced = {
       content: (
-        <>
-          {otherTabs.significantEvents ? (
-            <>
-              <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
-              <EuiSpacer />
-            </>
-          ) : null}
-          <UnmanagedElasticsearchAssets
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-          />
-        </>
+        <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: (
         <EuiToolTip
