@@ -21,10 +21,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { MigrationType } from '../../../../../common/siem_migrations/types';
-import type {
-  MigrationTaskStats,
-  SiemMigrationVendor,
-} from '../../../../../common/siem_migrations/model/common.gen';
+import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
 import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
 
@@ -39,8 +36,6 @@ const migrationStatsToComboBoxOption = (
 });
 
 export interface HeaderButtonsProps {
-  /** The migration vendor name */
-  migrationVendor?: SiemMigrationVendor;
   /** The type of migrations (e.g. rule, dashboards)*/
   migrationType: MigrationType;
   /** Available migrations stats */
@@ -51,22 +46,21 @@ export interface HeaderButtonsProps {
   onMigrationIdChange: (selectedId?: string) => void;
 }
 export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
-  ({
-    migrationVendor,
-    migrationType,
-    migrationsStats,
-    selectedMigrationId,
-    onMigrationIdChange,
-  }) => {
+  ({ migrationType, migrationsStats, selectedMigrationId, onMigrationIdChange }) => {
     const migrationOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
       () => migrationsStats.map(migrationStatsToComboBoxOption),
       [migrationsStats]
     );
 
-    const selectedMigrationOption = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-      const stats = migrationsStats.find(({ id }) => id === selectedMigrationId);
-      return stats ? [migrationStatsToComboBoxOption(stats)] : [];
+    const selectedMigrationStats = useMemo(() => {
+      return migrationsStats.find(({ id }) => id === selectedMigrationId);
     }, [migrationsStats, selectedMigrationId]);
+
+    const migrationVendor = useMemo(() => selectedMigrationStats?.vendor, [selectedMigrationStats]);
+
+    const selectedMigrationOption = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+      return selectedMigrationStats ? [migrationStatsToComboBoxOption(selectedMigrationStats)] : [];
+    }, [selectedMigrationStats]);
 
     const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
       onMigrationIdChange(selected[0].value);
