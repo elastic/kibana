@@ -12,6 +12,7 @@ import { NodeType } from '@kbn/apm-plugin/common/connections';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { roundNumber } from '../../utils/common';
 import { generateData, dataConfig } from './generate_data';
+import { generateManyDependencies } from '../../dependencies/generate_many_dependencies';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -22,11 +23,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   const serviceName = 'synth-go';
 
-  async function callApi() {
+  async function callApi(serviceNameOverride?: string) {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
       params: {
-        path: { serviceName },
+        path: { serviceName: serviceNameOverride ?? serviceName },
         query: {
           environment: 'production',
           numBuckets: 20,
@@ -134,6 +135,27 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const expectedValue = dataConfigErroRate / (rate + dataConfigErroRate);
         expect(errorRate.value).to.be(expectedValue);
         expect(errorRate.timeseries?.every(({ y }) => y === expectedValue)).to.be(true);
+      });
+    });
+
+    describe('when a high volume of data is loaded', () => {
+      let body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
+      let statusCode: number;
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateManyDependencies({ apmSynthtraceEsClient, from: start, to: end });
+        const response = await callApi('synth-java-0');
+        body = response.body;
+        statusCode = response.status;
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns dependency data without error', () => {
+        expect(statusCode).to.be(200);
+        expect(body.serviceDependencies.length).to.be.greaterThan(0);
       });
     });
   });
