@@ -257,7 +257,16 @@ class ToolRegistryImpl implements ToolRegistry {
    * Records success if no error results are present, otherwise records failure.
    */
   private async trackToolHealth(toolId: string, result: RunToolReturn): Promise<void> {
-    const errorResult = result.results.find(isErrorResult);
+    // Guard against missing or non-array results
+    if (!result?.results || !Array.isArray(result.results)) {
+      // Treat as success if we got a result but no valid results array
+      await this.healthClient.recordSuccess(toolId);
+      return;
+    }
+
+    const errorResult = result.results.find(
+      (r): r is ErrorResult => r.type === ToolResultType.error
+    );
 
     if (errorResult) {
       await this.healthClient.recordFailure(toolId, errorResult.data.message);
