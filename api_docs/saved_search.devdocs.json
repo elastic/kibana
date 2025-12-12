@@ -1686,7 +1686,15 @@
               },
               " | undefined; searchAfter?: ",
               "SortResults",
-              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
+              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",

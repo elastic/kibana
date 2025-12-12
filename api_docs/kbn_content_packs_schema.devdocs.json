@@ -812,9 +812,9 @@
             "description": [],
             "signature": [
               "BaseStream",
-              ".UpsertRequest<",
+              ".UpsertRequest<OmitWiredStreamUpsertProps<",
               "WiredStream",
-              ".Definition>"
+              ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
             "deprecated": false,
@@ -871,7 +871,15 @@
         "description": [],
         "signature": [
           "SavedObject",
-          "<Readonly<{ version?: number | undefined; timeRestore?: boolean | undefined; refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; sections?: Readonly<{ collapsed?: boolean | undefined; } & { title: string; gridData: Readonly<{} & { i: string; y: number; }>; }>[] | undefined; hits?: number | undefined; controlGroupInput?: Readonly<{ chainingSystem?: string | undefined; panelsJSON?: string | undefined; controlStyle?: string | undefined; ignoreParentSettingsJSON?: string | undefined; showApplySelections?: boolean | undefined; } & {}> | undefined; timeFrom?: string | undefined; timeTo?: string | undefined; optionsJSON?: string | undefined; } & { title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSourceJSON?: string | undefined; } & {}>; panelsJSON: string; }>> & { type: \"dashboard\"; }"
+          "<",
+          {
+            "pluginId": "dashboard",
+            "scope": "server",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-server.DashboardAttributes",
+            "text": "DashboardAttributes"
+          },
+          "> & { type: \"dashboard\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
         "deprecated": false,

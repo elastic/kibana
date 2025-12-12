@@ -49,7 +49,7 @@ export const searchResponseBodySchema = schema.object({
       data: schema.object({
         description: schema.maybe(schema.string()),
         tags: schema.maybe(schema.arrayOf(schema.string())),
-        timeRange: schema.maybe(timeRangeSchema),
+        time_range: schema.maybe(timeRangeSchema),
         title: schema.string(),
       }),
       meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),

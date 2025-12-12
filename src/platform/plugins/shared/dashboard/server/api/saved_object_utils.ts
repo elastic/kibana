@@ -23,12 +23,12 @@ export function getDashboardMeta(
   return {
     error: savedObject.error,
     managed: savedObject.managed,
-    updatedAt: savedObject.updated_at,
-    updatedBy: savedObject.updated_by,
+    updated_at: savedObject.updated_at,
+    updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
     ...(['create', 'read', 'search'].includes(operation) && {
-      createdAt: savedObject.created_at,
-      createdBy: savedObject.created_by,
+      created_at: savedObject.created_at,
+      created_by: savedObject.created_by,
     }),
   };
 }

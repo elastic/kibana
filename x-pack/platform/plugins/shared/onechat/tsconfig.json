@@ -77,6 +77,7 @@
     "@kbn/share-plugin",
     "@kbn/unsaved-changes-prompt",
     "@kbn/workflows-management-plugin",
+    "@kbn/workflows-extensions",
     "@kbn/spaces-plugin",
     "@kbn/doc-links",
     "@kbn/ui-actions-plugin",
@@ -86,13 +87,14 @@
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/lens-embeddable-utils",
-    "@kbn/ai-assistant-connector-selector-action",
     "@kbn/elastic-assistant",
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
     "@kbn/core-notifications-browser",
-    "@kbn/deeplinks-agent-builder",
+    "@kbn/ai-assistant-common",
+    "@kbn/ui-theme",
+    "@kbn/ai-assistant-management-plugin"
   ]
 }

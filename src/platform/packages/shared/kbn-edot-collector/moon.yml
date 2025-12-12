@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/edot-collector'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ai-assistant'
+  defaultOwner: '@elastic/obs-ai-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/edot-collector'
   description: Moon project for @kbn/edot-collector
   channel: ''
-  owner: '@elastic/obs-ai-assistant'
+  owner: '@elastic/obs-ai-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-edot-collector
 dependsOn:

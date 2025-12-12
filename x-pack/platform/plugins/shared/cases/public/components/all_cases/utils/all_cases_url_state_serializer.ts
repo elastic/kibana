@@ -17,6 +17,8 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
     'tags',
     'assignees',
     'category',
+    'from',
+    'to',
   ]);
 
   const customFieldsAsQueryParams = Object.entries(state.filterOptions.customFields).reduce(

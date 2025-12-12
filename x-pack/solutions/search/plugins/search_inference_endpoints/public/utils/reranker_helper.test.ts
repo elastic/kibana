@@ -26,7 +26,7 @@ describe('Reranker Tech preview badge', () => {
     expect(isProviderTechPreview(mockProvider)).toEqual(true);
   });
 
-  it('return true for rainbow-sprinkles', () => {
+  it('return false for rainbow-sprinkles', () => {
     const elasticProviderServiceSettings = {
       ...mockProvider.service_settings,
       model_id: 'rainbow-sprinkles',
@@ -37,7 +37,7 @@ describe('Reranker Tech preview badge', () => {
       service: 'elastic',
       service_settings: elasticProviderServiceSettings,
     } as any;
-    expect(isProviderTechPreview(elasticProvider)).toEqual(true);
+    expect(isProviderTechPreview(elasticProvider)).toEqual(false);
   });
 
   it('return false for other provider', () => {

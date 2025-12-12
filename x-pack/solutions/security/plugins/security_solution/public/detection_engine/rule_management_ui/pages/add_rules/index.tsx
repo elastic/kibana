@@ -23,7 +23,7 @@ import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_tab
 import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
 import { APP_UI_ID } from '../../../../../common';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
-import { MissingPrivilegesCallOut } from '../../../../common/components/missing_privileges';
+import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to';
 
 const AddRulesPageComponent: React.FC = () => {
@@ -50,7 +50,7 @@ const AddRulesPageComponent: React.FC = () => {
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
-      <MissingPrivilegesCallOut />
+      <MissingDetectionsPrivilegesCallOut />
 
       <AddPrebuiltRulesTableContextProvider>
         <SecuritySolutionPageWrapper>

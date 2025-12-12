@@ -47,7 +47,7 @@ If the specified entity already exists, it is updated with the provided values. 
     headerParams: [],
     pathParams: ['entityType'],
     urlParams: ['force'],
-    bodyParams: [],
+    bodyParams: ['@timestamp', 'asset', 'entity', 'event', 'user', 'host', 'service'],
   },
   paramsSchema: z.object({
     ...getShapeAt(upsert_entity_request, 'body'),

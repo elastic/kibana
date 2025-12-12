@@ -21,26 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import { formatDataRetention } from '../../../../utils';
 import { ErrorState } from './error_state';
 import { EmptyState } from './empty_state';
-
-const formatDataRetention = (template: TemplateDeserialized): string | undefined => {
-  const { lifecycle } = template;
-
-  if (!lifecycle?.enabled) {
-    return undefined;
-  }
-
-  if (lifecycle.infiniteDataRetention) {
-    return '∞';
-  }
-
-  if (lifecycle.value && lifecycle.unit) {
-    return `${lifecycle.value}${lifecycle.unit}`;
-  }
-
-  return undefined;
-};
 
 interface SelectTemplateStepProps {
   templates: TemplateDeserialized[];

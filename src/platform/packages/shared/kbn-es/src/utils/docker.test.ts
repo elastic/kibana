@@ -565,6 +565,8 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
         "--env",
+        "serverless.project_type=elasticsearch_general_purpose",
+        "--env",
         "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
@@ -618,7 +620,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "serverless.organization_id=org1234567890",
         "--env",
-        "serverless.project_type=elasticsearch",
+        "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "serverless.project_id=abcde1234567890",
         "--env",

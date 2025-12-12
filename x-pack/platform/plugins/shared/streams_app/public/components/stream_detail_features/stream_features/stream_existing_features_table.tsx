@@ -28,7 +28,7 @@ import {
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
-import { FeatureEventsSparkline } from './feature_events_sparkline';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
 
@@ -87,7 +87,7 @@ export function StreamExistingFeaturesTable({
       width: '15%',
       render: (feature: Feature) => {
         if (isFeatureWithFilter(feature)) {
-          return <FeatureEventsSparkline feature={feature} definition={definition} />;
+          return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
         }
       },
     },

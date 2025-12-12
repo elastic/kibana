@@ -20,6 +20,9 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_mark
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAttackDiscoveryAttachment } from '../../../use_attack_discovery_attachment';
 
 const scrollable = css`
   overflow-x: auto;
@@ -78,6 +81,10 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const filters = useMemo(() => buildAlertsKqlFilter('_id', originalAlertIds), [originalAlertIds]);
 
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+
   return (
     <div data-test-subj="attackDiscoveryTab">
       <EuiTitle data-test-subj="summaryTitle" size="xs">
@@ -120,7 +127,11 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
+          {isAgentBuilderEnabled ? (
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+          ) : (
+            <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
+          )}
         </EuiFlexItem>
         <EuiFlexItem
           css={css`

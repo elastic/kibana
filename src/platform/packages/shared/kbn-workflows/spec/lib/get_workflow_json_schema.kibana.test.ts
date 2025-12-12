@@ -242,7 +242,7 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
   });
 
   KIBANA_SAMPLE_STEPS.forEach((step) => {
-    it(`${step.type}`, async () => {
+    it(`${step.type} (${step.name})`, async () => {
       const result = await validateWithYamlLsp(
         `test-${step.name}.yaml`,
         yaml.stringify({

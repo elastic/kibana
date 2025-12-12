@@ -57,7 +57,12 @@ export const MyConnector: SingleFileConnectorDefinition = {
     supportedFeatureIds: ['workflows'],
   },
 
-  authTypes: ['bearer'],
+  auth: {
+    types: ['bearer'],
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  },
 
   schema: z.object({
     url: z.string().url().describe('API URL'),
@@ -155,17 +160,23 @@ are specified, defaults to no authentication. Can also specify a custom schema f
 which will be used in place of the default
 
 ```typescript
-authTypes: [
-  // use basic auth type with the default schema
-  'basic',
-  // use api_key_header auth type with a custom header field
-  {
-    type: 'api_key_header',
-    defaults: {
-      headerField: 'custom-api-key-field'
+auth: {
+  types: [
+    // use basic auth type with the default schema
+    'basic',
+    // use api_key_header auth type with a custom header field
+    {
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'custom-api-key-field'
+      }
     }
+  ],
+  // optionally add headers that will be added to all requests
+  headers: {
+    'Content-Type': 'application/json',
   }
-]
+}
 ```
 
 ### Schema
