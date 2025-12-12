@@ -12,15 +12,10 @@ import {
 } from '@kbn/inference-common/src/chat_complete/errors';
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
-import {
-  createAgentExecutionError,
-  isAgentExecutionError,
-  isToolUnavailableError,
-} from '@kbn/onechat-common/base/errors';
+import { createAgentExecutionError, isAgentExecutionError } from '@kbn/onechat-common/base/errors';
 
 const recoverableErrorCodes = [
   ErrCodes.toolNotFound,
-  ErrCodes.toolUnavailable,
   ErrCodes.toolValidationError,
   ErrCodes.emptyResponse,
 ];
@@ -35,11 +30,6 @@ export const convertError = (error: Error): OnechatAgentExecutionError => {
     return createAgentExecutionError(error.message, ErrCodes.toolNotFound, {
       toolName: error.meta.name,
       toolArgs: error.meta.arguments,
-    });
-  } else if (isToolUnavailableError(error)) {
-    return createAgentExecutionError(error.message, ErrCodes.toolUnavailable, {
-      toolName: error.meta.toolId,
-      reason: error.meta.reason,
     });
   } else if (isToolValidationError(error)) {
     return createAgentExecutionError(error.message, ErrCodes.toolValidationError, {

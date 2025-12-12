@@ -16,7 +16,6 @@ export enum OnechatErrorCode {
   internalError = 'internalError',
   badRequest = 'badRequest',
   toolNotFound = 'toolNotFound',
-  toolUnavailable = 'toolUnavailable',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
   agentExecutionError = 'agentExecutionError',
@@ -110,38 +109,6 @@ export const createToolNotFoundError = ({
     OnechatErrorCode.toolNotFound,
     customMessage ?? `Tool ${toolId} not found`,
     { ...meta, toolId, statusCode: 404 }
-  );
-};
-
-/**
- * Error thrown when a tool exists but is currently unavailable
- * (e.g., the associated connector is missing or inaccessible).
- */
-export type OnechatToolUnavailableError = OnechatError<
-  OnechatErrorCode.toolUnavailable,
-  { toolId: string; reason: string }
->;
-
-/**
- * Checks if the given error is a {@link OnechatToolUnavailableError}
- */
-export const isToolUnavailableError = (err: unknown): err is OnechatToolUnavailableError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.toolUnavailable;
-};
-
-export const createToolUnavailableError = ({
-  toolId,
-  reason,
-  meta = {},
-}: {
-  toolId: string;
-  reason: string;
-  meta?: Record<string, any>;
-}): OnechatToolUnavailableError => {
-  return new OnechatError(
-    OnechatErrorCode.toolUnavailable,
-    `Tool ${toolId} is unavailable: ${reason}`,
-    { ...meta, toolId, reason, statusCode: 503 }
   );
 };
 
@@ -268,14 +235,12 @@ export const OnechatErrorUtils = {
   isOnechatError,
   isInternalError,
   isToolNotFoundError,
-  isToolUnavailableError,
   isAgentNotFoundError,
   isConversationNotFoundError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createInternalError,
   createToolNotFoundError,
-  createToolUnavailableError,
   createAgentNotFoundError,
   createConversationNotFoundError,
   createAgentExecutionError,
