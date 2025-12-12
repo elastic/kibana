@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useStateFromPublishingSubject } from '../publishing_subject';
-import { apiHasParentApi, HasParentApi } from './has_parent_api';
-import { apiPublishesViewMode, PublishesViewMode } from './publishes_view_mode';
+import type { HasParentApi } from './has_parent_api';
+import { apiHasParentApi } from './has_parent_api';
+import type { PublishesViewMode } from './publishes_view_mode';
+import { apiPublishesViewMode } from './publishes_view_mode';
 
 /**
  * This API can access a view mode, either its own or from its parent API.
@@ -29,26 +30,16 @@ export const apiCanAccessViewMode = (api: unknown): api is CanAccessViewMode => 
  * A function which will get the view mode from the API or the parent API. if this api has a view mode AND its
  * parent has a view mode, we consider the APIs version the source of truth.
  */
-export const getInheritedViewMode = (api?: CanAccessViewMode) => {
+export const getInheritedViewMode = (api?: unknown) => {
   if (apiPublishesViewMode(api)) return api.viewMode$.getValue();
   if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) {
     return api.parentApi.viewMode$.getValue();
   }
 };
 
-export const getViewModeSubject = (api?: CanAccessViewMode) => {
+export const getViewModeSubject = (api?: unknown) => {
   if (apiPublishesViewMode(api)) return api.viewMode$;
   if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) {
     return api.parentApi.viewMode$;
   }
-};
-
-/**
- * A hook that gets a view mode from this API or its parent as a reactive variable which will cause re-renders on change.
- * if this api has a view mode AND its parent has a view mode, we consider the APIs version the source of truth.
- */
-export const useInheritedViewMode = <ApiType extends CanAccessViewMode = CanAccessViewMode>(
-  api: ApiType | undefined
-) => {
-  return useStateFromPublishingSubject(getViewModeSubject(api));
 };

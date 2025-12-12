@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
+import type {
+  ESQLAstExpression,
+  ESQLAstHeaderCommand,
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLProperNode,
+  ESQLSingleAstItem,
+} from '../types';
 
 /**
  * Normalizes AST "item" list to only contain *single* items.
@@ -38,7 +45,7 @@ export const firstItem = (items: ESQLAstItem[]): ESQLAstExpression | undefined =
   }
 };
 
-export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLAstItem => {
+export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLSingleAstItem => {
   return Array.isArray(items) ? resolveItem(items[0]) : items;
 };
 
@@ -55,31 +62,76 @@ export const lastItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined =>
   return last as ESQLSingleAstItem;
 };
 
-export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
+export function* children(
+  node: ESQLProperNode
+): Iterable<ESQLAstExpression | ESQLCommand | ESQLAstHeaderCommand> {
   switch (node.type) {
     case 'function':
     case 'command':
+    case 'header-command':
     case 'order':
     case 'option': {
-      for (const arg of singleItems(node.args)) {
-        yield arg;
-      }
+      yield* singleItems(node.args);
       break;
     }
     case 'list': {
-      for (const item of singleItems(node.values)) {
-        yield item;
-      }
+      yield* singleItems(node.values);
+      break;
+    }
+    case 'map': {
+      yield* node.entries;
+      break;
+    }
+    case 'map-entry': {
+      yield node.key;
+      yield node.value;
       break;
     }
     case 'inlineCast': {
       if (Array.isArray(node.value)) {
-        for (const item of singleItems(node.value)) {
-          yield item;
-        }
+        yield* singleItems(node.value);
       } else {
         yield node.value;
       }
+      break;
+    }
+    case 'parens': {
+      yield node.child;
+      break;
+    }
+  }
+}
+
+export function* childrenFoAnyNode(
+  node: ESQLProperNode
+): Iterable<ESQLAstExpression | ESQLCommand | ESQLAstHeaderCommand> {
+  if ('args' in node && Array.isArray(node.args)) {
+    yield* singleItems(node.args);
+    return;
+  }
+
+  switch (node.type) {
+    case 'query': {
+      if (node.header) {
+        yield* node.header;
+      }
+      yield* node.commands;
+      break;
+    }
+    case 'source': {
+      if (node.prefix) {
+        yield node.prefix;
+      }
+      if (node.index) {
+        yield node.index;
+      }
+      if (node.selector) {
+        yield node.selector;
+      }
+      break;
+    }
+    default: {
+      yield* children(node);
       break;
     }
   }

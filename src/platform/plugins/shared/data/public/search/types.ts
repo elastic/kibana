@@ -8,15 +8,16 @@
  */
 
 import type { PackageInfo } from '@kbn/core/server';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { WarningHandlerCallback } from '@kbn/search-response-warnings';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ISearchStartSearchSource } from '../../common/search';
-import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
-import { SearchUsageCollector } from './collectors';
-import { ISessionsClient, ISessionService } from './session';
+import type { ISearchStartSearchSource } from '../../common/search';
+import type { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
+import type { SearchUsageCollector } from './collectors';
+import type { ISessionsClient, ISessionService } from './session';
+import type { BackgroundSearchOpenedHandler } from './session/sessions_mgmt';
 
 export { SEARCH_EVENT_TYPE } from './collectors';
 export type { ISearchStartSearchSource, SearchUsageCollector };
@@ -67,6 +68,18 @@ export interface ISearchStart {
    * @param cb WarningHandlerCallback - optional callback to intercept warnings
    */
   showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
+  /**
+   * Shows a flyout with a table to manage search sessions.
+   */
+  showSearchSessionsFlyout: (attrs: {
+    appId: string;
+    trackingProps: { openedFrom: string };
+    onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+  }) => void;
+  /**
+   * Feature flag value to make it easier to use in different plugins
+   */
+  isBackgroundSearchEnabled: boolean;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

@@ -72,7 +72,7 @@ See the [grpc-node docs](https://github.com/grpc/grpc-node/blob/master/doc/envir
 * First, we need to define what metrics we want to instrument with OpenTelemetry
 
   ```ts
-  import { Counter, Meter } from '@opentelemetry/api-metrics';
+  import { Counter, Meter } from '@opentelemetry/api';
 
   export class FooApiMeters {
     requestCount: Counter;
@@ -92,7 +92,7 @@ See the [grpc-node docs](https://github.com/grpc/grpc-node/blob/master/doc/envir
   ```ts
   import { IRouter } from '@kbn/core/server';
   import { FooApiMeters } from './foo_api_meters';
-  import { metrics } from '@opentelemetry/api-metrics';
+  import { metrics } from '@opentelemetry/api';
 
   export class FooApiPlugin implements Plugin {
     private metrics: Metrics;

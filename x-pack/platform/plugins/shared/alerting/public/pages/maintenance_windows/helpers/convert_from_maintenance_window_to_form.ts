@@ -8,11 +8,15 @@
 import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { has } from 'lodash';
-import type { FormProps, RecurringScheduleFormProps } from '../components/schema';
-import type { RRuleParams, MaintenanceWindow } from '../../../../common';
-import type { MaintenanceWindowFrequency } from '../constants';
-import { EndsOptions } from '../constants';
-import { getInitialByWeekday } from './get_initial_by_weekday';
+import { getInitialByWeekday } from '@kbn/response-ops-recurring-schedule-form/utils/get_initial_by_weekday';
+import type {
+  RecurrenceFrequency,
+  RecurringSchedule,
+} from '@kbn/response-ops-recurring-schedule-form/types';
+import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import type { FormProps } from '../components/schema';
+import type { RRuleParams } from '../../../../common';
 
 export const convertFromMaintenanceWindowToForm = (
   maintenanceWindow: MaintenanceWindow
@@ -21,31 +25,26 @@ export const convertFromMaintenanceWindowToForm = (
   const endDate = moment(startDate).add(maintenanceWindow.duration);
   // maintenance window is considered recurring if interval is defined
   const recurring = has(maintenanceWindow, 'rRule.interval');
-  const hasScopedQuery = !!maintenanceWindow.scopedQuery;
   const form: FormProps = {
     title: maintenanceWindow.title,
     startDate,
     endDate: endDate.toISOString(),
     timezone: [maintenanceWindow.rRule.tzid],
     recurring,
-    solutionId:
-      maintenanceWindow.categoryIds && maintenanceWindow.categoryIds.length === 1 && hasScopedQuery
-        ? maintenanceWindow.categoryIds[0]
-        : undefined,
     scopedQuery: maintenanceWindow.scopedQuery,
   };
   if (!recurring) return form;
 
   const rRule = maintenanceWindow.rRule;
   const isCustomFrequency = isCustom(rRule);
-  const frequency = rRule.freq as MaintenanceWindowFrequency;
+  const frequency = rRule.freq as RecurrenceFrequency;
   const ends = rRule.until
-    ? EndsOptions.ON_DATE
+    ? RecurrenceEnd.ON_DATE
     : rRule.count
-    ? EndsOptions.AFTER_X
-    : EndsOptions.NEVER;
+    ? RecurrenceEnd.AFTER_X
+    : RecurrenceEnd.NEVER;
 
-  const recurringSchedule: RecurringScheduleFormProps = {
+  const recurringSchedule: RecurringSchedule = {
     frequency: isCustomFrequency ? 'CUSTOM' : frequency,
     interval: rRule.interval,
     ends,
@@ -75,6 +74,13 @@ export const convertFromMaintenanceWindowToForm = (
     }
   }
 
+  if (frequency === Frequency.DAILY && rRule.byweekday) {
+    recurringSchedule.byweekday = getInitialByWeekday(
+      rRule.byweekday as string[],
+      moment(startDate)
+    );
+  }
+
   form.recurringSchedule = recurringSchedule;
 
   return form;
@@ -84,10 +90,6 @@ const isCustom = (rRule: RRuleParams) => {
   const freq = rRule.freq;
   // interval is greater than 1
   if (rRule.interval && rRule.interval > 1) {
-    return true;
-  }
-  // frequency is daily and no weekdays are selected
-  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
     return true;
   }
   // frequency is weekly and there are multiple weekdays selected

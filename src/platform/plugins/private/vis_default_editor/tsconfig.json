@@ -1,10 +1,11 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
   "include": [
-    "public/**/*"
+    "public/**/*",
+    "../../../../../typings/emotion.d.ts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -30,6 +31,9 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/palettes",
+    "@kbn/css-utils",
+    "@kbn/visualizations-common",
+    "@kbn/chart-expressions-common",
   ],
   "exclude": [
     "target/**/*",

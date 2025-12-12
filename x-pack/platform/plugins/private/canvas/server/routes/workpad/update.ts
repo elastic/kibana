@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CanvasWorkpad } from '../../../types';
-import { RouteInitializerDeps } from '..';
+import type { CanvasWorkpad } from '../../../types';
+import type { RouteInitializerDeps } from '..';
 import {
   API_ROUTE_WORKPAD,
   API_ROUTE_WORKPAD_STRUCTURES,
@@ -34,17 +34,17 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
         },
       },
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -74,17 +74,17 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
         },
       },
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -119,17 +119,17 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
         },
       },
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

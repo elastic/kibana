@@ -8,9 +8,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Filter } from '@kbn/es-query';
-import { SavedObjectReference } from '@kbn/core/types';
-import { MigrateFunctionsObject, VersionedState } from '@kbn/kibana-utils-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { MigrateFunctionsObject, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 
 export const extract = (filters: Filter[]) => {

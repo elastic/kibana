@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { CustomIntegrationRegistry } from '../custom_integration_registry';
-import { CustomIntegrationIcon, PLUGIN_ID } from '../../common';
+import type { CoreSetup } from '@kbn/core/server';
+import type { CustomIntegrationRegistry } from '../custom_integration_registry';
+import type { CustomIntegrationIcon } from '../../common';
+import { PLUGIN_ID } from '../../common';
 
 import { languageIntegrations } from '../../common/language_integrations';
 import type { LanguageIntegration } from '../../common/language_integrations';
@@ -43,8 +44,7 @@ export function registerLanguageClients(
       shipper: 'language_clients',
       uiInternalPath: integration.exportLanguageUiComponent
         ? integration?.integrationsAppUrl
-        : // Documentation for `main` branches is still published at a `master` URL.
-          integration.docUrlTemplate.replace('{branch}', branch === 'main' ? 'master' : branch),
+        : integration.docUrlTemplate,
       isBeta: false,
       icons,
       categories: ['elastic_stack', 'elasticsearch_sdk'],

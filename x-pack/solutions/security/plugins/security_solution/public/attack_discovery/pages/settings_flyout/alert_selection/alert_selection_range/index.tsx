@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SingleRangeChangeEvent } from '@kbn/elastic-assistant';
 import { AlertsRange } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
+
 import * as i18n from '../translations';
 
 export const MAX_ALERTS = 500;
@@ -19,7 +20,7 @@ export const NO_INDEX_PATTERNS: DataView[] = [];
 
 interface Props {
   maxAlerts: number;
-  setMaxAlerts: React.Dispatch<React.SetStateAction<string>>;
+  setMaxAlerts: (value: string) => void;
 }
 
 const AlertSelectionRangeComponent: React.FC<Props> = ({ maxAlerts, setMaxAlerts }) => {
@@ -33,12 +34,6 @@ const AlertSelectionRangeComponent: React.FC<Props> = ({ maxAlerts, setMaxAlerts
 
   return (
     <EuiFlexGroup data-test-subj="alertSelectionRange" direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj="title" size="xs">
-          <h3>{i18n.SET_NUMBER_OF_ALERTS_TO_ANALYZE}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <EuiSpacer size="m" />
       </EuiFlexItem>

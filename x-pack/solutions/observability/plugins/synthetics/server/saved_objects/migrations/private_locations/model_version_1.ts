@@ -5,11 +5,11 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import {
+import type {
   SavedObjectModelTransformationFn,
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
-import { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 
 export const PrivateLocationAttributesCodecLegacy = t.intersection([
   t.interface({
@@ -58,7 +58,7 @@ export const modelVersion1: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'unsafe_transform',
-      transformFn: transformGeoProperty,
+      transformFn: (typeSafeGuard) => typeSafeGuard(transformGeoProperty),
     },
   ],
 };

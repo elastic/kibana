@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { merge } from 'lodash';
-import { LocationDescriptorObject } from 'history';
+import type { LocationDescriptorObject } from 'history';
 import SemVer from 'semver/classes/semver';
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import {
   notificationServiceMock,
   docLinksServiceMock,
@@ -66,6 +66,7 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
 const appDependencies = {
   services,
   history,
+  url: sharePluginMock.createStartContract().url,
   core: {
     getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),

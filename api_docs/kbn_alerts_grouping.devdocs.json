@@ -331,7 +331,73 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[], groupNumber: number) => JSX.Element[]) | undefined"
+              "[], groupNumber: number) => { items: ((",
+              "DisambiguateSet",
+              "<(",
+              "DisambiguateSet",
+              "<",
+              "EuiContextMenuPanelItemDescriptorEntry",
+              ", ",
+              "EuiContextMenuPanelItemSeparator",
+              "> & ",
+              "EuiContextMenuPanelItemSeparator",
+              ") | (",
+              "DisambiguateSet",
+              "<",
+              "EuiContextMenuPanelItemSeparator",
+              ", ",
+              "EuiContextMenuPanelItemDescriptorEntry",
+              "> & Omit<",
+              "EuiContextMenuItemProps",
+              ", \"hasPanel\"> & { name: React.ReactNode; key?: string | undefined; panel?: ",
+              "EuiContextMenuPanelId",
+              " | undefined; }), ",
+              "EuiContextMenuPanelItemRenderCustom",
+              "> & ",
+              "EuiContextMenuPanelItemRenderCustom",
+              ") | (",
+              "DisambiguateSet",
+              "<",
+              "EuiContextMenuPanelItemRenderCustom",
+              ", (",
+              "DisambiguateSet",
+              "<",
+              "EuiContextMenuPanelItemDescriptorEntry",
+              ", ",
+              "EuiContextMenuPanelItemSeparator",
+              "> & ",
+              "EuiContextMenuPanelItemSeparator",
+              ") | (",
+              "DisambiguateSet",
+              "<",
+              "EuiContextMenuPanelItemSeparator",
+              ", ",
+              "EuiContextMenuPanelItemDescriptorEntry",
+              "> & Omit<",
+              "EuiContextMenuItemProps",
+              ", \"hasPanel\"> & { name: React.ReactNode; key?: string | undefined; panel?: ",
+              "EuiContextMenuPanelId",
+              " | undefined; })> & ((",
+              "DisambiguateSet",
+              "<",
+              "EuiContextMenuPanelItemDescriptorEntry",
+              ", ",
+              "EuiContextMenuPanelItemSeparator",
+              "> & ",
+              "EuiContextMenuPanelItemSeparator",
+              ") | (",
+              "DisambiguateSet",
+              "<",
+              "EuiContextMenuPanelItemSeparator",
+              ", ",
+              "EuiContextMenuPanelItemDescriptorEntry",
+              "> & Omit<",
+              "EuiContextMenuItemProps",
+              ", \"hasPanel\"> & { name: React.ReactNode; key?: string | undefined; panel?: ",
+              "EuiContextMenuPanelId",
+              " | undefined; }))))[]; panels: ",
+              "EuiContextMenuPanelDescriptor",
+              "[]; }) | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
@@ -532,6 +598,58 @@
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.initialGroupings",
+            "type": "Array",
+            "tags": [],
+            "label": "initialGroupings",
+            "description": [
+              "\nInitial groupings configuration"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.onGroupingsChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onGroupingsChange",
+            "description": [
+              "\nCallback for when the groupings change"
+            ],
+            "signature": [
+              "((groupings: ",
+              "GroupModel",
+              ") => void) | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-grouping",
+                "id": "def-public.AlertsGroupingProps.onGroupingsChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "groupings",
+                "description": [],
+                "signature": [
+                  "GroupModel"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

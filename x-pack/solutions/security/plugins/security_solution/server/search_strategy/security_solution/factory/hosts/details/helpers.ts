@@ -19,6 +19,7 @@ import type {
   AggregationRequest,
   EndpointFields,
   HostAggEsItem,
+  HostBucketItem,
   HostBuckets,
   HostItem,
   HostValue,
@@ -132,7 +133,8 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     : fieldName.replace(/\./g, '_');
 
   if (has(`${aggField}.buckets`, bucket)) {
-    return getFirstItem(get(`${aggField}`, bucket));
+    const buckets = get(`${aggField}.buckets`, bucket);
+    return buckets.length > 0 ? buckets.map((item: HostBucketItem) => item.key) : null;
   } else if (fieldName === 'endpoint.id') {
     return get('endpoint_id.value.buckets[0].key', bucket) || null;
   } else if (has(aggField, bucket)) {
@@ -166,24 +168,16 @@ export const getHostEndpoint = async (
     return null;
   }
 
-  const { esClient, endpointContext } = deps;
+  const { endpointContext, request } = deps;
   const logger = endpointContext.logFactory.get('metadata');
+  const spaceId = (await endpointContext.service.getActiveSpace(request)).id;
 
   try {
-    const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
-
-    const endpointData = await endpointMetadataService
-      // Using `internalUser` ES client below due to the fact that Fleet data has been moved to
-      // system indices (`.fleet*`). Because this is a readonly action, this should be ok to do
-      // here until proper RBOC controls are implemented
-      .getEnrichedHostMetadata(id);
-
+    const endpointMetadataService = endpointContext.service.getEndpointMetadataService(spaceId);
+    const endpointData = await endpointMetadataService.getEnrichedHostMetadata(id);
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
-
     const pendingActions = fleetAgentId
-      ? getPendingActionsSummary(esClient.asInternalUser, endpointMetadataService, logger, [
-          fleetAgentId,
-        ])
+      ? getPendingActionsSummary(endpointContext.service, spaceId, [fleetAgentId])
           .then((results) => {
             return results[0].pending_actions;
           })

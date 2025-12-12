@@ -513,9 +513,9 @@
               },
               "[], store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
@@ -556,9 +556,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/es-query",
+                    "pluginId": "@kbn/es-query-constants",
                     "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
+                    "docId": "kibKbnEsQueryConstantsPluginApi",
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   }
@@ -1272,9 +1272,9 @@
           },
           "<S>, syncConfig: { time?: boolean | undefined; refreshInterval?: boolean | undefined; filters?: boolean | ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -1388,9 +1388,9 @@
                 "signature": [
                   "boolean | ",
                   {
-                    "pluginId": "@kbn/es-query",
+                    "pluginId": "@kbn/es-query-constants",
                     "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
+                    "docId": "kibKbnEsQueryConstantsPluginApi",
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
@@ -2244,14 +2244,7 @@
             "label": "refreshInterval",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " | undefined"
+              "Readonly<{} & { value: number; pause: boolean; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
             "deprecated": false,
@@ -2273,6 +2266,20 @@
                 "text": "Filter"
               },
               "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GlobalQueryStateFromUrl.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
             "deprecated": false,
@@ -3333,6 +3340,73 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.TimefilterHook",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimefilterHook",
+        "description": [],
+        "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimefilterHook.timeState",
+            "type": "Object",
+            "tags": [],
+            "label": "timeState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeState",
+                "text": "TimeState"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimefilterHook.refresh",
+            "type": "Function",
+            "tags": [],
+            "label": "refresh",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimefilterHook.timeState$",
+            "type": "Object",
+            "tags": [],
+            "label": "timeState$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "TimeStateUpdate",
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.TimefilterSetup",
         "type": "Interface",
         "tags": [],
@@ -3351,7 +3425,13 @@
             "description": [],
             "signature": [
               "{ readonly useTimefilter: () => ",
-              "TimefilterHook",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.TimefilterHook",
+                "text": "TimefilterHook"
+              },
               "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
@@ -3368,7 +3448,7 @@
                 "section": "def-public.AutoRefreshDoneFn",
                 "text": "AutoRefreshDoneFn"
               },
-              ">; getFetch$: () => ",
+              ">; triggerFetch: () => void; getFetch$: () => ",
               "Observable",
               "<void>; getTime: () => ",
               {
@@ -3388,23 +3468,7 @@
               },
               "; setTime: (time: ",
               "InputTimeRange",
-              ") => void; getRefreshInterval: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; createFilter: (indexPattern: ",
+              ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3512,15 +3576,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; getRefreshIntervalDefaults: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; }"
+              "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter_service.ts",
             "deprecated": false,
@@ -3733,15 +3789,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " & { refreshInterval: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; }"
+          " & { refreshInterval: Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
         "deprecated": false,
@@ -3757,7 +3805,13 @@
         "description": [],
         "signature": [
           "{ readonly useTimefilter: () => ",
-          "TimefilterHook",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.TimefilterHook",
+            "text": "TimefilterHook"
+          },
           "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
           "Observable",
           "<boolean>; getTimeUpdate$: () => ",
@@ -3774,7 +3828,7 @@
             "section": "def-public.AutoRefreshDoneFn",
             "text": "AutoRefreshDoneFn"
           },
-          ">; getFetch$: () => ",
+          ">; triggerFetch: () => void; getFetch$: () => ",
           "Observable",
           "<void>; getTime: () => ",
           {
@@ -3794,23 +3848,7 @@
           },
           "; setTime: (time: ",
           "InputTimeRange",
-          ") => void; getRefreshInterval: () => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          ">) => void; createFilter: (indexPattern: ",
+          ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -3918,15 +3956,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          "; getRefreshIntervalDefaults: () => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; }"
+          "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter.ts",
         "deprecated": false,
@@ -4793,15 +4823,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          " | undefined; filters?: ",
+          " | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4834,21 +4856,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.RefreshInterval",
-        "type": "Type",
-        "tags": [],
-        "label": "RefreshInterval",
-        "description": [],
-        "signature": [
-          "{ pause: boolean; value: number; }"
-        ],
-        "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.SavedQueryTimeFilter",
         "type": "Type",
         "tags": [],
@@ -4862,15 +4869,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " & { refreshInterval: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          "; }"
+          " & { refreshInterval: Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/common/query/types.ts",
         "deprecated": false,

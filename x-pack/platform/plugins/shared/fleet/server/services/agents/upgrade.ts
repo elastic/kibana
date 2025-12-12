@@ -48,7 +48,7 @@ export async function sendUpgradeAgentAction({
 
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: now,
     data,
@@ -101,6 +101,7 @@ export async function sendUpgradeAgentsActions(
 
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,
@@ -123,7 +124,7 @@ export async function sendUpgradeAgentsActions(
     }
   }
 
-  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentSpaceId);
+  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, [currentSpaceId]);
 }
 
 export async function sendAutomaticUpgradeAgentsActions(
@@ -133,6 +134,8 @@ export async function sendAutomaticUpgradeAgentsActions(
     agents: Agent[];
     version: string;
     upgradeDurationSeconds?: number;
+    spaceIds?: string[];
+    force?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -140,7 +143,7 @@ export async function sendAutomaticUpgradeAgentsActions(
     esClient,
     options.agents,
     {},
-    { ...options, isAutomatic: true },
-    currentSpaceId
+    { ...options, isAutomatic: true, force: options.force ?? false },
+    options.spaceIds ?? [currentSpaceId]
   );
 }

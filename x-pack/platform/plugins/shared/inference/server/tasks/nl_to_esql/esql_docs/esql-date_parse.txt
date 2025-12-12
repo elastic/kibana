@@ -1,6 +1,6 @@
 # DATE_PARSE
 
-The DATE_PARSE function is used to convert a date string into a date based on the provided format pattern.
+Parses a date string into a date object using the specified format.
 
 ## Syntax
 
@@ -8,22 +8,21 @@ The DATE_PARSE function is used to convert a date string into a date based on th
 
 ### Parameters
 
-#### datePattern
+#### `datePattern`
 
-This is the format of the date. If `null` is provided, the function will return `null`.
+The date format. Refer to the `DateTimeFormatter` documentation for the syntax. If `null`, the function returns `null`.
 
-#### dateString
+#### `dateString`
 
-This is the date expression in string format.
+A date expression as a string. If `null` or an empty string, the function returns `null`.
 
 ## Examples
+
+Parsing a date string
 
 ```esql
 ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```
 
-```esql
-FROM logs
-| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
-```
+This example parses the string `"2022-05-06"` into a date object using the format `"yyyy-MM-dd"`.

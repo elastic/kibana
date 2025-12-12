@@ -22,6 +22,8 @@ import {
 } from '../../../../../../../../common/constants';
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { generateCreateAgentlessPolicyDevToolsRequest } from '../../../services/devtools_request';
 
 export function useDevToolsRequest({
   newAgentPolicy,
@@ -43,6 +45,23 @@ export function useDevToolsRequest({
   const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
       const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
+
+      if (
+        ExperimentalFeaturesService.get().useAgentlessAPIInUI &&
+        packagePolicy.supports_agentless &&
+        !packagePolicy.supports_cloud_connector
+      ) {
+        return [
+          generateCreateAgentlessPolicyDevToolsRequest(packagePolicy),
+          i18n.translate(
+            'xpack.fleet.editPackagePolicy.devtoolsRequestAgentlessPolicyDescription',
+            {
+              defaultMessage: 'These Kibana requests create a new agentless policy.',
+            }
+          ),
+        ];
+      }
+
       return [
         `${generateCreateAgentPolicyDevToolsRequest(
           newAgentPolicy,
@@ -51,7 +70,7 @@ export function useDevToolsRequest({
           packagePolicyId
             ? generateUpdatePackagePolicyDevToolsRequest(
                 packagePolicyId,
-                set(omit(packagePolicy, 'elasticsearch', 'policy_id'), 'policy_ids', [
+                set(omit(packagePolicy, 'elasticsearch', 'spaceIds', 'policy_id'), 'policy_ids', [
                   ...packagePolicy.policy_ids,
                   '',
                 ])
@@ -82,7 +101,7 @@ export function useDevToolsRequest({
       packagePolicyId
         ? generateUpdatePackagePolicyDevToolsRequest(
             packagePolicyId,
-            omit(packagePolicy, 'elasticsearch', 'policy_id')
+            omit(packagePolicy, 'elasticsearch', 'spaceIds', 'policy_id')
           )
         : generateCreatePackagePolicyDevToolsRequest({
             ...packagePolicy,

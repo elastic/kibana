@@ -8,7 +8,8 @@
 import React from 'react';
 import { renderWithReduxStore } from '../mocks';
 import { SettingsMenu } from './settings_menu';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('settings menu', () => {
   const onCloseMock = jest.fn();
@@ -23,9 +24,9 @@ describe('settings menu', () => {
       />
     );
 
-    const toggleAutoApply = () => {
+    const toggleAutoApply = async () => {
       const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
-      autoApplyToggle.click();
+      await userEvent.click(autoApplyToggle);
     };
 
     const isAutoApplyOn = () => {
@@ -40,26 +41,15 @@ describe('settings menu', () => {
     };
   };
 
-  afterEach(() => {
-    onCloseMock.mockClear();
-  });
-
-  it('should call onClose when popover closes after toggling', async () => {
-    const { toggleAutoApply } = renderSettingsMenu();
-    toggleAutoApply();
-
-    await waitFor(() => expect(onCloseMock).toHaveBeenCalledTimes(1));
-  });
-
   it('should toggle auto-apply', async () => {
     const { toggleAutoApply, isAutoApplyOn } = renderSettingsMenu();
 
     expect(isAutoApplyOn()).toBeTruthy();
 
-    toggleAutoApply();
+    await toggleAutoApply();
     expect(isAutoApplyOn()).toBeFalsy();
 
-    toggleAutoApply();
+    await toggleAutoApply();
     expect(isAutoApplyOn()).toBeTruthy();
   });
 });

@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { DragHandleApi } from './use_drag_handle_api';
+import type { DragHandleApi } from './use_drag_handle_api';
 
 export const DefaultDragHandle = React.memo(
   ({ dragHandleApi }: { dragHandleApi: DragHandleApi }) => {
@@ -18,10 +18,11 @@ export const DefaultDragHandle = React.memo(
       <button
         onMouseDown={dragHandleApi.startDrag}
         onTouchStart={dragHandleApi.startDrag}
+        onKeyDown={dragHandleApi.startDrag}
         aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
           defaultMessage: 'Drag to move',
         })}
-        className="kbnGridPanel__dragHandle"
+        className="kbnGridPanel--dragHandle"
         data-test-subj="kbnGridPanel--dragHandle"
         css={styles}
       >
@@ -49,7 +50,6 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0`,
     transition: `${euiTheme.animation.slow} opacity`,
-    touchAction: 'none',
     '.kbnGridPanel:hover &, .kbnGridPanel:focus-within &, &:active, &:focus': {
       opacity: '1 !important',
     },

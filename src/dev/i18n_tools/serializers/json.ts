@@ -8,7 +8,7 @@
  */
 
 import { defaultEnFormats } from '@kbn/i18n/src/core';
-import { Serializer, FileOutput } from './types';
+import type { Serializer, FileOutput } from './types';
 
 export const serializeToJson: Serializer = (messageDescriptors, formats = defaultEnFormats) => {
   const resultJsonObject: FileOutput = {

@@ -9,6 +9,7 @@
 
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import type { RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {
@@ -18,6 +19,7 @@ import {
   INTERVAL_REQUIRED_TEXT,
   INTERVAL_MINIMUM_TEXT,
   RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT,
+  RULE_INVESTIGATION_GUIDE_TOO_LONG_TEXT,
 } from '../translations';
 import type {
   MinimumScheduleInterval,
@@ -64,6 +66,7 @@ export function validateRuleBase({
     actionConnectors: new Array<string>(),
     alertDelay: new Array<string>(),
     tags: new Array<string>(),
+    artifacts: new Array<string>(),
   };
 
   if (!formData.name) {
@@ -92,6 +95,16 @@ export function validateRuleBase({
 
   if (!formData.alertDelay || isNaN(formData.alertDelay.active) || formData.alertDelay.active < 1) {
     errors.alertDelay.push(RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT);
+  }
+
+  const investigationGuideLength = formData.artifacts?.investigation_guide?.blob.length ?? 0;
+  if (investigationGuideLength > MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH) {
+    errors.artifacts.push(
+      RULE_INVESTIGATION_GUIDE_TOO_LONG_TEXT(
+        investigationGuideLength,
+        MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
+      )
+    );
   }
 
   return errors;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SystemIndicesMigrationStatus } from '../../../../common/types';
+import type { SystemIndicesMigrationStatus } from '../../../../common/types';
 
 export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
   migration_status: 'MIGRATION_NEEDED',
@@ -51,6 +51,39 @@ export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
         {
           index: '.logstash-config',
           version: '7.1.4',
+        },
+      ],
+    },
+  ],
+};
+
+export const systemIndicesMigrationErrorStatus: SystemIndicesMigrationStatus = {
+  migration_status: 'ERROR',
+  features: [
+    {
+      feature_name: 'kibana',
+      minimum_index_version: '7.1.1',
+      migration_status: 'ERROR',
+      indices: [
+        {
+          index: '.kibana',
+          migration_status: 'ERROR',
+          failure_cause: {
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'something failed',
+            },
+          },
+        },
+        {
+          index: '.logs',
+          migration_status: 'ERROR',
+          failure_cause: {
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'something failed',
+            },
+          },
         },
       ],
     },

@@ -175,6 +175,7 @@ describe('When calling package policy', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
     testPackagePolicy = {
@@ -704,6 +705,22 @@ describe('When calling package policy', () => {
   });
 
   describe('create api handler', () => {
+    it('should not allow to create agentless policies if disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { ...testPackagePolicy, supports_agentless: true },
+      });
+
+      await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
+        /To create agentless package policies, use the Fleet agentless policies API./
+      );
+    });
+
     it('should return valid response', async () => {
       packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
       (

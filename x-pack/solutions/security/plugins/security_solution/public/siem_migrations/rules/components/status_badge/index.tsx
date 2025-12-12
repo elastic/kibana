@@ -9,15 +9,12 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import {
-  convertTranslationResultIntoText,
-  useResultVisColors,
-} from '../../utils/translation_results';
-import {
-  RuleMigrationStatusEnum,
-  type RuleMigration,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+  MigrationTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
+import { convertTranslationResultIntoText, useResultVisColors } from '../../../common/utils';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
 const statusTextWrapperClassName = css`
@@ -26,7 +23,7 @@ const statusTextWrapperClassName = css`
 `;
 
 interface StatusBadgeProps {
-  migrationRule: RuleMigration;
+  migrationRule: RuleMigrationRule;
   'data-test-subj'?: string;
 }
 
@@ -39,16 +36,18 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
         <EuiToolTip content={i18n.RULE_STATUS_INSTALLED}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="check" color={colors[RuleTranslationResult.FULL]} />
+              <EuiIcon type="check" color={colors[MigrationTranslationResult.FULL]} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_INSTALLED}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
+              {i18n.RULE_STATUS_INSTALLED}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );
     }
 
     // Failed
-    if (migrationRule.status === RuleMigrationStatusEnum.failed) {
+    if (migrationRule.status === SiemMigrationStatus.FAILED) {
       const tooltipMessage = migrationRule.comments?.length
         ? migrationRule.comments[0].message
         : i18n.RULE_STATUS_FAILED;
@@ -58,7 +57,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
             <EuiFlexItem grow={false}>
               <EuiIcon type="warningFilled" color="danger" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_FAILED}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
+              {i18n.RULE_STATUS_FAILED}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );

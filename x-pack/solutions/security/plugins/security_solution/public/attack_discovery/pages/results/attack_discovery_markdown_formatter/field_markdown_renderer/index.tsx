@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
@@ -18,6 +19,7 @@ const contextId = 'FieldMarkdownRenderer';
 export const getFieldMarkdownRenderer = (disableActions: boolean) => {
   const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     const { openRightPanel } = useExpandableFlyoutApi();
+    const { euiTheme } = useEuiTheme();
 
     const flyoutPanelProps = useMemo(
       () => getFlyoutPanelProps({ contextId, fieldName: name, value }),
@@ -34,6 +36,9 @@ export const getFieldMarkdownRenderer = (disableActions: boolean) => {
       () =>
         flyoutPanelProps != null ? (
           <EuiButtonEmpty
+            css={css`
+              font-size: ${euiTheme.font.scale.s}rem;
+            `}
             data-test-subj="entityButton"
             flush="both"
             onClick={onEntityClick}
@@ -43,7 +48,7 @@ export const getFieldMarkdownRenderer = (disableActions: boolean) => {
           </EuiButtonEmpty>
         ) : null,
 
-      [flyoutPanelProps, onEntityClick, value]
+      [euiTheme.font.scale.s, flyoutPanelProps, onEntityClick, value]
     );
 
     return (

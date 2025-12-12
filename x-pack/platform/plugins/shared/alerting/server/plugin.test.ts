@@ -21,12 +21,11 @@ import type { RuleType } from './types';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
+import { dataPluginMock as unifiedSearchPluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import type {
-  DataViewsServerPluginStart,
-  PluginSetup as DataPluginSetup,
-} from '@kbn/data-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { maintenanceWindowsMock } from '@kbn/maintenance-windows-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
@@ -77,7 +76,7 @@ describe('Alerting Plugin', () => {
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
-          unifiedSearch: autocompletePluginMock.createSetupContract(),
+          unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
           ...(useDataStreamForAlerts
             ? { serverless: serverlessPluginMock.createSetupContract() }
             : {}),
@@ -241,9 +240,150 @@ describe('Alerting Plugin', () => {
               ...sampleRuleType,
               minimumLicenseRequired: 'basic',
               cancelAlertsOnRuleTimeout: false,
+              autoRecoverAlerts: false,
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
             setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
+          });
+        });
+
+        describe('disabledRuleTypes', () => {
+          it('should not register type if type is in disabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ disabledRuleTypes: ['test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(false);
+            expect(context.logger.get().info).toHaveBeenCalledWith(
+              `rule type \"test\" disabled by configuration`
+            );
+            expect(context.logger.get().warn).not.toHaveBeenCalled();
+          });
+
+          it('should not register type if type is in disabled and enabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ disabledRuleTypes: ['test'], enabledRuleTypes: ['test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(false);
+            expect(context.logger.get().info).toHaveBeenCalledWith(
+              `rule type \"test\" disabled by configuration`
+            );
+            expect(context.logger.get().warn).toHaveBeenCalledWith(
+              `rule type \"test\" is both disabled and enabled allow-list. rule type will be disabled.`
+            );
+          });
+        });
+
+        describe('enabledRuleTypes', () => {
+          it('should log warning if enabledRuleTypes is empty array', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ enabledRuleTypes: [] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.getAllTypes()).toEqual([]);
+            expect(context.logger.get().warn).toHaveBeenCalledWith(
+              `xpack.alerting.enabledRuleTypes is empty. No rule types will be enabled in the configuration.`
+            );
+          });
+
+          it('should not register type if type is not in enabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ enabledRuleTypes: ['not-test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(false);
+            expect(context.logger.get().info).toHaveBeenCalledWith(
+              `rule type \"test\" is not enabled in configuration`
+            );
+          });
+
+          it('should register type if type is in enabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ enabledRuleTypes: ['test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(true);
+          });
+
+          it('should register type if enabled config is not set', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig()
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(true);
           });
         });
 
@@ -293,7 +433,7 @@ describe('Alerting Plugin', () => {
               monitoringCollection: monitoringCollectionMock.createSetup(),
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
-              unifiedSearch: autocompletePluginMock.createSetupContract(),
+              unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
               ...(useDataStreamForAlerts
                 ? { serverless: serverlessPluginMock.createSetupContract() }
                 : {}),
@@ -315,6 +455,7 @@ describe('Alerting Plugin', () => {
                   .mockResolvedValue(dataViewPluginMocks.createStartContract()),
                 getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
               } as DataViewsServerPluginStart,
+              maintenanceWindows: maintenanceWindowsMock.createStart(),
             });
 
             expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -345,7 +486,7 @@ describe('Alerting Plugin', () => {
               monitoringCollection: monitoringCollectionMock.createSetup(),
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
-              unifiedSearch: autocompletePluginMock.createSetupContract(),
+              unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
               ...(useDataStreamForAlerts
                 ? { serverless: serverlessPluginMock.createSetupContract() }
                 : {}),
@@ -367,6 +508,7 @@ describe('Alerting Plugin', () => {
                   .mockResolvedValue(dataViewPluginMocks.createStartContract()),
                 getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
               } as DataViewsServerPluginStart,
+              maintenanceWindows: maintenanceWindowsMock.createStart(),
             });
 
             const fakeRequest = {
@@ -409,7 +551,7 @@ describe('Alerting Plugin', () => {
             monitoringCollection: monitoringCollectionMock.createSetup(),
             data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
             features: featuresPluginMock.createSetup(),
-            unifiedSearch: autocompletePluginMock.createSetupContract(),
+            unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
             ...(useDataStreamForAlerts
               ? { serverless: serverlessPluginMock.createSetupContract() }
               : {}),
@@ -431,6 +573,7 @@ describe('Alerting Plugin', () => {
                 .mockResolvedValue(dataViewPluginMocks.createStartContract()),
               getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
             } as DataViewsServerPluginStart,
+            maintenanceWindows: maintenanceWindowsMock.createStart(),
           });
 
           const fakeRequest = {

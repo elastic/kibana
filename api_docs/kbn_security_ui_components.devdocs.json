@@ -830,7 +830,7 @@
         "label": "FeatureTableCell",
         "description": [],
         "signature": [
-          "({ feature, className }: Props) => React.JSX.Element"
+          "({ feature, hasSubFeaturePrivileges }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/components/feature_table_cell.tsx",
         "deprecated": false,
@@ -841,7 +841,7 @@
             "id": "def-public.FeatureTableCell.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ feature, className }",
+            "label": "{ feature, hasSubFeaturePrivileges }",
             "description": [],
             "signature": [
               "Props"

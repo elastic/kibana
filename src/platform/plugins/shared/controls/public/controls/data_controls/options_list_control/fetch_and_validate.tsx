@@ -7,43 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  Observable,
-  of,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, debounceTime, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
 
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  OptionsListSearchTechnique,
+  OptionsListSortingType,
+} from '../../../../common/options_list';
+import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
-import { ControlStateManager } from '../../types';
+import type { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+import type { ControlFetchContext } from '../../../control_group/control_fetch';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
+import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,
-  stateManager,
+  requestSize$,
+  runPastTimeout$,
+  selectedOptions$,
+  searchTechnique$,
+  sort$,
+  controlFetch$,
 }: {
   api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
-      controlFetch$: Observable<ControlFetchContext>;
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  stateManager: ControlStateManager<
-    Pick<OptionsListComponentState, 'requestSize' | 'runPastTimeout' | 'searchTechnique' | 'sort'>
-  > & {
-    selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
-  };
+  requestSize$: PublishingSubject<number>;
+  runPastTimeout$: PublishingSubject<boolean | undefined>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
+  sort$: PublishingSubject<OptionsListSortingType | undefined>;
+  controlFetch$: (onReload: () => void) => Observable<ControlFetchContext>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
@@ -51,23 +49,17 @@ export function fetchAndValidate$({
   return combineLatest([
     api.dataViews$,
     api.field$,
-    api.controlFetch$,
+    controlFetch$(requestCache.clearCache),
     api.parentApi.allowExpensiveQueries$,
     api.parentApi.ignoreParentSettings$,
     api.debouncedSearchString,
-    stateManager.sort,
-    stateManager.searchTechnique,
+    sort$,
+    searchTechnique$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
       debounceTime(100) // debounce load more so "loading" state briefly shows
     ),
-    apiPublishesReload(api.parentApi)
-      ? api.parentApi.reload$.pipe(
-          tap(() => requestCache.clearCache()),
-          startWith(undefined)
-        )
-      : of(undefined),
   ]).pipe(
     tap(() => {
       // abort any in progress requests
@@ -76,11 +68,7 @@ export function fetchAndValidate$({
         abortController = undefined;
       }
     }),
-    withLatestFrom(
-      stateManager.requestSize,
-      stateManager.runPastTimeout,
-      stateManager.selectedOptions
-    ),
+    withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
         [

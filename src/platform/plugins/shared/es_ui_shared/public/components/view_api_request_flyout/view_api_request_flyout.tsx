@@ -11,9 +11,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compressToEncodedURIComponent } from 'lz-string';
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
-  EuiFlyoutProps,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -23,9 +23,12 @@ import {
   EuiSpacer,
   EuiCodeBlock,
   EuiCopy,
+  useGeneratedHtmlId,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
-import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;
@@ -64,11 +67,21 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
   // Check if both the Dev Tools UI and the Console UI are enabled.
   const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+  const codeBlockTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={closeFlyout} data-test-subj="apiRequestFlyout" {...flyoutProps}>
+    <EuiFlyout
+      onClose={closeFlyout}
+      data-test-subj="apiRequestFlyout"
+      aria-labelledby={flyoutTitleId}
+      {...flyoutProps}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2 data-test-subj="apiRequestFlyoutTitle">{title}</h2>
+          <h2 id={flyoutTitleId} data-test-subj="apiRequestFlyoutTitle">
+            {title}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
@@ -112,14 +125,24 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           )}
         </div>
         <EuiSpacer size="s" />
-        <EuiCodeBlock
-          language="json"
-          data-test-subj="apiRequestFlyoutBody"
-          overflowHeight={1200}
-          isVirtualized
-        >
-          {request}
-        </EuiCodeBlock>
+        <div aria-labelledby={codeBlockTitleId}>
+          <EuiScreenReaderOnly>
+            <h3 id={codeBlockTitleId}>
+              <FormattedMessage
+                id="esUi.viewApiRequest.codeBlockTitle"
+                defaultMessage="Request code block"
+              />
+            </h3>
+          </EuiScreenReaderOnly>
+          <EuiCodeBlock
+            language="json"
+            data-test-subj="apiRequestFlyoutBody"
+            overflowHeight={1200}
+            isVirtualized
+          >
+            {request}
+          </EuiCodeBlock>
+        </div>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

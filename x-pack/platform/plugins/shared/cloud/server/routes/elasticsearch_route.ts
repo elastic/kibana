@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
-import { ElasticsearchConfigType } from '../../common/types';
+import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchConfigType } from '../../common/types';
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../../common/constants';
 
 export function setElasticsearchRoute({
@@ -23,16 +23,16 @@ export function setElasticsearchRoute({
     .get({
       path: ELASTICSEARCH_CONFIG_ROUTE,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {},
       },
       async (context, request, response) => {

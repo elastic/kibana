@@ -1,0 +1,186 @@
+{
+  "id": "@kbn/data-view-validation",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-view-validation",
+        "id": "def-common.validateDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "validateDataView",
+        "description": [
+          "\nValidate index pattern strings"
+        ],
+        "signature": [
+          "(indexPattern: string) => ",
+          {
+            "pluginId": "@kbn/data-view-validation",
+            "scope": "common",
+            "docId": "kibKbnDataViewValidationPluginApi",
+            "section": "def-common.ValidationErrors",
+            "text": "ValidationErrors"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-validation",
+            "id": "def-common.validateDataView.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [
+              "string to validate"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "errors object"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/data-view-validation",
+        "id": "def-common.ValidationErrors",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidationErrors",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-validation",
+            "id": "def-common.ValidationErrors.ILLEGAL_CHARACTERS_KEY",
+            "type": "Array",
+            "tags": [],
+            "label": "[ILLEGAL_CHARACTERS_KEY]",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-view-validation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-view-validation",
+            "id": "def-common.ValidationErrors.CONTAINS_SPACES_KEY",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[CONTAINS_SPACES_KEY]",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-view-validation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/data-view-validation",
+        "id": "def-common.CONTAINS_SPACES_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "CONTAINS_SPACES_KEY",
+        "description": [
+          "\nError code for when an index pattern contains spaces"
+        ],
+        "signature": [
+          "\"CONTAINS_SPACES\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-validation",
+        "id": "def-common.ILLEGAL_CHARACTERS",
+        "type": "Array",
+        "tags": [],
+        "label": "ILLEGAL_CHARACTERS",
+        "description": [
+          "\nAll characters disallowed in index patterns."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-validation",
+        "id": "def-common.ILLEGAL_CHARACTERS_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "ILLEGAL_CHARACTERS_KEY",
+        "description": [
+          "\nError code for when an index pattern contains illegal characters"
+        ],
+        "signature": [
+          "\"ILLEGAL_CHARACTERS\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-validation",
+        "id": "def-common.ILLEGAL_CHARACTERS_VISIBLE",
+        "type": "Array",
+        "tags": [],
+        "label": "ILLEGAL_CHARACTERS_VISIBLE",
+        "description": [
+          "\nCharacters disallowed in index patterns that are visible."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

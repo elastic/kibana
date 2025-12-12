@@ -52,7 +52,8 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user
  * This function will override that functionality in cy.visit by building the baseUrl
- * directly from the environment variables set up in x-pack/test/security_solution_cypress/runner.ts
+ * directly from the environment variables set up in
+ * x-pack/solutions/security/test/security_solution_cypress/runner.ts
  *
  * @param role string role/user to log in with
  * @param route string route to visit

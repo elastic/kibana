@@ -9,13 +9,11 @@ import type { FC } from 'react';
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
-import {
-  type RuleMigration,
-  type RuleMigrationTranslationResult,
-} from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type MigrationTranslationResult } from '../../../../../../../common/siem_migrations/model/common.gen';
+import { type RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
-type RuleMigrationTranslationCallOutMode = RuleMigrationTranslationResult | 'mapped';
+type RuleMigrationTranslationCallOutMode = MigrationTranslationResult | 'mapped';
 
 const getCallOutInfo = (
   mode: RuleMigrationTranslationCallOutMode
@@ -51,17 +49,17 @@ const getCallOutInfo = (
 };
 
 export interface TranslationCallOutProps {
-  ruleMigration: RuleMigration;
+  migrationRule: RuleMigrationRule;
 }
 
-export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ ruleMigration }) => {
-  if (!ruleMigration.translation_result) {
+export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ migrationRule }) => {
+  if (!migrationRule.translation_result) {
     return null;
   }
 
-  const mode = ruleMigration.elastic_rule?.prebuilt_rule_id
+  const mode = migrationRule.elastic_rule?.prebuilt_rule_id
     ? 'mapped'
-    : ruleMigration.translation_result;
+    : migrationRule.translation_result;
   const { title, message, icon, color } = getCallOutInfo(mode);
 
   return (

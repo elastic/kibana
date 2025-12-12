@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -24,11 +24,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_default_columns'));
-    loadTestFile(require.resolve('./_drag_drop'));
-    loadTestFile(require.resolve('./_request_counts'));
-    loadTestFile(require.resolve('./_doc_viewer'));
-    loadTestFile(require.resolve('./_panels_toggle'));
-    loadTestFile(require.resolve('./_lens_vis'));
+    loadTestFile(require.resolve('./_default_columns')); // 2 min
+    loadTestFile(require.resolve('./_drag_drop')); // 1 min
+    loadTestFile(require.resolve('./_request_counts')); // 6 min
   });
 }

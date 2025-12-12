@@ -18,31 +18,31 @@ import {
   EuiSwitch,
   type EuiSwitchEvent,
   EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import { AnonymousAccessState } from '../../../../common';
+import type { AnonymousAccessState } from '../../../../common';
 
-import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
+import { useShareContext, type IShareContext } from '../../context';
+import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type EmbedProps = Pick<
   IShareContext,
   | 'shareableUrlLocatorParams'
   | 'shareableUrlForSavedObject'
   | 'shareableUrl'
-  | 'embedUrlParamExtensions'
   | 'objectType'
   | 'isDirty'
   | 'allowShortUrl'
-  | 'anonymousAccess'
-  | 'urlService'
-> & {
-  objectConfig?: ShareContextObjectTypeConfig;
-};
+> &
+  EmbedShareConfig['config'] & {
+    objectConfig?: EmbedShareUIConfig;
+  };
 
 interface UrlParams {
   [extensionName: string]: {
@@ -50,8 +50,12 @@ interface UrlParams {
   };
 }
 
+const draftModeCalloutMessage = i18n.translate('share.embed.draftModeCallout.message', {
+  defaultMessage:
+    'This code might not work properly. Save your changes to ensure it works as expected.',
+});
+
 export const EmbedContent = ({
-  embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
   shareableUrlLocatorParams,
@@ -59,10 +63,11 @@ export const EmbedContent = ({
   objectConfig = {},
   isDirty,
   allowShortUrl,
-  urlService,
+  shortUrlService,
   anonymousAccess,
 }: EmbedProps) => {
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
+  const { onSave, isSaving } = useShareContext();
   const [isLoading, setIsLoading] = useState(false);
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
@@ -73,7 +78,12 @@ export const EmbedContent = ({
   const [showPublicUrlSwitch, setShowPublicUrlSwitch] = useState(false);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const { draftModeCallOut: DraftModeCallout, computeAnonymousCapabilities } = objectConfig;
+  const {
+    draftModeCallOut,
+    computeAnonymousCapabilities,
+    embedUrlParamExtensions: urlParamExtensions,
+  } = objectConfig;
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {
@@ -172,15 +182,13 @@ export const EmbedContent = ({
   }, [shareableUrlForSavedObject, snapshotUrl, updateUrlParams]);
 
   const createShortUrl = useCallback(async () => {
-    const shortUrlService = urlService.shortUrls.get(null);
-
     if (shareableUrlLocatorParams) {
       const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
       return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
     }
-  }, [shareableUrlLocatorParams, snapshotUrl, urlService.shortUrls]);
+  }, [shareableUrlLocatorParams, snapshotUrl, shortUrlService]);
 
   const addUrlAnonymousAccessParameters = useCallback(
     (tempUrl: string): string => {
@@ -274,16 +282,15 @@ export const EmbedContent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={
               <FormattedMessage
                 id="share.embed.publicUrlOptionsSwitch.tooltip"
                 defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
               />
             }
-          >
-            <EuiIcon type="questionInCircle" />
-          </EuiToolTip>
+            type="question"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -309,10 +316,19 @@ export const EmbedContent = ({
         <EuiText size="s">{helpText}</EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}
-        {isDirty && DraftModeCallout && (
+        {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            {DraftModeCallout}
+            <DraftModeCallout
+              message={draftModeCalloutMessage}
+              {...draftModeCalloutContent}
+              {...(onSave && {
+                saveButtonProps: {
+                  onSave,
+                  isSaving,
+                },
+              })}
+            />
           </>
         )}
         <EuiSpacer />

@@ -8,7 +8,7 @@
  */
 
 import { createOutputParser } from './output_parser';
-import { ConsoleOutputParserResult } from './types';
+import type { ConsoleOutputParserResult } from './types';
 
 const parser = createOutputParser();
 describe('console output parser', () => {

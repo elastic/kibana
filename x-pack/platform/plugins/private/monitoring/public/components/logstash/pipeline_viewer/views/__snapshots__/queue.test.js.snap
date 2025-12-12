@@ -10,7 +10,7 @@ exports[`Queue component renders default elements 1`] = `
     size="s"
   />
   <EuiText
-    css={[Function]}
+    css="unknown styles"
   >
     <MemoizedFormattedMessage
       defaultMessage="Queue metrics not available"

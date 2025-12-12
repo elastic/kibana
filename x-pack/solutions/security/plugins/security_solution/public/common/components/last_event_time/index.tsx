@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 
@@ -36,15 +36,16 @@ export const LastEventTime = memo<LastEventTimeProps>(
 
     if (errorMessage != null) {
       return (
-        <EuiToolTip
+        <EuiIconTip
           position="top"
           content={errorMessage}
-          data-test-subj="last_event_time_error"
           aria-label="last_event_time_error"
           id={`last_event_time_error-${indexKey}`}
-        >
-          <EuiIcon aria-describedby={`last_event_time_error-${indexKey}`} type="warning" />
-        </EuiToolTip>
+          type="warning"
+          iconProps={{
+            'data-test-subj': 'last_event_time_error',
+          }}
+        />
       );
     }
 

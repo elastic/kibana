@@ -9,7 +9,8 @@
 
 import moment from 'moment';
 import type { IScopedSearchSessionsClient } from './types';
-import { SearchSessionsConfigSchema } from '../../config';
+import type { SearchSessionsConfigSchema } from '../../config';
+import type { SearchSessionSavedObjectAttributes } from '../../../common';
 
 export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessionsClient> {
   return {
@@ -32,4 +33,17 @@ export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessi
         } as unknown as SearchSessionsConfigSchema)
     ),
   };
+}
+
+export function createSearchSessionSavedObjectAttributesMock(
+  overrides: Partial<SearchSessionSavedObjectAttributes> = {}
+) {
+  return {
+    sessionId: '1234',
+    created: moment().toISOString(),
+    expires: moment().add(7, 'days').toISOString(),
+    idMapping: {},
+    version: '9.2.0',
+    ...overrides,
+  } as SearchSessionSavedObjectAttributes;
 }

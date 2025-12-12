@@ -11,14 +11,14 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { range } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
 import {
   getKibanaMigratorTestKit,
   startElasticsearch,
   currentVersion,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getSampleAType } from '../fixtures/zdt_base.fixtures';
 

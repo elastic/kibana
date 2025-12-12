@@ -18,11 +18,8 @@ import {
   ActionsClientChatBedrockConverse,
   ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
-import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import {
-  OPENAI_CHAT_URL,
-  OpenAiProviderType,
-} from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { OPENAI_CHAT_URL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { CustomHttpRequestError } from './custom_http_request_error';
 
 export interface BulkError {
@@ -180,6 +177,16 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
     [`.inference`]: `inference`,
   };
   return llmTypeDictionary[actionTypeId];
+};
+
+export const getActionTypeId = (llmType: string): string | undefined => {
+  const actionTypeDictionary: Record<string, string> = {
+    openai: `.gen-ai`,
+    bedrock: `.bedrock`,
+    gemini: `.gemini`,
+    inference: `.inference`,
+  };
+  return actionTypeDictionary[llmType];
 };
 
 export const getLlmClass = (llmType?: string) => {

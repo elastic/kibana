@@ -8,8 +8,8 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { GetProfilesOptions } from '../profiles_manager';
+import { type GetProfilesOptions } from '../profiles_manager';
+import { useScopedServices } from '../../components/scoped_services_provider';
 
 /**
  * Hook to retreive the resolved profiles
@@ -17,11 +17,11 @@ import type { GetProfilesOptions } from '../profiles_manager';
  * @returns The resolved profiles
  */
 export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
-  const { profilesManager } = useDiscoverServices();
-  const [profiles, setProfiles] = useState(() => profilesManager.getProfiles({ record }));
+  const { scopedProfilesManager } = useScopedServices();
+  const [profiles, setProfiles] = useState(() => scopedProfilesManager.getProfiles({ record }));
   const profiles$ = useMemo(
-    () => profilesManager.getProfiles$({ record }),
-    [profilesManager, record]
+    () => scopedProfilesManager.getProfiles$({ record }),
+    [scopedProfilesManager, record]
   );
 
   useEffect(() => {

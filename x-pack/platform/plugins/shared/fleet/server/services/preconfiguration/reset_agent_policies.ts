@@ -12,12 +12,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
 import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../constants';
-import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
+import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
@@ -31,8 +31,8 @@ export async function resetPreconfiguredAgentPolicies(
   esClient: ElasticsearchClient,
   agentPolicyId?: string
 ) {
-  const logger = appContextService.getLogger();
-  logger.warn('Reseting Fleet preconfigured agent policies');
+  const logger = appContextService.getLogger().get('resetPreconfiguredAgentPolicies');
+  logger.warn(`Reseting Fleet preconfigured agent policy id [${agentPolicyId}]`);
   await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
   await _deleteGhostPackagePolicies(soClient, esClient, logger);
   await _deletePreconfigurationDeleteRecord(soClient, logger, agentPolicyId);
@@ -63,8 +63,7 @@ async function _deleteGhostPackagePolicies(
     return;
   }
 
-  const savedObjectType = await getAgentPolicySavedObjectType();
-  const objects = policyIds.map((id) => ({ id, type: savedObjectType }));
+  const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
     if (so.error && so.error.statusCode === 404) {
       acc.set(so.id, false);
@@ -149,7 +148,7 @@ async function _deleteExistingData(
     existingPolicies = (
       await agentPolicyService.list(soClient, {
         perPage: SO_SEARCH_LIMIT,
-        kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
       })
     ).items;
   }

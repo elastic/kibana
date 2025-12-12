@@ -12,4 +12,8 @@ export default class parser_config extends Parser {
   isDevVersion() {
     return true;
   }
+
+  hasMetricsCommand() {
+    return true;
+  }
 }

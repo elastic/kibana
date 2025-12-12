@@ -21,13 +21,6 @@ export const EMBEDDABLE_HEADER_HELP = i18n.translate(
   }
 );
 
-export const MAP_TITLE = i18n.translate(
-  'xpack.securitySolution.components.embeddables.embeddedMap.embeddablePanelTitle',
-  {
-    defaultMessage: 'Source -> Destination Point-to-Point Map',
-  }
-);
-
 export const SOURCE_LAYER = i18n.translate(
   'xpack.securitySolution.components.embeddables.embeddedMap.sourceLayerLabel',
   {

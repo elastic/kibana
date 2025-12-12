@@ -8,7 +8,7 @@
  */
 
 import { InvalidJSONProperty } from '@kbn/kibana-utils-plugin/common';
-import { SerializedSearchSourceFields } from './types';
+import type { SerializedSearchSourceFields } from './types';
 
 export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   // if we have a searchSource, set its values based on the searchSourceJson field

@@ -2417,7 +2417,7 @@
           "\nUnion type of JOB_MAP_NODE_TYPES"
         ],
         "signature": [
-          "\"index\" | \"transform\" | \"analytics\" | \"analytics-job-missing\" | \"trainedModel\" | \"ingestPipeline\""
+          "\"index\" | \"transform\" | \"analytics\" | \"ingestPipeline\" | \"analytics-job-missing\" | \"trainedModel\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,

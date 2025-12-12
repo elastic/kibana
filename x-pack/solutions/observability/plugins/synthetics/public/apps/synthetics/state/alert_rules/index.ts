@@ -6,14 +6,15 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { StatusRuleInspect } from '../../../../../common/runtime_types/alert_rules/common';
-import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
-import { IHttpSerializedFetchError } from '..';
+import type { StatusRuleInspect } from '../../../../../common/runtime_types/alert_rules/common';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
+import type { IHttpSerializedFetchError } from '..';
 import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
   inspectStatusRuleAction,
+  inspectTLSRuleAction,
   updateDefaultAlertingAction,
 } from './actions';
 
@@ -78,6 +79,18 @@ export const defaultAlertingReducer = createReducer(initialSettingState, (builde
       state.inspectError = null;
     })
     .addCase(inspectStatusRuleAction.fail, (state, action) => {
+      state.inspectError = action.payload;
+      state.inspectLoading = false;
+    })
+    .addCase(inspectTLSRuleAction.get, (state) => {
+      state.inspectLoading = true;
+    })
+    .addCase(inspectTLSRuleAction.success, (state, action) => {
+      state.inspectData = action.payload;
+      state.inspectLoading = false;
+      state.inspectError = null;
+    })
+    .addCase(inspectTLSRuleAction.fail, (state, action) => {
       state.inspectError = action.payload;
       state.inspectLoading = false;
     });

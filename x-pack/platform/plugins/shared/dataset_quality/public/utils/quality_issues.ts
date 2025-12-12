@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DegradedField, FailedDocsDetails, QualityIssue } from '../../common/api_types';
-import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
+import type { DegradedField, FailedDocsDetails, QualityIssue } from '../../common/api_types';
+import type { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 
 export function filterIssues(data: QualityIssue[] = [], type: QualityIssueType): QualityIssue[] {
   return data.filter((field) => field.type !== type);
@@ -20,11 +20,13 @@ export function mapDegradedFieldsIssues(degradedFields: DegradedField[] = []): Q
 }
 
 export function mapFailedDocsIssues(failedDocsDetails: FailedDocsDetails): QualityIssue[] {
-  return [
-    {
-      ...failedDocsDetails,
-      name: 'failedDocs',
-      type: 'failed',
-    },
-  ];
+  return failedDocsDetails.count > 0
+    ? [
+        {
+          ...failedDocsDetails,
+          name: 'failedDocs',
+          type: 'failed',
+        },
+      ]
+    : [];
 }

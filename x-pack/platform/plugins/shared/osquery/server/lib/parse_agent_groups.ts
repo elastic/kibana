@@ -8,6 +8,7 @@
 import { uniq } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import type { OsqueryAppContext } from './osquery_app_context_services';
 
@@ -16,6 +17,7 @@ export interface AgentSelection {
   allAgentsSelected?: boolean;
   platformsSelected?: string[];
   policiesSelected?: string[];
+  spaceId: string;
 }
 
 const PER_PAGE = 9000;
@@ -24,9 +26,9 @@ export const aggregateResults = async (
   generator: (
     page: number,
     perPage: number,
-    searchAfter?: unknown[],
+    searchAfter?: SortResults,
     pitId?: string
-  ) => Promise<{ results: string[]; total: number; searchAfter?: unknown[] }>,
+  ) => Promise<{ results: string[]; total: number; searchAfter?: SortResults }>,
   esClient: ElasticsearchClient,
   context: OsqueryAppContext
 ) => {
@@ -41,7 +43,7 @@ export const aggregateResults = async (
       index: AGENTS_INDEX,
       keep_alive: '10m',
     });
-    let currentSort: unknown[] | undefined;
+    let currentSort: SortResults | undefined;
     // Refetch first page with PIT
     const { results: pitInitialResults, searchAfter } = await generator(
       1,
@@ -75,6 +77,42 @@ export const aggregateResults = async (
   return uniq<string>(results);
 };
 
+/**
+ * Parses agent selection criteria and returns a deduplicated array of agent IDs.
+ *
+ * This function handles three types of agent selection:
+ * 1. All agents (filtered by online status and Osquery policy)
+ * 2. Agents filtered by platform and/or policy
+ * 3. Explicitly specified agent IDs
+ *
+ * @param soClient - SavedObjects client for accessing package policies
+ * @param esClient - Elasticsearch client for PIT-based pagination
+ * @param context - Osquery app context with services and logging
+ * @param agentSelection - Agent selection criteria
+ * @returns Array of unique agent IDs that match the selection criteria
+ *
+ * @remarks
+ * **Validation Safety**: This function does NOT perform an additional validation
+ * call to Fleet's `getByIds` after fetching agents. This is intentional and safe because:
+ *
+ * 1. **Agents Already Validated During Fetch**: The `aggregateResults` function uses
+ *    Fleet's `listAgents` API with proper filters (online status, Osquery policy).
+ *    Any agent returned by this API is already validated to exist and meet criteria.
+ *
+ * 2. **Space Security Enforced**: The `agentService` is created via
+ *    `asInternalScopedUser(spaceId)`, ensuring all agent queries are automatically
+ *    space-scoped. Agents from other spaces cannot be accessed.
+ *
+ * 3. **Scalability**: Fleet's `getByIds` does not use pagination and hits
+ *    Elasticsearch's `max_result_window` limit (default: 10,000) when validating
+ *    large agent sets. This prevents querying 10k+ agents simultaneously.
+ *
+ * 4. **Implicit Validation**: The filters applied (online status, Osquery policy)
+ *    provide implicit validation that agents are valid targets for Osquery actions.
+ *
+ * For deployments with 10,000+ agents, removing the redundant validation is
+ * required for the plugin to function correctly.
+ */
 export const parseAgentSelection = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -89,9 +127,14 @@ export const parseAgentSelection = async (
     policiesSelected = [],
     agents = [],
   } = agentSelection;
-  const agentService = context.service.getAgentService()?.asInternalUser;
+  const agentService = context.service
+    .getAgentService()
+    ?.asInternalScopedUser(agentSelection.spaceId);
   const packagePolicyService = context.service.getPackagePolicyService();
-  const kueryFragments = ['status:online'];
+  // Explicitly allow only online and degraded agents for Osquery queries
+  // - online: Agent is healthy and checking in regularly
+  // - degraded: Agent is checking in but has issues with other integrations
+  const kueryFragments: string[] = ['(status:online OR status:degraded)'];
 
   if (agentService && packagePolicyService) {
     const osqueryPolicies = await aggregateResults(
@@ -111,7 +154,7 @@ export const parseAgentSelection = async (
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(
-        async (page, perPage, searchAfter?: unknown[], pitId?: string) => {
+        async (page, perPage, searchAfter?: SortResults, pitId?: string) => {
           const res = await agentService.listAgents({
             ...(searchAfter ? { searchAfter } : {}),
             ...(pitId ? { pitId } : {}),
@@ -124,7 +167,10 @@ export const parseAgentSelection = async (
           return {
             results: res.agents.map((agent) => agent.id),
             total: res.total,
-            searchAfter: res.agents[res.agents.length - 1].sort,
+            searchAfter:
+              res.agents.length > 0 && res.agents[res.agents.length - 1].sort
+                ? res.agents[res.agents.length - 1].sort
+                : undefined,
           };
         },
         esClient,
@@ -145,7 +191,7 @@ export const parseAgentSelection = async (
         kueryFragments.push(`(${groupFragments.join(' or ')})`);
         const kuery = kueryFragments.join(' and ');
         const fetchedAgents = await aggregateResults(
-          async (page, perPage, searchAfter?: unknown[], pitId?: string) => {
+          async (page, perPage, searchAfter?: SortResults, pitId?: string) => {
             const res = await agentService.listAgents({
               ...(searchAfter ? { searchAfter } : {}),
               ...(pitId ? { pitId } : {}),
@@ -158,7 +204,10 @@ export const parseAgentSelection = async (
             return {
               results: res.agents.map((agent) => agent.id),
               total: res.total,
-              searchAfter: res.agents[res.agents.length - 1].sort,
+              searchAfter:
+                res.agents.length > 0 && res.agents[res.agents.length - 1].sort
+                  ? res.agents[res.agents.length - 1].sort
+                  : undefined,
             };
           },
           esClient,
@@ -171,5 +220,7 @@ export const parseAgentSelection = async (
 
   agents.forEach(addAgent);
 
+  // Note: No additional validation call to Fleet's `getByIds` is performed here.
+  // See JSDoc on `parseAgentSelection` for detailed rationale.
   return Array.from(selectedAgents);
 };

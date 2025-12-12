@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionFunction, ExpressionFunctionParameter } from '@kbn/expressions-plugin/common';
+import type {
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 const BOLD_MD_TOKEN = '**';

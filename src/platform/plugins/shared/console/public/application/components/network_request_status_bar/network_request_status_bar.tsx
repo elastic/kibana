@@ -8,7 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
@@ -84,6 +85,7 @@ export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
             <EuiBadge
               data-test-subj="consoleResponseStatusBadge"
               color={mapStatusCodeToBadgeColor(statusCode)}
+              tabIndex={0}
             >
               {/*  Use &nbsp; to ensure that no matter the width we don't allow line breaks */}
               {statusCode}&nbsp;-&nbsp;{statusText}
@@ -101,7 +103,7 @@ export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
               </EuiText>
             }
           >
-            <EuiText size="s">
+            <EuiText size="s" tabIndex={0}>
               <EuiBadge color="default">
                 {timeElapsedMs}&nbsp;{'ms'}
               </EuiBadge>

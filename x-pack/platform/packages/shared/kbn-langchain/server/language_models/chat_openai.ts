@@ -6,17 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { ChatOpenAI } from '@langchain/openai';
-import { Stream } from 'openai/streaming';
+import type { OpenAIClient } from '@langchain/openai';
+import { ChatOpenAICompletions } from '@langchain/openai';
+import type { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { parseChatCompletion } from 'openai/lib/parser';
+import type { ChatCompletionCreateParams } from 'openai/resources';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
-import {
+import type {
   InferenceChatCompleteParamsSchema,
   InvokeAIActionParamsSchema,
   RunActionParamsSchema,
@@ -48,7 +51,7 @@ export interface ActionsClientChatOpenAIParams {
  * In the ChatOpenAI class, *_streamResponseChunks calls completionWithRetry
  * and iterates over the chunks to form the response.
  */
-export class ActionsClientChatOpenAI extends ChatOpenAI {
+export class ActionsClientChatOpenAI extends ChatOpenAICompletions {
   streaming: boolean;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -125,6 +128,17 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return 'base_chat_model';
   }
 
+  async betaParsedCompletionWithRetry(
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<ReturnType<OpenAIClient['chat']['completions']['parse']>> {
+    return this.completionWithRetry(request).then((response) =>
+      parseChatCompletion(
+        response,
+        this.constructBody(request, this.llmType) as ChatCompletionCreateParams
+      )
+    );
+  }
+
   async completionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsStreaming
   ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk>>;
@@ -132,7 +146,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   async completionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsNonStreaming
   ): Promise<OpenAI.ChatCompletion>;
-
   async completionWithRetry(
     completionRequest:
       | OpenAI.ChatCompletionCreateParamsStreaming
@@ -195,29 +208,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     signal?: AbortSignal;
   } {
-    const body = {
-      temperature: this.#temperature,
-      // possible client model override
-      // security sends this from connectors, it is only missing from preconfigured connectors
-      // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
-      ...(llmType === 'inference' ? {} : { model: this.model }),
-      n: completionRequest.n,
-      stop: completionRequest.stop,
-      tools: completionRequest.tools,
-      ...(completionRequest.tool_choice ? { tool_choice: completionRequest.tool_choice } : {}),
-      // deprecated, use tools
-      ...(completionRequest.functions ? { functions: completionRequest?.functions } : {}),
-      // ensure we take the messages from the completion request, not the client request
-      messages: completionRequest.messages.map((message) => ({
-        role: message.role,
-        content: message.content ?? '',
-        ...('name' in message ? { name: message?.name } : {}),
-        ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
-        ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
-        // deprecated, use tool_calls
-        ...('function_call' in message ? { function_call: message?.function_call } : {}),
-      })),
-    };
+    const body = this.constructBody(completionRequest, llmType);
+
     const subAction =
       llmType === 'inference'
         ? completionRequest.stream
@@ -247,5 +239,41 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       },
       signal: this.#signal,
     };
+  }
+
+  constructBody(
+    completionRequest:
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+      | OpenAI.ChatCompletionCreateParamsStreaming,
+    llmType: string
+  ) {
+    const body = {
+      temperature: this.#temperature,
+      // possible client model override
+      // security sends this from connectors, it is only missing from preconfigured connectors
+      // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
+      ...(llmType === 'inference' ? {} : { model: this.model }),
+      n: completionRequest.n,
+      stop: completionRequest.stop,
+      tools: completionRequest.tools,
+      ...(completionRequest.response_format
+        ? { response_format: completionRequest.response_format }
+        : {}),
+      ...(completionRequest.tool_choice ? { tool_choice: completionRequest.tool_choice } : {}),
+      // deprecated, use tools
+      ...(completionRequest.functions ? { functions: completionRequest?.functions } : {}),
+      // ensure we take the messages from the completion request, not the client request
+      messages: completionRequest.messages.map((message) => ({
+        role: message.role,
+        content: message.content ?? '',
+        ...('name' in message ? { name: message?.name } : {}),
+        ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
+        ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
+        // deprecated, use tool_calls
+        ...('function_call' in message ? { function_call: message?.function_call } : {}),
+      })),
+    };
+
+    return body;
   }
 }

@@ -14,12 +14,14 @@ import {
   APP_POLICIES_PATH,
   APP_RESPONSE_ACTIONS_HISTORY_PATH,
   APP_TRUSTED_APPS_PATH,
+  APP_TRUSTED_DEVICES_PATH,
 } from '../../../../common/constants';
 
 export interface EndpointManagementPageMap {
   endpointList: EndpointManagementPage;
   policyList: EndpointManagementPage;
   trustedApps: EndpointManagementPage;
+  trustedDevices: EndpointManagementPage;
   eventFilters: EndpointManagementPage;
   hostIsolationExceptions: EndpointManagementPage;
   blocklist: EndpointManagementPage;
@@ -29,7 +31,7 @@ export interface EndpointManagementPageMap {
 export type EndpointManagementPageId = keyof EndpointManagementPageMap;
 export type EndpointArtifactPageId = keyof Pick<
   EndpointManagementPageMap,
-  'trustedApps' | 'eventFilters' | 'hostIsolationExceptions' | 'blocklist'
+  'trustedApps' | 'trustedDevices' | 'eventFilters' | 'hostIsolationExceptions' | 'blocklist'
 >;
 
 interface EndpointManagementPage {
@@ -58,6 +60,12 @@ export const getEndpointManagementPageList = (): EndpointManagementPage[] => {
       title: 'Trusted Apps Page',
       url: APP_TRUSTED_APPS_PATH,
       pageTestSubj: 'trustedAppsListPage-container',
+    },
+    {
+      id: 'trustedDevices',
+      title: 'Trusted Devices Page',
+      url: APP_TRUSTED_DEVICES_PATH,
+      pageTestSubj: 'trustedDevicesList-container',
     },
     {
       id: 'eventFilters',

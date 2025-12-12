@@ -62,17 +62,39 @@ export const getInsightsRouteHandler = (
 > => {
   const logger = endpointContext.logFactory.get('workflowInsights');
 
-  return async (_, request, response): Promise<IKibanaResponse<SecurityWorkflowInsight[]>> => {
+  return async (
+    context,
+    request,
+    response
+  ): Promise<IKibanaResponse<SecurityWorkflowInsight[]>> => {
+    const { defendInsightsPolicyResponseFailure } = endpointContext.experimentalFeatures;
+
     try {
+      // Validate feature flag for policy_response_failure insights
+      if (
+        request.query.types?.includes('policy_response_failure') &&
+        !defendInsightsPolicyResponseFailure
+      ) {
+        return response.badRequest({
+          body: 'policy_response_failure insight type requires defendInsightsPolicyResponseFailure feature flag',
+        });
+      }
+
       logger.debug('Fetching workflow insights');
 
       const insightsResponse = await securityWorkflowInsightsService.fetch(
         request.query as SearchParams
       );
 
-      const body = insightsResponse.flatMap((insight) =>
+      const body: SecurityWorkflowInsight[] = insightsResponse.flatMap((insight) =>
         insight._source ? { ...insight._source, id: insight._id } : []
       );
+
+      // Ensure the insights are in the current space, judging by agent IDs
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
+      const agentIds = Array.from(new Set(body.flatMap((insight) => insight.target.ids)));
+      await fleetServices.ensureInCurrentSpace({ agentIds });
 
       return response.ok({ body });
     } catch (e) {

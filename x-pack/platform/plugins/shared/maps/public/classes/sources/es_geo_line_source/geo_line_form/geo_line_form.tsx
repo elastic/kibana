@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { getTermsFields, getIsTimeseries } from '../../../../index_pattern_util';
 import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_constants';
@@ -108,7 +108,7 @@ export function GeoLineForm(props: Props) {
                 return (
                   !isSplitField &&
                   field.sortable &&
-                  !indexPatterns.isNestedField(field) &&
+                  !isNestedField(field) &&
                   ['number', 'date'].includes(field.type)
                 );
               })}

@@ -7,7 +7,8 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { get } from 'lodash';
 import { NumericField, ToggleField, useFormData } from '../../../../../../shared_imports';
@@ -60,6 +61,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       {isUsingShardSize === undefined ? null : (
         <>
           <EuiRadioGroup
+            name={`${phase}ShrinkMethod`}
             options={[
               {
                 id: `${phase}-configureShardCount`,

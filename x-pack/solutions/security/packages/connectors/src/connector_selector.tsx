@@ -5,137 +5,174 @@
  * 2.0.
  */
 
+import type { EuiContextMenuPanelDescriptor, EuiSuperSelectProps } from '@elastic/eui';
 import {
+  EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperSelect,
-  EuiText,
+  EuiContextMenu,
+  EuiInputPopover,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { some } from 'lodash';
-import * as i18n from './translations';
+import type { ConnectorSelectableComponentProps } from '@kbn/ai-assistant-connector-selector-action';
+import { ConnectorSelectable } from '@kbn/ai-assistant-connector-selector-action';
+import type { ActionConnector as AiConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { useConnectorSelectorStyles } from './connector_selector.styles';
-import { ADD_NEW_CONNECTOR } from './constants';
+import * as i18n from './translations';
 
-export interface ConnectorDetails {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export interface ConnectorSelectorProps {
-  connectors: ConnectorDetails[];
+export interface ConnectorSelectorProps
+  extends Partial<Pick<EuiSuperSelectProps<string>, 'isLoading' | 'isInvalid'>> {
+  connectors: AiConnector[];
   onChange: (connectorId: string) => void;
   selectedId?: string;
   onNewConnectorClicked?: () => void;
   isDisabled?: boolean;
+  mode?: 'combobox' | 'default';
+  settings: SettingsStart;
 }
 
 export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
-  ({ connectors, onChange, selectedId, onNewConnectorClicked, isDisabled }) => {
-    const styles = useConnectorSelectorStyles();
+  ({
+    connectors,
+    onChange,
+    selectedId,
+    onNewConnectorClicked,
+    isDisabled,
+    mode = 'default',
+    settings,
+  }) => {
     const { euiTheme } = useEuiTheme();
-
-    const addNewConnectorOption = useMemo(() => {
-      return {
-        value: ADD_NEW_CONNECTOR,
-        inputDisplay: i18n.ADD_NEW_CONNECTOR,
-        dropdownDisplay: (
-          <EuiFlexGroup gutterSize="none" key={ADD_NEW_CONNECTOR}>
-            <EuiFlexItem grow={true}>
-              <EuiButtonEmpty
-                data-test-subj="addNewConnectorButton"
-                href="#"
-                isDisabled={isDisabled}
-                iconType="plus"
-                size="xs"
-              >
-                {i18n.ADD_NEW_CONNECTOR}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* Right offset to compensate for 'selected' icon of EuiSuperSelect since native footers aren't supported*/}
-              <div css={styles.offset} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      };
-    }, [isDisabled, styles.offset]);
+    const styles = useConnectorSelectorStyles(mode);
+    const [modalOpen, setModalOpen] = useState(false);
 
     const connectorExists = useMemo(
       () => some(connectors, ['id', selectedId]),
       [connectors, selectedId]
     );
 
-    const mappedConnectorOptions = connectors.map((connector) => ({
-      value: connector.id,
-      'data-test-subj': connector.id,
-      inputDisplay: (
-        <EuiText css={styles.optionDisplay} size="s" color={euiTheme.colors.primary}>
-          {connector.name}
-        </EuiText>
-      ),
-      dropdownDisplay: (
-        <React.Fragment key={connector.id}>
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false} data-test-subj={`connector-${connector.name}`}>
-              <strong>{connector.name}</strong>
-              <EuiText size="xs" color="subdued">
-                <p>{connector.description}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </React.Fragment>
-      ),
-    }));
-
-    const allConnectorOptions = useMemo(
-      () =>
-        onNewConnectorClicked
-          ? [...mappedConnectorOptions, addNewConnectorOption]
-          : [...mappedConnectorOptions],
-      [onNewConnectorClicked, mappedConnectorOptions, addNewConnectorOption]
-    );
-
     const onChangeConnector = useCallback(
       (connectorId: string) => {
-        if (connectorId === ADD_NEW_CONNECTOR) {
-          onNewConnectorClicked?.();
-          return;
-        }
         onChange(connectorId);
+        setModalOpen(false);
       },
-      [onChange, onNewConnectorClicked]
+      [onChange]
     );
 
+    const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+
+    const { customConnectors, preConfiguredConnectors } = useMemo(
+      () =>
+        (connectors ?? []).reduce<{
+          customConnectors: ConnectorSelectableComponentProps['customConnectors'];
+          preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
+        }>(
+          (acc, connector) => {
+            if (connector.isPreconfigured) {
+              acc.preConfiguredConnectors.push({
+                label: connector.name,
+                value: connector.id,
+              });
+            } else {
+              acc.customConnectors.push({
+                label: connector.name,
+                value: connector.id,
+              });
+            }
+            return acc;
+          },
+          {
+            customConnectors: [],
+            preConfiguredConnectors: [],
+          }
+        ),
+      [connectors]
+    );
+
+    const panels: EuiContextMenuPanelDescriptor[] = useMemo(
+      () => [
+        {
+          id: 0,
+          width: '100%',
+          content: (
+            <ConnectorSelectable
+              preConfiguredConnectors={preConfiguredConnectors}
+              customConnectors={customConnectors}
+              value={selectedId}
+              onValueChange={(connectorId) => onChangeConnector(connectorId)}
+              onAddConnectorClick={onNewConnectorClicked}
+              defaultConnectorId={defaultConnectorId}
+              renderOption={(option) => (
+                <span data-test-subj={`connector-option-${option.label}`}>{option.label}</span>
+              )}
+            />
+          ),
+        },
+      ],
+      [
+        customConnectors,
+        defaultConnectorId,
+        onChangeConnector,
+        onNewConnectorClicked,
+        preConfiguredConnectors,
+        selectedId,
+      ]
+    );
+
+    const buttonLabel = useMemo(() => {
+      const selectedOrDefaultConnectorId = selectedId ?? defaultConnectorId;
+      const selectedOrDefaultConnector = connectors?.find(
+        (connector) => connector.id === selectedOrDefaultConnectorId
+      );
+      return selectedOrDefaultConnector?.name ?? i18n.CONNECTOR_SELECTOR_PLACEHOLDER;
+    }, [connectors, selectedId, defaultConnectorId]);
+
     return (
-      <div css={styles.inputContainer}>
-        {!connectorExists && !connectors.length ? (
+      <div css={styles?.inputContainer}>
+        {!connectorExists && !connectors.length && onNewConnectorClicked ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"
             isDisabled={isDisabled}
             size="xs"
-            onClick={() => onNewConnectorClicked?.()}
+            onClick={onNewConnectorClicked}
           >
             {i18n.ADD_CONNECTOR}
           </EuiButtonEmpty>
         ) : (
-          <EuiSuperSelect
-            aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-            css={styles.placeholder}
-            compressed={true}
-            data-test-subj="connector-selector"
-            disabled={isDisabled}
-            hasDividers={true}
-            onChange={onChangeConnector}
-            options={allConnectorOptions}
-            valueOfSelected={selectedId}
-            placeholder={i18n.CONNECTOR_SELECTOR_PLACEHOLDER}
-            popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
-          />
+          <EuiInputPopover
+            input={
+              <EuiButton
+                iconType="arrowDown"
+                iconSide="right"
+                size="s"
+                color="text"
+                onClick={() => setModalOpen(true)}
+                contentProps={{
+                  style: {
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    color: isDisabled ? euiTheme.colors.textDisabled : euiTheme.colors.textPrimary,
+                  },
+                }}
+                data-test-subj="connector-selector"
+                isDisabled={isDisabled}
+              >
+                {buttonLabel}
+              </EuiButton>
+            }
+            isOpen={modalOpen}
+            closePopover={() => setModalOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downCenter"
+            panelMinWidth={300}
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiInputPopover>
         )}
       </div>
     );

@@ -8,7 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { FtrService } from '../../ftr_provider_context';
 
 const partitionVisChartSelector = 'partitionVisChart';
@@ -124,7 +125,7 @@ export class PieChartService extends FtrService {
       await this.visChart.getEsChartDebugState(partitionVisChartSelector)
     );
     return slices.map((slice) => {
-      if (slice.name === '__missing__') {
+      if (slice.name === MISSING_TOKEN) {
         return 'Missing';
       } else if (slice.name === '__other__') {
         return 'Other';

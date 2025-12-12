@@ -19,9 +19,15 @@ interface Props {
   fields: Field[];
   changeHandler(i: string | null): void;
   selectedField: string | null;
+  titleId: string;
 }
 
-export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const CategorizationFieldSelect: FC<Props> = ({
+  fields,
+  changeHandler,
+  selectedField,
+  titleId,
+}) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { optionCss } = useFieldStatsTrigger();
 
@@ -57,6 +63,7 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlCategorizationFieldNameSelect"
+      titleId={titleId}
     />
   );
 };

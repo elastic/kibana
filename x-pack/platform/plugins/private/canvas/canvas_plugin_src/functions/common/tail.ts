@@ -6,7 +6,7 @@
  */
 
 import { takeRight } from 'lodash';
-import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import type { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

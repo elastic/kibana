@@ -45,10 +45,6 @@ import type {
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
 import type {
-  EntityManagerServerPluginSetup,
-  EntityManagerServerPluginStart,
-} from '@kbn/entityManager-plugin/server';
-import type {
   LogsDataAccessPluginSetup,
   LogsDataAccessPluginStart,
 } from '@kbn/logs-data-access-plugin/server';
@@ -56,6 +52,11 @@ import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
+import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
+import type {
+  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginStart,
+} from '@kbn/observability-agent-builder-plugin/server';
 import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
@@ -78,9 +79,10 @@ export interface APMPluginSetupDependencies {
   dataViews: {};
   share: SharePluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
-  entityManager: EntityManagerServerPluginSetup;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
+  onechat?: OnechatPluginSetup;
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
@@ -106,9 +108,10 @@ export interface APMPluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
   share: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
-  entityManager: EntityManagerServerPluginStart;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
+  onechat?: OnechatPluginStart;
   actions?: ActionsPlugin['start'];
   alerting?: AlertingServerStart;
   cloud?: undefined;

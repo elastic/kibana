@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { TimelionVisParams } from './timelion_vis_fn';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { TimelionVisParams } from './timelion_vis_fn';
 import { toExpressionAst } from './to_ast';
 
 describe('timelion vis toExpressionAst function', () => {

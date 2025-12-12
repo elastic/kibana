@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 export const useStyles = () => {
@@ -21,10 +21,13 @@ export const useStyles = () => {
 
     const tabListTitle = {
       display: 'flex',
+      minWidth: 0,
     };
 
     const tabListDescription = {
       display: 'flex',
+      minWidth: 0,
+      overflow: 'hidden',
     };
 
     return {

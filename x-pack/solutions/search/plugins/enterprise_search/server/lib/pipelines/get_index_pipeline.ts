@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { IngestPipelineParams, fetchConnectorByIndexName } from '@kbn/search-connectors';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
+import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { getDefaultPipeline } from './get_default_pipeline';
 

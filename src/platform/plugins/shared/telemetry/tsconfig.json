@@ -1,12 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
-    "public/**/**/*",
-    "server/**/**/*",
+    "public/**/*",
+    "server/**/*",
     "common/**/*",
     "../../../../../typings/**/*",
     "schema/*.json",
@@ -39,7 +39,8 @@
     "@kbn/core-analytics-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/security-plugin-types-common",
+    "@kbn/core-security-server",
+    "@kbn/telemetry-config",
   ],
   "exclude": [
     "target/**/*",

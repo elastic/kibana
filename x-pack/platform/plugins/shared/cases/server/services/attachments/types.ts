@@ -30,6 +30,7 @@ export interface ServiceContext {
 export interface AttachedToCaseArgs {
   caseId: string;
   filter?: KueryNode;
+  attachmentTypes?: AttachmentType[];
 }
 
 export interface GetAttachmentArgs {
@@ -47,6 +48,14 @@ export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
 
 export interface AlertIdsAggsResult {
   alertIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
+export interface EventIdsAggsResult {
+  eventIds: {
     buckets: Array<{
       key: string;
     }>;

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { ResolvedSimpleSavedObject, SavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse, SavedObject } from '@kbn/core-saved-objects-api-server';
 import {
-  API_ROUTE_SHAREABLE_ZIP,
   API_ROUTE_TEMPLATES,
   API_ROUTE_WORKPAD,
   API_ROUTE_WORKPAD_ASSETS,
   API_ROUTE_WORKPAD_STRUCTURES,
   DEFAULT_WORKPAD_CSS,
 } from '../../common/lib';
-import type { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
-import { CanvasTemplate, CanvasWorkpad } from '../../types';
+import type { CanvasTemplate, CanvasWorkpad } from '../../types';
 import { coreServices } from './kibana_services';
 
 export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
@@ -31,9 +29,9 @@ export interface TemplateFindResponse {
 
 export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 /*
@@ -178,13 +176,6 @@ class CanvasWorkpadService {
   public async updateAssets(id: string, assets: CanvasWorkpad['assets']) {
     coreServices.http.put(`${API_ROUTE_WORKPAD_ASSETS}/${id}`, {
       body: JSON.stringify(assets),
-      version: '1',
-    });
-  }
-
-  public async getRuntimeZip(workpad: CanvasRenderedWorkpad): Promise<Blob> {
-    return coreServices.http.post<Blob>(API_ROUTE_SHAREABLE_ZIP, {
-      body: JSON.stringify(workpad),
       version: '1',
     });
   }

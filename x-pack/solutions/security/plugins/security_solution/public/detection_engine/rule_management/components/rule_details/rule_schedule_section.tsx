@@ -14,6 +14,7 @@ import { IntervalAbbrScreenReader } from '../../../../common/components/accessib
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
+import { RuleFieldName } from './rule_field_name';
 
 interface AccessibleTimeValueProps {
   timeValue: string;
@@ -70,13 +71,20 @@ export const RuleScheduleSection = ({
   const ruleSectionListItems = !simpleRuleSchedule
     ? [
         {
-          title: <span data-test-subj="intervalPropertyTitle">{i18n.INTERVAL_FIELD_LABEL}</span>,
+          title: (
+            <span data-test-subj="intervalPropertyTitle">
+              <RuleFieldName label={i18n.INTERVAL_FIELD_LABEL} fieldName="rule_schedule" />
+            </span>
+          ),
           description: <Interval interval={rule.interval} />,
         },
         {
           title: (
             <span data-test-subj="fromToPropertyTitle">
-              {i18n.RULE_SOURCE_EVENTS_TIME_RANGE_FIELD_LABEL}
+              <RuleFieldName
+                label={i18n.RULE_SOURCE_EVENTS_TIME_RANGE_FIELD_LABEL}
+                fieldName="rule_schedule"
+              />
             </span>
           ),
           description: (
@@ -91,11 +99,19 @@ export const RuleScheduleSection = ({
       ]
     : [
         {
-          title: <span data-test-subj="intervalPropertyTitle">{i18n.INTERVAL_FIELD_LABEL}</span>,
+          title: (
+            <span data-test-subj="intervalPropertyTitle">
+              <RuleFieldName label={i18n.INTERVAL_FIELD_LABEL} fieldName="rule_schedule" />
+            </span>
+          ),
           description: <Interval interval={simpleRuleSchedule.interval} />,
         },
         {
-          title: <span data-test-subj="lookBackPropertyTitle">{i18n.LOOK_BACK_FIELD_LABEL}</span>,
+          title: (
+            <span data-test-subj="lookBackPropertyTitle">
+              <RuleFieldName label={i18n.LOOK_BACK_FIELD_LABEL} fieldName="rule_schedule" />
+            </span>
+          ),
           description: <LookBack value={simpleRuleSchedule.lookback} />,
         },
       ];

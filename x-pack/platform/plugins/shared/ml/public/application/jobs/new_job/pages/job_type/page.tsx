@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import { PageTitle } from '../../../../components/page_title';
+import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
 
 import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
@@ -39,7 +40,6 @@ export const Page: FC = () => {
   } = useMlKibana();
 
   const dataSourceContext = useDataSource();
-  const navigateToPath = useNavigateToPath();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   );
@@ -49,6 +49,17 @@ export const Page: FC = () => {
   const { selectedDataView, selectedSavedSearch } = dataSourceContext;
 
   const isTimeBasedIndex: boolean = selectedDataView.isTimeBased();
+
+  const mlManagementLocator = useMlManagementLocator();
+
+  const navigateToManagementPath = async (path: string) => {
+    if (!mlManagementLocator) return;
+
+    await mlManagementLocator.navigate({
+      sectionId: 'ml',
+      appId: `anomaly_detection${path}`,
+    });
+  };
 
   useEffect(() => {
     if (!isTimeBasedIndex) {
@@ -137,12 +148,12 @@ export const Page: FC = () => {
       dataVisualizerLink,
       recentlyAccessed
     );
-    navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
+    navigateToManagementPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 
   const jobTypes = [
     {
-      onClick: () => navigateToPath(`/jobs/new_job/single_metric${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/single_metric${getUrlParams()}`),
       icon: {
         type: 'createSingleMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
@@ -158,7 +169,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkSingleMetricJob',
     },
     {
-      onClick: () => navigateToPath(`/jobs/new_job/multi_metric${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/multi_metric${getUrlParams()}`),
       icon: {
         type: 'createMultiMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
@@ -175,7 +186,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkMultiMetricJob',
     },
     {
-      onClick: () => navigateToPath(`/jobs/new_job/population${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/population${getUrlParams()}`),
       icon: {
         type: 'createPopulationJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
@@ -192,7 +203,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkPopulationJob',
     },
     {
-      onClick: () => navigateToPath(`/jobs/new_job/advanced${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/advanced${getUrlParams()}`),
       icon: {
         type: 'createAdvancedJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
@@ -209,7 +220,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkAdvancedJob',
     },
     {
-      onClick: () => navigateToPath(`/jobs/new_job/categorization${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/categorization${getUrlParams()}`),
       icon: {
         type: 'createGenericJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
@@ -225,7 +236,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkCategorizationJob',
     },
     {
-      onClick: () => navigateToPath(`/jobs/new_job/rare${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/rare${getUrlParams()}`),
       icon: {
         type: 'createGenericJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
@@ -244,7 +255,7 @@ export const Page: FC = () => {
 
   if (hasGeoFields) {
     jobTypes.push({
-      onClick: () => navigateToPath(`/jobs/new_job/geo${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/geo${getUrlParams()}`),
       icon: {
         type: 'createGeoJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.geoAriaLabel', {
@@ -264,16 +275,25 @@ export const Page: FC = () => {
   return (
     <div data-test-subj="mlPageJobTypeSelection">
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
-          defaultMessage="Create a job from the {pageTitleLabel}"
-          values={{ pageTitleLabel }}
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
+              defaultMessage="Create a job from the {pageTitleLabel}"
+              values={{ pageTitleLabel }}
+            />
+          }
         />
       </MlPageHeader>
 
       {isTimeBasedIndex === false && (
         <>
-          <EuiCallOut title={indexWarningTitle} color="warning" iconType="warning">
+          <EuiCallOut
+            announceOnMount={false}
+            title={indexWarningTitle}
+            color="warning"
+            iconType="warning"
+          >
             <FormattedMessage
               id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
               defaultMessage="Anomaly detection can only be run over indices which are time based."

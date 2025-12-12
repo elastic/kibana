@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { DataViewsService } from '../../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../../../schemas';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { dataViewSpecSchema } from '../../schema';
-import { DataViewSpecRestResponse } from '../../route_types';
+import type { DataViewSpecRestResponse } from '../../route_types';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -29,6 +29,7 @@ import {
   INITIAL_REST_VERSION,
   UPDATE_DATA_VIEW_FIELDS_DESCRIPTION,
 } from '../../../constants';
+import { toApiSpec } from '../util/to_api_spec';
 
 interface UpdateFieldsArgs {
   dataViewsService: DataViewsService;
@@ -128,80 +129,86 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-              },
-              { unknowns: 'allow' }
-            ),
-            body: schema.object({
-              fields: schema.recordOf(
-                schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-                fieldUpdateSchema
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object(
+                {
+                  id: schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                  }),
+                },
+                { unknowns: 'allow' }
               ),
-            }),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
+              body: schema.object({
+                fields: schema.recordOf(
+                  schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                  }),
+                  fieldUpdateSchema
+                ),
+              }),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
+              },
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
-          const { fields } = req.body;
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const id = req.params.id;
+            const { fields } = req.body;
 
-          const dataView = await updateFields({
-            dataViewsService,
-            usageCollection,
-            id,
-            fields,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataView = await updateFields({
+              dataViewsService,
+              usageCollection,
+              id,
+              fields,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
-          };
+            const body: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: toApiSpec(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body,
+            });
+          })
+        )
+      );
   };
 };
 

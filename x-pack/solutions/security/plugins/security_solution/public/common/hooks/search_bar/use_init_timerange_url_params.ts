@@ -27,6 +27,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
+
   const onInitialize = useCallback(
     (initialState: UrlInputsModel | null) =>
       initializeTimerangeFromUrlParam(initialState, dispatch, isSocTrendsEnabled),
@@ -43,13 +44,15 @@ const initializeTimerangeFromUrlParam = (
 ) => {
   if (initialState != null) {
     const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', initialState) };
-    const globalType: TimeRangeKinds = get('global.timerange.kind', initialState);
+    const globalTimerangeKind: TimeRangeKinds = get('global.timerange.kind', initialState);
 
     const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', initialState) };
-    const timelineType: TimeRangeKinds = get('timeline.timerange.kind', initialState);
+    const timelineTimerangeKind: TimeRangeKinds = get('timeline.timerange.kind', initialState);
 
     const socTrendsLinkTo: LinkTo = { linkTo: get('socTrends.linkTo', initialState) };
     const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
+
+    const valueReportType: TimeRangeKinds = get('valueReport.timerange.kind', initialState);
     if (isSocTrendsEnabled) {
       if (isEmpty(socTrendsLinkTo.linkTo)) {
         dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.socTrends]));
@@ -76,8 +79,8 @@ const initializeTimerangeFromUrlParam = (
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
     }
 
-    if (timelineType) {
-      if (timelineType === 'absolute') {
+    if (timelineTimerangeKind) {
+      if (timelineTimerangeKind === 'absolute') {
         const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
           get('timeline.timerange', initialState)
         );
@@ -90,7 +93,7 @@ const initializeTimerangeFromUrlParam = (
         );
       }
 
-      if (timelineType === 'relative') {
+      if (timelineTimerangeKind === 'relative') {
         const relativeRange = normalizeTimeRange<RelativeTimeRange>(
           get('timeline.timerange', initialState)
         );
@@ -110,8 +113,8 @@ const initializeTimerangeFromUrlParam = (
       }
     }
 
-    if (globalType) {
-      if (globalType === 'absolute') {
+    if (globalTimerangeKind) {
+      if (globalTimerangeKind === 'absolute') {
         const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
           get('global.timerange', initialState)
         );
@@ -123,7 +126,7 @@ const initializeTimerangeFromUrlParam = (
           })
         );
       }
-      if (globalType === 'relative') {
+      if (globalTimerangeKind === 'relative') {
         const relativeRange = normalizeTimeRange<RelativeTimeRange>(
           get('global.timerange', initialState)
         );
@@ -172,6 +175,39 @@ const initializeTimerangeFromUrlParam = (
           inputsActions.setRelativeRangeDatePicker({
             ...relativeRange,
             id: InputsModelId.socTrends,
+          })
+        );
+      }
+    }
+    if (valueReportType) {
+      if (valueReportType === 'absolute') {
+        const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+          get('valueReport.timerange', initialState)
+        );
+
+        dispatch(
+          inputsActions.setAbsoluteRangeDatePicker({
+            ...absoluteRange,
+            id: InputsModelId.valueReport,
+          })
+        );
+      }
+
+      if (valueReportType === 'relative') {
+        const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+          get('valueReport.timerange', initialState)
+        );
+
+        // Updates date values when timerange is relative
+        relativeRange.from = formatDate(relativeRange.fromStr);
+        relativeRange.to = formatDate(relativeRange.toStr, {
+          roundUp: true,
+        });
+
+        dispatch(
+          inputsActions.setRelativeRangeDatePicker({
+            ...relativeRange,
+            id: InputsModelId.valueReport,
           })
         );
       }

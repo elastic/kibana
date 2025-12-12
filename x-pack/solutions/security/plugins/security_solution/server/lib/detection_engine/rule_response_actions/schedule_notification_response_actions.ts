@@ -14,16 +14,19 @@ import { endpointResponseAction } from './endpoint_response_action';
 import type { ScheduleNotificationActions } from '../rule_types/types';
 import type { Alert, AlertWithAgent } from './types';
 
-interface ScheduleNotificationResponseActionsService {
+interface ScheduleNotificationResponseActionsServiceParams {
   endpointAppContextService: EndpointAppContextService;
   osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'];
 }
 
+export type ScheduleNotificationResponseActionsService = (
+  params: ScheduleNotificationActions
+) => void;
 export const getScheduleNotificationResponseActionsService =
   ({
     osqueryCreateActionService,
     endpointAppContextService,
-  }: ScheduleNotificationResponseActionsService) =>
+  }: ScheduleNotificationResponseActionsServiceParams): ScheduleNotificationResponseActionsService =>
   async ({ signals, signalsCount, responseActions }: ScheduleNotificationActions) => {
     if (!signalsCount || !responseActions?.length) {
       return;
@@ -41,9 +44,14 @@ export const getScheduleNotificationResponseActionsService =
           responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&
           osqueryCreateActionService
         ) {
-          await osqueryResponseAction(responseAction, osqueryCreateActionService, {
-            alerts,
-          });
+          await osqueryResponseAction(
+            responseAction,
+            osqueryCreateActionService,
+            endpointAppContextService,
+            {
+              alerts,
+            }
+          );
         }
         if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
           // We currently support only automated response actions for Elastic Defend. This will

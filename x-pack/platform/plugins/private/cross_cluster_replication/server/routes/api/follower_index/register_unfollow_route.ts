@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Unfollow follower index's leader index

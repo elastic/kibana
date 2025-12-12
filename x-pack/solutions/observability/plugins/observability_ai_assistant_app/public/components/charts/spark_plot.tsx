@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PartialTheme } from '@elastic/charts';
 import {
   AnnotationDomainType,
   BarSeries,
@@ -11,7 +12,6 @@ import {
   CurveType,
   LineAnnotation,
   LineSeries,
-  PartialTheme,
   Position,
   ScaleType,
   Settings,
@@ -98,6 +98,7 @@ export function SparkPlot({
       ) : (
         <LineSeries
           id="Sparkline"
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}

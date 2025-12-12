@@ -7,40 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
-
-const ALPHA_NUMERIC_WITH_SPACES_REGEX = /^[a-z0-9\s_]+$/i;
-const ALPHA_NUMERIC_WITH_SPACES_EXT_REGEX = /^[a-z0-9\s\._]+$/i;
-
-function alphanumericValidation(v: string) {
-  return ALPHA_NUMERIC_WITH_SPACES_REGEX.test(v)
-    ? undefined
-    : 'Only alphanumeric characters are allowed as file names';
-}
-
-function alphanumericWithExtValidation(v: string) {
-  return ALPHA_NUMERIC_WITH_SPACES_EXT_REGEX.test(v)
-    ? undefined
-    : 'Only alphanumeric characters, spaces (" "), dots (".") and underscores ("_") are allowed';
-}
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const fileName = schema.string({
   minLength: 1,
   maxLength: 256,
-  validate: alphanumericValidation,
 });
 
 export const fileNameWithExt = schema.string({
   minLength: 1,
   maxLength: 256,
-  validate: alphanumericWithExtValidation,
 });
 
 export const fileAlt = schema.maybe(
   schema.string({
     minLength: 1,
     maxLength: 256,
-    validate: alphanumericValidation,
   })
 );
 

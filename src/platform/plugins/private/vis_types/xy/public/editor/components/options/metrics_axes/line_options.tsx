@@ -18,8 +18,8 @@ import {
   SwitchOption,
 } from '@kbn/vis-default-editor-plugin/public';
 
-import { SeriesParam } from '../../../../types';
-import { SetChart } from './chart_options';
+import type { SeriesParam } from '../../../../types';
+import type { SetChart } from './chart_options';
 import { getInterpolationModes } from '../../../collections';
 
 const interpolationModes = getInterpolationModes();

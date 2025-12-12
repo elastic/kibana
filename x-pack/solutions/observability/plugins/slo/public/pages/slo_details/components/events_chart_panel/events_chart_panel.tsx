@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { TimeBounds } from '../../types';
-import { getDiscoverLink } from '../../utils/get_discover_link';
+import type { TimeBounds } from '../../types';
+import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
 import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
 
@@ -44,11 +44,6 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
     remoteName: slo.remote?.remoteName,
   });
 
-  const canLinkToDiscover = ![
-    'sli.apm.transactionErrorRate',
-    'sli.apm.transactionDuration',
-  ].includes(slo.indicator.type);
-
   function getChartTitle() {
     switch (slo.indicator.type) {
       case 'sli.metric.timeslice':
@@ -64,7 +59,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
 
   function getChart() {
     if (isLoading) {
-      return <EuiLoadingChart size="m" mono data-test-subj="eventsLoadingChart" />;
+      return <EuiLoadingChart size="m" data-test-subj="eventsLoadingChart" />;
     }
 
     switch (slo.indicator.type) {
@@ -98,30 +93,29 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          {canLinkToDiscover && (
-            <EuiFlexItem grow={0}>
-              <EuiLink
-                color="text"
-                href={getDiscoverLink({
-                  slo,
-                  timeRange: {
-                    from: 'now-24h',
-                    to: 'now',
-                    mode: 'relative',
-                  },
-                  discover,
-                  uiSettings,
-                })}
-                data-test-subj="sloDetailDiscoverLink"
-              >
-                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
-                <FormattedMessage
-                  id="xpack.slo.sloDetails.viewEventsLink"
-                  defaultMessage="View events"
-                />
-              </EuiLink>
-            </EuiFlexItem>
-          )}
+
+          <EuiFlexItem grow={0}>
+            <EuiLink
+              color="text"
+              href={getDiscoverLink({
+                slo,
+                timeRange: {
+                  from: 'now-24h',
+                  to: 'now',
+                  mode: 'relative',
+                },
+                discover,
+                uiSettings,
+              })}
+              data-test-subj="sloDetailDiscoverLink"
+            >
+              <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
+              <FormattedMessage
+                id="xpack.slo.sloDetails.viewEventsLink"
+                defaultMessage="View events"
+              />
+            </EuiLink>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexItem>{getChart()}</EuiFlexItem>

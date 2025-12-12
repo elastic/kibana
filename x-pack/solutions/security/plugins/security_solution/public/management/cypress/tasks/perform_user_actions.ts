@@ -31,8 +31,27 @@ const performAction = (action: FormAction) => {
   if (action.type === 'click') {
     element.click();
   } else if (action.type === 'input') {
-    element.type(action.value || '');
+    // Check if this is a combobox field - if so, interact with the input inside it
+    element.then(($el) => {
+      const comboboxInput = $el.find('input[role="combobox"]');
+      if (comboboxInput.length > 0) {
+        cy.wrap(comboboxInput).click();
+        cy.wrap(comboboxInput).type(`{selectall}{backspace}`);
+        cy.wrap(comboboxInput).type(`${action.value || ''}{enter}`);
+      } else {
+        element.type(action.value || '');
+      }
+    });
   } else if (action.type === 'clear') {
-    element.clear();
+    // Check if this is a combobox field - if so, clear the input inside it
+    element.then(($el) => {
+      const comboboxInput = $el.find('input[role="combobox"]');
+      if (comboboxInput.length > 0) {
+        cy.wrap(comboboxInput).click();
+        cy.wrap(comboboxInput).type('{selectall}{backspace}');
+      } else {
+        element.clear();
+      }
+    });
   }
 };

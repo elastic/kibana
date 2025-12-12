@@ -19,13 +19,20 @@ function hardenPrototypes() {
   // While Object.seal() is not a silver bullet, it does provide a good balance between security and compatibility.
   // The goal is to prevent a majority of prototype pollution vulnerabilities that can be exploited by an attacker.
 
+  // ** IMPORTANT **
+  // This is ONLY within the Node.js (server-side) environment.
+  // This function is invoked as one of the first parts of `src/setup_node_env/setup_env.js`, before other modules are loaded.
+  //
+  // We _additionally_ seal prototypes in `src/platform/packages/shared/kbn-security-hardening/prototype.ts`, which is shared code between the client and server.
+  //
+  // This results in sealing prototypes twice on the server.
+  // The extra seal is a no-op, but it is done to ensure that the same code is run in both environments.
+
   Object.seal(Object.prototype);
   Object.seal(Number.prototype);
   Object.seal(String.prototype);
   Object.seal(Function.prototype);
-
-  // corejs currently manipulates Array.prototype, so we cannot seal it here.
-  // this is instead sealed within `src/platform/packages/shared/kbn-security-hardening/prototype.ts`
+  Object.seal(Array.prototype);
 }
 
 module.exports = hardenPrototypes;

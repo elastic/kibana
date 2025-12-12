@@ -16,6 +16,7 @@ import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profi
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { TestProviders } from '../../mock';
 import { mockUserProfiles } from './mocks';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
@@ -66,7 +67,7 @@ describe('<AssigneesApplyPanel />', () => {
     expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
   });
 
-  it('should call `onApply` callback on apply button click', () => {
+  it('should call `onApply` callback on apply button click', async () => {
     const mockedOnApply = jest.fn();
 
     const { getByText, getByTestId } = renderAssigneesApplyPanel({
@@ -75,9 +76,9 @@ describe('<AssigneesApplyPanel />', () => {
     });
 
     expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
-    getByText(mockUserProfiles[1].user.full_name).click();
+    await userEvent.click(getByText(mockUserProfiles[1].user.full_name));
     expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
-    getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID).click();
+    await userEvent.click(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
 
     expect(mockedOnApply).toHaveBeenCalledWith({
       add: ['user-id-2'],

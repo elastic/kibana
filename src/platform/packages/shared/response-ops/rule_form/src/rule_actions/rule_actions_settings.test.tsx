@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { RuleActionsSettings } from './rule_actions_settings';
 import { getAction } from '../common/test_utils/actions_test_utils';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
-import { RuleType } from '@kbn/alerting-types';
+import type { RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
 import type { RuleActionsNotifyWhenProps } from './rule_actions_notify_when';
 import type { RuleActionsAlertsFilterProps } from './rule_actions_alerts_filter';
@@ -327,7 +327,7 @@ describe('ruleActionsSettings', () => {
       validConsumers: ['stackAlerts', 'logs'],
       selectedRuleType: {
         ...ruleType,
-        hasFieldsForAAD: true,
+        hasAlertsMappings: true,
       },
       selectedRuleTypeModel: ruleModel,
     });
@@ -360,7 +360,7 @@ describe('ruleActionsSettings', () => {
       validConsumers: ['stackAlerts', 'logs'],
       selectedRuleType: {
         ...ruleType,
-        hasFieldsForAAD: true,
+        hasAlertsMappings: true,
       },
       selectedRuleTypeModel: ruleModel,
     });
@@ -402,7 +402,7 @@ describe('ruleActionsSettings', () => {
       validConsumers: ['stackAlerts', 'logs'],
       selectedRuleType: {
         ...ruleType,
-        hasFieldsForAAD: true,
+        hasAlertsMappings: true,
       },
       selectedRuleTypeModel: ruleModel,
     });

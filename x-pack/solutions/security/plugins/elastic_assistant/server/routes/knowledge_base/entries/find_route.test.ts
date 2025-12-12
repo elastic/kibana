@@ -13,7 +13,7 @@ import { getFindKnowledgeBaseEntriesResultWithSingleHit } from '../../../__mocks
 import { findKnowledgeBaseEntriesRoute } from './find_route';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 const mockUser = {
-  username: 'my_username',
+  username: 'elastic',
   authentication_realm: {
     type: 'my_realm_type',
     name: 'my_realm_name',

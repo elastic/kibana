@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { SnapshotSnapshotState } from '@elastic/elasticsearch/lib/api/types';
 import type { SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
@@ -114,6 +116,29 @@ export function registerSnapshotsRoutes({
           },
         });
       }
+      // Fetch the last successful snapshot from the managed repository (if it exists)
+      // This is used to mark it as non-deletable in the UI
+      let lastSuccessfulManagedSnapshot: SnapshotDetailsEs | undefined;
+      if (managedRepository) {
+        try {
+          const lastSuccessfulResponse = await clusterClient.asCurrentUser.snapshot.get({
+            repository: managedRepository,
+            snapshot: '_all',
+            state: 'SUCCESS',
+            sort: 'start_time',
+            order: 'desc',
+            size: 1,
+            offset: 0,
+            ignore_unavailable: true,
+          });
+          lastSuccessfulManagedSnapshot = lastSuccessfulResponse.snapshots?.[0] as
+            | SnapshotDetailsEs
+            | undefined;
+        } catch (e) {
+          // Silently swallow errors - if we can't fetch this, we just won't mark any snapshot as protected
+        }
+      }
+
       try {
         // If any of these repositories 504 they will cost the request significant time.
         const fetchedSnapshots = await clusterClient.asCurrentUser.snapshot.get({
@@ -145,6 +170,9 @@ export function registerSnapshotsRoutes({
                   operator: searchOperator,
                 })
               : '*,_none',
+          ...(searchField === 'state' && searchValue
+            ? { state: searchValue as SnapshotSnapshotState }
+            : {}),
           order: sortDirection,
           // @ts-expect-error sortField: string is not compatible with SnapshotSnapshotSort type
           sort: sortField,
@@ -154,7 +182,21 @@ export function registerSnapshotsRoutes({
 
         // Decorate each snapshot with the repository with which it's associated.
         const snapshots = fetchedSnapshots?.snapshots?.map((snapshot) => {
-          return deserializeSnapshotDetails(snapshot as SnapshotDetailsEs, managedRepository);
+          const snapshotDetails = deserializeSnapshotDetails(
+            snapshot as SnapshotDetailsEs,
+            managedRepository
+          );
+
+          // Mark the last successful snapshot in a managed repository as non-deletable
+          if (
+            lastSuccessfulManagedSnapshot &&
+            snapshot.snapshot === lastSuccessfulManagedSnapshot.snapshot &&
+            snapshot.repository === managedRepository
+          ) {
+            snapshotDetails.isLastSuccessfulSnapshot = true;
+          }
+
+          return snapshotDetails;
         });
 
         return res.ok({

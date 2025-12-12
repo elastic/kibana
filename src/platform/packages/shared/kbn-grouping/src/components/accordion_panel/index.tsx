@@ -28,6 +28,7 @@ interface GroupPanelProps<T> {
   onToggleGroup?: (isOpen: boolean, groupBucket: GroupingBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
+  multiValueFields?: string[];
 }
 
 const DefaultGroupPanelRenderer = ({
@@ -72,6 +73,7 @@ const GroupPanelComponent = <T,>({
   renderChildComponent,
   selectedGroup,
   nullGroupMessage,
+  multiValueFields,
 }: GroupPanelProps<T>) => {
   const lastForceState = useRef(forceState);
   useEffect(() => {
@@ -98,8 +100,8 @@ const GroupPanelComponent = <T,>({
     () =>
       isNullGroup
         ? getNullGroupFilter(selectedGroup)
-        : createGroupFilter(selectedGroup, groupFieldValue.asArray),
-    [groupFieldValue.asArray, isNullGroup, selectedGroup]
+        : createGroupFilter(selectedGroup, groupFieldValue.asArray, multiValueFields),
+    [groupFieldValue.asArray, isNullGroup, selectedGroup, multiValueFields]
   );
 
   const onToggle = useCallback(

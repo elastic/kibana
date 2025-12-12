@@ -6,39 +6,24 @@
  */
 
 import { takeLeading, put, call, takeLatest } from 'redux-saga/effects';
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { updateDefaultAlertingAction } from '../alert_rules';
-import { DynamicSettings } from '../../../../../common/runtime_types';
+import type { DynamicSettings } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import {
   getConnectorsAction,
   setDynamicSettingsAction,
   getDynamicSettingsAction,
-  syncGlobalParamsAction,
   getLocationMonitorsAction,
 } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchConnectors,
   setDynamicSettings,
-  syncGlobalParamsAPI,
   getDynamicSettings,
   fetchLocationMonitors,
 } from './api';
-
-export function* syncGlobalParamsEffect() {
-  yield takeLeading(
-    syncGlobalParamsAction.get,
-    fetchEffectFactory(
-      syncGlobalParamsAPI,
-      syncGlobalParamsAction.success,
-      syncGlobalParamsAction.fail,
-      successMessage,
-      failureMessage
-    )
-  );
-}
 
 export function* fetchLocationMonitorsEffect() {
   yield takeLeading(
@@ -61,14 +46,6 @@ export function* fetchDynamicSettingsEffect() {
     )
   );
 }
-
-const successMessage = i18n.translate('xpack.synthetics.settings.syncGlobalParams', {
-  defaultMessage: 'Successfully applied global params to all monitors',
-});
-
-const failureMessage = i18n.translate('xpack.synthetics.settings.syncGlobalParams.fail', {
-  defaultMessage: 'Failed to apply global params to all monitors',
-});
 
 export function* setDynamicSettingsEffect() {
   const couldNotSaveSettingsText = i18n.translate('xpack.synthetics.settings.error.couldNotSave', {

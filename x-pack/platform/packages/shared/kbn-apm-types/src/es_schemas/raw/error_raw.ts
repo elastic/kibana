@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APMBaseDoc } from './apm_base_doc';
-import {
+import type { APMBaseDoc } from './apm_base_doc';
+import type {
   Container,
   Host,
   Http,
@@ -19,6 +19,7 @@ import {
   Url,
   User,
 } from './fields';
+import type { Server } from './fields/server';
 
 export interface Processor {
   name: 'error';
@@ -70,5 +71,6 @@ export interface ErrorRaw extends APMBaseDoc {
   process?: Process;
   service: Service;
   url?: Url;
+  server?: Server;
   user?: User;
 }

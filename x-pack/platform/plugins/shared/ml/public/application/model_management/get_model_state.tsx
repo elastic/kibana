@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   type EuiHealthProps,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MODEL_STATE, type ModelState } from '@kbn/ml-trained-models-utils';
@@ -24,6 +25,7 @@ export interface NameOverrides {
 
 export const getModelStateColor = (
   state: ModelState | undefined,
+  canStartStopTrainedModels: boolean,
   nameOverrides?: NameOverrides
 ): { color: EuiHealthProps['color']; name: string; component?: React.ReactNode } | null => {
   switch (state) {
@@ -94,6 +96,42 @@ export const getModelStateColor = (
                 <EuiText size="xs">{this.name}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
+          );
+        },
+      };
+    case MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE:
+      return {
+        color: 'warning',
+        name: i18n.translate(
+          'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceName',
+          {
+            defaultMessage: 'Downloaded in different space',
+          }
+        ),
+        get component() {
+          const message = canStartStopTrainedModels
+            ? i18n.translate(
+                'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceTooltip.canDeploy',
+                {
+                  defaultMessage:
+                    'The model is downloaded in a different space. Assign it to the current space to deploy it.',
+                }
+              )
+            : i18n.translate(
+                'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceTooltip.cannotDeploy',
+                {
+                  defaultMessage:
+                    'The model is downloaded in a different space. If you have permission, assign it to the current space to review model details, or contact your administrator.',
+                }
+              );
+          return (
+            <EuiIconTip
+              aria-label="Warning"
+              size="m"
+              type="warning"
+              color="warning"
+              content={message}
+            />
           );
         },
       };

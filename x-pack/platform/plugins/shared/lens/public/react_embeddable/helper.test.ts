@@ -6,8 +6,15 @@
  */
 import { BehaviorSubject } from 'rxjs';
 import { defaultDoc } from '../mocks/services_mock';
-import { deserializeState } from './helper';
+import { deserializeState, getStructuredDatasourceStates } from './helper';
 import { makeEmbeddableServices } from './mocks';
+import expect from 'expect';
+import type {
+  FormBasedPersistedState,
+  TextBasedPersistedState,
+  DatasourceState,
+  StructuredDatasourceStates,
+} from '@kbn/lens-common';
 
 describe('Embeddable helpers', () => {
   describe('deserializeState', () => {
@@ -56,62 +63,52 @@ describe('Embeddable helpers', () => {
       // check the visualizationType set to null for empty state
       expect(runtimeState.attributes.visualizationType).toBeNull();
     });
+  });
 
-    describe('injected references should overwrite inner ones', () => {
-      // There are 3 possible scenarios here for reference injections:
-      // * default space for a by-value
-      // * default space for a by-ref with a "lens" panel reference type
-      // * other space for a by-value with new ref ids
+  describe('getStructuredDatasourceStates', () => {
+    const formBasedDSStateMock: FormBasedPersistedState = {
+      layers: {},
+    };
+    const textBasedDSStateMock: TextBasedPersistedState = {
+      layers: {},
+    };
 
-      it('should inject correctly serialized references into runtime state for a by value in the default space', async () => {
-        const services = getServices();
-        const mockedReferences = [
-          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
-        ];
-        const runtimeState = await deserializeState(
-          services,
-          {
-            attributes: defaultDoc,
-          },
-          mockedReferences
-        );
-        expect(services.attributeService.injectReferences).toHaveBeenCalled();
-        expect(runtimeState.attributes.references).toEqual(mockedReferences);
-      });
+    it('should return structured datasourceStates from unknown datasourceStates', () => {
+      const mockDatasourceStates: Record<string, unknown> = {
+        formBased: formBasedDSStateMock,
+        textBased: textBasedDSStateMock,
+        other: textBasedDSStateMock,
+      };
+      const result = getStructuredDatasourceStates(mockDatasourceStates);
 
-      it('should inject correctly serialized references into runtime state for a by ref in the default space', async () => {
-        const services = getServices();
-        const mockedReferences = [
-          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
-        ];
-        const runtimeState = await deserializeState(
-          services,
-          {
-            savedObjectId: '123',
-          },
-          mockedReferences
-        );
-        expect(services.attributeService.injectReferences).not.toHaveBeenCalled();
-        // Note the original references should be kept
-        expect(runtimeState.attributes.references).toEqual(defaultDoc.references);
-      });
+      expect(result.formBased).toEqual(formBasedDSStateMock);
+      expect(result.textBased).toEqual(textBasedDSStateMock);
+      expect('other' in result).toBe(false);
+    });
 
-      it('should inject correctly serialized references into runtime state for a by value in another space', async () => {
-        const services = getServices();
-        const mockedReferences = [
-          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
-        ];
-        const runtimeState = await deserializeState(
-          services,
-          {
-            attributes: defaultDoc,
-          },
-          mockedReferences
-        );
-        expect(services.attributeService.injectReferences).toHaveBeenCalled();
-        // note: in this case the references are swapped
-        expect(runtimeState.attributes.references).toEqual(mockedReferences);
-      });
+    it('should return structured datasourceStates from nested unknown datasourceStates', () => {
+      const wrap = (ds: unknown) => ({ state: ds, isLoading: false } satisfies DatasourceState);
+      const mockDatasourceStates: Record<string, unknown> = {
+        formBased: wrap(formBasedDSStateMock),
+        textBased: wrap(textBasedDSStateMock),
+        other: wrap(textBasedDSStateMock),
+      };
+      const result = getStructuredDatasourceStates(mockDatasourceStates);
+
+      expect(result.formBased).toEqual(formBasedDSStateMock);
+      expect(result.textBased).toEqual(textBasedDSStateMock);
+      expect('other' in result).toBe(false);
+    });
+
+    it('should return structured datasourceStates from structured datasourceStates', () => {
+      const mockDatasourceStates: StructuredDatasourceStates = {
+        formBased: formBasedDSStateMock,
+        textBased: textBasedDSStateMock,
+      };
+      const result = getStructuredDatasourceStates(mockDatasourceStates);
+
+      expect(result.formBased).toEqual(formBasedDSStateMock);
+      expect(result.textBased).toEqual(textBasedDSStateMock);
     });
   });
 });

@@ -6,19 +6,18 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useLoadConnectors, Props } from '.';
+import type { Props } from '.';
+import { useLoadConnectors } from '.';
 import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
-
-const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
-
-jest.mock('@kbn/inference-endpoint-ui-common', () => ({
-  isInferenceEndpointExists: jest.fn(),
-}));
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
+  // These connectors are not supported for inference
   {
     ...mockConnectors[0],
     id: 'connector-missing-secrets',
@@ -32,6 +31,16 @@ const mockConnectorsAndExtras = [
     name: 'Connector Wrong Action Type',
     isMissingSecrets: true,
     actionTypeId: '.d3',
+  },
+  {
+    ...mockConnectors[0],
+    id: 'connector-text-embedding',
+    name: 'Text Embedding Connector',
+    isMissingSecrets: false,
+    actionTypeId: '.inference',
+    config: {
+      taskType: 'text_embedding',
+    },
   },
 ];
 
@@ -59,12 +68,23 @@ const http = {
 const toasts = {
   addError: jest.fn(),
 };
-const defaultProps = { http, toasts } as unknown as Props;
+const settings = {
+  client: {
+    get: jest.fn().mockImplementation((settingKey) => {
+      if (settingKey === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+        return undefined;
+      }
+      if (settingKey === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
+        return false;
+      }
+    }),
+  },
+};
+const defaultProps = { http, toasts, settings } as unknown as Props;
 
 describe('useLoadConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedIsInferenceEndpointExists.mockResolvedValue(true);
   });
   it('should call api to load action types', async () => {
     renderHook(() => useLoadConnectors(defaultProps), {
@@ -100,11 +120,6 @@ describe('useLoadConnectors', () => {
     await waitFor(() => {
       expect(result.current.data).toStrictEqual(
         mockConnectors
-          .filter(
-            (c) =>
-              c.actionTypeId !== '.inference' ||
-              (c.actionTypeId === '.inference' && c.isPreconfigured)
-          )
           // @ts-ignore ts does not like config, but we define it in the mock data
           .map((c) => ({ ...c, referencedByCount: 0, apiProvider: c?.config?.apiProvider }))
       );
@@ -118,5 +133,23 @@ describe('useLoadConnectors', () => {
       wrapper: TestProviders,
     });
     await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
+  });
+
+  it('should filter out .inference connectors without chat_completion taskType', async () => {
+    const { result } = renderHook(
+      () => useLoadConnectors({ ...defaultProps, inferenceEnabled: true }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    await waitFor(() => {
+      const connectorIds = result.current.data?.map((c) => c.id) || [];
+
+      expect(connectorIds).not.toContain('connector-text-embedding');
+      expect(connectorIds).not.toContain('text-embedding-connector-id');
+      expect(connectorIds).not.toContain('sparse-embedding-connector-id');
+      expect(connectorIds).toContain('c29c28a0-20fe-11ee-9386-a1f4d42ec542'); // Regular Inference Connector
+      expect(connectorIds).toContain('connectorId'); // OpenAI connector
+    });
   });
 });

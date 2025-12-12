@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { TopValuesPopover } from './top_values_popover';
@@ -18,6 +18,7 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const element = document.createElement('button');
 document.body.appendChild(element);
@@ -53,26 +54,32 @@ describe('TopNAction', () => {
       wrapper: TestProviders,
     });
 
-    expect(queryByTestId('topN-container')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByTestId('topN-container')).toBeInTheDocument();
+    });
   });
 
-  it('does not render when nodeRef is null', () => {
+  it('does not render when nodeRef is null', async () => {
     mockUseObservable.mockReturnValue({ ...data, nodeRef: undefined });
 
     const { queryByTestId } = render(<TopValuesPopover />, {
       wrapper: TestProviders,
     });
 
-    expect(queryByTestId('topN-container')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByTestId('topN-container')).not.toBeInTheDocument();
+    });
   });
 
-  it('does not render when data is undefined', () => {
+  it('does not render when data is undefined', async () => {
     mockUseObservable.mockReturnValue(undefined);
 
     const { queryByTestId } = render(<TopValuesPopover />, {
       wrapper: TestProviders,
     });
 
-    expect(queryByTestId('topN-container')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByTestId('topN-container')).not.toBeInTheDocument();
+    });
   });
 });

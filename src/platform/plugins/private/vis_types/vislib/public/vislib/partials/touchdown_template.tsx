@@ -21,7 +21,7 @@ export const touchdownTemplate = ({ wholeBucket }: Props) => {
   return ReactDOM.renderToStaticMarkup(
     <KibanaRenderContextProvider {...getCoreStart()}>
       <p className="visTooltip__header">
-        <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />
+        <EuiIcon type="info" className="visTooltip__headerIcon" />
         <span className="visTooltip__headerText">
           {wholeBucket ? 'Part of this bucket' : 'This area'} may contain partial data. The selected
           time range does not fully cover it.

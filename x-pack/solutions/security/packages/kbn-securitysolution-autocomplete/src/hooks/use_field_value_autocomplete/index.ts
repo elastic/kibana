@@ -8,7 +8,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { DataViewBase, DataViewFieldBase, getDataViewFieldSubtypeNested } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { getDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '@kbn/unified-search-plugin/public';

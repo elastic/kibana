@@ -6,10 +6,9 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { LensState } from './types';
-import { DatasourceMap, VisualizationMap } from '../types';
+import type { LensState, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 import { getDatasourceLayers } from './utils';
 import { mergeToNewDoc } from './shared_logic';
 
@@ -18,6 +17,7 @@ export const selectQuery = (state: LensState) => state.lens.query;
 export const selectSearchSessionId = (state: LensState) => state.lens.searchSessionId;
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
+export const selectProjectRouting = (state: LensState) => state.lens.projectRouting;
 export const selectAdHocDataViews = (state: LensState) =>
   Object.fromEntries(
     Object.values(state.lens.dataViews.indexPatterns)
@@ -39,6 +39,7 @@ export const selectDataViews = (state: LensState) => state.lens.dataViews;
 export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
+export const selectSelectedLayerId = (state: LensState) => state.lens.visualization.selectedLayerId;
 
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {
@@ -49,12 +50,13 @@ export const selectTriggerApplyChanges = (state: LensState) => {
 
 // TODO - is there any point to keeping this around since we have selectExecutionSearchContext?
 export const selectExecutionContext = createSelector(
-  [selectQuery, selectFilters, selectResolvedDateRange],
-  (query, filters, dateRange) => ({
+  [selectQuery, selectFilters, selectResolvedDateRange, selectProjectRouting],
+  (query, filters, dateRange, projectRouting) => ({
     now: Date.now(),
     dateRange,
     query,
     filters,
+    projectRouting,
   })
 );
 
@@ -67,6 +69,7 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
   },
   filters: res.filters,
   disableWarningToasts: true,
+  projectRouting: res.projectRouting,
 }));
 
 const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 
 /**
  * A policy used to determinate when a rollout should be performed.

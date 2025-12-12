@@ -17,17 +17,19 @@ import type {
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { trace } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
 import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
 import type OpenAI from 'openai';
 import type { ChatCompletionChunk } from 'openai/resources';
 import {
+  SUB_ACTION,
   ChatCompleteParamsSchema,
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
   UnifiedChatCompleteParamsSchema,
-} from '../../../common/inference/schema';
+} from '@kbn/connector-schemas/inference';
 import type {
   Config,
   Secrets,
@@ -43,8 +45,7 @@ import type {
   DashboardActionResponse,
   ChatCompleteParams,
   ChatCompleteResponse,
-} from '../../../common/inference/types';
-import { SUB_ACTION } from '../../../common/inference/constants';
+} from '@kbn/connector-schemas/inference';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
 
@@ -118,7 +119,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
@@ -181,16 +182,21 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
   public async performApiUnifiedCompletionStream(params: UnifiedChatCompleteParams) {
+    const parentSpan = trace.getActiveSpan();
+    const body = { ...params.body, n: undefined }; // exclude n param for now, constant is used on the inference API side
+    if (parentSpan?.isRecording()) {
+      parentSpan.setAttribute('inference.raw_request', JSON.stringify(body));
+    }
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
         path: `_inference/chat_completion/${this.inferenceId}/_stream`,
-        body: { ...params.body, n: undefined }, // exclude n param for now, constant is used on the inference API side
+        body,
       },
       {
         asStream: true,
@@ -269,7 +275,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.rerank!;
+    return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
   }
 
   /**

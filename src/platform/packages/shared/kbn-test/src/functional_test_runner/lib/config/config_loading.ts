@@ -8,14 +8,14 @@
  */
 
 import Path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
 import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
+import type { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
 import { Config } from './config';
-import { EsVersion } from '../es_version';
+import type { EsVersion } from '../es_version';
 import { getAllFtrConfigsAndManifests } from './ftr_configs_manifest';
 
 interface LoadSettingsOptions {
@@ -61,7 +61,8 @@ async function getConfigModule({
     throw error;
   }
 
-  const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
+  const { ftrConfigEntries, manifestPaths } = getAllFtrConfigsAndManifests();
+  const allFtrConfigs = Array.from(ftrConfigEntries.keys());
 
   if (
     primary &&

@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AddTimelineButton } from './add_timeline_button';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../hooks/use_create_timeline');
 
@@ -16,7 +17,7 @@ const timelineId = 'timelineId';
 const renderAddTimelineButton = () => render(<AddTimelineButton timelineId={timelineId} />);
 
 describe('AddTimelineButton', () => {
-  it('should present 3 options in the popover when clicking on the plus button', () => {
+  it('should present 3 options in the popover when clicking on the plus button', async () => {
     (useCreateTimeline as jest.Mock).mockReturnValue(jest.fn());
 
     const { getByTestId } = renderAddTimelineButton();
@@ -25,7 +26,7 @@ describe('AddTimelineButton', () => {
 
     expect(plusButton).toBeInTheDocument();
 
-    plusButton.click();
+    await userEvent.click(plusButton);
 
     expect(getByTestId('timeline-bottom-bar-create-new-timeline')).toBeInTheDocument();
     expect(getByTestId('timeline-bottom-bar-create-new-timeline')).toHaveTextContent(

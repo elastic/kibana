@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '../filters';
-import { DataViewBase } from '../..';
+import type { Filter } from '../filters';
+import type { DataViewBase } from '../..';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify

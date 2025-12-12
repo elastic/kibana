@@ -15,18 +15,21 @@ import {
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   selectorMonitorDetailsState,
-  selectorError,
+  selectSyntheticsMonitorError,
 } from '../../../state';
 import { useGetUrlParams } from '../../../hooks';
 
-export const useSelectedMonitor = (monId?: string) => {
-  let monitorId = monId;
-  const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
+interface UseSelectedMonitorOptions {
+  refetchMonitorEnabled?: boolean;
+}
+
+export const useSelectedMonitor = ({
+  refetchMonitorEnabled = true,
+}: UseSelectedMonitorOptions = {}) => {
+  const { monitorId } = useParams<{ monitorId: string }>();
   const { space } = useKibanaSpace();
   const { spaceId } = useGetUrlParams();
-  if (!monitorId) {
-    monitorId = urlMonitorId;
-  }
+
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
 
@@ -34,7 +37,7 @@ export const useSelectedMonitor = (monId?: string) => {
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
-  const error = useSelector(selectorError);
+  const error = useSelector(selectSyntheticsMonitorError);
   const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
     useSelector(selectorMonitorDetailsState);
@@ -52,7 +55,7 @@ export const useSelectedMonitor = (monId?: string) => {
     : null;
 
   const isMonitorMissing =
-    error?.body.statusCode === 404 &&
+    error?.body?.statusCode === 404 &&
     (error.getPayload as { monitorId: string })?.monitorId === monitorId;
 
   useEffect(() => {
@@ -81,7 +84,8 @@ export const useSelectedMonitor = (monId?: string) => {
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
       syntheticsMonitorDispatchedAt > 0 &&
-      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000
+      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000 &&
+      refetchMonitorEnabled
     ) {
       dispatch(
         getMonitorAction.get({
@@ -100,6 +104,7 @@ export const useSelectedMonitor = (monId?: string) => {
     syntheticsMonitorDispatchedAt,
     spaceId,
     space?.id,
+    refetchMonitorEnabled,
   ]);
 
   return {

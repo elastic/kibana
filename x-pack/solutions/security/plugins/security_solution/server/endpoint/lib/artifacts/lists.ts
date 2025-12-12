@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { createHash } from 'crypto';
 import type {
   Entry,
@@ -13,22 +12,20 @@ import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EntryFieldType, hasSimpleExecutableName } from '@kbn/securitysolution-utils';
+import { EntryFieldType } from '@kbn/securitysolution-utils';
 
 import {
   ENDPOINT_ARTIFACT_LISTS,
-  type ENDPOINT_BLOCKLISTS_LIST_ID,
-  type ENDPOINT_EVENT_FILTERS_LIST_ID,
-  type ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   type ENDPOINT_LIST_ID,
-  type ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
+import {
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
-import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -39,7 +36,8 @@ import type {
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
   WrappedTranslatedExceptionList,
-  TranslatedEntriesOfDescendantOf,
+  TranslatedEntriesOfProcessDescendants,
+  TranslatedEntryTrustDescendants,
 } from '../../schemas';
 import {
   translatedPerformantEntries as translatedPerformantEntriesType,
@@ -75,10 +73,11 @@ export async function buildArtifact(
 
 export type ArtifactListId =
   | typeof ENDPOINT_LIST_ID
-  | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
-  | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
-  | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
-  | typeof ENDPOINT_BLOCKLISTS_LIST_ID;
+  | typeof ENDPOINT_ARTIFACT_LISTS.trustedApps.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.trustedDevices.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.eventFilters.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id;
 
 export function convertExceptionsToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
@@ -192,11 +191,17 @@ export function translateToEndpointExceptions(
           storeUniqueItem(translatedItem);
         });
       } else if (
-        experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
-        isFilterProcessDescendantsEnabled(entry)
+        isProcessDescendantsEnabled(entry)
       ) {
         const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
+        storeUniqueItem(translatedItem);
+      } else if (
+        experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
+        isProcessDescendantsEnabled(entry, TRUSTED_PROCESS_DESCENDANTS_TAG)
+      ) {
+        const translatedItem = translateProcessDescendantTrustedApp(schemaVersion, entry);
         storeUniqueItem(translatedItem);
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
@@ -214,10 +219,10 @@ function translateProcessDescendantEventFilter(
   schemaVersion: string,
   entry: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
-  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
     ...entry,
-    entries: [...entry.entries, PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY],
-  }) as TranslatedEntriesOfDescendantOf;
+    entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
+  }) as TranslatedEntriesOfProcessDescendants;
 
   return {
     type: entry.type,
@@ -230,6 +235,22 @@ function translateProcessDescendantEventFilter(
         },
       },
     ],
+  };
+}
+
+function translateProcessDescendantTrustedApp(
+  schemaVersion: string,
+  entry: ExceptionListItemSchema
+): TranslatedEntryTrustDescendants {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
+    ...entry,
+    entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
+  }) as TranslatedEntriesOfProcessDescendants;
+
+  return {
+    type: entry.type,
+    trust_descendants: true,
+    entries: translatedEntries.entries,
   };
 }
 
@@ -320,42 +341,6 @@ function translateItem(
   };
 }
 
-function appendOptimizedEntryForEndpoint({
-  entry,
-  os,
-  wildcardProcessEntry,
-}: {
-  entry: {
-    field: string;
-    operator: 'excluded' | 'included';
-    type: 'wildcard';
-    value: string;
-  };
-  os: ExceptionListItemSchema['os_types'][number];
-  wildcardProcessEntry: TranslatedEntryMatchWildcard;
-}): TranslatedPerformantEntries {
-  const entries: TranslatedPerformantEntries = [
-    wildcardProcessEntry,
-    {
-      field:
-        entry.field === 'file.path.text'
-          ? normalizeFieldName('file.name')
-          : normalizeFieldName('process.name'),
-      operator: entry.operator,
-      type: (os === 'linux' ? 'exact_cased' : 'exact_caseless') as Extract<
-        TranslatedEntryMatcher,
-        'exact_caseless' | 'exact_cased'
-      >,
-      value: os === 'windows' ? path.win32.basename(entry.value) : path.posix.basename(entry.value),
-    },
-  ].reduce<TranslatedPerformantEntries>((p, c) => {
-    p.push(c);
-    return p;
-  }, []);
-
-  return entries;
-}
-
 function translateEntry(
   schemaVersion: string,
   exceptionListItemEntries: ExceptionListItemSchema['entries'],
@@ -422,29 +407,7 @@ function translateEntry(
             value: entry.value,
           };
 
-          const hasExecutableName = hasSimpleExecutableName({
-            os: os as OperatingSystem,
-            type: entry.type,
-            value: entry.value,
-          });
-
-          const existingFields = exceptionListItemEntries.map((e) => e.field);
-          const doAddPerformantEntries = !(
-            existingFields.includes('process.name') || existingFields.includes('file.name')
-          );
-
-          if (hasExecutableName && doAddPerformantEntries) {
-            // when path has a full executable name
-            // append a process.name entry based on os
-            // `exact_cased` for linux and `exact_caseless` for others
-            return appendOptimizedEntryForEndpoint({
-              entry,
-              os,
-              wildcardProcessEntry,
-            });
-          } else {
-            return wildcardProcessEntry;
-          }
+          return wildcardProcessEntry;
         }
       };
 

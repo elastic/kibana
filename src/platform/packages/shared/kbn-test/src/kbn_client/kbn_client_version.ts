@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnClientStatus } from './kbn_client_status';
+import type { KbnClientStatus } from './kbn_client_status';
 
 export class KbnClientVersion {
   private versionCache: string | undefined;

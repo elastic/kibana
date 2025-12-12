@@ -10,10 +10,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DashboardApi,
   DashboardCreationOptions,
-  DashboardLocatorParams,
   DashboardRendererProps,
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
@@ -112,8 +112,12 @@ const DashboardRendererComponent = ({
       getInitialInput: () => {
         return initialInput.value;
       },
-      getIncomingEmbeddable: () =>
-        embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
+      getIncomingEmbeddables: () => {
+        const incoming = embeddable
+          .getStateTransfer()
+          .getIncomingEmbeddablePackage(APP_UI_ID, true);
+        return incoming;
+      },
       getEmbeddableAppContext: (dashboardId?: string) => ({
         getCurrentPath: () =>
           dashboardId ? `${DASHBOARDS_PATH}/${dashboardId}/edit` : `${DASHBOARDS_PATH}/create`,
@@ -150,7 +154,8 @@ const DashboardRendererComponent = ({
   }, [dashboardContainer, query]);
 
   useEffect(() => {
-    dashboardContainer?.setTimeRange(timeRange);
+    const { from, to } = timeRange;
+    dashboardContainer?.setTimeRange({ from, to });
   }, [dashboardContainer, timeRange]);
 
   useEffect(() => {
@@ -159,7 +164,7 @@ const DashboardRendererComponent = ({
 
   useEffect(() => {
     /** We need to update the initial input on navigation so that changes to filter pills, queries, etc. get applied */
-    initialInput.next({ timeRange, viewMode, query, filters });
+    initialInput.next({ time_range: timeRange, viewMode, query, filters });
   }, [timeRange, viewMode, query, filters]);
 
   /** Dashboard renderer is stored in the state as it's a temporary solution for

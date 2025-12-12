@@ -40,16 +40,48 @@ describe('commands.from.sources', () => {
       expect(list).toMatchObject([
         {
           type: 'source',
-          index: 'index',
+          index: {
+            valueUnquoted: 'index',
+          },
         },
         {
           type: 'source',
-          index: 'index2',
+          index: {
+            valueUnquoted: 'index2',
+          },
         },
         {
           type: 'source',
-          index: 'index3',
-          cluster: 'cl',
+          index: {
+            valueUnquoted: 'index3',
+          },
+          prefix: {
+            type: 'literal',
+            literalType: 'keyword',
+            valueUnquoted: 'cl',
+          },
+        },
+      ]);
+    });
+
+    it('returns sources from subquery', () => {
+      const src = 'FROM index, (FROM subquery_index)';
+      const { root } = parse(src);
+      const list = [...commands.from.sources.list(root)];
+
+      expect(list.length).toBe(2);
+      expect(list).toMatchObject([
+        {
+          type: 'source',
+          index: {
+            valueUnquoted: 'index',
+          },
+        },
+        {
+          type: 'source',
+          index: {
+            valueUnquoted: 'subquery_index',
+          },
         },
       ]);
     });
@@ -72,7 +104,9 @@ describe('commands.from.sources', () => {
       expect(source).toMatchObject({
         type: 'source',
         name: 'index',
-        index: 'index',
+        index: {
+          valueUnquoted: 'index',
+        },
       });
     });
 
@@ -85,13 +119,34 @@ describe('commands.from.sources', () => {
       expect(source1).toMatchObject({
         type: 'source',
         name: 's2',
-        index: 's2',
+        index: {
+          valueUnquoted: 's2',
+        },
       });
       expect(source2).toMatchObject({
         type: 'source',
         name: 'c:s1',
-        index: 's1',
-        cluster: 'c',
+        index: {
+          valueUnquoted: 's1',
+        },
+        prefix: {
+          type: 'literal',
+          literalType: 'keyword',
+          valueUnquoted: 'c',
+        },
+      });
+    });
+
+    it('can find a source inside subquery', () => {
+      const src = 'FROM index, (FROM subquery_index)';
+      const { root } = parse(src);
+      const source = commands.from.sources.find(root, 'subquery_index')!;
+
+      expect(source).toMatchObject({
+        type: 'source',
+        index: {
+          valueUnquoted: 'subquery_index',
+        },
       });
     });
   });
@@ -123,6 +178,17 @@ describe('commands.from.sources', () => {
       const src3 = BasicPrettyPrinter.print(root);
 
       expect(src3).toBe('FROM a, b, c');
+    });
+
+    it('can remove a source from subquery', () => {
+      const src1 = 'FROM a, (FROM b, c)';
+      const { root } = parse(src1);
+
+      commands.from.sources.remove(root, 'c');
+
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, (FROM b)');
     });
   });
 

@@ -11,7 +11,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
+import type { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
   defaultMessage: 'Sample web logs',
@@ -20,8 +20,6 @@ const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
 });
 
-export const GLOBE_ICON_PATH =
-  '/platform/plugins/shared/home/assets/sample_data_resources/logs/icon.svg';
 export const logsSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'logs',

@@ -12,6 +12,7 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
   RouteRegistrar,
+  RouteSecurity,
 } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
@@ -185,8 +186,6 @@ export function registerRoutes({
 
         return response.ok({ body });
       } catch (error) {
-        logger.error(error);
-
         if (!options.disableTelemetry && telemetryUsageCounter) {
           telemetryUsageCounter.incrementCounter({
             counterName: `${method.toUpperCase()} ${pathname}`,
@@ -213,6 +212,10 @@ export function registerRoutes({
           opts.body.attributes.data = error?.data;
         }
 
+        if (opts.statusCode >= 500) {
+          logger.error(error);
+        }
+
         // capture error with APM node agent
         apm.captureError(error);
 
@@ -229,7 +232,7 @@ export function registerRoutes({
           path: pathname,
           options,
           validate: passThroughValidationObject,
-          security,
+          security: security as RouteSecurity,
         },
         wrappedHandler
       );
@@ -243,7 +246,7 @@ export function registerRoutes({
         path: pathname,
         access: pathname.includes('/internal/apm') ? 'internal' : 'public',
         options,
-        security,
+        security: security as RouteSecurity,
       }).addVersion(
         {
           version,

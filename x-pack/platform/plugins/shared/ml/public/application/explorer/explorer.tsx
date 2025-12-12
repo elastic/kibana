@@ -33,18 +33,19 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
-import { isDefined } from '@kbn/ml-is-defined';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
-import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
+import { ExplorerNoResultsFound } from './components';
+import { AnomalyDetectionNoJobsSelected } from '../components/anomaly_detection_no_jobs_selected';
 import { InfluencersList } from '../components/influencers_list';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { SelectSeverity } from '../components/controls/select_severity';
 import {
   ExplorerQueryBar,
   getKqlQueryValues,
@@ -77,7 +78,6 @@ import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
 import { useMlIndexUtils } from '../util/index_service';
-import type { ExplorerState } from './explorer_data';
 import { useJobSelection } from './hooks/use_job_selection';
 
 const AnnotationFlyout = dynamic(async () => ({
@@ -95,8 +95,6 @@ const ExplorerChartsContainer = dynamic(async () => ({
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
   filterActive?: boolean;
-  filterPlaceHolder?: string;
-  indexPattern?: DataView;
   queryString?: string;
   updateLanguage?: (language: string) => void;
   dataViews?: DataView[];
@@ -106,23 +104,20 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
   children,
   jobSelectorProps,
   filterActive,
-  filterPlaceHolder,
-  indexPattern,
   dataViews,
   queryString,
   updateLanguage,
 }) => (
   <>
     <EuiPageHeader>
-      <EuiPageHeaderSection style={{ width: '100%' }}>
+      <EuiPageHeaderSection css={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
-        {indexPattern && updateLanguage ? (
+        {dataViews && dataViews.length > 0 && updateLanguage ? (
           <>
             <ExplorerQueryBar
               filterActive={!!filterActive}
-              filterPlaceHolder={filterPlaceHolder}
-              indexPattern={indexPattern}
+              indexPattern={dataViews[0]}
               dataViews={dataViews}
               queryString={queryString}
               updateLanguage={updateLanguage}
@@ -138,8 +133,7 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
 );
 
 interface ExplorerUIProps {
-  explorerState: ExplorerState;
-  severity: number;
+  severity: SeverityThreshold[];
   showCharts: boolean;
   selectedJobsRunning: boolean;
   overallSwimlaneData: OverallSwimlaneData | null;
@@ -149,7 +143,7 @@ interface ExplorerUIProps {
   // TODO Remove
   timeBuckets: TimeBuckets;
   selectedCells: AppStateSelectedCells | undefined | null;
-  swimLaneSeverity?: number;
+  swimLaneSeverity?: SeverityThreshold[];
   noInfluencersConfigured?: boolean;
 }
 
@@ -174,9 +168,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   timefilter,
   timeBuckets,
   selectedCells,
-  swimLaneSeverity,
-  explorerState,
   overallSwimlaneData,
+  swimLaneSeverity,
   noInfluencersConfigured,
 }) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -278,9 +271,13 @@ export const Explorer: FC<ExplorerUIProps> = ({
     chartsStateService,
     anomalyDetectionAlertsStateService,
     anomalyTableService,
+    annotationsStateService,
+    influencersStateService,
   } = useAnomalyExplorerContext();
 
   const tableData = useObservable(anomalyTableService.tableData$, anomalyTableService.tableData);
+  const tableError = useObservable(anomalyTableService.tableError$, anomalyTableService.tableError);
+  const isTableDataLoading = useObservable(anomalyTableService.tableDataLoading$, true);
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
@@ -301,8 +298,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const applyFilter = useCallback(
     (fieldName: string, fieldValue: string, action: FilterAction) => {
       const { filterActive, queryString } = filterSettings;
-
-      const indexPattern = explorerState.indexPattern;
 
       let newQueryString = '';
       const operator = 'and ';
@@ -330,11 +325,16 @@ export const Explorer: FC<ExplorerUIProps> = ({
         }
       }
 
+      // Only apply filters if we have a valid index pattern
+      if (!dataViews || dataViews.length === 0) {
+        return;
+      }
+
       try {
         const { clearSettings, settings } = getKqlQueryValues({
           inputString: `${newQueryString}`,
           queryLanguage: language,
-          indexPattern: indexPattern as DataView,
+          indexPattern: dataViews[0],
         });
 
         if (clearSettings === true) {
@@ -354,7 +354,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [explorerState, language, filterSettings]
+    [dataViews, language, filterSettings]
   );
 
   const {
@@ -368,12 +368,17 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
-  const { annotations, filterPlaceHolder, indexPattern, influencers, loading } = explorerState;
+  const influencers = useObservable(
+    influencersStateService.influencers$,
+    influencersStateService.influencers
+  );
+  const influencersLoading = useObservable(influencersStateService.isLoading$, true);
 
   const chartsData = useObservable(
     chartsStateService.getChartsData$(),
     chartsStateService.getChartsData()
   );
+  const isChartsDataLoading = useObservable(chartsStateService.isChartsDataLoading$(), true);
 
   const { filterActive, queryString } = filterSettings;
 
@@ -386,14 +391,26 @@ export const Explorer: FC<ExplorerUIProps> = ({
     true
   );
 
-  const isDataLoading = loading || isOverallSwimLaneLoading || isViewBySwimLaneLoading;
+  const isDataLoading =
+    isOverallSwimLaneLoading ||
+    isViewBySwimLaneLoading ||
+    influencersLoading ||
+    isChartsDataLoading ||
+    isTableDataLoading;
 
   const swimLaneBucketInterval = useObservable(
     anomalyTimelineStateService.getSwimLaneBucketInterval$(),
     anomalyTimelineStateService.getSwimLaneBucketInterval()
   );
 
-  const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
+  const {
+    annotationsData,
+    totalCount: allAnnotationsCnt,
+    error: annotationsError,
+  } = useObservable(
+    annotationsStateService.annotationsTable$,
+    annotationsStateService.annotationsTable
+  );
 
   const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
   const badge =
@@ -440,7 +457,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     (hasResults && overallSwimlaneData!.points.some((v) => v.value > 0)) ||
     (tableData && tableData.anomalies?.length > 0);
 
-  const hasActiveFilter = isDefined(swimLaneSeverity);
+  const hasActiveFilter = swimLaneSeverity?.length ?? false;
 
   useEffect(() => {
     if (!noJobsSelected) {
@@ -454,10 +471,10 @@ export const Explorer: FC<ExplorerUIProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
-  if (noJobsSelected && !loading) {
+  if (noJobsSelected) {
     return (
       <ExplorerPage dataViews={dataViews} jobSelectorProps={jobSelectorProps}>
-        <ExplorerNoJobsSelected />
+        <AnomalyDetectionNoJobsSelected />
       </ExplorerPage>
     );
   }
@@ -476,6 +493,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     <div>
       {stoppedPartitions && (
         <EuiCallOut
+          announceOnMount
           size={'s'}
           title={
             <FormattedMessage
@@ -490,7 +508,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         />
       )}
 
-      <AnomalyTimeline explorerState={explorerState} />
+      <AnomalyTimeline />
 
       <EuiSpacer size="m" />
 
@@ -508,6 +526,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
           </EuiTitle>
           <EuiPanel>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
                 defaultMessage: 'An error occurred loading annotations:',
               })}
@@ -520,7 +539,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {loading === false && tableData && tableData.anomalies?.length ? (
+      {!isOverallSwimLaneLoading && tableData && tableData.anomalies?.length ? (
         <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
       ) : null}
       {annotationsCnt > 0 && (
@@ -575,7 +594,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             </EuiTitle>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+          <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
             <AnomalyContextMenu
               selectedJobs={selectedJobs!}
               mergedGroupsAndJobsIds={mergedGroupsAndJobsIds}
@@ -586,6 +605,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
 
         <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
           <EuiFlexItem grow={false}>
@@ -603,33 +624,51 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
         <EuiSpacer size="m" />
 
-        {showCharts ? (
-          // @ts-ignore inferred js types are incorrect
-          <ExplorerChartsContainer
-            {...{
-              ...chartsData,
-              severity,
-              tableData,
-              timefilter,
-              mlLocator,
-              timeBuckets,
-              onSelectEntity: applyFilter,
-              chartsService,
-            }}
-          />
-        ) : null}
+        <EuiSkeletonText lines={5} isLoading={isChartsDataLoading && showCharts}>
+          {showCharts ? (
+            // @ts-ignore inferred js types are incorrect
+            <ExplorerChartsContainer
+              {...{
+                ...chartsData,
+                severity,
+                tableData,
+                timefilter,
+                mlLocator,
+                timeBuckets,
+                onSelectEntity: applyFilter,
+                chartsService,
+              }}
+            />
+          ) : null}
+        </EuiSkeletonText>
 
         <EuiSpacer size="m" />
 
-        {tableData ? (
-          <AnomaliesTable
-            bounds={bounds}
-            tableData={tableData}
-            influencerFilter={applyFilter}
-            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
-            selectedJobs={selectedJobs}
-          />
-        ) : null}
+        {tableError ? (
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="warning"
+            title={i18n.translate('xpack.ml.explorer.anomaliesTableErrorTitle', {
+              defaultMessage: 'An error occurred loading anomalies table data',
+            })}
+            data-test-subj="mlAnomaliesTableErrorCallout"
+          >
+            {tableError}
+          </EuiCallOut>
+        ) : (
+          <EuiSkeletonText lines={8} isLoading={isTableDataLoading}>
+            {tableData ? (
+              <AnomaliesTable
+                bounds={bounds}
+                tableData={tableData}
+                influencerFilter={applyFilter}
+                sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+                selectedJobs={selectedJobs}
+              />
+            ) : null}
+          </EuiSkeletonText>
+        )}
       </EuiPanel>
     </div>
   );
@@ -639,8 +678,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
       dataViews={dataViews}
       jobSelectorProps={jobSelectorProps}
       filterActive={filterActive}
-      filterPlaceHolder={filterPlaceHolder}
-      indexPattern={indexPattern as DataView}
       queryString={queryString}
       updateLanguage={updateLanguage}
     >
@@ -655,7 +692,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                   'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
               })}
               position="right"
-              type="iInCircle"
+              type="info"
             />
           </EuiFlexItem>
           <EuiFlexItem>{mainPanelContent}</EuiFlexItem>
@@ -716,6 +753,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
                             title={i18n.translate('xpack.ml.explorer.topInfluencersPopoverTitle', {
                               defaultMessage: 'Top influencers',
                             })}
+                            buttonCss={css`
+                              color: inherit;
+                            `}
                           >
                             <p>
                               <FormattedMessage
@@ -729,7 +769,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
                       <EuiSpacer size={'m'} />
 
-                      <EuiSkeletonText lines={10} isLoading={loading}>
+                      <EuiSkeletonText lines={10} isLoading={influencersLoading}>
                         <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
                       </EuiSkeletonText>
                     </div>

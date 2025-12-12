@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 
+import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '@kbn/maintenance-windows-plugin/common';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
 import * as i18n from './translations';
 import { PageHeader } from './components/page_header';
 import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
-import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 import { useGetMaintenanceWindow } from '../../hooks/use_get_maintenance_window';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 
@@ -38,22 +38,11 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
   return (
     <EuiPageSection restrictWidth={true}>
       <PageHeader showBackButton={true} title={i18n.EDIT_MAINTENANCE_WINDOW} />
-      <EuiSpacer size="xl" />
-      {showMultipleSolutionsWarning && (
-        <>
-          <EuiCallOut
-            data-test-subj="maintenanceWindowMultipleSolutionsWarning"
-            title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
-            color="warning"
-          >
-            <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
-          </EuiCallOut>
-          <EuiSpacer size="xl" />
-        </>
-      )}
+      <EuiSpacer size="m" />
       <CreateMaintenanceWindowForm
         initialValue={maintenanceWindow}
         maintenanceWindowId={maintenanceWindowId}
+        showMultipleSolutionsWarning={showMultipleSolutionsWarning}
         onCancel={navigateToMaintenanceWindows}
         onSuccess={navigateToMaintenanceWindows}
       />

@@ -18,7 +18,7 @@ import {
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
 } from './constants';
 import { setup } from './template_create.helpers';
-import { TemplateFormTestBed } from './template_form.helpers';
+import type { TemplateFormTestBed } from './template_form.helpers';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -235,11 +235,10 @@ describe('<TemplateCreate />', () => {
 
         showFilters();
 
-        expect(find('filterList.filterItem').map((wrapper) => wrapper.text())).toEqual([
-          'Index settings',
-          'Mappings',
-          'Aliases',
-        ]);
+        const filtersList = find('filterList.filterItem').map((wrapper) => wrapper.text());
+        expect(filtersList[0]).toContain('Index settings');
+        expect(filtersList[1]).toContain('Mappings');
+        expect(filtersList[2]).toContain('Aliases');
 
         await selectFilter('settings');
         expect(getComponentTemplatesInList()).toEqual(['test_component_template_2']); // only this one has settings
@@ -391,21 +390,14 @@ describe('<TemplateCreate />', () => {
       });
 
       describe('plugin parameters', () => {
-        const selectMappingsEditorTab = async (
-          tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced'
-        ) => {
-          const tabIndex = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
-          const tabElement = testBed.find('mappingsEditor.formTab').at(tabIndex);
-          await act(async () => {
-            tabElement.simulate('click');
-          });
-          testBed.component.update();
-        };
-
         test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
           const { exists } = testBed;
           // Navigate to the advanced configuration
-          await selectMappingsEditorTab('advanced');
+
+          await act(async () => {
+            testBed.find('advancedOptionsTab').simulate('click');
+          });
+          testBed.component.update();
 
           expect(exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(false);
         });
@@ -419,7 +411,10 @@ describe('<TemplateCreate />', () => {
           testBed.component.update();
           await navigateToMappingsStep();
 
-          await selectMappingsEditorTab('advanced');
+          await act(async () => {
+            testBed.find('advancedOptionsTab').simulate('click');
+          });
+          testBed.component.update();
 
           expect(testBed.exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(
             true
@@ -491,9 +486,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: 'my_logs_template',
             indexPatterns: ['logs-*-*'],
-            indexMode: 'logsdb',
             allowAutoCreate: 'NO_OVERWRITE',
-            dataStream: {},
+            indexMode: 'logsdb',
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
@@ -637,9 +631,9 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            indexMode: 'time_series',
             allowAutoCreate: 'TRUE',
             dataStream: {},
+            indexMode: 'time_series',
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,

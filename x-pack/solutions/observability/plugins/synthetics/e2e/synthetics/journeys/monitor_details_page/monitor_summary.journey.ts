@@ -7,7 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import moment from 'moment';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
@@ -30,7 +30,7 @@ journeySkip(`MonitorSummaryTab`, async ({ page, params }) => {
   let configId: string;
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
     await services.enableMonitorManagedViaApi();
     configId = await services.addTestMonitor('Test Monitor', {
       type: 'http',
@@ -44,7 +44,7 @@ journeySkip(`MonitorSummaryTab`, async ({ page, params }) => {
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('Go to monitor summary page', async () => {

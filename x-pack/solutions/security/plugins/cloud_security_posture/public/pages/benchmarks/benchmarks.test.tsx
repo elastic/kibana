@@ -7,7 +7,7 @@
 import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
@@ -38,7 +38,10 @@ describe('<Benchmarks />', () => {
           cspm: { status: 'indexed' },
           kspm: { status: 'indexed' },
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },

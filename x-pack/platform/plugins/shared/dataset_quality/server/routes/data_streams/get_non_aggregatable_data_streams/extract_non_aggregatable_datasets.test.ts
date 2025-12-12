@@ -6,7 +6,7 @@
  */
 
 import { extractNonAggregatableDatasets } from './extract_non_aggregatable_datasets';
-import { Indices } from '@elastic/elasticsearch/lib/api/types';
+import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 
 describe('extractNonAggregatableDatasets', () => {
   it('Indices and nonAggregatableIndices are empty', async () => {

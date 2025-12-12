@@ -17,7 +17,7 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import {
   searchFindingsHandler,
@@ -25,6 +25,11 @@ import {
   generateMultipleCspFindings,
   rulesGetStatesHandler,
 } from './configurations.handlers.mock';
+import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
+
+jest.mock('../../common/hooks/use_expandable_flyout_csp', () => ({
+  useExpandableFlyoutCsp: jest.fn(),
+}));
 
 const server = setupMockServer();
 
@@ -39,6 +44,10 @@ const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
 
 describe('<Findings />', () => {
   startMockServer(server);
+
+  (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
+    onExpandDocClick: jest.fn(),
+  });
 
   beforeEach(() => {
     server.use(rulesGetStatesHandler);

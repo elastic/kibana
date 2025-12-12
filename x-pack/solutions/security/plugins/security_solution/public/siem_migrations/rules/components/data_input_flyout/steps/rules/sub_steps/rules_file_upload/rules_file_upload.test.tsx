@@ -10,23 +10,27 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { RulesFileUploadProps } from './rules_file_upload';
 import { RulesFileUpload } from './rules_file_upload';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import { screen } from '@elastic/eui/lib/test/rtl';
-import { I18nProvider } from '@kbn/i18n-react';
+import { TestProviders } from '../../../../../../../../common/mock';
 // eslint-disable-next-line import/no-nodejs-modules
 import path from 'path';
 // eslint-disable-next-line import/no-nodejs-modules
 import os from 'os';
 import { splunkTestRules } from './splunk_rules.test.data';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { MigrationSource } from '../../../../../../../common/types';
 
 const mockCreateMigration: CreateMigration = jest.fn();
+const mockOnRulesFileChanged = jest.fn();
 const mockApiError = 'Some Mock API Error';
+const migrationName = 'test migration name';
 
 const defaultProps: RulesFileUploadProps = {
   createMigration: mockCreateMigration,
+  onRulesFileChanged: mockOnRulesFileChanged,
   apiError: undefined,
   isLoading: false,
   isCreated: false,
+  migrationName,
 };
 
 const renderTestComponent = (props: Partial<RulesFileUploadProps> = {}) => {
@@ -34,10 +38,10 @@ const renderTestComponent = (props: Partial<RulesFileUploadProps> = {}) => {
     ...defaultProps,
     ...props,
   };
-  render(
-    <I18nProvider>
+  return render(
+    <TestProviders>
       <RulesFileUpload {...finalProps} />
-    </I18nProvider>
+    </TestProviders>
   );
 };
 
@@ -61,10 +65,10 @@ describe('RulesFileUpload', () => {
   });
 
   it('should render the upload button', () => {
-    renderTestComponent();
+    const { getByTestId } = renderTestComponent();
 
-    expect(screen.getByTestId('rulesFilePicker')).toBeInTheDocument();
-    expect(screen.getByTestId('uploadFileButton')).toBeDisabled();
+    expect(getByTestId('rulesFilePicker')).toBeInTheDocument();
+    expect(getByTestId('uploadFileButton')).toBeDisabled();
   });
 
   it('should be able to upload correct file type', async () => {
@@ -72,9 +76,9 @@ describe('RulesFileUpload', () => {
     const ndJSONString = splunkTestRules.map((obj) => JSON.stringify(obj)).join('\n');
     const testFile = createRulesFileFromRulesData(ndJSONString, getTestDir(), fileName);
 
-    renderTestComponent();
+    const { getByTestId } = renderTestComponent();
 
-    const filePicker = screen.getByTestId('rulesFilePicker');
+    const filePicker = getByTestId('rulesFilePicker');
 
     act(() => {
       fireEvent.change(filePicker, {
@@ -83,6 +87,8 @@ describe('RulesFileUpload', () => {
         },
       });
     });
+
+    expect(mockOnRulesFileChanged).toHaveBeenCalledWith([testFile]);
 
     await waitFor(() => {
       expect(filePicker).toHaveAttribute('data-loading', 'true');
@@ -93,7 +99,7 @@ describe('RulesFileUpload', () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId('uploadFileButton'));
+      fireEvent.click(getByTestId('uploadFileButton'));
     });
 
     await waitFor(() => {
@@ -110,7 +116,11 @@ describe('RulesFileUpload', () => {
       severity: rule['alert.severity'] as OriginalRule['severity'],
     }));
 
-    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, rulesToExpect);
+    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, {
+      migrationName,
+      rules: rulesToExpect,
+      migrationSource: MigrationSource.SPLUNK,
+    });
   });
 
   describe('Error Handling', () => {
@@ -133,12 +143,12 @@ describe('RulesFileUpload', () => {
     ];
 
     it('should display API Error', async () => {
-      renderTestComponent({
+      const { getByText } = renderTestComponent({
         apiError: mockApiError,
       });
 
       await waitFor(() => {
-        expect(screen.getByText(mockApiError)).toBeVisible();
+        expect(getByText(mockApiError)).toBeVisible();
       });
     });
 
@@ -147,11 +157,11 @@ describe('RulesFileUpload', () => {
         const fileName = 'invalid_rule_file.json';
         const testFile = createRulesFileFromRulesData(scenario.fileContent, getTestDir(), fileName);
 
-        renderTestComponent({
+        const { getByTestId, getByText } = renderTestComponent({
           apiError: undefined,
         });
 
-        const filePicker = screen.getByTestId('rulesFilePicker');
+        const filePicker = getByTestId('rulesFilePicker');
 
         act(() => {
           fireEvent.change(filePicker, {
@@ -170,11 +180,11 @@ describe('RulesFileUpload', () => {
         });
 
         await waitFor(() => {
-          expect(screen.getByText(scenario.errorMessage)).toBeVisible();
+          expect(getByText(scenario.errorMessage)).toBeVisible();
         });
 
         await waitFor(() => {
-          expect(screen.getByTestId('uploadFileButton')).toBeDisabled();
+          expect(getByTestId('uploadFileButton')).toBeDisabled();
         });
       });
     });

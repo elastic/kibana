@@ -5,27 +5,29 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  CodeEditorMode,
+import type {
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
-  MonitorTypeEnum,
-  FormMonitorType,
   HTTPAdvancedFields,
-  HTTPMethod,
   HTTPSimpleFields,
   ICMPSimpleFields,
-  Mode,
   MonitorDefaults,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-  ScreenshotOption,
-  SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
   ThrottlingConfig,
   TLSFields,
+} from '../runtime_types/monitor_management';
+import {
+  CodeEditorMode,
+  MonitorTypeEnum,
+  FormMonitorType,
+  HTTPMethod,
+  Mode,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  ScreenshotOption,
+  SourceType,
   TLSVersion,
   VerificationMode,
 } from '../runtime_types/monitor_management';
@@ -154,6 +156,8 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.PARAMS]: '',
   [ConfigKey.LABELS]: {},
   [ConfigKey.MAX_ATTEMPTS]: 2,
+  [ConfigKey.MAINTENANCE_WINDOWS]: [],
+  [ConfigKey.KIBANA_SPACES]: [],
   revision: 1,
 };
 

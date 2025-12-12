@@ -17,6 +17,7 @@ import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -27,17 +28,20 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     tools,
     temperature = 0,
     functionCalling = 'auto',
-    modelName,
+    modelName: modelName,
     logger,
     abortSignal,
     metadata,
   }) => {
+    const connector = executor.getConnector();
+
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
-        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        ? !isNativeFunctionCallingSupported(connector)
         : functionCalling === 'simulated';
 
     let request: OpenAIRequest;
+
     if (useSimulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
@@ -47,17 +51,17 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       });
       request = {
         stream: true,
-        temperature,
+        ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
         stream: true,
-        temperature,
+        ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
-        tool_choice: toolChoiceToOpenAI(toolChoice),
+        tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
         tools: toolsToOpenAI(tools),
       };
     }

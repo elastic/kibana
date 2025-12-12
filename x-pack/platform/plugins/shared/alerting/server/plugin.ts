@@ -37,7 +37,7 @@ import type {
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { LICENSE_TYPE } from '@kbn/licensing-plugin/server';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
@@ -52,6 +52,7 @@ import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -61,7 +62,6 @@ import {
   RulesSettingsService,
   getRulesSettingsFeature,
 } from './rules_settings';
-import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import type { ILicenseState } from './lib/license_state';
 import { LicenseState } from './lib/license_state';
 import type { AlertingRequestHandlerContext, RuleAlertData } from './types';
@@ -82,6 +82,7 @@ import {
   setupSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
@@ -103,15 +104,16 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import type { GetAlertIndicesAlias } from './lib';
-import { createGetAlertIndicesAliasFn } from './lib';
+import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
+import { AlertDeletionClient } from './alert_deletion';
+import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -125,6 +127,8 @@ export const EVENT_LOG_ACTIONS = {
   executeTimeout: 'execute-timeout',
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
+  deleteAlerts: 'delete-alerts',
+  gapAutoFillSchedule: 'gap-auto-fill-schedule',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -204,6 +208,7 @@ export interface AlertingPluginsStart {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
+  maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 
 export class AlertingPlugin {
@@ -217,7 +222,6 @@ export class AlertingPlugin {
   private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
-  private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -229,9 +233,13 @@ export class AlertingPlugin {
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
   private backfillClient?: BackfillClient;
+  private alertDeletionClient?: AlertDeletionClient;
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
+  private readonly disabledRuleTypes: Set<string>;
+  private readonly enabledRuleTypes: Set<string> | null = null;
+  private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -242,12 +250,14 @@ export class AlertingPlugin {
     this.nodeRoles = initializerContext.node.roles;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
-    this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
+    this.enabledRuleTypes =
+      this.config.enabledRuleTypes != null ? new Set(this.config.enabledRuleTypes) : null;
   }
 
   public setup(
@@ -268,15 +278,26 @@ export class AlertingPlugin {
         management: {
           insightsAndAlerting: {
             triggersActions: true,
-            maintenanceWindows: true,
           },
         },
       };
     });
 
-    plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
+    if (this.config.rulesSettings.enabled) {
+      plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
+    }
 
-    plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    if (this.config.cancelAlertsOnRuleTimeout === false) {
+      this.logger.warn(
+        `Setting xpack.alerting.cancelAlertsOnRuleTimeout=false can lead to unexpected behavior for certain rule types. This setting will be deprecated in a future version and will be ignored for rule types that do not support it.`
+      );
+    }
+
+    if (this.config.enabledRuleTypes && this.config.enabledRuleTypes.length === 0) {
+      this.logger.warn(
+        `xpack.alerting.enabledRuleTypes is empty. No rule types will be enabled in the configuration.`
+      );
+    }
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -327,7 +348,7 @@ export class AlertingPlugin {
       }
     }
 
-    const ruleTypeRegistry = new RuleTypeRegistry({
+    const ruleTypeRegistry: RuleTypeRegistry = new RuleTypeRegistry({
       config: this.config,
       logger: this.logger,
       taskManager: plugins.taskManager,
@@ -339,6 +360,21 @@ export class AlertingPlugin {
       inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
+
+    this.alertDeletionClient = new AlertDeletionClient({
+      auditService: plugins.security?.audit,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      eventLogger: this.eventLogger,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
+      logger: this.logger,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      securityService: core.getStartServices().then(([{ security }]) => security),
+      spacesService: core.getStartServices().then(([_, { spaces }]) => spaces?.spacesService),
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise,
+    });
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -393,6 +429,16 @@ export class AlertingPlugin {
       });
     }
 
+    if (this?.config?.gapAutoFillScheduler?.enabled ?? false) {
+      registerGapAutoFillSchedulerTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        getRulesClientWithRequest: (request) => this?.getRulesClientWithRequest?.(request),
+        eventLogger: this.eventLogger!,
+        schedulerConfig: this.config.gapAutoFillScheduler,
+      });
+    }
+
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
@@ -405,6 +451,8 @@ export class AlertingPlugin {
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
       docLinks: core.docLinks,
+      alertingConfig: this.config,
+      core,
     });
 
     return {
@@ -437,19 +485,67 @@ export class AlertingPlugin {
           AlertData
         >
       ) => {
-        if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
-          throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
+        if (this.disabledRuleTypes.has(ruleType.id)) {
+          this.logger.info(`rule type "${ruleType.id}" disabled by configuration`);
+
+          if (this.enabledRuleTypes && this.enabledRuleTypes.has(ruleType.id)) {
+            this.logger.warn(
+              `rule type "${ruleType.id}" is both disabled and enabled allow-list. rule type will be disabled.`
+            );
+          }
+          return;
         }
-        ruleType.ruleTaskTimeout = getRuleTaskTimeout({
-          config: this.config.rules,
-          ruleTaskTimeout: ruleType.ruleTaskTimeout,
-          ruleTypeId: ruleType.id,
-        });
-        ruleType.cancelAlertsOnRuleTimeout =
-          ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
-        ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
-        ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
-        ruleTypeRegistry.register(ruleType);
+
+        if (
+          this.enabledRuleTypes &&
+          this.enabledRuleTypes.size > 0 &&
+          !this.enabledRuleTypes.has(ruleType.id)
+        ) {
+          this.logger.info(`rule type "${ruleType.id}" is not enabled in configuration`);
+        }
+
+        // Register the rule type if enabledRuleTypes is not defined or if it is defined and it contains the rule type id
+        if (
+          this.enabledRuleTypes == null ||
+          (this.enabledRuleTypes.size > 0 && this.enabledRuleTypes.has(ruleType.id))
+        ) {
+          if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
+            throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
+          }
+
+          // validate cancelAlertsOnTimeout if set explicitly on the rule type definition
+          if (
+            ruleType.cancelAlertsOnRuleTimeout === false &&
+            (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
+          ) {
+            throw new Error(
+              `Rule type "${ruleType.id}" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.`
+            );
+          }
+
+          ruleType.ruleTaskTimeout = getRuleTaskTimeout({
+            config: this.config.rules,
+            ruleTaskTimeout: ruleType.ruleTaskTimeout,
+            ruleTypeId: ruleType.id,
+          });
+          ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
+          ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
+
+          if (
+            ruleType.autoRecoverAlerts === true &&
+            this.config.cancelAlertsOnRuleTimeout === false
+          ) {
+            this.logger.debug(
+              `Setting xpack.alerting.cancelAlertsOnRuleTimeout=false is incompatible with rule type "${ruleType.id}" and will be ignored.`
+            );
+            ruleType.cancelAlertsOnRuleTimeout = true;
+          } else {
+            ruleType.cancelAlertsOnRuleTimeout =
+              ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
+          }
+
+          ruleTypeRegistry.register(ruleType);
+        }
       },
       getSecurityHealth: async () => {
         return await getSecurityHealth(
@@ -493,21 +589,18 @@ export class AlertingPlugin {
       rulesClientFactory,
       alertingAuthorizationClientFactory,
       rulesSettingsClientFactory,
-      maintenanceWindowClientFactory,
       security,
       licenseState,
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        RULE_SAVED_OBJECT_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      ],
     });
-
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
@@ -530,9 +623,10 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
@@ -558,13 +652,6 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
-    maintenanceWindowClientFactory.initialize({
-      logger: this.logger,
-      savedObjectsService: core.savedObjects,
-      securityService: core.security,
-      uiSettings: core.uiSettings,
-    });
-
     const getRulesClientWithRequest = async (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
@@ -574,6 +661,8 @@ export class AlertingPlugin {
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 
+    this.getRulesClientWithRequest = getRulesClientWithRequest;
+
     const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);
     };
@@ -582,8 +671,11 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
-    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
-      return maintenanceWindowClientFactory!.create(request);
+    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+      if (!plugins.maintenanceWindows) {
+        return;
+      }
+      return plugins.maintenanceWindows.getMaintenanceWindowClientInternal(request);
     };
 
     taskRunnerFactory.initialize({
@@ -604,8 +696,8 @@ export class AlertingPlugin {
       logger,
       maintenanceWindowsService: new MaintenanceWindowsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
-        getMaintenanceWindowClientWithRequest,
         logger,
+        getMaintenanceWindowClientInternal,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
       ruleTypeRegistry: this.ruleTypeRegistry!,
@@ -617,7 +709,7 @@ export class AlertingPlugin {
       }),
       savedObjects: core.savedObjects,
       share: plugins.share,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
       getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
@@ -661,14 +753,17 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const {
+      alertDeletionClient,
       ruleTypeRegistry,
       rulesClientFactory,
       rulesSettingsClientFactory,
-      maintenanceWindowClientFactory,
     } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
+        getAlertDeletionClient: () => {
+          return alertDeletionClient!;
+        },
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
@@ -677,9 +772,6 @@ export class AlertingPlugin {
             return rulesSettingsClientFactory.create(request);
           }
           return rulesSettingsClientFactory.createWithAuthorization(request);
-        },
-        getMaintenanceWindowClient: () => {
-          return maintenanceWindowClientFactory.createWithAuthorization(request);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>

@@ -7,23 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
-import { DataView } from '@kbn/data-views-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { render, waitFor } from '@testing-library/react';
+import { render as rtlRender, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
+import React from 'react';
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
-import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
-import * as initializeControl from '../initialize_data_control';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
   const controlGroupApi = getMockedControlGroupApi();
+  const factory = getOptionsListControlFactory();
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
-  dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
+  const getDataView = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -53,35 +57,99 @@ describe('Options List Control Api', () => {
       };
     });
     return stubDataView;
+  };
+
+  describe('initialization', () => {
+    let dataviewDelayPromise: Promise<void> | undefined;
+
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(async (id: string) => {
+        if (dataviewDelayPromise) await dataviewDelayPromise;
+        return getDataView(id);
+      });
+    });
+
+    it('returns api immediately when no initial selections are configured', async () => {
+      let resolveDataView: (() => void) | undefined;
+      let apiReturned = false;
+      dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
+      (async () => {
+        await factory.buildControl({
+          initialState: {
+            dataViewId: 'myDataViewId',
+            fieldName: 'myFieldName',
+          },
+          finalizeApi,
+          uuid,
+          controlGroupApi,
+        });
+        apiReturned = true;
+      })();
+      await new Promise((r) => setTimeout(r, 1));
+      expect(apiReturned).toBe(true);
+      resolveDataView?.();
+      dataviewDelayPromise = undefined;
+    });
+
+    it('waits until data view is available before returning api when initial selections are configured', async () => {
+      let resolveDataView: (() => void) | undefined;
+      let apiReturned = false;
+      dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
+      (async () => {
+        await factory.buildControl({
+          initialState: {
+            dataViewId: 'myDataViewId',
+            fieldName: 'myFieldName',
+            selectedOptions: ['cool', 'test'],
+          },
+          finalizeApi,
+          uuid,
+          controlGroupApi,
+        });
+        apiReturned = true;
+      })();
+
+      // even after 10ms the API should not have returned yet because the data view was not available
+      await new Promise((r) => setTimeout(r, 10));
+      expect(apiReturned).toBe(false);
+
+      // resolve the data view and ensure the api returns
+      resolveDataView?.();
+      await new Promise((r) => setTimeout(r, 10));
+      expect(apiReturned).toBe(true);
+      dataviewDelayPromise = undefined;
+    });
   });
 
-  const factory = getOptionsListControlFactory();
-
   describe('filters$', () => {
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    });
+
     test('should not set filters$ when selectedOptions is not provided', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toBeUndefined();
     });
 
     test('should set filters$ when selectedOptions is provided', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['cool', 'test'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toEqual([
         {
           meta: {
@@ -112,16 +180,16 @@ describe('Options List Control Api', () => {
     });
 
     test('should set filters$ when exists is selected', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toEqual([
         {
           meta: {
@@ -138,17 +206,17 @@ describe('Options List Control Api', () => {
     });
 
     test('should set filters$ when exclude is selected', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
           exclude: true,
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toEqual([
         {
           meta: {
@@ -168,31 +236,62 @@ describe('Options List Control Api', () => {
 
   describe('make selection', () => {
     beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
       coreServices.http.fetch = jest.fn().mockResolvedValue({
         suggestions: [
           { value: 'woof', docCount: 10 },
           { value: 'bark', docCount: 15 },
           { value: 'meow', docCount: 12 },
+          { value: '', docCount: 20 },
         ],
       });
     });
 
-    test('clicking another option unselects "Exists"', async () => {
-      const { Component } = await factory.buildControl(
-        {
+    test('renders a "(blank)" option', async () => {
+      const { Component } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toBe(4);
+        expect(control.getAllByRole('option').length).toBe(5);
+      });
+      const option = control.getByTestId('optionsList-control-selection-');
+      await userEvent.click(option);
+      await waitFor(async () => {
+        expect(option).toBeChecked();
+      });
+
+      await userEvent.click(option);
+      await waitFor(async () => {
+        expect(option).not.toBeChecked();
+      });
+    });
+
+    test('clicking another option unselects "Exists"', async () => {
+      const { Component } = await factory.buildControl({
+        initialState: {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
+        },
+        finalizeApi,
+        uuid,
+        controlGroupApi,
+      });
+
+      const control = render(<Component className={'controlPanel'} />);
+      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await waitFor(() => {
+        expect(control.getAllByRole('option').length).toBe(5);
       });
 
       expect(control.getByTestId('optionsList-control-selection-exists')).toBeChecked();
@@ -207,21 +306,21 @@ describe('Options List Control Api', () => {
     });
 
     test('clicking "Exists" unselects all other selections', async () => {
-      const { Component } = await factory.buildControl(
-        {
+      const { Component } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['woof', 'bark'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
+        expect(control.getAllByRole('option').length).toEqual(5);
       });
 
       const existsOption = control.getByTestId('optionsList-control-selection-exists');
@@ -241,21 +340,21 @@ describe('Options List Control Api', () => {
     });
 
     test('deselects when showOnlySelected is true', async () => {
-      const { Component, api } = await factory.buildControl(
-        {
+      const { Component, api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['woof', 'bark'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
+        expect(control.getAllByRole('option').length).toEqual(5);
       });
       await userEvent.click(control.getByTestId('optionsList-control-show-only-selected'));
 
@@ -287,17 +386,17 @@ describe('Options List Control Api', () => {
     });
 
     test('replace selection when singleSelect is true', async () => {
-      const { Component, api } = await factory.buildControl(
-        {
+      const { Component, api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           singleSelect: true,
           selectedOptions: ['woof'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
 
@@ -317,7 +416,7 @@ describe('Options List Control Api', () => {
 
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
+        expect(control.getAllByRole('option').length).toEqual(5);
       });
       expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
@@ -345,36 +444,5 @@ describe('Options List Control Api', () => {
         },
       ]);
     });
-  });
-
-  test('ensure initialize data control contains all editor state', async () => {
-    const initializeSpy = jest.spyOn(initializeControl, 'initializeDataControl');
-    const initialState = {
-      dataViewId: 'myDataViewId',
-      fieldName: 'myFieldName',
-      runPastTimeout: true,
-    };
-    await factory.buildControl(
-      {
-        dataViewId: 'myDataViewId',
-        fieldName: 'myFieldName',
-        runPastTimeout: true,
-      },
-      getMockedBuildApi(uuid, factory, controlGroupApi),
-      uuid,
-      controlGroupApi
-    );
-    expect(initializeSpy).toHaveBeenCalledWith(
-      uuid,
-      'optionsListControl',
-      'optionsListDataView',
-      initialState,
-      {
-        searchTechnique: expect.anything(),
-        singleSelect: expect.anything(),
-        runPastTimeout: expect.anything(),
-      },
-      controlGroupApi
-    );
   });
 });

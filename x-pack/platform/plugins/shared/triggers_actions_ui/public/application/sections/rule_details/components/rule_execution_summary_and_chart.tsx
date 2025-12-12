@@ -15,7 +15,8 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleSummary, RuleType } from '../../../../types';
+import { css } from '@emotion/react';
+import type { RuleSummary, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
@@ -23,11 +24,9 @@ import {
   formatMillisForDisplay,
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
-import { RefreshToken } from './types';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import type { RefreshToken } from './types';
 
 export const DEFAULT_NUMBER_OF_EXECUTIONS = 60;
 
@@ -69,6 +68,11 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
   const { euiTheme } = useEuiTheme();
 
   const isInitialized = useRef(false);
+
+  const ruleDurationWarningIconCss = css`
+    bottom: ${euiTheme.size.xs};
+    position: relative;
+  `;
 
   const [internalRuleSummary, setInternalRuleSummary] = useState<RuleSummary | null>(null);
   const [internalNumberOfExecutions, setInternalNumberOfExecutions] = useState(
@@ -182,6 +186,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
               <EuiFlexItem grow={false} data-test-subj="ruleDurationWarning">
                 <EuiIconTip
                   anchorClassName="ruleDurationWarningIcon"
+                  css={ruleDurationWarningIconCss}
                   type="warning"
                   color="warning"
                   content={ruleTypeExcessDurationMessage}

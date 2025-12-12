@@ -8,9 +8,10 @@
  */
 
 import type { RouteValidationFunction } from '@kbn/core/server';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
+import type { Context, Errors, Type, ValidationError } from 'io-ts';
+import { IntersectionType, UnionType } from 'io-ts';
 
 type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;
 

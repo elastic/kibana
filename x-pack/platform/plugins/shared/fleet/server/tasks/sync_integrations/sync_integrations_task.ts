@@ -19,25 +19,34 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { appContextService, outputService } from '../../services';
+import { outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
-import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../../services/setup/fleet_synced_integrations';
+import {
+  FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+  canEnableSyncIntegrations,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.6';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '5m';
+const DEFAULT_INTERVAL = '5m';
 const TIMEOUT = '5m';
+
+interface SyncIntegrationsTaskConfig {
+  taskInterval?: string;
+}
 
 interface SyncIntegrationsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  config: SyncIntegrationsTaskConfig;
 }
 
 interface SyncIntegrationsTaskStartContract {
@@ -47,24 +56,29 @@ interface SyncIntegrationsTaskStartContract {
 export class SyncIntegrationsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
+  private taskInterval: string;
 
   constructor(setupContract: SyncIntegrationsTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController.abort('Task cancelled');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -78,7 +92,7 @@ export class SyncIntegrationsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${this.taskInterval}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -86,7 +100,7 @@ export class SyncIntegrationsTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -101,10 +115,14 @@ export class SyncIntegrationsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!this.wasStarted) {
       this.logger.debug('[SyncIntegrationsTask] runTask Aborted. Task not started yet');
       return;
@@ -117,28 +135,27 @@ export class SyncIntegrationsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
+
+    if (!canEnableSyncIntegrations()) {
+      this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
+      return;
+    }
 
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
-    const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
-
-    if (!enableSyncIntegrationsOnRemote) {
-      return;
-    }
-
     try {
       // write integrations on main cluster
-      await this.updateSyncedIntegrationsData(esClient, soClient);
+      await this.updateSyncedIntegrationsData(esClient, soClient, abortController);
 
       // sync integrations on remote cluster
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
         packageService.asInternalUser,
-        this.abortController,
+        abortController,
         this.logger
       );
 
@@ -152,15 +169,6 @@ export class SyncIntegrationsTask {
       this.logger.error(`[SyncIntegrationsTask] error: ${err}`);
       this.endRun('error');
     }
-  };
-
-  private syncedIntegrationsIndexExists = async (esClient: ElasticsearchClient) => {
-    return await esClient.indices.exists(
-      {
-        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-      },
-      { signal: this.abortController.signal }
-    );
   };
 
   private getSyncedIntegrationDoc = async (
@@ -188,24 +196,20 @@ export class SyncIntegrationsTask {
 
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient
+    soClient: SavedObjectsClient,
+    abortController: AbortController
   ) => {
-    const indexExists = await this.syncedIntegrationsIndexExists(esClient);
-
-    if (!indexExists) {
-      this.logger.info(
-        `[SyncIntegrationsTask] index ${FLEET_SYNCED_INTEGRATIONS_INDEX_NAME} does not exist`
-      );
-      return;
-    }
-
-    const outputs = await outputService.list(soClient);
+    const outputs = await outputService.list();
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
     );
     const isSyncEnabled = remoteESOutputs.some(
       (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
     );
+
+    if (isSyncEnabled) {
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
+    }
 
     const previousSyncIntegrationsData = await this.getSyncedIntegrationDoc(esClient);
 
@@ -225,6 +229,7 @@ export class SyncIntegrationsTask {
           name: remoteOutput.name,
           hosts: remoteOutput.hosts ?? [],
           sync_integrations: remoteOutput.sync_integrations ?? false,
+          sync_uninstalled_integrations: remoteOutput.sync_uninstalled_integrations ?? false,
         };
       }),
       integrations: [],
@@ -235,19 +240,44 @@ export class SyncIntegrationsTask {
       perPage: SO_SEARCH_LIMIT,
       sortOrder: 'asc',
     });
-    newDoc.integrations = packageSavedObjects.saved_objects.map((item) => {
-      return {
-        package_name: item.attributes.name,
-        package_version: item.attributes.version,
-        updated_at: item.updated_at ?? new Date().toISOString(),
-      };
-    });
+    newDoc.integrations = packageSavedObjects.saved_objects
+      .filter(
+        (item) =>
+          item.attributes.install_source === 'registry' ||
+          item.attributes.install_source === 'bundled'
+      ) // not included install sources: 'custom' and 'upload'
+      .map((item) => {
+        return {
+          package_name: item.attributes.name,
+          package_version: item.attributes.version,
+          updated_at: item.updated_at ?? new Date().toISOString(),
+          install_status: item.attributes.install_status,
+          install_source: item.attributes.install_source,
+          rolled_back: item.attributes.rolled_back,
+        };
+      });
+
+    const isSyncUninstalledEnabled = remoteESOutputs.some(
+      (output) => (output as NewRemoteElasticsearchOutput).sync_uninstalled_integrations
+    );
+    if (isSyncUninstalledEnabled && previousSyncIntegrationsData) {
+      const removedIntegrations = previousSyncIntegrationsData.integrations.filter(
+        (item) =>
+          !packageSavedObjects.saved_objects
+            .map((data) => data.attributes.name)
+            .includes(item.package_name)
+      );
+      newDoc.integrations.push(
+        ...removedIntegrations.map((item) => ({ ...item, install_status: 'not_installed' }))
+      );
+    }
 
     try {
       const customAssets = await getCustomAssets(
         esClient,
+        soClient,
         newDoc.integrations,
-        this.abortController,
+        abortController,
         previousSyncIntegrationsData
       );
       newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
@@ -265,7 +295,7 @@ export class SyncIntegrationsTask {
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: newDoc,
       },
-      { signal: this.abortController.signal }
+      { signal: abortController.signal }
     );
   };
 }

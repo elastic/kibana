@@ -1,0 +1,331 @@
+{
+  "id": "@kbn/shared-ux-page-kibana-no-data-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+        "id": "def-public.KibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaDependencies",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.KibanaDependencies.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "{ hasData: { hasESData: () => Promise<boolean>; hasUserDataView: () => Promise<boolean>; }; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+        "id": "def-public.KibanaNoDataPageProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaNoDataPageProps",
+        "description": [
+          "\nProps for `KibanaNoDataPage`."
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.KibanaNoDataPageProps.onDataViewCreated",
+            "type": "Function",
+            "tags": [],
+            "label": "onDataViewCreated",
+            "description": [
+              "Handler for successfully creating a new data view."
+            ],
+            "signature": [
+              "(dataView: unknown) => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+                "id": "def-public.KibanaNoDataPageProps.onDataViewCreated.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.KibanaNoDataPageProps.noDataConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "noDataConfig",
+            "description": [
+              "`NoDataPage` configuration; see `NoDataPageProps`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-page-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+                "section": "def-public.NoDataPageProps",
+                "text": "NoDataPageProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.KibanaNoDataPageProps.allowAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAdHocDataView",
+            "description": [
+              "if set to true allows creation of an ad-hoc dataview from data view editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.KibanaNoDataPageProps.showPlainSpinner",
+            "type": "boolean",
+            "tags": [],
+            "label": "showPlainSpinner",
+            "description": [
+              "Set to true if the kibana is customly branded"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.KibanaNoDataPageProps.onTryESQL",
+            "type": "Function",
+            "tags": [],
+            "label": "onTryESQL",
+            "description": [
+              "If the cluster has data, this handler allows the user to try ES|QL"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.KibanaNoDataPageProps.onESQLNavigationComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "onESQLNavigationComplete",
+            "description": [
+              "Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+        "id": "def-public.Services",
+        "type": "Interface",
+        "tags": [],
+        "label": "Services",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.Services.hasESData",
+            "type": "Function",
+            "tags": [],
+            "label": "hasESData",
+            "description": [
+              "True if the cluster contains data, false otherwise."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.Services.hasUserDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "hasUserDataView",
+            "description": [
+              "True if Kibana instance contains user-created data view, false otherwise."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "id": "def-public.Services.allowAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAdHocDataView",
+            "description": [
+              "if set to true allows creation of an ad-hoc data view from data view editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+        "id": "def-public.KibanaNoDataPageKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaNoDataPageKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component and its dependencies."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptKibanaDependencies",
+            "text": "NoDataViewsPromptKibanaDependencies"
+          },
+          " & KibanaDependencies"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+        "id": "def-public.KibanaNoDataPageServices",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaNoDataPageServices",
+        "description": [
+          "\nA list of Services that are consumed by this component.."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

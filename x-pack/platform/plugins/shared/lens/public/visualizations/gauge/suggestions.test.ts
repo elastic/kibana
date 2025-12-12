@@ -15,7 +15,7 @@ import {
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
-import { GaugeVisualizationState } from './constants';
+import type { GaugeVisualizationState } from './constants';
 
 const metricColumn = {
   columnId: 'metric-column',

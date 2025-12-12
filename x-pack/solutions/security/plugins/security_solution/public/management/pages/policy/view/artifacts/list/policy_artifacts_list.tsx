@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useBulkFetchFleetIntegrationPolicies } from '../../../../../hooks/policy/use_bulk_fetch_fleet_integration_policies';
 import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -17,13 +18,15 @@ import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { useUrlParams } from '../../../../../hooks/use_url_params';
 import { useUrlPagination } from '../../../../../hooks/use_url_pagination';
-import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
 import { useOldUrlSearchPaginationReplace } from '../../../../../hooks/use_old_url_search_pagination_replace';
 import type { ArtifactCardGridProps } from '../../../../../components/artifact_card_grid';
 import { ArtifactCardGrid } from '../../../../../components/artifact_card_grid';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
-import { isArtifactGlobal } from '../../../../../../../common/endpoint/service/artifacts';
+import {
+  getPolicyIdsFromArtifact,
+  isArtifactGlobal,
+} from '../../../../../../../common/endpoint/service/artifacts';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
@@ -58,7 +61,6 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
-    const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(apiClient.listId);
     const { urlParams } = useUrlParams();
     const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
@@ -80,6 +82,23 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         policies: [policy.id, 'all'],
       },
       searchableFields
+    );
+
+    const allArtifactReferencedPolicyIds: string[] = useMemo(() => {
+      const ids = new Set<string>();
+
+      if (artifacts?.data) {
+        for (const artifact of artifacts.data) {
+          getPolicyIdsFromArtifact(artifact).forEach((policyId) => ids.add(policyId));
+        }
+      }
+
+      return Array.from(ids);
+    }, [artifacts?.data]);
+
+    const policiesRequest = useBulkFetchFleetIntegrationPolicies<PolicyData>(
+      { ids: allArtifactReferencedPolicyIds },
+      { enabled: allArtifactReferencedPolicyIds.length > 0, keepPreviousData: false }
     );
 
     const pagination: Pagination = useMemo(

@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiCardProps, EuiIcon, IconType } from '@elastic/eui';
+import type { EuiCardProps, IconType } from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 
 export interface SynopsisProps {
   id: string;

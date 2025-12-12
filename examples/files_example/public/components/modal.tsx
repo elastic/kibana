@@ -9,9 +9,11 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiModal, EuiModalHeader, EuiModalBody, EuiText } from '@elastic/eui';
-import { exampleFileKind, MyImageMetadata } from '../../common';
-import { FilesClient, FileUpload } from '../imports';
+import { EuiModal, EuiModalHeader, EuiModalBody, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import type { MyImageMetadata } from '../../common';
+import { exampleFileKind } from '../../common';
+import type { FilesClient } from '../imports';
+import { FileUpload } from '../imports';
 
 interface Props {
   client: FilesClient<MyImageMetadata>;
@@ -20,11 +22,13 @@ interface Props {
 }
 
 export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={onDismiss}>
+    <EuiModal onClose={onDismiss} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
         <EuiText>
-          <h2>Upload image</h2>
+          <h2 id={modalTitleId}>Upload image</h2>
         </EuiText>
       </EuiModalHeader>
       <EuiModalBody>

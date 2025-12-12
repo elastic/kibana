@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiModal,
@@ -18,13 +19,19 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
   EuiSelectable,
-  EuiSelectableOption,
-  EuiLink,
-  EuiTextColor,
+  EuiBadge,
+  EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AVAILABLE_LANGUAGES } from '../../../../../../common/constants';
+
+const styles = {
+  constrainedSelectable: css`
+    max-width: 550px;
+  `,
+};
 
 interface Props {
   closeModal: () => void;
@@ -34,13 +41,11 @@ interface Props {
 }
 
 const DEFAULT_BADGE = (
-  <strong>
-    <EuiTextColor color="subdued">
-      {i18n.translate('console.requestPanel.contextMenu.defaultSelectedLanguage', {
-        defaultMessage: 'Default',
-      })}
-    </EuiTextColor>
-  </strong>
+  <EuiBadge color="hollow">
+    {i18n.translate('console.requestPanel.contextMenu.defaultSelectedLanguage', {
+      defaultMessage: 'Default',
+    })}
+  </EuiBadge>
 );
 
 export const LanguageSelectorModal = ({
@@ -67,19 +72,7 @@ export const LanguageSelectorModal = ({
     return options.map((option) => ({
       ...option,
       ...(noOptionsSelected && option.key === selectedLanguage && { checked: 'on' }),
-      append:
-        option.key === selectedLanguage ? (
-          DEFAULT_BADGE
-        ) : (
-          <EuiLink
-            onClick={() => setSelectedLanguage(option.key!)}
-            data-test-subj={`changeDefaultLanguageTo-${option.key}`}
-          >
-            {i18n.translate('console.requestPanel.contextMenu.defaultSelectedLanguage', {
-              defaultMessage: 'Set as default',
-            })}
-          </EuiLink>
-        ),
+      append: option.key === selectedLanguage ? DEFAULT_BADGE : undefined,
     }));
   }, [options, selectedLanguage, noOptionsSelected]);
 
@@ -95,6 +88,14 @@ export const LanguageSelectorModal = ({
     onSubmit(language);
   };
 
+  const onSetAsDefault = () => {
+    // Move the "Default" badge to the currently checked language
+    const selectedOption = options.find((option) => option.checked);
+    if (selectedOption?.key) {
+      setSelectedLanguage(selectedOption.key);
+    }
+  };
+
   const onCloseModal = () => {
     changeDefaultLanguage(selectedLanguage);
     closeModal();
@@ -106,14 +107,22 @@ export const LanguageSelectorModal = ({
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="console.requestPanel.contextMenu.languageSelectorModalTitle"
-            defaultMessage="Select a language"
+            defaultMessage="Programming language options"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="console.requestPanel.contextMenu.languageSelectorModalDescription"
+              defaultMessage="Convert Console requests into your preferred programming language."
+            />
+          </p>
+        </EuiText>
         <EuiSelectable
-          css={{ maxWidth: 550 }}
+          css={styles.constrainedSelectable}
           options={optionsList as EuiSelectableOption[]}
           onChange={(changedOptions) => setOptions(changedOptions)}
           singleSelection="always"
@@ -133,10 +142,16 @@ export const LanguageSelectorModal = ({
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
-        <EuiButton onClick={onCopyCode} fill data-test-subj="copyAsLanguageSubmit">
+        <EuiButton onClick={onCopyCode} data-test-subj="copyAsLanguageSubmit">
           <FormattedMessage
             id="console.requestPanel.contextMenu.languageSelectorModalCopy"
             defaultMessage="Copy code"
+          />
+        </EuiButton>
+        <EuiButton onClick={onSetAsDefault} fill data-test-subj="setAsDefaultLanguage">
+          <FormattedMessage
+            id="console.requestPanel.contextMenu.languageSelectorModalSetDefault"
+            defaultMessage="Set as default"
           />
         </EuiButton>
       </EuiModalFooter>

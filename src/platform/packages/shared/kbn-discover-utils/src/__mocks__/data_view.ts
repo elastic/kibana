@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 export const shallowMockedFields = [
   {
@@ -84,12 +85,14 @@ export const buildDataViewMock = ({
   name = 'data-view-mock',
   fields: definedFields = [] as unknown as DataView['fields'],
   timeFieldName,
+  isPersisted = true,
 }: {
   id?: string;
   title?: string;
   name?: string;
   fields?: DataView['fields'];
   timeFieldName?: string;
+  isPersisted?: boolean;
 }): DataView => {
   const dataViewFields = [...definedFields] as DataView['fields'];
 
@@ -122,13 +125,14 @@ export const buildDataViewMock = ({
     getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, runtimeFields: {} }),
     getSourceFiltering: () => ({}),
-    getIndexPattern: () => `${name}-title`,
+    getIndexPattern: () => title,
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
-    timeFieldName: timeFieldName || '',
+    timeFieldName,
     docvalueFields: [],
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    isTimeBased: () => !!timeFieldName,
     isTimeNanosBased: () => false,
-    isPersisted: () => true,
+    isPersisted: () => isPersisted,
     toSpec: () => ({ id, title, name }),
     toMinimalSpec: () => ({}),
     getTimeField: () => {
@@ -139,10 +143,10 @@ export const buildDataViewMock = ({
     },
     getRuntimeField: () => null,
     getAllowHidden: () => false,
+    isTSDBMode: () =>
+      dataViewFields.some((field) => field.timeSeriesMetric || field.timeSeriesDimension),
     setFieldCount: jest.fn(),
   } as unknown as DataView;
-
-  dataView.isTimeBased = () => !!timeFieldName;
 
   return dataView;
 };

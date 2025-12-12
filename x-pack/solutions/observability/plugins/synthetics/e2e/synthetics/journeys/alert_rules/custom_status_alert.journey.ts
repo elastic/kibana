@@ -19,11 +19,11 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
   let configId: string;
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('Go to monitors page', async () => {
@@ -57,6 +57,7 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
       }
     });
     await page.getByTestId('ruleFormStep-details').click();
+    expect(await page.getByText('Related dashboards').isVisible()).toBe(true);
     await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
     await page.getByTestId('ruleFlyoutFooterSaveButton').click();
     await page.getByTestId('confirmModalConfirmButton').click();

@@ -10,7 +10,7 @@ jest.mock('../constants', () => {
   return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
 });
 
-import { Fields, NormalizedFields, State } from '../types';
+import type { Fields, NormalizedFields, State } from '../types';
 import {
   stripUndefinedValues,
   getTypeLabelFromField,
@@ -462,8 +462,25 @@ describe('utils', () => {
         } as any;
         expect(getStateWithCopyToFields(state)).toEqual(state);
       });
-      test('returns state if semantic text field has no reference field', () => {
+      test('returns state if reference field in semantic_text is empty', () => {
         const state = {
+          fields: {
+            byId: {
+              '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+                id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+                isMultiField: false,
+                source: {
+                  name: 'title',
+                  type: 'semantic_text',
+                  inference_id: 'id',
+                  reference_field: '',
+                },
+              },
+            },
+          },
+        } as any;
+
+        const expectedState = {
           fields: {
             byId: {
               '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
@@ -478,7 +495,7 @@ describe('utils', () => {
             },
           },
         } as any;
-        expect(getStateWithCopyToFields(state)).toEqual(state);
+        expect(getStateWithCopyToFields(state)).toEqual(expectedState);
       });
       test('adds text field with copy to to state if semantic text field has reference field', () => {
         const state = {

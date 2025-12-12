@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { inspect } from 'util';
-import { dematerialize, materialize, OperatorFunction, tap } from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
+import { dematerialize, materialize, tap } from 'rxjs';
 
 export function debug<T>(prefix: string): OperatorFunction<T, T> {
   return (source$) => {

@@ -403,17 +403,36 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-types",
-            "id": "def-public.FieldDefinition.solution",
+            "id": "def-public.FieldDefinition.solutionViews",
+            "type": "Array",
+            "tags": [
+              "see"
+            ],
+            "label": "solutionViews",
+            "description": [
+              "The solutions where this setting is applicable.\nIf undefined or an empty array, the setting must be displayed in all solutions."
+            ],
+            "signature": [
+              "UiSettingsSolutions",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.technicalPreview",
             "type": "CompoundType",
             "tags": [
               "see"
             ],
-            "label": "solution",
+            "label": "technicalPreview",
             "description": [
-              "The solution where this setting is applicable.\nIf undefined, the setting must be displayed in all solutions."
+              "\nTechnical preview information for the field"
             ],
             "signature": [
-              "UiSettingsSolution",
+              "TechnicalPreviewSettings",
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
@@ -507,6 +526,20 @@
             "description": [],
             "signature": [
               "SettingCapability"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/types/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SettingsCapabilities.filterSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "filterSettings",
+            "description": [],
+            "signature": [
+              "FilterCapability"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/capabilities.ts",
             "deprecated": false,
@@ -744,6 +777,39 @@
                 "text": "KnownTypeToValue"
               },
               "<T> | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UnsavedFieldChange.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "The scope of the field."
+            ],
+            "signature": [
+              "UiSettingsScope",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UnsavedFieldChange.needsReload",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "needsReload",
+            "description": [
+              "True if the change requires a page reload to take effect, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
             "deprecated": false,

@@ -8,10 +8,8 @@
 import { EuiCallOut, EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  IntegrationInstallationError,
-  useInstallIntegrations,
-} from '../../../hooks/use_install_integrations';
+import type { IntegrationInstallationError } from '../../../hooks/use_install_integrations';
+import { useInstallIntegrations } from '../../../hooks/use_install_integrations';
 
 export function MultiIntegrationInstallBanner() {
   const [error, setError] = useState<IntegrationInstallationError>();
@@ -22,7 +20,7 @@ export function MultiIntegrationInstallBanner() {
 
   const { performRequest, requestState } = useInstallIntegrations({
     onIntegrationCreationFailure,
-    packages: ['system', 'kubernetes'],
+    packages: ['system_otel', 'kubernetes_otel'],
   });
 
   useEffect(() => {

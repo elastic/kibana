@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MeteringStatsIndex } from '../../types';
+import type { MeteringStatsIndex } from '../../types';
 
 export const mockStatsPacketbeatIndex: Record<string, MeteringStatsIndex> = {
   '.ds-packetbeat-8.6.1-2023.02.04-000001': {

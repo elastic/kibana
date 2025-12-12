@@ -12,13 +12,15 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { KIBANA_API_PREFIX } from '../../../../common/constants';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
-import { BaseResponseType } from '../../../types';
+import type { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;
 
 export interface RequestArgs {
   http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
+  host?: string;
+  isPackagedEnvironment?: boolean;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -50,10 +52,21 @@ const extractStatusCodeAndText = (response: Response | undefined, path: string) 
   // For ES requests, we need to extract the status code and text from the response
   // headers, due to the way the proxy set up to avoid mirroring the status code which could be 401
   // and trigger a login prompt. See for more details: https://github.com/elastic/kibana/issues/140536
-  const statusCode = parseInt(response?.headers.get('x-console-proxy-status-code') ?? '500', 10);
-  const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
+  const proxyStatusCode = response?.headers.get('x-console-proxy-status-code');
+  const proxyStatusText = response?.headers.get('x-console-proxy-status-text');
 
-  return { statusCode, statusText };
+  // If proxy headers are missing (e.g., validation errors), use the actual response status
+  if (!proxyStatusCode) {
+    return {
+      statusCode: parseInt(String(response?.status ?? 500), 10),
+      statusText: response?.statusText ?? 'error',
+    };
+  }
+
+  return {
+    statusCode: parseInt(proxyStatusCode, 10),
+    statusText: proxyStatusText ?? 'error',
+  };
 };
 
 let CURRENT_REQ_ID = 0;
@@ -104,6 +117,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           path,
           data,
           asResponse: true,
+          host: args.host,
+          isPackagedEnvironment: args.isPackagedEnvironment,
         });
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
@@ -115,8 +130,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         if (response) {
           let value;
+          if (statusCode === 200 && !body) {
+            // If the request resolves with a 200 status code but has an empty or null body,
+            // we should still display a success message to the user.
+            value = 'OK';
+          }
           // check if object is ArrayBuffer
-          if (body instanceof ArrayBuffer) {
+          else if (body instanceof ArrayBuffer) {
             value = body;
           } else {
             value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
@@ -153,22 +173,23 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
       } catch (error) {
         let value;
-        const { response, body } = error as IHttpFetchError;
+        const { response, body: errorBody } = error as IHttpFetchError;
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
-        // When the request is sent, the HTTP library tries to parse the response body as JSON.
-        // However, if the response body is empty or not in valid JSON format, it throws an error.
-        // To handle this, if the request resolves with a 200 status code but has an empty or invalid body,
-        // we should still display a success message to the user.
-        if (statusCode === 200 && body === null) {
+        if (statusCode === 200 && !errorBody) {
           value = 'OK';
+        } else if (errorBody) {
+          value = JSON.stringify(errorBody, null, 2);
         } else {
-          if (body) {
-            value = JSON.stringify(body, null, 2);
-          } else {
-            value = 'Request failed to get to the server (status code: ' + statusCode + ')';
-          }
+          value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+        }
+
+        // Check for warning headers in error responses
+        const warnings = response?.headers.get('warning');
+        if (warnings) {
+          const warningMessages = extractWarningMessages(warnings);
+          value = warningMessages.join('\n') + '\n' + value;
         }
 
         if (isMultiRequest) {

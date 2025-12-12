@@ -7,23 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import dedent from 'dedent';
-
-import { ToolingLog } from '@kbn/tooling-log';
-import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+import dedent from 'dedent';
+import { silence } from '../common';
+import { getPlaywrightGrepTag } from '../playwright/utils';
+import { getConfigRootDir, loadServersConfig } from './configs';
+import type { StartServerOptions } from './flags';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
-import { StartServerOptions } from './flags';
-import { loadServersConfig } from '../config';
-import { silence } from '../common';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout_start_servers');
 
   await withProcRunner(log, async (procs) => {
-    const config = await loadServersConfig(options.mode, log);
+    // Use a default path that resolves to default configs (contains 'scout/' not 'scout_')
+    // If configDir is provided, it will override the default path detection
+    const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
+    const configRootDir = getConfigRootDir(defaultPlaywrightPath, options.mode, options.configDir);
+    const config = await loadServersConfig(options.mode, log, configRootDir);
+    const pwGrepTag = getPlaywrightGrepTag(options.mode);
 
     const shutdownEs = await runElasticsearch({
       config,
@@ -52,7 +57,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          Use 'npx playwright test --config <path_to_Playwright.config.ts> --project local' to run tests'
+          Use 'npx playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
         '\n\n'
     );

@@ -13,10 +13,10 @@ import { useDismissableTour } from '../../../../hooks/use_dismissable_tour';
 import type { Section } from '../../sections';
 import { useLink, useConfig, useAuthz, useStartServices } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
+import { TourManagerProvider } from '../../../../hooks/use_tour_manager';
 
 import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
-
-import { ExperimentalFeaturesService } from '../../services';
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../hooks/use_can_enable_auto_upgrades';
 
 import { DefaultPageTitle } from './default_page_title';
 
@@ -36,7 +36,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const authz = useAuthz();
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
-  const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
+  const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
   const tabs = [
     {
@@ -116,9 +116,10 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
     .map(({ isHidden, ...tab }) => tab);
 
   return (
-    <>
+    <TourManagerProvider>
       {!authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
         <EuiCallOut
+          announceOnMount
           size="s"
           iconType="cheer"
           onDismiss={granularPrivilegesCallout.dismiss}
@@ -129,7 +130,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                 defaultMessage="We've added new privileges that let you define more granularly who can view or edit Fleet agents, policies, and settings. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
-                    <EuiLink href={docLinks.links.fleet.roleAndPrivileges} external>
+                    <EuiLink href={docLinks.links.fleet.roleAndPrivileges} external target="_blank">
                       <strong>
                         <FormattedMessage
                           id="xpack.fleet.granularPrivileges.learnMoreLinkText"
@@ -147,9 +148,9 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
         {children}
       </WithHeaderLayout>
-      {enableAutomaticAgentUpgrades ? (
+      {canEnableAutomaticAgentUpgrades ? (
         <AutoUpgradeAgentsTour anchor="#fleet-agent-policies-tab" />
       ) : null}
-    </>
+    </TourManagerProvider>
   );
 };

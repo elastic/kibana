@@ -11,9 +11,9 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { RequestHandler } from '@kbn/core-http-server';
+import type { RequestHandler } from '@kbn/core-http-server';
 import { LastReportedRoute } from '../../common/routes';
-import { v2 } from '../../common/types';
+import type { v2 } from '../../common/types';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from '../saved_objects';
 
 export function registerTelemetryLastReported(
@@ -38,17 +38,20 @@ export function registerTelemetryLastReported(
   };
 
   router.versioned
-    .get({ access: 'internal', path: LastReportedRoute })
+    .get({
+      access: 'internal',
+      path: LastReportedRoute,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: v2GetValidations,
       },
       v2GetHandler
@@ -56,12 +59,6 @@ export function registerTelemetryLastReported(
     .addVersion(
       {
         version: '2',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: v2GetValidations,
       },
       v2GetHandler
@@ -77,17 +74,20 @@ export function registerTelemetryLastReported(
   };
 
   router.versioned
-    .put({ access: 'internal', path: LastReportedRoute })
+    .put({
+      access: 'internal',
+      path: LastReportedRoute,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: false,
       },
       v2PutHandler
@@ -95,12 +95,6 @@ export function registerTelemetryLastReported(
     .addVersion(
       {
         version: '2',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: false,
       },
       v2PutHandler

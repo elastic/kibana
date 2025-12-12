@@ -7,15 +7,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { union, isEmpty } from 'lodash';
-import {
-  EuiComboBox,
-  EuiFormControlLayout,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormControlLayout, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { FieldValueSelectionProps } from './types';
+import type { FieldValueSelectionProps } from './types';
 const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {
   const uniqueValues = Array.from(
     new Set(
@@ -65,18 +61,21 @@ export function FieldValueCombobox({
     onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
   };
 
+  const searchFieldPlaceholder = i18n.translate(
+    'xpack.observabilityShared.fieldValueSelection.placeholder.search',
+    {
+      defaultMessage: 'Search {label}',
+      values: { label },
+    }
+  );
+
   const comboBox = (
     <EuiComboBox
       fullWidth
       singleSelection={singleSelection ? { asPlainText: true } : false}
       compressed={compressed}
-      placeholder={i18n.translate(
-        'xpack.observabilityShared.fieldValueSelection.placeholder.search',
-        {
-          defaultMessage: 'Search {label}',
-          values: { label },
-        }
-      )}
+      placeholder={searchFieldPlaceholder}
+      aria-label={searchFieldPlaceholder}
       isLoading={loading}
       onSearchChange={(searchVal) => {
         setQuery(searchVal);

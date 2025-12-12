@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -14,7 +15,7 @@ import {
   EuiFlexItem,
   EuiTextColor,
 } from '@elastic/eui';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import type { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 interface Props {
   findLayerById: (layerId: string) => IVectorLayer | undefined;
@@ -24,14 +25,12 @@ interface Props {
 }
 
 interface State {
-  layerIcon: ReactNode;
   layerName: string | null;
 }
 
 export class Header extends Component<Props, State> {
   private _isMounted = false;
   state: State = {
-    layerIcon: null,
     layerName: null,
   };
 
@@ -50,21 +49,13 @@ export class Header extends Component<Props, State> {
       return;
     }
     const layerName = await layer.getDisplayName();
-    const { icon } = layer.getLayerIcon(false);
     if (this._isMounted) {
-      this.setState({ layerIcon: icon, layerName });
+      this.setState({ layerName });
     }
   }
 
   render() {
     const items: ReactNode[] = [];
-    if (this.state.layerIcon) {
-      items.push(
-        <EuiFlexItem grow={false} key="layerIcon" className="mapFeatureTooltip_layerIcon">
-          {this.state.layerIcon}
-        </EuiFlexItem>
-      );
-    }
 
     if (this.state.layerName) {
       items.push(

@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
-import { registerTestBed, TestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import type { ReactWrapper } from 'enzyme';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 
 // This import needs to come first as it sets the jest.mock calls
 import { WithAppDependencies } from './setup_environment';
 import { getChildFieldsName } from '../../../lib';
-import { RuntimeField } from '../../../shared_imports';
+import type { RuntimeField } from '../../../shared_imports';
 import { MappingsEditor } from '../../../mappings_editor';
 
 export interface DomFields {
@@ -128,7 +129,12 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     return { field: find(testSubject as TestSubjects), testSubject };
   };
 
-  const addField = async (name: string, type: string, subType?: string) => {
+  const addField = async (
+    name: string,
+    type: string,
+    subType?: string,
+    referenceFieldValue?: string
+  ) => {
     await act(async () => {
       form.setInputValue('nameParameterInput', name);
       jest.advanceTimersByTime(0); // advance timers to allow the form to validate
@@ -149,6 +155,11 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
         form.setInputValue('createFieldForm.fieldSubType', subType);
         jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
+    }
+
+    if (referenceFieldValue !== undefined) {
+      form.setSelectValue('select', referenceFieldValue);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     }
 
     await act(async () => {
@@ -303,8 +314,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   // --- Other ---
   const selectTab = async (tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced') => {
     const index = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
+    const dataTestSubjValues = ['fieldsTab', 'runtimeTab', 'templatesTab', 'advancedOptionsTab'];
 
-    const tabElement = find('formTab').at(index);
+    const tabElement = find(dataTestSubjValues[index]);
     if (tabElement.length === 0) {
       throw new Error(`Tab not found: "${tab}"`);
     }

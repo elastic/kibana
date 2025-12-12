@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { Filter } from '@kbn/es-query';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import {
@@ -27,7 +28,6 @@ import { CloudSecurityDataTable } from '../../../components/cloud_security_data_
 import { getDefaultQuery, defaultColumns } from './constants';
 import { useLatestFindingsTable } from './use_latest_findings_table';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
-import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { findingsTableFieldLabels } from './findings_table_field_labels';
 
 interface LatestFindingsTableProps {
@@ -49,13 +49,11 @@ const getCspFinding = (source: Record<string, any> | undefined): CspFinding | un
 };
 
 /**
- * Flyout component for the latest findings table
+ * Flyout component for the latest findings table, renders empty component as now we use Use Expandable Flyout API hook to handle all the rendering
  */
-const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-  const finding = row.raw._source;
-  if (!finding || !isCspFinding(finding)) return <></>;
+const onOpenFlyoutCallback = (): JSX.Element => {
   uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, OPEN_FINDINGS_FLYOUT);
-  return <FindingsRuleFlyout finding={finding} onClose={onCloseFlyout} />;
+  return <></>;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
@@ -141,7 +139,7 @@ export const LatestFindingsTable = ({
             defaultColumns={defaultColumns}
             rows={rows}
             total={total}
-            flyoutComponent={flyoutComponent}
+            onOpenFlyoutCallback={onOpenFlyoutCallback}
             cloudPostureDataTable={cloudPostureDataTable}
             loadMore={fetchNextPage}
             title={title}
@@ -150,6 +148,7 @@ export const LatestFindingsTable = ({
             height={height}
             createRuleFn={createMisconfigurationRuleFn}
             columnHeaders={findingsTableFieldLabels}
+            flyoutType="misconfiguration"
           />
         </>
       )}

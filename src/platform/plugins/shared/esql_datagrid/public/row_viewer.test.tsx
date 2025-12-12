@@ -89,7 +89,7 @@ describe('RowViewer', () => {
   it('should run the onClose prop when the close button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
     renderComponent(closeFlyoutSpy);
-    await userEvent.click(screen.getByTestId('docViewerFlyoutCloseButton'));
+    await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 

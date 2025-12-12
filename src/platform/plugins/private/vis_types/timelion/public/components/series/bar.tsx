@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { BarSeries, ScaleType, BarSeriesStyle } from '@elastic/charts';
+import type { BarSeriesStyle } from '@elastic/charts';
+import { BarSeries, ScaleType } from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 
 interface BarSeriesComponentProps {
@@ -43,6 +44,7 @@ export const BarSeriesComponent = ({ index, groupId, visData }: BarSeriesCompone
     id={index + visData.label}
     groupId={groupId}
     name={visData.label}
+    // Defaults to multi layer time axis as of Elastic Charts v70
     xScaleType={ScaleType.Time}
     yScaleType={ScaleType.Linear}
     xAccessor={0}

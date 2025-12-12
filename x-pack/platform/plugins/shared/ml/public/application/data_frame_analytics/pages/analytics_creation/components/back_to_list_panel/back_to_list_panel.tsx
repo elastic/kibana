@@ -9,13 +9,14 @@ import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 
 export const BackToListPanel: FC = () => {
-  const analyticsManagementPageLink = useMlLink({
-    page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-  });
+  const redirectToAnalyticsList = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    'analytics'
+  );
 
   return (
     <Fragment>
@@ -31,7 +32,7 @@ export const BackToListPanel: FC = () => {
             defaultMessage: 'Return to the analytics management page.',
           }
         )}
-        href={analyticsManagementPageLink}
+        onClick={redirectToAnalyticsList}
         data-test-subj="analyticsWizardCardManagement"
       />
     </Fragment>

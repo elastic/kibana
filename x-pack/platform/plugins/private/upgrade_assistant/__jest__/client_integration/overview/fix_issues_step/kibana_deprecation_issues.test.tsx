@@ -11,7 +11,8 @@ import type { DomainDeprecationDetails } from '@kbn/core/public';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
-import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import type { OverviewTestBed } from '../overview.helpers';
+import { setupOverviewPage } from '../overview.helpers';
 import { esNoDeprecations } from './mock_es_issues';
 
 describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
@@ -73,12 +74,12 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
         await setup(mockedCriticalKibanaDeprecations);
       });
 
-      test('renders a count for critical issues and success state for warning issues', () => {
+      test('renders a count for critical issues', () => {
         const { exists, find } = testBed;
 
         expect(exists('kibanaStatsPanel')).toBe(true);
         expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
-        expect(exists('kibanaStatsPanel.noWarningDeprecationIssues')).toBe(true);
+        expect(exists('kibanaStatsPanel.warningDeprecations')).toBe(false);
       });
 
       test('panel links to Kibana deprecations page', () => {

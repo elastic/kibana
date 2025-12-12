@@ -8,7 +8,8 @@
  */
 
 import { resolveLinkInfo } from './resolve_links';
-import { Link, DASHBOARD_LINK_TYPE } from '../../common/content_management';
+import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
+import type { Link } from '../../server';
 
 jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
   fetchDashboard: async (id: string) => {
@@ -17,10 +18,9 @@ jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
       throw error;
     }
     return {
-      attributes: {
-        title: `Dashboard ${id}`,
-        description: 'Some descriptive text.',
-      },
+      id,
+      title: `Dashboard ${id}`,
+      description: 'Some descriptive text.',
     };
   },
 }));

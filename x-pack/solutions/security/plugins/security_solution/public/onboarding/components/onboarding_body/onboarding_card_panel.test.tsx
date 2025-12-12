@@ -13,9 +13,9 @@ import type { OnboardingCardId } from '../../constants';
 import { TestProviders } from '../../../common/mock/test_providers';
 
 const mockUseDarkMode = jest.fn(() => false);
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useDarkMode: () => mockUseDarkMode(),
+jest.mock('@kbn/react-kibana-context-theme', () => ({
+  ...jest.requireActual('@kbn/react-kibana-context-theme'),
+  useKibanaIsDarkMode: () => mockUseDarkMode(),
 }));
 
 jest.mock('@elastic/eui', () => ({

@@ -11,7 +11,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-int
 import { ensureRawRequest, type CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { getEcsResponseLog } from '@kbn/core-http-server-internal/src/logging';
 import { buildApiDeprecationId } from '../deprecations';
 import { getIsRouteApiDeprecation, getIsAccessApiDeprecation } from '../deprecations';

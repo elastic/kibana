@@ -23,7 +23,6 @@ export type {
   NavigationEntry,
 } from './components/page_template/page_template';
 export { HeaderMenuPortal } from './components/header_menu';
-export { useObservabilityTourContext, observTourStepStorageKey } from './components/tour';
 export { ActionMenu, ActionMenuDivider } from './components/action_menu/action_menu';
 export {
   Section,
@@ -108,3 +107,5 @@ export { AddDataPanel, type AddDataPanelProps } from './components/add_data_pane
 export { useUrlState } from './hooks/use_url_state';
 export { type ControlPanels, useControlPanels } from './hooks/use_control_panels_url_state';
 export { useKibanaQuerySettings } from './hooks/use_kibana_query_settings';
+
+export { ExternalResourceLinks } from './components/external_resource_links';

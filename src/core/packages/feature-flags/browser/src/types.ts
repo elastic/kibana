@@ -88,6 +88,12 @@ export type SingleContextEvaluationContext = OpenFeatureEvaluationContext & {
  */
 export interface FeatureFlagsSetup {
   /**
+   * Used for bootstrapping the browser-side client with a seed of the feature flags for faster load-times.
+   * @remarks It shouldn't be used to evaluate the feature flags because it won't report usage.
+   */
+  getInitialFeatureFlags: () => Record<string, unknown>;
+
+  /**
    * Registers an OpenFeature provider to talk to the
    * 3rd-party service that manages the Feature Flags.
    * @param provider The {@link Provider | OpenFeature Provider} to handle the communication with the feature flags management system.

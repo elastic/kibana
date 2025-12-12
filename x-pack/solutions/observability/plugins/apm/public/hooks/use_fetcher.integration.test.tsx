@@ -41,6 +41,7 @@ describe('when simulating race condition', () => {
 
     const { rerender } = render(<MyComponent name="John" ms={500} renderFn={renderSpy} />, {
       wrapper,
+      legacyRoot: true,
     });
 
     rerender(<MyComponent name="Peter" ms={100} renderFn={renderSpy} />);

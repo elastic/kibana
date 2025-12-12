@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { relatedDashboardSchema } from '../../schema/related_dashboard/v1';
+import { linkedDashboardSchema, suggestedDashboardSchema } from '../../schema/related_dashboard/v1';
 
 export const getRelatedDashboardsParamsSchema = z.object({
   query: z.object({
@@ -15,8 +15,8 @@ export const getRelatedDashboardsParamsSchema = z.object({
 });
 
 export const getRelatedDashboardsResponseSchema = z.object({
-  suggestedDashboards: z.array(relatedDashboardSchema),
-  linkedDashboards: z.array(relatedDashboardSchema),
+  suggestedDashboards: z.array(suggestedDashboardSchema),
+  linkedDashboards: z.array(linkedDashboardSchema),
 });
 
 export type GetRelatedDashboardsResponse = z.output<typeof getRelatedDashboardsResponseSchema>;

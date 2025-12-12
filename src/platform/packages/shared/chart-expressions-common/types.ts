@@ -8,7 +8,7 @@
  */
 
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
-import React from 'react';
+import type React from 'react';
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 

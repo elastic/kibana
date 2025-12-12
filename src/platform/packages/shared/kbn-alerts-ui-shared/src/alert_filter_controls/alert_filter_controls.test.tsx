@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { AlertFilterControls, AlertFilterControlsProps } from './alert_filter_controls';
+import { act, render, screen } from '@testing-library/react';
+import type { AlertFilterControlsProps } from './alert_filter_controls';
+import { AlertFilterControls } from './alert_filter_controls';
 import { DEFAULT_CONTROLS } from './constants';
 import { useAlertsDataView } from '../common/hooks/use_alerts_data_view';
 import { FilterGroup } from './filter_group';
@@ -66,6 +67,8 @@ describe('AlertFilterControls', () => {
     ControlGroupRenderer,
   };
 
+  beforeEach(jest.clearAllMocks);
+
   it('renders the filter group', async () => {
     render(<AlertFilterControls {...props} />);
 
@@ -80,5 +83,19 @@ describe('AlertFilterControls', () => {
         id: 'alerts-filters-dv',
       })
     );
+  });
+
+  it('clears the cache when removed from the tree', async () => {
+    const result = render(<AlertFilterControls {...props} />);
+    act(() => result.unmount());
+
+    expect(mockServices.dataViews.clearInstanceCache).toHaveBeenCalled();
+  });
+
+  it('does not clear the cache on removal when cache management is disabled', async () => {
+    const result = render(<AlertFilterControls {...props} preventCacheClearOnUnmount={true} />);
+    act(() => result.unmount());
+
+    expect(mockServices.dataViews.clearInstanceCache).not.toHaveBeenCalled();
   });
 });

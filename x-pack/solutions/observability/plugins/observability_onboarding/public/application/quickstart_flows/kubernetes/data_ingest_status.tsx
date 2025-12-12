@@ -12,11 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
+import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 
 interface Props {
   onboardingId: string;
@@ -27,12 +30,16 @@ const SHOW_TROUBLESHOOTING_DELAY = 120000; // 2 minutes
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c';
 
 export function DataIngestStatus({ onboardingId }: Props) {
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
   const [checkDataStartTime] = useState(Date.now());
   const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
   const {
     services: { share, analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
   const { data, status, refetch } = useFetcher(
     (callApi) => {
@@ -125,25 +132,43 @@ export function DataIngestStatus({ onboardingId }: Props) {
             newTab={false}
             isLoading={false}
             actionLinks={[
-              {
-                id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                label: i18n.translate(
-                  'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
-                  {
-                    defaultMessage: 'Explore Kubernetes cluster',
+              metricsOnboardingEnabled
+                ? {
+                    id: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                    label: i18n.translate(
+                      'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
+                      {
+                        defaultMessage: 'Explore Kubernetes cluster',
+                      }
+                    ),
+                    title: i18n.translate(
+                      'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
+                      {
+                        defaultMessage:
+                          'Overview your Kubernetes cluster with this pre-made dashboard',
+                      }
+                    ),
+                    href:
+                      dashboardLocator?.getRedirectUrl({
+                        dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                      }) ?? '',
                   }
-                ),
-                title: i18n.translate(
-                  'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
-                  {
-                    defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
-                  }
-                ),
-                href:
-                  dashboardLocator?.getRedirectUrl({
-                    dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                  }) ?? '',
-              },
+                : {
+                    id: 'logs',
+                    title: i18n.translate(
+                      'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
+                      {
+                        defaultMessage: 'View and analyze your logs:',
+                      }
+                    ),
+                    label: i18n.translate(
+                      'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
+                      {
+                        defaultMessage: 'Explore logs',
+                      }
+                    ),
+                    href: logsLocator?.getRedirectUrl({}) ?? '',
+                  },
             ]}
           />
         </>

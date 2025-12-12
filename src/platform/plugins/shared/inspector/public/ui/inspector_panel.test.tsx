@@ -8,21 +8,24 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
 import { InspectorPanel } from './inspector_panel';
-import { InspectorViewDescription } from '../types';
-import { Adapters } from '../../common';
+import type { InspectorViewDescription } from '../types';
+import type { Adapters } from '../../common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { applicationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
   let views: InspectorViewDescription[];
+
   const dependencies = {
     application: applicationServiceMock.createStartContract(),
     http: {},
@@ -48,6 +51,7 @@ describe('InspectorPanel', () => {
       },
       bardapter: {},
     };
+
     views = [
       {
         title: 'View 1',
@@ -73,18 +77,31 @@ describe('InspectorPanel', () => {
     ];
   });
 
-  it('should render as expected', () => {
-    const component = mountWithIntl(
+  it('should render title and default view correctly', () => {
+    renderWithI18n(
       <InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />
     );
-    expect(component.render()).toMatchSnapshot();
+
+    // Panel title
+    expect(screen.getByRole('heading', { name: /Inspector/i })).toBeInTheDocument();
+
+    // Selected view label in dropdown
+    expect(screen.getByText('View: View 1')).toBeInTheDocument();
+
+    // Rendered content of the selected view
+    expect(screen.getByRole('heading', { name: 'View 1' })).toBeInTheDocument();
   });
 
   it('should not allow updating adapters', () => {
-    const component = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />
     );
+
+    // Mutate adapters (simulate external change)
     adapters.notAllowed = {};
-    expect(() => component.setProps({ adapters })).toThrow();
+
+    expect(() =>
+      rerender(<InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />)
+    ).toThrow();
   });
 });

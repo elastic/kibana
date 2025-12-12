@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { append } from '../pipeline/append';
+
+/**
+ * Appends a `KEEP` command to the ESQL composer pipeline.
+ *
+ * @param columns The columns to keep.
+ * @returns A `QueryPipeline` instance with the `KEEP` command appended.
+ */
+export function keep(...columns: Array<string | string[]>) {
+  const command = `KEEP ${columns.flatMap((column) => column).join(', ')}`;
+
+  return append({ command });
+}

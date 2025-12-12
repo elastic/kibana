@@ -7,7 +7,7 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import { SamplesFormat } from '../../../common';
+import type { SamplesFormat } from '../../../common';
 import type { RelatedState } from '../../types';
 import { handleValidatePipeline } from '../../util/graph';
 import { prefixSamples } from '../../util/samples';

@@ -11,7 +11,8 @@ import { EuiBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
 interface Props {
@@ -48,6 +49,9 @@ export function Breadcrumbs({ breadcrumbs$ }: Props) {
     <EuiBreadcrumbs
       breadcrumbs={crumbs}
       data-test-subj="breadcrumbs"
+      aria-label={i18n.translate('core.ui.chrome.breadcrumbs.ariaLabel', {
+        defaultMessage: 'Breadcrumbs',
+      })}
       // reduce number of visible breadcrumbs due to increased max-width of the root breadcrumbs
       responsive={{
         xs: 1,

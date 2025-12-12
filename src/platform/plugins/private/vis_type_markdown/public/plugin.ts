@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { markdownVisType } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
 import type { ConfigSchema } from '../server/config';
@@ -44,11 +44,5 @@ export class MarkdownPlugin implements Plugin<void, void> {
     expressions.registerFunction(createMarkdownVisFn);
   }
 
-  public start(core: CoreStart, deps: MarkdownStartDependencies) {
-    deps.uiActions.registerActionAsync('addMarkdownAction', async () => {
-      const { getAddMarkdownPanelAction } = await import('./add_markdown_panel_action');
-      return getAddMarkdownPanelAction(deps);
-    });
-    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMarkdownAction');
-  }
+  public start(core: CoreStart, deps: MarkdownStartDependencies) {}
 }

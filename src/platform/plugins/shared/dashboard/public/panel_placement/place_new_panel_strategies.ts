@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/content_management';
+import { cloneDeep } from 'lodash';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import { PanelPlacementStrategy } from '../plugin_constants';
-import { PanelPlacementProps, PanelPlacementReturn } from './types';
+import type { PanelPlacementProps, PanelPlacementReturn } from './types';
 
 export const runPanelPlacementStrategy = (
   strategy: PanelPlacementStrategy,
-  { width, height, currentPanels }: PanelPlacementProps
+  { width, height, currentPanels, sectionId }: PanelPlacementProps
 ): PanelPlacementReturn => {
   switch (strategy) {
     case PanelPlacementStrategy.placeAtTop:
       const otherPanels = { ...currentPanels };
       for (const [id, panel] of Object.entries(currentPanels)) {
-        const { gridData, ...currentPanel } = cloneDeep(panel);
-        const newGridData = { ...gridData, y: gridData.y + height };
-        otherPanels[id] = { ...currentPanel, gridData: newGridData };
+        // only consider collisions with panels in the same section
+        if (!sectionId || panel.grid.sectionId === sectionId) {
+          const { grid, ...currentPanel } = cloneDeep(panel);
+          const newGridData = { ...grid, y: grid.y + height };
+          otherPanels[id] = { ...currentPanel, grid: newGridData };
+        }
       }
       return {
         newPanelPlacement: { x: 0, y: 0, w: width, h: height },
@@ -35,7 +38,10 @@ export const runPanelPlacementStrategy = (
 
       const currentPanelsArray = Object.values(currentPanels);
       currentPanelsArray.forEach((panel) => {
-        maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
+        // only consider panels in the same section when calculating maxY
+        if (panel.grid.sectionId === sectionId) {
+          maxY = Math.max(panel.grid.y + panel.grid.h, maxY);
+        }
       });
 
       // Handle case of empty grid.
@@ -52,17 +58,19 @@ export const runPanelPlacementStrategy = (
       }
 
       currentPanelsArray.forEach((panel) => {
-        for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
-          for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
-            const row = grid[y];
-            if (row === undefined) {
-              throw new Error(
-                `Attempted to access a row that doesn't exist at ${y} for panel ${JSON.stringify(
-                  panel
-                )}`
-              );
+        if (panel.grid.sectionId === sectionId) {
+          for (let x = panel.grid.x; x < panel.grid.x + panel.grid.w; x++) {
+            for (let y = panel.grid.y; y < panel.grid.y + panel.grid.h; y++) {
+              const row = grid[y];
+              if (row === undefined) {
+                throw new Error(
+                  `Attempted to access a row that doesn't exist at ${y} for panel ${JSON.stringify(
+                    panel
+                  )}`
+                );
+              }
+              grid[y][x] = 1;
             }
-            grid[y][x] = 1;
           }
         }
       });

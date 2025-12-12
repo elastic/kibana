@@ -6,24 +6,23 @@
  */
 
 import pMap from 'p-map';
-import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import { validatePermissions } from '../edit_monitor';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import { normalizeSecrets } from '../../../synthetics_service/utils';
+import { ConfigKey } from '../../../../common/runtime_types';
 import {
   formatTelemetryDeleteEvent,
   sendErrorTelemetryEvents,
   sendTelemetryEvents,
 } from '../../telemetry/monitor_upgrade_sender';
-import { RouteContext } from '../../types';
+import type { RouteContext } from '../../types';
 
 export class DeleteMonitorAPI {
   routeContext: RouteContext;
@@ -50,19 +49,11 @@ export class DeleteMonitorAPI {
   }
 
   async getMonitorToDelete(monitorId: string) {
-    const { spaceId, savedObjectsClient, server } = this.routeContext;
+    const { spaceId, savedObjectsClient, server, monitorConfigRepository } = this.routeContext;
     try {
-      const encryptedSOClient = server.encryptedSavedObjects.getClient();
+      const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
 
-      const monitor =
-        await encryptedSOClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-          syntheticsMonitorType,
-          monitorId,
-          {
-            namespace: spaceId,
-          }
-        );
-      return normalizeSecrets(monitor);
+      return normalizedMonitor;
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.result.push({
@@ -71,7 +62,9 @@ export class DeleteMonitorAPI {
           error: `Monitor id ${monitorId} not found!`,
         });
       } else {
-        server.logger.error(`Failed to decrypt monitor to delete ${monitorId}${e}`);
+        server.logger.error(`Failed to decrypt monitor to delete, monitor id: ${monitorId}`, {
+          error: e,
+        });
         sendErrorTelemetryEvents(server.logger, server.telemetry, {
           reason: `Failed to decrypt monitor to delete ${monitorId}`,
           message: e?.message,
@@ -81,7 +74,7 @@ export class DeleteMonitorAPI {
           stackVersion: server.stackVersion,
         });
         return await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-          syntheticsMonitorType,
+          syntheticsMonitorSavedObjectType,
           monitorId
         );
       }
@@ -118,10 +111,11 @@ export class DeleteMonitorAPI {
       });
 
       return { errors, result: this.result };
-    } catch (e) {
-      server.logger.error(`Unable to delete Synthetics monitor with error ${e.message}`);
-      server.logger.error(e);
-      throw e;
+    } catch (error) {
+      server.logger.error(`Unable to delete Synthetics monitor with error ${error.message}`, {
+        error,
+      });
+      throw error;
     }
   }
 
@@ -143,7 +137,7 @@ export class DeleteMonitorAPI {
       );
 
       const deletePromise = this.routeContext.monitorConfigRepository.bulkDelete(
-        monitors.map((monitor) => monitor.id)
+        monitors.map((monitor) => ({ id: monitor.id, type: monitor.type }))
       );
 
       const [errors, result] = await Promise.all([deleteSyncPromise, deletePromise]);

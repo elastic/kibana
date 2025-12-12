@@ -37,7 +37,9 @@ export interface SavedQuerySO {
   query: string;
   timeout?: number;
   ecs_mapping: ECSMapping;
+  created_by?: string;
   updated_at: string;
+  updated_by?: string;
   prebuilt?: boolean;
 }
 
@@ -75,7 +77,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
   );
 
   return (
-    <EuiToolTip position="top" content={playText}>
+    <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
       <EuiButtonIcon
         color="primary"
         iconType="play"
@@ -114,7 +116,7 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
   );
 
   return (
-    <EuiToolTip position="top" content={editText}>
+    <EuiToolTip position="top" content={editText} disableScreenReaderOutput>
       <EuiButtonIcon
         color="primary"
         {...buttonProps}
@@ -295,7 +297,6 @@ const SavedQueriesPageComponent = () => {
           pagination={pagination}
           sorting={sorting}
           onChange={onTableChange}
-          rowHeader="id"
         />
       )}
     </WithHeaderLayout>

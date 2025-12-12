@@ -1,0 +1,1999 @@
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (0)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-00",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIwNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (1)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-01",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIwNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (2)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-02",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIwNywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (3)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-03",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIwOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (4)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-04",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIwOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (5)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-05",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (6)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-06",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (7)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-07",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (8)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-08",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxMywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (9)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-09",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (10)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-10",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (11)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-11",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (12)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-12",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxNywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (13)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-13",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (14)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-14",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIxOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (15)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-15",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (16)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-16",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (17)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-17",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (18)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-18",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyMywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (19)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-19",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (20)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-20",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (21)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-21",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (22)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-22",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (23)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-23",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (24)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-24",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIyOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (25)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-25",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (26)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-26",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (27)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-27",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (28)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-28",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzMywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (29)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-29",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (30)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-30",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (31)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-31",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (32)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-32",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzNywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (33)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-33",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (34)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-34",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzIzOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (35)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-35",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (36)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-36",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0MSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (37)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-37",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (38)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-38",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0MywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (39)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-39",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (40)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-40",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (41)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-41",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (42)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-42",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0NywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (43)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-43",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (44)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-44",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI0OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (45)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-45",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (46)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-46",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1MSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (47)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-47",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (48)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-48",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1MywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (49)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-49",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (50)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-50",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (51)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-51",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (52)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-52",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1NywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (53)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-53",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (54)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-54",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI1OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (55)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-55",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (56)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-56",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2MSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (57)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-57",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (58)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-58",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2MywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (59)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-59",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (60)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-60",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (61)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-61",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (62)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-62",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2NywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (63)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-63",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (64)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-64",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI2OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (65)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-65",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (66)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-66",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3MSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (67)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-67",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (68)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-68",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3MywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (69)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-69",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (70)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-70",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (71)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-71",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (72)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-72",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3NywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (73)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-73",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (74)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-74",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI3OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (75)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-75",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (76)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-76",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4MSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (77)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-77",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (78)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-78",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4MywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (79)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-79",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (80)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-80",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (81)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-81",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (82)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-82",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4NywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (83)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-83",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (84)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-84",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI4OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (85)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-85",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (86)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-86",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5MSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (87)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-87",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (88)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-88",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5MywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (89)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-89",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (90)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-90",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (91)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-91",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (92)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-92",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5NywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (93)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-93",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (94)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-94",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzI5OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (95)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-95",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzMwMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (96)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-96",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzMwMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (97)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-97",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzMwMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (98)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-98",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzMwMywxXQ=="
+}
+
+{
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "My dashboard (99)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-20T18:14:41.618Z",
+  "id": "test-dashboard-99",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-20T18:14:41.618Z",
+  "version": "WzMwNCwxXQ=="
+}

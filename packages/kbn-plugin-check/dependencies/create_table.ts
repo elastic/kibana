@@ -7,13 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Table, { Table as TableType } from 'cli-table3';
+import type { Table as TableType } from 'cli-table3';
+import Table from 'cli-table3';
 
 import colors from 'colors/safe';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { PluginLayer, PluginLifecycle, PluginInfo, PluginStatuses, PluginState } from '../types';
+import type {
+  PluginLayer,
+  PluginLifecycle,
+  PluginInfo,
+  PluginStatuses,
+  PluginState,
+} from '../types';
 import { PLUGIN_LAYERS, PLUGIN_LIFECYCLES } from '../const';
 import { borders } from './table_borders';
 

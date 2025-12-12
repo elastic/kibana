@@ -10,7 +10,7 @@
 import { readRolesDescriptorsFromResource, STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import { AuthProvider } from '../get_auth_provider';
+import type { AuthProvider } from '../get_auth_provider';
 import {
   getStatefulInternalRequestHeaders,
   COMMON_REQUEST_HEADERS,
@@ -18,6 +18,14 @@ import {
 
 export class StatefulAuthProvider implements AuthProvider {
   private readonly rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
+
+  isServerless() {
+    return false;
+  }
+
+  getProjectType() {
+    return undefined;
+  }
 
   getSupportedRoleDescriptors() {
     const roleDescriptors = new Map<string, any>(
@@ -39,8 +47,9 @@ export class StatefulAuthProvider implements AuthProvider {
     return true;
   }
 
+  // For compatibility with the Scout test framework we use the same name for the custom role
   getCustomRole() {
-    return 'customRole';
+    return 'custom_role_worker_1';
   }
 
   getRolesDefinitionPath() {

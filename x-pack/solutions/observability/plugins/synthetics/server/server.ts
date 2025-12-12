@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { registerSyntheticsTLSCheckRule } from './alert_rules/tls_rule/tls_rule';
 import { registerSyntheticsStatusCheckRule } from './alert_rules/status_rule/monitor_status_rule';
-import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from './types';
+import type { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from './types';
 import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
-import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
 import { syntheticsAppPublicRestApiRoutes, syntheticsAppRestApiRoutes } from './routes';
 
@@ -67,12 +67,12 @@ export const initSyntheticsServer = (
         router.versioned
           .get({
             access: 'public',
+            security,
             path: routeDefinition.path,
           })
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler
@@ -82,12 +82,12 @@ export const initSyntheticsServer = (
         router.versioned
           .put({
             access: 'public',
+            security,
             path: routeDefinition.path,
           })
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler
@@ -97,12 +97,12 @@ export const initSyntheticsServer = (
         router.versioned
           .post({
             access: 'public',
+            security,
             path: routeDefinition.path,
           })
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler
@@ -113,6 +113,7 @@ export const initSyntheticsServer = (
           .delete({
             access: 'public',
             path: routeDefinition.path,
+            security,
             options: {
               tags: options?.tags,
             },
@@ -120,7 +121,6 @@ export const initSyntheticsServer = (
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler

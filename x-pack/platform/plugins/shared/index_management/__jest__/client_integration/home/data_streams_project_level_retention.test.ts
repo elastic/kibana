@@ -15,8 +15,8 @@ import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 import { notificationService } from '../../../public/application/services/notification';
 
+import type { DataStreamsTabTestBed } from './data_streams_tab.helpers';
 import {
-  DataStreamsTabTestBed,
   setup,
   createDataStreamPayload,
   createDataStreamBackingIndex,
@@ -32,6 +32,7 @@ const urlServiceMock = {
         state: {},
       }),
       getUrl: async ({ policyName }: { policyName: string }) => `/test/${policyName}`,
+      getRedirectUrl: () => '/app/path',
       navigate: async () => {},
       useUrl: () => '',
     }),

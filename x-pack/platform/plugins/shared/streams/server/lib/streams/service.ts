@@ -6,59 +6,54 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
-import { StreamDefinition } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsPluginStartDependencies } from '../../types';
+import { createStreamsStorageClient } from './storage/streams_storage_client';
+import type { AssetClient } from './assets/asset_client';
+import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
-import { AssetClient } from './assets/asset_client';
-
-export const streamsStorageSettings = {
-  name: '.kibana_streams',
-  schema: {
-    properties: {
-      name: types.keyword(),
-      ingest: types.object({ enabled: false }),
-      group: types.object({ enabled: false }),
-    },
-  },
-} satisfies StorageSettings;
-
-export type StreamsStorageSettings = typeof streamsStorageSettings;
-export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, StreamDefinition>;
+import type { FeatureClient } from './feature/feature_client';
+import type { AttachmentClient } from './attachments/attachment_client';
 
 export class StreamsService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly isDev: boolean
   ) {}
 
   async getClientWithRequest({
     request,
     assetClient,
+    attachmentClient,
+    queryClient,
+    featureClient: featureClient,
   }: {
     request: KibanaRequest;
     assetClient: AssetClient;
+    attachmentClient: AttachmentClient;
+    queryClient: QueryClient;
+    featureClient: FeatureClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
-
-    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, StreamDefinition>(
-      scopedClusterClient.asInternalUser,
-      logger,
-      streamsStorageSettings
-    );
 
     return new StreamsClient({
       assetClient,
+      attachmentClient,
+      queryClient,
+      featureClient,
       logger,
       scopedClusterClient,
-      storageClient: storageAdapter.getClient(),
+      lockManager: new LockManagerService(this.coreSetup, logger),
+      storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),
+      request,
       isServerless,
+      isDev: this.isDev,
     });
   }
 }

@@ -13,11 +13,11 @@ import { StackAlertsPage } from './stack_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { createAppMockRenderer } from '../../test_utils';
 import { ruleTypesIndex } from '../../../mock/rule_types_index';
-import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 
-jest.mock('../../../lib/rule_api/rule_types');
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const mockLoadRuleTypes = jest
-  .mocked(loadRuleTypes)
+  .mocked(getRuleTypes)
   .mockResolvedValue(Array.from(ruleTypesIndex.values()));
 
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');

@@ -9,7 +9,7 @@
 
 import * as path from 'path';
 import { readFile } from 'fs/promises';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 import { checkMatchingMapping } from '../check_collector_integrity';
 
 export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: boolean) {

@@ -16,17 +16,19 @@ green=$(tput setaf 2)
 blue=$(tput setaf 4)
 yellow=$(tput setaf 3)
 
-while getopts ":s:r:" opt; do
+while getopts ":s:r:q:" opt; do
   case $opt in
     s) SRC_DIR="$OPTARG" ;;
     r) CODEQL_DIR="$OPTARG"; DATABASE_PATH="$CODEQL_DIR/database"; QUERY_OUTPUT="$DATABASE_PATH/results.sarif" ;;
+    q) QUERY_DIR="$OPTARG" ;;
     \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
     :) echo "Option -$OPTARG requires an argument." >&2; exit 1 ;;
   esac
 done
 
+
 if [ -z "$SRC_DIR" ]; then
-    echo "Usage: $0 -s <source_dir> [-r <results_dir>]"
+    echo "Usage: $0 -s <source_dir> [-r <results_dir>] [-q <query_dir>]"
     exit 1
 fi
 
@@ -73,8 +75,51 @@ fi
 
 echo "Analyzing a CodeQL database: $DATABASE_PATH"
 # Step 2: Run the Docker container to analyze the CodeQL database.
-docker run $PLATFORM_FLAG --rm -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
-    "codeql database analyze --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif /workspace/shared/codeql-db javascript-security-and-quality.qls"
+if [ -n "$QUERY_DIR" ]; then
+    # Resolve to absolute path
+    QUERY_DIR="$(cd "$(dirname "$QUERY_DIR")"; pwd)/$(basename "$QUERY_DIR")"
+    
+    if [ -f "$QUERY_DIR" ]; then
+        # Single .ql file - find the qlpack root directory
+        QUERY_FILE="$QUERY_DIR"
+        QLPACK_DIR="$(dirname "$QUERY_DIR")"
+        
+        # Walk up to find qlpack.yml
+        while [ "$QLPACK_DIR" != "/" ]; do
+            if [ -f "$QLPACK_DIR/qlpack.yml" ] || [ -f "$QLPACK_DIR/codeql-pack.yml" ]; then
+                break
+            fi
+            QLPACK_DIR="$(dirname "$QLPACK_DIR")"
+        done
+        
+        if [ "$QLPACK_DIR" = "/" ]; then
+            echo "${red}Error: Could not find qlpack.yml for query file${reset}"
+            exit 1
+        fi
+        
+        # Get relative path from qlpack root to query file
+        QUERY_REL_PATH="${QUERY_FILE#$QLPACK_DIR/}"
+        
+        echo "Using qlpack at: $QLPACK_DIR"
+        echo "Query: $QUERY_REL_PATH"
+        
+        docker run $PLATFORM_FLAG --rm \
+            -v "${DATABASE_PATH}":/workspace/shared \
+            -v "${QLPACK_DIR}":/workspace/queries $DOCKER_IMAGE \
+            "codeql database analyze /workspace/shared/codeql-db /workspace/queries/${QUERY_REL_PATH} --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif"
+    else
+        # Directory or qlpack - mount as-is
+        docker run $PLATFORM_FLAG --rm \
+            -v "${DATABASE_PATH}":/workspace/shared \
+            -v "${QUERY_DIR}":/workspace/queries $DOCKER_IMAGE \
+            "codeql database analyze /workspace/shared/codeql-db /workspace/queries --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif"
+    fi
+else
+    # Use default CodeQL queries
+    docker run $PLATFORM_FLAG --rm \
+        -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
+        "codeql database analyze /workspace/shared/codeql-db javascript-security-and-quality.qls githubsecuritylab/codeql-javascript-queries --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif --download"
+fi
 
 if [ $? -ne 0 ]; then
   echo "CodeQL database analysis failed."

@@ -6,14 +6,17 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { SystemPromptSettings, useSystemPromptUpdater } from './use_system_prompt_updater';
-import { FindPromptsResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
-import { ConversationsBulkActions, useFetchCurrentUserConversations } from '../../../..';
-import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
+import type { SystemPromptSettings } from './use_system_prompt_updater';
+import { useSystemPromptUpdater } from './use_system_prompt_updater';
+import type { FindPromptsResponse } from '@kbn/elastic-assistant-common';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import type { ConversationsBulkActions } from '../../../..';
+import { useFetchCurrentUserConversations } from '../../../..';
+import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
-import { FetchCurrentUserConversations } from '../../api';
+import type { FetchCurrentUserConversations } from '../../api';
 
 jest.mock('../../../..');
 const mockSetConversationsSettingsBulkActions = jest.fn();
@@ -160,7 +163,7 @@ describe('useSystemPromptUpdater', () => {
     });
   });
 
-  it('should delete a system prompt by ID', () => {
+  it('should delete a system prompt by ID', async () => {
     const { result } = renderHook(() => useSystemPromptUpdater(defaultParams), {
       wrapper: TestProviders,
     });
@@ -169,8 +172,19 @@ describe('useSystemPromptUpdater', () => {
       result.current.onSystemPromptSelect({ ...defaultPrompt, id: '1' });
     });
 
+    expect(result.current.selectedSystemPrompt).toEqual({
+      consumer: 'app-id',
+      content: '',
+      conversations: [],
+      id: '1',
+      name: 'New Prompt',
+      promptType: 'system',
+    });
     act(() => {
       result.current.onSystemPromptDelete('1');
+    });
+    await act(async () => {
+      await result.current.saveSystemPromptSettings();
     });
 
     expect(result.current.selectedSystemPrompt).toBeUndefined();

@@ -31,9 +31,9 @@ export const AlertReasonPanel: React.FC = memo(() => {
       justifyContent="spaceBetween"
       direction="column"
       gutterSize="none"
-      style={{ height: '100%' }}
+      css={{ height: '100%' }}
     >
-      <EuiFlexItem style={{ marginTop: '-15px' }}>
+      <EuiFlexItem css={{ marginTop: '-15px' }}>
         <AlertReason />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -9,7 +9,10 @@ paths:
       x-codegen-enabled: true
       operationId: ReadPrebuiltRulesAndTimelinesStatus
       summary: Retrieve the status of prebuilt detection rules and Timelines
-      description: Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+      description: |
+        Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
+      
+        This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
       tags:
         - Prebuilt Rules API
       responses:
@@ -57,3 +60,13 @@ paths:
                   - timelines_installed
                   - timelines_not_installed
                   - timelines_not_updated
+              examples:
+                example1:
+                  value:
+                    rules_custom_installed: 0
+                    rules_installed: 0
+                    rules_not_installed: 112
+                    rules_not_updated: 0
+                    timelines_installed: 0
+                    timelines_not_installed: 0
+                    timelines_not_updated: 0

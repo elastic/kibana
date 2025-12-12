@@ -10,7 +10,11 @@ import moment from 'moment';
 import { ReplaySubject } from 'rxjs';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import type {
+  DefendInsight,
+  DefendInsightsGetRequestQuery,
+  DefendInsightsPostRequestBody,
+} from '@kbn/elastic-assistant-common';
 import type { SearchHit, UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
@@ -145,7 +149,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -162,7 +165,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -187,7 +189,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
       expect(createDatastreamMock).toHaveBeenCalledTimes(1);
@@ -214,7 +215,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -250,8 +250,12 @@ describe('SecurityWorkflowInsightsService', () => {
         insight, // intentional dupe to confirm de-duping
       ];
 
-      const request = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
+      const request = { body: { insightType: workflowInsights[0].type } } as KibanaRequest<
+        unknown,
+        unknown,
+        DefendInsightsPostRequestBody
+      >;
 
       const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
@@ -277,8 +281,8 @@ describe('SecurityWorkflowInsightsService', () => {
         request
       );
 
-      // three since it calls securityWorkflowInsightsService.create + fetch
-      expect(isInitializedSpy).toHaveBeenCalledTimes(3);
+      // four since it calls fetch + update + fetch + create
+      expect(isInitializedSpy).toHaveBeenCalledTimes(4);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
         request,
@@ -311,7 +315,7 @@ describe('SecurityWorkflowInsightsService', () => {
       });
     });
 
-    it('should not index the doc if remediation exists', async () => {
+    it('should mark insight as remediated if remediation exists', async () => {
       await securityWorkflowInsightsService.start({
         esClient,
         registerDefendInsightsCallback: jest.fn(),
@@ -326,8 +330,17 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(remediationExistsMock).toHaveBeenCalledTimes(1);
 
       // two since it calls fetch as well
-      expect(isInitializedSpy).toHaveBeenCalledTimes(1);
-      expect(esClient.index).toHaveBeenCalledTimes(0);
+      expect(isInitializedSpy).toHaveBeenCalledTimes(2);
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            action: expect.objectContaining({
+              type: ActionType.Remediated,
+            }),
+          }),
+        })
+      );
     });
 
     it('should call update instead if insight already exists', async () => {
@@ -430,7 +443,7 @@ describe('SecurityWorkflowInsightsService', () => {
               },
               {
                 terms: {
-                  types: ['incompatible_antivirus'],
+                  type: ['incompatible_antivirus'],
                 },
               },
               {
@@ -488,6 +501,89 @@ describe('SecurityWorkflowInsightsService', () => {
         },
         size: searchParams.size,
         from: searchParams.from,
+      });
+    });
+  });
+
+  describe('agent space-awareness and lifecycle hooks', () => {
+    let request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
+
+    const setupWithMockFleet = () => {
+      const { ensureInCurrentSpace } = mockEndpointAppContextService.getInternalFleetServices();
+
+      securityWorkflowInsightsService.setup({
+        kibanaVersion: kibanaPackageJson.version,
+        logger,
+        endpointContext: mockEndpointAppContextService,
+      });
+
+      return { ensureInCurrentSpace };
+    };
+
+    beforeEach(async () => {
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
+
+      request = {} as KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
+    });
+
+    describe('ensureAgentIdsInCurrentSpace', () => {
+      it('should call fleetServices.ensureInCurrentSpace with correct agent IDs when feature is enabled', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, [
+          'agent-123',
+          'agent-456',
+        ]);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({
+          agentIds: ['agent-123', 'agent-456'],
+        });
+      });
+
+      it('should default to empty agentIds if none provided', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({ agentIds: [] });
+      });
+    });
+
+    describe('onBeforeCreate', () => {
+      it('should extract agent IDs from request body and ensure they’re in current space', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        const req = {
+          body: {
+            endpointIds: ['agent-A', 'agent-B'],
+          },
+        } as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
+
+        await securityWorkflowInsightsService.onBeforeCreate(req);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({
+          agentIds: ['agent-A', 'agent-B'],
+        });
+      });
+
+      it('should handle undefined request body gracefully', async () => {
+        const req = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
+
+        await expect(securityWorkflowInsightsService.onBeforeCreate(req)).resolves.not.toThrow();
+      });
+    });
+
+    describe('onAfterFetch', () => {
+      it('should forward agent IDs to ensureAgentIdsInCurrentSpace', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        const agentIds = ['agent-X', 'agent-Y'];
+        await securityWorkflowInsightsService.onAfterFetch(request, agentIds);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({ agentIds });
       });
     });
   });

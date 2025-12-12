@@ -7,28 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { StateComparators, ViewMode } from '@kbn/presentation-publishing';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
-import { DashboardState } from './types';
 
-export function initializeViewModeManager(
-  incomingEmbeddable?: EmbeddablePackageState,
-  savedObjectResult?: LoadDashboardReturn
-) {
+export function initializeViewModeManager({
+  incomingEmbeddables,
+  isManaged,
+  savedObjectId,
+}: {
+  incomingEmbeddables?: EmbeddablePackageState[];
+  isManaged: boolean;
+  savedObjectId?: string;
+}) {
   const dashboardBackupService = getDashboardBackupService();
   function getInitialViewMode() {
-    if (savedObjectResult?.managed || !getDashboardCapabilities().showWriteControls) {
+    if (isManaged || !getDashboardCapabilities().showWriteControls) {
       return 'view';
     }
 
     if (
-      incomingEmbeddable ||
-      savedObjectResult?.newDashboardCreated ||
-      dashboardBackupService.dashboardHasUnsavedEdits(savedObjectResult?.dashboardId)
+      incomingEmbeddables?.length ||
+      !Boolean(savedObjectId) ||
+      dashboardBackupService.dashboardHasUnsavedEdits(savedObjectId)
     )
       return 'edit';
 
@@ -39,7 +42,7 @@ export function initializeViewModeManager(
 
   function setViewMode(viewMode: ViewMode) {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
-    if (savedObjectResult?.managed && viewMode?.toLowerCase() === 'edit') {
+    if (isManaged && viewMode?.toLowerCase() === 'edit') {
       return;
     }
     viewMode$.next(viewMode);
@@ -50,14 +53,5 @@ export function initializeViewModeManager(
       viewMode$,
       setViewMode,
     },
-    comparators: {
-      viewMode: [
-        viewMode$,
-        setViewMode,
-        // When compared view mode is always considered unequal so that it gets backed up.
-        // view mode unsaved changes do not show unsaved badge
-        () => false,
-      ],
-    } as StateComparators<Pick<DashboardState, 'viewMode'>>,
   };
 }

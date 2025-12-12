@@ -16,7 +16,7 @@ const TEST_SETTINGS: SettingsConfig[] = [
   {
     name: 'test.foo',
     title: 'test',
-    description: 'test',
+    description: () => 'test',
     schema: z.boolean(),
     api_field: {
       name: 'test_foo',
@@ -25,11 +25,21 @@ const TEST_SETTINGS: SettingsConfig[] = [
   {
     name: 'test.foo.default_value',
     title: 'test',
-    description: 'test',
+    description: () => 'test',
     schema: z.string().default('test'),
     api_field: {
       name: 'test_foo_default_value',
     },
+  },
+  {
+    name: 'agent.internal',
+    title: 'test',
+    description: () => 'test',
+    schema: z.string(),
+    api_field: {
+      name: 'agent_internal',
+    },
+    type: 'yaml',
   },
 ];
 
@@ -70,6 +80,31 @@ describe('form_settings', () => {
         },
       } as any);
       expect(res).toEqual({ 'test.foo.default_value': 'test' });
+    });
+
+    it('dot not render empty values for agent policy (full agent policy)', () => {
+      const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
+        advanced_settings: {
+          test_foo_default_value: 'test',
+          test_foo_empty_value: '',
+        },
+      } as any);
+      expect(res).toEqual({ 'test.foo.default_value': 'test' });
+    });
+
+    it('render yaml values for agent policy (full agent policy)', () => {
+      const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
+        advanced_settings: {
+          agent_internal: 'agent:\n  internal:\n    runtime:\n      default: otel',
+        },
+      } as any);
+      expect(res).toEqual({
+        'agent.internal': {
+          runtime: {
+            default: 'otel',
+          },
+        },
+      });
     });
   });
 });

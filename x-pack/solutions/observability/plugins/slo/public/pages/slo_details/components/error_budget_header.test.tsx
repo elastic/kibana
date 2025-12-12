@@ -64,7 +64,7 @@ describe('In Dashboard Context', () => {
 
   it('does not render the "Error budget burn down" title', () => {
     const slo = buildSlo();
-    render(<ErrorBudgetHeader showTitle={false} isMouseOver={true} slo={slo} />);
+    render(<ErrorBudgetHeader hideTitle={true} isMouseOver={true} slo={slo} />);
     expect(screen.queryByTestId('errorBudgetPanelTitle')).toBeFalsy();
   });
 });

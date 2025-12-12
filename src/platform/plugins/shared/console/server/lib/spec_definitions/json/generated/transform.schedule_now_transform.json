@@ -17,7 +17,7 @@
     "patterns": [
       "_transform/{transform_id}/_schedule_now"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/schedule-now-transform.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-schedule-now-transform",
     "availability": {
       "stack": true,
       "serverless": true

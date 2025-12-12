@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
@@ -13,12 +12,12 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { StreamsTourProvider } from '../streams_tour';
 import { streamsAppRouter } from '../../routes/config';
-import { StreamsAppStartDependencies } from '../../types';
-import { StreamsAppServices } from '../../services/types';
-import { HeaderMenuPortal } from '../header_menu';
+import type { StreamsAppStartDependencies } from '../../types';
+import type { StreamsAppServices } from '../../services/types';
+import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 
 export function AppRoot({
   coreStart,
@@ -46,32 +45,16 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <RedirectAppLinks coreStart={coreStart}>
+      <StreamsTourProvider>
+        {/* @ts-expect-error upgrade typescript v5.4.5 */}
         <RouterProvider history={history} router={streamsAppRouter}>
-          <BreadcrumbsContextProvider>
-            <RouteRenderer />
-          </BreadcrumbsContextProvider>
-          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
+          <KbnUrlStateStorageFromRouterProvider>
+            <BreadcrumbsContextProvider>
+              <RouteRenderer />
+            </BreadcrumbsContextProvider>
+          </KbnUrlStateStorageFromRouterProvider>
         </RouterProvider>
-      </RedirectAppLinks>
+      </StreamsTourProvider>
     </StreamsAppContextProvider>
-  );
-}
-
-export function StreamsAppHeaderActionMenu({
-  appMountParameters,
-}: {
-  appMountParameters: AppMountParameters;
-}) {
-  const { setHeaderActionMenu, theme$ } = appMountParameters;
-
-  return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          <></>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </HeaderMenuPortal>
   );
 }

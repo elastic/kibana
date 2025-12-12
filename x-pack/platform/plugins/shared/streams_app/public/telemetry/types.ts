@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-interface StreamsAssetCountProps {
+import type { FeatureType } from '@kbn/streams-schema';
+import type { EnrichmentDataSource } from '../../common/url_schema';
+
+type StreamType = 'wired' | 'classic' | 'unknown';
+
+interface StreamsAttachmentCountProps {
   name: string;
   dashboards: number;
   slos?: number;
   rules?: number;
 }
 
-interface StreamsAssetClickEventProps {
+interface StreamsAttachmentClickEventProps {
   name: string;
-  asset_type: 'dashboard' | 'slo' | 'rule';
-  asset_id: string;
+  attachment_type: 'dashboard' | 'slo' | 'rule';
+  attachment_id: string;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
@@ -35,9 +40,136 @@ interface StreamsAIGrokSuggestionAcceptedProps {
   detected_fields: number;
 }
 
+interface StreamsAIDissectSuggestionLatencyProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  suggestion_count: number;
+  duration_ms: number;
+  match_rate: number[];
+}
+
+interface StreamsAIDissectSuggestionAcceptedProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  match_rate: number;
+  detected_fields: number;
+}
+
+interface WiredStreamsStatusChangedProps {
+  is_enabled: boolean;
+}
+
+interface StreamsProcessingSavedProps {
+  processors_count: number;
+  stream_type: StreamType;
+}
+
+interface StreamsRetentionChangedProps {
+  lifecycle_type: 'dsl' | 'ilm' | 'inherit';
+  lifecycle_value?: string;
+  stream_type: StreamType;
+}
+
+interface StreamsChildStreamCreatedProps {
+  name: string;
+}
+
+interface StreamsSchemaUpdatedProps {
+  stream_type: StreamType;
+}
+
+interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
+  duration_ms: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  count: number;
+  count_by_feature_type: Record<FeatureType, number>;
+  features_selected: number;
+  features_total: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsSignificantEventsCreatedProps {
+  count: number;
+  count_by_feature_type: Record<FeatureType, number>;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsFeatureIdentificationIdentifiedProps {
+  count: number;
+  count_by_type: Record<FeatureType, number>;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsFeatureIdentificationSavedProps {
+  count: number;
+  count_by_type: Record<FeatureType, number>;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsFeatureIdentificationDeletedProps {
+  count: number;
+  count_by_type: Record<FeatureType, number>;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsDescriptionGeneratedProps {
+  stream_name: string;
+  stream_type: StreamType;
+  input_tokens_used: number;
+  output_tokens_used: number;
+}
+
+interface StreamsProcessingSimulationSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
+  data_source_type: EnrichmentDataSource['type'];
+  duration_ms: number;
+}
+
+interface StreamsTabVisitedProps {
+  stream_name: string;
+  stream_type: StreamType;
+  tab_name: string;
+  privileges: {
+    manage: boolean;
+    monitor: boolean;
+    view_index_metadata: boolean;
+    lifecycle: boolean;
+    simulate: boolean;
+    text_structure: boolean;
+    read_failure_store: boolean;
+    manage_failure_store: boolean;
+  };
+}
+
 export {
-  type StreamsAssetCountProps,
-  type StreamsAssetClickEventProps,
+  type StreamsAttachmentCountProps,
+  type StreamsAttachmentClickEventProps,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
+  type StreamsAIDissectSuggestionLatencyProps,
+  type StreamsAIDissectSuggestionAcceptedProps,
+  type StreamsRetentionChangedProps,
+  type StreamsProcessingSavedProps,
+  type StreamsChildStreamCreatedProps,
+  type StreamsSchemaUpdatedProps,
+  type StreamsSignificantEventsSuggestionsGeneratedEventProps,
+  type StreamsSignificantEventsCreatedProps,
+  type WiredStreamsStatusChangedProps,
+  type StreamsFeatureIdentificationSavedProps,
+  type StreamsFeatureIdentificationIdentifiedProps,
+  type StreamsFeatureIdentificationDeletedProps,
+  type StreamsDescriptionGeneratedProps,
+  type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsTabVisitedProps,
 };

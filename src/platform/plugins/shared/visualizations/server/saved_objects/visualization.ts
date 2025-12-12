@@ -9,8 +9,8 @@
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsType } from '@kbn/core/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { SavedObjectsType } from '@kbn/core/server';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { CONTENT_ID } from '../../common/content_management';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 import { getInAppUrl } from './get_in_app_url';

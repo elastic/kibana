@@ -38,7 +38,8 @@ import type {
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
-import { navigateToUptime } from '../../lib/navigate_to_uptime';
+import { getUptimeUrl } from '../../lib/get_uptime_url';
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -52,6 +53,7 @@ export const NodeContextMenu = withEuiTheme(
   ({ options, currentTime, node, nodeType }: PropsWithTheme) => {
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
+    const { preferredSchema } = useWaffleOptionsContext();
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
@@ -101,8 +103,8 @@ export const NodeContextMenu = withEuiTheme(
     }, [nodeType, node.ip, node.id]);
 
     const nodeDetailMenuItemLinkProps = getAssetDetailUrl({
-      assetType: nodeType,
-      assetId: node.id,
+      entityType: nodeType,
+      entityId: node.id,
       search: {
         from: nodeDetailFrom,
         to: currentTime,
@@ -118,6 +120,10 @@ export const NodeContextMenu = withEuiTheme(
       },
     });
 
+    const uptimeMenuItemLinkUrl = showUptimeLink
+      ? getUptimeUrl({ uptimeLocator, nodeType, node })
+      : '';
+
     const nodeLogsMenuItem: SectionLinkProps = {
       label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
         defaultMessage: '{inventoryName} logs',
@@ -131,7 +137,6 @@ export const NodeContextMenu = withEuiTheme(
         timeRange: getTimeRange(currentTime),
       }),
       'data-test-subj': 'viewLogsContextMenuItem',
-      isDisabled: !showLogsLink,
     };
 
     const nodeDetailMenuItem: SectionLinkProps = {
@@ -140,8 +145,6 @@ export const NodeContextMenu = withEuiTheme(
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
       href: nodeDetailMenuItemLinkProps.href,
-      onClick: nodeDetailMenuItemLinkProps.onClick,
-      isDisabled: !showDetail,
     };
 
     const apmTracesMenuItem: SectionLinkProps = {
@@ -151,7 +154,6 @@ export const NodeContextMenu = withEuiTheme(
       }),
       ...apmTracesMenuItemLinkProps,
       'data-test-subj': 'viewApmTracesContextMenuItem',
-      isDisabled: !showAPMTraceLink,
     };
 
     const uptimeMenuItem: SectionLinkProps = {
@@ -159,8 +161,7 @@ export const NodeContextMenu = withEuiTheme(
         defaultMessage: '{inventoryName} in Uptime',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      onClick: () => (showUptimeLink ? navigateToUptime({ uptimeLocator, nodeType, node }) : {}),
-      isDisabled: !showUptimeLink,
+      href: uptimeMenuItemLinkUrl,
     };
 
     const createAlertMenuItem: SectionLinkProps = {
@@ -170,7 +171,6 @@ export const NodeContextMenu = withEuiTheme(
       onClick: () => {
         setFlyoutVisible(true);
       },
-      isDisabled: !showCreateAlertLink,
     };
 
     return (
@@ -196,18 +196,32 @@ export const NodeContextMenu = withEuiTheme(
               </SectionSubtitle>
             )}
             <SectionLinks>
-              <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-              <SectionLink
-                data-test-subj="viewAssetDetailsContextMenuItem"
-                {...nodeDetailMenuItem}
-              />
-              <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
-              <SectionLink {...uptimeMenuItem} color={'primary'} />
+              {showLogsLink && (
+                <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
+              )}
+              {showDetail && (
+                <SectionLink
+                  data-test-subj="viewAssetDetailsContextMenuItem"
+                  {...nodeDetailMenuItem}
+                />
+              )}
+              {showAPMTraceLink && (
+                <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
+              )}
+              {showUptimeLink && (
+                <SectionLink
+                  data-test-subj="viewApmUptimeContextMenuItem"
+                  {...uptimeMenuItem}
+                  color={'primary'}
+                />
+              )}
             </SectionLinks>
             <ActionMenuDivider />
-            <SectionLinks>
-              <SectionLink iconType={'bell'} color={'primary'} {...createAlertMenuItem} />
-            </SectionLinks>
+            {showCreateAlertLink && (
+              <SectionLinks>
+                <SectionLink iconType={'bell'} color={'primary'} {...createAlertMenuItem} />
+              </SectionLinks>
+            )}
           </Section>
         </div>
 
@@ -218,6 +232,7 @@ export const NodeContextMenu = withEuiTheme(
             nodeType={nodeType}
             setVisible={setFlyoutVisible}
             visible={flyoutVisible}
+            schema={preferredSchema}
           />
         )}
       </>

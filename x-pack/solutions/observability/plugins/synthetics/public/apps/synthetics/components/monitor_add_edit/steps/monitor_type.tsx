@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormMonitorType } from '../types';
+import type { FormMonitorType } from '../types';
 import { MONITOR_TYPE_CONFIG } from '../form/field_config';
 
 export const MonitorType = ({ monitorType }: { monitorType: FormMonitorType }) => {

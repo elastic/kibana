@@ -14,6 +14,7 @@ export const mockUseOnboardingSuccessCallout = (
     isOnboardingSuccessCalloutVisible: false,
     hideOnboardingSuccessCallout: jest.fn(),
     showOnboardingSuccessCallout: jest.fn(),
+    onAddIntegrationClick: jest.fn(),
     ...overrides,
   };
   return defaultMock;

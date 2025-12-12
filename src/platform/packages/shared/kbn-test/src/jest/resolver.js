@@ -70,11 +70,25 @@ module.exports = (request, options) => {
     });
   }
 
-  // This is a workaround to run tests with React 17 and the latest @testing-library/react
-  // This will be removed once we upgrade to React 18 and start transitioning to the Concurrent Mode
-  // Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
-  if (request === 'react-dom/client') {
-    return Path.resolve(__dirname, 'mocks/react_dom_client_mock.ts');
+  if (request === 'ts-api-utils') {
+    return resolve.sync('ts-api-utils/lib/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  if (request === 'zod' || request === 'zod/v3') {
+    return resolve.sync('zod/v3/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  if (request.startsWith('zod/v4/')) {
+    return resolve.sync(`zod/v4/index.cjs`, {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
   }
 
   if (request === `elastic-apm-node`) {

@@ -20,7 +20,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 #### FTR (CI)
 
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/fleet_cypress`
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/platform/test/fleet_cypress`
 
 ## Test Artifacts
 
@@ -153,7 +153,7 @@ Remember that minimizing the number of times the web page is loaded, we minimize
 
 ### Accessibility
 
-The `checkA11y({ skipFailures: false });` call uses [axe-core](https://github.com/dequelabs/axe-core) to perform a full page check for accessibility violations.
+The `checkA11y();` call uses [axe-core](https://github.com/dequelabs/axe-core) to perform a full page check for accessibility violations.
 
 See [axe-core](https://github.com/dequelabs/axe-core)'s documentation for details on what is checked for.
 

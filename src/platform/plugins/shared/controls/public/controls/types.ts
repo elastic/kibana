@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-
-import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import {
+import type { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import type {
   HasParentApi,
   HasType,
   HasUniqueId,
@@ -21,12 +19,12 @@ import {
   PublishesTitle,
   PublishesUnsavedChanges,
   PublishingSubject,
-  StateComparators,
 } from '@kbn/presentation-publishing';
+import type { ControlWidth } from '@kbn/controls-schemas';
 
-import { ControlWidth, DefaultControlState } from '../../common/types';
-import { ControlGroupApi } from '../control_group/types';
-import { CanClearSelections } from '../types';
+import type { DefaultControlState } from '../../common/types';
+import type { ControlGroupApi } from '../control_group/types';
+import type { CanClearSelections } from '../types';
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
@@ -43,13 +41,13 @@ export type DefaultControlApi = PublishesDataLoading &
   HasParentApi<ControlGroupApi> & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
-    grow: PublishingSubject<boolean | undefined>;
-    width: PublishingSubject<ControlWidth | undefined>;
+    grow$: PublishingSubject<boolean | undefined>;
+    width$: PublishingSubject<ControlWidth | undefined>;
   };
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parentApi' | 'type' | 'unsavedChanges$' | 'resetUnsavedChanges'
+  'uuid' | 'parentApi' | 'type'
 >;
 
 export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =
@@ -66,20 +64,18 @@ export interface ControlFactory<
   order?: number;
   getIconType: () => string;
   getDisplayName: () => string;
-  buildControl: (
-    initialState: State,
-    buildApi: (
-      apiRegistration: ControlApiRegistration<ControlApi>,
-      comparators: StateComparators<State>
-    ) => ControlApi,
-    uuid: string,
-    parentApi: ControlGroupApi
-  ) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
+  buildControl: ({
+    initialState,
+    finalizeApi,
+    uuid,
+    controlGroupApi,
+  }: {
+    initialState: State;
+    finalizeApi: (apiRegistration: ControlApiRegistration<ControlApi>) => ControlApi;
+    uuid: string;
+    controlGroupApi: ControlGroupApi;
+  }) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
-
-export type ControlStateManager<State extends object = object> = {
-  [key in keyof Required<State>]: BehaviorSubject<State[key]>;
-};
 
 export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,

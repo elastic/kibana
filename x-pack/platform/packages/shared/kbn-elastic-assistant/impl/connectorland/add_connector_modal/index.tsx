@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ActionType } from '@kbn/actions-plugin/common';
+import React, { Suspense } from 'react';
+import type { ActionType } from '@kbn/actions-plugin/common';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import {
+import type {
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -33,13 +33,15 @@ export const AddConnectorModal: React.FC<Props> = React.memo(
     actionTypeSelectorInline = false,
   }) => (
     <>
-      <ActionTypeSelectorModal
-        actionTypes={actionTypes}
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        onSelect={onSelectActionType}
-        actionTypeSelectorInline={actionTypeSelectorInline}
-      />
+      <Suspense fallback={null}>
+        <ActionTypeSelectorModal
+          actionTypes={actionTypes}
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onSelect={onSelectActionType}
+          actionTypeSelectorInline={actionTypeSelectorInline}
+        />
+      </Suspense>
       {selectedActionType && (
         <ConnectorAddModal
           actionType={selectedActionType}

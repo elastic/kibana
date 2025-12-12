@@ -13,6 +13,8 @@ import { act } from '@testing-library/react';
 
 class ApiRouteNotMocked extends Error {}
 
+const MOCK_REGISTERED_HANDLERS = Symbol('registered_mock_handlers');
+
 // Source: https://stackoverflow.com/a/43001581
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -82,7 +84,16 @@ const HTTP_METHODS: HttpMethods[] = ['delete', 'fetch', 'get', 'post', 'put', 'h
 
 export type ApiHandlerMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> = (
   http: jest.Mocked<HttpStart>,
-  options?: { ignoreUnMockedApiRouteErrors?: boolean }
+  options?: {
+    /**
+     * If an error should be thrown for an API route that might not have a mock defined for it.
+     * Set it to true during development to understand which APIs are being called an not handled.
+     * Default is `false`
+     */
+    ignoreUnMockedApiRouteErrors?: boolean;
+    /** Set to `true` during development to have additional logs in the run output */
+    debug?: boolean;
+  }
 ) => MockedApi<R>;
 
 interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> {
@@ -135,7 +146,13 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 ): ApiHandlerMock<R> => {
   return (http, options) => {
     let inflightApiCalls = 0;
-    const { ignoreUnMockedApiRouteErrors = false } = options ?? {};
+    const { ignoreUnMockedApiRouteErrors = false, debug = false } = options ?? {};
+    const log: (typeof console)['log'] = (...data) => {
+      if (debug) {
+        window.console.log('httpHandlerMockFactory(): ', ...data);
+      }
+    };
+
     const apiDoneListeners: Array<() => void> = [];
     const markApiCallAsInFlight = () => {
       inflightApiCalls++;
@@ -174,6 +191,8 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
     const mockedApiInterface: MockedApi<R> = {
       async waitForApi() {
+        log('waiting for all inflight apis to complete');
+
         await act(async () => {
           await new Promise<void>((resolve) => {
             if (inflightApiCalls > 0) {
@@ -191,11 +210,19 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
       const priorMockedFunction = http[method].getMockImplementation();
       const methodMocks = mocks.filter((mock) => mock.method === method);
 
+      // For debugging, store the list of mock handlers in the HTTP method
+      // @ts-expect-error TS7053: Element implicitly has an any type because expression of type unique symbol can't be used to index type
+      http[method][MOCK_REGISTERED_HANDLERS] = http[method][MOCK_REGISTERED_HANDLERS] ?? [];
+      // @ts-expect-error TS7053: Element implicitly has an any type because expression of type unique symbol can't be used to index type
+      http[method][MOCK_REGISTERED_HANDLERS].push(...methodMocks);
+
       http[method].mockImplementation(async (...args) => {
         const path = isHttpFetchOptionsWithPath(args[0]) ? args[0].path : args[0];
         const routeMock = methodMocks.find((handler) => pathMatchesPattern(handler.path, path));
 
         if (routeMock) {
+          log(`Found mock handler for route [${path}]: ${JSON.stringify(routeMock, null, 2)}`);
+
           // Use the handler defined for the HTTP Mocked interface (not the one passed on input to
           // the factory) for retrieving the response value because that one could have had its
           // response value manipulated by the individual test case.
@@ -222,6 +249,13 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
             return thisRouteResponseProvider(fetchOptions);
           } catch (err) {
             err.stack += `\n${testContextStackTrace}`;
+
+            log(
+              `API mock [${routeMock.id as string}] for route [${routeMock.method.toUpperCase()} ${
+                routeMock.path
+              }] threw an error (if unexpected, register API mocks with 'debug' set to true to get more info)`
+            );
+
             return Promise.reject(err);
           } finally {
             markApiCallAsHandled();

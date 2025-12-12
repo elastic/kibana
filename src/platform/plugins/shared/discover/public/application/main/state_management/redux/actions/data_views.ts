@@ -7,15 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { differenceBy } from 'lodash';
-import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import {
+  internalStateSlice,
+  type TabActionPayload,
+  type InternalStateThunkActionCreator,
+} from '../internal_state';
+import { selectTabRuntimeState } from '../runtime_state';
+import { createInternalStateAsyncThunk } from '../utils';
 
-export const setDataView: InternalStateThunkActionCreator<[DataView]> =
-  (dataView) =>
+export const loadDataViewList = createInternalStateAsyncThunk(
+  'internalState/loadDataViewList',
+  async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
+);
+
+export const setDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> =
+  ({ tabId, dataView }) =>
   (dispatch, _, { runtimeStateManager }) => {
-    dispatch(internalStateSlice.actions.setDataViewId(dataView.id));
-    runtimeStateManager.currentDataView$.next(dataView);
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+
+    if (dataView.id !== currentDataView$.getValue()?.id) {
+      dispatch(internalStateSlice.actions.setExpandedDoc({ expandedDoc: undefined }));
+    }
+
+    currentDataView$.next(dataView);
   };
 
 export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =

@@ -7,13 +7,16 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '..';
+import type {
+  OverviewStatusMetaData,
+  OverviewStatusState,
+} from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
 import {
   clearOverviewStatusErrorAction,
-  clearOverviewStatusState,
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
+  initialLoadReported,
 } from './actions';
 
 export interface OverviewStatusStateReducer {
@@ -23,6 +26,7 @@ export interface OverviewStatusStateReducer {
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
+  isInitialLoad: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -30,6 +34,7 @@ const initialState: OverviewStatusStateReducer = {
   loaded: false,
   status: null,
   error: null,
+  isInitialLoad: true,
 };
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
@@ -57,14 +62,11 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.error = action.payload;
       state.loading = false;
     })
-    .addCase(clearOverviewStatusState, (state, action) => {
-      state.status = null;
-      state.loading = false;
-      state.loaded = false;
-      state.error = null;
-    })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;
+    })
+    .addCase(initialLoadReported, (state) => {
+      state.isInitialLoad = false;
     });
 });
 

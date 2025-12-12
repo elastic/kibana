@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiConfirmModal } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, PureComponent } from 'react';
-import { Job } from '@kbn/reporting-public';
+import type { Job } from '@kbn/reporting-public';
 
 type DeleteFn = () => Promise<void>;
 
@@ -52,6 +52,7 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
 
   private renderConfirm() {
     const { jobsToDelete } = this.props;
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
 
     const title =
       jobsToDelete.length > 1
@@ -75,7 +76,9 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={title}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={() => this.hideConfirm()}
         onConfirm={() => this.performDelete()}
         confirmButtonText={confirmButtonText}

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -36,7 +36,6 @@
     "@kbn/i18n-react",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/test-jest-helpers",
     "@kbn/core-application-browser",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-button-exit-full-screen",
@@ -46,10 +45,8 @@
     "@kbn/core-custom-branding-browser",
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
-    "@kbn/shared-ux-button-toolbar",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/object-versioning",
     "@kbn/core-saved-objects-api-server",
     "@kbn/content-management-table-list-view",
     "@kbn/content-management-table-list-view-table",
@@ -79,11 +76,23 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-mount-utils-browser",
     "@kbn/visualization-utils",
-    "@kbn/std",
     "@kbn/core-rendering-browser",
     "@kbn/grid-layout",
     "@kbn/ui-actions-browser",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/std",
+    "@kbn/css-utils",
+    "@kbn/es-query-server",
+    "@kbn/data-service-server",
+    "@kbn/controls-schemas",
+    "@kbn/controls-constants",
+    "@kbn/presentation-util",
+    "@kbn/react-query",
+    "@kbn/core-http-server",
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

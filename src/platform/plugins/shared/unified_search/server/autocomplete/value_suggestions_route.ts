@@ -8,8 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import { firstValueFrom, Observable } from 'rxjs';
+import type { IRouter } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ConfigSchema } from '../config';
@@ -21,17 +22,17 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
     .post({
       path: '/internal/kibana/suggestions/values/{index}',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because uses the current user authorizations.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because uses the current user authorizations.',
-          },
-        },
         validate: {
           request: {
             params: schema.object(

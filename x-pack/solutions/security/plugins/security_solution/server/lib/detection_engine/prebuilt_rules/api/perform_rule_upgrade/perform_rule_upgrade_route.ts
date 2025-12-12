@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   PERFORM_RULE_UPGRADE_URL,
   PerformRuleUpgradeRequestBody,
@@ -18,14 +20,14 @@ import {
 } from '../../constants';
 import { performRuleUpgradeHandler } from './perform_rule_upgrade_handler';
 
-export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
+export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
       path: PERFORM_RULE_UPGRADE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
       options: {
@@ -44,6 +46,6 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
           },
         },
       },
-      performRuleUpgradeHandler
+      (context, request, response) => performRuleUpgradeHandler(context, request, response, logger)
     );
 };

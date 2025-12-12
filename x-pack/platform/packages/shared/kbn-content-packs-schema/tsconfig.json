@@ -1,0 +1,27 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/esql-utils",
+    "@kbn/dashboard-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/core",
+    "@kbn/es-query",
+    "@kbn/zod",
+    "@kbn/data-views-plugin",
+    "@kbn/streams-schema",
+    "@kbn/lens-common"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

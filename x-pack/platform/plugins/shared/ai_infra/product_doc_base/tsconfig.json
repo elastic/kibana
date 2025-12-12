@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -26,6 +26,10 @@
     "@kbn/licensing-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/inference-common",
-    "@kbn/security-authorization-core-common",
+    "@kbn/core-security-server",
+    "@kbn/ml-is-populated-object",
+    "@kbn/i18n",
+    "@kbn/licensing-types",
+    "@kbn/react-query"
   ]
 }

@@ -6,28 +6,29 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../../common/translations';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
   Field,
-  getUseField,
-  useFormData,
-  useForm,
   FIELD_TYPES,
   fieldValidators,
+  getUseField,
+  useForm,
+  useFormData,
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
+
 const CommonUseField = getUseField({ component: Field });
 
 type IndexPatternsEditActions =
@@ -149,7 +150,12 @@ const IndexPatternsFormComponent = ({
       )}
       {overwrite && (
         <EuiFormRow fullWidth>
-          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesIndexPatternsWarning">
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            size="s"
+            data-test-subj="bulkEditRulesIndexPatternsWarning"
+          >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWarningCallout"
               defaultMessage="You’re about to overwrite index patterns for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
@@ -170,7 +176,12 @@ const IndexPatternsFormComponent = ({
       )}
       {overwriteDataViews && (
         <EuiFormRow fullWidth>
-          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesDataViewsWarning">
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            size="s"
+            data-test-subj="bulkEditRulesDataViewsWarning"
+          >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setDataViewsOverwriteWarningCallout"
               defaultMessage="If you have selected rules which depend on a data view this action will force those rules to read from the index pattern as defined after this update, not the dataview, and may result in broken rules."
@@ -180,7 +191,12 @@ const IndexPatternsFormComponent = ({
       )}
       {editAction === BulkActionEditTypeEnum.delete_index_patterns && (
         <EuiFormRow fullWidth>
-          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesDataViewsWarning">
+          <EuiCallOut
+            announceOnMount={false}
+            color="warning"
+            size="s"
+            data-test-subj="bulkEditRulesDataViewsWarning"
+          >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPattnersDataViewsOverwriteWarningCallout"
               defaultMessage="If you have selected rules which depend on a data view this action will not have any effect on those rules."

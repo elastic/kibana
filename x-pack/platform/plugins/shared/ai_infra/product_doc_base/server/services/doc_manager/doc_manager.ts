@@ -9,7 +9,9 @@ import type { Logger } from '@kbn/logging';
 import type { CoreAuditService } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { InstallationStatus } from '../../../common/install_status';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   INSTALL_ALL_TASK_ID,
@@ -26,7 +28,10 @@ import type {
   DocInstallOptions,
   DocUninstallOptions,
   DocUpdateOptions,
+  DocUpdateAllOptions,
 } from './types';
+import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
+import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
 
@@ -62,10 +67,11 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.auditService = auditService;
   }
 
-  async install(options: DocInstallOptions = {}): Promise<void> {
+  async install(options: DocInstallOptions): Promise<void> {
     const { request, force = false, wait = false } = options;
+    const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
-    const { status } = await this.getStatus();
+    const { status } = await this.getStatus({ inferenceId });
     if (!force && status === 'installed') {
       return;
     }
@@ -78,11 +84,14 @@ export class DocumentationManager implements DocumentationManagerAPI {
     const taskId = await scheduleInstallAllTask({
       taskManager: this.taskManager,
       logger: this.logger,
+      inferenceId,
     });
 
     if (request) {
       this.auditService.asScoped(request).log({
-        message: `User is requesting installation of product documentation for AI Assistants. Task ID=[${taskId}]`,
+        message:
+          `User is requesting installation of product documentation for AI Assistants. Task ID=[${taskId}]` +
+          (inferenceId ? `| Inference ID=[${inferenceId}]` : ''),
         event: {
           action: 'product_documentation_create',
           category: ['database'],
@@ -101,17 +110,21 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async update(options: DocUpdateOptions = {}): Promise<void> {
-    const { request, wait = false } = options;
+  async update(options: DocUpdateOptions): Promise<void> {
+    const { request, wait = false, inferenceId, forceUpdate } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
       logger: this.logger,
+      inferenceId,
+      forceUpdate,
     });
 
     if (request) {
       this.auditService.asScoped(request).log({
-        message: `User is requesting update of product documentation for AI Assistants. Task ID=[${taskId}]`,
+        message:
+          `User is requesting update of product documentation for AI Assistants. Task ID=[${taskId}]` +
+          (inferenceId ? `| Inference ID=[${inferenceId}]` : ''),
         event: {
           action: 'product_documentation_update',
           category: ['database'],
@@ -130,12 +143,28 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async uninstall(options: DocUninstallOptions = {}): Promise<void> {
-    const { request, wait = false } = options;
+  async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
+    const { forceUpdate, inferenceIds } = options ?? {};
+    const idsToUpdate: string[] =
+      Array.isArray(inferenceIds) && inferenceIds?.length > 0
+        ? inferenceIds
+        : (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+    this.logger.info(
+      `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
+    );
+    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
+    return {
+      inferenceIds: idsToUpdate,
+    };
+  }
+
+  async uninstall(options: DocUninstallOptions): Promise<void> {
+    const { request, wait = false, inferenceId } = options;
 
     const taskId = await scheduleUninstallAllTask({
       taskManager: this.taskManager,
       logger: this.logger,
+      inferenceId,
     });
 
     if (request) {
@@ -159,10 +188,16 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async getStatus(): Promise<DocGetStatusResponse> {
+  /**
+   * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
+   */
+  async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
+    const taskId = isImpliedDefaultElserInferenceId(inferenceId)
+      ? INSTALL_ALL_TASK_ID
+      : INSTALL_ALL_TASK_ID_MULTILINGUAL;
     const taskStatus = await getTaskStatus({
       taskManager: this.taskManager,
-      taskId: INSTALL_ALL_TASK_ID,
+      taskId,
     });
     if (taskStatus !== 'not_scheduled') {
       const status = convertTaskStatus(taskStatus);
@@ -171,9 +206,65 @@ export class DocumentationManager implements DocumentationManagerAPI {
       }
     }
 
-    const installStatus = await this.docInstallClient.getInstallationStatus();
+    const installStatus = await this.docInstallClient.getInstallationStatus({ inferenceId });
     const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
-    return { status: overallStatus };
+    return { status: overallStatus, installStatus };
+  }
+
+  async getStatuses({
+    inferenceIds,
+  }: {
+    inferenceIds: string[];
+  }): Promise<Record<string, PerformUpdateResponse>> {
+    // check status after installation in case of failure
+    const statuses = await Promise.allSettled(
+      inferenceIds.map((inferenceId) =>
+        this.getStatus({
+          inferenceId,
+        })
+      )
+    );
+    const body = statuses.reduce<Record<string, PerformUpdateResponse>>(
+      (acc, installationStatus, index) => {
+        const inferenceId = inferenceIds[index];
+        // Handle internal server error
+        if (installationStatus.status === 'rejected') {
+          const failureReason = installationStatus.reason;
+          return {
+            ...acc,
+            [inferenceId]: {
+              installed: status === 'uninstalled',
+              ...(failureReason ? { failureReason: JSON.stringify(failureReason) } : {}),
+            },
+          };
+        }
+        if (installationStatus.status === 'fulfilled') {
+          const { status, installStatus } = installationStatus.value;
+
+          let failureReason = null;
+          // Check for real reason of previous installation failure
+          if (status === 'error' && installStatus) {
+            failureReason = Object.values(installStatus)
+              .filter(
+                (product: ProductInstallState) =>
+                  product.status === 'error' && product.failureReason
+              )
+              .map((product: ProductInstallState) => product.failureReason)
+              .join('\n');
+          }
+          return {
+            ...acc,
+            [inferenceId]: {
+              installed: status === 'installed',
+              ...(failureReason ? { failureReason } : {}),
+            } as PerformUpdateResponse,
+          };
+        }
+        return acc;
+      },
+      {}
+    );
+    return body;
   }
 }
 
@@ -194,7 +285,13 @@ const convertTaskStatus = (taskStatus: TaskStatus): InstallationStatus | 'unknow
 };
 
 const getOverallStatus = (statuses: InstallationStatus[]): InstallationStatus => {
-  const statusOrder: InstallationStatus[] = ['error', 'installing', 'uninstalled', 'installed'];
+  const statusOrder: InstallationStatus[] = [
+    'error',
+    'installing',
+    'uninstalling',
+    'uninstalled',
+    'installed',
+  ];
   for (const status of statusOrder) {
     if (statuses.includes(status)) {
       return status;

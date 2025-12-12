@@ -94,7 +94,7 @@ export const metricsExplorerRequestBodyOptionalFieldsRT = rt.partial({
   groupInstance: rt.union([groupByRT, rt.array(groupByRT)]),
   afterKey: rt.union([rt.string, rt.null, rt.undefined, afterKeyObjectRT]),
   limit: rt.union([rt.number, rt.null, rt.undefined]),
-  filterQuery: rt.union([rt.string, rt.null, rt.undefined]),
+  kuery: rt.string,
   forceInterval: rt.boolean,
   dropLastBucket: rt.boolean,
 });

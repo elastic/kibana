@@ -91,7 +91,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   }
 
   return (
-    <EuiToolTip content={VIEW_IN_DISCOVER}>
+    <EuiToolTip content={VIEW_IN_DISCOVER} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="discoverApp"
         aria-label={VIEW_IN_DISCOVER}

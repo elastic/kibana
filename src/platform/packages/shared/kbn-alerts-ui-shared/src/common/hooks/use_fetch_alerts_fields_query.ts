@@ -8,9 +8,10 @@
  */
 
 import { isSiemRuleType } from '@kbn/rule-data-utils';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
-import { fetchAlertsFields, FetchAlertsFieldsParams } from '../apis/fetch_alerts_fields';
+import type { FetchAlertsFieldsParams } from '../apis/fetch_alerts_fields';
+import { fetchAlertsFields } from '../apis/fetch_alerts_fields';
 
 export type UseFetchAlertsFieldsQueryParams = FetchAlertsFieldsParams;
 

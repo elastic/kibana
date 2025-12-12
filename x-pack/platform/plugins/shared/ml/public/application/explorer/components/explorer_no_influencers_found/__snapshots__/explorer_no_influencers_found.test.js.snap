@@ -1,13 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExplorerNoInfluencersFound snapshot 1`] = `
-<MemoizedFormattedMessage
-  defaultMessage="No {viewBySwimlaneFieldName} influencers found"
-  id="xpack.ml.explorer.noInfluencersFoundTitle"
-  values={
-    Object {
-      "viewBySwimlaneFieldName": "field_name",
-    }
-  }
-/>
+<div>
+  No field_name influencers found
+</div>
 `;

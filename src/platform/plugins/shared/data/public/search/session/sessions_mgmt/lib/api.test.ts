@@ -8,20 +8,17 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { SessionsClient } from '../../..';
 import { SearchSessionStatus } from '../../../../../common';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionsMgmtAPI } from './api';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
-let mockShareStart: jest.Mocked<SharePluginStart>;
 let mockConfig: SearchSessionsConfigSchema;
 let sessionsClient: SessionsClient;
 
@@ -29,7 +26,6 @@ describe('Search Sessions Management API', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
-    mockShareStart = sharePluginMock.createStartContract();
     mockConfig = {
       defaultExpiration: moment.duration('7d'),
       management: {
@@ -66,36 +62,79 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
-      expect(await api.fetchTableData()).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "actions": Array [
-              "inspect",
-              "rename",
-              "extend",
-              "delete",
-            ],
-            "appId": "pizza",
-            "created": undefined,
-            "errors": undefined,
-            "expires": undefined,
-            "id": "hello-pizza-123",
-            "idMapping": Array [],
-            "initialState": Object {},
-            "name": "Veggie",
-            "numSearches": 0,
-            "reloadUrl": undefined,
-            "restoreState": Object {},
-            "restoreUrl": undefined,
-            "status": "complete",
-            "version": undefined,
+
+      const { savedObjects: results, statuses } = await api.fetchTableData();
+      expect(results).toEqual([
+        {
+          id: 'hello-pizza-123',
+          attributes: {
+            name: 'Veggie',
+            appId: 'pizza',
+            initialState: {},
+            restoreState: {},
+            idMapping: [],
           },
-        ]
-      `);
+        },
+      ]);
+      expect(statuses['hello-pizza-123']).toEqual({ status: 'complete' });
+    });
+
+    test('fetchDataTable returns saved objects for a specific appId', async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return {
+          saved_objects: [
+            {
+              id: 'hello-pizza-123',
+              attributes: {
+                name: 'Veggie',
+                appId: 'pizza',
+                initialState: {},
+                restoreState: {},
+                idMapping: [],
+              },
+            },
+            {
+              id: 'hello-burguer-123',
+              attributes: {
+                name: 'Cheeseburguer',
+                appId: 'burguer',
+                initialState: {},
+                restoreState: {},
+                idMapping: [],
+              },
+            },
+          ],
+          statuses: {
+            'hello-pizza-123': { status: 'complete' },
+            'hello-burguer-123': { status: 'complete' },
+          },
+        };
+      });
+
+      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        notifications: mockCoreStart.notifications,
+        application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
+      });
+
+      const { savedObjects: results, statuses } = await api.fetchTableData({ appId: 'burguer' });
+      expect(results).toEqual([
+        {
+          id: 'hello-burguer-123',
+          attributes: {
+            name: 'Cheeseburguer',
+            appId: 'burguer',
+            initialState: {},
+            restoreState: {},
+            idMapping: [],
+          },
+        },
+      ]);
+      expect(statuses['hello-burguer-123']).toEqual({ status: 'complete' });
     });
 
     test('expired session is showed as expired', async () => {
@@ -121,22 +160,22 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
 
-      const res = await api.fetchTableData();
-      expect(res[0].status).toBe(SearchSessionStatus.EXPIRED);
+      const { savedObjects: res, statuses } = await api.fetchTableData();
+      expect(statuses[res[0].id]).toEqual({ status: 'expired' });
     });
 
     test('handle error from sessionsClient response', async () => {
       sessionsClient.find = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.fetchTableData();
 
@@ -163,14 +202,14 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.fetchTableData();
 
       expect(mockCoreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Fetching the Search Session info timed out after 1 seconds'
+        'Fetching the Background Search info timed out after 1 seconds'
       );
     });
   });
@@ -191,14 +230,14 @@ describe('Search Sessions Management API', () => {
 
     test('send cancel calls the cancel endpoint with a session ID', async () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'The search session was deleted.',
+        title: 'The background search was deleted.',
       });
     });
 
@@ -206,15 +245,15 @@ describe('Search Sessions Management API', () => {
       sessionsClient.delete = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
-        { title: 'Failed to delete the search session!' }
+        { title: 'Failed to delete the background search!' }
       );
     });
   });
@@ -235,9 +274,9 @@ describe('Search Sessions Management API', () => {
 
     test('send extend throws an error for now', async () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendExtend('my-id', '5d');
 
@@ -248,9 +287,9 @@ describe('Search Sessions Management API', () => {
     test('displays error on reject', async () => {
       sessionsClient.extend = jest.fn().mockRejectedValue({});
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendExtend('my-id', '5d');
 

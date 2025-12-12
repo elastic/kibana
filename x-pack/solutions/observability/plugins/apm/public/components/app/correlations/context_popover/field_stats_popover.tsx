@@ -264,7 +264,8 @@ export function FieldStatsPopover({
       content={i18n.translate(
         'xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent',
         {
-          defaultMessage: 'Show top 10 field values',
+          defaultMessage: 'Show top 10 field values for {fieldName}',
+          values: { fieldName },
         }
       )}
     >
@@ -276,7 +277,8 @@ export function FieldStatsPopover({
         aria-label={i18n.translate(
           'xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel',
           {
-            defaultMessage: 'Show top 10 field values',
+            defaultMessage: 'Show top 10 field values for {fieldName}',
+            values: { fieldName },
           }
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}

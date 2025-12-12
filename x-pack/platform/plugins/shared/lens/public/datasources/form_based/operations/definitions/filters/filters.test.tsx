@@ -14,9 +14,8 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fireEvent, screen } from '@testing-library/react';
-import type { FiltersIndexPatternColumn } from '.';
+import type { FiltersIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import { filtersOperation } from '..';
-import type { FormBasedLayer } from '../../../types';
 import { createMockedIndexPattern } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../../../test_utils/test_utils';
@@ -74,7 +73,6 @@ describe('filters', () => {
           label: 'filters',
           dataType: 'document',
           operationType: 'filters',
-          scale: 'ordinal',
           isBucketed: true,
           params: {
             filters: [
@@ -199,7 +197,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        scale: 'ordinal',
         isBucketed: true,
         params: {
           filters: [
@@ -236,7 +233,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        scale: 'ordinal',
         isBucketed: true,
         params: {
           filters: [
@@ -275,7 +271,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        scale: 'ordinal',
         isBucketed: true,
         params: {
           filters: [

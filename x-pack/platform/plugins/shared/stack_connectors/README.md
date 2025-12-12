@@ -408,13 +408,13 @@ Connectors that take URLs or hostnames should check that those values are allowe
 
 ## Documentation
 
-You should create asciidoc for the new connector type. Add an entry to the connector type index - [`docs/user/alerting/action-types.asciidoc`](../../../../../docs/user/alerting/action-types.asciidoc), which points to a new document for the connector type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
+You should create markdown docs for the new connector type. Add an entry to appropriate location in the table of content - [`docs/reference/toc.yml`](../../../../../docs/reference/toc.yml), which points to a new document for the connector type that should be in the [`docs/reference/connectors-kibana`](../../../../../docs/reference/connectors-kibana) directory.
 
-We suggest following the template provided in `docs/action-type-template.asciidoc`. The [Email action type](https://www.elastic.co/guide/en/kibana/master/email-action-type.html) is an example of documentation created following the template.
+We suggest following the template provided in `docs/action-type-template.md`. The [Email action type](https://www.elastic.co/docs/reference/kibana/connectors-kibana/email-action-type) is an example of documentation created following the template.
 
 ## Tests
 
-The connector type should have both unit tests and functional tests. For functional tests, if your connector interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service to test with. See the existing functional test servers in the directory [`x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server`](../../../../test/alerting_api_integration/common/plugins/actions_simulators/server)
+The connector type should have both unit tests and functional tests. For functional tests, if your connector interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service to test with. See the existing functional test servers in the directory [`x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server`](../../../../test/alerting_api_integration/common/plugins/actions_simulators/server)
 
 ## Connector type config and secrets
 

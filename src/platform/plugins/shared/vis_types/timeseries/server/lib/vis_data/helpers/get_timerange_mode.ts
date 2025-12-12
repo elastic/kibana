@@ -14,20 +14,20 @@ const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
 
 /**
  * Check if passed 'series' has overridden index pattern or not.
- * @private
+ * @internal
  */
 const hasOverriddenIndexPattern = (series?: Series) =>
   Boolean(series?.[OVERRIDE_INDEX_PATTERN_KEY]);
 
 /**
  * Get value of Time Range Mode for panel
- * @private
+ * @internal
  */
 const getPanelTimeRangeMode = (panel: Panel) => panel[TIME_RANGE_MODE_KEY];
 
 /**
  * Get value of Time Range Mode for series
- * @private
+ * @internal
  */
 const getSeriesTimeRangeMode = (series: Series) => series[TIME_RANGE_MODE_KEY];
 

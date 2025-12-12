@@ -8,10 +8,10 @@
  */
 
 import { SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createClassicNavRootProfileProvider } from './profile';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('classicNavRootProfileProvider', () => {
   const classicNavRootProfileProvider = createClassicNavRootProfileProvider(mockServices);

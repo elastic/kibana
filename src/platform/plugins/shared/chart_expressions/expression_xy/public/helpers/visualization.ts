@@ -13,7 +13,7 @@ import {
   REFERENCE_LINE_LAYER,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../../common/constants';
-import {
+import type {
   CommonXYLayerConfig,
   CommonXYDataLayerConfig,
   CommonXYReferenceLineLayerConfig,

@@ -6,9 +6,11 @@
  */
 
 import React, { useState } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDeleteSynonymRule } from '../../hooks/use_delete_synonym_rule';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface DeleteSynonymRuleModalProps {
   synonymsSetId: string;
@@ -23,6 +25,8 @@ export const DeleteSynonymRuleModal = ({
 }: DeleteSynonymRuleModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const onSuccess = () => {
     setIsLoading(false);
     closeDeleteModal();
@@ -34,17 +38,21 @@ export const DeleteSynonymRuleModal = ({
   };
 
   const { mutate: deleteEndpoint } = useDeleteSynonymRule(onSuccess, onError);
+  const usageTracker = useUsageTracker();
 
   const deleteOperation = () => {
     setIsLoading(true);
+    usageTracker?.click(AnalyticsEvents.rule_deleted);
     deleteEndpoint({ synonymsSetId, ruleId });
   };
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.searchSynonyms.deleteSynonymRuleModal.title', {
         defaultMessage: 'Delete synonym rule',
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeDeleteModal}
       onConfirm={deleteOperation}
       cancelButtonText={i18n.translate('xpack.searchSynonyms.deleteSynonymRuleModal.cancelButton', {

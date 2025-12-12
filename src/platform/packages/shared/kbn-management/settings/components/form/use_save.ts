@@ -7,20 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldDefinition } from '@kbn/management-settings-types';
+import type { UnsavedFieldChanges } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { UnsavedFieldChange } from '@kbn/management-settings-types';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from './services';
 
 export interface UseSaveParameters {
-  /** All {@link FieldDefinition} in the form. */
-  fields: FieldDefinition[];
   /** The function to invoke for clearing all unsaved changes. */
   clearChanges: () => void;
-  /** The {@link UiSettingsScope} of the unsaved changes. */
-  scope: UiSettingsScope;
 }
 
 /**
@@ -29,19 +23,17 @@ export interface UseSaveParameters {
  * @param params The {@link UseSaveParameters} to use.
  * @returns A function that will save all {@link UnsavedFieldChange} that are passed as an argument.
  */
-export const useSave = (params: UseSaveParameters) => {
+export const useSave = ({ clearChanges }: UseSaveParameters) => {
   const { saveChanges, showError, showReloadPagePrompt } = useServices();
 
-  return async (changes: Record<string, UnsavedFieldChange>) => {
+  return async (changes: UnsavedFieldChanges) => {
     if (isEmpty(changes)) {
       return;
     }
     try {
-      await saveChanges(changes, params.scope);
-      params.clearChanges();
-      const requiresReload = params.fields.some(
-        (setting) => Object.hasOwn(changes, setting.id) && setting.requiresPageReload
-      );
+      await saveChanges(changes);
+      clearChanges();
+      const requiresReload = Object.values(changes).some((change) => change.needsReload);
       if (requiresReload) {
         showReloadPagePrompt();
       }

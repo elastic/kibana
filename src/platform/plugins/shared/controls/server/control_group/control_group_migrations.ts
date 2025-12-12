@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import {
-  OPTIONS_LIST_CONTROL,
-  type ControlPanelsState,
-  type SerializedControlState,
-} from '../../common';
-import { OptionsListControlState } from '../../common/options_list';
-import { SerializableControlGroupState } from './types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import type { ControlPanelsState, SerializedControlState } from '../../common';
+import type { OptionsListControlState } from '../../common/options_list';
+import type { SerializableControlGroupState } from './types';
 
 export const makeControlOrdersZeroBased = (state: SerializableControlGroupState) => {
   if (

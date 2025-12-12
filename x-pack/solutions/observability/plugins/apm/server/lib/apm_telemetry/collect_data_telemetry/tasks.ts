@@ -10,14 +10,17 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq, without } from 'lodash';
 import type { SavedObjectsClient } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import {
+  type APMIndices,
+  APM_AGENT_CONFIGURATION_INDEX,
+} from '@kbn/apm-sources-access-plugin/server';
 import {
   AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
   OPEN_TELEMETRY_BASE_AGENT_NAMES,
   RUM_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils/src/agent_names';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
@@ -72,11 +75,15 @@ import type {
   MetricRollupIntervals,
   MetricSupportingRollUp,
 } from '../types';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import type { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
 import type { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
 import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../../common/custom_dashboards';
+import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import {
+  filterByAgent,
+  settingDefinitions,
+} from '../../../../common/agent_configuration/setting_definitions';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -540,7 +547,7 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'agent_configuration',
-    executor: async ({ indices, telemetryClient }) => {
+    executor: async ({ telemetryClient }) => {
       const agentConfigurationCount = await telemetryClient.search({
         index: APM_AGENT_CONFIGURATION_INDEX,
         size: 0,
@@ -554,6 +561,45 @@ export const tasks: TelemetryTask[] = [
             all: agentConfigurationCount.hits.total.value,
           },
         },
+      };
+    },
+  },
+  {
+    name: 'per_agent_config_settings',
+    executor: async ({ telemetryClient }) => {
+      const agentConfigurations = await telemetryClient.search({
+        index: APM_AGENT_CONFIGURATION_INDEX,
+        size: 1000,
+        timeout,
+        track_total_hits: true,
+      });
+
+      return {
+        per_agent_config_settings: agentConfigurations.hits.hits.map((hit) => {
+          const agentConfig = hit._source as AgentConfiguration;
+          const settingsDefinitionByAgent = settingDefinitions.filter(
+            filterByAgent(agentConfig.agent_name as AgentName)
+          );
+          const predefinedSettingsKeys = new Set();
+          settingsDefinitionByAgent.forEach((setting) => {
+            predefinedSettingsKeys.add(setting.key);
+          });
+          const predefinedSettings: string[] = [];
+          const advancedSettings: string[] = [];
+          Object.keys(agentConfig.settings).forEach((key) => {
+            if (predefinedSettingsKeys.has(key)) {
+              predefinedSettings.push(key);
+            } else {
+              advancedSettings.push(key);
+            }
+          });
+          return {
+            agent_name: agentConfig.agent_name,
+            has_error: !!agentConfig.error,
+            settings: predefinedSettings,
+            advanced_settings: advancedSettings,
+          };
+        }),
       };
     },
   },
@@ -726,12 +772,15 @@ export const tasks: TelemetryTask[] = [
         fields: asMutableArray([OBSERVER_VERSION] as const),
       });
 
-      const event = unflattenKnownApmEventFields(response.hits.hits[0]?.fields);
-      if (!event || !event.observer?.version) {
+      const fields = response.hits.hits[0]?.fields;
+
+      const observerVersion = fields && accessKnownApmEventFields(fields)[OBSERVER_VERSION];
+
+      if (!observerVersion) {
         return {};
       }
 
-      const [major, minor, patch] = event.observer.version.split('.').map((part) => Number(part));
+      const [major, minor, patch] = observerVersion.split('.').map((part) => Number(part));
 
       return {
         version: {

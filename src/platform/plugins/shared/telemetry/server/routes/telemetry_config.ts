@@ -10,10 +10,10 @@
 import { type Observable, firstValueFrom } from 'rxjs';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from '@kbn/core-http-server';
+import type { RequestHandler } from '@kbn/core-http-server';
 import { labelsSchema } from '../config/telemetry_labels';
 import type { TelemetryConfigType } from '../config';
-import { v2 } from '../../common/types';
+import type { v2 } from '../../common/types';
 import {
   FetchTelemetryConfigRoutePathBasedV2,
   FetchTelemetryConfigRoute,
@@ -100,17 +100,17 @@ export function registerTelemetryConfigRoutes({
       access: 'internal',
       path: FetchTelemetryConfigRoute,
       options: { authRequired: 'optional' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: v2Validations,
       },
       v2Handler
@@ -131,17 +131,22 @@ export function registerTelemetryConfigRoutes({
 
   // Register the deprecated public and path-based for BWC
   // as we know this one is used by other Elastic products to fetch the opt-in status.
-  router.versioned.get({ access: 'public', path: FetchTelemetryConfigRoutePathBasedV2 }).addVersion(
-    {
-      version: '2023-10-31',
+  router.versioned
+    .get({
+      access: 'public',
+      path: FetchTelemetryConfigRoutePathBasedV2,
       security: {
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
       },
-      validate: v2Validations,
-    },
-    v2Handler
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: v2Validations,
+      },
+      v2Handler
+    );
 }

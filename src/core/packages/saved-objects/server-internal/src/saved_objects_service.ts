@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, firstValueFrom, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
@@ -35,7 +36,9 @@ import type {
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
   SavedObjectsExtensions,
+  SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
+import { ENCRYPTION_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
   SavedObjectsSerializer,
@@ -64,9 +67,8 @@ import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
 
 /**
  * @internal
@@ -124,7 +126,7 @@ export class SavedObjectsService
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry = new SavedObjectTypeRegistry();
+  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -219,7 +221,7 @@ export class SavedObjectsService
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(applyTypeDefaults(type));
+        this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
@@ -307,6 +309,7 @@ export class SavedObjectsService
       const migrationStartTime = performance.now();
       await migrator.runMigrations();
       migrationDuration = Math.round(performance.now() - migrationStartTime);
+      this.logger.info(`Completed all migrations in ${migrationDuration}ms`);
     }
 
     const createRepository = (
@@ -363,6 +366,15 @@ export class SavedObjectsService
 
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
+      getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
+        const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
+        const extensions = this.getInternalExtensions(safeExcludedExtensions);
+        const repository = repositoryFactory.createInternalRepository(
+          includedHiddenTypes,
+          extensions
+        );
+        return new SavedObjectsClient(repository);
+      },
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
@@ -402,6 +414,42 @@ export class SavedObjectsService
     };
   }
 
+  private getInternalExtensions(excludedExtensions: string[] = []): SavedObjectsExtensions {
+    // For internal clients, we automatically exclude security extension to avoid user scoping
+    // and handle extensions that can work without a request context
+    const createExt = <T>(
+      extensionId: string,
+      extensionFactory?: SavedObjectsExtensionFactory<T | undefined>
+    ): T | undefined => {
+      if (excludedExtensions.includes(extensionId) || !extensionFactory) {
+        return undefined;
+      }
+
+      // Create a minimal request-like object for extensions that need it
+      // but don't require actual user context (like encryption/spaces)
+      // Using 'unknown' cast is intentional here as we're creating a minimal fake request
+      const internalRequest = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: { href: '/' },
+        raw: { req: { url: '/' } },
+      } as unknown as KibanaRequest;
+
+      return extensionFactory({
+        typeRegistry: this.typeRegistry,
+        request: internalRequest,
+      });
+    };
+
+    return {
+      encryptionExtension: createExt(ENCRYPTION_EXTENSION_ID, this.encryptionExtensionFactory),
+      securityExtension: undefined, // Always undefined for internal clients
+      spacesExtension: createExt(SPACES_EXTENSION_ID, this.spacesExtensionFactory),
+    };
+  }
+
   public async stop() {}
 
   private createMigrator(
@@ -425,6 +473,7 @@ export class SavedObjectsService
       waitForMigrationCompletion,
       nodeRoles: nodeInfo.roles,
       esCapabilities,
+      kibanaVersionCheck: '8.18.0', // enforce upgrades from a compatible Kibana version
     });
   }
 }

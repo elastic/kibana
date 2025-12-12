@@ -45,7 +45,7 @@
             "section": "def-common.YarnLock",
             "text": "YarnLock"
           },
-          ") => Map<string, { name: string; version: string; }>"
+          ", ignoreOptional: boolean) => Map<string, { name: string; version: string; }>"
         ],
         "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
         "deprecated": false,
@@ -87,6 +87,21 @@
                 "section": "def-common.YarnLock",
                 "text": "YarnLock"
               }
+            ],
+            "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/yarn-lock-validator",
+            "id": "def-common.findProductionDependencies.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreOptional",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
             "deprecated": false,

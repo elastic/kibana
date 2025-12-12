@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
@@ -18,17 +18,17 @@ export function initializeDeleteCustomElementRoute(deps: RouteInitializerDeps) {
       path: `${API_ROUTE_CUSTOM_ELEMENT}/{id}`,
 
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

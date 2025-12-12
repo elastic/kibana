@@ -13,13 +13,22 @@ export const scheduleBodySchema = schema.arrayOf(
   schema.object(
     {
       rule_id: schema.string(),
-      start: schema.string(),
-      end: schema.maybe(schema.string()),
+      ranges: schema.arrayOf(
+        schema.object({
+          start: schema.string(),
+          end: schema.string(),
+        })
+      ),
       run_actions: schema.maybe(schema.boolean()),
     },
     {
-      validate({ start, end }) {
-        return validateBackfillSchedule(start, end);
+      validate({ ranges }) {
+        const errors = ranges
+          .map((range) => validateBackfillSchedule(range.start, range.end))
+          .filter(Boolean);
+        if (errors.length > 0) {
+          return errors.join('\n');
+        }
       },
     }
   ),

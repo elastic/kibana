@@ -198,13 +198,6 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const RULE_NAME_OVERRIDE_DISABLED_FIELD_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleNameOverrideDisabledFieldDescription',
-  {
-    defaultMessage: 'Rule name will not be overridden',
-  }
-);
-
 export const THREAT_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFieldLabel',
   {
@@ -287,13 +280,6 @@ export const MACHINE_LEARNING_JOB_NOT_AVAILABLE = i18n.translate(
   {
     defaultMessage:
       'This job is currently unavailable. Please ensure that all related ML integrations are installed and configured.',
-  }
-);
-
-export const OPEN_HELP_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.machineLearning.mlJobNotAvailable.openHelpPopoverAriaLabel',
-  {
-    defaultMessage: 'Open help popover',
   }
 );
 
@@ -427,6 +413,21 @@ export const MODIFIED_PREBUILT_RULE_LABEL = i18n.translate(
   }
 );
 
+export const MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRulePerFieldLabel',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
+export const MODIFIED_FIELD_BADGE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.customizedPrebuiltRulePerFieldTooltipContent',
+  {
+    defaultMessage:
+      'This field has been modified from the original Elastic version. Click to open.',
+  }
+);
+
 export const QUERY_LANGUAGE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.queryLanguageLabel',
   {
@@ -473,5 +474,34 @@ export const HAS_RULE_UPDATE_CALLOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton',
   {
     defaultMessage: 'Review update',
+  }
+);
+
+export const MODIFIED_PREBUILT_DIFF_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleDiffTooltipTitle',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
+export const MODIFIED_PREBUILT_DIFF_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleDiffTooltipContent',
+  {
+    defaultMessage: 'This rule has been modified from the original Elastic version. Click to open.',
+  }
+);
+
+export const NO_BASE_VERSION_MODIFIED_PREBUILT_DIFF_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.noBaseVersionRuleDiffTooltipTitle',
+  {
+    defaultMessage: 'Unable to view rule diff',
+  }
+);
+
+export const NO_BASE_VERSION_MODIFIED_PREBUILT_DIFF_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.noBaseVersionRuleDiffTooltipContent',
+  {
+    defaultMessage:
+      "This rule hasn't been updated in a while and the original Elastic version cannot be found. We recommend updating this rule to the latest version.",
   }
 );

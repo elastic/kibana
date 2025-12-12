@@ -6,12 +6,14 @@
  */
 
 import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -31,6 +33,8 @@ import {
   FLEET_SETUP_LOCK_TYPE,
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
+
+import { SettingsSchemaV5, SettingsSchemaV6 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -103,6 +107,8 @@ import {
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
+import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
+import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_disable_browser_input';
 
 /*
  * Saved object types and mappings
@@ -169,6 +175,12 @@ export const getSavedObjectTypes = (
               is_preconfigured: { type: 'boolean', index: false },
             },
           },
+          action_secret_storage_requirements_met: { type: 'boolean' },
+          ilm_migration_status: {
+            dynamic: false,
+            properties: {},
+          },
+          ssl_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -203,6 +215,47 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+        4: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                action_secret_storage_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                ilm_migration_status: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV5,
+          },
+        },
+        6: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                ssl_secret_storage_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV6,
+          },
         },
       },
     },
@@ -669,6 +722,7 @@ export const getSavedObjectTypes = (
           policy_id: { type: 'keyword' },
           policy_ids: { type: 'keyword' },
           output_id: { type: 'keyword' },
+          cloud_connector_id: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },
@@ -689,12 +743,14 @@ export const getSavedObjectTypes = (
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
+          supports_cloud_connector: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
+          latest_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -875,6 +931,39 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '19': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                latest_revision: { type: 'boolean' },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillPackagePolicyLatestRevision,
+            },
+          ],
+        },
+        '20': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                supports_cloud_connector: { type: 'boolean' },
+                cloud_connector_id: { type: 'keyword' },
+              },
+            },
+          ],
+        },
+        '21': {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -912,6 +1001,7 @@ export const getSavedObjectTypes = (
           policy_id: { type: 'keyword' },
           policy_ids: { type: 'keyword' },
           output_id: { type: 'keyword' },
+          cloud_connector_id: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },
@@ -932,12 +1022,14 @@ export const getSavedObjectTypes = (
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
+          supports_cloud_connector: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
+          latest_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -977,6 +1069,39 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                latest_revision: { type: 'boolean' },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillPackagePolicyLatestRevision,
+            },
+          ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                cloud_connector_id: { type: 'keyword' },
+                supports_cloud_connector: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        '7': {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
+            },
+          ],
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -988,6 +1113,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           version: { type: 'keyword' },
@@ -1042,6 +1168,7 @@ export const getSavedObjectTypes = (
               },
             },
           },
+          previous_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1071,6 +1198,24 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 additional_spaces_installed_kibana: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                previous_version: { type: 'keyword' },
               },
             },
           ],
@@ -1251,6 +1396,95 @@ export const getSavedObjectTypes = (
         },
       },
     },
+    [CLOUD_CONNECTOR_SAVED_OBJECT_TYPE]: {
+      name: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          name: { type: 'keyword' },
+          namespace: { type: 'keyword' },
+          cloudProvider: { type: 'keyword' },
+          accountType: { type: 'keyword' },
+          vars: { type: 'flattened' },
+          packagePolicyCount: { type: 'integer' },
+          created_at: { type: 'date' },
+          updated_at: { type: 'date' },
+        },
+      },
+      modelVersions: {
+        1: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                name: { type: 'keyword' },
+                namespace: { type: 'keyword' },
+                cloudProvider: { type: 'keyword' },
+                vars: { type: 'flattened' },
+                packagePolicyCount: { type: 'integer' },
+                created_at: { type: 'date' },
+                updated_at: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                vars: schema.any(),
+                packagePolicyCount: schema.number(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
+        },
+        2: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                accountType: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                accountType: schema.maybe(schema.string()),
+                vars: schema.any(),
+                packagePolicyCount: schema.number(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
+              cloudProvider: schema.string(),
+              accountType: schema.maybe(schema.string()),
+              vars: schema.any(),
+              packagePolicyCount: schema.number(),
+              created_at: schema.string(),
+              updated_at: schema.string(),
+            }),
+          },
+        },
+      },
+    },
   };
 };
 
@@ -1273,15 +1507,14 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
   'channel_buffer_size',
 ]);
 
-// dangerouslyExposeValue added to allow the user with access to the SO to see and edit these values through the UI
+// Encrypted fields need to be retrieved using an EncryptedSavedObjectsClient.
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
-  { key: 'ssl', dangerouslyExposeValue: true },
-  { key: 'password', dangerouslyExposeValue: true },
+  { key: 'ssl' },
+  { key: 'password' },
+  { key: 'kibana_api_key' },
 ]);
 
-export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
-  { key: 'ssl', dangerouslyExposeValue: true },
-]);
+export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }]);
 
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
@@ -1310,7 +1543,7 @@ export function registerEncryptedSavedObjects(
   });
   encryptedSavedObjects.registerType({
     type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToEncrypt: new Set([{ key: 'ssl' }]),
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });

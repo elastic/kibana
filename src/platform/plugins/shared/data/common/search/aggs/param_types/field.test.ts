@@ -10,7 +10,7 @@
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../..';
-import { IAggConfig } from '../agg_config';
+import type { IAggConfig } from '../agg_config';
 
 describe('Field', () => {
   const indexPattern = {

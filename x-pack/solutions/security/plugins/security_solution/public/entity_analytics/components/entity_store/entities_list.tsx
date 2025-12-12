@@ -26,7 +26,7 @@ import { useEntitiesListQuery } from './hooks/use_entities_list_query';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
 import type { EntitySourceTag } from './types';
-import { useStoreEntityTypes } from '../../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -37,7 +37,7 @@ export const EntitiesList: React.FC = () => {
     field: '@timestamp',
     direction: Direction.desc,
   });
-  const entityTypes = useStoreEntityTypes();
+  const entityTypes = useEntityStoreTypes();
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
   const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);

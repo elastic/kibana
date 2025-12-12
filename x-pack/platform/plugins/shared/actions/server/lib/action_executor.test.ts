@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -25,14 +25,26 @@ import {
   asBackgroundTaskExecutionSource,
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
+  isSavedObjectExecutionSource,
 } from './action_execution_source';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import type { ConnectorRateLimiter } from './connector_rate_limiter';
+import { createMockInMemoryConnector } from '../application/connector/mocks';
 
-const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
+const mockRateLimiterLog = jest.fn();
+const mockRateLimiterIsRateLimited = jest.fn().mockReturnValue(false);
+
+const connectorRateLimiter = {
+  logsByConnectors: new Map([]),
+  log: mockRateLimiterLog,
+  isRateLimited: mockRateLimiterIsRateLimited,
+} as unknown as ConnectorRateLimiter;
+
+const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true, connectorRateLimiter });
 const services = actionsMock.createServices();
 const unsecuredServices = actionsMock.createUnsecuredServices();
 
@@ -80,7 +92,7 @@ const actionExecutorInitializationParams = {
   eventLogger,
   getActionsAuthorizationWithRequest,
   inMemoryConnectors: [
-    {
+    createMockInMemoryConnector({
       id: 'preconfigured',
       name: 'Preconfigured',
       actionTypeId: 'test',
@@ -91,19 +103,14 @@ const actionExecutorInitializationParams = {
         apiKey: 'abc',
       },
       isPreconfigured: true,
-      isDeprecated: false,
-      isSystemAction: false,
-    },
-    {
+    }),
+    createMockInMemoryConnector({
       actionTypeId: '.cases',
       config: {},
       id: 'system-connector-.cases',
       name: 'System action: .cases',
       secrets: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: true,
-    },
+    }),
   ],
 };
 actionExecutor.initialize(actionExecutorInitializationParams);
@@ -114,11 +121,27 @@ const connectorType: jest.Mocked<ConnectorType> = {
   minimumLicenseRequired: 'basic',
   supportedFeatureIds: ['alerting'],
   validate: {
-    config: { schema: schema.object({ bar: schema.boolean() }) },
-    secrets: { schema: schema.object({ baz: schema.boolean() }) },
-    params: { schema: schema.object({ foo: schema.boolean() }) },
+    config: { schema: z.object({ bar: z.boolean() }) },
+    secrets: { schema: z.object({ baz: z.boolean() }) },
+    params: { schema: z.object({ foo: z.boolean() }) },
   },
   executor: jest.fn(),
+};
+
+const connectorTypeWithGlobalHeaders: jest.Mocked<ConnectorType> = {
+  id: 'test-with-global-headers',
+  name: 'Test with Global Headers',
+  minimumLicenseRequired: 'basic',
+  supportedFeatureIds: ['alerting'],
+  validate: {
+    config: { schema: z.object({ bar: z.boolean() }) },
+    secrets: { schema: z.object({ baz: z.boolean() }) },
+    params: { schema: z.object({ foo: z.boolean() }) },
+  },
+  executor: jest.fn(),
+  globalAuthHeaders: {
+    'x-custom-header': 'custom-header-value',
+  },
 };
 
 const systemConnectorType: jest.Mocked<ConnectorType> = {
@@ -128,9 +151,9 @@ const systemConnectorType: jest.Mocked<ConnectorType> = {
   supportedFeatureIds: ['alerting'],
   isSystemActionType: true,
   validate: {
-    config: { schema: schema.any() },
-    secrets: { schema: schema.any() },
-    params: { schema: schema.any() },
+    config: { schema: z.any() },
+    secrets: { schema: z.any() },
+    params: { schema: z.any() },
   },
   executor: jest.fn(),
 };
@@ -142,9 +165,9 @@ const subFeatureConnectorType: jest.Mocked<ConnectorType> = {
   supportedFeatureIds: ['siem'],
   subFeature: 'endpointSecurity',
   validate: {
-    config: { schema: schema.any() },
-    secrets: { schema: schema.any() },
-    params: { schema: schema.any() },
+    config: { schema: z.any() },
+    secrets: { schema: z.any() },
+    params: { schema: z.any() },
   },
   executor: jest.fn(),
 };
@@ -342,6 +365,41 @@ describe('Action Executor', () => {
 
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, execStartDoc);
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, execDoc);
+
+      expect(mockRateLimiterLog).toHaveBeenCalledTimes(1);
+      expect(mockRateLimiterLog).toBeCalledWith('test');
+    });
+
+    test(`successfully  ${label} with any defined auth headers`, async () => {
+      mockGetRequestBodyByte.mockReturnValue(300);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorTypeWithGlobalHeaders);
+
+      if (executeUnsecure) {
+        await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        await actionExecutor.execute(executeParams);
+      }
+
+      expect(connectorTypeWithGlobalHeaders.executor).toHaveBeenCalledWith({
+        actionId: CONNECTOR_ID,
+        services: expect.anything(),
+        config: {
+          bar: true,
+        },
+        secrets: {
+          baz: true,
+        },
+        params: { foo: true },
+        logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        globalAuthHeaders: {
+          'x-custom-header': 'custom-header-value',
+        },
+        ...(executeUnsecure ? {} : { source: SOURCE }),
+      });
     });
 
     for (const executionSource of [
@@ -417,6 +475,10 @@ describe('Action Executor', () => {
 
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
           ...execStartDoc,
+          ...(isSavedObjectExecutionSource(executionSource.source) &&
+          executionSource.source.source.type === 'alert'
+            ? { rule: { id: executionSource.source.source.id } }
+            : {}),
           kibana: {
             ...execStartDoc.kibana,
             action: {
@@ -430,6 +492,10 @@ describe('Action Executor', () => {
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
           ...execDoc,
+          ...(isSavedObjectExecutionSource(executionSource.source) &&
+          executionSource.source.source.type === 'alert'
+            ? { rule: { id: executionSource.source.source.id } }
+            : {}),
           kibana: {
             ...execDoc.kibana,
 
@@ -449,9 +515,9 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: schema.object({ bar: schema.string() }) },
-          secrets: { schema: schema.object({ apiKey: schema.string() }) },
-          params: { schema: schema.object({ foo: schema.boolean() }) },
+          config: { schema: z.object({ bar: z.string() }) },
+          secrets: { schema: z.object({ apiKey: z.string() }) },
+          params: { schema: z.object({ foo: z.boolean() }) },
         },
       });
 
@@ -808,9 +874,9 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({ foo: schema.boolean() }) },
+          config: { schema: z.object({}) },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({ foo: z.boolean() }) },
         },
       });
 
@@ -836,11 +902,11 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({ foo: schema.boolean() }) },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({ foo: z.boolean() }) },
           config: {
-            schema: schema.object({
-              param1: schema.string(),
+            schema: z.object({
+              param1: z.string(),
             }),
           },
         },
@@ -854,9 +920,32 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+        message: `error validating connector type config: Required`,
         errorSource: TaskErrorSource.FRAMEWORK,
       });
+    });
+
+    test(`${label} returns error when the connector is rate limited`, async () => {
+      mockRateLimiterIsRateLimited.mockReturnValueOnce(true);
+      mockGetRequestBodyByte.mockReturnValue(300);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      const result = executeUnsecure
+        ? await actionExecutor.executeUnsecured(executeUnsecuredParams)
+        : await actionExecutor.execute(executeParams);
+
+      expect(result).toEqual({
+        actionId: '1',
+        status: 'error',
+        retry: true,
+        message: `Action execution rate limit exceeded for connector: test`,
+        errorSource: TaskErrorSource.USER,
+      });
+
+      expect(mockRateLimiterLog).not.toHaveBeenCalled();
     });
 
     test(`${label} returns error when connector is invalid`, async () => {
@@ -872,9 +961,9 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          secrets: { schema: schema.object({}) },
-          config: { schema: schema.object({}) },
-          params: { schema: schema.object({ foo: schema.boolean() }) },
+          secrets: { schema: z.object({}) },
+          config: { schema: z.object({}) },
+          params: { schema: z.object({ foo: z.boolean() }) },
           connector: () => {
             return 'error';
           },
@@ -889,7 +978,8 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action type connector: config must be defined`,
+        message: `error validating connector type config: Required`,
+
         errorSource: TaskErrorSource.FRAMEWORK,
       });
     });
@@ -905,11 +995,11 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
+          config: { schema: z.object({}) },
+          secrets: { schema: z.object({}) },
           params: {
-            schema: schema.object({
-              param1: schema.string(),
+            schema: z.object({
+              param1: z.string(),
             }),
           },
         },
@@ -923,7 +1013,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+        message: `error validating action params: Field \"param1\": Required`,
         errorSource: TaskErrorSource.USER,
       });
     });
@@ -1033,7 +1123,10 @@ describe('Action Executor', () => {
     });
 
     test(`${label} throws error if isESOCanEncrypt is false`, async () => {
-      const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+      const customActionExecutor = new ActionExecutor({
+        isESOCanEncrypt: false,
+        connectorRateLimiter,
+      });
       customActionExecutor.initialize({
         ...actionExecutorInitializationParams,
         inMemoryConnectors: [],
@@ -1054,15 +1147,18 @@ describe('Action Executor', () => {
     });
 
     test(`${label} does not throw error if isESOCanEncrypt is false but connector is preconfigured`, async () => {
-      const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+      const customActionExecutor = new ActionExecutor({
+        isESOCanEncrypt: false,
+        connectorRateLimiter,
+      });
       customActionExecutor.initialize(actionExecutorInitializationParams);
 
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: schema.object({ bar: schema.string() }) },
-          secrets: { schema: schema.object({ apiKey: schema.string() }) },
-          params: { schema: schema.object({ foo: schema.boolean() }) },
+          config: { schema: z.object({ bar: z.string() }) },
+          secrets: { schema: z.object({ apiKey: z.string() }) },
+          params: { schema: z.object({ foo: z.boolean() }) },
         },
       });
 
@@ -1161,7 +1257,10 @@ describe('Action Executor', () => {
 
     test(`${label} does not throw error if isESOCanEncrypt is false but connector is a system action`, async () => {
       if (executeUnsecure) return;
-      const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+      const customActionExecutor = new ActionExecutor({
+        isESOCanEncrypt: false,
+        connectorRateLimiter,
+      });
       customActionExecutor.initialize(actionExecutorInitializationParams);
 
       connectorTypeRegistry.get.mockReturnValueOnce(systemConnectorType);
@@ -1706,6 +1805,7 @@ describe('Event log', () => {
       ...mockUser,
       authentication_type: 'api_key',
       api_key: {
+        managed_by: 'elasticsearch',
         id: '456',
         name: 'test api key',
       },
@@ -1846,9 +1946,9 @@ describe('Event log', () => {
 
   test('writes usage data to event log for streaming OpenAI events', async () => {
     const executorMock = setupActionExecutorMock('.gen-ai', {
-      params: { schema: schema.any() },
-      config: { schema: schema.any() },
-      secrets: { schema: schema.any() },
+      params: { schema: z.any() },
+      config: { schema: z.any() },
+      secrets: { schema: z.any() },
     });
 
     const stream = new PassThrough();

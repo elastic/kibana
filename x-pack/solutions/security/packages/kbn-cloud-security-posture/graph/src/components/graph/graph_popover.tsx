@@ -7,8 +7,7 @@
 
 import React, { type PropsWithChildren } from 'react';
 import type { CommonProps, EuiWrappingPopoverProps } from '@elastic/eui';
-import { EuiWrappingPopover, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiWrappingPopover } from '@elastic/eui';
 
 export interface GraphPopoverProps
   extends PropsWithChildren,
@@ -29,8 +28,6 @@ export const GraphPopover = ({
   children,
   ...rest
 }: GraphPopoverProps) => {
-  const { euiTheme } = useEuiTheme();
-
   if (!anchorElement) {
     return null;
   }
@@ -38,16 +35,6 @@ export const GraphPopover = ({
   return (
     <EuiWrappingPopover
       {...rest}
-      panelProps={{
-        css: css`
-          .euiPopover__arrow {
-            --euiPopoverBackgroundColor: ${euiTheme.colors?.body};
-          }
-
-          background-color: ${euiTheme.colors?.body};
-        `,
-      }}
-      color={euiTheme.colors?.body}
       isOpen={isOpen}
       closePopover={closePopover}
       button={anchorElement}

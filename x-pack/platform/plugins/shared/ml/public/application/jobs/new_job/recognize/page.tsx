@@ -46,6 +46,7 @@ import type { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';
+import { PageTitle } from '../../../components/page_title';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -288,16 +289,21 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.newJob.recognize.newJobFromTitle"
-          defaultMessage="New job from {pageTitle}"
-          values={{ pageTitle }}
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.newJob.recognize.newJobFromTitle"
+              defaultMessage="New job from {pageTitle}"
+              values={{ pageTitle }}
+            />
+          }
         />
       </MlPageHeader>
 
       {displayQueryWarning && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.searchWillBeOverwrittenLabel"

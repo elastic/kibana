@@ -6,7 +6,10 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { ToolCallsOf, ToolOptions } from './tools';
+import type { Deanonymization } from './anonymization';
+import type { Message } from './messages';
+import type { ToolOptions } from './tools';
+import type { ToolCallOfToolOptions } from './tools_of';
 
 /**
  * List possible values of {@link ChatCompletionEvent} types.
@@ -30,12 +33,19 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       content: string;
       /**
-       * The eventual tool calls performed by the LLM.
+       * Optional deanonymized input messages metadata
        */
-      toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+      deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+      /**
+       * Optional deanonymized output metadata
+       */
+      deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+      /**
+       * Tool calls from the LLM
+       */
+      toolCalls: ToolCallOfToolOptions<TToolOptions>[];
     }
   >;
-
 /**
  * Represent a partial tool call present in a chunk event.
  *
@@ -78,6 +88,14 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
+    /**
+     * Optional deanonymized input messages metadata
+     */
+    deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+    /**
+     * Optional deanonymized output metadata
+     */
+    deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
   }
 >;
 
@@ -97,6 +115,10 @@ export interface ChatCompletionTokenCount {
    * Total token count
    */
   total: number;
+  /**
+   * Cached prompt tokens
+   */
+  cached?: number;
 }
 
 /**

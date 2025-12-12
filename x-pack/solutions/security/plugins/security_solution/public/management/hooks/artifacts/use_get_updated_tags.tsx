@@ -9,9 +9,11 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { useCallback } from 'react';
 import type { TagFilter } from '../../../../common/endpoint/service/artifacts/utils';
 import {
+  isAdvancedModeTag,
   isOwnerSpaceIdTag,
   isFilterProcessDescendantsTag,
   isPolicySelectionTag,
+  isTrustedProcessDescendantsTag,
 } from '../../../../common/endpoint/service/artifacts/utils';
 
 interface TagFiltersType {
@@ -23,6 +25,8 @@ type GetTagsUpdatedBy<TagFilters> = (tagType: keyof TagFilters, newTags: string[
 const DEFAULT_FILTERS = Object.freeze({
   policySelection: isPolicySelectionTag,
   processDescendantsFiltering: isFilterProcessDescendantsTag,
+  trustedProcessDescendants: isTrustedProcessDescendantsTag,
+  advancedMode: isAdvancedModeTag,
   ownerSpaceId: isOwnerSpaceIdTag,
 } as const);
 

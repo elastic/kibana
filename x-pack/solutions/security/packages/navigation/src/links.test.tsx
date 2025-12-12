@@ -6,16 +6,7 @@
  */
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
-import {
-  useGetLinkUrl,
-  useGetLinkProps,
-  withLink,
-  isSecurityId,
-  getAppIdsFromId,
-  formatPath,
-  isModified,
-  concatPaths,
-} from './links';
+import { useGetLinkUrl, useGetLinkProps, withLink, formatPath, isModifiedEvent } from './links';
 import { mockGetAppUrl, mockNavigateTo } from '../mocks/navigation';
 
 jest.mock('./navigation');
@@ -102,89 +93,6 @@ describe('links', () => {
     });
   });
 
-  describe('isSecurityId', () => {
-    it('should return false for an external id', () => {
-      const id = 'externalAppId:12345';
-      const result = isSecurityId(id);
-      expect(result).toBe(false);
-    });
-
-    it('should return true for an internal id', () => {
-      const id = 'internalId';
-      const result = isSecurityId(id);
-      expect(result).toBe(true);
-    });
-
-    it('should return false for a root external id', () => {
-      const id = 'externalAppId:';
-      const result = isSecurityId(id);
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('getAppIdsFromId', () => {
-    it('should return the correct app and deep link ids for an external id', () => {
-      const id = 'externalAppId:12345';
-      const result = getAppIdsFromId(id);
-      expect(result).toEqual(
-        expect.objectContaining({ appId: 'externalAppId', deepLinkId: '12345' })
-      );
-    });
-
-    it('should return the correct deep link id for an internal id', () => {
-      const id = 'internalId';
-      const result = getAppIdsFromId(id);
-      expect(result).toEqual(expect.objectContaining({ deepLinkId: 'internalId' }));
-    });
-
-    it('should return the correct app id for a root external id', () => {
-      const id = 'externalAppId:';
-      const result = getAppIdsFromId(id);
-      expect(result).toEqual(expect.objectContaining({ appId: 'externalAppId', deepLinkId: '' }));
-    });
-
-    it('should return the correct path', () => {
-      expect(getAppIdsFromId('externalAppId:12345')).toEqual({
-        appId: 'externalAppId',
-        deepLinkId: '12345',
-        path: '',
-      });
-
-      expect(getAppIdsFromId('externalAppId:/some/path')).toEqual({
-        appId: 'externalAppId',
-        deepLinkId: '',
-        path: '/some/path',
-      });
-
-      expect(getAppIdsFromId('externalAppId:12345/some/path')).toEqual({
-        appId: 'externalAppId',
-        deepLinkId: '12345',
-        path: '/some/path',
-      });
-    });
-  });
-
-  describe('concatPaths', () => {
-    it('should return empty path for undefined or empty paths', () => {
-      expect(concatPaths(undefined, undefined)).toEqual('');
-      expect(concatPaths('', '')).toEqual('');
-    });
-    it('should return path if sub-path not defined or empty', () => {
-      expect(concatPaths('/main/path', undefined)).toEqual('/main/path');
-      expect(concatPaths('/main/path', '')).toEqual('/main/path');
-    });
-    it('should return sub-path if path not defined or empty', () => {
-      expect(concatPaths(undefined, '/some/sub-path')).toEqual('/some/sub-path');
-      expect(concatPaths('', '/some/sub-path')).toEqual('/some/sub-path');
-    });
-    it('should concatenate path and sub-path if defined', () => {
-      expect(concatPaths('/main/path', '/some/sub-path')).toEqual('/main/path/some/sub-path');
-    });
-    it('should clean path before merging', () => {
-      expect(concatPaths('/main/path/', '/some/sub-path')).toEqual('/main/path/some/sub-path');
-    });
-  });
-
   describe('formatPath', () => {
     it('should format the path correctly with URL state', () => {
       const path = 'testPath';
@@ -223,7 +131,7 @@ describe('links', () => {
         ctrlKey: false,
         shiftKey: true,
       } as unknown as React.MouseEvent;
-      const result = isModified(event);
+      const result = isModifiedEvent(event);
       expect(result).toBe(true);
     });
 
@@ -234,7 +142,7 @@ describe('links', () => {
         ctrlKey: false,
         shiftKey: false,
       } as unknown as React.MouseEvent;
-      const result = isModified(event);
+      const result = isModifiedEvent(event);
       expect(result).toBe(false);
     });
   });

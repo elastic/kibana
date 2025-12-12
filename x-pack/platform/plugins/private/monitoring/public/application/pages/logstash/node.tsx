@@ -19,13 +19,13 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { LogstashTemplate } from './logstash_template';
 import { DetailStatus } from '../../../components/logstash/detail_status';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { AlertsCallout } from '../../../alerts/callout';
 import { useCharts } from '../../hooks/use_charts';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';

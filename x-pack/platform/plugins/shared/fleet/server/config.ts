@@ -26,7 +26,8 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
-const REGISTRY_SPEC_MAX_VERSION = '3.3';
+const REGISTRY_SPEC_MIN_VERSION = '2.3';
+const REGISTRY_SPEC_MAX_VERSION = '3.5';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -36,8 +37,13 @@ export const config: PluginConfigDescriptor = {
     },
     agentless: {
       enabled: true,
+      isDefault: true,
+      customIntegrations: {
+        enabled: true,
+      },
     },
     enableExperimental: true,
+    experimentalFeatures: true,
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
     },
@@ -45,7 +51,11 @@ export const config: PluginConfigDescriptor = {
       fleetServerStandalone: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
+      excludeDataStreamTypes: true,
     },
+    integrationsHomeOverride: true,
+    prereleaseEnabledByDefault: true,
+    hideDashboards: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -109,16 +119,50 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
-    // Log invalid experimental values
+    // Log invalid experimental values listed in xpack.fleet.enableExperimental
     (fullConfig, fromPath, addDeprecation) => {
       for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
         if (!isValidExperimentalValue(key)) {
           addDeprecation({
-            configPath: 'xpack.fleet.fleet.enableExperimental',
-            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
+            configPath: 'xpack.fleet.enableExperimental',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].`,
             correctiveActions: {
               manualSteps: [
-                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
+                `Use [xpack.fleet.enableExperimental] with an array of valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
+        }
+      }
+    },
+
+    // Prefer using xpack.fleet.experimentalFeatures over xpack.fleet.enableExperimental
+    (fullConfig, fromPath, addDeprecation) => {
+      if (fullConfig?.xpack?.fleet?.enableExperimental?.length > 0) {
+        addDeprecation({
+          configPath: 'xpack.fleet.enableExperimental',
+          message: `Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.`,
+          correctiveActions: {
+            manualSteps: [
+              `Use [xpack.fleet.experimentalFeatures] to enable or disable experimental features.`,
+            ],
+          },
+          level: 'warning',
+        });
+      }
+    },
+
+    // Log invalid experimental values listed in xpack.fleet.experimentalFeatures
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of Object.keys(fullConfig?.xpack?.fleet?.experimentalFeatures ?? {})) {
+        if (!isValidExperimentalValue(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.experimentalFeatures',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].`,
+            correctiveActions: {
+              manualSteps: [
+                `Use [xpack.fleet.experimentalFeatures] with an object containing valid experimental features.`,
               ],
             },
             level: 'warning',
@@ -150,6 +194,7 @@ export const config: PluginConfigDescriptor = {
       agentless: schema.maybe(
         schema.object({
           enabled: schema.boolean({ defaultValue: false }),
+          isDefault: schema.maybe(schema.boolean({ defaultValue: false })),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -160,6 +205,24 @@ export const config: PluginConfigDescriptor = {
                   ca: schema.maybe(schema.string()),
                 })
               ),
+            })
+          ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
+          customIntegrations: schema.maybe(
+            schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+            })
+          ),
+          backgroundSync: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+              dryRun: schema.boolean({ defaultValue: false }),
+              interval: schema.maybe(schema.string({ defaultValue: '1h' })),
             })
           ),
         })
@@ -203,6 +266,19 @@ export const config: PluginConfigDescriptor = {
         defaultValue: () => [],
       }),
 
+      /**
+       * A record of experimental features that can be enabled or disabled.
+       * Keys must be one of the values listed in `allowedExperimentalValues`.
+       *
+       * @example
+       * xpack.fleet.experimentalFeatures:
+       *   enableAgentStatusAlerting: false # Disable agent status alerting (enabled by default)
+       *   enableAgentPrivilegeLevelChange: true # Enable agent privilege level change (disabled by default)
+       */
+      experimentalFeatures: schema.recordOf(schema.string(), schema.boolean(), {
+        defaultValue: {},
+      }),
+
       internal: schema.object({
         useMeteringApi: schema.boolean({
           defaultValue: false,
@@ -221,25 +297,32 @@ export const config: PluginConfigDescriptor = {
             min: 0,
           })
         ),
-        retrySetupOnBoot: schema.boolean({ defaultValue: false }),
+        retrySetupOnBoot: schema.boolean({ defaultValue: true }),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
             excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
             spec: schema.object(
               {
-                min: schema.maybe(schema.string()),
-                max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
+                min: schema.string({
+                  coerceFromNumber: true,
+                  defaultValue: REGISTRY_SPEC_MIN_VERSION,
+                }),
+                max: schema.string({
+                  coerceFromNumber: true,
+                  defaultValue: REGISTRY_SPEC_MAX_VERSION,
+                }),
               },
               {
                 defaultValue: {
+                  min: REGISTRY_SPEC_MIN_VERSION,
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },
               }
             ),
             capabilities: schema.arrayOf(
               schema.oneOf([
-                // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+                // See package-spec for the list of available capabilities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
                 schema.literal('apm'),
                 schema.literal('enterprise_search'),
                 schema.literal('observability'),
@@ -249,6 +332,9 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
+            ),
           },
           {
             defaultValue: {
@@ -256,11 +342,15 @@ export const config: PluginConfigDescriptor = {
               capabilities: [],
               excludePackages: [],
               spec: {
+                min: REGISTRY_SPEC_MIN_VERSION,
                 max: REGISTRY_SPEC_MAX_VERSION,
               },
             },
           }
         ),
+        excludeDataStreamTypes: schema.arrayOf(schema.string(), {
+          defaultValue: () => [],
+        }),
       }),
       enabled: schema.boolean({ defaultValue: true }),
       /**
@@ -284,9 +374,36 @@ export const config: PluginConfigDescriptor = {
       ),
       autoUpgrades: schema.maybe(
         schema.object({
+          taskInterval: schema.maybe(schema.string()),
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+      syncIntegrations: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      agentStatusChange: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      autoInstallContentPackages: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      fleetPolicyRevisionsCleanup: schema.maybe(
+        schema.object({
+          maxRevisions: schema.number({ min: 1, defaultValue: 10 }),
+          interval: schema.string({ defaultValue: '1h' }),
+          maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
+        })
+      ),
+      integrationsHomeOverride: schema.maybe(schema.string()),
+      prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
+      hideDashboards: schema.boolean({ defaultValue: false }),
+      integrationRollbackTTL: schema.maybe(schema.string()),
     },
     {
       validate: (configToValidate) => {

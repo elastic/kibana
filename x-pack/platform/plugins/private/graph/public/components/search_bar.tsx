@@ -16,24 +16,24 @@ import {
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
+import type {
   IUnifiedSearchPluginServices,
   UnifiedSearchPublicPluginStart,
 } from '@kbn/unified-search-plugin/public/types';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { css } from '@emotion/react';
-import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
+import type { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
+import type { GraphState, IndexpatternDatasource } from '../state_management';
 import {
-  GraphState,
   datasourceSelector,
   requestDatasource,
-  IndexpatternDatasource,
   submitSearch,
   selectedFieldsSelector,
 } from '../state_management';
@@ -107,14 +107,13 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
 
   const euiThemeContext = useEuiTheme();
 
-  const kibana = useKibana<
+  const { services, overlays } = useKibana<
     IUnifiedSearchPluginServices & {
       contentManagement: ContentManagementPublicStart;
       unifiedSearch: UnifiedSearchPublicPluginStart;
     }
   >();
 
-  const { services, overlays } = kibana;
   const {
     uiSettings,
     appName,
@@ -133,7 +132,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
         }
       }}
     >
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
@@ -142,6 +141,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
           >
             <EuiButton
               data-test-subj="graphDatasourceButton"
+              size="s"
               css={css`
                 max-width: 320px;
                 ${euiBreakpoint(euiThemeContext, ['xs', 's'])} {
@@ -214,6 +214,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             <EuiButton
               fill
               type="submit"
+              size="s"
               disabled={isLoading || !currentIndexPattern || !selectedFields.length}
               data-test-subj="graph-explore-button"
             >

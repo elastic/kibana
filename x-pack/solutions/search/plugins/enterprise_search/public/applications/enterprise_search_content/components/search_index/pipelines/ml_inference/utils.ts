@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline';
+import type { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline';
 
-import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
+import type { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 const NORMALIZABLE_PIPELINE_CHARS_REGEX = /[^\w\-]/g;
-export const TRAINED_MODELS_PATH = '/app/ml/trained_models';
+export const TRAINED_MODELS_PATH = '/app/management/ml/trained_models';
 
 export const isValidPipelineName = (input: string): boolean => {
   return input.length > 0 && VALID_PIPELINE_NAME_REGEX.test(input);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EndpointEntriesArray } from '../common/endpoint/entries';
-import { EntriesArray, Entry } from '../common/entries';
-import { EntryMatch } from '../common/entry_match';
-import { EntryNested } from '../common/entry_nested';
-import { OsTypeArray } from '../common/os_type';
+import type { EndpointEntriesArray } from '../common/endpoint/entries';
+import type { EntriesArray, Entry } from '../common/entries';
+import type { EntryMatch } from '../common/entry_match';
+import type { EntryNested } from '../common/entry_nested';
+import type { OsTypeArray } from '../common/os_type';
 
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';

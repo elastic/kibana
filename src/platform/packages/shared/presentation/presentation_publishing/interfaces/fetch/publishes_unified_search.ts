@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  AggregateQuery,
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
-import fastIsEqual from 'fast-deep-equal';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { PublishingSubject } from '../../publishing_subject';
+import type { PublishingSubject } from '../../publishing_subject';
+import {
+  areFiltersEqualForFetch,
+  isQueryEqualForFetch,
+  isTimeRangeEqualForFetch,
+} from './fetch_context';
 
 export interface PublishesTimeslice {
   timeslice$: PublishingSubject<[number, number] | undefined>;
@@ -121,25 +118,19 @@ export function useSearchApi({
   }, []);
 
   useEffect(() => {
-    if (
-      !onlyDisabledFiltersChanged(searchApi.filters$.getValue(), filters, {
-        ...COMPARE_ALL_OPTIONS,
-        // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
-        state: false,
-      })
-    ) {
+    if (!areFiltersEqualForFetch(searchApi.filters$.getValue(), filters)) {
       searchApi.filters$.next(filters);
     }
   }, [filters, searchApi.filters$]);
 
   useEffect(() => {
-    if (!fastIsEqual(searchApi.query$.getValue(), query)) {
+    if (!isQueryEqualForFetch(searchApi.query$.getValue(), query)) {
       searchApi.query$.next(query);
     }
   }, [query, searchApi.query$]);
 
   useEffect(() => {
-    if (!fastIsEqual(searchApi.timeRange$.getValue(), timeRange)) {
+    if (!isTimeRangeEqualForFetch(searchApi.timeRange$.getValue(), timeRange)) {
       searchApi.timeRange$.next(timeRange);
     }
   }, [timeRange, searchApi.timeRange$]);

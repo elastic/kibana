@@ -10,9 +10,10 @@
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../../profiles';
-import { DataSourceCategory, SolutionType } from '../../../../profiles';
+import { SolutionType } from '../../../../profiles';
 import { createResolve } from './create_resolve';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
+import { RESOLUTION_MATCH } from '../__mocks__';
 
 describe('createResolve', () => {
   const VALID_INDEX_PATTERN = 'valid';
@@ -20,10 +21,6 @@ describe('createResolve', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
-  };
-  const RESOLUTION_MATCH = {
-    isMatch: true,
-    context: { category: DataSourceCategory.Logs },
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,

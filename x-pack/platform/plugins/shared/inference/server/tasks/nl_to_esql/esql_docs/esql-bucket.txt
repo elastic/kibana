@@ -1,28 +1,28 @@
 # BUCKET
 
-The BUCKET function allows you to create groups of values, known as buckets, from a datetime or numeric input. The size of the buckets can be specified directly or determined based on a recommended count and values range.
+The `BUCKET` function creates groups of values—buckets—out of a datetime or numeric input. The size of the buckets can either be provided directly or chosen based on a recommended count and values range.
 
 ## Syntax
 
-`BUCKET(field, buckets [, from, to])`
+`BUCKET(field, buckets, from, to)`
 
 ### Parameters
 
-#### field
+#### `field`
 
 A numeric or date expression from which to derive buckets.
 
-#### buckets
+#### `buckets`
 
-The target number of buckets, or the desired bucket size if `from` and `to` parameters are omitted.
+The target number of buckets or the desired bucket size if the `from` and `to` parameters are omitted.
 
-#### from
+#### `from` (optional)
 
-(optional) The start of the range. This can be a number, a date, or a date expressed as a string.
+The start of the range. Can be a number, a date, or a date expressed as a string.
 
-#### to
+#### `to` (optional)
 
-(optional) The end of the range. This can be a number, a date, or a date expressed as a string.
+The end of the range. Can be a number, a date, or a date expressed as a string.
 
 ## Important notes:
 
@@ -36,7 +36,7 @@ When the bucket size is provided directly for time interval, it is expressed as 
 
 ## Examples
 
-For instance, asking for at most 20 buckets over a year results in monthly buckets:
+Using a target number of buckets, a start of a range, and an end of a range
 
 ```esql
 FROM employees
@@ -45,7 +45,31 @@ FROM employees
 | SORT hire_date
 ```
 
-If the desired bucket size is known in advance, simply provide it as the second argument, leaving the range out:
+This example creates buckets for hire dates in 1985, aiming for 20 buckets. The actual number of buckets may vary depending on the range.
+
+Combine BUCKET with an aggregation to create a histogram
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT month
+```
+
+This example calculates the number of hires per month in 1985.
+
+Asking for more buckets can result in a smaller range
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT week
+```
+
+This example creates weekly buckets for hire dates in 1985, aiming for 100 buckets.
+
+Providing the bucket size directly
 
 ```esql
 FROM employees
@@ -54,7 +78,9 @@ FROM employees
 | SORT week
 ```
 
-BUCKET can also operate on numeric fields. For example, to create a salary histogram:
+This example creates weekly buckets for hire dates in 1985 by directly specifying the bucket size.
+
+Creating a salary histogram
 
 ```esql
 FROM employees
@@ -62,7 +88,41 @@ FROM employees
 | SORT bs
 ```
 
-BUCKET may be used in both the aggregating and grouping part of the STATS ... BY ... command provided that in the aggregating part the function is referenced by an alias defined in the grouping part, or that it is invoked with the exact same expression:
+This example creates a histogram of salaries, dividing the range into 20 buckets.
+
+Omitting the range when the bucket size is known
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS c = COUNT(*) BY b = BUCKET(salary, 5000.)
+| SORT b
+```
+
+This example creates salary buckets with a fixed size of 5000.
+
+Create hourly buckets for the last 24 hours
+
+```esql
+FROM sample_data
+| WHERE @timestamp >= NOW() - 1 day AND @timestamp < NOW()
+| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
+```
+
+This example creates hourly buckets for the last 24 hours.
+
+Create monthly buckets for the year 1985
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT bucket
+```
+
+This example calculates the average salary for each month in 1985.
+
+Using BUCKET in both aggregating and grouping parts of STATS
 
 ```esql
 FROM employees
@@ -71,42 +131,16 @@ FROM employees
 | KEEP s1, b1, s2, b2
 ```
 
-More examples:
+This example demonstrates advanced usage of `BUCKET` in both aggregation and grouping.
 
-*Regrouping employees in buckets based on salary and counting them*
+Adjusting bucket start value with an offset
+
 ```esql
 FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS c = COUNT(*) BY b = BUCKET(salary, 5000.)
-| SORT b
+| STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR
+| EVAL d_count = MV_COUNT(dates)
+| SORT d_count, b
+| LIMIT 3
 ```
 
-*Group data emitted over the last 24h into 25 buckets*
-```esql
-FROM sample_data
-| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
-| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
-```
-
-*Similar to previous example but with fixed 1 hour bucket size*
-```esql
-FROM sample_data
-| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
-| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour)
-```
-
-*Group employees in 20 buckets based on their hire_date and then calculate the average salary for each bucket*
-```esql
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT bucket
-```
-
-*Similar to previous example but using fixed 1 month buckets size*
-```esql
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS AVG(salary) BY bucket = BUCKET(hire_date, 1 month)
-| SORT bucket
-```
+This example adjusts the bucket start value by adding and subtracting an offset.

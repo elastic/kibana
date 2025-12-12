@@ -9,8 +9,8 @@ import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
+import { HttpStatusCode } from '@kbn/apm-ui-shared';
 import { unit } from '../../../../utils/style';
-import { HttpStatusBadge } from '../http_status_badge';
 
 const urlStyles = css`
   display: inline-block;
@@ -23,7 +23,7 @@ const urlStyles = css`
 interface HttpInfoProps {
   method?: string;
   status?: number;
-  url: string;
+  url?: string;
 }
 
 export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
@@ -51,16 +51,20 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
       >
         {method && (
           <EuiToolTip content={methodLabel}>
-            <span data-test-subj="apmHttpInfoRequestMethod">{method.toUpperCase()}</span>
+            <span tabIndex={0} data-test-subj="apmHttpInfoRequestMethod">
+              {method.toUpperCase()}
+            </span>
           </EuiToolTip>
         )}{' '}
-        <EuiToolTip content={url}>
-          <span data-test-subj="apmHttpInfoUrl" css={urlStyles}>
-            {url}
-          </span>
-        </EuiToolTip>
+        {url && (
+          <EuiToolTip content={url}>
+            <span tabIndex={0} data-test-subj="apmHttpInfoUrl" css={urlStyles}>
+              {url}
+            </span>
+          </EuiToolTip>
+        )}
       </EuiBadge>
-      {status && <HttpStatusBadge status={status} />}
+      {status && <HttpStatusCode code={status} showTooltip />}
     </span>
   );
 }

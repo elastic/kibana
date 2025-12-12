@@ -9,4 +9,4 @@
 
 export * from './src/import_resolver';
 export * from './src/helpers/import_req';
-export * from './src/resolve_result';
+export type * from './src/resolve_result';

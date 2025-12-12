@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { DEFAULT_LOG_SOURCES } from './constants';
@@ -28,6 +28,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     type: 'array',
     schema: schema.arrayOf(schema.string()),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutionViews: ['classic', 'oblt'],
   },
 };

@@ -9,14 +9,15 @@
 
 import { transformWithTs } from '@formatjs/ts-transformer';
 
-import difference from 'lodash/difference';
+import { difference } from 'lodash';
 import * as icuParser from '@formatjs/icu-messageformat-parser';
 import type { MessageFormatElement } from '@formatjs/icu-messageformat-parser';
 
 import ts from 'typescript';
 type TypeScript = typeof ts;
 
-import { extractMessagesFromCallExpression, MessageDescriptor, ExtractorOpts } from './call_expt';
+import type { MessageDescriptor, ExtractorOpts } from './call_expt';
+import { extractMessagesFromCallExpression } from './call_expt';
 import { extractMessageFromJsxComponent } from './react';
 
 function getVisitor(

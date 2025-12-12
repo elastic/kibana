@@ -6,7 +6,7 @@
  */
 
 import { createEsContext } from './context';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '../lib/ready_signal';
 import type { estypes } from '@elastic/elasticsearch';
@@ -26,7 +26,7 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
       prefer_ilm: false,
       rollover_on_write: true,
       next_generation_managed_by: 'Index Lifecycle Management',
-    },
+    } as Partial<estypes.IndicesDataStream> as estypes.IndicesDataStream,
   ],
 };
 

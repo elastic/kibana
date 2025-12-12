@@ -8,7 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
+import type { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
+import { TabMenuItemName } from '../types';
 import { isLastTab, hasSingleTab, type TabsState } from './manage_tabs';
 
 const DividerMenuItem = 'divider';
@@ -17,7 +18,7 @@ interface TabMenuItemProps {
   name: string;
   label: string;
   item: TabItem;
-  onClick: (item: TabItem) => void;
+  onClick: ((item: TabItem) => void) | null; // `null` can be overridden inside tab menu
 }
 
 const getTabMenuItem = ({
@@ -29,7 +30,7 @@ const getTabMenuItem = ({
   'data-test-subj': `unifiedTabs_tabMenuItem_${name}`,
   name,
   label,
-  onClick: () => onClick(item),
+  onClick: onClick ? () => onClick(item) : null,
 });
 
 export interface GetTabMenuItemsFnProps {
@@ -52,7 +53,7 @@ export const getTabMenuItemsFn = ({
       ? null
       : getTabMenuItem({
           item,
-          name: 'closeOtherTabs',
+          name: TabMenuItemName.closeOtherTabs,
           label: i18n.translate('unifiedTabs.tabMenu.closeOtherTabsMenuItem', {
             defaultMessage: 'Close other tabs',
           }),
@@ -63,20 +64,29 @@ export const getTabMenuItemsFn = ({
       ? null
       : getTabMenuItem({
           item,
-          name: 'closeTabsToTheRight',
+          name: TabMenuItemName.closeTabsToTheRight,
           label: i18n.translate('unifiedTabs.tabMenu.closeTabsToTheRightMenuItem', {
             defaultMessage: 'Close tabs to the right',
           }),
           onClick: onCloseTabsToTheRight,
         });
 
-    const items: TabMenuItem[] = [];
+    const items: TabMenuItem[] = [
+      getTabMenuItem({
+        item,
+        name: TabMenuItemName.enterRenamingMode,
+        label: i18n.translate('unifiedTabs.tabMenu.renameTabMenuItem', {
+          defaultMessage: 'Rename',
+        }),
+        onClick: null,
+      }),
+    ];
 
     if (!maxItemsCount || tabsState.items.length < maxItemsCount) {
       items.push(
         getTabMenuItem({
           item,
-          name: 'duplicate',
+          name: TabMenuItemName.duplicate,
           label: i18n.translate('unifiedTabs.tabMenu.duplicateMenuItem', {
             defaultMessage: 'Duplicate',
           }),

@@ -7,30 +7,29 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { QueryClientProvider } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
-import { AppPluginStartDependencies } from './types';
+import type { AppServices } from './types';
+import { queryClient } from './utils/query_client';
 
-export const renderApp = async (
-  core: CoreStart,
-  services: AppPluginStartDependencies,
-  element: HTMLElement
-) => {
+export const renderApp = async (core: CoreStart, services: AppServices, element: HTMLElement) => {
   const { PlaygroundRouter } = await import('./playground_router');
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
           <Router history={services.history}>
-            <PlaygroundRouter />
+            <QueryClientProvider client={queryClient}>
+              <PlaygroundRouter />
+            </QueryClientProvider>
           </Router>
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

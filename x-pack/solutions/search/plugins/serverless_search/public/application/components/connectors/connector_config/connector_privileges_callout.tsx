@@ -20,7 +20,7 @@ export const ConnectorPrivilegesCallout: React.FC = () => {
   });
   return (
     <>
-      <EuiCallOut title={calloutTitle} color="warning" iconType="iInCircle">
+      <EuiCallOut title={calloutTitle} color="warning" iconType="info">
         {data.canReadConnectors
           ? i18n.translate('xpack.serverlessSearch.connectors.noManagePrivileges', {
               defaultMessage:

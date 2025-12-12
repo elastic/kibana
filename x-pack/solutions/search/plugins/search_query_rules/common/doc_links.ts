@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 
 class QueryRulesDocLinks {
   public queryRulesApi: string = '';
 
   constructor() {}
 
-  setDocLinks(newDocLinks: DocLinks) {}
+  setDocLinks(newDocLinks: DocLinks) {
+    this.queryRulesApi = newDocLinks.queryRules.queryRulesAPIDocumentation;
+  }
 }
 
 export const docLinks = new QueryRulesDocLinks();

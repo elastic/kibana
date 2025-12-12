@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DeletePipelineOptions {
@@ -40,9 +40,9 @@ export async function upsertIngestPipeline({
 }: PipelineManagementOptions) {
   try {
     await retryTransientEsErrors(() => esClient.ingest.putPipeline(pipeline), { logger });
-    logger.debug(() => `Installed index template: ${JSON.stringify(pipeline)}`);
+    logger.debug(() => `Installed ingest pipeline: ${JSON.stringify(pipeline)}`);
   } catch (error: any) {
-    logger.error(`Error updating index template: ${error.message}`);
+    logger.error(`Error updating ingest pipeline: ${error.message}`);
     throw error;
   }
 }

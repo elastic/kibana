@@ -8,12 +8,12 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
-import { VisSavedObject } from '../../types';
+import type { VisSavedObject } from '../../types';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from './constants';
-import { VisualizationSavedObjectAttributes } from '../../../common';
+import type { VisualizationSavedObjectAttributes } from '../../../common';
+import type { CreateOptions } from '../../../common/content_management';
 
 const coreStart = coreMock.createStart();
 const mockFindContent = jest.fn(() => ({
@@ -67,7 +67,7 @@ jest.mock('../../services', () => ({
 
 describe('saveWithConfirmation', () => {
   const source: VisualizationSavedObjectAttributes = {} as VisualizationSavedObjectAttributes;
-  const options: SavedObjectsCreateOptions = {} as SavedObjectsCreateOptions;
+  const options = {} as CreateOptions;
   const savedObject = {
     getEsType: () => 'visualization',
     title: 'test title',

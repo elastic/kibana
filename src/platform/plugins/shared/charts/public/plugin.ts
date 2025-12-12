@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { palette, systemPalette } from '../common';
 
 import { ThemeService } from './services';

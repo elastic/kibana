@@ -23,6 +23,7 @@ export enum EntityDetailsLeftPanelTab {
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',
+  FIELDS_TABLE = 'fields_table',
 }
 
 export enum CspInsightLeftPanelSubTab {

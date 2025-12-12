@@ -10,7 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { escapeRegExp } from 'lodash';
 import { HIGHLIGHT_CLASS_NAME, CELL_MATCH_INDEX_ATTRIBUTE } from './constants';
-import { InTableSearchHighlightsWrapperProps } from './types';
+import type { InTableSearchHighlightsWrapperProps } from './types';
 
 /**
  * Counts and highlights search term matches in the children of the component
@@ -61,7 +61,7 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
     onHighlightsCountFound,
   ]);
 
-  return <div ref={cellValueRef}>{children}</div>;
+  return <span ref={cellValueRef}>{children}</span>;
 };
 
 const searchTermRegExpCache = new Map<string, RegExp>();

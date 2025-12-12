@@ -11,10 +11,8 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DiscoverAppState } from '../state_management/discover_app_state_container';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -35,17 +33,22 @@ import type {
 } from '../state_management/discover_data_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
-import type { InternalStateStore } from '../state_management/redux';
+import type { InternalStateStore, TabState } from '../state_management/redux';
+import type { ScopedProfilesManager } from '../../../context_awareness';
+import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 
-export interface FetchDeps {
+export interface CommonFetchParams {
+  dataSubjects: SavedSearchData;
   abortController: AbortController;
-  getAppState: () => DiscoverAppState;
   internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
   searchSessionId: string;
   services: DiscoverServices;
+  scopedProfilesManager: ScopedProfilesManager;
+  scopedEbtManager: ScopedDiscoverEBTManager;
+  getCurrentTab: () => TabState;
 }
 
 /**
@@ -56,28 +59,32 @@ export interface FetchDeps {
  * have been completed (failed or successfully).
  */
 export function fetchAll(
-  dataSubjects: SavedSearchData,
-  reset = false,
-  fetchDeps: FetchDeps,
-  onFetchRecordsComplete?: () => Promise<void>
+  params: CommonFetchParams & {
+    reset: boolean;
+    onFetchRecordsComplete?: () => Promise<void>;
+  }
 ): Promise<void> {
   const {
+    dataSubjects,
+    reset = false,
     initialFetchStatus,
-    getAppState,
-    internalState,
     services,
+    scopedProfilesManager,
+    scopedEbtManager,
     inspectorAdapters,
     savedSearch,
     abortController,
-  } = fetchDeps;
-  const { data, expressions, profilesManager } = services;
-  const searchSource = savedSearch.searchSource.createChild();
+    getCurrentTab,
+    onFetchRecordsComplete,
+  } = params;
+  const { data, expressions } = services;
 
   try {
+    const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const query = getAppState().query;
-    const prevQuery = dataSubjects.documents$.getValue().query;
+    const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
+    const currentTab = getCurrentTab();
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -88,8 +95,8 @@ export function fetchAll(
       updateVolatileSearchSource(searchSource, {
         dataView,
         services,
-        sort: getAppState().sort as SortOrder[],
-        inputTimeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
+        sort: sort as SortOrder[],
+        inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
       });
     }
 
@@ -109,28 +116,38 @@ export function fetchAll(
           inspectorAdapters,
           data,
           expressions,
-          profilesManager,
-          timeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
+          scopedProfilesManager,
+          timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+          esqlVariables: currentTab.esqlVariables,
+          searchSessionId: params.searchSessionId,
         })
-      : fetchDocuments(searchSource, fetchDeps);
+      : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
-    const startTime = window.performance.now();
+    const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
+      'discoverFetchAllRequestsOnly'
+    );
+
+    // Calculate query range in seconds
+    const queryRangeSeconds = currentTab.dataRequestParams.timeRangeAbsolute
+      ? getTimeDifferenceInSeconds(currentTab.dataRequestParams.timeRangeAbsolute)
+      : 0;
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
-        if (services.analytics) {
-          const duration = window.performance.now() - startTime;
-          reportPerformanceMetricEvent(services.analytics, {
-            eventName: 'discoverFetchAllRequestsOnly',
-            duration,
-            meta: { fetchType },
-          });
-        }
+      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
+        fetchAllRequestOnlyTracker.reportEvent({
+          meta: { fetchType },
+          key1: 'query_range_secs',
+          value1: queryRangeSeconds,
+        });
 
         if (isEsqlQuery) {
+          const fetchStatus =
+            interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
+              ? FetchStatus.ERROR
+              : FetchStatus.COMPLETE;
           dataSubjects.totalHits$.next({
-            fetchStatus: FetchStatus.COMPLETE,
+            fetchStatus,
             result: records.length,
           });
         } else {
@@ -147,16 +164,18 @@ export function fetchAll(
         }
 
         /**
-         * The partial state for ES|QL mode is necessary in case the query has changed
-         * In the follow up useEsqlMode hook in this case new columns are added to AppState
-         * So the data table shows the new columns of the table. The partial state was introduced to prevent
-         * To frequent change of state causing the table to re-render to often, which causes race conditions
-         * So it takes too long, a bad user experience, also a potential flakniess in tests
+         * Determine the appropriate fetch status
+         *
+         * The partial state for ES|QL mode is necessary to limit data table renders.
+         * Depending on the type of query new columns can be added to AppState to ensure the data table
+         * shows the updated columns. The partial state was introduced to prevent
+         * too frequent state changes that cause the table to re-render too often, which can cause
+         * race conditions, poor user experience, and potential test flakiness.
+         *
+         * For non-ES|QL queries, we always use COMPLETE status as they don't require this
+         * special handling.
          */
-        const fetchStatus =
-          isEsqlQuery && (!prevQuery || !isEqual(query, prevQuery))
-            ? FetchStatus.PARTIAL
-            : FetchStatus.COMPLETE;
+        const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
         dataSubjects.documents$.next({
           fetchStatus,
@@ -208,15 +227,13 @@ export function fetchAll(
   }
 }
 
-export async function fetchMoreDocuments(
-  dataSubjects: SavedSearchData,
-  fetchDeps: FetchDeps
-): Promise<void> {
+export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
+  const { dataSubjects, services, savedSearch, getCurrentTab } = params;
+
   try {
-    const { getAppState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const query = getAppState().query;
+    const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {
@@ -240,11 +257,11 @@ export async function fetchMoreDocuments(
     updateVolatileSearchSource(searchSource, {
       dataView,
       services,
-      sort: getAppState().sort as SortOrder[],
+      sort: sort as SortOrder[],
     });
 
     // Fetch more documents
-    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
+    const { records, interceptedWarnings } = await fetchDocuments(searchSource, params);
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {

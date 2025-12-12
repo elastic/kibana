@@ -138,26 +138,5 @@ describe('command options', () => {
         });
       });
     });
-
-    describe('RENAME', () => {
-      it('parses correctly AS option position in RENAME command', () => {
-        const query = 'FROM a | RENAME b AS c';
-        const { root } = parse(query);
-        const option = Walker.match(root, { type: 'option', name: 'as' });
-
-        expect(option).toMatchObject({
-          type: 'option',
-          name: 'as',
-          location: {
-            // The "AS" option is unusual as the it contains the argument before
-            // it, the "a" argument. It should not be the case. The "AS" option
-            // should not exist at all, should be replaced by a *rename expression*
-            // in the future: https://github.com/elastic/kibana/issues/190360
-            min: 'FROM a | RENAME '.length,
-            max: 'FROM a | RENAME b AS c'.length - 1,
-          },
-        });
-      });
-    });
   });
 });

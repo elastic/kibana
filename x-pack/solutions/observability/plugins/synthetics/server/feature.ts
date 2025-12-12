@@ -7,18 +7,23 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import {
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
 } from '../common/saved_objects/private_locations';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+  syntheticsParamType,
+} from '../common/types/saved_objects';
+
 import { PLUGIN } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
@@ -32,7 +37,7 @@ const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID],
+  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
 }));
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
@@ -72,6 +77,27 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
+const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_read_param_values',
+      name: i18n.translate('xpack.synthetics.features.canReadParams.label', {
+        defaultMessage: 'Can read global parameter values',
+      }),
+      includeIn: 'none', // This ensures it is not granted by default
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canReadParamValues'],
+      /* Field level access is enforced for the VALUE of the param.
+       * The api is still accessible for SO operations to users without this privilege */
+      api: [],
+    },
+  ],
+};
+
 export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
@@ -79,7 +105,6 @@ export const syntheticsFeature = {
   category: DEFAULT_APP_CATEGORIES.observability,
   app: ['uptime', 'kibana', 'synthetics'],
   catalogue: ['uptime'],
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -92,7 +117,8 @@ export const syntheticsFeature = {
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
-          syntheticsMonitorType,
+          legacySyntheticsMonitorTypeSingle,
+          syntheticsMonitorSavedObjectType,
           syntheticsApiKeyObjectType,
           syntheticsParamType,
 
@@ -123,7 +149,8 @@ export const syntheticsFeature = {
         read: [
           syntheticsParamType,
           syntheticsSettingsObjectType,
-          syntheticsMonitorType,
+          syntheticsMonitorSavedObjectType,
+          legacySyntheticsMonitorTypeSingle,
           syntheticsApiKeyObjectType,
           privateLocationSavedObjectName,
           legacyPrivateLocationsSavedObjectName,
@@ -165,6 +192,15 @@ export const syntheticsFeature = {
           'This feature allows you to manage your private locations, for example adding, or deleting them.',
       }),
       privilegeGroups: [canManagePrivateLocationsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.params', {
+        defaultMessage: 'Global Parameters',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.params.description', {
+        defaultMessage: 'This feature allows you to read global parameters values',
+      }),
+      privilegeGroups: [canReadParamsPrivilege],
     },
   ],
 };

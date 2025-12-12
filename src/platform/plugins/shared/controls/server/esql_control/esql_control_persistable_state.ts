@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
-} from '@kbn/embeddable-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
+} from '@kbn/embeddable-plugin/server';
+import type { SavedObjectReference } from '@kbn/core/types';
 
 export const createEsqlControlInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {

@@ -5,32 +5,33 @@
  * 2.0.
  */
 import type {
-  Layer,
-  TermsColumn,
-  FiltersColumn,
-  FormulaColumn,
-  StaticValueColumn,
-  CountColumn,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { DatasourceSuggestion } from '../../types';
+  TermsColumn as VisualizeContextTermsColumn,
+  FiltersColumn as VisualizeContextFiltersColumn,
+  FormulaColumn as VisualizeContextFormulaColumn,
+  StaticValueColumn as VisualizeContextStaticValueColumn,
+  CountColumn as VisualizeContextCountColumn,
+} from '@kbn/visualizations-plugin/common';
+import type {
+  NavigateToLensLayer,
+  DatasourceSuggestion,
+  FormBasedPrivateState,
+  DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
+  MathIndexPatternColumn,
+  RangeIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+} from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
-import type { FormBasedPrivateState } from './types';
+import type { IndexPatternSuggestion } from './form_based_suggestions';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
   getDatasourceSuggestionsForVisualizeCharts,
-  IndexPatternSuggestion,
 } from './form_based_suggestions';
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
-import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
-import {
-  MathIndexPatternColumn,
-  RangeIndexPatternColumn,
-  StaticValueIndexPatternColumn,
-} from './operations/definitions';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -1314,7 +1315,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
-                    scale: undefined,
+                    scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
                     hasReducedTimeRange: false,
@@ -1408,7 +1409,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
-                    scale: undefined,
+                    scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
                     hasReducedTimeRange: false,
@@ -1587,7 +1588,7 @@ describe('IndexPattern Data Source suggestions', () => {
         indexPatternId: '1',
         ignoreGlobalFilters: false,
       },
-    ] as Layer[];
+    ] as unknown as NavigateToLensLayer[];
     function stateWithoutLayer() {
       return {
         ...testInitialState(),
@@ -1725,7 +1726,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   id: 'bytes',
                 },
               },
-            } as CountColumn,
+            } as VisualizeContextCountColumn,
             context[0].columns[1],
           ],
         },
@@ -1802,7 +1803,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnId: 'column-id-1',
                 },
               },
-            } as TermsColumn,
+            } satisfies VisualizeContextTermsColumn,
           ],
         },
       ];
@@ -1872,6 +1873,7 @@ describe('IndexPattern Data Source suggestions', () => {
               operationType: 'filters',
               isBucketed: true,
               columnId: 'column-id-3',
+              dataType: 'string',
               isSplit: true,
               params: {
                 filters: [
@@ -1891,7 +1893,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   },
                 ],
               },
-            } as FiltersColumn,
+            } satisfies VisualizeContextFiltersColumn,
           ],
         },
       ];
@@ -1978,7 +1980,7 @@ describe('IndexPattern Data Source suggestions', () => {
               params: {
                 formula: 'overall_sum(count())',
               },
-            } as FormulaColumn,
+            } satisfies VisualizeContextFormulaColumn,
             context[0].columns[1],
           ],
         },
@@ -2051,7 +2053,7 @@ describe('IndexPattern Data Source suggestions', () => {
               params: {
                 value: '10',
               },
-            } as StaticValueColumn,
+            } satisfies VisualizeContextStaticValueColumn,
           ],
         },
       ];
@@ -2070,7 +2072,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   'column-id-1': expect.objectContaining({
                     operationType: 'static_value',
-                    isStaticValue: true,
                     params: expect.objectContaining({
                       value: '10',
                     }),
@@ -2259,7 +2260,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op',
                   dataType: 'string',
                   isBucketed: true,
-                  scale: undefined,
+                  scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
                   hasReducedTimeRange: false,
@@ -2285,7 +2286,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op 2',
                   dataType: 'string',
                   isBucketed: true,
-                  scale: undefined,
+                  scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
                   hasReducedTimeRange: false,
@@ -2701,7 +2702,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'number',
                   isBucketed: false,
                   label: 'Unique count of dest',
-                  scale: undefined,
+                  scale: 'ratio',
                   isStaticValue: false,
                   hasTimeShift: false,
                   hasReducedTimeRange: false,
@@ -3213,7 +3214,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'string',
                   isBucketed: true,
                   label: 'My Op',
-                  scale: undefined,
+                  scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
                   hasReducedTimeRange: false,
@@ -3226,7 +3227,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'string',
                   isBucketed: true,
                   label: 'Top 5',
-                  scale: undefined,
+                  scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
                   hasReducedTimeRange: false,
@@ -3309,7 +3310,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Cumulative sum of Records',
-                    scale: undefined,
+                    scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
                     hasReducedTimeRange: false,
@@ -3323,7 +3324,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Cumulative sum of (incomplete)',
-                    scale: undefined,
+                    scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
                     hasReducedTimeRange: false,
@@ -3391,7 +3392,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'date',
                     isBucketed: true,
                     label: '',
-                    scale: undefined,
+                    scale: 'interval',
                     isStaticValue: false,
                     hasTimeShift: false,
                     hasReducedTimeRange: false,
@@ -3405,7 +3406,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
-                    scale: undefined,
+                    scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
                     hasReducedTimeRange: false,
@@ -3419,7 +3420,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
-                    scale: undefined,
+                    scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
                     hasReducedTimeRange: false,

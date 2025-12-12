@@ -1,0 +1,1269 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "949fd557280ee9b7a88db57d075a92c53f02325f55372b4e87bce986b2c94d7d",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2025-07-18T17:30:28.922Z",
+      "Endpoint": {
+        "capabilities": [
+          "isolation",
+          "kill_process",
+          "suspend_process",
+          "running_processes",
+          "get_file",
+          "execute",
+          "upload_file",
+          "scan"
+        ],
+        "configuration": {
+          "isolation": false
+        },
+        "policy": {
+          "applied": {
+            "endpoint_policy_version": 4,
+            "id": "47d7965d-6869-478b-bd9c-fb0d2bb3959f",
+            "name": "Detect Malware Only",
+            "status": "unsupported",
+            "version": "9"
+          }
+        },
+        "state": {
+          "isolation": false
+        },
+        "status": "enrolled"
+      },
+      "Memory_protection": {
+        "feature": "shellcode_thread",
+        "self_injection": true
+      },
+      "Target": {
+        "process": {
+          "thread": {
+            "Ext": {
+              "start_address_allocation_offset": 0,
+              "start_address_bytes_disasm_hash": "a disam hash",
+              "start_address_details": {
+                "allocation_size": 4000,
+                "allocation_type": "PRIVATE",
+                "memory_pe": {
+                  "imphash": "a hash"
+                },
+                "region_protection": "RWX",
+                "region_size": 4000
+              }
+            }
+          }
+        }
+      },
+      "agent": {
+        "id": "132c2b3c-7a6d-42d3-87e0-b2532b430f2f",
+        "type": "endpoint",
+        "version": "9.2.0"
+      },
+      "data_stream": {
+        "dataset": "endpoint.alerts",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "dll": {
+        "Ext": {
+          "compile_time": "1970-01-18T18:13:44.710Z",
+          "malware_classification": {
+            "identifier": "Whitelisted",
+            "score": 0,
+            "threshold": 0,
+            "version": "3.0.0"
+          },
+          "mapped_address": 5362483200,
+          "mapped_size": 0
+        },
+        "code_signature": {
+          "subject_name": "Cybereason Inc",
+          "trusted": true
+        },
+        "hash": {
+          "md5": "1f2d082566b0fc5f2c238a5180db7451",
+          "sha1": "ca85243c0af6a6471bdaa560685c51eefd6dbc0d",
+          "sha256": "8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2"
+        },
+        "path": "C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe",
+        "pe": {
+          "architecture": "x64"
+        }
+      },
+      "ecs": {
+        "version": "1.6.0"
+      },
+      "elastic": {
+        "agent": {
+          "id": "132c2b3c-7a6d-42d3-87e0-b2532b430f2f"
+        }
+      },
+      "event": {
+        "action": "start",
+        "agent_id_status": "auth_metadata_missing",
+        "category": "malware",
+        "code": "shellcode_thread",
+        "dataset": "endpoint",
+        "id": "9a932fb8-f8f7-4651-8809-f0a3c52f2fbe",
+        "ingested": "2025-07-18T17:29:52Z",
+        "module": "endpoint",
+        "sequence": 15,
+        "type": "info"
+      },
+      "event.kind": "signal",
+      "host": {
+        "architecture": "dmrd6a7xnw",
+        "hostname": "Host-0rlfgcpnl5",
+        "id": "60e8befc-5238-40c5-b470-794892d25346",
+        "ip": [
+          "10.249.233.202"
+        ],
+        "mac": [
+          "af-76-b9-48-e2-cb",
+          "3f-87-b4-b8-3d-e8"
+        ],
+        "name": "Host-0rlfgcpnl5",
+        "os": {
+          "Ext": {
+            "variant": "Windows Pro"
+          },
+          "family": "windows",
+          "full": "Windows 10",
+          "name": "Windows",
+          "platform": "Windows",
+          "version": "10.0"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "AZgelSktJjTTg2TVS0M8",
+          "index": ".ds-logs-endpoint.alerts-default-2025.07.18-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2025-07-18T17:30:28.922Z",
+      "kibana.alert.last_detected": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.original_data_stream.dataset": "endpoint.alerts",
+      "kibana.alert.original_data_stream.namespace": "default",
+      "kibana.alert.original_data_stream.type": "logs",
+      "kibana.alert.original_event.action": "start",
+      "kibana.alert.original_event.agent_id_status": "auth_metadata_missing",
+      "kibana.alert.original_event.category": "malware",
+      "kibana.alert.original_event.code": "shellcode_thread",
+      "kibana.alert.original_event.dataset": "endpoint",
+      "kibana.alert.original_event.id": "9a932fb8-f8f7-4651-8809-f0a3c52f2fbe",
+      "kibana.alert.original_event.ingested": "2025-07-18T17:29:52Z",
+      "kibana.alert.original_event.kind": "alert",
+      "kibana.alert.original_event.module": "endpoint",
+      "kibana.alert.original_event.sequence": 15,
+      "kibana.alert.original_event.type": "info",
+      "kibana.alert.original_time": "2025-07-18T17:29:58.152Z",
+      "kibana.alert.reason": "malware event with process explorer.exe, by 18lpbws2ay on Host-0rlfgcpnl5 created medium alert Endpoint Security (Elastic Defend).",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [
+      ],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2025-07-18T17:30:23.143Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Generates a detection alert each time an Elastic Defend alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [
+        {
+          "id": "endpoint_list",
+          "list_id": "endpoint_list",
+          "namespace_type": "agnostic",
+          "type": "endpoint"
+        }
+      ],
+      "kibana.alert.rule.execution.timestamp": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.rule.execution.type": "scheduled",
+      "kibana.alert.rule.execution.uuid": "5fbee9ed-48c1-485f-a2af-5edb938b5c2f",
+      "kibana.alert.rule.false_positives": [
+      ],
+      "kibana.alert.rule.from": "now-2m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "logs-endpoint.alerts-*"
+      ],
+      "kibana.alert.rule.interval": "1m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 1000,
+      "kibana.alert.rule.name": "Endpoint Security (Elastic Defend)",
+      "kibana.alert.rule.note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating Endpoint Security (Elastic Defend)\n\nElastic Defend is a robust endpoint security solution that monitors and protects systems by analyzing events and generating alerts for suspicious activities. Adversaries may exploit endpoints by executing unauthorized code or manipulating system processes. The detection rule leverages event data to identify alerts from Elastic Defend, focusing on potential threats while excluding non-relevant modules, thus enabling timely investigation of endpoint anomalies.\n\n### Possible investigation steps\n\n- Review the alert details to understand the specific event.kind:alert and event.module: endpoint that triggered the alert, ensuring it is not related to the excluded endgame module.\n- Examine the timeline of events leading up to the alert to identify any unusual or unauthorized activities, such as unexpected process executions or system changes.\n- Correlate the alert with other security events or logs from the same endpoint to gather additional context and determine if there is a pattern of suspicious behavior.\n- Investigate the source and destination of any network connections associated with the alert to identify potential command and control activity or data exfiltration attempts.\n- Check for any recent changes or updates to the endpoint's software or configuration that could explain the alert, ensuring they are legitimate and authorized.\n- Assess the risk score and severity of the alert in conjunction with other alerts from the same endpoint to prioritize the investigation and response efforts.\n\n### False positive analysis\n\n- Alerts triggered by routine software updates can be false positives. Users can create exceptions for known update processes to prevent unnecessary alerts.\n- System maintenance activities, such as scheduled scans or backups, may generate alerts. Exclude these activities by identifying their specific event signatures and adding them to the exception list.\n- Legitimate administrative actions, like remote desktop sessions or script executions by IT staff, might be flagged. Define exceptions for these actions by correlating them with authorized user accounts or IP addresses.\n- Frequent alerts from non-malicious applications that interact with system processes can be excluded by whitelisting these applications based on their hash or path.\n- Network monitoring tools that simulate attack patterns for testing purposes may trigger alerts. Exclude these tools by specifying their known behaviors and IP ranges in the exception settings.\n\n### Response and remediation\n\n- Isolate the affected endpoint immediately to prevent further unauthorized access or lateral movement within the network.\n- Analyze the alert details to identify the specific unauthorized code or process manipulation involved, and terminate any malicious processes identified.\n- Remove any unauthorized code or files from the affected endpoint, ensuring that all traces of the threat are eradicated.\n- Conduct a thorough review of system logs and event data to identify any additional indicators of compromise or related suspicious activities.\n- Update endpoint security configurations and signatures to prevent similar threats from exploiting the same vulnerabilities in the future.\n- Restore the affected endpoint from a known good backup if necessary, ensuring that the system is free from any residual threats.\n- Escalate the incident to the security operations center (SOC) or relevant team for further analysis and to determine if additional systems may be affected.",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Generates a detection alert each time an Elastic Defend alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+        "exceptions_list": [
+          {
+            "id": "endpoint_list",
+            "list_id": "endpoint_list",
+            "namespace_type": "agnostic",
+            "type": "endpoint"
+          }
+        ],
+        "false_positives": [
+        ],
+        "from": "now-2m",
+        "immutable": true,
+        "index": [
+          "logs-endpoint.alerts-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 1000,
+        "note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating Endpoint Security (Elastic Defend)\n\nElastic Defend is a robust endpoint security solution that monitors and protects systems by analyzing events and generating alerts for suspicious activities. Adversaries may exploit endpoints by executing unauthorized code or manipulating system processes. The detection rule leverages event data to identify alerts from Elastic Defend, focusing on potential threats while excluding non-relevant modules, thus enabling timely investigation of endpoint anomalies.\n\n### Possible investigation steps\n\n- Review the alert details to understand the specific event.kind:alert and event.module: endpoint that triggered the alert, ensuring it is not related to the excluded endgame module.\n- Examine the timeline of events leading up to the alert to identify any unusual or unauthorized activities, such as unexpected process executions or system changes.\n- Correlate the alert with other security events or logs from the same endpoint to gather additional context and determine if there is a pattern of suspicious behavior.\n- Investigate the source and destination of any network connections associated with the alert to identify potential command and control activity or data exfiltration attempts.\n- Check for any recent changes or updates to the endpoint's software or configuration that could explain the alert, ensuring they are legitimate and authorized.\n- Assess the risk score and severity of the alert in conjunction with other alerts from the same endpoint to prioritize the investigation and response efforts.\n\n### False positive analysis\n\n- Alerts triggered by routine software updates can be false positives. Users can create exceptions for known update processes to prevent unnecessary alerts.\n- System maintenance activities, such as scheduled scans or backups, may generate alerts. Exclude these activities by identifying their specific event signatures and adding them to the exception list.\n- Legitimate administrative actions, like remote desktop sessions or script executions by IT staff, might be flagged. Define exceptions for these actions by correlating them with authorized user accounts or IP addresses.\n- Frequent alerts from non-malicious applications that interact with system processes can be excluded by whitelisting these applications based on their hash or path.\n- Network monitoring tools that simulate attack patterns for testing purposes may trigger alerts. Exclude these tools by specifying their known behaviors and IP ranges in the exception settings.\n\n### Response and remediation\n\n- Isolate the affected endpoint immediately to prevent further unauthorized access or lateral movement within the network.\n- Analyze the alert details to identify the specific unauthorized code or process manipulation involved, and terminate any malicious processes identified.\n- Remove any unauthorized code or files from the affected endpoint, ensuring that all traces of the threat are eradicated.\n- Conduct a thorough review of system logs and event data to identify any additional indicators of compromise or related suspicious activities.\n- Update endpoint security configurations and signatures to prevent similar threats from exploiting the same vulnerabilities in the future.\n- Restore the affected endpoint from a known good backup if necessary, ensuring that the system is free from any residual threats.\n- Escalate the incident to the security operations center (SOC) or relevant team for further analysis and to determine if additional systems may be affected.",
+        "query": "event.kind:alert and event.module:(endpoint and not endgame)\n",
+        "references": [
+        ],
+        "related_integrations": [
+          {
+            "package": "endpoint",
+            "version": "^9.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.kind",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.module",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [
+          {
+            "field": "event.risk_score",
+            "operator": "equals",
+            "value": ""
+          }
+        ],
+        "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+        "rule_name_override": "message",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "## Setup\n\n### Elastic Defend Alerts\nIf this rule is disabled, you will not receive alerts for Elastic Defend alerts. This rule is designed to capture all alerts generated by Elastic Defend. For more granular alerting, consider using additional prebuilt-rules that capture specific Elastic Defend alerts.\n\nIf this rule is enabled, along with the related rules listed below, you will receive duplicate alerts for the same events. To avoid this, it is recommended to disable this generic rule and enable the more specific rules that capture these alerts separately.\n\nRelated rules:\n- Behavior - Detected - Elastic Defend (UUID: 0f615fe4-eaa2-11ee-ae33-f661ea17fbce)\n- Behavior - Prevented - Elastic Defend (UUID: eb804972-ea34-11ee-a417-f661ea17fbce)\n- Malicious File - Detected - Elastic Defend (UUID: f2c3caa6-ea34-11ee-a417-f661ea17fbce)\n- Malicious File - Prevented - Elastic Defend (UUID: f87e6122-ea34-11ee-a417-f661ea17fbce)\n- Memory Threat - Detected - Elastic Defend (UUID: 017de1e4-ea35-11ee-a417-f661ea17fbce)\n- Memory Threat - Prevented - Elastic Defend (UUID: 06f3a26c-ea35-11ee-a417-f661ea17fbce)\n- Ransomware - Detected - Elastic Defend (UUID: 0c74cd7e-ea35-11ee-a417-f661ea17fbce)\n- Ransomware - Prevented - Elastic Defend (UUID: 10f3d520-ea35-11ee-a417-f661ea17fbce)\n\n### Additional notes\n\nFor information on troubleshooting the maximum alerts warning please refer to this [guide](https://www.elastic.co/guide/en/security/current/alerts-ui-monitor.html#troubleshoot-max-alerts).\n",
+        "severity": "medium",
+        "severity_mapping": [
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "low",
+            "value": "21"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "medium",
+            "value": "47"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "high",
+            "value": "73"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "critical",
+            "value": "99"
+          }
+        ],
+        "threat": [
+        ],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 108
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [
+      ],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [
+        {
+          "field": "event.risk_score",
+          "operator": "equals",
+          "value": ""
+        }
+      ],
+      "kibana.alert.rule.rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+      "kibana.alert.rule.rule_name_override": "message",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "low",
+          "value": "21"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "medium",
+          "value": "47"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "high",
+          "value": "73"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "critical",
+          "value": "99"
+        }
+      ],
+      "kibana.alert.rule.tags": [
+        "Data Source: Elastic Defend",
+        "Resources: Investigation Guide"
+      ],
+      "kibana.alert.rule.threat": [
+      ],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2025-07-18T17:30:23.143Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "dc008bf7-2886-42f6-9d91-3bcb472b0011",
+      "kibana.alert.rule.version": 108,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "949fd557280ee9b7a88db57d075a92c53f02325f55372b4e87bce986b2c94d7d",
+      "kibana.alert.workflow_assignee_ids": [
+      ],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [
+      ],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.2.0",
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "q58yyxpr7x",
+            "pb18grqhr5"
+          ],
+          "code_signature": {
+            "subject_name": "bad signer",
+            "trusted": false
+          },
+          "malware_signature": {
+            "all_names": "Windows.Trojan.FakeAgent",
+            "identifier": "diagnostic-malware-signature-v1-fake"
+          },
+          "token": {
+            "integrity_level_name": "high"
+          },
+          "user": "SYSTEM"
+        },
+        "entity_id": "1z9yf489wl",
+        "entry_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake entry",
+          "pid": 345
+        },
+        "executable": "C:/fake/explorer.exe",
+        "group_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake leader",
+          "pid": 835
+        },
+        "hash": {
+          "md5": "fake md5",
+          "sha1": "fake sha1",
+          "sha256": "fake sha256"
+        },
+        "name": "explorer.exe",
+        "parent": {
+          "entity_id": "q58yyxpr7x",
+          "pid": 1
+        },
+        "pid": 2,
+        "session_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake session",
+          "pid": 729
+        },
+        "start": "2025-07-18T17:29:58.152Z",
+        "uptime": 0
+      },
+      "user": {
+        "domain": "y6mlmwyzkm",
+        "name": "18lpbws2ay"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "77c022576f808aa7d5df32738683d0ce24af0da135e25d5f1ec7547f8db70d74",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2025-07-18T17:30:28.924Z",
+      "Endpoint": {
+        "capabilities": [
+          "isolation",
+          "kill_process",
+          "suspend_process",
+          "running_processes",
+          "get_file",
+          "execute",
+          "upload_file",
+          "scan"
+        ],
+        "configuration": {
+          "isolation": false
+        },
+        "policy": {
+          "applied": {
+            "endpoint_policy_version": 4,
+            "id": "47d7965d-6869-478b-bd9c-fb0d2bb3959f",
+            "name": "Detect Malware Only",
+            "status": "unsupported",
+            "version": "9"
+          }
+        },
+        "state": {
+          "isolation": false
+        },
+        "status": "enrolled"
+      },
+      "agent": {
+        "id": "132c2b3c-7a6d-42d3-87e0-b2532b430f2f",
+        "type": "endpoint",
+        "version": "9.2.0"
+      },
+      "data_stream": {
+        "dataset": "endpoint.alerts",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "destination": {
+        "ip": "10.53.190.192",
+        "port": 443
+      },
+      "dll": {
+        "Ext": {
+          "compile_time": "1970-01-18T18:13:44.710Z",
+          "malware_classification": {
+            "identifier": "Whitelisted",
+            "score": 0,
+            "threshold": 0,
+            "version": "3.0.0"
+          },
+          "mapped_address": 5362483200,
+          "mapped_size": 0
+        },
+        "code_signature": {
+          "subject_name": "Cybereason Inc",
+          "trusted": true
+        },
+        "hash": {
+          "md5": "1f2d082566b0fc5f2c238a5180db7451",
+          "sha1": "ca85243c0af6a6471bdaa560685c51eefd6dbc0d",
+          "sha256": "8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2"
+        },
+        "path": "C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe",
+        "pe": {
+          "architecture": "x64"
+        }
+      },
+      "ecs": {
+        "version": "1.6.0"
+      },
+      "elastic": {
+        "agent": {
+          "id": "132c2b3c-7a6d-42d3-87e0-b2532b430f2f"
+        }
+      },
+      "event": {
+        "action": "rule_detection",
+        "agent_id_status": "auth_metadata_missing",
+        "category": "behavior",
+        "code": "behavior",
+        "dataset": "endpoint.diagnostic.collection",
+        "id": "3c54dbd9-c02c-4760-9de7-80bdc839015a",
+        "ingested": "2025-07-18T17:29:52Z",
+        "module": "endpoint",
+        "sequence": 58,
+        "type": "info"
+      },
+      "event.kind": "signal",
+      "file": {
+        "name": "fake_behavior.exe",
+        "path": "C:/fake_behavior.exe"
+      },
+      "host": {
+        "architecture": "dmrd6a7xnw",
+        "hostname": "Host-0rlfgcpnl5",
+        "id": "60e8befc-5238-40c5-b470-794892d25346",
+        "ip": [
+          "10.249.233.202"
+        ],
+        "mac": [
+          "af-76-b9-48-e2-cb",
+          "3f-87-b4-b8-3d-e8"
+        ],
+        "name": "Host-0rlfgcpnl5",
+        "os": {
+          "Ext": {
+            "variant": "Windows Pro"
+          },
+          "family": "windows",
+          "full": "Windows 10",
+          "name": "Windows",
+          "platform": "Windows",
+          "version": "10.0"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "AZgelSktJjTTg2TVS0Nn",
+          "index": ".ds-logs-endpoint.alerts-default-2025.07.18-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2025-07-18T17:30:28.924Z",
+      "kibana.alert.last_detected": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.original_data_stream.dataset": "endpoint.alerts",
+      "kibana.alert.original_data_stream.namespace": "default",
+      "kibana.alert.original_data_stream.type": "logs",
+      "kibana.alert.original_event.action": "rule_detection",
+      "kibana.alert.original_event.agent_id_status": "auth_metadata_missing",
+      "kibana.alert.original_event.category": "behavior",
+      "kibana.alert.original_event.code": "behavior",
+      "kibana.alert.original_event.dataset": "endpoint.diagnostic.collection",
+      "kibana.alert.original_event.id": "3c54dbd9-c02c-4760-9de7-80bdc839015a",
+      "kibana.alert.original_event.ingested": "2025-07-18T17:29:52Z",
+      "kibana.alert.original_event.kind": "alert",
+      "kibana.alert.original_event.module": "endpoint",
+      "kibana.alert.original_event.sequence": 58,
+      "kibana.alert.original_event.type": "info",
+      "kibana.alert.original_time": "2025-07-18T17:43:40.152Z",
+      "kibana.alert.reason": "behavior event with process notepad.exe, file fake_behavior.exe, source 10.138.131.101:59406, destination 10.53.190.192:443, by 0048thtr18 on Host-0rlfgcpnl5 created medium alert Endpoint Security (Elastic Defend).",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [
+      ],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2025-07-18T17:30:23.143Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Generates a detection alert each time an Elastic Defend alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [
+        {
+          "id": "endpoint_list",
+          "list_id": "endpoint_list",
+          "namespace_type": "agnostic",
+          "type": "endpoint"
+        }
+      ],
+      "kibana.alert.rule.execution.timestamp": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.rule.execution.type": "scheduled",
+      "kibana.alert.rule.execution.uuid": "5fbee9ed-48c1-485f-a2af-5edb938b5c2f",
+      "kibana.alert.rule.false_positives": [
+      ],
+      "kibana.alert.rule.from": "now-2m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "logs-endpoint.alerts-*"
+      ],
+      "kibana.alert.rule.interval": "1m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 1000,
+      "kibana.alert.rule.name": "Endpoint Security (Elastic Defend)",
+      "kibana.alert.rule.note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating Endpoint Security (Elastic Defend)\n\nElastic Defend is a robust endpoint security solution that monitors and protects systems by analyzing events and generating alerts for suspicious activities. Adversaries may exploit endpoints by executing unauthorized code or manipulating system processes. The detection rule leverages event data to identify alerts from Elastic Defend, focusing on potential threats while excluding non-relevant modules, thus enabling timely investigation of endpoint anomalies.\n\n### Possible investigation steps\n\n- Review the alert details to understand the specific event.kind:alert and event.module: endpoint that triggered the alert, ensuring it is not related to the excluded endgame module.\n- Examine the timeline of events leading up to the alert to identify any unusual or unauthorized activities, such as unexpected process executions or system changes.\n- Correlate the alert with other security events or logs from the same endpoint to gather additional context and determine if there is a pattern of suspicious behavior.\n- Investigate the source and destination of any network connections associated with the alert to identify potential command and control activity or data exfiltration attempts.\n- Check for any recent changes or updates to the endpoint's software or configuration that could explain the alert, ensuring they are legitimate and authorized.\n- Assess the risk score and severity of the alert in conjunction with other alerts from the same endpoint to prioritize the investigation and response efforts.\n\n### False positive analysis\n\n- Alerts triggered by routine software updates can be false positives. Users can create exceptions for known update processes to prevent unnecessary alerts.\n- System maintenance activities, such as scheduled scans or backups, may generate alerts. Exclude these activities by identifying their specific event signatures and adding them to the exception list.\n- Legitimate administrative actions, like remote desktop sessions or script executions by IT staff, might be flagged. Define exceptions for these actions by correlating them with authorized user accounts or IP addresses.\n- Frequent alerts from non-malicious applications that interact with system processes can be excluded by whitelisting these applications based on their hash or path.\n- Network monitoring tools that simulate attack patterns for testing purposes may trigger alerts. Exclude these tools by specifying their known behaviors and IP ranges in the exception settings.\n\n### Response and remediation\n\n- Isolate the affected endpoint immediately to prevent further unauthorized access or lateral movement within the network.\n- Analyze the alert details to identify the specific unauthorized code or process manipulation involved, and terminate any malicious processes identified.\n- Remove any unauthorized code or files from the affected endpoint, ensuring that all traces of the threat are eradicated.\n- Conduct a thorough review of system logs and event data to identify any additional indicators of compromise or related suspicious activities.\n- Update endpoint security configurations and signatures to prevent similar threats from exploiting the same vulnerabilities in the future.\n- Restore the affected endpoint from a known good backup if necessary, ensuring that the system is free from any residual threats.\n- Escalate the incident to the security operations center (SOC) or relevant team for further analysis and to determine if additional systems may be affected.",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Generates a detection alert each time an Elastic Defend alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+        "exceptions_list": [
+          {
+            "id": "endpoint_list",
+            "list_id": "endpoint_list",
+            "namespace_type": "agnostic",
+            "type": "endpoint"
+          }
+        ],
+        "false_positives": [
+        ],
+        "from": "now-2m",
+        "immutable": true,
+        "index": [
+          "logs-endpoint.alerts-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 1000,
+        "note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating Endpoint Security (Elastic Defend)\n\nElastic Defend is a robust endpoint security solution that monitors and protects systems by analyzing events and generating alerts for suspicious activities. Adversaries may exploit endpoints by executing unauthorized code or manipulating system processes. The detection rule leverages event data to identify alerts from Elastic Defend, focusing on potential threats while excluding non-relevant modules, thus enabling timely investigation of endpoint anomalies.\n\n### Possible investigation steps\n\n- Review the alert details to understand the specific event.kind:alert and event.module: endpoint that triggered the alert, ensuring it is not related to the excluded endgame module.\n- Examine the timeline of events leading up to the alert to identify any unusual or unauthorized activities, such as unexpected process executions or system changes.\n- Correlate the alert with other security events or logs from the same endpoint to gather additional context and determine if there is a pattern of suspicious behavior.\n- Investigate the source and destination of any network connections associated with the alert to identify potential command and control activity or data exfiltration attempts.\n- Check for any recent changes or updates to the endpoint's software or configuration that could explain the alert, ensuring they are legitimate and authorized.\n- Assess the risk score and severity of the alert in conjunction with other alerts from the same endpoint to prioritize the investigation and response efforts.\n\n### False positive analysis\n\n- Alerts triggered by routine software updates can be false positives. Users can create exceptions for known update processes to prevent unnecessary alerts.\n- System maintenance activities, such as scheduled scans or backups, may generate alerts. Exclude these activities by identifying their specific event signatures and adding them to the exception list.\n- Legitimate administrative actions, like remote desktop sessions or script executions by IT staff, might be flagged. Define exceptions for these actions by correlating them with authorized user accounts or IP addresses.\n- Frequent alerts from non-malicious applications that interact with system processes can be excluded by whitelisting these applications based on their hash or path.\n- Network monitoring tools that simulate attack patterns for testing purposes may trigger alerts. Exclude these tools by specifying their known behaviors and IP ranges in the exception settings.\n\n### Response and remediation\n\n- Isolate the affected endpoint immediately to prevent further unauthorized access or lateral movement within the network.\n- Analyze the alert details to identify the specific unauthorized code or process manipulation involved, and terminate any malicious processes identified.\n- Remove any unauthorized code or files from the affected endpoint, ensuring that all traces of the threat are eradicated.\n- Conduct a thorough review of system logs and event data to identify any additional indicators of compromise or related suspicious activities.\n- Update endpoint security configurations and signatures to prevent similar threats from exploiting the same vulnerabilities in the future.\n- Restore the affected endpoint from a known good backup if necessary, ensuring that the system is free from any residual threats.\n- Escalate the incident to the security operations center (SOC) or relevant team for further analysis and to determine if additional systems may be affected.",
+        "query": "event.kind:alert and event.module:(endpoint and not endgame)\n",
+        "references": [
+        ],
+        "related_integrations": [
+          {
+            "package": "endpoint",
+            "version": "^9.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.kind",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.module",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [
+          {
+            "field": "event.risk_score",
+            "operator": "equals",
+            "value": ""
+          }
+        ],
+        "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+        "rule_name_override": "message",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "## Setup\n\n### Elastic Defend Alerts\nIf this rule is disabled, you will not receive alerts for Elastic Defend alerts. This rule is designed to capture all alerts generated by Elastic Defend. For more granular alerting, consider using additional prebuilt-rules that capture specific Elastic Defend alerts.\n\nIf this rule is enabled, along with the related rules listed below, you will receive duplicate alerts for the same events. To avoid this, it is recommended to disable this generic rule and enable the more specific rules that capture these alerts separately.\n\nRelated rules:\n- Behavior - Detected - Elastic Defend (UUID: 0f615fe4-eaa2-11ee-ae33-f661ea17fbce)\n- Behavior - Prevented - Elastic Defend (UUID: eb804972-ea34-11ee-a417-f661ea17fbce)\n- Malicious File - Detected - Elastic Defend (UUID: f2c3caa6-ea34-11ee-a417-f661ea17fbce)\n- Malicious File - Prevented - Elastic Defend (UUID: f87e6122-ea34-11ee-a417-f661ea17fbce)\n- Memory Threat - Detected - Elastic Defend (UUID: 017de1e4-ea35-11ee-a417-f661ea17fbce)\n- Memory Threat - Prevented - Elastic Defend (UUID: 06f3a26c-ea35-11ee-a417-f661ea17fbce)\n- Ransomware - Detected - Elastic Defend (UUID: 0c74cd7e-ea35-11ee-a417-f661ea17fbce)\n- Ransomware - Prevented - Elastic Defend (UUID: 10f3d520-ea35-11ee-a417-f661ea17fbce)\n\n### Additional notes\n\nFor information on troubleshooting the maximum alerts warning please refer to this [guide](https://www.elastic.co/guide/en/security/current/alerts-ui-monitor.html#troubleshoot-max-alerts).\n",
+        "severity": "medium",
+        "severity_mapping": [
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "low",
+            "value": "21"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "medium",
+            "value": "47"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "high",
+            "value": "73"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "critical",
+            "value": "99"
+          }
+        ],
+        "threat": [
+        ],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 108
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [
+      ],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [
+        {
+          "field": "event.risk_score",
+          "operator": "equals",
+          "value": ""
+        }
+      ],
+      "kibana.alert.rule.rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+      "kibana.alert.rule.rule_name_override": "message",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "low",
+          "value": "21"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "medium",
+          "value": "47"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "high",
+          "value": "73"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "critical",
+          "value": "99"
+        }
+      ],
+      "kibana.alert.rule.tags": [
+        "Data Source: Elastic Defend",
+        "Resources: Investigation Guide"
+      ],
+      "kibana.alert.rule.threat": [
+      ],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2025-07-18T17:30:23.143Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "dc008bf7-2886-42f6-9d91-3bcb472b0011",
+      "kibana.alert.rule.version": 108,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "77c022576f808aa7d5df32738683d0ce24af0da135e25d5f1ec7547f8db70d74",
+      "kibana.alert.workflow_assignee_ids": [
+      ],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [
+      ],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.2.0",
+      "network": {
+        "direction": "outgoing",
+        "transport": "tcp",
+        "type": "ipv4"
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "q4yq9c2y0m",
+            "b8lhsw9am8"
+          ],
+          "code_signature": [
+            {
+              "subject_name": "bad signer",
+              "trusted": false
+            },
+            {
+              "subject_name": "good signer",
+              "trusted": true
+            }
+          ],
+          "token": {
+            "elevation_level": "full",
+            "integrity_level_name": "high"
+          },
+          "user": "SYSTEM"
+        },
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft Windows"
+        },
+        "entity_id": "5kh87psex7",
+        "entry_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake entry",
+          "pid": 724
+        },
+        "executable": "C:/fake_behavior/notepad.exe",
+        "group_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake leader",
+          "pid": 411
+        },
+        "name": "notepad.exe",
+        "parent": {
+          "entity_id": "q4yq9c2y0m",
+          "pid": 1
+        },
+        "pid": 2,
+        "session_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake session",
+          "pid": 709
+        }
+      },
+      "registry": {
+        "data": {
+          "strings": "C:/fake_behavior/notepad.exe"
+        },
+        "path": "HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome",
+        "value": "notepad.exe"
+      },
+      "rule": {
+        "description": "Behavior rule description",
+        "id": "d839b926-9e65-4fd4-8754-a74513ca776c"
+      },
+      "source": {
+        "ip": "10.138.131.101",
+        "port": 59406
+      },
+      "user": {
+        "domain": "sdis579k6k",
+        "name": "0048thtr18"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "f8446689871223db240d12c9c1e27ddd3ffd095a58553b8efff367b56f412c5e",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2025-07-18T17:30:28.924Z",
+      "Endpoint": {
+        "capabilities": [
+          "isolation",
+          "kill_process",
+          "suspend_process",
+          "running_processes",
+          "get_file",
+          "execute",
+          "upload_file",
+          "scan"
+        ],
+        "configuration": {
+          "isolation": false
+        },
+        "policy": {
+          "applied": {
+            "endpoint_policy_version": 4,
+            "id": "47d7965d-6869-478b-bd9c-fb0d2bb3959f",
+            "name": "Detect Malware Only",
+            "status": "unsupported",
+            "version": "9"
+          }
+        },
+        "state": {
+          "isolation": false
+        },
+        "status": "enrolled"
+      },
+      "agent": {
+        "id": "132c2b3c-7a6d-42d3-87e0-b2532b430f2f",
+        "type": "endpoint",
+        "version": "9.2.0"
+      },
+      "data_stream": {
+        "dataset": "endpoint.alerts",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "destination": {
+        "ip": "10.190.223.172",
+        "port": 443
+      },
+      "dll": {
+        "Ext": {
+          "compile_time": "1970-01-18T18:13:44.710Z",
+          "malware_classification": {
+            "identifier": "Whitelisted",
+            "score": 0,
+            "threshold": 0,
+            "version": "3.0.0"
+          },
+          "mapped_address": 5362483200,
+          "mapped_size": 0
+        },
+        "code_signature": {
+          "subject_name": "Cybereason Inc",
+          "trusted": true
+        },
+        "hash": {
+          "md5": "1f2d082566b0fc5f2c238a5180db7451",
+          "sha1": "ca85243c0af6a6471bdaa560685c51eefd6dbc0d",
+          "sha256": "8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2"
+        },
+        "path": "C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe",
+        "pe": {
+          "architecture": "x64"
+        }
+      },
+      "ecs": {
+        "version": "1.6.0"
+      },
+      "elastic": {
+        "agent": {
+          "id": "132c2b3c-7a6d-42d3-87e0-b2532b430f2f"
+        }
+      },
+      "event": {
+        "action": "rule_detection",
+        "agent_id_status": "auth_metadata_missing",
+        "category": "behavior",
+        "code": "behavior",
+        "dataset": "endpoint.diagnostic.collection",
+        "id": "89441083-e4e2-461d-99e0-476a53be7ea2",
+        "ingested": "2025-07-18T17:29:52Z",
+        "module": "endpoint",
+        "sequence": 28,
+        "type": "info"
+      },
+      "event.kind": "signal",
+      "file": {
+        "name": "fake_behavior.exe",
+        "path": "C:/fake_behavior.exe"
+      },
+      "host": {
+        "architecture": "dmrd6a7xnw",
+        "hostname": "Host-0rlfgcpnl5",
+        "id": "60e8befc-5238-40c5-b470-794892d25346",
+        "ip": [
+          "10.249.233.202"
+        ],
+        "mac": [
+          "af-76-b9-48-e2-cb",
+          "3f-87-b4-b8-3d-e8"
+        ],
+        "name": "Host-0rlfgcpnl5",
+        "os": {
+          "Ext": {
+            "variant": "Windows Pro"
+          },
+          "family": "windows",
+          "full": "Windows 10",
+          "name": "Windows",
+          "platform": "Windows",
+          "version": "10.0"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "AZgelSktJjTTg2TVS0NJ",
+          "index": ".ds-logs-endpoint.alerts-default-2025.07.18-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2025-07-18T17:30:28.924Z",
+      "kibana.alert.last_detected": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.original_data_stream.dataset": "endpoint.alerts",
+      "kibana.alert.original_data_stream.namespace": "default",
+      "kibana.alert.original_data_stream.type": "logs",
+      "kibana.alert.original_event.action": "rule_detection",
+      "kibana.alert.original_event.agent_id_status": "auth_metadata_missing",
+      "kibana.alert.original_event.category": "behavior",
+      "kibana.alert.original_event.code": "behavior",
+      "kibana.alert.original_event.dataset": "endpoint.diagnostic.collection",
+      "kibana.alert.original_event.id": "89441083-e4e2-461d-99e0-476a53be7ea2",
+      "kibana.alert.original_event.ingested": "2025-07-18T17:29:52Z",
+      "kibana.alert.original_event.kind": "alert",
+      "kibana.alert.original_event.module": "endpoint",
+      "kibana.alert.original_event.sequence": 28,
+      "kibana.alert.original_event.type": "info",
+      "kibana.alert.original_time": "2025-07-18T17:49:10.152Z",
+      "kibana.alert.reason": "behavior event with process iexlorer.exe, file fake_behavior.exe, source 10.39.209.230:59406, destination 10.190.223.172:443, by 6l5xhfti69 on Host-0rlfgcpnl5 created medium alert Endpoint Security (Elastic Defend).",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [
+      ],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2025-07-18T17:30:23.143Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Generates a detection alert each time an Elastic Defend alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [
+        {
+          "id": "endpoint_list",
+          "list_id": "endpoint_list",
+          "namespace_type": "agnostic",
+          "type": "endpoint"
+        }
+      ],
+      "kibana.alert.rule.execution.timestamp": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.rule.execution.type": "scheduled",
+      "kibana.alert.rule.execution.uuid": "5fbee9ed-48c1-485f-a2af-5edb938b5c2f",
+      "kibana.alert.rule.false_positives": [
+      ],
+      "kibana.alert.rule.from": "now-2m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "logs-endpoint.alerts-*"
+      ],
+      "kibana.alert.rule.interval": "1m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 1000,
+      "kibana.alert.rule.name": "Endpoint Security (Elastic Defend)",
+      "kibana.alert.rule.note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating Endpoint Security (Elastic Defend)\n\nElastic Defend is a robust endpoint security solution that monitors and protects systems by analyzing events and generating alerts for suspicious activities. Adversaries may exploit endpoints by executing unauthorized code or manipulating system processes. The detection rule leverages event data to identify alerts from Elastic Defend, focusing on potential threats while excluding non-relevant modules, thus enabling timely investigation of endpoint anomalies.\n\n### Possible investigation steps\n\n- Review the alert details to understand the specific event.kind:alert and event.module: endpoint that triggered the alert, ensuring it is not related to the excluded endgame module.\n- Examine the timeline of events leading up to the alert to identify any unusual or unauthorized activities, such as unexpected process executions or system changes.\n- Correlate the alert with other security events or logs from the same endpoint to gather additional context and determine if there is a pattern of suspicious behavior.\n- Investigate the source and destination of any network connections associated with the alert to identify potential command and control activity or data exfiltration attempts.\n- Check for any recent changes or updates to the endpoint's software or configuration that could explain the alert, ensuring they are legitimate and authorized.\n- Assess the risk score and severity of the alert in conjunction with other alerts from the same endpoint to prioritize the investigation and response efforts.\n\n### False positive analysis\n\n- Alerts triggered by routine software updates can be false positives. Users can create exceptions for known update processes to prevent unnecessary alerts.\n- System maintenance activities, such as scheduled scans or backups, may generate alerts. Exclude these activities by identifying their specific event signatures and adding them to the exception list.\n- Legitimate administrative actions, like remote desktop sessions or script executions by IT staff, might be flagged. Define exceptions for these actions by correlating them with authorized user accounts or IP addresses.\n- Frequent alerts from non-malicious applications that interact with system processes can be excluded by whitelisting these applications based on their hash or path.\n- Network monitoring tools that simulate attack patterns for testing purposes may trigger alerts. Exclude these tools by specifying their known behaviors and IP ranges in the exception settings.\n\n### Response and remediation\n\n- Isolate the affected endpoint immediately to prevent further unauthorized access or lateral movement within the network.\n- Analyze the alert details to identify the specific unauthorized code or process manipulation involved, and terminate any malicious processes identified.\n- Remove any unauthorized code or files from the affected endpoint, ensuring that all traces of the threat are eradicated.\n- Conduct a thorough review of system logs and event data to identify any additional indicators of compromise or related suspicious activities.\n- Update endpoint security configurations and signatures to prevent similar threats from exploiting the same vulnerabilities in the future.\n- Restore the affected endpoint from a known good backup if necessary, ensuring that the system is free from any residual threats.\n- Escalate the incident to the security operations center (SOC) or relevant team for further analysis and to determine if additional systems may be affected.",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Generates a detection alert each time an Elastic Defend alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+        "exceptions_list": [
+          {
+            "id": "endpoint_list",
+            "list_id": "endpoint_list",
+            "namespace_type": "agnostic",
+            "type": "endpoint"
+          }
+        ],
+        "false_positives": [
+        ],
+        "from": "now-2m",
+        "immutable": true,
+        "index": [
+          "logs-endpoint.alerts-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 1000,
+        "note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating Endpoint Security (Elastic Defend)\n\nElastic Defend is a robust endpoint security solution that monitors and protects systems by analyzing events and generating alerts for suspicious activities. Adversaries may exploit endpoints by executing unauthorized code or manipulating system processes. The detection rule leverages event data to identify alerts from Elastic Defend, focusing on potential threats while excluding non-relevant modules, thus enabling timely investigation of endpoint anomalies.\n\n### Possible investigation steps\n\n- Review the alert details to understand the specific event.kind:alert and event.module: endpoint that triggered the alert, ensuring it is not related to the excluded endgame module.\n- Examine the timeline of events leading up to the alert to identify any unusual or unauthorized activities, such as unexpected process executions or system changes.\n- Correlate the alert with other security events or logs from the same endpoint to gather additional context and determine if there is a pattern of suspicious behavior.\n- Investigate the source and destination of any network connections associated with the alert to identify potential command and control activity or data exfiltration attempts.\n- Check for any recent changes or updates to the endpoint's software or configuration that could explain the alert, ensuring they are legitimate and authorized.\n- Assess the risk score and severity of the alert in conjunction with other alerts from the same endpoint to prioritize the investigation and response efforts.\n\n### False positive analysis\n\n- Alerts triggered by routine software updates can be false positives. Users can create exceptions for known update processes to prevent unnecessary alerts.\n- System maintenance activities, such as scheduled scans or backups, may generate alerts. Exclude these activities by identifying their specific event signatures and adding them to the exception list.\n- Legitimate administrative actions, like remote desktop sessions or script executions by IT staff, might be flagged. Define exceptions for these actions by correlating them with authorized user accounts or IP addresses.\n- Frequent alerts from non-malicious applications that interact with system processes can be excluded by whitelisting these applications based on their hash or path.\n- Network monitoring tools that simulate attack patterns for testing purposes may trigger alerts. Exclude these tools by specifying their known behaviors and IP ranges in the exception settings.\n\n### Response and remediation\n\n- Isolate the affected endpoint immediately to prevent further unauthorized access or lateral movement within the network.\n- Analyze the alert details to identify the specific unauthorized code or process manipulation involved, and terminate any malicious processes identified.\n- Remove any unauthorized code or files from the affected endpoint, ensuring that all traces of the threat are eradicated.\n- Conduct a thorough review of system logs and event data to identify any additional indicators of compromise or related suspicious activities.\n- Update endpoint security configurations and signatures to prevent similar threats from exploiting the same vulnerabilities in the future.\n- Restore the affected endpoint from a known good backup if necessary, ensuring that the system is free from any residual threats.\n- Escalate the incident to the security operations center (SOC) or relevant team for further analysis and to determine if additional systems may be affected.",
+        "query": "event.kind:alert and event.module:(endpoint and not endgame)\n",
+        "references": [
+        ],
+        "related_integrations": [
+          {
+            "package": "endpoint",
+            "version": "^9.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.kind",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.module",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [
+          {
+            "field": "event.risk_score",
+            "operator": "equals",
+            "value": ""
+          }
+        ],
+        "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+        "rule_name_override": "message",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "## Setup\n\n### Elastic Defend Alerts\nIf this rule is disabled, you will not receive alerts for Elastic Defend alerts. This rule is designed to capture all alerts generated by Elastic Defend. For more granular alerting, consider using additional prebuilt-rules that capture specific Elastic Defend alerts.\n\nIf this rule is enabled, along with the related rules listed below, you will receive duplicate alerts for the same events. To avoid this, it is recommended to disable this generic rule and enable the more specific rules that capture these alerts separately.\n\nRelated rules:\n- Behavior - Detected - Elastic Defend (UUID: 0f615fe4-eaa2-11ee-ae33-f661ea17fbce)\n- Behavior - Prevented - Elastic Defend (UUID: eb804972-ea34-11ee-a417-f661ea17fbce)\n- Malicious File - Detected - Elastic Defend (UUID: f2c3caa6-ea34-11ee-a417-f661ea17fbce)\n- Malicious File - Prevented - Elastic Defend (UUID: f87e6122-ea34-11ee-a417-f661ea17fbce)\n- Memory Threat - Detected - Elastic Defend (UUID: 017de1e4-ea35-11ee-a417-f661ea17fbce)\n- Memory Threat - Prevented - Elastic Defend (UUID: 06f3a26c-ea35-11ee-a417-f661ea17fbce)\n- Ransomware - Detected - Elastic Defend (UUID: 0c74cd7e-ea35-11ee-a417-f661ea17fbce)\n- Ransomware - Prevented - Elastic Defend (UUID: 10f3d520-ea35-11ee-a417-f661ea17fbce)\n\n### Additional notes\n\nFor information on troubleshooting the maximum alerts warning please refer to this [guide](https://www.elastic.co/guide/en/security/current/alerts-ui-monitor.html#troubleshoot-max-alerts).\n",
+        "severity": "medium",
+        "severity_mapping": [
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "low",
+            "value": "21"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "medium",
+            "value": "47"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "high",
+            "value": "73"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "critical",
+            "value": "99"
+          }
+        ],
+        "threat": [
+        ],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 108
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [
+      ],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [
+        {
+          "field": "event.risk_score",
+          "operator": "equals",
+          "value": ""
+        }
+      ],
+      "kibana.alert.rule.rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+      "kibana.alert.rule.rule_name_override": "message",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "low",
+          "value": "21"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "medium",
+          "value": "47"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "high",
+          "value": "73"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "critical",
+          "value": "99"
+        }
+      ],
+      "kibana.alert.rule.tags": [
+        "Data Source: Elastic Defend",
+        "Resources: Investigation Guide"
+      ],
+      "kibana.alert.rule.threat": [
+      ],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2025-07-18T17:30:23.143Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "dc008bf7-2886-42f6-9d91-3bcb472b0011",
+      "kibana.alert.rule.version": 108,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2025-07-18T17:30:28.991Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "f8446689871223db240d12c9c1e27ddd3ffd095a58553b8efff367b56f412c5e",
+      "kibana.alert.workflow_assignee_ids": [
+      ],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [
+      ],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.2.0",
+      "network": {
+        "direction": "outgoing",
+        "transport": "tcp",
+        "type": "ipv4"
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "bxoiwuq7c9",
+            "b3f0kp7d19"
+          ],
+          "code_signature": [
+            {
+              "subject_name": "bad signer",
+              "trusted": false
+            },
+            {
+              "subject_name": "good signer",
+              "trusted": true
+            }
+          ],
+          "token": {
+            "elevation_level": "full",
+            "integrity_level_name": "high"
+          },
+          "user": "SYSTEM"
+        },
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft Windows"
+        },
+        "entity_id": "b4ygsz2ccz",
+        "entry_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake entry",
+          "pid": 523
+        },
+        "executable": "C:/fake_behavior/iexlorer.exe",
+        "group_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake leader",
+          "pid": 875
+        },
+        "name": "iexlorer.exe",
+        "parent": {
+          "entity_id": "bxoiwuq7c9",
+          "pid": 1
+        },
+        "pid": 2,
+        "session_leader": {
+          "entity_id": "uli4wzuu8v",
+          "name": "fake session",
+          "pid": 670
+        }
+      },
+      "registry": {
+        "data": {
+          "strings": "C:/fake_behavior/iexlorer.exe"
+        },
+        "path": "HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome",
+        "value": "iexlorer.exe"
+      },
+      "rule": {
+        "description": "Behavior rule description",
+        "id": "bcae2a0f-d369-4a8e-889a-f42a74c8a794"
+      },
+      "source": {
+        "ip": "10.39.209.230",
+        "port": 59406
+      },
+      "user": {
+        "domain": "5k35hfp85n",
+        "name": "6l5xhfti69"
+      }
+    }
+  }
+}

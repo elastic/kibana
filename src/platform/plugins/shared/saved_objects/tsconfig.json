@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -17,7 +17,6 @@
     "@kbn/data-views-plugin",
     "@kbn/i18n-react",
     "@kbn/react-kibana-mount",
-    "@kbn/test-jest-helpers"
   ],
   "exclude": [
     "target/**/*"

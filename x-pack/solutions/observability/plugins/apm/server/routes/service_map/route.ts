@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
@@ -34,7 +33,6 @@ const serviceMapRoute = createApmServerRoute({
         serviceName: t.string,
         serviceGroup: t.string,
         kuery: kueryRt.props.kuery,
-        useV2: toBooleanRt,
       }),
       environmentRt,
       rangeRt,
@@ -58,7 +56,7 @@ const serviceMapRoute = createApmServerRoute({
     });
 
     const {
-      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery, useV2 },
+      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery },
     } = params;
 
     const {
@@ -99,7 +97,6 @@ const serviceMapRoute = createApmServerRoute({
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
-      useV2,
     });
   },
 });

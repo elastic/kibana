@@ -28,7 +28,7 @@ import {
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
-import {
+import type {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,
@@ -248,7 +248,10 @@ export class RenderingService {
     const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
     });
+    const themeName = this.themeName$.getValue();
+
     const scriptPaths = getScriptPaths({
+      themeName,
       darkMode,
       baseHref: staticAssetsHrefBase,
     });
@@ -265,6 +268,7 @@ export class RenderingService {
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -295,6 +299,7 @@ export class RenderingService {
         env,
         featureFlags: {
           overrides: featureFlags?.getOverrides() || {},
+          initialFeatureFlags: (await featureFlags?.getInitialFeatureFlags()) || {},
         },
         clusterInfo,
         apmConfig,
@@ -304,7 +309,7 @@ export class RenderingService {
         },
         theme: {
           darkMode,
-          name: this.themeName$.getValue(),
+          name: themeName,
           version: themeVersion,
           stylesheetPaths: {
             default: themeStylesheetPaths(false),

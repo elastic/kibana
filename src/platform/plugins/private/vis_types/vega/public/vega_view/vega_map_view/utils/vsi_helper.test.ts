@@ -8,7 +8,7 @@
  */
 
 import { injectMapPropsIntoSpec } from './vsi_helper';
-import { VegaSpec } from '../../../data_model/types';
+import type { VegaSpec } from '../../../data_model/types';
 
 describe('vega_map_view/vsi_helper', () => {
   describe('injectMapPropsIntoSpec', () => {

@@ -12,7 +12,7 @@ exports[`\`format()\` correctly formats record with custom pattern. 5`] = `"mock
 
 exports[`\`format()\` correctly formats record with custom pattern. 6`] = `"mock-message-6-context-6-message-6"`;
 
-exports[`\`format()\` correctly formats record with full pattern. 1`] = `"[2012-02-01T09:30:22.011-05:00][FATAL][context-1] Some error stack"`;
+exports[`\`format()\` correctly formats record with full pattern. 1`] = `"[2012-02-01T09:30:22.011-05:00][FATAL][context-1] Some error stack Meta error stack"`;
 
 exports[`\`format()\` correctly formats record with full pattern. 2`] = `"[2012-02-01T09:30:22.011-05:00][ERROR][context-2] message-2"`;
 

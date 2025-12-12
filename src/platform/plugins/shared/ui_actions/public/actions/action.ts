@@ -9,7 +9,7 @@
 
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /**
  * During action execution we can provide additional information,
@@ -20,6 +20,10 @@ export interface ActionExecutionMeta {
    * Trigger that executed the action
    */
   trigger: Trigger;
+  /**
+   * The event that caused the action to execute (e.g., mouse click, keyboard event)
+   */
+  event?: React.MouseEvent;
 }
 
 /**

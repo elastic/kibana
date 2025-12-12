@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import inquirer from 'inquirer';
-import { InferenceConnector } from '@kbn/inference-common';
-import { KibanaClient } from '@kbn/kibana-api-cli';
+import type { InferenceConnector } from '@kbn/inference-common';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
 import { getConnectors } from './get_connector';
 
 export async function selectConnector({
@@ -16,24 +16,28 @@ export async function selectConnector({
   kibanaClient,
   prompt = true,
   preferredConnectorId,
+  signal,
 }: {
   log: ToolingLog;
   kibanaClient: KibanaClient;
   prompt?: boolean;
   preferredConnectorId?: string;
+  signal: AbortSignal;
 }): Promise<InferenceConnector> {
   const connectors = await getConnectors(kibanaClient);
 
   if (!connectors.length) {
-    throw new Error(
-      `No connectors available for inference. See https://www.elastic.co/guide/en/kibana/current/action-types.html`
-    );
+    throw new Error(`No connectors available.`);
   }
 
   const connector = connectors.find((item) => item.connectorId === preferredConnectorId);
 
   if (!connector && preferredConnectorId) {
     log.warning(`Could not find connector ${preferredConnectorId}`);
+  }
+
+  if (connector) {
+    return connector;
   }
 
   const firstConnector = connectors[0];

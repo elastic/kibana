@@ -10,22 +10,15 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TabPreview } from './tab_preview';
-import type { TabPreviewData, TabItem } from '../../types';
-import { TabStatus } from '../../types';
-
-const tabPreviewData: TabPreviewData = {
-  query: {
-    esql: 'SELECT * FROM table',
-  },
-  status: TabStatus.SUCCESS,
-};
+import type { TabItem } from '../../types';
+import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 
 const tabItem: TabItem = {
   id: 'test-id',
   label: 'test-label',
 };
 
-const previewTestSubj = `unifiedTabs_tabPreview_${tabItem.id}`;
+const previewTestSubj = `unifiedTabs_tabPreview_outerPanel_${tabItem.id}`;
 
 describe('TabPreview', () => {
   it('should call setShowPreview when mouse enters and change opacity after a delay', async () => {
@@ -35,7 +28,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        tabPreviewData={tabPreviewData}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={false}
         previewDelay={0}
@@ -63,7 +56,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={true}
         setShowPreview={setShowPreview}
-        tabPreviewData={tabPreviewData}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={false}
       >
@@ -90,7 +83,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        tabPreviewData={tabPreviewData}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={true}
       >

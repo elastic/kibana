@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { from, Observable, of, switchMap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { from, of, switchMap } from 'rxjs';
 import { MessageRole } from '@kbn/inference-common';
 import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
-import { InvestigateEntityToolMessage, RootCauseAnalysisContext, ToolErrorMessage } from './types';
+import type {
+  InvestigateEntityToolMessage,
+  RootCauseAnalysisContext,
+  ToolErrorMessage,
+} from './types';
 import { investigateEntity } from './tasks/investigate_entity';
 import { formatEntity } from './util/format_entity';
 

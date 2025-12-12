@@ -61,7 +61,7 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={false} />
+        <DeprecationBadge level={deprecation.level} isResolved={false} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="defaultDeprecationDetailsFlyoutTitle">{message}</h2>

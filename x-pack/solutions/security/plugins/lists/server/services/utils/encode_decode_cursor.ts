@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
 import type {
   CursorOrUndefined,
@@ -124,6 +124,7 @@ export const decodeCursor = ({
 export const parseOrUndefined = (input: string): ContextCursor | undefined => {
   try {
     return JSON.parse(input);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     return undefined;
   }

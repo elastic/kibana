@@ -15,6 +15,7 @@ export enum AnalyticsEvents {
   citationDetailsCollapsed = 'citation_details_collapsed',
   editContextFieldToggled = 'edit_context_field_toggled',
   editContextDocSizeChanged = 'edit_context_doc_size_changed',
+  editElasticsearchQuery = 'edit_elasticsearch_query',
   genAiConnectorAdded = 'gen_ai_connector_added',
   genAiConnectorCreated = 'gen_ai_connector_created',
   genAiConnectorExists = 'gen_ai_connector_exists',
@@ -33,4 +34,6 @@ export enum AnalyticsEvents {
   setupSearchPageLoaded = 'search_setup_page_loaded',
   viewCodeFlyoutOpened = 'view_code_flyout_opened',
   viewCodeLanguageChange = 'view_code_language_change',
+  viewCostTransparencyTour = 'view_cost_transparency_tour',
+  closedCostTransparencyTour = 'closed_cost_transparency_tour',
 }

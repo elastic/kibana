@@ -9,14 +9,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
-import { ScriptedFieldItem } from '../../types';
+import type { ScriptedFieldItem } from '../../types';
 
 interface DeleteScritpedFieldConfirmationModalProps {
   field: ScriptedFieldItem;
   hideDeleteConfirmationModal: (
-    event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
+    event?:
+      | React.KeyboardEvent<HTMLDivElement>
+      | React.MouseEvent<HTMLButtonElement>
+      | MouseEvent
+      | TouchEvent
   ) => void;
   deleteField: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
@@ -26,6 +30,8 @@ export const DeleteScritpedFieldConfirmationModal = ({
   hideDeleteConfirmationModal,
   deleteField,
 }: DeleteScritpedFieldConfirmationModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const title = i18n.translate(
     'indexPatternManagement.editIndexPattern.scripted.deleteFieldLabel',
     {
@@ -44,7 +50,9 @@ export const DeleteScritpedFieldConfirmationModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={title}
+      titleProps={{ id: modalTitleId }}
       onCancel={hideDeleteConfirmationModal}
       onConfirm={deleteField}
       cancelButtonText={cancelButtonText}

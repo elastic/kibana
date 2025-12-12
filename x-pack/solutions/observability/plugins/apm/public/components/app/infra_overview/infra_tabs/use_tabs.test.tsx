@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { ReactNode } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { useTabs } from './use_tabs';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { shallow } from 'enzyme';
 
 const KibanaReactContext = createKibanaReactContext({
   metricsDataAccess: {
@@ -19,101 +20,80 @@ const KibanaReactContext = createKibanaReactContext({
     PodMetricsTable: () => 'Pods metrics table',
   },
 } as unknown as Partial<CoreStart>);
+
 function wrapper({ children }: { children: ReactNode }) {
   return <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>;
 }
 
 describe('useTabs', () => {
-  describe('when we have container ids, pod names and host names', () => {
-    it('returns all the tabs', () => {
-      const params = {
-        containerIds: ['apple'],
-        podNames: ['orange'],
-        hostNames: ['banana'],
-        start: '2022-05-18T11:43:23.367Z',
-        end: '2022-05-18T11:58:23.367Z',
-      };
-      const { result } = renderHook(() => useTabs(params), { wrapper });
+  it('returns all tabs when container ids, pod names and host names are present', () => {
+    const params = {
+      containerIds: ['apple'],
+      podNames: ['orange'],
+      hostNames: ['banana'],
+      start: '2022-05-18T11:43:23.367Z',
+      end: '2022-05-18T11:58:23.367Z',
+    };
 
-      const tabs = [
-        {
-          id: 'containers',
-          name: 'Containers',
-          content: '<EuiSpacer />Container metrics table',
-        },
-        {
-          id: 'pods',
-          name: 'Pods',
-          content: '<EuiSpacer />Pods metrics table',
-        },
-        {
-          id: 'hosts',
-          name: 'Hosts',
-          content: '<EuiSpacer />Host metrics table',
-        },
-      ];
-      tabs.forEach(({ id, name, content }, index) => {
-        const currentResult = result.current[index];
-        const component = shallow(<div>{currentResult.content}</div>);
-        expect(currentResult.id).toBe(id);
-        expect(currentResult.name).toBe(name);
-        expect(component.text()).toBe(content);
-      });
+    const { result } = renderHook(() => useTabs(params), { wrapper });
+
+    const expectedTabs = [
+      { id: 'containers', name: 'Containers', content: 'Container metrics table' },
+      { id: 'pods', name: 'Pods', content: 'Pods metrics table' },
+      { id: 'hosts', name: 'Hosts', content: 'Host metrics table' },
+    ];
+
+    expect(result.current).toHaveLength(expectedTabs.length);
+
+    expectedTabs.forEach(({ id, name, content }, index) => {
+      const currentTab = result.current[index];
+      expect(currentTab.id).toBe(id);
+      expect(currentTab.name).toBe(name);
+
+      render(<div>{currentTab.content}</div>);
+      expect(screen.getByText(content)).toBeInTheDocument();
     });
   });
-  describe('when there are not container ids nor pod names', () => {
-    it('returns host tab', () => {
-      const params = {
-        containerIds: [],
-        podNames: [],
-        hostNames: ['banana'],
-        start: '2022-05-18T11:43:23.367Z',
-        end: '2022-05-18T11:58:23.367Z',
-      };
-      const { result } = renderHook(() => useTabs(params), { wrapper });
-      const tabs = [
-        {
-          id: 'hosts',
-          name: 'Hosts',
-          content: '<EuiSpacer />Host metrics table',
-        },
-      ];
 
-      tabs.forEach(({ id, name, content }, index) => {
-        const currentResult = result.current[index];
-        const component = shallow(<div>{currentResult.content}</div>);
-        expect(currentResult.id).toBe(id);
-        expect(currentResult.name).toBe(name);
-        expect(component.text()).toBe(content);
-      });
-    });
+  it('returns only host tab when no container ids and pod names are present', () => {
+    const params = {
+      containerIds: [],
+      podNames: [],
+      hostNames: ['banana'],
+      start: '2022-05-18T11:43:23.367Z',
+      end: '2022-05-18T11:58:23.367Z',
+    };
+
+    const { result } = renderHook(() => useTabs(params), { wrapper });
+
+    expect(result.current).toHaveLength(1);
+    const hostTab = result.current[0];
+
+    expect(hostTab.id).toBe('hosts');
+    expect(hostTab.name).toBe('Hosts');
+
+    render(<div>{hostTab.content}</div>);
+    expect(screen.getByText('Host metrics table')).toBeInTheDocument();
   });
-  describe('when there are not container ids nor pod names nor host names', () => {
-    it('returns host tab', () => {
-      const params = {
-        containerIds: [],
-        podNames: [],
-        hostNames: [],
-        start: '2022-05-18T11:43:23.367Z',
-        end: '2022-05-18T11:58:23.367Z',
-      };
 
-      const { result } = renderHook(() => useTabs(params), { wrapper });
-      const tabs = [
-        {
-          id: 'hosts',
-          name: 'Hosts',
-          content: '<EuiSpacer />Host metrics table',
-        },
-      ];
+  it('returns default host tab when no ids or names are present', () => {
+    const params = {
+      containerIds: [],
+      podNames: [],
+      hostNames: [],
+      start: '2022-05-18T11:43:23.367Z',
+      end: '2022-05-18T11:58:23.367Z',
+    };
 
-      tabs.forEach(({ id, name, content }, index) => {
-        const currentResult = result.current[index];
-        const component = shallow(<div>{currentResult.content}</div>);
-        expect(currentResult.id).toBe(id);
-        expect(currentResult.name).toBe(name);
-        expect(component.text()).toBe(content);
-      });
-    });
+    const { result } = renderHook(() => useTabs(params), { wrapper });
+
+    expect(result.current).toHaveLength(1);
+    const hostTab = result.current[0];
+
+    expect(hostTab.id).toBe('hosts');
+    expect(hostTab.name).toBe('Hosts');
+
+    render(<div>{hostTab.content}</div>);
+    expect(screen.getByText('Host metrics table')).toBeInTheDocument();
   });
 });

@@ -23,7 +23,7 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
 export type AbortableAsyncStateOf<T extends AbortableAsyncState<any>> =
   T extends AbortableAsyncState<infer TResponse> ? Awaited<TResponse> : never;
 
-interface UseAbortableAsyncOptions<T> {
+export interface UseAbortableAsyncOptions<T> {
   clearValueOnNext?: boolean;
   unsetValueOnError?: boolean;
   defaultValue?: () => T;

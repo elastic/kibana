@@ -15,6 +15,7 @@ import { toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { FleetError, EnrollmentKeyNameExistsError, EnrollmentKeyNotFoundError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
@@ -24,6 +25,7 @@ import { auditLoggingService } from '../audit_logging';
 import { _joinFilters } from '../agents';
 import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
+import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
 import { invalidateAPIKeys } from './security';
 
@@ -58,10 +60,9 @@ export async function listEnrollmentApiKeys(
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     if (useSpaceAwareness && spaceId) {
       if (spaceId === DEFAULT_SPACE_ID) {
-        // TODO use constant
-        filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
+        filters.push(DEFAULT_NAMESPACES_FILTER);
       } else {
-        filters.push(`namespaces:"${spaceId}"`);
+        filters.push(`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`);
       }
     }
 
@@ -116,7 +117,9 @@ export async function getEnrollmentAPIKey(
     });
 
     if (spaceId) {
-      if (spaceId === DEFAULT_SPACE_ID) {
+      if (body._source?.namespaces?.includes(ALL_SPACES_ID)) {
+        // Do nothing all spaces have access to this key
+      } else if (spaceId === DEFAULT_SPACE_ID) {
         if (
           (body._source?.namespaces?.length ?? 0) > 0 &&
           !body._source?.namespaces?.includes(DEFAULT_SPACE_ID)
@@ -312,6 +315,7 @@ export async function generateEnrollmentAPIKey(
     policy_id: agentPolicyId,
     namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
+    hidden: agentPolicy?.supports_agentless || agentPolicy?.is_managed,
   };
 
   const res = await esClient.create({
@@ -429,5 +433,6 @@ function esDocToEnrollmentApiKey(doc: {
     policy_id: doc._source.policy_id,
     created_at: doc._source.created_at as string,
     active: doc._source.active || false,
+    hidden: doc._source.hidden || false,
   };
 }

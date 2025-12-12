@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pMap from 'p-map';
+
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import type { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import {
+  combineFiltersWithInternalRuleTypeFilter,
+  constructIgnoreInternalRuleTypesFilter,
+} from '../../../../rules_client/common/construct_ignore_internal_rule_type_filters';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { tryToRemoveTasks } from '../../../../rules_client/common';
-import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  migrateLegacyActions,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
@@ -38,6 +41,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -51,17 +55,28 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
   const { ids, filter } = options;
   const actionsClient = await context.getActionsClient();
+  const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
 
   const kueryNodeFilterWithAuth =
     authorizationFilter && kueryNodeFilter
       ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
       : kueryNodeFilter;
 
+  const finalFilter = ignoreInternalRuleTypes
+    ? combineFiltersWithInternalRuleTypeFilter({
+        filter: kueryNodeFilterWithAuth,
+        internalRuleTypeFilter,
+      })
+    : kueryNodeFilterWithAuth;
+
   const { total } = await checkAuthorizationAndGetTotal(context, {
-    filter: kueryNodeFilterWithAuth,
+    filter: finalFilter,
     action: 'DELETE',
   });
 
@@ -73,7 +88,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
           bulkDeleteWithOCC(context, { filter: filterKueryNode }),
-        filter: kueryNodeFilterWithAuth,
+        filter: finalFilter,
       })
   );
 
@@ -152,7 +167,7 @@ const bulkDeleteWithOCC = async (
       })
   );
 
-  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const rulesToDelete: Array<SavedObject<RawRule>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -161,6 +176,7 @@ const bulkDeleteWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
+        await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
         for (const rule of response.saved_objects) {
           if (rule.attributes.apiKey && !rule.attributes.apiKeyCreatedByUser) {
             apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
@@ -193,6 +209,22 @@ const bulkDeleteWithOCC = async (
 
   for (const { id, attributes } of rulesToDelete) {
     await untrackRuleAlerts(context, id, attributes as RawRule);
+  }
+
+  const ruleIds = rulesToDelete.map((rule) => rule.id);
+  try {
+    const eventLogClient = await context.getEventLogClient();
+    await softDeleteGaps({
+      ruleIds,
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
+  } catch (error) {
+    // Failing to soft delete gaps should not block the rule deletion
+    context.logger.error(
+      `delete(): Failed to soft delete gaps for rules: ${ruleIds.join(',')}: ${error.message}`
+    );
   }
 
   const result = await withSpan(
@@ -230,21 +262,6 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
-
-  // migrate legacy actions only for SIEM rules
-  // TODO (http-versioning) Remove RawRule casts
-  await pMap(
-    rules,
-    async (rule) => {
-      await migrateLegacyActions(context, {
-        ruleId: rule.id,
-        attributes: rule.attributes as RawRule,
-        skipActionsValidation: true,
-      });
-    },
-    // max concurrency for bulk edit operations, that is limited by api key generations, should be sufficient for bulk migrations
-    { concurrency: API_KEY_GENERATE_CONCURRENCY }
-  );
 
   return {
     errors,

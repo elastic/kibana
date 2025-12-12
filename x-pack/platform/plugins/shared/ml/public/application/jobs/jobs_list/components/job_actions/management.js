@@ -23,7 +23,7 @@ import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
   toastNotifications,
-  application,
+  share,
   mlApi,
   showEditJobFlyout,
   showDatafeedChartFlyout,
@@ -152,7 +152,7 @@ export function actionsMenuContent(
         return isJobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
-        cloneJob(toastNotifications, application, mlApi, item.id);
+        cloneJob(toastNotifications, share, mlApi, item.id);
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',

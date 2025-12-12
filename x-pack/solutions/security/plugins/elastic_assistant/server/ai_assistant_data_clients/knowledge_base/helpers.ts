@@ -8,19 +8,15 @@
 import { z } from '@kbn/zod';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
-import {
+import type {
   QueryDslQueryContainer,
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import {
-  contentReferenceBlock,
-  ContentReferencesStore,
-  esqlQueryReference,
-  IndexEntry,
-} from '@kbn/elastic-assistant-common';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
+import { contentReferenceBlock, esqlQueryReference } from '@kbn/elastic-assistant-common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
 
 export const isModelAlreadyExistsError = (error: Error) => {
@@ -187,7 +183,7 @@ export const getStructuredToolForIndexEntry = ({
       // Generate filters for inputSchema fields
       const filter =
         indexEntry.inputSchema?.reduce(
-          // @ts-expect-error Possible to override types with dynamic input schema?
+          // @ts-expect-error upgrade typescript v5.9.3
           (prev, i) => [...prev, { term: { [`${i.fieldName}`]: input?.[i.fieldName] } }],
           [] as Array<{ term: { [key: string]: string } }>
         ) ?? [];
@@ -199,9 +195,8 @@ export const getStructuredToolForIndexEntry = ({
           bool: {
             must: [
               {
-                semantic: {
-                  field: indexEntry.field,
-                  query: input.query,
+                match: {
+                  [indexEntry.field]: input.query,
                 },
               },
             ],
@@ -211,7 +206,6 @@ export const getStructuredToolForIndexEntry = ({
         highlight: {
           fields: {
             [indexEntry.field]: {
-              type: 'semantic',
               number_of_fragments: 2,
               order: 'score',
             },

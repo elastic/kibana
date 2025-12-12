@@ -27,10 +27,8 @@ import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -53,6 +51,7 @@ import {
   expectError,
   createBadRequestErrorPayload,
   expectUpdateResult,
+  MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
@@ -374,26 +373,31 @@ describe('#bulkUpdate', () => {
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
-        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], { namespace });
+        let res = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
+          namespace,
+        });
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual([namespace]);
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
-        await bulkUpdateSuccess(client, repository, registry, [
+        res = await bulkUpdateSuccess(client, repository, registry, [
           { ...obj1, namespace },
           { ...obj2, namespace },
         ]);
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual([namespace]);
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
-        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+        let res = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual(['default']);
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
-        await bulkUpdateSuccess(
+        res = await bulkUpdateSuccess(
           client,
           repository,
           registry,
@@ -404,13 +408,15 @@ describe('#bulkUpdate', () => {
           { namespace }
         );
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual(['default']);
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`;
-        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
+        const res = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
           namespace: 'default',
         });
+        expect(res.saved_objects[0].namespaces).toEqual(['default']);
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
@@ -615,6 +621,74 @@ describe('#bulkUpdate', () => {
           {
             id: modifiedObj1.id,
             type: modifiedObj1.type,
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates single namespace objects using the object namespace', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test',
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespace: 'test',
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates multiple namespace objects using the object namespaces', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          type: MULTI_NAMESPACE_TYPE,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test',
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespaces: ['test'],
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates namespace agnsostic objects', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          type: NAMESPACE_AGNOSTIC_TYPE,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test', // specify a namespace, but it should be ignored
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespaces: [],
           },
           true,
           2

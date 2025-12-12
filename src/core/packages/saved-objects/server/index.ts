@@ -40,6 +40,7 @@ export type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
+  SavedObjectsMappingPropertiesSafe,
 } from './src/mapping_definition';
 export type {
   SavedObjectMigration,
@@ -64,6 +65,7 @@ export {
   ANALYTICS_SAVED_OBJECT_INDEX,
   USAGE_COUNTERS_SAVED_OBJECT_INDEX,
   ALL_SAVED_OBJECT_INDICES,
+  SEARCH_SOLUTION_SAVED_OBJECT_INDEX,
 } from './src/saved_objects_index_pattern';
 export type {
   SavedObjectsType,
@@ -71,7 +73,6 @@ export type {
 } from './src/saved_objects_type';
 export type {
   ISavedObjectsSerializer,
-  SavedObjectsRawDocSource,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
@@ -125,6 +126,7 @@ export {
 } from './src/saved_objects_error_helpers';
 
 export type {
+  ModelVersionIdentifier,
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
@@ -145,6 +147,8 @@ export type {
   SavedObjectModelVersionForwardCompatibilityFn,
   SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectsFullModelVersion,
+  SavedObjectsFullModelVersionSchemaDefinitions,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.
@@ -154,4 +158,5 @@ export type {
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';

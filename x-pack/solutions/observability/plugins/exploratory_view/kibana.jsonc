@@ -9,14 +9,13 @@
   "plugin": {
     "id": "exploratoryView",
     "browser": true,
-    "server": false,
+    "server": true,
     "configPath": [
       "xpack",
-      "exploratory_view"
+      "exploratoryView"
     ],
     "requiredPlugins": [
       "alerting",
-      "cases",
       "charts",
       "data",
       "dataViews",
@@ -31,6 +30,7 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
+      "cases",
       "discover",
       "embeddable",
       "home",
@@ -40,13 +40,13 @@
       "observabilityAIAssistant"
     ],
     "requiredBundles": [
+      "cases",
       "dataViews",
       "data",
       "kibanaReact",
       "kibanaUtils",
       "lens",
-      "unifiedSearch",
-      "visualizations"
+      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   GetIn,
   CreateIn,
   SearchIn,
@@ -19,15 +19,9 @@ import {
   CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
-import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type { ContentManagementCrudTypes, Reference } from '@kbn/content-management-utils';
 
-import { VisualizationContentType } from '../types';
-
-export interface Reference {
-  type: string;
-  id: string;
-  name: string;
-}
+import type { VisualizationContentType } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VisualizationSavedObjectAttributes = {
@@ -40,6 +34,7 @@ export type VisualizationSavedObjectAttributes = {
   visState?: string;
   uiStateJSON?: string;
   savedSearchRefName?: string;
+  typeName?: string;
 };
 
 export interface VisualizationSavedObject {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { CCRReadExceptionsStats } from '../../../common/types/alerts';
+import type { CCRReadExceptionsStats } from '../../../common/types/alerts';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';

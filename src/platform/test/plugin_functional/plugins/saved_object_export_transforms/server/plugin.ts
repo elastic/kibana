@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class SavedObjectExportTransformsPlugin implements Plugin {
   public setup({ savedObjects, getStartServices }: CoreSetup, deps: {}) {

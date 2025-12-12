@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
-export type { ConsoleSetup, ConsoleStart } from './types';
+export type { ConsoleSetup, ConsoleStart, SpecDefinitionsJson } from './types';
 
 export { config } from './config';
 

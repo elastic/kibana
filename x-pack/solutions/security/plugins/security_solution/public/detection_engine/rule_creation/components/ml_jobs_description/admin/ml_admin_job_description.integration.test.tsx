@@ -62,7 +62,7 @@ describe('MlAdminJobDescription', () => {
     await waitFor(() => {
       expect(refreshJobSpy).toHaveBeenCalledWith(securityJobNotStarted);
     });
-  });
+  }, 10000);
 
   it('should render loading spinner when job start is in progress', async () => {
     useEnableDataFeedMock.mockReturnValueOnce({
@@ -101,7 +101,6 @@ describe('MlAdminJobDescription', () => {
     // link to job
     const linkElement = screen.getByTestId('machineLearningJobLink');
 
-    expect(linkElement).toHaveAttribute('href', expect.any(String));
     expect(linkElement).toHaveTextContent(
       securityJobNotStarted.customSettings?.security_app_display_name!
     );

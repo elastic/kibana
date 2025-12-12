@@ -8,8 +8,8 @@
  */
 
 import { createEsClientForTesting, KbnClient } from '@kbn/test';
-import { ScoutLogger } from './logger';
-import { ScoutTestConfig, EsClient } from '../../types';
+import type { ScoutLogger } from './logger';
+import type { ScoutTestConfig, EsClient } from '../../types';
 
 interface ClientOptions {
   serviceName: string;
@@ -45,6 +45,7 @@ export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
 
     esClientInstance = createEsClientForTesting({
       esUrl: elasticsearchUrl,
+      isCloud: config.isCloud,
       authOverride: { username, password },
     });
   }

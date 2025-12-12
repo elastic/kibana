@@ -7,42 +7,40 @@
 
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { useCallback, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
-import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
+import type { QuerySchema } from '@kbn/slo-schema';
+import { kqlQuerySchema } from '@kbn/slo-schema';
 import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { buildFilter, FILTERS, TimeRange } from '@kbn/es-query';
-import { FieldPath, useFormContext } from 'react-hook-form';
-import { Serializable } from '@kbn/utility-types';
+import type { TimeRange } from '@kbn/es-query';
+import { buildFilter, FILTERS } from '@kbn/es-query';
+import type { FieldPath } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
+import type { Serializable } from '@kbn/utility-types';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 import { QuerySearchBar } from './query_search_bar';
-import { SearchBarProps } from './query_builder';
+import type { SearchBarProps } from './query_builder';
 import { useTableDocs } from './use_table_docs';
 import { useFieldSidebar } from './use_field_sidebar';
 
-export function DocumentsTable({
-  dataView,
-  range,
-  name,
-  searchBarProps,
-  setRange,
-}: {
+interface Props {
   searchBarProps: SearchBarProps;
   dataView: DataView;
-  range: TimeRange;
-  setRange: (range: TimeRange) => void;
   name: FieldPath<CreateSLOForm>;
-}) {
+}
+
+export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
+  const services = useKibana().services;
   const { setValue, watch } = useFormContext<CreateSLOForm>();
 
   const filter = watch(name) as QuerySchema;
 
+  const [range, setRange] = useState<TimeRange>({ from: 'now-1d', to: 'now' });
   const [sampleSize, setSampleSize] = useState(100);
   const [columns, setColumns] = useState<string[]>([]);
-  const services = useKibana().services;
   const [sizes, setSizes] = useState({
     fieldsPanel: 180,
     documentsPanel: 500,
@@ -56,13 +54,16 @@ export function DocumentsTable({
 
   const { data, loading, error } = useTableDocs({ dataView, range, sampleSize, name });
   const fieldSideBar = useFieldSidebar({ dataView, columns, setColumns });
+
   return (
     <>
       <QuerySearchBar {...searchBarProps} range={range} setRange={setRange} isFlyoutOpen={true} />
       {error && !loading && (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut color="danger">{error?.message}</EuiCallOut>
+          <EuiCallOut announceOnMount color="danger">
+            {error?.message}
+          </EuiCallOut>
         </>
       )}
       <EuiResizableContainer

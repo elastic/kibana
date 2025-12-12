@@ -9,14 +9,14 @@ import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL, UNIQUE_COUNT } from '../..
 import type { LensAttributes, GetLensAttributes } from '../../types';
 import { getDestinationIpColor, getSourceIpColor } from '../common/utils/unique_ips_palette';
 
-const columnSourceIp = uuidv4();
-const columnSourceIpFilter = uuidv4();
+const columnSourceIp = `column-source-ip-id-${uuidv4()}`;
+const columnSourceIpFilter = `column-source-ip-filter-id-${uuidv4()}`;
 
-const columnDestinationIp = uuidv4();
-const columnDestinationIpFilter = uuidv4();
+const columnDestinationIp = `column-destination-ip-id-${uuidv4()}`;
+const columnDestinationIpFilter = `column-destination-ip-filter-id-${uuidv4()}`;
 
-const layerSourceIp = uuidv4();
-const layerDestinationIp = uuidv4();
+const layerSourceIp = `layer-source-ip-id-${uuidv4()}`;
+const layerDestinationIp = `layer-destination-ip-id-${uuidv4()}`;
 
 export const getKpiUniquePrivateIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }) => {
   return {

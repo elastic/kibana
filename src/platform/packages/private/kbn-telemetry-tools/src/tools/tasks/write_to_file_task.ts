@@ -9,7 +9,7 @@
 
 import * as path from 'path';
 import { writeFile } from 'fs/promises';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 
 export function writeToFileTask({ roots }: TaskContext) {
   return roots.map((root) => ({

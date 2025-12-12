@@ -8,7 +8,7 @@
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { JourneyStep } from '../../../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../../../common/runtime_types';
 import { WaterfallContext } from '../context/waterfall_context';
 
 const EmbeddableMock = ({

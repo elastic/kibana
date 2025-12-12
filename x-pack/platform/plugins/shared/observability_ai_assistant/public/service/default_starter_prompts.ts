@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { StarterPrompt } from '../../common/types';
+import type { StarterPrompt } from '../../common/types';
 
 export const defaultStarterPrompts: StarterPrompt[] = [
   {
@@ -55,7 +55,7 @@ export const defaultStarterPrompts: StarterPrompt[] = [
       defaultMessage: 'SLOs',
     }),
     prompt: i18n.translate('xpack.observabilityAiAssistant.app.starterPrompts.whatAreSlos.prompt', {
-      defaultMessage: 'What are SLOs?',
+      defaultMessage: 'What are Service Level Objectives (SLOs)?',
     }),
     icon: 'bullseye',
     scopes: ['observability'],

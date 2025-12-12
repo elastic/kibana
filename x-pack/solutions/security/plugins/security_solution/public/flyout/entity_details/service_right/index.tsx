@@ -84,10 +84,9 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
     setQuery,
   });
 
-  const { openDetailsPanel, isLinkEnabled } = useNavigateToServiceDetails({
+  const openDetailsPanel = useNavigateToServiceDetails({
     serviceName,
     scopeId,
-    contextID,
     isRiskScoreExist,
   });
 
@@ -108,7 +107,7 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
       <FlyoutNavigation
         flyoutIsExpandable={isRiskScoreExist}
         expandDetails={openPanelFirstTab}
-        isPreview={scopeId === TableId.rulePreview}
+        isRulePreview={scopeId === TableId.rulePreview}
       />
       <ServicePanelHeader serviceName={serviceName} observedService={observedService} />
       <ServicePanelContent
@@ -120,7 +119,6 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
         contextID={contextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
-        isLinkEnabled={isLinkEnabled}
       />
     </>
   );

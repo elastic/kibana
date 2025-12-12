@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiIconProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiIconProps, EuiThemeComputed } from '@elastic/eui';
 
 import { AssistantIcon } from './icon';
 import { useStyles } from './beacon.styles';
@@ -26,13 +26,22 @@ export interface AssistantBeaconProps {
    * Size of the beacon.
    */
   size?: Size;
+
+  /**
+   * Color of the rings around the icon.
+   */
+  ringsColor?: string;
 }
 
 /**
  * An AI Assistant icon with a pulsing ring around it, used in "hero" areas promoting functionality or prompting interaction.
  */
-export const AssistantBeacon = ({ backgroundColor, size = 'xxl' }: AssistantBeaconProps) => {
-  const { root, rings } = useStyles({ backgroundColor, size });
+export const AssistantBeacon = ({
+  backgroundColor,
+  size = 'xxl',
+  ringsColor,
+}: AssistantBeaconProps) => {
+  const { root, rings } = useStyles({ backgroundColor, size, ringsColor });
 
   return (
     <div css={root}>

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import type { MapAttributes, MapItem } from '../../../common/content_management';
+import type { MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getMapsCapabilities,
@@ -70,7 +70,6 @@ function MapsListViewComp({ history }: Props) {
   });
 
   const isReadOnly = !getMapsCapabilities().save;
-  const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   // TLDR; render should be side effect free
@@ -97,7 +96,7 @@ function MapsListViewComp({ history }: Props) {
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
-      return getMapClient<MapAttributes>()
+      return getMapClient()
         .search({
           text: searchTerm ? `${searchTerm}*` : undefined,
           limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
@@ -129,7 +128,6 @@ function MapsListViewComp({ history }: Props) {
       createItem={isReadOnly ? undefined : navigateToNewMap}
       findItems={findMaps}
       deleteItems={isReadOnly ? undefined : deleteMaps}
-      listingLimit={listingLimit}
       initialFilter={''}
       initialPageSize={initialPageSize}
       entityName={i18n.translate('xpack.maps.mapListing.entityName', {

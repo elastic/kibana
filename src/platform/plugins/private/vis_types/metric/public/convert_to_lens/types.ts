@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { NavigateToLensContext, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { VisParams } from '../types';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type {
+  NavigateToLensContext,
+  MetricVisualizationState as MetricVisConfiguration,
+} from '@kbn/lens-common';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { VisParams } from '../types';
 
 export type ConvertMetricVisToLensVisualization = (
   vis: Vis<VisParams>,

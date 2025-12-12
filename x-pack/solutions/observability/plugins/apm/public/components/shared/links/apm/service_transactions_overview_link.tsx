@@ -8,8 +8,8 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import type { APMQueryParams } from '../url_helpers';
-import type { APMLinkExtendProps } from './apm_link';
-import { useAPMHref } from './apm_link';
+import type { APMLinkExtendProps } from './apm_link_hooks';
+import { useAPMHref } from './apm_link_hooks';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
@@ -34,7 +34,8 @@ export function useServiceOrTransactionsOverviewHref({
 }: Props) {
   const query = { environment, transactionType };
   return useAPMHref({
-    path: `/services/${serviceName}`,
+    path: '/services/{serviceName}',
+    pathParams: { serviceName },
     persistedFilters,
     query: removeUndefinedProps(query),
   });

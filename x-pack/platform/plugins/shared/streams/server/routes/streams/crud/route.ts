@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import {
-  isGroupStreamDefinition,
-  StreamDefinition,
-  StreamGetResponse,
-  isWiredStreamDefinition,
-  streamUpsertRequestSchema,
-  isGroupStreamDefinitionBase,
-  isUnwiredStreamDefinition,
-} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { badData, badRequest } from '@hapi/boom';
-import { hasSupportedStreamsRoot } from '../../../lib/streams/root_stream_definition';
-import { UpsertStreamResponse } from '../../../lib/streams/client';
+import { badData } from '@hapi/boom';
+import { Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
 
@@ -33,22 +26,27 @@ export const readStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<StreamGetResponse> => {
-    const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<Streams.all.GetResponse> => {
+    const { assetClient, attachmentClient, streamsClient, scopedClusterClient } =
+      await getScopedClients({
+        request,
+      });
 
     const body = await readStream({
       name: params.path.name,
       assetClient,
+      attachmentClient,
       scopedClusterClient,
       streamsClient,
     });
@@ -69,13 +67,14 @@ export const listStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients }): Promise<{ streams: StreamDefinition[] }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ streams: Streams.all.Definition[] }> => {
     const { streamsClient } = await getScopedClients({ request });
     return {
       streams: await streamsClient.listStreams(),
@@ -96,47 +95,41 @@ export const editStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
       name: z.string(),
     }),
-    body: streamUpsertRequestSchema,
+    body: Streams.all.UpsertRequest.right,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    context,
+  }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
-    const streamDefinition = { ...params.body.stream, name: params.path.name };
 
-    if (!isUnwiredStreamDefinition(streamDefinition) && !(await streamsClient.isStreamsEnabled())) {
-      throw badData('Streams are not enabled for Wired and Group streams.');
+    if (
+      Streams.WiredStream.UpsertRequest.is(params.body) &&
+      !(await streamsClient.isStreamsEnabled())
+    ) {
+      throw badData('Streams are not enabled for Wired streams.');
     }
 
-    if (isWiredStreamDefinition(streamDefinition) && !hasSupportedStreamsRoot(params.path.name)) {
-      throw badRequest('Cannot create wired stream due to unsupported root stream');
-    }
+    const core = await context.core;
+    const groupStreamsEnabled = await core.uiSettings.client.get(
+      OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
+    );
 
-    if (isGroupStreamDefinition(streamDefinition) && params.path.name.startsWith('logs.')) {
-      throw badRequest('A group stream name can not start with [logs.]');
+    if (Streams.GroupStream.UpsertRequest.is(params.body) && !groupStreamsEnabled) {
+      throw badData('Streams are not enabled for Group streams.');
     }
-
-    const body = isGroupStreamDefinitionBase(params.body.stream)
-      ? {
-          ...params.body,
-          stream: {
-            group: {
-              ...params.body.stream.group,
-              members: Array.from(new Set(params.body.stream.group.members)),
-            },
-          },
-        }
-      : params.body;
 
     return await streamsClient.upsertStream({
-      request: body,
+      request: params.body,
       name: params.path.name,
     });
   },
@@ -154,9 +147,7 @@ export const deleteStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

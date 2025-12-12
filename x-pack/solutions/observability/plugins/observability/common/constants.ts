@@ -30,7 +30,7 @@ export const observabilityAlertFeatureIds: ValidFeatureId[] = [
 export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.LOGS,
-  AlertConsumers.OBSERVABILITY,
+  AlertConsumers.ALERTS,
 ];
 
 export const EventsAsUnit = 'events';
@@ -39,3 +39,7 @@ export const OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
   ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
 ];
+
+export enum ALERTS_API_URLS {
+  INTERNAL_RELATED_DASHBOARDS = '/internal/observability/alerts/related_dashboards',
+}

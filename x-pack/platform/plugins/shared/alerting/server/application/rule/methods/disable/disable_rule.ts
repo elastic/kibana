@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
 import type { RawRule } from '../../../../types';
@@ -12,7 +12,11 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../../../../rules_client/lib';
+import {
+  untrackRuleAlerts,
+  updateMeta,
+  bulkMigrateLegacyActions,
+} from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DisableRuleParams } from './types';
 import { disableRuleParamsSchema } from './schemas';
@@ -34,14 +38,13 @@ async function disableWithOCC(
 ) {
   let attributes: RawRule;
   let version: string | undefined;
-  let references: SavedObjectReference[];
 
   try {
     disableRuleParamsSchema.validate({ id, untrack });
   } catch (error) {
     throw Boom.badRequest(`Error validating disable rule parameters - ${error.message}`);
   }
-
+  let alert: SavedObject<RawRule>;
   try {
     const decryptedAlert =
       await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
@@ -53,17 +56,13 @@ async function disableWithOCC(
       );
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
-    references = decryptedAlert.references;
+    alert = decryptedAlert;
   } catch (e) {
     context.logger.error(`disable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
-      RULE_SAVED_OBJECT_TYPE,
-      id
-    );
+    alert = await context.unsecuredSavedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id);
     attributes = alert.attributes;
     version = alert.version;
-    references = alert.references;
   }
 
   try {
@@ -99,12 +98,7 @@ async function disableWithOCC(
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === true) {
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: id,
-      actions: attributes.actions,
-      references,
-      attributes,
-    });
+    const migratedIds = await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     await context.unsecuredSavedObjectsClient.update(
       RULE_SAVED_OBJECT_TYPE,
@@ -116,15 +110,10 @@ async function disableWithOCC(
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
         nextRun: null,
-        ...(migratedActions.hasLegacyActions
-          ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
-          : {}),
       }),
       {
         version,
-        ...(migratedActions.hasLegacyActions
-          ? { references: migratedActions.resultedReferences }
-          : {}),
+        ...(migratedIds.includes(alert.id) ? { references: alert.references } : {}),
       }
     );
     const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(

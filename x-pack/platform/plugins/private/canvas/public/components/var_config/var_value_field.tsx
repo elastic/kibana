@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CanvasVariable } from '../../../types';
+import type { CanvasVariable } from '../../../types';
 
 const strings = {
   getBooleanOptionsLegend: () =>

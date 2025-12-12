@@ -40,8 +40,13 @@ export interface PackageSpecManifest {
     fields?: Array<{
       name: string;
     }>;
+    datasets?: DiscoveryDataset[];
   };
 }
+export interface DiscoveryDataset {
+  name: string;
+}
+
 export interface PackageSpecTags {
   text: string;
   asset_types?: string[];
@@ -55,6 +60,7 @@ export type PackageSpecCategory =
   | 'analytics_engine'
   | 'application_observability'
   | 'app_search'
+  | 'asset_inventory'
   | 'auditd'
   | 'authentication'
   | 'aws'
@@ -91,11 +97,13 @@ export type PackageSpecCategory =
   | 'languages'
   | 'load_balancer'
   | 'message_queue'
+  | 'misconfiguration_workflow'
   | 'monitoring'
   | 'native_search'
   | 'network'
   | 'network_security'
   | 'notification'
+  | 'opentelemetry'
   | 'observability'
   | 'os_system'
   | 'process_manager'
@@ -104,6 +112,7 @@ export type PackageSpecCategory =
   | 'proxy_security'
   | 'sdk_search'
   | 'security'
+  | 'siem'
   | 'stream_processing'
   | 'support'
   | 'threat_intel'
@@ -112,6 +121,7 @@ export type PackageSpecCategory =
   | 'virtualization'
   | 'vpn_security'
   | 'vulnerability_management'
+  | 'vulnerability_workflow'
   | 'web'
   | 'web_application_firewall'
   | 'websphere'

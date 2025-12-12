@@ -76,6 +76,7 @@ class RuleEditorFlyoutUI extends Component {
       isScopeEnabled: false,
       filterListIds: [],
       isFlyoutVisible: false,
+      focusTrapProps: {},
     };
 
     this.partitioningFieldNames = [];
@@ -101,7 +102,7 @@ class RuleEditorFlyoutUI extends Component {
     }
   }
 
-  showFlyout = (anomaly) => {
+  showFlyout = (anomaly, focusTrapProps) => {
     let ruleIndex = -1;
     const job = this.props.selectedJob ?? this.mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
@@ -147,6 +148,7 @@ class RuleEditorFlyoutUI extends Component {
       isConditionsEnabled,
       isScopeEnabled: false,
       isFlyoutVisible: true,
+      focusTrapProps,
     });
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
@@ -499,6 +501,7 @@ class RuleEditorFlyoutUI extends Component {
       filterListIds,
       isConditionsEnabled,
       isScopeEnabled,
+      focusTrapProps,
     } = this.state;
 
     if (isFlyoutVisible === false) {
@@ -510,9 +513,9 @@ class RuleEditorFlyoutUI extends Component {
     if (ruleIndex === -1) {
       flyout = (
         <EuiFlyout
-          className="ml-rule-editor-flyout"
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"
+          focusTrapProps={focusTrapProps}
         >
           <EuiFlyoutHeader hasBorder={true}>
             <EuiTitle size="m">
@@ -571,9 +574,9 @@ class RuleEditorFlyoutUI extends Component {
       flyout = (
         <EuiFlyout
           data-test-subj="mlRuleEditorFlyout"
-          className="ml-rule-editor-flyout"
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"
+          focusTrapProps={focusTrapProps}
         >
           <EuiFlyoutHeader hasBorder={true}>
             <EuiTitle size="m">
@@ -648,7 +651,6 @@ class RuleEditorFlyoutUI extends Component {
             {conditionSupported === true ? (
               <EuiCheckbox
                 id="enable_conditions_checkbox"
-                className="scope-enable-checkbox"
                 label={conditionsText}
                 checked={isConditionsEnabled}
                 onChange={this.onConditionsEnabledChange}
@@ -656,6 +658,7 @@ class RuleEditorFlyoutUI extends Component {
               />
             ) : (
               <EuiCallOut
+                announceOnMount={false}
                 title={
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsNotSupportedTitle"
@@ -663,7 +666,7 @@ class RuleEditorFlyoutUI extends Component {
                     values={{ functionName: anomaly.source.function }}
                   />
                 }
-                iconType="iInCircle"
+                iconType="info"
               />
             )}
             <EuiSpacer size="s" />
@@ -687,6 +690,7 @@ class RuleEditorFlyoutUI extends Component {
             />
 
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
@@ -694,7 +698,7 @@ class RuleEditorFlyoutUI extends Component {
                 />
               }
               color="warning"
-              iconType="help"
+              iconType="question"
             >
               <p>
                 <FormattedMessage
@@ -724,7 +728,12 @@ class RuleEditorFlyoutUI extends Component {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.saveEdit} isDisabled={!isValidRule(rule)} fill>
+                <EuiButton
+                  onClick={this.saveEdit}
+                  isDisabled={!isValidRule(rule)}
+                  fill
+                  data-test-subj="mlRuleEditorSaveButton"
+                >
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
                     defaultMessage="Save"

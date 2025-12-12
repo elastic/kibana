@@ -1,0 +1,138 @@
+{
+  "id": "genAiSettings",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "genAiSettings",
+      "id": "def-public.GenAiSettingsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "GenAiSettingsPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/private/gen_ai_settings/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "genAiSettings",
+      "id": "def-public.GenAiSettingsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "GenAiSettingsPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/private/gen_ai_settings/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "genAiSettings",
+        "id": "def-server.GenAiSettingsConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "GenAiSettingsConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; readonly showAiAssistantsVisibilitySetting: boolean; }"
+        ],
+        "path": "x-pack/platform/plugins/private/gen_ai_settings/common/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "genAiSettings",
+        "id": "def-server.GenAiSettingsServerRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "GenAiSettingsServerRouteRepository",
+        "description": [],
+        "signature": [
+          "{ \"GET /internal/gen_ai_settings/connectors\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/gen_ai_settings/connectors\", undefined, ",
+          "GenAiSettingsRouteHandlerResources",
+          ", ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
+          },
+          "[], ",
+          "GenAiSettingsRouteCreateOptions",
+          ">; }"
+        ],
+        "path": "x-pack/platform/plugins/private/gen_ai_settings/server/routes/get_global_gen_ai_settings_route_repository.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "genAiSettings",
+      "id": "def-server.GenAiSettingsPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "GenAiSettingsPluginSetup",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/private/gen_ai_settings/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "genAiSettings",
+      "id": "def-server.GenAiSettingsPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "GenAiSettingsPluginStart",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/private/gen_ai_settings/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

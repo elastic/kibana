@@ -17,7 +17,6 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const soClient = this.options.soClient;
-    const esClient = this.options.esClient;
     const metadataService = this.options.endpointService.getEndpointMetadataService(
       soClient.getCurrentNamespace()
     );
@@ -30,7 +29,7 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
           pageSize: 1000,
           kuery: agentIdsKql,
         }),
-        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, createElement } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { createElement } from 'react';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { i18n } from '@kbn/i18n';
-import { RenderingMetadata } from '../types';
+import type { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Logo } from './logo';
 import { Styles } from './styles';

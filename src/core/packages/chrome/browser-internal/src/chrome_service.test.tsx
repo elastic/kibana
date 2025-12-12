@@ -8,7 +8,7 @@
  */
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
-import { shallow, mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray, firstValueFrom } from 'rxjs';
@@ -27,7 +27,8 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { findTestSubject } from '@kbn/test-jest-helpers';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+
 import { ChromeService } from './chrome_service';
 
 const mockhandleSystemColorModeChange = jest.fn();
@@ -72,6 +73,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
   };
 
   if (availableApps) {
@@ -242,34 +244,8 @@ describe('start', () => {
 
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
-      expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
-    });
-
-    it('renders the custom project side navigation', async () => {
-      const { chrome, startDeps } = await start({
-        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
-      });
-
-      const MyNav = function MyNav() {
-        return <div data-test-subj="customProjectSideNav">HELLO</div>;
-      };
-      chrome.setChromeStyle('project');
-      chrome.project.setSideNavComponent(MyNav);
-
-      const component = mount(
-        <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getHeaderComponent()}
-        </KibanaRenderContextProvider>
-      );
-
-      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
-      expect(projectHeader.length).toBe(1);
-
-      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
-      expect(defaultProjectSideNav.length).toBe(0); // Default side nav not mounted
-
-      const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
-      expect(customProjectSideNav.text()).toBe('HELLO');
+      // Render and assert that no error is thrown
+      render(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()));
     });
 
     it('renders chromeless header', async () => {
@@ -277,14 +253,13 @@ describe('start', () => {
 
       chrome.setIsVisible(false);
 
-      const component = mount(
+      render(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getHeaderComponent()}
+          {chrome.getLegacyHeaderComponentForFixedLayout()}
         </KibanaRenderContextProvider>
       );
 
-      const chromeless = findTestSubject(component, 'kibanaHeaderChromeless');
-      expect(chromeless.length).toBe(1);
+      expect(screen.getByTestId('kibanaHeaderChromeless')).toBeInTheDocument();
     });
   });
 
@@ -462,6 +437,9 @@ describe('start', () => {
     it('allows the project breadcrumb to also be set', async () => {
       const { chrome } = await start();
 
+      chrome.project.setCloudUrls({
+        deploymentUrl: 'my-deployment-url.com',
+      });
       chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]); // only setting the classic breadcrumbs
 
       {
@@ -738,10 +716,9 @@ describe('start', () => {
 });
 
 describe('stop', () => {
-  it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
+  it('completes applicationClass$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
     const promise = Rx.combineLatest([
-      chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
       chrome.getIsVisible$(),
       chrome.getHelpExtension$(),
@@ -757,7 +734,6 @@ describe('stop', () => {
 
     await expect(
       Rx.combineLatest([
-        chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),
         chrome.getIsVisible$(),
         chrome.getHelpExtension$(),

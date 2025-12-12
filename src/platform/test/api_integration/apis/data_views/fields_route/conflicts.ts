@@ -11,7 +11,7 @@ import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/con
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

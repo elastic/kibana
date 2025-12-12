@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './rule_source_importer_interface';
+export type * from './rule_source_importer_interface';
 export * from './rule_source_importer';

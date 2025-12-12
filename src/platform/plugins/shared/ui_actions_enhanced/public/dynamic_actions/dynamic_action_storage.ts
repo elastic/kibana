@@ -9,8 +9,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Observable, Subject } from 'rxjs';
-import { SerializedEvent } from './types';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import type { SerializedEvent } from './types';
 
 /**
  * This CRUD interface needs to be implemented by dynamic action users if they

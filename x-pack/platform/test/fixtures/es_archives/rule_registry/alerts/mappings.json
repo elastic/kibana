@@ -1,0 +1,98 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".alerts-observability.apm.alerts",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "kibana.alert.rule.consumer": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.rule.rule_type_id": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.time_range": {
+          "type": "date_range",
+          "format": "epoch_millis||strict_date_optional_time"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".alerts-security.alerts",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "kibana.alert.rule.consumer": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.rule.rule_type_id": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".alerts-observability.logs.alerts-000001",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "kibana.alert.rule.consumer": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.rule.rule_type_id": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.status": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.time_range": {
+          "type": "date_range",
+          "format": "epoch_millis||strict_date_optional_time"
+        },
+        "kibana.alert.end": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}

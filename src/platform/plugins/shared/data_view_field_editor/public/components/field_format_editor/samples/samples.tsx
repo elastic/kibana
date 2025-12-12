@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './samples.scss';
-
 import React, { PureComponent } from 'react';
+import { css } from '@emotion/react';
 
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Sample } from '../types';
+import type { Sample } from '../types';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];
@@ -69,6 +68,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
       >
         <EuiBasicTable<Sample>
           className="kbnFieldFormatEditor__samples"
+          css={styles.samples}
           compressed={true}
           items={samples}
           columns={columns}
@@ -77,3 +77,11 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
     ) : null;
   }
 }
+
+const styles = {
+  samples: css`
+    audio {
+      max-width: 100%;
+    }
+  `,
+};

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { StoredSLODefinition } from '../../domain/models';
+import type { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
-import { SLOConfig } from '../../types';
+import type { SLOConfig } from '../../types';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
@@ -44,7 +44,6 @@ export const getDeleteQueryFilter = (
 };
 
 export class SloOrphanSummaryCleanupTask {
-  private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
   private soClient?: SavedObjectsClientContract;
@@ -60,63 +59,70 @@ export class SloOrphanSummaryCleanupTask {
         title: 'SLO Definitions Cleanup Task',
         timeout: '3m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask();
+              return this.runTask(abortController);
             },
-
-            cancel: async () => {
-              this.abortController.abort('orphan-slo-summary-cleanup task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
     });
   }
 
-  runTask = async () => {
-    if (this.soClient && this.esClient) {
-      let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
+  public async runTask(abortController: AbortController) {
+    if (!this.soClient || !this.esClient) {
+      return;
+    }
 
-      do {
-        const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
+    let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
-        if (sloSummaryIds.length === 0) {
-          return;
-        }
+    do {
+      const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
 
-        searchAfterKey = searchAfter;
+      if (sloSummaryIds.length === 0) {
+        return;
+      }
 
-        const ids = sloSummaryIds.map(({ id }) => id);
+      searchAfterKey = searchAfter;
 
-        const sloDefinitions = await this.findSloDefinitions(ids);
+      const ids = sloSummaryIds.map(({ id }) => id);
 
-        const sloSummaryIdsToDelete = sloSummaryIds.filter(
-          ({ id, revision }) =>
-            !sloDefinitions.find(
-              (attributes) => attributes.id === id && attributes.revision === revision
-            )
+      const sloDefinitions = await this.findSloDefinitions(ids);
+
+      const sloSummaryIdsToDelete = sloSummaryIds.filter(
+        ({ id, revision }) =>
+          !sloDefinitions.find(
+            (attributes) => attributes.id === id && attributes.revision === revision
+          )
+      );
+
+      if (sloSummaryIdsToDelete.length > 0) {
+        this.logger.debug(
+          `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
         );
 
-        if (sloSummaryIdsToDelete.length > 0) {
-          this.logger.debug(
-            `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
-          );
-
-          await this.esClient.deleteByQuery({
-            wait_for_completion: false,
-            index: SUMMARY_DESTINATION_INDEX_PATTERN,
-            query: {
-              bool: {
-                should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
-              },
+        await this.esClient.deleteByQuery({
+          index: SUMMARY_DESTINATION_INDEX_PATTERN,
+          wait_for_completion: false,
+          conflicts: 'proceed',
+          slices: 'auto',
+          query: {
+            bool: {
+              should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
             },
-          });
-        }
-      } while (searchAfterKey);
-    }
-  };
+          },
+        });
+      }
+    } while (searchAfterKey);
+  }
 
   fetchSloSummariesIds = async (
     searchAfter?: AggregationsCompositeAggregateKey

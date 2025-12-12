@@ -6,19 +6,19 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { Provider as ReduxProvider } from 'react-redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { StatusRuleComponent } from '../../../components/alerts/status_rule_ui';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { store } from '../../../state';
 
 interface Props {

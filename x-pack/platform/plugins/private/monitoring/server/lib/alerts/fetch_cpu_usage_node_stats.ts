@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
-import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
+import type { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';

@@ -45,6 +45,7 @@ import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const StyledText = styled(EuiText)`
   font-style: italic;
@@ -97,7 +98,8 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const toasts = useToasts();
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [{ hasIndexWrite }] = useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -139,6 +141,8 @@ const ExceptionsViewerComponent = ({
   ] = useReducer(allExceptionItemsReducer(), {
     ...initialState,
   });
+
+  const isReadOnlyOnCurrentList = isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly;
 
   // Reducer actions
   const setLastUpdated = useCallback(
@@ -457,8 +461,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canEditRules || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, hasIndexWrite, canEditRules]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
@@ -522,7 +526,7 @@ const ExceptionsViewerComponent = ({
               />
               <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar
-                canAddException={isReadOnly}
+                isReadOnly={isReadOnlyOnCurrentList}
                 isEndpoint={isEndpointSpecified}
                 isSearching={viewerState === 'searching'}
                 onSearch={handleSearch}
@@ -533,8 +537,8 @@ const ExceptionsViewerComponent = ({
           <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
-            isReadOnly={isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
+            isReadOnly={isReadOnlyOnCurrentList}
+            disableActions={isReadOnlyOnCurrentList || viewerState === 'deleting'}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}

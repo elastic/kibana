@@ -5,25 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 interface ManagementBottomBarProps {
   confirmButtonText?: string;
   disabled?: boolean;
+  insufficientPrivileges?: boolean;
   isLoading?: boolean;
+  isInvalid?: boolean;
+  streamType?: 'classic' | 'wired' | 'unknown';
   onCancel: () => void;
   onConfirm: () => void;
+  onViewCodeClick?: () => void;
 }
 
 export function ManagementBottomBar({
   confirmButtonText = defaultConfirmButtonText,
   disabled = false,
   isLoading = false,
+  insufficientPrivileges = false,
+  isInvalid = false,
+  streamType,
   onCancel,
   onConfirm,
+  onViewCodeClick,
 }: ManagementBottomBarProps) {
   const handleCancel = useDiscardConfirm(onCancel, {
     title: discardUnsavedChangesTitle,
@@ -33,38 +48,95 @@ export function ManagementBottomBar({
   });
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
-      <EuiButtonEmpty
-        data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
-        disabled={disabled}
-        color="text"
-        size="s"
-        iconType="cross"
-        onClick={handleCancel}
+    <EuiBottomBar usePortal={false}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+        gutterSize="s"
       >
-        {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
-          defaultMessage: 'Cancel changes',
-        })}
-      </EuiButtonEmpty>
-      <EuiButton
-        data-test-subj="streamsAppManagementBottomBarButton"
-        disabled={disabled}
-        color="primary"
-        fill
-        size="s"
-        iconType="check"
-        onClick={onConfirm}
-        isLoading={isLoading}
-      >
-        {confirmButtonText}
-      </EuiButton>
-    </EuiFlexGroup>
+        {onViewCodeClick && (
+          <EuiButtonEmpty
+            data-test-subj="streamsAppManagementBottomBarViewRequestButton"
+            data-stream-type={streamType}
+            color="text"
+            size="s"
+            iconType="editorCodeBlock"
+            onClick={onViewCodeClick}
+            disabled={isInvalid}
+          >
+            {viewCodeButtonText}
+          </EuiButtonEmpty>
+        )}
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            responsive={false}
+            gutterSize="s"
+          >
+            <EuiButtonEmpty
+              data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
+              data-stream-type={streamType}
+              disabled={disabled}
+              color="text"
+              size="s"
+              iconType="cross"
+              onClick={handleCancel}
+            >
+              {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
+                defaultMessage: 'Cancel changes',
+              })}
+            </EuiButtonEmpty>
+            <EuiToolTip
+              content={
+                isInvalid
+                  ? i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.bottomBar.fixErrors',
+                      {
+                        defaultMessage: 'Please fix the errors before saving.',
+                      }
+                    )
+                  : insufficientPrivileges
+                  ? i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
+                      {
+                        defaultMessage: "You don't have sufficient privileges to save changes.",
+                      }
+                    )
+                  : undefined
+              }
+            >
+              <EuiButton
+                data-test-subj="streamsAppManagementBottomBarButton"
+                data-stream-type={streamType}
+                disabled={disabled || insufficientPrivileges || isInvalid}
+                color="primary"
+                fill
+                size="s"
+                iconType="check"
+                onClick={onConfirm}
+                isLoading={isLoading}
+              >
+                {confirmButtonText}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBottomBar>
   );
 }
 
 const defaultConfirmButtonText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.bottomBar.confirm',
   { defaultMessage: 'Save changes' }
+);
+
+const viewCodeButtonText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.bottomBar.viewCode',
+  { defaultMessage: 'View API request' }
 );
 
 const discardUnsavedChangesLabel = i18n.translate(

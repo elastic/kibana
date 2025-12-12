@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -16,7 +16,8 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 
@@ -24,6 +25,7 @@ import type { VisualizationsServerSetup, VisualizationsServerStart } from './typ
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { getTransforms } from '../common/embeddable/transforms/get_transforms';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>
@@ -52,6 +54,14 @@ export class VisualizationsPlugin
 
     plugins.embeddable.registerEmbeddableFactory(
       makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()
+    );
+
+    plugins.embeddable.registerTransforms(
+      VISUALIZE_EMBEDDABLE_TYPE,
+      getTransforms(
+        plugins.embeddable.transformEnhancementsIn,
+        plugins.embeddable.transformEnhancementsOut
+      )
     );
 
     plugins.contentManagement.register({

@@ -75,16 +75,36 @@ export type FormattedHit = FormattedHitPair[];
 export interface LogDocumentOverview
   extends LogResourceFields,
     LogStackTraceFields,
-    LogCloudFields {
+    LogCloudFields,
+    LogOtelStackTraceFields,
+    Partial<ApmErrorLogFields>,
+    Partial<OtelExceptionLogFields> {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
+  'transaction.id'?: string;
+  'span.id'?: string;
   'log.file.path'?: string;
   'data_stream.namespace': string;
   'data_stream.dataset': string;
+  'exception.message'?: string;
+}
+
+export interface ApmErrorLogFields {
+  'processor.event': string;
+  'error.log.level'?: string;
+  'error.exception.type'?: string;
+  'error.exception.message'?: string;
+  'error.culprit'?: string;
+  'error.grouping_name'?: string;
+}
+
+export interface OtelExceptionLogFields {
+  event_name: string; // OTEL-specific field
+  'exception.type'?: string;
 }
 
 export interface LogResourceFields {
@@ -105,6 +125,12 @@ export interface LogStackTraceFields {
   'error.log.stacktrace'?: string;
 }
 
+export interface LogOtelStackTraceFields {
+  'attributes.exception.stacktrace'?: string;
+  'attributes.exception.type'?: string;
+  'attributes.exception.message'?: string;
+}
+
 export interface LogCloudFields {
   'cloud.provider'?: string;
   'cloud.region'?: string;
@@ -114,15 +140,24 @@ export interface LogCloudFields {
 }
 
 export interface TraceDocumentOverview
-  extends ServiceFields,
-    TransactionTraceFields,
-    SpanTraceFields,
-    UserAgentTraceFields {
+  extends TraceFields,
+    Partial<ServiceFields>,
+    Partial<SpanFields>,
+    Partial<UserAgentFields>,
+    Partial<TransactionFields> {
+  duration?: number;
+  kind?: string;
+  'resource.attributes.telemetry.sdk.language'?: string;
+  'links.trace_id'?: string;
+  'links.span_id'?: string;
+}
+
+export interface TraceFields {
   '@timestamp': number;
   'trace.id': string;
+  'processor.event'?: 'span' | 'transaction';
   'parent.id'?: string;
   'http.response.status_code'?: number;
-  'processor.event'?: 'span' | 'transaction';
 }
 
 export interface ServiceFields {
@@ -131,22 +166,37 @@ export interface ServiceFields {
   'agent.name': string;
 }
 
-export interface TransactionTraceFields {
-  'transaction.id'?: string;
-  'transaction.name'?: string;
+export interface TransactionFields {
+  'transaction.id': string;
+  'transaction.type': string;
+  'transaction.name': string;
   'transaction.duration.us'?: number;
 }
 
-export interface SpanTraceFields {
-  'span.name'?: string;
-  'span.action'?: string;
-  'span.duration.us'?: number;
-  'span.type'?: string;
-  'span.subtype'?: string;
-  'span.destination.service.resource'?: string;
+export interface SpanFields {
+  'span.id': string;
+  'span.name': string;
+  'span.action': string;
+  'span.duration.us': number;
+  'span.type': string;
+  'span.subtype': string;
+  'span.destination.service.resource': string;
+  'span.links.span.id'?: string;
+  'span.links.trace.id'?: string;
 }
 
-export interface UserAgentTraceFields {
-  'user_agent.name'?: string;
-  'user_agent.version'?: string;
+export interface UserAgentFields {
+  'user_agent.name': string;
+  'user_agent.version': string;
+}
+
+export interface TraceDocumentOverview
+  extends TraceFields,
+    Partial<ServiceFields>,
+    Partial<SpanFields>,
+    Partial<UserAgentFields>,
+    Partial<TransactionFields> {
+  duration?: number;
+  kind?: string;
+  'resource.attributes.telemetry.sdk.language'?: string;
 }

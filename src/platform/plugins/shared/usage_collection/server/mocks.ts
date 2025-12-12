@@ -14,10 +14,12 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
+import { lazyObject } from '@kbn/lazy-object';
 import { type CollectorOptions, CollectorSet } from './collector';
 import { Collector } from './collector/collector';
 import type { UsageCollectionSetup, CollectorFetchContext } from '.';
 import { usageCountersServiceMock } from './usage_counters/usage_counters_service.mock';
+
 export type { CollectorOptions };
 export { Collector };
 
@@ -30,7 +32,7 @@ export const createUsageCollectionSetupMock = () => {
   const { createUsageCounter, getUsageCounterByDomainId } =
     usageCountersServiceMock.createSetupContract();
 
-  const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
+  const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = lazyObject({
     createUsageCounter,
     getUsageCounterByDomainId,
     bulkFetch: jest.fn().mockImplementation(collectorSet.bulkFetch),
@@ -40,16 +42,16 @@ export const createUsageCollectionSetupMock = () => {
     makeStatsCollector: jest.fn().mockImplementation(collectorSet.makeStatsCollector),
     makeUsageCollector: jest.fn().mockImplementation(collectorSet.makeUsageCollector),
     registerCollector: jest.fn().mockImplementation(collectorSet.registerCollector),
-  };
+  });
 
   return usageCollectionSetupMock;
 };
 
 export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchContext> {
-  const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext> = {
+  const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext> = lazyObject({
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
     soClient: savedObjectsClientMock.create(),
-  };
+  });
   return collectorFetchClientsMock;
 }
 

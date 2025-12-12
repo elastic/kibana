@@ -7,6 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
+import {
   COVERAGE_OVERVIEW_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
@@ -29,7 +34,6 @@ import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
-import { siemMigrationsLinks } from '../siem_migrations/links';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -38,7 +42,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [RULES_UI_READ_PRIVILEGE, SECURITY_UI_SHOW_PRIVILEGE],
   links: [
     {
       id: SecurityPageName.rules,
@@ -53,6 +57,7 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
+      capabilities: [[RULES_UI_READ_PRIVILEGE, RULES_UI_DETECTIONS_PRIVILEGE]],
       links: [
         {
           id: SecurityPageName.rulesAdd,
@@ -79,7 +84,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [`${SECURITY_FEATURE_ID}.showEndpointExceptions`],
+      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.showEndpointExceptions`],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
@@ -100,14 +105,13 @@ export const links: LinkItem = {
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
-      capabilities: [`${SECURITY_FEATURE_ID}.show`],
+      capabilities: RULES_UI_READ_PRIVILEGE,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
           defaultMessage: 'MITRE ATT&CK Coverage',
         }),
       ],
     },
-    siemMigrationsLinks,
   ],
   categories: [
     {
@@ -118,7 +122,6 @@ export const links: LinkItem = {
         SecurityPageName.rules,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
-        SecurityPageName.siemMigrationsRules,
       ],
     },
     {

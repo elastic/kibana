@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
@@ -12,7 +12,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_EXIT, TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
-import { SetupUX } from '../../../typings/ui_filters';
+import type { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';
 import { rangeQuery } from './range_query';
 

@@ -17,18 +17,22 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV2: [
-            'minimal_all',
+          siemV5: [
+            'all',
 
             'policy_management_all',
 
+            'global_artifact_management_all',
             'trusted_applications_all',
+            'trusted_devices_all',
             'event_filters_all',
             'host_isolation_exceptions_all',
             'blocklist_all',
+            'endpoint_exceptions_all',
 
             'workflow_insights_all',
           ],
+          securitySolutionRulesV1: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },
@@ -46,7 +50,7 @@ export const getEndpointSecurityPolicyManagementReadRole: () => Omit<Role, 'name
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV2: ['minimal_all', 'policy_management_read'],
+          siemV5: ['all', 'policy_management_read'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

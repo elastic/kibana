@@ -28,7 +28,7 @@ interface Props {
   };
   /** Predicate to indicate if the update requires a page reload */
   pageReloadChecker?: (
-    previsous: UserProfileData | null | undefined,
+    previous: UserProfileData | null | undefined,
     next: UserProfileData
   ) => boolean;
 }
@@ -84,6 +84,7 @@ export const useUpdateUserProfile = ({
                       size="s"
                       onClick={() => window.location.reload()}
                       data-test-subj="windowReloadButton"
+                      autoFocus
                     >
                       {i18n.translate(
                         'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',

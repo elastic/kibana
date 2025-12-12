@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { mockKibanaValues, setMockValues } from '../../__mocks__/kea_logic';
+import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { mount, shallow } from 'enzyme';
 
 import { act } from 'react-dom/test-utils';
-
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 
 import { findOrCreateDataView } from '../utils/find_or_create_data_view';
 
@@ -99,8 +97,6 @@ describe('withLensData', () => {
 
   it('should call getAttributes with the correct arguments when dataView and formula are available', async () => {
     const getAttributes = jest.fn();
-    const formula = {} as FormulaPublicApi;
-    mockKibanaValues.lens.stateHelperApi = jest.fn().mockResolvedValueOnce({ formula });
     (findOrCreateDataView as jest.Mock).mockResolvedValueOnce(mockDataView);
 
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
@@ -123,13 +119,11 @@ describe('withLensData', () => {
       await flushPromises();
     });
 
-    expect(getAttributes).toHaveBeenCalledWith(mockDataView, formula, props);
+    expect(getAttributes).toHaveBeenCalledWith(mockDataView, props);
   });
 
   it('should not call getAttributes when dataView is not available', async () => {
     const getAttributes = jest.fn();
-    const formula = {} as FormulaPublicApi;
-    mockKibanaValues.lens.stateHelperApi = jest.fn().mockResolvedValueOnce({ formula });
     (findOrCreateDataView as jest.Mock).mockResolvedValueOnce(undefined);
 
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(

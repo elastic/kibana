@@ -1,0 +1,12 @@
+{
+  "attributes": {
+    "promptId": "systemPrompt",
+    "promptGroupId": "aiAssistant",
+    "provider": "openai",
+    "prompt": {
+      "default": "You always talk like a pirate."
+    }
+  },
+  "id": "sample_security_ai_prompt",
+  "type": "security-ai-prompt"
+}

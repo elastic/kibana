@@ -6,8 +6,8 @@
  */
 
 import type { Subject } from 'rxjs';
-import { ObjectType } from '@kbn/config-schema';
-import {
+import type { ObjectType } from '@kbn/config-schema';
+import type {
   RequestHandler,
   RouteConfig,
   RouteMethod,
@@ -15,10 +15,11 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
+  RouteSecurity,
 } from '@kbn/core/server';
-import { UMServerLibs, UptimeEsClient } from '../lib/lib';
+import type { UMServerLibs, UptimeEsClient } from '../lib/lib';
 import type { UptimeRequestHandlerContext } from '../../types';
-import { UptimeServerSetup } from '../lib/adapters';
+import type { UptimeServerSetup } from '../lib/adapters';
 
 export type SyntheticsRequest = KibanaRequest<
   Record<string, any>,
@@ -45,8 +46,9 @@ export interface UMServerRoute<T> {
  * provided by Kibana core.
  */
 export type UMRouteDefinition<T> = UMServerRoute<T> &
-  RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>;
-
+  Omit<RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>, 'security'> & {
+    security?: RouteSecurity;
+  };
 /**
  * This type represents an Uptime route definition that corresponds to the contract
  * provided by the Kibana platform. Route objects must conform to this type in order
@@ -78,7 +80,7 @@ export type UMRestApiRouteFactory<ClientContract = unknown> = (
 export type UMKibanaRouteWrapper = (
   uptimeRoute: UptimeRoute<any>,
   server: UptimeServerSetup
-) => UMKibanaRoute;
+) => UMKibanaRoute & { security: RouteSecurity };
 
 export interface UptimeRouteContext {
   uptimeEsClient: UptimeEsClient;

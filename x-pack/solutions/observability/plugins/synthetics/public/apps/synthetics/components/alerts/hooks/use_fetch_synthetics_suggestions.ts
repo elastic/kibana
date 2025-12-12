@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export interface Suggestion {
   label: string;
@@ -21,14 +21,17 @@ export interface UseFetchSyntheticsSuggestions {
   allSuggestions?: Record<string, Suggestion[]>;
 }
 
+export interface FetchSyntheticsSuggestionsFilters {
+  locations?: string[];
+  monitorIds?: string[];
+  tags?: string[];
+  projects?: string[];
+  monitorTypes?: string[];
+}
+
 export interface Params {
   fieldName?: string;
-  filters?: {
-    locations?: string[];
-    monitorIds?: string[];
-    tags?: string[];
-    projects?: string[];
-  };
+  filters?: FetchSyntheticsSuggestionsFilters;
   search: string;
 }
 
@@ -40,7 +43,7 @@ export function useFetchSyntheticsSuggestions({
   search,
 }: Params): UseFetchSyntheticsSuggestions {
   const { http } = useKibana<ClientPluginsStart>().services;
-  const { locations, monitorIds, tags, projects } = filters || {};
+  const { locations, monitorIds, tags, projects, monitorTypes } = filters || {};
 
   const { loading, data } = useFetcher(
     async ({ signal }) => {
@@ -50,12 +53,13 @@ export function useFetchSyntheticsSuggestions({
           monitorQueryIds: monitorIds || [],
           tags: tags || [],
           projects: projects || [],
+          monitorTypes: monitorTypes || [],
           query: search,
         },
         signal,
       });
     },
-    [http, locations, monitorIds, tags, projects, search]
+    [http, locations, monitorIds, tags, projects, search, monitorTypes]
   );
 
   return {

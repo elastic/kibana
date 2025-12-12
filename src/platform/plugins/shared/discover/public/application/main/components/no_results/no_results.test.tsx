@@ -13,7 +13,6 @@ import * as RxApi from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
@@ -23,7 +22,7 @@ import type { DiscoverNoResultsProps } from './no_results';
 import { DiscoverNoResults } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   rawResponse: {
@@ -70,16 +69,14 @@ async function mountAndFindSubjects(
 
   act(() => {
     component = mountWithIntl(
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <DiscoverNoResults
-            stateContainer={stateContainer}
-            isTimeBased={isTimeBased}
-            onDisableFilters={() => {}}
-            {...props}
-          />
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
+      <DiscoverTestProvider services={services} stateContainer={stateContainer}>
+        <DiscoverNoResults
+          stateContainer={stateContainer}
+          isTimeBased={isTimeBased}
+          onDisableFilters={() => {}}
+          {...props}
+        />
+      </DiscoverTestProvider>
     );
   });
 

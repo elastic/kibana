@@ -8,7 +8,12 @@
  */
 
 import React from 'react';
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButtonEmpty,
+  EuiTextTruncate,
+} from '@elastic/eui';
 import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
@@ -19,15 +24,22 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+function prependRootCrumb(rootCrumb: ChromeBreadcrumb | undefined, rest: ChromeBreadcrumb[]) {
+  if (rootCrumb) {
+    return [rootCrumb, ...rest];
+  }
+  return rest;
+}
+
 export function buildBreadcrumbs({
-  projectName,
+  kibanaName,
   cloudLinks,
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
   isServerless,
 }: {
-  projectName?: string;
+  kibanaName?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
@@ -38,13 +50,13 @@ export function buildBreadcrumbs({
   isServerless: boolean;
 }): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
-    projectName,
+    kibanaName,
     cloudLinks,
     isServerless,
   });
 
   if (projectBreadcrumbs.params.absolute) {
-    return [rootCrumb, ...projectBreadcrumbs.breadcrumbs];
+    return prependRootCrumb(rootCrumb, projectBreadcrumbs.breadcrumbs);
   }
 
   // breadcrumbs take the first active path
@@ -62,7 +74,7 @@ export function buildBreadcrumbs({
 
   // if there are project breadcrumbs set, use them
   if (projectBreadcrumbs.breadcrumbs.length !== 0) {
-    return [rootCrumb, ...navBreadcrumbs, ...projectBreadcrumbs.breadcrumbs];
+    return prependRootCrumb(rootCrumb, [...navBreadcrumbs, ...projectBreadcrumbs.breadcrumbs]);
   }
 
   // otherwise try to merge legacy breadcrumbs with navigational project breadcrumbs using deeplinkid
@@ -80,29 +92,28 @@ export function buildBreadcrumbs({
   }
 
   if (chromeBreadcrumbStartIndex === -1) {
-    return [rootCrumb, ...navBreadcrumbs];
+    return prependRootCrumb(rootCrumb, navBreadcrumbs);
   } else {
-    return [
-      rootCrumb,
+    return prependRootCrumb(rootCrumb, [
       ...navBreadcrumbs.slice(0, navBreadcrumbEndIndex),
       ...chromeBreadcrumbs.slice(chromeBreadcrumbStartIndex),
-    ];
+    ]);
   }
 }
 
 function buildRootCrumb({
-  projectName,
+  kibanaName,
   cloudLinks,
   isServerless,
 }: {
-  projectName?: string;
+  kibanaName?: string;
   cloudLinks: CloudLinks;
   isServerless: boolean;
-}): ChromeBreadcrumb {
+}): ChromeBreadcrumb | undefined {
   if (isServerless) {
     return {
       text:
-        projectName ??
+        kibanaName ??
         i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
           defaultMessage: 'Project',
         }),
@@ -131,47 +142,60 @@ function buildRootCrumb({
     };
   }
 
-  return {
-    text: i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
-      defaultMessage: 'Deployment',
-    }),
-    'data-test-subj': 'deploymentCrumb',
-    popoverContent: () => (
-      <>
-        {cloudLinks.deployment && (
-          <EuiButtonEmpty
-            href={cloudLinks.deployment.href}
-            color="text"
-            iconType="gear"
-            data-test-subj="manageDeploymentBtn"
-            size="s"
-          >
-            {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
-              defaultMessage: 'Manage this deployment',
-            })}
-          </EuiButtonEmpty>
-        )}
+  if (cloudLinks.deployment || cloudLinks.deployments) {
+    return {
+      text: kibanaName ? (
+        <EuiTextTruncate text={kibanaName} width={96} />
+      ) : (
+        i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
+          defaultMessage: 'Deployment',
+        })
+      ),
+      'data-test-subj': 'deploymentCrumb',
+      popoverContent: () => (
+        <>
+          {cloudLinks.deployment && (
+            <EuiButtonEmpty
+              href={cloudLinks.deployment.href}
+              color="text"
+              iconType="gear"
+              data-test-subj="manageDeploymentBtn"
+              aria-label={i18n.translate(
+                'core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel',
+                {
+                  defaultMessage: 'Manage this deployment',
+                }
+              )}
+              size="s"
+            >
+              {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
+                defaultMessage: 'Manage this deployment',
+              })}
+            </EuiButtonEmpty>
+          )}
 
-        {cloudLinks.deployments && (
-          <EuiButtonEmpty
-            href={cloudLinks.deployments.href}
-            color="text"
-            iconType="spaces"
-            data-test-subj="viewDeploymentsBtn"
-            size="s"
-          >
-            {cloudLinks.deployments.title}
-          </EuiButtonEmpty>
-        )}
-      </>
-    ),
-    popoverProps: {
-      panelPaddingSize: 's',
-      zIndex: 6000,
-      panelStyle: { maxWidth: 240 },
-      panelProps: {
-        'data-test-subj': 'deploymentLinksPanel',
+          {cloudLinks.deployments && (
+            <EuiButtonEmpty
+              href={cloudLinks.deployments.href}
+              color="text"
+              iconType="spaces"
+              data-test-subj="viewDeploymentsBtn"
+              aria-label={cloudLinks.deployments.title}
+              size="s"
+            >
+              {cloudLinks.deployments.title}
+            </EuiButtonEmpty>
+          )}
+        </>
+      ),
+      popoverProps: {
+        panelPaddingSize: 's',
+        zIndex: 6000,
+        panelStyle: { maxWidth: 240 },
+        panelProps: {
+          'data-test-subj': 'deploymentLinksPanel',
+        },
       },
-    },
-  };
+    };
+  }
 }

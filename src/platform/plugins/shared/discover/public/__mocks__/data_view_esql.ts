@@ -31,5 +31,7 @@ const fields = [
 
 export const dataViewEsql = buildDataViewMock({
   name: 'index-pattern-esql',
+  title: 'index-pattern-esql',
   fields,
+  isPersisted: false,
 });

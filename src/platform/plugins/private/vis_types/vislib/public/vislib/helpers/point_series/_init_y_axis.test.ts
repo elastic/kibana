@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import { initYAxis } from './_init_y_axis';
-import { Chart } from './point_series';
+import type { Chart } from './point_series';
 
 describe('initYAxis', function () {
   const baseChart = {

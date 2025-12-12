@@ -8,10 +8,10 @@
 import moment from 'moment';
 import { useState } from 'react';
 
-import { parseInterval } from '../../../../../../../common';
-import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../../types';
+import { parseInterval } from '../../../../../../../common/parse_interval';
+import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../../../types';
 import { recurrenceSummary } from '../recurrence_scheduler/helpers';
-import { SnoozeUnit } from './constants';
+import type { SnoozeUnit } from './constants';
 import { ONE } from './translations';
 
 const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';

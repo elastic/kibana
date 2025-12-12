@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { castArray } from 'lodash';
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
-import { LogLevel } from './log_levels';
-import { Message } from './message';
+import type { LogLevel } from './log_levels';
+import type { Message } from './message';
 
 export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
   messages: string[] = [];
@@ -32,7 +33,7 @@ export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
   write(msg: Message) {
     const args = [
       msg.source ? `source[${msg.source}]` : null,
-      msg.context ? `context[${msg.context}]` : null,
+      msg.context ? `context[${castArray(msg.context ?? []).join(',')}]` : null,
     ]
       .filter(Boolean)
       .concat(msg.args);

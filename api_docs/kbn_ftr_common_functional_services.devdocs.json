@@ -1160,8 +1160,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
-          "default"
+          ") => Promise<",
+          "default",
+          ">"
         ],
         "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/es.ts",
         "deprecated": false,
@@ -1580,6 +1581,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.TryWithRetriesOptions.initialDelay",
+            "type": "number",
+            "tags": [],
+            "label": "initialDelay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/retry/retry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
             "id": "def-common.TryWithRetriesOptions.retryCount",
             "type": "number",
             "tags": [],
@@ -1631,6 +1646,16 @@
         "label": "Es",
         "description": [],
         "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.AsyncInstance",
+            "text": "AsyncInstance"
+          },
+          "<",
+          "default",
+          "> & ",
           "default"
         ],
         "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/index.ts",
@@ -1673,9 +1698,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
+          ") => Promise<",
           "default",
-          "; kibanaServer: ({ getService }: ",
+          ">; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -1803,9 +1828,25 @@
             "section": "def-common.CookieCredentials",
             "text": "CookieCredentials"
           },
+          ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.GetCookieOptions",
+            "text": "GetCookieOptions"
+          },
+          " | undefined): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.CookieCredentials",
+            "text": "CookieCredentials"
+          },
           ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
           "UserProfile",
-          ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+          ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -1814,6 +1855,14 @@
             "text": "RoleCredentials"
           },
           ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -1901,9 +1950,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
+          ") => Promise<",
           "default",
-          "; kibanaServer: ({ getService }: ",
+          ">; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -2031,9 +2080,25 @@
             "section": "def-common.CookieCredentials",
             "text": "CookieCredentials"
           },
+          ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.GetCookieOptions",
+            "text": "GetCookieOptions"
+          },
+          " | undefined): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.CookieCredentials",
+            "text": "CookieCredentials"
+          },
           ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
           "UserProfile",
-          ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+          ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -2042,6 +2107,14 @@
             "text": "RoleCredentials"
           },
           ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -2196,9 +2269,25 @@
             "section": "def-common.CookieCredentials",
             "text": "CookieCredentials"
           },
+          ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.GetCookieOptions",
+            "text": "GetCookieOptions"
+          },
+          " | undefined): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.CookieCredentials",
+            "text": "CookieCredentials"
+          },
           ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
           "UserProfile",
-          ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+          ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -2207,6 +2296,14 @@
             "text": "RoleCredentials"
           },
           ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RoleCredentials",
+            "text": "RoleCredentials"
+          },
+          ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -2292,8 +2389,9 @@
                 "section": "def-common.FtrProviderContext",
                 "text": "FtrProviderContext"
               },
-              ") => ",
-              "default"
+              ") => Promise<",
+              "default",
+              ">"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/all.ts",
             "deprecated": false,
@@ -2323,9 +2421,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2453,9 +2551,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2464,6 +2578,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2551,9 +2673,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2681,9 +2803,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2692,6 +2830,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2832,9 +2978,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2962,9 +3108,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2973,6 +3135,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3060,9 +3230,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3190,9 +3360,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3201,6 +3387,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3341,9 +3535,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3471,9 +3665,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3482,6 +3692,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3569,9 +3787,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3699,9 +3917,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3710,6 +3944,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3885,9 +4127,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4015,9 +4257,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4026,6 +4284,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4113,9 +4379,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4243,9 +4509,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4254,6 +4536,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4408,9 +4698,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4538,9 +4828,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4549,6 +4855,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4636,9 +4950,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4766,9 +5080,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4777,6 +5107,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4967,9 +5305,25 @@
                 "section": "def-common.CookieCredentials",
                 "text": "CookieCredentials"
               },
+              ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined): Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.CookieCredentials",
+                "text": "CookieCredentials"
+              },
               ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
               "UserProfile",
-              ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+              ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
                 "scope": "common",
@@ -4978,6 +5332,14 @@
                 "text": "RoleCredentials"
               },
               ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.RoleCredentials",
+                "text": "RoleCredentials"
+              },
+              ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
                 "scope": "common",
@@ -5039,9 +5401,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5169,9 +5531,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5180,6 +5558,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5267,9 +5653,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5397,9 +5783,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5408,6 +5810,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5542,9 +5952,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5672,9 +6082,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5683,6 +6109,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5770,9 +6204,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5900,9 +6334,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5911,6 +6361,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6045,9 +6503,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6175,9 +6633,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6186,6 +6660,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6273,9 +6755,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6403,9 +6885,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6414,6 +6912,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6551,9 +7057,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6681,9 +7187,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6692,6 +7214,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6779,9 +7309,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6909,9 +7439,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6920,6 +7466,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -7061,9 +7615,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -7191,9 +7745,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -7202,6 +7772,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -7289,9 +7867,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -7419,9 +7997,25 @@
                     "section": "def-common.CookieCredentials",
                     "text": "CookieCredentials"
                   },
+                  ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.CookieCredentials",
+                    "text": "CookieCredentials"
+                  },
                   ">; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
                   "UserProfile",
-                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  ">; checkRoleIsSupported(role: string): void; createM2mApiKeyWithDefaultRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -7430,6 +8024,14 @@
                     "text": "RoleCredentials"
                   },
                   ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithCustomRoleScope(): Promise<",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",

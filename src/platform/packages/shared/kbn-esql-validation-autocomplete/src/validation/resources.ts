@@ -7,52 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@kbn/esql-ast';
-import { createMapFromList, isSourceItem, nonNullable } from '../shared/helpers';
-import {
-  getFieldsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from '../shared/resources_helpers';
-import type { ESQLCallbacks } from '../shared/types';
-import {
-  buildQueryForFieldsForStringSources,
-  buildQueryForFieldsFromSource,
-  buildQueryForFieldsInPolicies,
-} from './helpers';
-import type { ESQLRealField, ESQLPolicy } from './types';
+import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLAstAllCommands, ESQLCommand } from '@kbn/esql-ast/src/types';
+import { Walker } from '@kbn/esql-ast';
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
-export async function retrieveFields(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks || commands.length < 1) {
-    return new Map();
+function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
+  const arrMap = new Map<string, T>();
+  for (const item of arr) {
+    arrMap.set(item.name, item);
   }
-  // Do not fetch fields, if query has only one source command and that command
-  // does not require fields.
-  if (commands.length === 1) {
-    switch (commands[0].name) {
-      case 'from':
-      case 'show':
-      case 'row': {
-        return new Map();
-      }
-    }
-  }
-  if (commands[0].name === 'row') {
-    return new Map();
-  }
-  const customQuery = buildQueryForFieldsFromSource(queryString, commands);
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
+  return arrMap;
 }
 
 export async function retrievePolicies(
-  commands: ESQLCommand[],
+  commands: ESQLAstAllCommands[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
-  if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
+  const enrichCommands = Walker.matchAll(commands, {
+    type: 'command',
+    name: 'enrich',
+  }) as ESQLCommand[];
+  if (!callbacks || !enrichCommands.length) {
     return new Map();
   }
 
@@ -61,7 +38,7 @@ export async function retrievePolicies(
 }
 
 export async function retrieveSources(
-  commands: ESQLCommand[],
+  commands: ESQLAstAllCommands[],
   callbacks?: ESQLCallbacks
 ): Promise<Set<string>> {
   if (!callbacks || commands.length < 1) {
@@ -72,41 +49,4 @@ export async function retrieveSources(
   }
   const sources = await getSourcesHelper(callbacks)();
   return new Set(sources.map(({ name }) => name));
-}
-
-export async function retrievePoliciesFields(
-  commands: ESQLCommand[],
-  policies: Map<string, ESQLPolicy>,
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks) {
-    return new Map();
-  }
-  const enrichCommands = commands.filter(({ name }) => name === 'enrich');
-  if (!enrichCommands.length) {
-    return new Map();
-  }
-  const policyNames = enrichCommands
-    .map(({ args }) => (isSourceItem(args[0]) ? args[0].name : undefined))
-    .filter(nonNullable);
-  if (!policyNames.every((name) => policies.has(name))) {
-    return new Map();
-  }
-
-  const customQuery = buildQueryForFieldsInPolicies(
-    policyNames.map((name) => policies.get(name)) as ESQLPolicy[]
-  );
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
-}
-
-export async function retrieveFieldsFromStringSources(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks) {
-    return new Map();
-  }
-  const customQuery = buildQueryForFieldsForStringSources(queryString, commands);
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }

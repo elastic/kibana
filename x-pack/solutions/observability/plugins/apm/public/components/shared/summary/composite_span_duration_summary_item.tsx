@@ -24,7 +24,7 @@ function CompositeSpanDurationSummaryItem({ count, durationSum }: Props) {
         defaultMessage: 'Average duration',
       })}
     >
-      <EuiText>
+      <EuiText tabIndex={0}>
         {i18n.translate('xpack.apm.compositeSpanCallsLabel', {
           defaultMessage: `, {count} calls, on avg. {duration}`,
           values: {

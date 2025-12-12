@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import type { FieldHook } from '../../hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

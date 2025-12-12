@@ -91,21 +91,46 @@ Both methods offer customization such as opening the target in a new page, with 
 * [core.application.navigateToApp options](https://github.com/elastic/kibana/tree/master/src/core/packages/application/browser/src/contracts.ts)
 * [core.application.navigateToUrl options](https://github.com/elastic/kibana/tree/master/src/core/packages/application/browser/src/contracts.ts)
 
-**Rendering a link to a different {{kib}} app on its own would also cause a full page reload:**
+With {{kib}}'s `GlobalRedirectAppLinks` global solution, regular links now work correctly without causing full page reloads:
 
 ```typescript
-const myLink = () =>
+const MyLink = () =>
   <a href={urlToADashboard}>Go to Dashboard</a>;
 ```
 
-A workaround could be to handle a click, prevent browser navigation and use `core.application.navigateToApp` API:
+This works automatically throughout your entire app without any additional wrapping or manual click handling. The `GlobalRedirectAppLinks` component is registered once by the core rendering service and automatically handles link clicks on the entire document, enabling SPA-friendly in-app navigation.
+
+This means you can use regular links throughout your app without any wrapper:
 
 ```typescript
-const MySPALink = () =>
+const MyApp = () =>
+  <div>
+    {/*...*/}
+    {/* Link navigations automatically happen in SPA friendly way */}
+    <a href={urlToADashboard}>Go to Dashboard</a>
+    {/*...*/}
+  </div>
+```
+
+::::{note}
+The previous `RedirectAppLinks` wrapper approach is now deprecated. It's no longer necessary to wrap component trees, as the global solution handles all links automatically. Existing usages will continue to work for backward compatibility, but new code should rely on the global solution instead.
+::::
+
+## Advanced: Manual Navigation Control
+
+In most cases, regular links are sufficient. However, you may need manual navigation control when you want to pass navigation state, execute custom logic, or handle special cases.
+
+### Intercepting Link Clicks
+
+Use `preventDefault()` to intercept a link click and handle navigation manually:
+
+```typescript
+const MyCustomLink = () =>
   <a
     href={urlToADashboard}
     onClick={(e) => {
       e.preventDefault();
+      // Custom logic here
       core.application.navigateToApp('dashboard', { path: '/my-dashboard' });
     }}
   >
@@ -113,37 +138,38 @@ const MySPALink = () =>
   </a>;
 ```
 
-As it would be too much boilerplate to do this for each {{kib}} link in your app, there is a handy wrapper that helps with it: [RedirectAppLinks](https://github.com/elastic/kibana/tree/master/src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx).
+### Passing Navigation State
+
+Use `navigateToApp` to navigate to other apps and pass state through locators:
 
 ```typescript
-const MyApp = () =>
-  <RedirectAppLinks coreStart={{application: core.application}}>
-    {/*...*/}
-    {/* navigations using this link will happen in SPA friendly way */}
-      <a href={urlToADashboard}>Go to Dashboard</a>
-    {/*...*/}
-  </RedirectAppLinks>
+const navigateWithState = async () => {
+  await plugins.discover.locator.navigate({
+    filters: myFilters,
+    timeRange: myTimeRange,
+    index: myIndexPattern,
+  });
+};
 ```
 
-::::{note}
-There may be cases where you need a full page reload. While rare and should be avoided, rather than implement your own navigation, you can use the `navigateToUrl` `forceRedirect` option.
-::::
+### Special Navigation Scenarios
 
+For cases requiring full page reload or bypassing navigation guards:
 
 ```typescript
-const MyForcedPageReloadLink = () =>
+const MyForcedReloadLink = () =>
   <a
     href={urlToSomeSpecialApp}
     onClick={(e) => {
       e.preventDefault();
-      core.application.navigateToUrl('someSpecialApp', { forceRedirect: true });
+      core.application.navigateToUrl(urlToSomeSpecialApp, { forceRedirect: true });
     }}
   >
-    Go to Some Special App
+    Go to Special App
   </a>;
 ```
 
-If you also need to bypass the default onAppLeave behavior, you can set the `skipUnload` option to `true`. This option is also available in `navigateToApp`.
+To bypass the default onAppLeave behavior, you can set the `skipUnload` option to `true`. This option is also available in `navigateToApp`.
 
 
 ## Setting up internal app routing [routing]
@@ -227,7 +253,7 @@ You’d notice that you were navigated to **Dashboard** app with the **same stat
 
 Historically {{kib}} Analyze groups apps achieve that behavior relying on state in the URL. If you’d have a closer look on a link in the navigation, you’d notice that state is stored inside that link, and it also gets updated whenever relevant state changes happen:
 
-![State is stored inside the navigation link](../images/state_inside_the_link.png "")
+![State is stored inside the navigation link](images/state_inside_the_link.png "")
 
 This is where [separation](#query-params) into `_a` and `_g` query params comes into play. What is considered a **global** state gets constantly updated in those navigation links. In the example above it was a time filter. This is backed by [KbnUrlTracker](https://github.com/elastic/kibana/tree/master/src/platform/plugins/shared/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57) util. You can use it to achieve similar behavior.
 

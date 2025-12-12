@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { LOGSTASH_SYSTEM_ID, RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 

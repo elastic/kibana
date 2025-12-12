@@ -17,7 +17,7 @@ import type { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
-import { internalStateActions } from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -47,7 +47,6 @@ describe('test getDataStateContainer', () => {
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).not.toHaveBeenCalled();
@@ -58,8 +57,12 @@ describe('test getDataStateContainer', () => {
 
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
     const resolveDataSourceProfileSpy = jest.spyOn(
-      discoverServiceMock.profilesManager,
+      scopedProfilesManager$.getValue(),
       'resolveDataSourceProfile'
     );
 
@@ -73,11 +76,14 @@ describe('test getDataStateContainer', () => {
     });
 
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledTimes(1);
-    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
-      dataSource: stateContainer.appState.get().dataSource,
-      dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
-      query: stateContainer.appState.get().query,
-    });
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith(
+      {
+        dataSource: stateContainer.getCurrentTab().appState.dataSource,
+        dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
+        query: stateContainer.getCurrentTab().appState.query,
+      },
+      expect.any(Function)
+    );
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
 
@@ -85,9 +91,6 @@ describe('test getDataStateContainer', () => {
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).toHaveBeenCalled();
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
 
     unsubscribe();
   });
@@ -131,15 +134,14 @@ describe('test getDataStateContainer', () => {
       result: initialRecords,
     }) as DataDocuments$;
 
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
-
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
     const resolveDataSourceProfileSpy = jest.spyOn(
-      discoverServiceMock.profilesManager,
+      scopedProfilesManager$.getValue(),
       'resolveDataSourceProfile'
     );
 
@@ -157,10 +159,6 @@ describe('test getDataStateContainer', () => {
       if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
         expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
         expect(value.result).toEqual([...initialRecords, ...moreRecords]);
-        // it uses the same current search session id
-        expect(
-          stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-        ).toHaveBeenCalled();
         unsubscribe();
         done();
       }
@@ -174,14 +172,22 @@ describe('test getDataStateContainer', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
-    const appUnsub = stateContainer.appState.initAndSync();
-    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    stateContainer.actions.initializeAndSync();
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+
+    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: false,
+        },
       })
     );
 
@@ -194,31 +200,38 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
+      hideChart: false,
     });
-    expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
-    expect(stateContainer.appState.get().rowHeight).toEqual(3);
+    expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
+    expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
     dataUnsub();
-    appUnsub();
+    stateContainer.actions.stopSyncing();
   });
 
   it('should not update app state from default profile state', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
-    const appUnsub = stateContainer.appState.initAndSync();
-    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    stateContainer.actions.initializeAndSync();
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+
+    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+          hideChart: false,
+        },
       })
     );
     dataState.data$.totalHits$.next({
@@ -229,16 +242,15 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
+      hideChart: false,
     });
-    expect(stateContainer.appState.get().columns).toEqual(['default_column']);
-    expect(stateContainer.appState.get().rowHeight).toBeUndefined();
+    expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
+    expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
     dataUnsub();
-    appUnsub();
+    stateContainer.actions.stopSyncing();
   });
 });

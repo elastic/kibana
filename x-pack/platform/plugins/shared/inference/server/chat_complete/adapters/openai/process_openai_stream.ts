@@ -6,15 +6,19 @@
  */
 
 import type OpenAI from 'openai';
-import { filter, from, map, mergeMap, Observable, tap } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import { catchError, filter, from, map, mergeMap, tap } from 'rxjs';
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
-  createInferenceInternalError,
 } from '@kbn/inference-common';
-import { createTokenLimitReachedError } from '../../errors';
+import {
+  createInferenceInternalError,
+  createInferenceRequestAbortedError,
+} from '@kbn/inference-common';
 import { tokenCountFromOpenAI, chunkFromOpenAI } from './from_openai';
 import { convertStreamError, type ErrorLine } from './stream_errors';
+import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 
 export function processOpenAIStream() {
   return (source: Observable<string>) => {
@@ -51,6 +55,12 @@ export function processOpenAIStream() {
           events.push(chunkFromOpenAI(chunk));
         }
         return from(events);
+      }),
+      catchError((error) => {
+        if (error.code === 'ECONNRESET' && error.message === 'aborted') {
+          throw createInferenceRequestAbortedError();
+        }
+        throw error;
       })
     );
   };

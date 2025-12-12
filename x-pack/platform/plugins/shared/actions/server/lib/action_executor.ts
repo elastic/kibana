@@ -23,7 +23,10 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
-import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
+import {
+  getGenAiTokenTracking,
+  shouldTrackGenAiToken,
+} from './token_tracking/gen_ai_token_tracking';
 import {
   validateConfig,
   validateConnector,
@@ -37,6 +40,7 @@ import type {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   ActionTypeSecrets,
+  ConnectorTokenClientContract,
   GetServicesFunction,
   GetUnsecuredServicesFunction,
   InMemoryConnector,
@@ -52,6 +56,7 @@ import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import type { ConnectorRateLimiter } from './connector_rate_limiter';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -85,10 +90,12 @@ export interface ExecuteOptions<Source = unknown> {
   request: KibanaRequest;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  connectorTokenClient?: ConnectorTokenClientContract;
 }
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
+  connectorTokenClient?: ConnectorTokenClientContract;
   checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
   executeLabel: string;
   namespace: { namespace?: string };
@@ -110,11 +117,18 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
-
+  private connectorRateLimiter: ConnectorRateLimiter;
   private actionInfo: ActionInfo | undefined;
 
-  constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
+  constructor({
+    isESOCanEncrypt,
+    connectorRateLimiter,
+  }: {
+    isESOCanEncrypt: boolean;
+    connectorRateLimiter: ConnectorRateLimiter;
+  }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
+    this.connectorRateLimiter = connectorRateLimiter;
   }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
@@ -128,6 +142,7 @@ export class ActionExecutor {
   public async execute({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     executionId,
     request,
@@ -153,6 +168,7 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
+      connectorTokenClient,
       consumer,
       currentUser,
       checkCanExecuteFn: async (connectorTypeId: string) => {
@@ -358,6 +374,7 @@ export class ActionExecutor {
   private async executeHelper({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     currentUser,
     checkCanExecuteFn,
@@ -401,6 +418,16 @@ export class ActionExecutor {
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
+        }
+
+        if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
+          return {
+            actionId,
+            status: 'error',
+            message: `Action execution rate limit exceeded for connector: ${actionTypeId}`,
+            retry: true,
+            errorSource: TaskErrorSource.USER,
+          };
         }
 
         if (
@@ -508,11 +535,13 @@ export class ActionExecutor {
             config: validatedConfig,
             secrets: validatedSecrets,
             taskInfo,
+            globalAuthHeaders: actionType.globalAuthHeaders,
             configurationUtilities,
             logger,
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
             connectorUsageCollector,
+            connectorTokenClient,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -535,6 +564,8 @@ export class ActionExecutor {
           }
         }
 
+        this.connectorRateLimiter.log(actionTypeId);
+
         // allow null-ish return to indicate success
         const result = rawResult || {
           actionId,
@@ -551,7 +582,13 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = currentUser?.username;
           event.user.id = currentUser?.profile_uid;
-          event.kibana!.user_api_key = currentUser?.api_key;
+          if (currentUser?.api_key) {
+            event.kibana!.user_api_key = {
+              name: currentUser.api_key?.name,
+              id: currentUser.api_key?.id,
+            };
+          }
+
           set(
             event,
             'kibana.action.execution.usage.request_body_bytes',
@@ -590,7 +627,10 @@ export class ActionExecutor {
         }
 
         // start genai extension
-        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
+        if (
+          result.status === 'ok' &&
+          shouldTrackGenAiToken(actionTypeId, `${validatedParams.subAction}`)
+        ) {
           getGenAiTokenTracking({
             actionTypeId,
             logger,

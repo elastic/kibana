@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useDeleteListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -39,6 +40,12 @@ export const DeleteListItem = ({ id, value }: { id: string; value: string }) => 
 
   return (
     <EuiButtonIcon
+      aria-label={i18n.translate(
+        'xpack.securitySolution.valueLists.deleteListItemButton.ariaLabel',
+        {
+          defaultMessage: 'Delete list item',
+        }
+      )}
       color={'danger'}
       onClick={deleteListItem}
       iconType="trash"

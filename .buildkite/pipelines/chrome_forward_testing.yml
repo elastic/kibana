@@ -3,7 +3,7 @@ env:
   # This is what will switch the FTRs/cypress pipeline to use Chrome Beta
   USE_CHROME_BETA: 'true'
 agents:
-  image: family/kibana-ubuntu-2004
+  image: family/kibana-ubuntu-2404
   imageProject: elastic-images-prod
   provider: gcp
 
@@ -56,6 +56,21 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      machineType: n2-standard-4
+    key: build_scout_tests
+    timeout_in_minutes: 15
+    depends_on:
+      - build
+    env:
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
       automatic:
         - exit_status: '*'
@@ -117,8 +132,50 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
-    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -145,15 +202,57 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
-    label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
+    label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
       preemptible: true
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
+    label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
+    label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
+    label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'

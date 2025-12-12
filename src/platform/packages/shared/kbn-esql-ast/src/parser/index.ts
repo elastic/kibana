@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  getLexer,
-  getParser,
-  createParser,
-  parse,
-  parseErrors,
-  type ParseOptions,
-  type ParseResult,
+export { parse, Parser, type ParseOptions, type ParseResult } from './parser';
 
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
-} from './parser';
+export { TIME_SPAN_UNITS, SOURCE_COMMANDS } from './constants';
 
 export { ESQLErrorListener } from './esql_error_listener';

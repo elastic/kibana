@@ -11,13 +11,19 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SwitchOption, RangeOption } from '@kbn/vis-default-editor-plugin/public';
-import { MarkdownVisParams } from './types';
+import { css } from '@emotion/react';
+import type { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel
+      paddingSize="s"
+      css={css`
+        flex-grow: 1 !important;
+      `}
+    >
       <RangeOption
         label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
           defaultMessage: 'Base font size in points',

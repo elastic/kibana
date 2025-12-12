@@ -11,6 +11,8 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
+import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
+import { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
@@ -21,7 +23,6 @@ import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
@@ -37,6 +38,12 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
+import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/engine/data_client';
+import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
+import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/entity_store/auth/api_key';
+import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
+import { getSiemMigrationClients } from './lib/siem_migrations';
+import { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
 
 export interface IRequestContextFactory {
   create(
@@ -108,6 +115,57 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
+    const getLogger = () => options.logger;
+
+    const getEntityStoreApiKeyManager = () =>
+      getApiKeyManagerEntityStore({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
+    const getPrivilegedUserMonitoringApiKeyManager = () =>
+      getApiKeyManagerPrivilegedUserMonitoring({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
+    const getEntityStoreDataClient = memoize(() => {
+      // why are we defining this here, but other places we do it inline?
+      const clusterClient = coreContext.elasticsearch.client;
+      const logger = options.logger;
+
+      const soClient = coreContext.savedObjects.getClient({
+        includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+      });
+
+      return new EntityStoreDataClient({
+        namespace: getSpaceId(),
+        clusterClient,
+        dataViewsService,
+        appClient: getAppClient(),
+        logger,
+        soClient,
+        taskManager: startPlugins.taskManager,
+        auditLogger: getAuditLogger(),
+        kibanaVersion: options.kibanaVersion,
+        config: config.entityAnalytics.entityStore,
+        experimentalFeatures: config.experimentalFeatures,
+        telemetry: core.analytics,
+        apiKeyManager: getEntityStoreApiKeyManager(),
+        security: startPlugins.security,
+        request,
+        uiSettingsClient: coreContext.uiSettings.client,
+        isServerless: options.buildFlavor === 'serverless',
+      });
+    });
 
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
@@ -117,6 +175,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     return {
       core: coreContext,
+
+      getAnalytics: () => core.analytics,
 
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
@@ -128,6 +188,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
         return endpointAuthz;
       },
+
+      getEndpointService: () => endpointAppContextService,
 
       getConfig: () => config,
 
@@ -143,7 +205,15 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getLogger,
+
       getDataViewsService: () => dataViewsService,
+
+      getEntityStoreApiKeyManager,
+
+      getPrivilegedUserMonitoringApiKeyManager,
+
+      getProductFeatureService: () => productFeaturesService,
 
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
@@ -178,21 +248,19 @@ export class RequestContextFactory implements IRequestContextFactory {
         })
       ),
 
-      getSiemRuleMigrationsClient: memoize(() =>
-        siemMigrationsService.createRulesClient({
-          request,
-          currentUser: coreContext.security.authc.getCurrentUser(),
-          spaceId: getSpaceId(),
-          dependencies: {
-            inferenceClient: startPlugins.inference.getClient({ request }),
-            rulesClient,
-            actionsClient,
-            savedObjectsClient: coreContext.savedObjects.client,
-            packageService: startPlugins.fleet?.packageService,
-            telemetry: core.analytics,
-          },
-        })
-      ),
+      siemMigrations: getSiemMigrationClients(siemMigrationsService, {
+        request,
+        currentUser: coreContext.security.authc.getCurrentUser(),
+        spaceId: getSpaceId(),
+        dependencies: {
+          inferenceService: startPlugins.inference,
+          rulesClient,
+          actionsClient,
+          savedObjectsClient: coreContext.savedObjects.client,
+          packageService: startPlugins.fleet?.packageService,
+          telemetry: core.analytics,
+        },
+      }),
 
       getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
 
@@ -237,46 +305,65 @@ export class RequestContextFactory implements IRequestContextFactory {
             auditLogger: getAuditLogger(),
           })
       ),
-      getEntityStoreDataClient: memoize(() => {
-        const clusterClient = coreContext.elasticsearch.client;
-        const logger = options.logger;
-
-        const soClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
-        });
-
-        return new EntityStoreDataClient({
+      getPrivilegeMonitoringDataClient: memoize(() => {
+        return new PrivilegeMonitoringDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
           namespace: getSpaceId(),
-          clusterClient,
-          dataViewsService,
-          appClient: getAppClient(),
-          logger,
-          soClient,
+          savedObjects: coreStart.savedObjects,
           taskManager: startPlugins.taskManager,
-          auditLogger: getAuditLogger(),
+          apiKeyManager: getPrivilegedUserMonitoringApiKeyManager(),
+          auditLogger: coreStart.security.audit.asScoped(request),
           kibanaVersion: options.kibanaVersion,
-          config: config.entityAnalytics.entityStore,
-          experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
-          apiKeyManager: getApiKeyManager({
-            core: coreStart,
-            logger,
-            security: startPlugins.security,
-            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
-            request,
-            namespace: getSpaceId(),
-          }),
-          security: startPlugins.security,
-          request,
+          experimentalFeatures: options.config.experimentalFeatures,
         });
       }),
-      getAssetInventoryClient: memoize(() => {
-        const clusterClient = coreContext.elasticsearch.client;
-        const logger = options.logger;
-        return new AssetInventoryDataClient({
-          clusterClient,
-          logger,
-          experimentalFeatures: config.experimentalFeatures,
+      getMonitoringEntitySourceDataClient: memoize(() => {
+        const soClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [monitoringEntitySourceType.name],
+        });
+        return new MonitoringEntitySourceDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          soClient,
+        });
+      }),
+      getPadPackageInstallationClient: memoize(() => {
+        return new PadPackageInstallationClient({
+          clusterClient: coreContext.elasticsearch.client,
+          soClient: coreContext.savedObjects.client,
+          logger: options.logger,
+          namespace: getSpaceId(),
+          dataViewsService,
+        });
+      }),
+      getEntityStoreDataClient,
+      getEntityStoreCrudClient: memoize(() => {
+        return new EntityStoreCrudClient({
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          logger: options.logger,
+          dataClient: getEntityStoreDataClient(),
+        });
+      }),
+      getAssetInventoryClient: memoize(
+        () =>
+          new AssetInventoryDataClient({
+            logger: options.logger,
+            clusterClient: coreContext.elasticsearch.client,
+            uiSettingsClient: coreContext.uiSettings.client,
+            usageCollection: options.plugins.usageCollection,
+            coreStartPromise: core.getStartServices(),
+          })
+      ),
+      getMlAuthz: memoize(() => {
+        return buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
         });
       }),
     };

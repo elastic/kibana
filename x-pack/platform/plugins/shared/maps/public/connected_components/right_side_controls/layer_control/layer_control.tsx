@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LayerTOC } from './layer_toc';
 import { isScreenshotMode } from '../../../kibana_services';
-import { ILayer } from '../../../classes/layers/layer';
+import type { ILayer } from '../../../classes/layers/layer';
 import { ExpandButton } from './expand_button';
 
 export interface Props {
@@ -128,6 +128,7 @@ export function LayerControl({
                 content={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
                   defaultMessage: 'Hide all layers',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   onClick={hideAllLayers}
@@ -145,6 +146,7 @@ export function LayerControl({
                 content={i18n.translate('xpack.maps.layerControl.showAllLayersButton', {
                   defaultMessage: 'Show all layers',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   onClick={showAllLayers}

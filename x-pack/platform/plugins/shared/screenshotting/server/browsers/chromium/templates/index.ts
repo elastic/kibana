@@ -8,12 +8,28 @@
 import { i18n } from '@kbn/i18n';
 import fs from 'fs/promises';
 import path from 'path';
-import Handlebars from 'handlebars';
+import type { TemplateDelegate } from '@kbn/handlebars';
+import Handlebars from '@kbn/handlebars';
 import { assetPath } from '../../../constants';
 
-async function compileTemplate<T>(pathToTemplate: string): Promise<Handlebars.TemplateDelegate<T>> {
+// see: https://handlebarsjs.com/guide/builtin-helpers.html
+const HBCompileOptions = {
+  knownHelpersOnly: true,
+  knownHelpers: {
+    helperMissing: false,
+    blockHelperMissing: false,
+    each: false,
+    if: true,
+    unless: false,
+    with: false,
+    log: false,
+    lookup: false,
+  },
+};
+
+async function compileTemplate<T>(pathToTemplate: string): Promise<TemplateDelegate<T>> {
   const contentsBuffer = await fs.readFile(pathToTemplate);
-  return Handlebars.compile(contentsBuffer.toString());
+  return Handlebars.compileAST(contentsBuffer.toString(), HBCompileOptions);
 }
 
 interface HeaderTemplateInput {
@@ -30,7 +46,7 @@ export async function getHeaderTemplate({ title }: GetHeaderArgs): Promise<strin
   return template({ title });
 }
 
-async function getDefaultFooterLogo(): Promise<string> {
+export async function getDefaultFooterLogo(): Promise<string> {
   const logoBuffer = await fs.readFile(path.resolve(assetPath, 'img', 'logo-grey.png'));
   return `data:image/png;base64,${logoBuffer.toString('base64')}`;
 }

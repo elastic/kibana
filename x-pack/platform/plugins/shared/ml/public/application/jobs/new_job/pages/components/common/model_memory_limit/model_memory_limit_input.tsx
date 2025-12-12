@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, useGeneratedHtmlId } from '@elastic/eui';
 import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
 import { JobCreatorContext } from '../../job_creator_context';
 import { Description } from './description';
@@ -22,7 +22,9 @@ export const ModelMemoryLimitInput: FC = () => {
 
   const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
   const { model_memory_limit: modelMemoryLimitDefault } = anomalyDetectors;
-
+  const titleId = useGeneratedHtmlId({
+    prefix: 'modelMemoryLimitInput',
+  });
   useEffect(() => {
     jobCreator.modelMemoryLimit = modelMemoryLimit === '' ? null : modelMemoryLimit;
     jobCreatorUpdate();
@@ -40,13 +42,14 @@ export const ModelMemoryLimitInput: FC = () => {
   }, [jobValidatorUpdated]);
 
   return (
-    <Description validation={validation}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldText
         value={modelMemoryLimit}
         placeholder={modelMemoryLimitDefault}
         onChange={(e) => setModelMemoryLimit(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputModelMemoryLimit"
+        aria-labelledby={titleId}
       />
     </Description>
   );

@@ -10,7 +10,7 @@
 import { unzip } from 'lodash';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const getTestSpec = (expression: string) => `
 {
@@ -27,6 +27,49 @@ signals: [ {
   }]
 }]}`;
 
+const getLinkTestSpec = (url: string, usermeta?: string) => `
+{
+  $schema: https://vega.github.io/schema/vega-lite/v5.json
+  data: {
+    url: {
+      %context%: true
+      %timefield%: @timestamp
+      index: logstash-*
+      body: {
+        aggs: {
+          country_buckets: {
+            terms: {
+              field: geo.dest
+              size: 1
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.country_buckets.buckets"}
+  }
+  transform: [
+    {
+      "calculate": "'${url}'", "as": "url"
+    }
+  ]
+  mark: bar
+  encoding: {
+    x: {
+      field: key
+      type: nominal
+      axis: {labelAngle: 0}
+    }
+    y: {
+      field: doc_count
+      type: quantitative
+    }
+    "href": {"field": "url", "type": "nominal"}
+  }
+  usermeta: ${usermeta}
+}`;
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { timePicker, visualize, visChart, visEditor, vegaChart } = getPageObjects([
     'timePicker',
@@ -41,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('vega chart in visualize app', () => {
     before(async () => {
@@ -96,7 +140,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should render different data in response to filter change', async function () {
-          await vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
+          const { spec, isValid } = await vegaChart.getSpecAsJSON();
+          expect(isValid).to.be(true);
+          // add SVG renderer to read the Y axis labels
+          const updatedSpec = { ...spec, config: { kibana: { renderer: 'svg' } } };
+          await vegaChart.fillSpec(JSON.stringify(updatedSpec, null, 2));
           await visEditor.clickGo();
           await visChart.waitForVisualizationRenderingStabilized();
           const fullDataLabels = await vegaChart.getYAxisLabels();
@@ -266,6 +314,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
+        // click on the breadcrumbs to dismiss the tooltip (prevents flakiness)
+        await testSubjects.click('breadcrumb last');
         await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
 
         expect(await filterBar.getFilterCount()).to.be(1);
@@ -286,6 +336,53 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await fillSpecAndGo(getTestSpec('kibanaRemoveAllFilters()'));
 
         expect(await filterBar.getFilterCount()).to.be(0);
+      });
+    });
+
+    describe('clickable marks with links', () => {
+      beforeEach(async () => {
+        await timePicker.setDefaultAbsoluteRange();
+      });
+
+      const fillSpecAndGo = async (newSpec: string) => {
+        await vegaChart.fillSpec(newSpec);
+        await visEditor.clickGo();
+
+        const viewContainer = await vegaChart.getViewContainer();
+        const canvasElement = await viewContainer.findByTagName('canvas');
+        const { width, height } = await canvasElement.getSize();
+
+        await canvasElement.moveMouseTo({
+          xOffset: Math.round(width / 2),
+          yOffset: Math.round(height / 2),
+        });
+        await canvasElement.click();
+      };
+
+      const getKibanaBaseUrl = async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.substring(0, currentUrl.indexOf('#'));
+      };
+
+      it('should open in a new tab when passing the appropriate usermeta to spec', async () => {
+        const usermeta = JSON.stringify({ embedOptions: { loader: { target: '_blank' } } });
+        const spec = getLinkTestSpec(await getKibanaBaseUrl(), usermeta);
+        await fillSpecAndGo(spec);
+
+        const windowHandlers = await browser.getAllWindowHandles();
+        expect(windowHandlers.length).to.equal(2);
+
+        await browser.switchTab(1);
+        await browser.closeCurrentWindow();
+        await browser.switchTab(0);
+      });
+
+      it('should open in the same tab without passing the appropriate usermeta to spec', async () => {
+        const spec = getLinkTestSpec(await getKibanaBaseUrl());
+        await fillSpecAndGo(spec);
+
+        const windowHandlers = await browser.getAllWindowHandles();
+        expect(windowHandlers.length).to.equal(1);
       });
     });
   });

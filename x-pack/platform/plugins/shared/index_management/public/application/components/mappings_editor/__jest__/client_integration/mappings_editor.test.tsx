@@ -7,7 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed } from './helpers';
+import type { MappingsEditorTestBed } from './helpers';
+import { componentHelpers } from './helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
@@ -165,12 +166,10 @@ describe('Mappings editor: core', () => {
 
     test('should have 4 tabs (fields, runtime, template, advanced settings)', () => {
       const { find } = testBed;
-      const tabs = find('formTab').map((wrapper) => wrapper.text());
-
-      expect(tabs).toEqual([
-        'Mapped fields',
-        'Runtime fields',
-        'Dynamic templates',
+      expect(find('fieldsTab').map((wrapper) => wrapper.text())).toEqual(['Mapped fields']);
+      expect(find('runtimeTab').map((wrapper) => wrapper.text())).toEqual(['Runtime fields']);
+      expect(find('templatesTab').map((wrapper) => wrapper.text())).toEqual(['Dynamic templates']);
+      expect(find('advancedOptionsTab').map((wrapper) => wrapper.text())).toEqual([
         'Advanced options',
       ]);
     });
@@ -505,6 +504,44 @@ describe('Mappings editor: core', () => {
 
       const newField = { name: 'someNewField', type: 'semantic_text' };
       await addField(newField.name, newField.type);
+
+      updatedMappings = {
+        ...updatedMappings,
+        properties: {
+          ...updatedMappings.properties,
+          [newField.name]: { reference_field: '', type: 'semantic_text' },
+        },
+      };
+
+      ({ data } = await getMappingsEditorData(component));
+
+      expect(data).toEqual(updatedMappings);
+    });
+
+    test('updates mapping with reference field value for semantic_text field', async () => {
+      let updatedMappings = { ...defaultMappings };
+
+      const {
+        find,
+        actions: { addField },
+        component,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      await act(async () => {
+        find('addFieldButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      });
+      component.update();
+
+      const newField = {
+        name: 'someNewField',
+        type: 'semantic_text',
+        referenceField: 'address.city',
+      };
+      await addField(newField.name, newField.type, undefined, newField.referenceField);
 
       updatedMappings = {
         ...updatedMappings,

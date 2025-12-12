@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, ReactNode } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
-import { LabelStaticOptions } from '../../../../../../common/descriptor_types';
-import { StaticTextProperty } from '../../properties/static_text_property';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
+import type { LabelStaticOptions } from '../../../../../../common/descriptor_types';
+import type { StaticTextProperty } from '../../properties/static_text_property';
 
 interface Props {
   onStaticStyleChange: (propertyName: VECTOR_STYLES, options: LabelStaticOptions) => void;

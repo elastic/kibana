@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Calculate risk scores with ESQL ESQL query matches snapshot 1`] = `
+"
+  FROM .alerts-security.alerts-default METADATA _index
+    | WHERE kibana.alert.risk_score IS NOT NULL AND KQL(\\"host.name > abel and host.name <= zuzanna\\")
+    | RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category,
+             @timestamp as time
+    | EVAL input = CONCAT(\\"\\"\\" {\\"risk_score\\": \\"\\"\\"\\", risk_score::keyword, \\"\\"\\"\\", \\"time\\": \\"\\"\\"\\", time::keyword, \\"\\"\\"\\", \\"index\\": \\"\\"\\"\\", _index, \\"\\"\\"\\", \\"rule_name\\": \\"\\"\\"\\", rule_name, \\"\\"\\"\\", \\"category\\": \\"\\"\\"\\", category, \\"\\"\\"\\", \\"id\\": \\"\\"\\"\\", alert_id, \\"\\"\\"\\" } \\"\\"\\")
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, 10000, \\"desc\\"), 1.5),
+        risk_inputs = TOP(input, 10, \\"desc\\")
+    BY host.name
+    | SORT scores DESC
+    | LIMIT 3500
+  "
+`;

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
   EuiSpacer,
-  EuiContextMenuPanelDescriptor,
   EuiButton,
   EuiPopover,
   EuiContextMenu,
@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { ReactEmbeddableRenderer, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { useUiActions } from '../../context';
 import { BUTTON_EMBEDDABLE } from '../../embeddables/register_button_embeddable';
 
@@ -95,7 +95,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
         <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div style={{ maxWidth: 200 }}>
-            <ReactEmbeddableRenderer<{}, {}>
+            <EmbeddableRenderer
               type={BUTTON_EMBEDDABLE}
               getParentApi={() => ({
                 getSerializedStateForChild: () => undefined,
@@ -107,7 +107,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
       </EuiFlexGroup>
 
       {showManager && (
-        <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
+        <EuiFlyout onClose={() => setShowManager(false)} aria-label="Drilldown Manager">
           <plugins.uiActionsEnhanced.DrilldownManager
             key={viewRef.current}
             initialRoute={viewRef.current}

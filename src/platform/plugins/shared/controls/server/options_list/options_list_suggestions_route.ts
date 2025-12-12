@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
+import type { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 import { getSuggestionAggregationBuilder } from './suggestion_queries';
 
@@ -29,17 +29,17 @@ export const setupOptionsListSuggestionsRoute = (
     .post({
       access: 'internal',
       path: '/internal/controls/optionsList/{index}',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             params: schema.object(

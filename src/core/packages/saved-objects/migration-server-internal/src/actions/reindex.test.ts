@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Option from 'fp-ts/lib/Option';
+import * as Option from 'fp-ts/Option';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';

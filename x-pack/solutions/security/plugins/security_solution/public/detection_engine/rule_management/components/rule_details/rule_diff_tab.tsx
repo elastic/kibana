@@ -21,7 +21,6 @@ import { normalizeMachineLearningJobIds } from '../../../../../common/detection_
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
-import * as i18n from './json_diff/translations';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -57,6 +56,8 @@ const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
    * Another technical property that is used for logic under the hood the user doesn't need to be aware of
    */
   'rule_source',
+  /* Technical property that changes at rule runtime. */
+  'execution_summary',
 ];
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
@@ -121,9 +122,20 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
+  leftDiffSideLabel: string;
+  rightDiffSideLabel: string;
+  leftDiffSideDescription: string;
+  rightDiffSideDescription: string;
 }
 
-export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
+export const RuleDiffTab = ({
+  oldRule,
+  newRule,
+  leftDiffSideLabel,
+  rightDiffSideLabel,
+  leftDiffSideDescription,
+  rightDiffSideDescription,
+}: RuleDiffTabProps) => {
   const [oldSource, newSource] = useMemo(() => {
     const visibleNewRuleProperties = omit(normalizeRule(newRule), ...HIDDEN_PROPERTIES);
     const visibleOldRuleProperties = omit(
@@ -145,24 +157,19 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
             <EuiIconTip
               color="subdued"
-              content={i18n.CURRENT_VERSION_DESCRIPTION}
-              type="iInCircle"
+              content={leftDiffSideDescription}
+              type="info"
               size="m"
               display="block"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.CURRENT_RULE_VERSION}</h6>
+              <h6>{leftDiffSideLabel}</h6>
             </EuiTitle>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-            <EuiIconTip
-              color="subdued"
-              content={i18n.UPDATED_VERSION_DESCRIPTION}
-              type="iInCircle"
-              size="m"
-            />
+            <EuiIconTip color="subdued" content={rightDiffSideDescription} type="info" size="m" />
             <EuiTitle size="xxxs">
-              <h6>{i18n.ELASTIC_UPDATE_VERSION}</h6>
+              <h6>{rightDiffSideLabel}</h6>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlexGroup>

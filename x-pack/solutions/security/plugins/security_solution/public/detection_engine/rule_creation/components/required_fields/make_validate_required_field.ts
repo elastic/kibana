@@ -8,7 +8,7 @@
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { ERROR_CODE, FormData, FormHook, ValidationFunc } from '../../../../shared_imports';
 import * as i18n from './translations';
-import { getFlattenedArrayFieldNames } from './utils';
+import { getFlattenedArrayFieldNames } from '../utils';
 
 export function makeValidateRequiredField(parentFieldPath: string) {
   return function validateRequiredField(

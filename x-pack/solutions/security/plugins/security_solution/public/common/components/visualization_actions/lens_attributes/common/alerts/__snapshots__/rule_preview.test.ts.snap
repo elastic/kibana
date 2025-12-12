@@ -6,11 +6,11 @@ Object {
   "references": Array [],
   "state": Object {
     "adHocDataViews": Object {
-      "mockInternalReferenceId": Object {
+      "internal-reference-id-generated-uuid": Object {
         "allowNoIndex": false,
         "fieldAttrs": Object {},
         "fieldFormats": Object {},
-        "id": "mockInternalReferenceId",
+        "id": "internal-reference-id-generated-uuid",
         "name": ".preview.alerts-security.alerts-undefined",
         "runtimeFieldMap": Object {},
         "sourceFilters": Array [],
@@ -21,14 +21,14 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "mockLayerId": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "mockColumnTopValuesId",
-              "mockColumnTimestampId",
-              "mockColumnCountOfRecordsId",
+              "column-top-values-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-count-of-records-id-generated-uuid",
             ],
             "columns": Object {
-              "mockColumnCountOfRecordsId": Object {
+              "column-count-of-records-id-generated-uuid": Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Count of records",
@@ -39,7 +39,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
-              "mockColumnTimestampId": Object {
+              "column-timestamp-id-generated-uuid": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -52,7 +52,7 @@ Object {
                 "scale": "interval",
                 "sourceField": "@timestamp",
               },
-              "mockColumnTopValuesId": Object {
+              "column-top-values-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top 10 values of event.category",
@@ -64,7 +64,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "mockColumnCountOfRecordsId",
+                    "columnId": "column-count-of-records-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -93,7 +93,7 @@ Object {
           "alias": null,
           "disabled": false,
           "field": "kibana.alert.rule.uuid",
-          "index": "mockInternalReferenceId",
+          "index": "internal-reference-id-generated-uuid",
           "key": "kibana.alert.rule.uuid",
           "negate": false,
           "params": Object {
@@ -127,8 +127,8 @@ Object {
     ],
     "internalReferences": Array [
       Object {
-        "id": "mockInternalReferenceId",
-        "name": "indexpattern-datasource-layer-mockLayerId",
+        "id": "internal-reference-id-generated-uuid",
+        "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
         "type": "index-pattern",
       },
     ],
@@ -145,15 +145,15 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "mockColumnCountOfRecordsId",
+            "column-count-of-records-id-generated-uuid",
           ],
-          "layerId": "mockLayerId",
+          "layerId": "layer-id-generated-uuid",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "mockColumnTopValuesId",
-          "xAccessor": "mockColumnTimestampId",
+          "splitAccessor": "column-top-values-id-generated-uuid",
+          "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],
       "legend": Object {

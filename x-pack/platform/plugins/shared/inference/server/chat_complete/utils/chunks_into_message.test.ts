@@ -6,12 +6,11 @@
  */
 
 import { lastValueFrom, of } from 'rxjs';
-import {
-  ToolChoiceType,
+import type {
   ChatCompletionChunkEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
+import { ToolChoiceType, ChatCompletionEventType } from '@kbn/inference-common';
 import { chunksIntoMessage } from './chunks_into_message';
 import type { Logger } from '@kbn/logging';
 

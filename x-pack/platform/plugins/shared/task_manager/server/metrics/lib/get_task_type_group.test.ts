@@ -13,6 +13,10 @@ describe('getTaskTypeGroup', () => {
     expect(getTaskTypeGroup('actions:def')).toEqual('actions');
   });
 
+  test('should correctly group ad hoc runs under alerting', () => {
+    expect(getTaskTypeGroup('ad_hoc_run-backfill')).toEqual('alerting');
+  });
+
   test('should return undefined if no match', () => {
     expect(getTaskTypeGroup('alerting-abc')).toBeUndefined();
     expect(getTaskTypeGroup('fooalertingbar')).toBeUndefined();

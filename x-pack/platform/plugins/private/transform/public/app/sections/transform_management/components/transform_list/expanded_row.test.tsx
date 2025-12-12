@@ -6,9 +6,9 @@
  */
 
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import moment from 'moment-timezone';
 import type { TransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';
@@ -34,7 +34,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
     // @ts-expect-error mock data is too loosely typed
     const item: TransformListRow = transformListRow;
 
-    renderReactTestingLibraryWithI18n(
+    renderWithI18n(
       <QueryClientProvider client={queryClient}>
         <ExpandedRow item={item} onAlertEdit={onAlertEdit} />
       </QueryClientProvider>

@@ -40,13 +40,6 @@ describe('mergeServiceStats', () => {
             throughput: 4,
           }),
         ],
-        servicesWithoutTransactions: [
-          {
-            environments: ['production'],
-            serviceName: 'opbeans-java',
-            agentName: 'java',
-          },
-        ],
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
@@ -84,7 +77,7 @@ describe('mergeServiceStats', () => {
     ]);
   });
 
-  it('shows services that only have metric documents', () => {
+  it('shows services that only have trace data', () => {
     expect(
       mergeServiceStats({
         serviceStats: [
@@ -92,13 +85,6 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java-2',
             environments: ['staging'],
           }),
-        ],
-        servicesWithoutTransactions: [
-          {
-            environments: ['production'],
-            serviceName: 'opbeans-java',
-            agentName: 'java',
-          },
         ],
         healthStatuses: [
           {
@@ -124,11 +110,8 @@ describe('mergeServiceStats', () => {
         transactionType: 'request',
       },
       {
-        agentName: 'java',
-        environments: ['production'],
-        healthStatus: ServiceHealthStatus.healthy,
-        serviceName: 'opbeans-java',
         alertsCount: 2,
+        serviceName: 'opbeans-java',
       },
     ]);
   });
@@ -142,7 +125,6 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesWithoutTransactions: [],
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
@@ -166,38 +148,6 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 3,
-      },
-    ]);
-  });
-
-  it('concatenates environments from metric/transaction data', () => {
-    expect(
-      mergeServiceStats({
-        serviceStats: [
-          stat({
-            serviceName: 'opbeans-java',
-            environments: ['staging'],
-          }),
-        ],
-        servicesWithoutTransactions: [
-          {
-            environments: ['production'],
-            serviceName: 'opbeans-java',
-            agentName: 'java',
-          },
-        ],
-        healthStatuses: [],
-        alertCounts: [],
-      })
-    ).toEqual([
-      {
-        agentName: 'java',
-        environments: ['staging', 'production'],
-        serviceName: 'opbeans-java',
-        latency: 1,
-        throughput: 2,
-        transactionErrorRate: 3,
-        transactionType: 'request',
       },
     ]);
   });

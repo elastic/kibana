@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DocumentsTab } from './tab_documents';
+export { TabDocuments as DocumentsTab } from './tab_documents';

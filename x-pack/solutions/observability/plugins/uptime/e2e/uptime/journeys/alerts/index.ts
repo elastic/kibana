@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './tls_alert_flyouts_in_alerting_app';
+export type * from './tls_alert_flyouts_in_alerting_app';
 // export * from './status_alert_flyouts_in_alerting_app';
-export * from './default_email_settings';
+export type * from './default_email_settings';

@@ -84,6 +84,7 @@ describe('HttpServer - TLS config', () => {
       {
         path: '/',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (ctx, req, res) => {
         return res.ok({

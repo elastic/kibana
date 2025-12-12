@@ -21,71 +21,6 @@ describe('ML locator', () => {
       });
     });
 
-    describe('Job Management Page', () => {
-      it('should generate valid URL for the Anomaly Detection job management page', async () => {
-        const location = await definition.getLocation({
-          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-        });
-
-        expect(location).toMatchObject({
-          app: 'ml',
-          path: '/jobs',
-          state: {},
-        });
-      });
-
-      it('should generate valid URL for the Anomaly Detection job management page for job', async () => {
-        const location = await definition.getLocation({
-          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-          pageState: {
-            jobId: 'fq_single_1',
-          },
-        });
-
-        expect(location).toMatchObject({
-          app: 'ml',
-          path: "/jobs?_a=(jobs:(queryText:'id:fq_single_1'))",
-          state: {},
-        });
-      });
-
-      it('should generate valid URL for the Anomaly Detection job management page for groupIds', async () => {
-        const location = await definition.getLocation({
-          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-          pageState: {
-            groupIds: ['farequote', 'categorization'],
-          },
-        });
-
-        expect(location).toMatchObject({
-          app: 'ml',
-          path: "/jobs?_a=(jobs:(queryText:'groups:(farequote%20or%20categorization)'))",
-          state: {},
-        });
-      });
-
-      it('should generate valid URL for the page for selecting the type of anomaly detection job to create', async () => {
-        const location = await definition.getLocation({
-          page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
-          pageState: {
-            index: `3da93760-e0af-11ea-9ad3-3bcfc330e42a`,
-            globalState: {
-              time: {
-                from: 'now-30m',
-                to: 'now',
-              },
-            },
-          },
-        });
-
-        expect(location).toMatchObject({
-          app: 'ml',
-          path: '/jobs/new_job/step/job_type?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))',
-          state: {},
-        });
-      });
-    });
-
     describe('Anomaly Explorer Page', () => {
       it('should generate valid URL for the Anomaly Explorer page', async () => {
         const location = await definition.getLocation({
@@ -202,50 +137,6 @@ describe('ML locator', () => {
     });
 
     describe('DataFrameAnalytics', () => {
-      describe('JobManagement Page', () => {
-        it('should generate valid URL for the Data Frame Analytics job management page', async () => {
-          const location = await definition.getLocation({
-            page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-          });
-
-          expect(location).toMatchObject({
-            app: 'ml',
-            path: '/data_frame_analytics',
-            state: {},
-          });
-        });
-
-        it('should generate valid URL for the Data Frame Analytics job management page with jobId', async () => {
-          const location = await definition.getLocation({
-            page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-            pageState: {
-              jobId: 'grid_regression_1',
-            },
-          });
-
-          expect(location).toMatchObject({
-            app: 'ml',
-            path: "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'id:grid_regression_1'))",
-            state: {},
-          });
-        });
-
-        it('should generate valid URL for the Data Frame Analytics job management page with groupIds', async () => {
-          const location = await definition.getLocation({
-            page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-            pageState: {
-              groupIds: ['group_1', 'group_2'],
-            },
-          });
-
-          expect(location).toMatchObject({
-            app: 'ml',
-            path: "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'groups:(group_1%20or%20group_2)'))",
-            state: {},
-          });
-        });
-      });
-
       describe('ExplorationPage', () => {
         it('should generate valid URL for the Data Frame Analytics exploration page for job', async () => {
           const location = await definition.getLocation({
@@ -319,23 +210,6 @@ describe('ML locator', () => {
         expect(location).toMatchObject({
           app: 'ml',
           path: '/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))',
-          state: {},
-        });
-      });
-    });
-
-    describe('Trained Models', () => {
-      it('should generate valid URL for the Trained Models page with model id', async () => {
-        const location = await definition.getLocation({
-          page: ML_PAGES.TRAINED_MODELS_MANAGE,
-          pageState: {
-            modelId: 'my_model_01',
-          },
-        });
-
-        expect(location).toMatchObject({
-          app: 'ml',
-          path: "/trained_models?_a=(trained_models:(queryText:'model_id:(my_model_01)'))",
           state: {},
         });
       });

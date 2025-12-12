@@ -8,15 +8,22 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import { Observable, defer, map, timer } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { defer, map, timer } from 'rxjs';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import { ServerSentEvent } from '@kbn/sse-utils/src/events';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
   router.versioned
     .get({
       path: '/internal/sse_examples/clock',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out of authorization since it is an example sse route',
+        },
+      },
     })
     .addVersion(
       {

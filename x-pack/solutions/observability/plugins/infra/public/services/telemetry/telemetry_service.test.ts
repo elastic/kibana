@@ -9,6 +9,7 @@ import { infraTelemetryEvents } from './telemetry_events';
 
 import { TelemetryService } from './telemetry_service';
 import { InfraTelemetryEventTypes } from './types';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 
 describe('TelemetryService', () => {
   let service: TelemetryService;
@@ -65,6 +66,7 @@ describe('TelemetryService', () => {
       expect(telemetry).toHaveProperty('reportAnomalyDetectionDateFieldChange');
       expect(telemetry).toHaveProperty('reportAnomalyDetectionPartitionFieldChange');
       expect(telemetry).toHaveProperty('reportAnomalyDetectionFilterFieldChange');
+      expect(telemetry).toHaveProperty('reportMetricsExplorerCalloutViewInDiscoverClicked');
     });
   });
 
@@ -121,6 +123,7 @@ describe('TelemetryService', () => {
         interval: 'interval(now-1h)',
         with_query: false,
         limit: 100,
+        schema_selected: 'ecs',
       });
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -132,6 +135,7 @@ describe('TelemetryService', () => {
           interval: 'interval(now-1h)',
           with_query: false,
           limit: 100,
+          schema_selected: 'ecs',
         }
       );
     });
@@ -211,6 +215,7 @@ describe('TelemetryService', () => {
         componentName: 'infraAssetDetailsFlyout',
         assetType: 'host',
         tabId: 'overview',
+        schema_selected: 'ecs',
       });
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -220,6 +225,7 @@ describe('TelemetryService', () => {
           componentName: 'infraAssetDetailsFlyout',
           assetType: 'host',
           tabId: 'overview',
+          schema_selected: 'ecs',
         }
       );
     });
@@ -236,6 +242,7 @@ describe('TelemetryService', () => {
         assetType: 'host',
         tabId: 'overview',
         integrations: ['nginx'],
+        schema_selected: 'ecs',
       });
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -246,6 +253,7 @@ describe('TelemetryService', () => {
           assetType: 'host',
           tabId: 'overview',
           integrations: ['nginx'],
+          schema_selected: 'ecs',
         }
       );
     });
@@ -447,6 +455,53 @@ describe('TelemetryService', () => {
         {
           job_type: 'host',
           filter_field: 'filterField',
+        }
+      );
+    });
+  });
+
+  describe('#reportSchemaSelectorInteraction', () => {
+    it('should report schema selector interaction with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const interaction = 'select schema';
+      const schemaSelected = 'ecs';
+      const schemasAvailable = ['ecs', 'semconv'] as DataSchemaFormat[];
+
+      telemetry.reportSchemaSelectorInteraction({
+        interaction,
+        schema_selected: schemaSelected,
+        schemas_available: schemasAvailable,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Schema Selector Interaction',
+        {
+          interaction,
+          schema_selected: schemaSelected,
+          schemas_available: schemasAvailable,
+        }
+      );
+    });
+  });
+  describe('#reportMetricsExplorerCalloutViewInDiscoverClicked', () => {
+    it('should report metrics explorer callout view in discover clicked with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const view = 'metrics_explorer';
+
+      telemetry.reportMetricsExplorerCalloutViewInDiscoverClicked({
+        view,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Metrics Explorer Callout View In Discover Clicked',
+        {
+          view,
         }
       );
     });

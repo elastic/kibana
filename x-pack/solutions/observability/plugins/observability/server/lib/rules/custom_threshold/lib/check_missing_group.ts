@@ -11,7 +11,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
-import {
+import type {
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';

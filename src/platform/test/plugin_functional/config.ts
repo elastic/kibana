@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 

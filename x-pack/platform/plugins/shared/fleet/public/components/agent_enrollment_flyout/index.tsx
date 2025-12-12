@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useGeneratedHtmlId } from '@elastic/eui';
+
 import {
   useStartServices,
   useFleetStatus,
@@ -83,6 +85,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const {
     fleetServerHost,
+    fleetServerHostConfig,
     fleetProxy,
     downloadSource,
     isLoadingInitialRequest,
@@ -112,11 +115,18 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const { isK8s } = useIsK8sPolicy(selectedPolicy ?? undefined);
   const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
+    <EuiFlyout
+      data-test-subj="agentEnrollmentFlyout"
+      onClose={onClose}
+      maxWidth={MAX_FLYOUT_WIDTH}
+      aria-labelledby={flyoutTitleId}
+    >
+      <EuiFlyoutHeader hasBorder aria-labelledby={flyoutTitleId}>
         <EuiTitle size="m">
-          <h2 id="FleetAgentEnrollmentFlyoutTitle">
+          <h2 id={flyoutTitleId}>
             {isFleetServerPolicySelected ? (
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.flyoutFleetServerTitle"
@@ -179,8 +189,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
                 data-test-subj="standaloneTab"
                 isSelected={mode === 'standalone'}
                 onClick={() => setMode('standalone')}
-                // Standalone need read access to agent policies
-                disabled={!authz.fleet.readAgentPolicies}
+                // Standalone need read access to agent policies and cannot be used for Fleet Server policies
+                disabled={!authz.fleet.readAgentPolicies || isFleetServerPolicySelected}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
@@ -203,10 +213,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
         ) : (
           <Instructions
             fleetServerHost={fleetServerHost}
+            fleetServerHostConfig={fleetServerHostConfig}
             fleetProxy={fleetProxy}
             downloadSource={downloadSource}
             downloadSourceProxy={downloadSourceProxy}
             setSelectedPolicyId={setSelectedPolicyId}
+            selectedPolicyId={selectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
             agentPolicies={agentPolicies}

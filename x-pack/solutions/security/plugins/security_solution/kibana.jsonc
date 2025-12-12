@@ -19,6 +19,7 @@
       "alerting",
       "cases",
       "cloud",
+      "cloudDefend",
       "cloudSecurityPosture",
       "contentManagement",
       "dashboard",
@@ -30,7 +31,9 @@
       "eventLog",
       "features",
       "fieldFormats",
+      "inference",
       "inspector",
+      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -39,7 +42,6 @@
       "sessionView",
       "spaces",
       "taskManager",
-      "threatIntelligence",
       "timelines",
       "triggersActionsUi",
       "uiActions",
@@ -59,7 +61,9 @@
       "inference",
       "discoverShared",
       "productDocBase",
-      "telemetry"
+      "telemetry",
+      "elasticAssistantSharedState",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -74,9 +78,9 @@
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "onechat"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -87,7 +91,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "onechat"
     ],
     "extraPublicDirs": [
       "common"

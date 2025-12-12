@@ -13,7 +13,7 @@
         "signature": [
           "() => HTMLElement | undefined"
         ],
-        "path": "src/core/packages/rendering/browser/src/use_app_fixed_viewport.ts",
+        "path": "src/core/packages/chrome/layout/core-chrome-layout/app_fixed_viewport.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -21,7 +21,54 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser",
+        "id": "def-public.RenderingService",
+        "type": "Interface",
+        "tags": [],
+        "label": "RenderingService",
+        "description": [],
+        "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-rendering-browser",
+            "id": "def-public.RenderingService.addContext",
+            "type": "Function",
+            "tags": [],
+            "label": "addContext",
+            "description": [],
+            "signature": [
+              "(element: React.ReactNode) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-rendering-browser",
+                "id": "def-public.RenderingService.addContext.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -30,11 +77,13 @@
         "type": "string",
         "tags": [],
         "label": "APP_FIXED_VIEWPORT_ID",
-        "description": [],
+        "description": [
+          "\nThe ID of the fixed viewport container in the application.\nThis div is rendered by the `AppFixedViewport` component on the top of the application area and can be used to render fixed elements that should not scroll with the main content."
+        ],
         "signature": [
           "\"app-fixed-viewport\""
         ],
-        "path": "src/core/packages/rendering/browser/src/use_app_fixed_viewport.ts",
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

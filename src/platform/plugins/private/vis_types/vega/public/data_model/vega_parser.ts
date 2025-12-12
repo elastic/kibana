@@ -15,17 +15,18 @@ import hjson from 'hjson';
 import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, None, version as vegaVersion, scheme } from 'vega';
-import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
+import type { TopLevelSpec } from 'vega-lite';
+import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
 import { EsQueryParser } from './es_query_parser';
 import { Utils, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
-import { SearchAPI } from './search_api';
-import { TimeCache } from './time_cache';
+import type { SearchAPI } from './search_api';
+import type { TimeCache } from './time_cache';
 import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
-import {
+import type {
   Bool,
   Data,
   VegaSpec,
@@ -271,8 +272,11 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     }
     this.vlspec = this.spec;
-    const vegaLogger = logger(Warn); // note: eslint has a false positive here
-    vegaLogger.warn = this._onWarning.bind(this);
+    const vegaLogger = logger(Warn);
+    vegaLogger.warn = (...args) => {
+      this._onWarning(...args);
+      return vegaLogger;
+    };
     this.spec = compile(this.vlspec as TopLevelSpec, { logger: vegaLogger }).spec;
 
     // When using Vega-Lite (VL) with the type=map and user did not provid their own projection settings,
@@ -320,7 +324,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
   /**
    * Calculate container-direction CSS property for binding placement
-   * @private
+   * @internal
    */
   _parseControlPlacement() {
     this.containerDir = this._config?.controlsLocation
@@ -357,7 +361,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Parse {config: kibana: {...}} portion of the Vega spec (or root-level _hostConfig for backward compat)
    * @returns {object} kibana config
-   * @private
+   * @internal
    */
   _parseConfig(): KibanaConfig | {} {
     let result: KibanaConfig | null = null;
@@ -467,7 +471,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Parse map-specific configuration
    * @returns {{mapStyle: *|string, delayRepaint: boolean, latitude: number, longitude: number, zoom, minZoom, maxZoom, zoomControl: *|boolean, maxBounds: *}}
-   * @private
+   * @internal
    */
   _parseMapConfig() {
     const res: VegaConfig = {
@@ -552,7 +556,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Parse Vega schema element
    * @returns {object} isVegaLite, libVersion
-   * @private
+   * @internal
    */
   private parseSchema(spec: VegaSpec) {
     try {
@@ -593,7 +597,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   /**
    * Replace all instances of ES requests with raw values.
    * Also handle any other type of url: {type: xxx, ...}
-   * @private
+   * @internal
    */
   async _resolveDataUrls() {
     if (!this._urlParsers) {
@@ -652,7 +656,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * @param {*} obj current location in the object tree
    * @param {function({object})} onFind Call this function for all url objects
    * @param {string} [key] field name of the current object
-   * @private
+   * @internal
    */
 
   _findObjectDataUrls(obj: VegaSpec | Data, onFind: (data: Data) => void, key?: unknown) {
@@ -695,7 +699,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
   /**
    * Inject default colors into the spec.config
-   * @private
+   * @internal
    */
   _setDefaultColors() {
     // Add the default palette
@@ -749,7 +753,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * Given an object, and an array of fields, ensure that obj.fld1.fld2. ... .fldN is set to value if it doesn't exist.
    * @param {*} value
    * @param {string} fields
-   * @private
+   * @internal
    */
   _setDefaultValue(value: unknown, ...fields: string[]) {
     let o = this.spec;
@@ -771,12 +775,12 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
   /**
    * Add a warning to the warnings array
-   * @private
+   * @internal
    */
   _onWarning(...args: any[]) {
     if (!this.hideWarnings) {
-      this.warnings.push(Utils.formatWarningToStr(args));
-      return Utils.formatWarningToStr(args);
+      this.warnings.push(Utils.formatWarningToStr(...args));
+      return Utils.formatWarningToStr(...args);
     }
   }
 }

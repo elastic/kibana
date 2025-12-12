@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
+import type { Actions } from '../../../../shared/api_logic/create_api_logic';
+import type {
   FetchCustomPipelineApiLogicArgs,
   FetchCustomPipelineApiLogicResponse,
-  FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
+import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import { IndexNameLogic } from '../index_name_logic';
 
 interface IndexPipelinesConfigurationsActions {
@@ -77,7 +78,6 @@ export const IndexPipelinesConfigurationsLogic = kea<
     selectedPipelineId: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         selectPipeline: (_, { pipeline }) => pipeline,
       },
     ],

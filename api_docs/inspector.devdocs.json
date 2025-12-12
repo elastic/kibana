@@ -107,9 +107,7 @@
                 "section": "def-public.InspectorViewDescription",
                 "text": "InspectorViewDescription"
               },
-              ") => void; __LEGACY: { views: ",
-              "InspectorViewRegistry",
-              "; }; }"
+              ") => void; }"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
             "deprecated": false,
@@ -170,7 +168,7 @@
                 "section": "def-public.InspectorOptions",
                 "text": "InspectorOptions"
               },
-              " | undefined) => ",
+              " | undefined, parentApi?: unknown) => ",
               "OverlayRef",
               "; }"
             ],
@@ -250,7 +248,8 @@
             "text": "RequestAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
@@ -357,6 +356,101 @@
           },
           {
             "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.loadFromEntries",
+            "type": "Function",
+            "tags": [],
+            "label": "loadFromEntries",
+            "description": [],
+            "signature": [
+              "(requests: Map<string, ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              ">, responses: WeakMap<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              ", ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              },
+              ">) => void"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.loadFromEntries.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "requests",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Request",
+                    "text": "Request"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.loadFromEntries.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "responses",
+                "description": [],
+                "signature": [
+                  "WeakMap<",
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Request",
+                    "text": "Request"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestResponder",
+                    "text": "RequestResponder"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
             "id": "def-public.RequestAdapter.reset",
             "type": "Function",
             "tags": [],
@@ -420,6 +514,38 @@
                 "text": "Request"
               },
               "[]"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.getRequestEntries",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequestEntries",
+            "description": [],
+            "signature": [
+              "() => [",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              ", ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              },
+              "][]"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
@@ -861,6 +987,7 @@
         "type": "Interface",
         "tags": [
           "property",
+          "property",
           "property"
         ],
         "label": "InspectorOptions",
@@ -901,13 +1028,15 @@
           },
           {
             "parentPluginId": "inspector",
-            "id": "def-public.InspectorOptions.flyoutType",
+            "id": "def-public.InspectorOptions.flyoutProps",
             "type": "CompoundType",
             "tags": [],
-            "label": "flyoutType",
+            "label": "flyoutProps",
             "description": [],
             "signature": [
-              "\"push\" | \"overlay\" | undefined"
+              "(Partial<",
+              "OverlayFlyoutOpenOptions",
+              "> & { triggerId?: string | undefined; focusedPanelId?: string | undefined; }) | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
@@ -1456,22 +1585,6 @@
               "trackAdoption": false
             }
           ]
-        },
-        {
-          "parentPluginId": "inspector",
-          "id": "def-public.Setup.__LEGACY",
-          "type": "Object",
-          "tags": [],
-          "label": "__LEGACY",
-          "description": [],
-          "signature": [
-            "{ views: ",
-            "InspectorViewRegistry",
-            "; }"
-          ],
-          "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1570,7 +1683,7 @@
               "section": "def-public.InspectorOptions",
               "text": "InspectorOptions"
             },
-            " | undefined) => ",
+            " | undefined, parentApi?: unknown) => ",
             "OverlayRef"
           ],
           "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
@@ -1623,6 +1736,23 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
+            },
+            {
+              "parentPluginId": "inspector",
+              "id": "def-public.Start.open.$3",
+              "type": "Unknown",
+              "tags": [],
+              "label": "parentApi",
+              "description": [
+                "- Optional parent api for trackingOverlays."
+              ],
+              "signature": [
+                "unknown"
+              ],
+              "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
             }
           ],
           "returnComment": [
@@ -1664,7 +1794,8 @@
             "text": "RequestAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
@@ -1771,6 +1902,101 @@
           },
           {
             "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.loadFromEntries",
+            "type": "Function",
+            "tags": [],
+            "label": "loadFromEntries",
+            "description": [],
+            "signature": [
+              "(requests: Map<string, ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              ">, responses: WeakMap<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              ", ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              },
+              ">) => void"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.loadFromEntries.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "requests",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Request",
+                    "text": "Request"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.loadFromEntries.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "responses",
+                "description": [],
+                "signature": [
+                  "WeakMap<",
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Request",
+                    "text": "Request"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestResponder",
+                    "text": "RequestResponder"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
             "id": "def-common.RequestAdapter.reset",
             "type": "Function",
             "tags": [],
@@ -1834,6 +2060,38 @@
                 "text": "Request"
               },
               "[]"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.getRequestEntries",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequestEntries",
+            "description": [],
+            "signature": [
+              "() => [",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              ", ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              },
+              "][]"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,

@@ -9,12 +9,14 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { HttpSetup } from '@kbn/core/public';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import type { HttpSetup } from '@kbn/core/public';
 
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
-import { uiMetricService, apiService } from '../../../../services';
-import { Props } from '../..';
+import { uiMetricService, apiService, documentationService } from '../../../../services';
+import type { Props } from '../..';
 import { initHttpRequests } from '../http_requests.helpers';
 import { ProcessorsEditorWithDeps } from '../processors_editor';
 
@@ -108,6 +110,7 @@ export const setup = async (httpSetup: HttpSetup, props: Props): Promise<SetupRe
 export const setupEnvironment = () => {
   // Initialize mock services
   uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
+  documentationService.setup(docLinksServiceMock.createStartContract());
 
   return initHttpRequests();
 };
@@ -161,6 +164,7 @@ type TestSubject =
   | 'mediaTypeSelectorField'
   | 'networkDirectionField.input'
   | 'toggleCustomField'
+  | 'toggleRemoveField'
   | 'toggleCustomField.input'
   | 'ignoreEmptyField.input'
   | 'overrideField.input'

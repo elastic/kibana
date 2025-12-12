@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, AppMountParameters } from '@kbn/core/public';
-import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { PluginInitializerContext, CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 export type { MonitoringConfig } from '../server';
 export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ReactNode } from 'react';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ReactNode } from 'react';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
@@ -35,6 +34,8 @@ interface LegacyStartDependencies {
   element: HTMLElement;
   core: CoreStart;
   isCloud: boolean;
+  cloudBaseUrl?: string;
+  hasEnterpriseLicense: boolean;
   pluginInitializerContext: PluginInitializerContext;
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
   appMountParameters: AppMountParameters;

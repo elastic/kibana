@@ -9,8 +9,8 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import { pitOrUndefined } from '.';
 
 import * as t from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 
 describe('pitOrUndefined', () => {
   test('it will validate a correct pit', () => {

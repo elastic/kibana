@@ -7,29 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiLink,
+  EuiSkeletonRectangle,
+  EuiSkeletonTitle,
+  EuiCallOut,
+  type UseEuiTheme,
+  useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-import {
-  DataView,
-  DataViewSpec,
-  Form,
-  useForm,
-  useFormData,
-  useKibana,
-  UseField,
-} from '../shared_imports';
+import type { DataView, DataViewSpec } from '../shared_imports';
+import { Form, useForm, useFormData, useKibana, UseField } from '../shared_imports';
 
 import { FlyoutPanels } from './flyout_panels';
 
@@ -37,7 +38,7 @@ import { removeSpaces } from '../lib';
 
 import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
 
-import {
+import type {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
   IndexPatternConfig,
@@ -57,7 +58,7 @@ import {
   RollupDeprecatedWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
-import { DataViewEditorService } from '../data_view_editor_service';
+import type { DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**
@@ -73,6 +74,9 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
+  isDuplicating: boolean;
+  onDuplicate?: () => void;
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -90,13 +94,24 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
   allowAdHoc,
   showManagementLink,
+  getDataViewHelpText,
   dataViewEditorService,
+  onDuplicate,
+  isDuplicating,
 }: Props) => {
+  const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
+  const isMobile = useIsWithinBreakpoints(['s', 'xs']);
+
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
+  const isManaged = !!editData?.managed;
+  // onDuplicate is only provided when editing an existing data view
+  // if onDuplicate is undefined we are duplicating a new data view
+  const isEditingExisting = editData && !isDuplicating;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -109,8 +124,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       ...(editData
         ? {
             title: editData.getIndexPattern(),
-            id: editData.id,
-            name: editData.name,
+            id: isDuplicating ? undefined : editData.id,
+            name: isDuplicating ? undefined : editData.name,
             allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
@@ -146,7 +161,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && editData.getIndexPattern() !== formData.title) {
+      if (isEditingExisting && editData.getIndexPattern() !== formData.title) {
         await editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
@@ -179,6 +194,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const rollupCaps = useObservable(dataViewEditorService.rollupCaps$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
+  const namesNotAllowed = useMemo(() => {
+    // When duplicating a data view, add the existing name
+    // to the not allowed names list
+    if (isDuplicating && editData) {
+      return [editData.name, ...(existingDataViewNames || [])];
+    }
+    return existingDataViewNames || [];
+  }, [existingDataViewNames, isDuplicating, editData]);
+
   useDebounce(
     () => {
       dataViewEditorService.setIndexPattern(title);
@@ -196,6 +220,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }, [dataViewEditorService, type]);
 
   const getRollupIndices = (rollupCapsRes: RollupIndicesCapsResponse) => Object.keys(rollupCapsRes);
+  const titleHelpText = useMemo(
+    () => editData && getDataViewHelpText && getDataViewHelpText(editData),
+    [editData, getDataViewHelpText]
+  );
 
   const onTypeChange = useCallback(
     (newType: INDEX_PATTERN_TYPE) => {
@@ -210,7 +238,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   if (isLoadingSources || !existingDataViewNames) {
-    return <EuiLoadingSpinner size="xl" />;
+    return (
+      <EuiFlexGroup css={styles.loadingWrapper}>
+        <EuiFlexItem>
+          <EuiSkeletonTitle size="l" css={styles.skeletonTitle} />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <React.Fragment key={index}>
+              <EuiSpacer size="xl" />
+              <EuiSkeletonRectangle width="100%" height="48px" />
+            </React.Fragment>
+          ))}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSkeletonRectangle width="100%" height="160px" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const showIndexPatternTypeSelect = () =>
@@ -240,101 +283,123 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
+  const FlyoutEditorFooter = () => (
+    <Footer
+      onCancel={onCancel}
+      onSubmit={async (adhoc?: boolean) => {
+        const formData = form.getFormData();
+        if (!formData.name) {
+          form.updateFieldValues({ name: formData.title });
+          await form.getFields().name.validate();
+        }
+        // Ensures timestamp field is validated against current set of options
+        form.validateFields(['timestampField']);
+        form.setFieldValue('isAdHoc', adhoc || false);
+        form.submit();
+      }}
+      submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
+      submittingType={
+        form.isSubmitting
+          ? form.getFormData().isAdHoc
+            ? SubmittingType.savingAsAdHoc
+            : SubmittingType.persisting
+          : undefined
+      }
+      hasEditData={!!editData}
+      isPersisted={Boolean(editData && editData.isPersisted())}
+      allowAdHoc={allowAdHoc}
+      canSave={canSave}
+      isManaged={isManaged}
+      onDuplicate={onDuplicate}
+      isDuplicating={isDuplicating}
+    />
+  );
+
   return (
-    <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-      <FlyoutPanels.Item
-        className="fieldEditor__mainFlyoutPanel"
-        data-test-subj="indexPatternEditorFlyout"
-        border="right"
-      >
-        <EuiTitle data-test-subj="flyoutTitle">
-          <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
-        </EuiTitle>
-        {showManagementLink && editData && editData.id && (
-          <EuiLink
-            href={application.getUrlForApp('management', {
-              path: `/kibana/dataViews/dataView/${editData.id}`,
-            })}
+    <FlyoutPanels.Group flyoutClassName="indexPatternEditorFlyout" maxWidth={1180}>
+      <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
+        <FlyoutPanels.Content>
+          <EuiTitle data-test-subj="flyoutTitle">
+            <h2 id="dataViewEditorFlyoutTitle">
+              {isEditingExisting ? editorTitleEditMode : editorTitle}
+            </h2>
+          </EuiTitle>
+          {showManagementLink && isEditingExisting && editData && editData.id && (
+            <EuiLink
+              href={application.getUrlForApp('management', {
+                path: `/kibana/dataViews/dataView/${editData.id}`,
+              })}
+            >
+              {i18n.translate('indexPatternEditor.goToManagementPage', {
+                defaultMessage: 'Manage settings and view field details',
+              })}
+            </EuiLink>
+          )}
+          {isManaged && (
+            <EuiCallOut
+              title={i18n.translate('indexPatternEditor.managedDataViewCalloutMessage', {
+                defaultMessage:
+                  "You can't edit managed data views. Instead, you can duplicate the data view and make changes to your newly created copy.",
+              })}
+              color="primary"
+              iconType="info"
+              size="s"
+              css={{ marginTop: euiTheme.base }}
+            />
+          )}
+          <Form
+            form={form}
+            css={styles.patternEditorForm}
+            error={form.getErrors()}
+            isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
+            data-validation-error={form.getErrors().length ? '1' : '0'}
+            data-test-subj="indexPatternEditorForm"
           >
-            {i18n.translate('indexPatternEditor.goToManagementPage', {
-              defaultMessage: 'Manage settings and view field details',
-            })}
-          </EuiLink>
-        )}
-        <Form
-          form={form}
-          className="indexPatternEditor__form"
-          error={form.getErrors()}
-          isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
-          data-validation-error={form.getErrors().length ? '1' : '0'}
-          data-test-subj="indexPatternEditorForm"
-        >
-          <UseField path="isAdHoc" />
-          {indexPatternTypeSelect}
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <NameField namesNotAllowed={existingDataViewNames || []} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <TitleField
-                isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                matchedIndices$={dataViewEditorService.matchedIndices$}
-                rollupIndicesCapabilities={rollupIndicesCapabilities}
-                indexPatternValidationProvider={
-                  dataViewEditorService.indexPatternValidationProvider
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <TimestampField
-                options$={dataViewEditorService.timestampFieldOptions$}
-                isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
-                matchedIndices$={dataViewEditorService.matchedIndices$}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <AdvancedParamsContent
-            disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-            disableId={!!editData}
-            onAllowHiddenChange={() => {
-              form.getFields().title.validate();
-            }}
-            defaultVisible={editData?.getAllowHidden()}
-          />
-        </Form>
-        <Footer
-          onCancel={onCancel}
-          onSubmit={async (adhoc?: boolean) => {
-            const formData = form.getFormData();
-            if (!formData.name) {
-              form.updateFieldValues({ name: formData.title });
-              await form.getFields().name.validate();
-            }
-            // Ensures timestamp field is validated against current set of options
-            form.validateFields(['timestampField']);
-            form.setFieldValue('isAdHoc', adhoc || false);
-            form.submit();
-          }}
-          submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
-          submittingType={
-            form.isSubmitting
-              ? form.getFormData().isAdHoc
-                ? SubmittingType.savingAsAdHoc
-                : SubmittingType.persisting
-              : undefined
-          }
-          isEdit={!!editData}
-          isPersisted={Boolean(editData && editData.isPersisted())}
-          allowAdHoc={allowAdHoc}
-          canSave={canSave}
-        />
+            <UseField path="isAdHoc" />
+            {indexPatternTypeSelect}
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <NameField namesNotAllowed={namesNotAllowed} disabled={isManaged} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <TitleField
+                  isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
+                  matchedIndices$={dataViewEditorService.matchedIndices$}
+                  rollupIndicesCapabilities={rollupIndicesCapabilities}
+                  indexPatternValidationProvider={
+                    dataViewEditorService.indexPatternValidationProvider
+                  }
+                  titleHelpText={titleHelpText}
+                  disabled={isManaged}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <TimestampField
+                  options$={dataViewEditorService.timestampFieldOptions$}
+                  isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
+                  matchedIndices$={dataViewEditorService.matchedIndices$}
+                  disabled={isManaged}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <AdvancedParamsContent
+              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP || isManaged}
+              disableId={isEditingExisting || isManaged}
+              onAllowHiddenChange={() => {
+                form.getFields().title.validate();
+              }}
+              defaultVisible={editData?.getAllowHidden()}
+            />
+          </Form>
+        </FlyoutPanels.Content>
+        {!isMobile && <FlyoutEditorFooter />}
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>
         {isLoadingSources ? (
@@ -348,8 +413,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
           />
         )}
       </FlyoutPanels.Item>
+      {isMobile && <FlyoutEditorFooter />}
     </FlyoutPanels.Group>
   );
+};
+
+const componentStyles = {
+  patternEditorForm: css({
+    flexGrow: 1,
+  }),
+  loadingWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: euiTheme.size.l,
+    }),
+  skeletonTitle: css({
+    width: '25vw',
+  }),
 };
 
 export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyoutContentComponent);

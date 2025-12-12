@@ -11,7 +11,8 @@ import type { RouteConfig } from '@kbn/core-http-server';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
-import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
+import type { PrebootDeps, SetupDeps } from './http_resources_service';
+import { HttpResourcesService } from './http_resources_service';
 import type { HttpResources } from '@kbn/core-http-resources-server';
 import {
   createCoreRequestHandlerContextMock,
@@ -48,7 +49,15 @@ describe('HttpResources service', () => {
       getDeps: () => PrebootDeps | SetupDeps
     ) {
       describe(`${name} register`, () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
+        const routeConfig: RouteConfig<any, any, any, 'get'> = {
+          path: '/',
+          validate: false,
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
+        };
         let register: HttpResources['register'];
 
         beforeEach(async () => {

@@ -25,6 +25,7 @@ import {
   EuiFormFieldset,
   EuiCheckbox,
   htmlIdGenerator,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -64,6 +65,8 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
     { defaultMessage: 'Create APM agent key' }
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const createAgentKey = async () => {
     setFormTouched(true);
     if (isInputInvalid) {
@@ -97,10 +100,10 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
   };
 
   return (
-    <EuiFlyout onClose={onCancel} size="s">
+    <EuiFlyout onClose={onCancel} size="s" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>{createAgentKeyTitle}</h2>
+          <h2 id={modalTitleId}>{createAgentKeyTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 

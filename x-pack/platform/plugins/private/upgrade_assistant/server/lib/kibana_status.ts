@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DeprecationsClient, DomainDeprecationDetails } from '@kbn/core/server';
+import type { DeprecationsClient, DomainDeprecationDetails } from '@kbn/core/server';
 
 export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsClient) => {
   const kibanaDeprecations: DomainDeprecationDetails[] =
@@ -15,7 +15,10 @@ export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsCli
     (d) => d.deprecationType !== 'api' && d.level === 'critical'
   ).length;
 
+  const apiDeprecations = kibanaDeprecations.filter((d) => d.deprecationType === 'api');
+
   return {
     totalCriticalDeprecations,
+    apiDeprecations,
   };
 };

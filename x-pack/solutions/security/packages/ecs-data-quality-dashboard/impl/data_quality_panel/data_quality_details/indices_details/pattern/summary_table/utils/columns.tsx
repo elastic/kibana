@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiText,
-  EuiProgress,
-  EuiToolTip,
-  CENTER_ALIGNMENT,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText, EuiProgress, EuiToolTip, CENTER_ALIGNMENT, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
 import { css } from '@emotion/react';
 
 import { getDocsCountPercent } from '../../../../../utils/stats';
-import { IndexSummaryTableItem } from '../../../../../types';
+import type { IndexSummaryTableItem } from '../../../../../types';
 import { EMPTY_STAT } from '../../../../../constants';
 import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translations';
@@ -36,7 +30,6 @@ import { IndexResultBadge } from '../../index_result_badge';
 import { Stat } from '../../../../../stat';
 import { getIndexResultToolTip } from '../../utils/get_index_result_tooltip';
 import { CHECK_NOW } from '../../translations';
-import { HISTORICAL_RESULTS_TOUR_SELECTOR_KEY } from '../../constants';
 
 const styles = {
   progressContainer: css({
@@ -84,7 +77,9 @@ export const getSummaryTableSizeInBytesColumn = ({
           render: (_, { sizeInBytes }) =>
             Number.isInteger(sizeInBytes) ? (
               <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
-                <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
+                <span data-test-subj="sizeInBytes" tabIndex={0}>
+                  {formatBytes(sizeInBytes)}
+                </span>
               </EuiToolTip>
             ) : null,
           sortable: true,
@@ -106,7 +101,6 @@ export const getSummaryTableColumns = ({
   pattern,
   onCheckNowAction,
   onViewHistoryAction,
-  firstIndexName,
   dangerColor,
 }: {
   formatBytes: (value: number | undefined) => string;
@@ -115,7 +109,6 @@ export const getSummaryTableColumns = ({
   pattern: string;
   onCheckNowAction: (indexName: string) => void;
   onViewHistoryAction: (indexName: string) => void;
-  firstIndexName?: string;
   dangerColor: string;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
@@ -127,7 +120,7 @@ export const getSummaryTableColumns = ({
         name: CHECK_NOW,
         render: (item) => {
           return (
-            <EuiToolTip content={CHECK_NOW}>
+            <EuiToolTip content={CHECK_NOW} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="refresh"
@@ -142,18 +135,14 @@ export const getSummaryTableColumns = ({
       {
         name: i18n.VIEW_HISTORY,
         render: (item) => {
-          const isFirstIndexName = firstIndexName === item.indexName;
           return (
-            <EuiToolTip content={i18n.VIEW_HISTORY}>
+            <EuiToolTip content={i18n.VIEW_HISTORY} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="clockCounter"
                 aria-label={i18n.VIEW_HISTORY}
                 data-test-subj={`viewHistoryAction-${item.indexName}`}
                 onClick={() => onViewHistoryAction(item.indexName)}
-                {...(isFirstIndexName && {
-                  [HISTORICAL_RESULTS_TOUR_SELECTOR_KEY]: pattern,
-                })}
               />
             </EuiToolTip>
           );
@@ -169,7 +158,9 @@ export const getSummaryTableColumns = ({
         <IndexResultBadge incompatible={incompatible} data-test-subj="resultBadge" />
       ) : (
         <EuiToolTip content={getIndexResultToolTip(incompatible)}>
-          <span data-test-subj="incompatiblePlaceholder">{EMPTY_STAT}</span>
+          <span data-test-subj="incompatiblePlaceholder" tabIndex={0}>
+            {EMPTY_STAT}
+          </span>
         </EuiToolTip>
       ),
     sortable: true,
@@ -181,7 +172,7 @@ export const getSummaryTableColumns = ({
     name: INDEX,
     render: (_, { indexName }) => (
       <EuiToolTip content={i18n.INDEX_TOOL_TIP(pattern)}>
-        <span aria-roledescription={i18n.INDEX_NAME_LABEL} data-test-subj="indexName">
+        <span aria-roledescription={i18n.INDEX_NAME_LABEL} data-test-subj="indexName" tabIndex={0}>
           {indexName}
         </span>
       </EuiToolTip>
@@ -217,6 +208,7 @@ export const getSummaryTableColumns = ({
           size="xs"
           data-test-subj="incompatibleStat"
           color={getIncompatibleStatColor(incompatible, dangerColor)}
+          tabIndex={0}
         >
           {incompatible ?? EMPTY_STAT}
         </EuiText>

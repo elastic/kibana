@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { type Owner } from '../../../common/constants/types';
+import { OWNERS } from '../../../common/constants';
+
 export const getMarkdownEditorStorageKey = ({
   caseId,
   commentId,
@@ -20,3 +23,6 @@ export const getMarkdownEditorStorageKey = ({
 
   return `cases.${appIdKey}.${caseIdKey}.${commentIdKey}.markdownEditor`;
 };
+
+const validOwners = new Set<Owner>(OWNERS);
+export const isOwner = (o: string): o is Owner => validOwners.has(o as Owner);

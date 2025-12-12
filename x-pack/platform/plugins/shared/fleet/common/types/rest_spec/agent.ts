@@ -21,6 +21,7 @@ import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
   query: ListWithKuery & {
+    showAgentless?: boolean;
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
@@ -181,7 +182,55 @@ export interface DeleteAgentRequest {
     agentId: string;
   };
 }
-
+export interface MigrateSingleAgentRequest {
+  body: {
+    id: string;
+    enrollment_token: string;
+    uri: string;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: string;
+      tags?: string;
+      replace_token?: string;
+    };
+  };
+}
+export interface MigrateSingleAgentResponse {
+  actionId: string;
+}
+export interface BulkMigrateAgentsRequest {
+  body: {
+    agents: string[] | string;
+    enrollment_token: string;
+    uri: string;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: string;
+      tags?: string;
+    };
+  };
+}
+export interface BulkMigrateAgentsResponse {
+  actionId: string;
+}
 export interface UpdateAgentRequest {
   params: {
     agentId: string;
@@ -267,4 +316,32 @@ export interface PostRetrieveAgentsByActionsRequest {
 
 export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
+}
+
+export interface ChangeAgentPrivilegeLevelRequest {
+  agentId: string;
+  body: {
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+  } | null;
+}
+
+export interface ChangeAgentPrivilegeLevelResponse {
+  actionId: string;
+}
+
+export interface AgentPrivilegeLevelChangeUserInfo {
+  username?: string;
+  groupname?: string;
+  password?: string;
+}
+
+export interface BulkChangeAgentPrivilegeLevelRequest {
+  body: {
+    agents: string[] | string;
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+  };
+}
+
+export interface BulkChangeAgentPrivilegeLevelResponse {
+  actionId: string;
 }

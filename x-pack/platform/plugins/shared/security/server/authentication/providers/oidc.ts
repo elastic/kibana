@@ -18,7 +18,7 @@ import {
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -304,12 +304,20 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      const { state, nonce, redirect } =
+      const { state, nonce, realm, redirect } =
         (await this.options.client.asInternalUser.transport.request({
           method: 'POST',
           path: '/_security/oidc/prepare',
           body: params,
         })) as any;
+
+      if (realm !== this.realm) {
+        this.logger.debug(
+          `Provider is configured with the "${this.realm}" realm and isn't compatible with the "${realm}" ` +
+            `realm used by Elasticsearch to prepare the authentication request. Skipping provider…`
+        );
+        return AuthenticationResult.notHandled();
+      }
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
       return AuthenticationResult.redirectTo(
@@ -374,27 +382,24 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
+      // When user has neither valid access nor refresh token, the only way to resolve this issue is to redirect
+      // user to OpenID Connect provider, re-initiate the authentication flow and get a new access/refresh token
+      // pair as result. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error
+      // message. There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it
+      // seems logical to do the same on Kibana side and `401` would force user to logout and do full SLO if it's
+      // supported.
+      if (err instanceof InvalidGrantError) {
+        if (canStartNewSession(request)) {
+          this.logger.warn(
+            'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
+          );
+          return this.initiateAuthenticationHandshake(request);
+        }
+
+        return AuthenticationResult.failed(Boom.badRequest(err.message));
+      }
       this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
-    }
-
-    // When user has neither valid access nor refresh token, the only way to resolve this issue is to redirect
-    // user to OpenID Connect provider, re-initiate the authentication flow and get a new access/refresh token
-    // pair as result. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error
-    // message. There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it
-    // seems logical to do the same on Kibana side and `401` would force user to logout and do full SLO if it's
-    // supported.
-    if (refreshTokenResult === null) {
-      if (canStartNewSession(request)) {
-        this.logger.warn(
-          'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
-        );
-        return this.initiateAuthenticationHandshake(request);
-      }
-
-      return AuthenticationResult.failed(
-        Boom.badRequest('Both access and refresh tokens are expired.')
-      );
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');

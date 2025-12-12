@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useCallback } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
-import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
+import type { SearchSourceExpressionProps } from './search_source_expression';
+import { SearchSourceExpression } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isEsqlQueryRule, isSearchSourceRule } from '../util';
@@ -38,14 +40,13 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
   const isEsqlQuery = isEsqlQueryRule(ruleParams);
-  // metadata provided only when open alert from Discover page
+  // metadata provided only when the user opens the alert from the Discover page or a dashboard
   const isManagementPage = props.metadata?.isManagementPage ?? true;
 
   const formTypeSelected = useCallback(
     (searchType: SearchType | null) => {
       if (!searchType) {
-        // @ts-expect-error Reset rule params regardless of their type
-        setRuleProperty('params', {});
+        setRuleProperty('params', {} as EsQueryRuleParams);
         return;
       }
       setRuleParams('searchType', searchType);
@@ -77,6 +78,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   const expressionError = !!errorParam && (
     <>
       <EuiCallOut
+        announceOnMount
         color="danger"
         size="s"
         data-test-subj="esQueryAlertExpressionError"
@@ -91,6 +93,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   );
 
   return (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {expressionError}
 

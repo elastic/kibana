@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { snakeCase } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { SplitAccordion } from '../../../../../../common/components/split_accordion';
@@ -29,7 +30,7 @@ export function FieldUpgrade(): JSX.Element {
           />
         }
         initialIsOpen={hasConflict}
-        data-test-subj="ruleUpgradePerFieldDiff"
+        data-test-subj={`${snakeCase(fieldName)}-upgrade`}
       >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart">
           <EuiFlexItem grow={1}>

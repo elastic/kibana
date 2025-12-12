@@ -6,24 +6,29 @@
  */
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import {
+import type {
   ActionConnector,
   ActionType,
   GenericValidationResult,
-  ActionConnectorMode,
   ActionVariables,
   NotifyWhenSelectOptions,
 } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
-import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
+import userEvent from '@testing-library/user-event';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -48,9 +53,36 @@ const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   },
 ];
 
+const mockedRuleTypeIndex = new Map(
+  Object.entries({
+    test_rule_type: {
+      enabledInLicense: true,
+      id: 'test_rule_type',
+      name: 'test rule',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTING_FEATURE_ID,
+      minimumLicenseRequired: 'basic',
+      authorizedConsumers: {
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
+      },
+      ruleTaskTimeout: '1m',
+    },
+  })
+);
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
+
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
+  useGetRuleTypesPermissions: jest.fn(),
+}));
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
   const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
@@ -70,8 +102,8 @@ jest.mock('../../../common/get_experimental_features', () => ({
   },
 }));
 
-jest.mock('../../hooks/use_rule_aad_template_fields', () => ({
-  useRuleTypeAadTemplateFields: () => ({
+jest.mock('../../hooks/use_rule_alert_fields', () => ({
+  useRuleTypeAlertFields: () => ({
     isLoading: false,
     fields: [],
   }),
@@ -80,6 +112,18 @@ jest.mock('../../hooks/use_rule_aad_template_fields', () => ({
 describe('action_type_form', () => {
   afterEach(() => {
     jest.clearAllMocks();
+
+    // some tests rely on fake timers, so we need to clear them
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
+  useGetRuleTypesPermissions.mockReturnValue({
+    ruleTypesState: {
+      isLoading: false,
+      isInitialLoading: false,
+      data: mockedRuleTypeIndex,
+    },
   });
 
   const mockedActionParamsFields = React.lazy(async () => ({
@@ -434,10 +478,8 @@ describe('action_type_form', () => {
     expect(summaryOrPerRuleSelect).toBeTruthy();
 
     const button = wrapper.getByText('For each alert');
-    button.click();
-    await act(async () => {
-      wrapper.getByText('Summary of alerts').click();
-    });
+    await userEvent.click(button);
+    await userEvent.click(wrapper.getByText('Summary of alerts'));
 
     expect(mockTransformActionVariables.mock.calls).toEqual([
       [
@@ -564,19 +606,17 @@ describe('action_type_form', () => {
         </IntlProvider>
       );
 
-      wrapper.getByTestId('notifyWhenSelect').click();
-      await act(async () => {
-        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
-        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
-        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+      await userEvent.click(wrapper.getByTestId('notifyWhenSelect'));
+      expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
+      expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
+      expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
 
-        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
-        expect(wrapper.getAllByText('Custom frequency')).toBeTruthy();
+      expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
+      expect(wrapper.getAllByText('Custom frequency')).toBeTruthy();
 
-        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
-        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
-        expect(wrapper.getByTestId('onThrottleInterval')).toBeTruthy();
-      });
+      expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+      expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
+      expect(wrapper.getByTestId('onThrottleInterval')).toBeTruthy();
     });
 
     it('should have only "Per rule run" notify when option for "For each alert" actions', async () => {
@@ -618,19 +658,17 @@ describe('action_type_form', () => {
         </IntlProvider>
       );
 
-      wrapper.getByTestId('notifyWhenSelect').click();
-      await act(async () => {
-        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
-        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
-        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+      await userEvent.click(wrapper.getByTestId('notifyWhenSelect'));
+      expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
+      expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
+      expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
 
-        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
-        expect(wrapper.queryByText('Custom frequency')).not.toBeTruthy();
+      expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
+      expect(wrapper.queryByText('Custom frequency')).not.toBeTruthy();
 
-        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
-        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
-        expect(wrapper.queryByTestId('onThrottleInterval')).not.toBeTruthy();
-      });
+      expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+      expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
+      expect(wrapper.queryByTestId('onThrottleInterval')).not.toBeTruthy();
     });
   });
 });
@@ -676,18 +714,14 @@ function getActionTypeForm({
   producerId?: string;
   featureId?: string;
 }) {
-  const actionConnectorDefault = {
+  const actionConnectorDefault = createMockActionConnector({
     actionTypeId: '.pagerduty',
     config: {
       apiUrl: 'http:\\test',
     },
     id: 'test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
     name: 'test name',
-    secrets: {},
-  };
+  });
 
   const actionItemDefault = {
     id: '123',
@@ -700,32 +734,23 @@ function getActionTypeForm({
   };
 
   const connectorsDefault = [
-    {
+    createMockActionConnector({
       actionTypeId: '.pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },
       id: 'test',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
       name: 'test name',
-      secrets: {},
-    },
-    {
+    }),
+    createMockActionConnector({
       id: '123',
       name: 'Server log',
       actionTypeId: '.server-log',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
-      config: {},
-      secrets: {},
-    },
+    }),
   ];
 
   const actionTypeIndexDefault: Record<string, ActionType> = {
-    '.pagerduty': {
+    '.pagerduty': createMockConnectorType({
       id: '.pagerduty',
       enabled: true,
       name: 'Test',
@@ -734,8 +759,9 @@ function getActionTypeForm({
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
-    },
-    '.server-log': {
+      isDeprecated: false,
+    }),
+    '.server-log': createMockConnectorType({
       id: '.server-log',
       enabled: true,
       name: 'Test SL',
@@ -744,31 +770,34 @@ function getActionTypeForm({
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
-    },
+      isDeprecated: false,
+    }),
   };
 
   return (
-    <ActionTypeForm
-      actionConnector={actionConnector ?? actionConnectorDefault}
-      actionItem={actionItem ?? actionItemDefault}
-      connectors={connectors ?? connectorsDefault}
-      onAddConnector={onAddConnector ?? jest.fn()}
-      onDeleteAction={onDeleteAction ?? jest.fn()}
-      onConnectorSelected={onConnectorSelected ?? jest.fn()}
-      defaultActionGroupId={defaultActionGroupId ?? 'default'}
-      setActionParamsProperty={setActionParamsProperty ?? jest.fn()}
-      setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
-      setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
-      index={index ?? 1}
-      actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
-      actionTypeRegistry={actionTypeRegistry}
-      hasAlertsMappings={hasAlertsMappings}
-      messageVariables={messageVariables}
-      summaryMessageVariables={summaryMessageVariables}
-      notifyWhenSelectOptions={notifyWhenSelectOptions}
-      producerId={producerId}
-      featureId={featureId}
-      ruleTypeId={ruleTypeId}
-    />
+    <QueryClientProvider client={new QueryClient()}>
+      <ActionTypeForm
+        actionConnector={actionConnector ?? actionConnectorDefault}
+        actionItem={actionItem ?? actionItemDefault}
+        connectors={connectors ?? connectorsDefault}
+        onAddConnector={onAddConnector ?? jest.fn()}
+        onDeleteAction={onDeleteAction ?? jest.fn()}
+        onConnectorSelected={onConnectorSelected ?? jest.fn()}
+        defaultActionGroupId={defaultActionGroupId ?? 'default'}
+        setActionParamsProperty={setActionParamsProperty ?? jest.fn()}
+        setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
+        setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
+        index={index ?? 1}
+        actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
+        actionTypeRegistry={actionTypeRegistry}
+        hasAlertsMappings={hasAlertsMappings}
+        messageVariables={messageVariables}
+        summaryMessageVariables={summaryMessageVariables}
+        notifyWhenSelectOptions={notifyWhenSelectOptions}
+        producerId={producerId}
+        featureId={featureId}
+        ruleTypeId={ruleTypeId}
+      />
+    </QueryClientProvider>
   );
 }

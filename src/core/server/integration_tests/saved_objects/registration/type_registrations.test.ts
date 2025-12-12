@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -16,6 +16,7 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'ad_hoc_run_params',
   'alert',
+  'alerting_rule_template',
   'api_key_pending_invalidation',
   'apm-custom-dashboards',
   'apm-indices',
@@ -33,11 +34,13 @@ const previouslyRegisteredTypes = [
   'canvas-workpad',
   'canvas-workpad-template',
   'cloud',
+  'cloud-connect-api-key',
   'cloud-security-posture-settings',
   'cases',
   'cases-comments',
   'cases-configure',
   'cases-connector-mappings',
+  'cases-incrementing-id', // Added in 8.19/9.1 to allow for incremental numerical ids in cases
   'cases-rules',
   'cases-sub-case',
   'cases-user-actions',
@@ -55,7 +58,9 @@ const previouslyRegisteredTypes = [
   'endpoint:user-artifact-manifest',
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-analytics-monitoring-entity-source',
   'entity-definition',
+  'privmon-api-key',
   'entity-discovery-api-key',
   'epm-packages',
   'epm-packages-assets',
@@ -80,11 +85,14 @@ const previouslyRegisteredTypes = [
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
   'fleet-space-settings',
+  'fleet-cloud-connector',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
   'index-pattern',
+  'intercept_interaction_record',
+  'intercept_trigger_record',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',
@@ -94,6 +102,7 @@ const previouslyRegisteredTypes = [
   'ingest-package-policies',
   'ingest_manager_settings',
   'inventory-view',
+  'investigation',
   'kql-telemetry',
   'legacy-url-alias',
   'lens',
@@ -116,16 +125,20 @@ const previouslyRegisteredTypes = [
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
   'policy-settings-protection-updates-note',
+  'privilege-monitoring-status',
   'product-doc-install-status',
   'query',
   'rules-settings',
   'sample-data-telemetry',
+  'scheduled_report',
   'search',
   'search-session',
   'search-telemetry',
+  'search_playground',
   'security-ai-prompt',
   'security-rule',
   'security-solution-signals-migration',
+  'security:reference-data',
   'risk-engine-configuration',
   'entity-engine-status',
   'server',
@@ -140,6 +153,7 @@ const previouslyRegisteredTypes = [
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
+  'synthetics-monitor-multi-space',
   'synthetics-param',
   'synthetics-privates-locations',
   'synthetics-private-location',
@@ -162,6 +176,7 @@ const previouslyRegisteredTypes = [
   'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
+  'gap_auto_fill_scheduler',
 ].sort();
 
 describe('SO type registrations', () => {

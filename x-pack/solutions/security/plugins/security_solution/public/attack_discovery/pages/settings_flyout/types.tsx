@@ -7,16 +7,10 @@
 
 import type { Filter, Query } from '@kbn/es-query';
 
-export interface FilterSettings {
-  end: string | undefined;
-  filters: Filter[] | undefined;
-  localStorageAttackDiscoveryMaxAlerts: string | undefined;
-  onClose: () => void;
-  query: Query | undefined;
-  setEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setFilters: React.Dispatch<React.SetStateAction<Filter[] | undefined>>;
-  setLocalStorageAttackDiscoveryMaxAlerts: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setQuery: React.Dispatch<React.SetStateAction<Query | undefined>>;
-  setStart: React.Dispatch<React.SetStateAction<string | undefined>>;
-  start: string | undefined;
+export interface AlertsSelectionSettings {
+  end: string;
+  filters: Filter[];
+  query: Query;
+  size: number;
+  start: string;
 }

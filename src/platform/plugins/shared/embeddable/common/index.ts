@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { EmbeddableTransforms } from './types';
+
 export type {
-  CommonEmbeddableStartContract,
+  EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-} from './types';
+} from '../server';

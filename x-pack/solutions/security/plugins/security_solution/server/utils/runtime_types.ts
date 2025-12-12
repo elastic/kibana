@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 export type GenericIntersectionC =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

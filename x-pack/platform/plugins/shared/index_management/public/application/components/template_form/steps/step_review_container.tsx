@@ -7,16 +7,18 @@
 
 import React from 'react';
 
-import { TemplateDeserialized } from '../../../../../common';
+import type { DataStreamOptions } from '../../../../../common/types/data_streams';
+import type { TemplateDeserialized } from '../../../../../common';
 import { Forms } from '../../../../shared_imports';
-import { WizardContent, WizardSection } from '../template_form';
+import type { WizardContent, WizardSection } from '../template_form';
 import { StepReview } from './step_review';
 
 interface Props {
   getTemplateData: (wizardContent: WizardContent) => TemplateDeserialized;
+  dataStreamOptions?: DataStreamOptions;
 }
 
-export const StepReviewContainer = React.memo(({ getTemplateData }: Props) => {
+export const StepReviewContainer = React.memo(({ getTemplateData, dataStreamOptions }: Props) => {
   const { navigateToStep } = Forms.useFormWizardContext<WizardSection>();
   const { getData } = Forms.useMultiContentContext<WizardContent>();
 
@@ -24,5 +26,11 @@ export const StepReviewContainer = React.memo(({ getTemplateData }: Props) => {
   // Build the final template object, providing the wizard content data
   const template = getTemplateData(wizardContent);
 
-  return <StepReview template={template} navigateToStep={navigateToStep} />;
+  return (
+    <StepReview
+      template={template}
+      navigateToStep={navigateToStep}
+      dataStreamOptions={dataStreamOptions}
+    />
+  );
 });

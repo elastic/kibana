@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Headers, RouteRegistrar } from '@kbn/core/server';
+import type { Headers, RouteRegistrar, RouteSecurity } from '@kbn/core/server';
 import type { CasesRequestHandlerContext } from '../../types';
 import type { RegisterRoutesDeps } from './types';
 import {
@@ -85,7 +85,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
           query: params?.query ?? escapeHatch,
           body: params?.body ?? schema.nullable(escapeHatch),
         },
-        security,
+        security: security as RouteSecurity,
       },
       async (context, request, response) => {
         let responseHeaders = {};

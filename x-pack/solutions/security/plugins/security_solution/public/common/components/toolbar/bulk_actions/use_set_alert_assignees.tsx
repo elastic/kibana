@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback, useEffect, useRef } from 'react';
 import type { AlertAssignees } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -28,14 +26,13 @@ export type ReturnSetAlertAssignees = SetAlertAssigneesFunc | null;
  * @param ids alert ids that will be used to create the update query.
  * @param onSuccess a callback function that will be called on successful api response
  * @param setTableLoading a function that sets the alert table in a loading state for bulk actions
-
  *
  * @throws An error if response is not OK
  */
 export const useSetAlertAssignees = (): ReturnSetAlertAssignees => {
-  const { http } = useKibana<CoreStart>().services;
   const { addSuccess, addError } = useAppToasts();
-  const setAlertAssigneesRef = useRef<SetAlertAssigneesFunc | null>(null);
+
+  const abortCtrl = useRef<AbortController>(new AbortController());
 
   const onUpdateSuccess = useCallback(
     (updated: number = 0) => addSuccess(i18n.UPDATE_ALERT_ASSIGNEES_SUCCESS_TOAST(updated)),
@@ -49,38 +46,32 @@ export const useSetAlertAssignees = (): ReturnSetAlertAssignees => {
     [addError]
   );
 
-  useEffect(() => {
-    let ignore = false;
-    const abortCtrl = new AbortController();
-
-    const onSetAlertAssignees: SetAlertAssigneesFunc = async (
-      assignees,
-      ids,
-      onSuccess,
-      setTableLoading
-    ) => {
+  const onSetAlertAssignees: SetAlertAssigneesFunc = useCallback(
+    async (assignees, ids, onSuccess, setTableLoading) => {
       try {
         setTableLoading(true);
-        const response = await setAlertAssignees({ assignees, ids, signal: abortCtrl.signal });
-        if (!ignore) {
-          onSuccess();
-          setTableLoading(false);
-          onUpdateSuccess(response.updated);
-        }
+        const response = await setAlertAssignees({
+          assignees,
+          ids,
+          signal: abortCtrl.current.signal,
+        });
+        onSuccess();
+        setTableLoading(false);
+        onUpdateSuccess(response.updated);
       } catch (error) {
-        if (!ignore) {
-          setTableLoading(false);
-          onUpdateFailure(error);
-        }
+        setTableLoading(false);
+        onUpdateFailure(error);
       }
-    };
+    },
+    [onUpdateFailure, onUpdateSuccess]
+  );
 
-    setAlertAssigneesRef.current = onSetAlertAssignees;
+  useEffect(() => {
+    const currentAbortCtrl = abortCtrl.current;
     return (): void => {
-      ignore = true;
-      abortCtrl.abort();
+      currentAbortCtrl.abort();
     };
-  }, [http, onUpdateFailure, onUpdateSuccess]);
+  }, [abortCtrl]);
 
-  return setAlertAssigneesRef.current;
+  return onSetAlertAssignees;
 };

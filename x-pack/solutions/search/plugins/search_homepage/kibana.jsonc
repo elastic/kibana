@@ -10,16 +10,19 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "search",
-      "homepage"
+      "searchHomepage"
     ],
     "requiredPlugins": [
       "share",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
+      "searchNavigation",
       "usageCollection",
+      "sampleDataIngest",
+      "dataViews",
     ],
     "requiredBundles": [
       "kibanaReact"

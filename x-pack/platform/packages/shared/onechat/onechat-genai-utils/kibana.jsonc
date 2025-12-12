@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/onechat-genai-utils",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -6,18 +6,17 @@
  */
 
 import React from 'react';
+import { RULES_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { IconRules } from '../../../../../common/icons/rules';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { RULES_CARD_TITLE } from './translations';
 import { checkRulesComplete } from './rules_check_complete';
-import rulesIcon from './images/rules_icon.png';
-import rulesDarkIcon from './images/rules_icon_dark.png';
 
 export const rulesCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.rules,
   title: RULES_CARD_TITLE,
-  icon: rulesIcon,
-  iconDark: rulesDarkIcon,
+  icon: IconRules,
   Component: React.lazy(
     () =>
       import(
@@ -26,4 +25,5 @@ export const rulesCardConfig: OnboardingCardConfig = {
       )
   ),
   checkComplete: checkRulesComplete,
+  capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE],
 };

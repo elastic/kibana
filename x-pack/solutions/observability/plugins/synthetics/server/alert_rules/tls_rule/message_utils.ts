@@ -6,23 +6,23 @@
  */
 
 import moment from 'moment/moment';
-import { IBasePath } from '@kbn/core-http-server';
+import type { IBasePath } from '@kbn/core-http-server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import {
+import type {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   ActionGroupIdsOf,
 } from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import type { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
-import { MonitorSummaryTLSRule } from './types';
-import { TLSLatestPing } from './tls_rule_executor';
+import type { MonitorSummaryTLSRule } from './types';
+import type { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
-import { Cert } from '../../../common/runtime_types';
+import type { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
-import { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
+import type { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
 import {
   AGENT_NAME,
   CERT_COMMON_NAME,
@@ -48,7 +48,7 @@ interface TLSContent {
 }
 
 const getValidBefore = (notBefore?: string): TLSContent => {
-  if (!notBefore) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
+  if (!notBefore) return { summary: 'Error, missing `not_before` date.' };
   const relativeDate = moment().diff(notBefore, 'days');
   const formattedDate = moment(notBefore).format('MMM D, YYYY z');
   return relativeDate >= 0
@@ -62,7 +62,7 @@ const getValidBefore = (notBefore?: string): TLSContent => {
       };
 };
 const getValidAfter = (notAfter?: string): TLSContent => {
-  if (!notAfter) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
+  if (!notAfter) return { summary: 'Error, missing `not_after` date.' };
   const relativeDate = moment().diff(notAfter, 'days');
   const formattedDate = moment(notAfter).format('MMM D, YYYY z');
   return relativeDate >= 0

@@ -6,12 +6,14 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '../plugin';
+import { TaskManagerPlugin } from '../plugin';
 import { injectTask, retry, setupTestServers } from './lib';
-import { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import type { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
@@ -124,9 +126,27 @@ describe('unrecognized task types', () => {
       }
     });
 
+    // wait until the task finishes
     await retry(async () => {
-      const task = await getTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
-      expect(task?._source?.task?.status).toBe('unrecognized');
+      const hasRun = await taskManagerPlugin
+        .get('mark_removed_tasks_as_unrecognized')
+        .then((t) => t.runAt != null)
+        .catch(() => false);
+      expect(hasRun).toBe(true);
+    });
+
+    await retry(async () => {
+      const unregisteredTaskInstance = await getTask(
+        kibanaServer.coreStart.elasticsearch.client.asInternalUser,
+        notRegisteredTypeId
+      );
+      expect(unregisteredTaskInstance?.task?.status).toBe('idle');
+
+      const removedTaskInstance = await getTask(
+        kibanaServer.coreStart.elasticsearch.client.asInternalUser,
+        removeTypeId
+      );
+      expect(removedTaskInstance?.task?.status).toBe('unrecognized');
     });
 
     // monitored_aggregated_stats_refresh_rate is set to the minimum of 5 seconds
@@ -147,21 +167,10 @@ describe('unrecognized task types', () => {
   });
 });
 
-async function getTask(esClient: ElasticsearchClient) {
-  const response = await esClient.search<{ task: ConcreteTaskInstance }>({
+async function getTask(esClient: ElasticsearchClient, id: string) {
+  const scheduledTask = await esClient.get<{ task: ConcreteTaskInstance }>({
+    id: `task:${id}`,
     index: '.kibana_task_manager',
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              'task.taskType': 'sampleTaskRemovedType',
-            },
-          },
-        ],
-      },
-    },
   });
-
-  return response.hits.hits[0];
+  return scheduledTask._source!;
 }

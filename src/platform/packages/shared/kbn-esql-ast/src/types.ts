@@ -7,32 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
+ */
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand =
+  | ESQLCommand
+  | ESQLAstJoinCommand
+  | ESQLAstChangePointCommand
+  | ESQLAstRerankCommand
+  | ESQLAstCompletionCommand
+  | ESQLAstFuseCommand
+  | ESQLAstForkCommand;
 
-export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
+
+export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
  */
-export type ESQLAstExpression = ESQLSingleAstItem | ESQLAstQueryExpression;
+export type ESQLAstExpression = ESQLSingleAstItem;
 
 export type ESQLSingleAstItem =
+  | ESQLAstQueryExpression
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
-  | ESQLTimeInterval
+  | ESQLDatePeriodLiteral
+  | ESQLTimeDurationLiteral
   | ESQLList
   | ESQLLiteral
   | ESQLIdentifier
-  | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
-  | ESQLUnknownItem;
+  | ESQLUnknownItem
+  | ESQLMap
+  | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn;
+/**
+ * A field is either an index field `this.is.field`, or it is a field assignment
+ * `new_field = 123`, in which case it is a binary expression with "=" operator.
+ *
+ * Also, a field can be specified as a parameter.
+ *
+ * ```
+ * EVAL this.is.a.nested.field
+ * EVAL new_field = 123
+ * EVAL ?param
+ * EVAL ?param = 123
+ * ```
+ */
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -48,7 +77,7 @@ export type ESQLAstNodeWithChildren = ESQLAstNodeWithArgs | ESQLList;
  * of the nodes which are plain arrays, all nodes will be *proper* and we can
  * remove this type.
  */
-export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand;
+export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand | ESQLAstHeaderCommand;
 
 export interface ESQLLocation {
   min: number;
@@ -86,10 +115,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
-  sources: ESQLSource[];
-}
-
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
   commandType: 'lookup' | 'left' | 'right';
 }
@@ -103,25 +128,97 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
   };
 }
 
+export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
+  prompt: ESQLAstExpression;
+  inferenceId: ESQLLiteral;
+  targetField?: ESQLColumn;
+}
+
+export interface ESQLAstFuseCommand extends ESQLCommand<'fuse'> {
+  fuseType?: ESQLIdentifier;
+}
+
+export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
+  query: ESQLLiteral;
+  fields: ESQLAstField[];
+  targetField?: ESQLColumn;
+  inferenceId: ESQLLiteral | undefined;
+}
+
+export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
+  args: ESQLForkParens[];
+}
+
+/**
+ * Represents a PROMQL command.
+ *
+ * ```
+ * PROMQL <params_map> ( <query> )
+ * ```
+ */
+export interface ESQLAstPromqlCommand extends ESQLCommand<'promql'> {
+  args:
+    | // Full version of args
+    [
+        /** The parameters map for the PROMQL query. */
+        params: ESQLMap,
+        /** The embedded PromQL query expression wrapped in parentheses. */
+        query: ESQLParens
+      ]
+
+    // Below versions are in case the command is `.incomplete: true`.
+    | [
+        /** The parameters map for the PROMQL query. */
+        params: ESQLMap
+      ]
+    | [];
+}
+
+/**
+ * Represents a header pseudo-command, such as SET.
+ *
+ * Example:
+ *
+ * ```
+ * SET setting1 = "value1", setting2 = "value2";
+ * ```
+ */
+export interface ESQLAstHeaderCommand<Name extends string = string, Arg = ESQLAstExpression>
+  extends ESQLAstBaseItem {
+  type: 'header-command';
+
+  /** Name of the command */
+  name: Name;
+
+  /**
+   * Represents the arguments for the command. It has to be a list, because
+   * even the SET command was initially designed to accept multiple
+   * assignments.
+   *
+   * Example:
+   *
+   * ```
+   * SET setting1 = "value1", setting2 = "value2"
+   * ```
+   */
+  args: Arg[];
+}
+
+export type ESQLAstSetHeaderCommand = ESQLAstHeaderCommand<
+  'set',
+  ESQLBinaryExpression<BinaryExpressionAssignmentOperator>
+>;
+
+export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
+
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];
 }
 
-/**
- * Right now rename expressions ("clauses") are parsed as options in the
- * RENAME command.
- */
-export interface ESQLAstRenameExpression extends ESQLCommandOption {
-  name: 'as';
-}
-
-export interface ESQLCommandMode extends ESQLAstBaseItem {
-  type: 'mode';
-}
-
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
   type: 'query';
+  header?: ESQLAstHeaderCommand[];
   commands: ESQLAstCommand[];
 }
 
@@ -175,7 +272,8 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
   args: ESQLAstItem[];
 }
 
-export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+export interface ESQLUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'unary-expression', Name> {
   subtype: 'unary-expression';
   args: [ESQLAstItem];
 }
@@ -214,15 +312,19 @@ export type BinaryExpressionOperator =
   | BinaryExpressionRegexOperator
   | BinaryExpressionRenameOperator
   | BinaryExpressionWhereOperator
-  | BinaryExpressionMatchOperator;
+  | BinaryExpressionMatchOperator
+  | BinaryExpressionIn
+  | BinaryExpressionLogical;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
-export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
+export type BinaryExpressionRegexOperator = 'like' | 'not like' | 'rlike' | 'not rlike';
 export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
 export type BinaryExpressionMatchOperator = ':';
+export type BinaryExpressionIn = 'in' | 'not in';
+export type BinaryExpressionLogical = 'and' | 'or';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =
@@ -268,26 +370,20 @@ export interface ESQLUnknownItem extends ESQLAstBaseItem {
   type: 'unknown';
 }
 
-export interface ESQLTimeInterval extends ESQLAstBaseItem {
-  /** @todo For consistency with other literals, this should be `literal`, not `timeInterval`. */
-  type: 'timeInterval';
-  unit: string;
-  quantity: number;
-}
-
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
   sourceType: 'index' | 'policy';
 
   /**
-   * Represents the cluster part of the source identifier. Empty string if not
-   * present.
+   * Represents the prefix part of the source identifier. Empty string if not
+   * present. Used in index pattern as the cluster identifier or as "mode" in
+   * enrich policy.
    *
    * ```
-   * FROM [<cluster>:]<index>
+   * FROM [<prefix>:]<index>
    * ```
    */
-  cluster?: string;
+  prefix?: ESQLStringLiteral | undefined;
 
   /**
    * Represents the index part of the source identifier. Unescaped and unquoted.
@@ -296,11 +392,50 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * FROM [<cluster>:]<index>
    * ```
    */
-  index?: string;
+  index?: ESQLStringLiteral | undefined;
+
+  /**
+   * Represents the selector (component) part of the source identifier.
+   *
+   * ```
+   * FROM <index>[::<selector>]
+   * ```
+   */
+  selector?: ESQLStringLiteral | undefined;
+}
+
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
+}
+
+export interface ESQLForkParens extends ESQLParens {
+  child: ESQLAstQueryExpression;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
+
+  /**
+   * Optional qualifier for the column, e.g. index name or alias.
+   *
+   * @example
+   *
+   * ```esql
+   * [index].[column]
+   * [index].[nested.column.part]
+   * ```
+   *
+   * `index` is the qualifier.
+   */
+  qualifier?: ESQLIdentifier;
 
   /**
    * A ES|QL column name can be composed of multiple parts,
@@ -329,9 +464,74 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   quoted: boolean;
 }
 
+/**
+ * Represents list-like structures where elements are separated by commas.
+ *
+ * *Literal lists* use square brackets and can contain only
+ * string, number, or boolean literals and all elements must be of the same
+ * type:
+ *
+ * ```
+ * [1, 2, 3]
+ * ```
+ *
+ * *Tuple lists* use round brackets and can contain any type of expression.
+ * Tuple list are used in the `IN` expression:
+ *
+ * ```
+ * a IN ("abc", "def")
+ * ```
+ */
 export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
-  values: ESQLLiteral[];
+
+  /**
+   * The list can be a literal list (uses square brackets) or a tuple list (uses
+   * round brackets). If not specified, the list is assumed to be a literal list.
+   *
+   * @default 'literal'
+   */
+  subtype?: 'literal' | 'tuple';
+
+  values: ESQLAstExpression[];
+}
+
+/**
+ * Represents a ES|QL "map" object, a list of key-value pairs. Can have different
+ * *representation* styles, such as "map" or "listpairs". The representation
+ * style affects how the map is pretty-printed.
+ */
+export interface ESQLMap extends ESQLAstBaseItem {
+  type: 'map';
+  entries: ESQLMapEntry[];
+
+  /**
+   * Specifies how the key-value pairs are represented.
+   *
+   * @default 'map'
+   *
+   * `map` example:
+   *
+   * ```
+   * { "key1": "value1", "key2": "value2" }
+   * ```
+   *
+   * `listpairs` example:
+   *
+   * ```
+   * key1 value1 key2 value2
+   * ```
+   */
+  representation?: 'map' | 'listpairs';
+}
+
+/**
+ * Represents a key-value pair in a ES|QL map object.
+ */
+export interface ESQLMapEntry extends ESQLAstBaseItem {
+  type: 'map-entry';
+  key: ESQLAstExpression;
+  value: ESQLAstExpression;
 }
 
 export type ESQLNumericLiteralType = 'double' | 'integer';
@@ -342,6 +542,8 @@ export type ESQLLiteral =
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
+  | ESQLTimeDurationLiteral
+  | ESQLDatePeriodLiteral
   | ESQLParamLiteral<string>;
 
 // Exporting here to prevent TypeScript error TS4058
@@ -377,12 +579,35 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
 
-  /** This really should be `string`, not `keyword`. */
   literalType: 'keyword';
 
   value: string;
   valueUnquoted: string;
+
+  /**
+   * Whether the string was parsed as "unqouted" and/or can be pretty-printed
+   * unquoted, i.e. in the source text it did not have any quotes (not single ",
+   * not triple """) quotes. This happens in FROM command source parsing, the
+   * cluster and selector can be unquoted strings:
+   *
+   * ```
+   * FROM <cluster>:index:<selector>
+   * ```
+   */
+  unquoted?: boolean;
 }
+
+export interface ESQLBaseTimeSpanLiteral<T extends 'time_duration' | 'date_period'>
+  extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: T;
+  value: string;
+  unit: string;
+  quantity: number;
+}
+export type ESQLDatePeriodLiteral = ESQLBaseTimeSpanLiteral<'date_period'>;
+export type ESQLTimeDurationLiteral = ESQLBaseTimeSpanLiteral<'time_duration'>;
+export type ESQLTimeSpanLiteral = ESQLDatePeriodLiteral | ESQLTimeDurationLiteral;
 
 // @internal
 export interface ESQLParamLiteral<
@@ -445,14 +670,9 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
-
-export type AstProviderFn = (text: string | undefined) =>
-  | Promise<{
-      ast: ESQLAst;
-      errors: EditorError[];
-    }>
-  | { ast: ESQLAst; errors: EditorError[] };
 
 export interface EditorError {
   startLineNumber: number;
@@ -460,7 +680,7 @@ export interface EditorError {
   startColumn: number;
   endColumn: number;
   message: string;
-  code?: string;
+  code: string;
   severity: 'error' | 'warning' | number;
 }
 

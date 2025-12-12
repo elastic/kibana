@@ -12,6 +12,8 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
@@ -29,7 +31,6 @@ import {
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
@@ -52,11 +53,10 @@ export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
-export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
+export type EventsQueryTabBodyComponentProps = Omit<QueryTabBodyProps, 'setQuery'> & {
   additionalFilters: Filter[];
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
-  setQuery: GlobalTimeArgs['setQuery'];
   tableId: TableId;
 };
 
@@ -76,11 +76,12 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   deleteQuery,
   endDate,
   filterQuery,
-  setQuery,
   startDate,
   tableId,
 }) => {
   let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -94,10 +95,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const {
     notesPrivileges: { read: canReadNotes },
   } = useUserPrivileges();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  if (!canReadNotes || securitySolutionNotesDisabled) {
+  if (!canReadNotes) {
     ACTION_BUTTON_COUNT--;
   }
 
@@ -173,15 +171,19 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     tableId,
     from: startDate,
     to: endDate,
-    scopeId: SourcererScopeName.default,
+    scopeId: PageScope.default,
   }) as CustomBulkAction;
+
+  const caseEventsBulkActions = useBulkAddEventsToCaseActions({
+    clearSelection: () => dispatch(dataTableActions.clearSelected({ id: tableId })),
+  });
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
       alertStatusActions: false,
-      customBulkActions: [addBulkToTimelineAction],
+      customBulkActions: [addBulkToTimelineAction, ...caseEventsBulkActions],
     };
-  }, [addBulkToTimelineAction]);
+  }, [addBulkToTimelineAction, caseEventsBulkActions]);
 
   return (
     <>
@@ -191,9 +193,9 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
-          setQuery={setQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
+          sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
         />
       )}
       <StatefulEventsViewer
@@ -204,7 +206,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={SourcererScopeName.default}
+        sourcererScope={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

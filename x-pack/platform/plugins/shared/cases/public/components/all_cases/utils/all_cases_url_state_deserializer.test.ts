@@ -25,16 +25,19 @@ describe('allCasesUrlStateDeserializer', () => {
         "filterOptions": Object {
           "assignees": Array [],
           "category": Array [],
+          "from": "now-30d",
           "owner": Array [],
           "reporters": Array [],
           "search": "",
           "searchFields": Array [
             "title",
             "description",
+            "incremental_id.text",
           ],
           "severity": Array [],
           "status": Array [],
           "tags": Array [],
+          "to": "now",
         },
         "queryParams": Object {
           "page": 1,

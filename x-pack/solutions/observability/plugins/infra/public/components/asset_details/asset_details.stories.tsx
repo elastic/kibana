@@ -6,10 +6,11 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { Meta, StoryFn } from '@storybook/react';
 import { MemoryRouter } from 'react-router-dom';
-import { useArgs } from '@storybook/manager-api';
+import { useArgs } from '@storybook/preview-api';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { type TabIds, type AssetDetailsProps } from './types';
@@ -73,6 +74,9 @@ const FlyoutTemplate: StoryFn<AssetDetailsStoryArgs> = (args) => {
           text: id,
           value: id,
         }))}
+        aria-label={i18n.translate('xpack.infra.assetDetails.flyout.tabSelectAriaLabel', {
+          defaultMessage: 'Asset details tabs',
+        })}
       />
       <EuiSpacer />
       <EuiButton

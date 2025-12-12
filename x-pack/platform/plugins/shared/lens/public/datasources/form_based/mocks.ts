@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { IndexPattern, IndexPatternField } from '@kbn/lens-common';
 import { getFieldByNameFactory } from './pure_helpers';
-import type { IndexPattern, IndexPatternField } from '../../types';
 
 export function createMockedField(
   someProps: Partial<IndexPatternField> & Pick<IndexPatternField, 'name' | 'type'>

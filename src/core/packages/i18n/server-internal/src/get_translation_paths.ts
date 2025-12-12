@@ -8,8 +8,8 @@
  */
 
 import { resolve, dirname } from 'path';
-import globby from 'globby';
-import { readFile } from 'fs/promises';
+import { readFile, glob } from 'fs/promises';
+import normalizePath from 'normalize-path';
 
 interface I18NRCFileStructure {
   translations?: string[];
@@ -18,12 +18,11 @@ interface I18NRCFileStructure {
 const I18N_RC = '.i18nrc.json';
 
 export async function getTranslationPaths({ cwd, nested }: { cwd: string; nested: boolean }) {
-  const glob = nested ? `*/${I18N_RC}` : I18N_RC;
-  const entries = await globby(glob, { cwd, dot: true });
+  const globPattern = nested ? `*/${I18N_RC}` : I18N_RC;
   const translationPaths: string[] = [];
 
-  for (const entry of entries) {
-    const entryFullPath = resolve(cwd, entry);
+  for await (const entry of glob(globPattern, { cwd })) {
+    const entryFullPath = resolve(cwd, normalizePath(entry));
     const pluginBasePath = dirname(entryFullPath);
     try {
       const content = await readFile(entryFullPath, 'utf8');

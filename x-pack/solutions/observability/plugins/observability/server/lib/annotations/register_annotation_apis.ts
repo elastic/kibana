@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
-import { isLeft } from 'fp-ts/lib/Either';
+import type { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
+import { isLeft } from 'fp-ts/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import {
   getAnnotationByIdRt,
@@ -17,7 +17,7 @@ import {
   findAnnotationRt,
   updateAnnotationRt,
 } from '../../../common/annotations';
-import { ScopedAnnotationsClient } from './bootstrap_annotations';
+import type { ScopedAnnotationsClient } from './bootstrap_annotations';
 import { createAnnotationsClient } from './create_annotations_client';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 
@@ -78,12 +78,19 @@ export function registerAnnotationAPIs({
         return response.ok({
           body: res,
         });
-      } catch (err) {
-        logger.error(err);
+      } catch (error) {
+        const statusCode = error.output?.statusCode ?? 500;
+        const errorMessage = error.output?.payload?.message ?? 'An internal server error occurred';
+        if (statusCode >= 500) {
+          logger.error(errorMessage, { error });
+        } else {
+          logger.debug(errorMessage, { error });
+        }
+
         return response.custom({
-          statusCode: err.output?.statusCode ?? 500,
+          statusCode,
           body: {
-            message: err.output?.payload?.message ?? 'An internal server error occurred',
+            message: errorMessage,
           },
         });
       }

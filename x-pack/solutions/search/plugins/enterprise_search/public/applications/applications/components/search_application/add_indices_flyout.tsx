@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -21,6 +21,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -28,9 +29,9 @@ import { Status } from '../../../../../common/types/api';
 import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
 import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
+import type { IndicesSelectComboBoxOption } from '../search_applications/components/indices_select_combobox';
 import {
   IndicesSelectComboBox,
-  IndicesSelectComboBoxOption,
   indexToOption,
 } from '../search_applications/components/indices_select_combobox';
 
@@ -42,6 +43,8 @@ export interface AddIndicesFlyoutProps {
 }
 
 export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { selectedIndices, updateSearchApplicationStatus, updateSearchApplicationError } =
     useValues(AddIndicesLogic);
@@ -60,11 +63,13 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
     [setSelectedIndices]
   );
 
+  const [isIndicesSelectComboBoxDisabled, setIndicesSelectComboBoxDisabled] =
+    useState<boolean>(false);
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.title',
               { defaultMessage: 'Add new indices' }
@@ -75,6 +80,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
           <>
             <EuiSpacer />
             <EuiCallOut
+              announceOnMount
               color="danger"
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.updateError.title',
@@ -98,6 +104,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.selectableLabel',
             { defaultMessage: 'Select searchable indices' }
           )}
+          setIndicesSelectComboBoxDisabled={setIndicesSelectComboBoxDisabled}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -109,6 +116,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               data-telemetry-id="entSearchApplications-indices-addNewIndices-submit"
               iconType="plusInCircle"
               onClick={submitSelectedIndices}
+              disabled={isIndicesSelectComboBoxDisabled}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.submitButton',

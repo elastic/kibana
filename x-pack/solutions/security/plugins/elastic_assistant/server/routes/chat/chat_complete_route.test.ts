@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../../__mocks__/action_result_data';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { PassThrough } from 'stream';
-import { getConversationResponseMock } from '../../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
+import {
+  getConversationResponseMock,
+  getFindAnonymizationFieldsResultWithSingleHit,
+} from '../../__mocks__/response';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { chatCompleteRoute } from './chat_complete_route';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -25,6 +27,8 @@ import {
   createConversationWithUserInput,
   langChainExecute,
 } from '../helpers';
+import type { OnLlmResponse } from '../../lib/langchain/executors/types';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const license = licensingMock.createLicenseMock();
 
@@ -137,6 +141,7 @@ const mockRequest = {
   events: {
     aborted$: NEVER,
   },
+  query: {},
 };
 
 const mockResponse = {
@@ -145,8 +150,6 @@ const mockResponse = {
 };
 
 describe('chatCompleteRoute', () => {
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockAppendAssistantMessageToConversation.mockResolvedValue(true);
@@ -160,24 +163,32 @@ describe('chatCompleteRoute', () => {
       }: {
         connectorId: string;
         isStream: boolean;
-        onLlmResponse: (
-          content: string,
-          replacements: Record<string, string>,
-          isError: boolean
-        ) => Promise<void>;
+        onLlmResponse: OnLlmResponse;
       }) => {
         if (!isStream && connectorId === 'mock-connector-id') {
-          onLlmResponse('Non-streamed test reply.', {}, false).catch(() => {});
+          onLlmResponse({
+            content: 'Non-streamed test reply.',
+            traceData: {},
+            isError: false,
+          }).catch(() => {});
           return {
             connector_id: 'mock-connector-id',
             data: mockActionResponse,
             status: 'ok',
           };
         } else if (isStream && connectorId === 'mock-connector-id') {
-          onLlmResponse('Streamed test reply.', {}, false).catch(() => {});
+          onLlmResponse({
+            content: 'Streamed test reply.',
+            traceData: {},
+            isError: false,
+          }).catch(() => {});
           return mockStream;
         } else {
-          onLlmResponse('simulated error', {}, true).catch(() => {});
+          onLlmResponse({
+            content: 'simulated error',
+            traceData: {},
+            isError: true,
+          }).catch(() => {});
           throw new Error('simulated error');
         }
       }
@@ -189,20 +200,16 @@ describe('chatCompleteRoute', () => {
       }))
     );
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
         name: 'my name',
         actionTypeId: '.gen-ai',
-        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
           c: true,
         },
-      },
+      }),
     ]);
   });
 
@@ -235,10 +242,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('returns the expected error when executeCustomLlmChain fails', async () => {
@@ -268,8 +272,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -291,6 +294,7 @@ describe('chatCompleteRoute', () => {
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
                 errorMessage: 'simulated error',
+                errorLocation: 'chatCompleteRoute',
                 actionTypeId: '.gen-ai',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,
@@ -303,8 +307,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -337,8 +340,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -368,8 +370,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -398,8 +399,7 @@ describe('chatCompleteRoute', () => {
       },
     };
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -433,10 +433,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('should not add assistant reply to existing conversation when `persist=false`', async () => {
@@ -465,10 +462,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('should add assistant reply to new conversation when `persist=true`', async () => {
@@ -502,10 +496,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('should not create a new conversation when `persist=false`', async () => {
@@ -534,9 +525,6 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 });

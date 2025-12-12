@@ -30,10 +30,11 @@ import {
   mockRenderingSetupDeps,
   mockRenderingStartDeps,
 } from './test_helpers/params';
-import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
-import { DEFAULT_THEME_NAME, ThemeName } from '@kbn/core-ui-settings-common';
+import type { ThemeName } from '@kbn/core-ui-settings-common';
+import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 import { BehaviorSubject } from 'rxjs';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
@@ -211,6 +212,7 @@ function renderTestCases(
       expect(getScriptPathsMock).toHaveBeenCalledWith({
         darkMode: true,
         baseHref: '/mock-server-basepath',
+        themeName: 'borealis',
       });
     });
 
@@ -254,6 +256,19 @@ function renderTestCases(
     it('renders feature flags overrides', async () => {
       mockRenderingSetupDeps.featureFlags.getOverrides.mockReturnValueOnce({
         'my-overridden-flag': 1234,
+      });
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders initial feature flags', async () => {
+      mockRenderingSetupDeps.featureFlags.getInitialFeatureFlags.mockResolvedValueOnce({
+        'my-initial-flag': 1234,
       });
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {
@@ -590,7 +605,7 @@ describe('RenderingService', () => {
   });
 
   describe('start()', () => {
-    it('subscribes to the featureFlags.setStringValue$ observable and updates theme name accordingly', async () => {
+    it('subscribes to the featureFlags.setStringValue$', async () => {
       // setup and render added to assert the current theme name
       const { render } = await service.setup(mockRenderingSetupDeps);
       const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
@@ -616,15 +631,11 @@ describe('RenderingService', () => {
         globalClient: uiSettingsServiceMock.createClient(),
       };
 
-      getIsThemeBundledMock.mockImplementation((name) => ['borealis', 'amsterdam'].includes(name));
+      getIsThemeBundledMock.mockImplementation((name) => name === 'borealis');
 
-      let renderResult = await render(createKibanaRequest(), uiSettings);
+      const renderResult = await render(createKibanaRequest(), uiSettings);
       expect(getIsThemeBundledMock).toHaveBeenCalledWith('borealis');
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
-
-      themeName$.next('amsterdam');
-      renderResult = await render(createKibanaRequest(), uiSettings);
-      expect(renderResult).toContain(',&quot;name&quot;:&quot;amsterdam&quot;');
     });
 
     it('falls back to the default theme if theme is not bundled', async () => {

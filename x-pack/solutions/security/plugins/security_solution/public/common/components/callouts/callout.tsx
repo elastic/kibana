@@ -50,7 +50,7 @@ const CallOutComponent: FC<CallOutProps> = ({
 const getDefaultIconType = (type: CallOutType): string => {
   switch (type) {
     case 'primary':
-      return 'iInCircle';
+      return 'info';
     case 'success':
       return 'cheer';
     case 'warning':

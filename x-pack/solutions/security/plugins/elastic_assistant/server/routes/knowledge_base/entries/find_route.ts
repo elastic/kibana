@@ -9,25 +9,27 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import _ from 'lodash';
 
-import {
-  API_VERSIONS,
+import type {
   DocumentEntry,
-  DocumentEntryType,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
   KnowledgeBaseResource,
 } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  DocumentEntryType,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
+  FindKnowledgeBaseEntriesRequestQuery,
+} from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticAssistantPluginRouter } from '../../../types';
+import type { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
 import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
-import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import type { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
-import { SECURITY_LABS_RESOURCE } from '../constants';
+import { DEFEND_INSIGHTS_RESOURCE, SECURITY_LABS_RESOURCE } from '../constants';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -110,6 +112,12 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
               bucketId: 'securityLabsId',
               kbResource: SECURITY_LABS_RESOURCE as KnowledgeBaseResource,
               name: 'Security Labs',
+              required: true,
+            },
+            {
+              bucketId: 'defendInsightsId',
+              kbResource: DEFEND_INSIGHTS_RESOURCE as KnowledgeBaseResource,
+              name: 'Defend Insights',
               required: true,
             },
           ]

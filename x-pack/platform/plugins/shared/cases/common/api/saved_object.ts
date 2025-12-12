@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 
 export const NumberFromString = new rt.Type<number, string, unknown>(
   'NumberFromString',

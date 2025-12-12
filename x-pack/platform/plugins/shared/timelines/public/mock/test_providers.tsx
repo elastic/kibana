@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import { ThemeProvider } from 'styled-components';
 
 import { configureStore } from '@reduxjs/toolkit';

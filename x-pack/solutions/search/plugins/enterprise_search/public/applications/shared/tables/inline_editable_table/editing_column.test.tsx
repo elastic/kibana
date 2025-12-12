@@ -9,7 +9,8 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiFormRow } from '@elastic/eui';
 
@@ -20,7 +21,7 @@ describe('EditingColumn', () => {
     name: 'foo',
     field: 'foo',
     render: jest.fn(),
-    editingRender: jest.fn().mockReturnValue(<div data-test-subj="editing-view" />),
+    editingRender: jest.fn<any, any, any>(() => <div data-test-subj="editing-view" />),
   };
 
   const requiredProps = {

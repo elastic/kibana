@@ -12,6 +12,7 @@ import type { MigrationLog } from '../types';
 export interface RetryableState {
   controlState: string;
   retryCount: number;
+  skipRetryReset: boolean;
   retryDelay: number;
   logs: MigrationLog[];
 }
@@ -50,7 +51,8 @@ export const delayRetryState = <S extends RetryableState>(
 export const resetRetryState = <S extends RetryableState>(state: S): S => {
   return {
     ...state,
-    retryCount: 0,
-    retryDelay: 0,
+    retryCount: state.skipRetryReset ? state.retryCount : 0,
+    retryDelay: state.skipRetryReset ? state.retryDelay : 0,
+    skipRetryReset: false,
   };
 };

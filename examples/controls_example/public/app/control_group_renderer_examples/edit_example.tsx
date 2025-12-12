@@ -22,16 +22,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  type ControlGroupRuntimeState,
-} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
+import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import {
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
   ControlGroupRenderer,
-  ControlGroupRendererApi,
   type ControlStateTransform,
 } from '@kbn/controls-plugin/public';
 
@@ -68,7 +65,7 @@ export const EditExample = () => {
     localStorage.setItem(
       INPUT_KEY,
       JSON.stringify({
-        ...controlGroupAPI.snapshotRuntimeState(),
+        ...controlGroupAPI.getInput(),
         disabledActions: controlGroupAPI.disabledActionIds$.getValue(), // not part of runtime
       })
     );

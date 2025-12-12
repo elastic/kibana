@@ -8,7 +8,7 @@
  */
 
 import React, { Component } from 'react';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import { EuiBetaBadge } from '@elastic/eui';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
 
@@ -52,8 +52,9 @@ export class HeaderBadge extends Component<Props, State> {
     }
 
     return (
-      <div className="chrHeaderBadge__wrapper">
+      <div css={({ euiTheme }) => ({ alignSelf: 'center', marginRight: euiTheme.size.s })}>
         <EuiBetaBadge
+          alignment="middle"
           data-test-subj="headerBadge"
           data-test-badge-label={this.state.badge.text}
           tabIndex={0}

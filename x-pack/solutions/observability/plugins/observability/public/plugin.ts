@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import {
+import type {
+  IUiSettingsClient,
   App,
   AppDeepLink,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
   PluginInitializerContext,
   ToastsStart,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -44,14 +46,12 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
+import { BehaviorSubject, from, map, mergeMap, switchMap } from 'rxjs';
 
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import type { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -71,7 +71,11 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -84,11 +88,14 @@ import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
-import {
-  ObservabilityRuleTypeRegistry,
-  createObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import {
+  CaseDetailsLocatorDefinition,
+  CasesOverviewLocatorDefinition,
+} from '../common/locators/cases';
+import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
   unsafe: {
@@ -110,6 +117,7 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
+  managedOtlpServiceUrl: string;
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
@@ -127,23 +135,25 @@ export interface ObservabilityPublicPluginsSetup {
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
+  cases?: CasesPublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  exploratoryView: ExploratoryViewPublicStart;
+  exploratoryView?: ExploratoryViewPublicStart;
   fieldFormats: FieldFormatsStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  logsDataAccess: LogsDataAccessPluginStart;
   navigation: NavigationPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -164,9 +174,11 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
-  investigate?: InvestigatePublicStart;
-  streams?: StreamsPluginStart;
+  streams: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  inspector: InspectorPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
+  onechat?: OnechatPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -182,6 +194,7 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+  private telemetry: TelemetryService;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -204,40 +217,51 @@ export class Plugin
           visibleIn: [],
         },
       ],
+      keywords: ['alerts', 'rules'],
     },
-    getCasesDeepLinks({
-      basePath: CASES_PATH,
-      extend: {
-        [CasesDeepLinkId.cases]: {
-          order: 8003,
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesCreate]: {
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesConfigure]: {
-          visibleIn: [],
-        },
-      },
-    }),
   ];
 
-  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
+    this.telemetry = new TelemetryService();
+  }
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
+    const startServicesPromise = coreSetup.getStartServices();
+    if (pluginsSetup.cases) {
+      this.deepLinks.push(
+        getCasesDeepLinks({
+          basePath: CASES_PATH,
+          extend: {
+            [CasesDeepLinkId.cases]: {
+              order: 8003,
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesCreate]: {
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesConfigure]: {
+              visibleIn: [],
+            },
+          },
+        })
+      );
+    }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
+    this.telemetry.setup(coreSetup.analytics);
 
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
     const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+    pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
+    pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
 
     const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
       new RuleDetailsLocatorDefinition()
@@ -261,7 +285,12 @@ export class Plugin
         kibanaVersion,
         observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        telemetryClient: this.telemetry.start(coreStart.analytics),
+        plugins: {
+          ...pluginsStart,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        },
         usageCollection: pluginsSetup.usageCollection,
         isServerless: !!pluginsStart.serverless,
       });
@@ -287,7 +316,6 @@ export class Plugin
         'logs',
         'metrics',
         'apm',
-        'slo',
         'performance',
         'trace',
         'agent',
@@ -401,7 +429,7 @@ export class Plugin
                 }));
 
               const casesLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'cases')
+                .filter((link) => link.id === 'cases' && pluginsStart.cases)
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,
@@ -418,6 +446,39 @@ export class Plugin
                     ...sloLink,
                     ...casesLink,
                     ...aiAssistantLink,
+                  ],
+                },
+              ];
+            })
+          )
+        )
+      )
+    );
+
+    pluginsSetup.observabilityShared.navigation.registerSections(
+      from(startServicesPromise).pipe(
+        switchMap(([_, pluginsStart]) =>
+          pluginsStart.streams.navigationStatus$.pipe(
+            map(({ status }) => {
+              if (status !== 'enabled') {
+                return [];
+              }
+
+              return [
+                {
+                  label: '',
+                  sortKey: 101,
+                  entries: [
+                    {
+                      label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
+                        defaultMessage: 'Streams',
+                      }),
+                      app: 'streams',
+                      path: '/',
+                      matchPath(currentPath: string) {
+                        return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                      },
+                    },
                   ],
                 },
               ];
@@ -445,6 +506,7 @@ export class Plugin
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
+      pricing: coreStart.pricing,
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {

@@ -51,10 +51,16 @@ export const sloKeys = {
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
     [...sloKeys.historicalSummaries(), list] as const,
-  definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
-    [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
+  allDefinitions: () => [...sloKeys.all, 'definitions'],
+  definitions: (params: {
+    search: string;
+    page: number;
+    perPage: number;
+    includeOutdatedOnly: boolean;
+    validTags: string;
+  }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
-  health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
+  health: (list: Array<{ id: string; instanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
   burnRates: (
     sloId: string,
@@ -82,6 +88,7 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
 };
 
 export type SloKeys = typeof sloKeys;

@@ -88,6 +88,7 @@ export function RuntimeAttachment({
       {showUnsavedWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.unsavedRules',
               {
@@ -96,7 +97,7 @@ export function RuntimeAttachment({
               }
             )}
             color="warning"
-            iconType="iInCircle"
+            iconType="info"
             size="s"
           />
           <EuiSpacer />
@@ -139,7 +140,7 @@ export function RuntimeAttachment({
           <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="iInCircle" />
+              <EuiIcon type="info" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs">

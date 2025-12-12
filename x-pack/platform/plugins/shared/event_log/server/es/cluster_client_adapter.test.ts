@@ -6,18 +6,21 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  ClusterClientAdapter,
+import type {
   IClusterClientAdapter,
-  EVENT_BUFFER_LENGTH,
-  getQueryBody,
   FindEventsOptionsBySavedObjectFilter,
   AggregateEventsOptionsBySavedObjectFilter,
   AggregateEventsWithAuthFilter,
-  getQueryBodyWithAuthFilter,
   Doc,
 } from './cluster_client_adapter';
-import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
+import {
+  ClusterClientAdapter,
+  EVENT_BUFFER_LENGTH,
+  getQueryBody,
+  getQueryBodyWithAuthFilter,
+} from './cluster_client_adapter';
+import type { AggregateOptionsType } from '../event_log_client';
+import { queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
@@ -51,6 +54,20 @@ describe('indexDocument', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: [{ create: {} }, { message: 'foo' }],
+      index: 'kibana-event-log-ds',
+    });
+  });
+
+  test('should call cluster client bulk with given doc and id', async () => {
+    // @ts-expect-error
+    clusterClientAdapter.indexDocument({ id: 'abc', body: { message: 'foo' }, index: 'event-log' });
+
+    await retryUntil('cluster client bulk called', () => {
+      return clusterClient.bulk.mock.calls.length !== 0;
+    });
+
+    expect(clusterClient.bulk).toHaveBeenCalledWith({
+      body: [{ create: { _id: 'abc' } }, { message: 'foo' }],
       index: 'kibana-event-log-ds',
     });
   });
@@ -376,13 +393,11 @@ describe('setLegacyIndexTemplateToHidden', () => {
     await clusterClientAdapter.setLegacyIndexTemplateToHidden('foo-bar-template', currentTemplate);
     expect(clusterClient.indices.putTemplate).toHaveBeenCalledWith({
       name: 'foo-bar-template',
-      body: {
-        order: 0,
-        index_patterns: ['foo-bar-*'],
-        settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
-        mappings: { dynamic: false, properties: {} },
-        aliases: {},
-      },
+      order: 0,
+      index_patterns: ['foo-bar-*'],
+      settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
+      mappings: { dynamic: false, properties: {} },
+      aliases: {},
     });
   });
 
@@ -568,7 +583,7 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
       prefer_ilm: false,
       rollover_on_write: true,
       next_generation_managed_by: 'Index Lifecycle Management',
-    },
+    } as Partial<estypes.IndicesDataStream> as estypes.IndicesDataStream,
   ],
 };
 
@@ -656,7 +671,8 @@ describe('updateConcreteIndices', () => {
     });
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
   });
 
@@ -717,7 +733,8 @@ describe('updateConcreteIndices', () => {
 
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
     expect(logger.error).toHaveBeenCalledWith(
       `Error updating index mappings for foo: failed to put mappings`
@@ -2595,6 +2612,38 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
     },
   };
 
+  const defaultSearchResponse = {
+    hits: {
+      hits: [
+        {
+          _id: 'hit1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: { field: 'value1' },
+          sort: ['2021-01-01T00:00:00.000Z'],
+        },
+        {
+          _id: 'hit2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+          _source: { field: 'value2' },
+          sort: ['2021-01-01T00:00:01.000Z'],
+        },
+      ],
+      total: { value: 100, relation: 'eq' },
+    },
+    took: 0,
+    timed_out: false,
+    _shards: {
+      failed: 0,
+      successful: 0,
+      total: 0,
+      skipped: 0,
+    },
+  } as Awaited<ReturnType<typeof clusterClient.search>>;
+
   beforeEach(() => {
     clusterClient.openPointInTime.mockResponse({
       id: 'test-pit-id',
@@ -2605,37 +2654,7 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
         skipped: 0,
       },
     });
-    clusterClient.search.mockResponse({
-      hits: {
-        hits: [
-          {
-            _id: 'hit1',
-            _index: 'test-index',
-            _seq_no: 1,
-            _primary_term: 1,
-            _source: { field: 'value1' },
-            sort: ['2021-01-01T00:00:00.000Z'],
-          },
-          {
-            _id: 'hit2',
-            _index: 'test-index',
-            _seq_no: 2,
-            _primary_term: 1,
-            _source: { field: 'value2' },
-            sort: ['2021-01-01T00:00:01.000Z'],
-          },
-        ],
-        total: { value: 100, relation: 'eq' },
-      },
-      took: 0,
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        successful: 0,
-        total: 0,
-        skipped: 0,
-      },
-    });
+    clusterClient.search.mockResponse(defaultSearchResponse);
   });
 
   test('should use seq_no_primary_term in query', async () => {
@@ -2719,6 +2738,43 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
     ).rejects.toThrow('Search failed');
 
     expect(clusterClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+  });
+
+  describe('when the search request returns a pit', () => {
+    beforeEach(() => {
+      clusterClient.search.mockResponseOnce({
+        ...defaultSearchResponse,
+        pit_id: 'pit-id-returned-in-search-response',
+      });
+    });
+
+    test('should return properly formatted response', async () => {
+      const response = await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(
+        defaultQuery
+      );
+
+      expect(response).toEqual({
+        data: [
+          {
+            field: 'value1',
+            _id: 'hit1',
+            _index: 'test-index',
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+          {
+            field: 'value2',
+            _id: 'hit2',
+            _index: 'test-index',
+            _seq_no: 2,
+            _primary_term: 1,
+          },
+        ],
+        total: 100,
+        search_after: ['2021-01-01T00:00:01.000Z'],
+        pit_id: 'pit-id-returned-in-search-response',
+      });
+    });
   });
 });
 

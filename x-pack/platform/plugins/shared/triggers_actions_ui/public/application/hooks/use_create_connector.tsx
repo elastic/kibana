@@ -7,7 +7,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector, ActionConnectorWithoutId } from '../../types';
+import type { ActionConnector, ActionConnectorWithoutId } from '../../types';
 import { createActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -62,13 +62,18 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
         setIsLoading(false);
 
         if (error.name !== 'AbortError') {
-          toasts.addDanger(
-            error.body?.message ??
+          toasts.addError(error, {
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
+              { defaultMessage: 'Unable to create a connector.' }
+            ),
+            toastMessage:
+              error.body?.message ??
               i18n.translate(
                 'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
-                { defaultMessage: 'Cannot create a connector.' }
-              )
-          );
+                { defaultMessage: 'Check the Kibana logs for more information.' }
+              ),
+          });
         }
       }
     }

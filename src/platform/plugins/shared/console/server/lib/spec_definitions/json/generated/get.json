@@ -12,6 +12,7 @@
       "routing": "",
       "_source": "__flag__",
       "_source_excludes": [],
+      "_source_exclude_vectors": "__flag__",
       "_source_includes": [],
       "stored_fields": [],
       "version": "",
@@ -28,7 +29,7 @@
     "patterns": [
       "{index}/_doc/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get",
     "availability": {
       "stack": true,
       "serverless": true

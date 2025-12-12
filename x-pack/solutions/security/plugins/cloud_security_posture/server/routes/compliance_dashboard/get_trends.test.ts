@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { formatTrends, ScoreTrendDoc } from './get_trends';
+import type { ScoreTrendDoc } from './get_trends';
+import { formatTrends } from './get_trends';
 
 const trendDocs: ScoreTrendDoc[] = [
   {

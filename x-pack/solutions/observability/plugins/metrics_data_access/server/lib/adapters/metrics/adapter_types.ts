@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryMetric } from '../../../../common/inventory_models/types';
+import type { InventoryTsvbType } from '../../../../common/inventory_models/types';
 
 export enum InfraMetricModelQueryType {
   lucene = 'lucene',
@@ -27,7 +27,7 @@ export enum InfraMetricModelMetricType {
 }
 
 export interface InfraMetricModel {
-  id: InventoryMetric;
+  id: InventoryTsvbType;
   requires: string[];
   index_pattern: string | string[];
   interval: string;

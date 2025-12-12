@@ -9,11 +9,14 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { isStringLiteral } from '../ast/is';
+import { TIME_DURATION_UNITS } from '../parser/constants';
 import { LeafPrinter } from '../pretty_print';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
+  ESQLAstExpression,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
@@ -26,6 +29,7 @@ import {
   ESQLLocation,
   ESQLNamedParamLiteral,
   ESQLParam,
+  ESQLParens,
   ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
@@ -35,13 +39,18 @@ import {
   ESQLStringLiteral,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
-  ESQLTimeInterval,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
   BinaryExpressionOperator,
   ESQLParamKinds,
+  ESQLMap,
+  ESQLMapEntry,
+  ESQLTimeDurationLiteral,
+  ESQLDatePeriodLiteral,
+  ESQLAstHeaderCommand,
+  ESQLAstSetHeaderCommand,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
+import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**
@@ -98,49 +107,95 @@ export namespace Builder {
   export namespace expression {
     export const query = (
       commands: ESQLAstQueryExpression['commands'] = [],
-      fromParser?: Partial<AstNodeParserFields>
+      fromParser?: Partial<AstNodeParserFields>,
+      header?: ESQLAstHeaderCommand[]
     ): ESQLAstQueryExpression => {
       return {
         ...Builder.parserFields(fromParser),
+        header,
         commands,
         type: 'query',
         name: '',
       };
     };
 
-    export type SourceTemplate = { index: string } & Omit<AstNodeTemplate<ESQLSource>, 'name'>;
+    export namespace source {
+      export type SourceTemplate = {
+        prefix?: string | ESQLSource['prefix'];
+        index?: string | ESQLSource['index'];
+        selector?: string | ESQLSource['selector'];
+      } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'prefix' | 'index' | 'selector'> &
+        Partial<Pick<ESQLSource, 'name'>>;
 
-    export const source = (
-      indexOrTemplate: string | SourceTemplate,
-      fromParser?: Partial<AstNodeParserFields>
-    ): ESQLSource => {
-      const template: SourceTemplate =
-        typeof indexOrTemplate === 'string'
-          ? { sourceType: 'index', index: indexOrTemplate }
-          : indexOrTemplate;
-      const { index, cluster } = template;
-      return {
-        ...template,
-        ...Builder.parserFields(fromParser),
-        type: 'source',
-        name: (cluster ? cluster + ':' : '') + index,
+      export const node = (
+        indexOrTemplate: string | ESQLStringLiteral | SourceTemplate,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLSource => {
+        const template: SourceTemplate =
+          typeof indexOrTemplate === 'string' || isStringLiteral(indexOrTemplate)
+            ? { sourceType: 'index', index: indexOrTemplate }
+            : indexOrTemplate;
+        const prefix: ESQLSource['prefix'] = !template.prefix
+          ? undefined
+          : typeof template.prefix === 'string'
+          ? Builder.expression.literal.string(template.prefix, { unquoted: true })
+          : template.prefix;
+        const index: ESQLSource['index'] = !template.index
+          ? undefined
+          : typeof template.index === 'string'
+          ? Builder.expression.literal.string(template.index, { unquoted: true })
+          : template.index;
+        const selector: ESQLSource['selector'] = !template.selector
+          ? undefined
+          : typeof template.selector === 'string'
+          ? Builder.expression.literal.string(template.selector, { unquoted: true })
+          : template.selector;
+        const sourceNode: ESQLSource = {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'source',
+          prefix,
+          index,
+          selector,
+          name: template.name ?? '',
+        };
+
+        if (!sourceNode.name) {
+          sourceNode.name = LeafPrinter.source(sourceNode);
+        }
+
+        return sourceNode;
       };
-    };
 
-    export const indexSource = (
-      index: string,
-      cluster?: string,
-      template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
+      export const index = (
+        indexName: string,
+        prefix?: string | ESQLSource['prefix'],
+        selector?: string | ESQLSource['selector'],
+        template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'prefix'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLSource => {
+        return Builder.expression.source.node(
+          {
+            ...template,
+            index: indexName,
+            prefix,
+            selector,
+            sourceType: 'index',
+          },
+          fromParser
+        );
+      };
+    }
+
+    export const parens = (
+      child: ESQLAstExpression,
       fromParser?: Partial<AstNodeParserFields>
-    ): ESQLSource => {
+    ): ESQLParens => {
       return {
-        ...template,
+        type: 'parens',
+        name: '',
+        child,
         ...Builder.parserFields(fromParser),
-        index,
-        cluster,
-        sourceType: 'index',
-        type: 'source',
-        name: (cluster ? cluster + ':' : '') + index,
       };
     };
 
@@ -265,10 +320,10 @@ export namespace Builder {
       export const binary = <Name extends BinaryExpressionOperator = BinaryExpressionOperator>(
         name: Name,
         args: [left: ESQLAstItem, right: ESQLAstItem],
-        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        template?: Omit<AstNodeTemplate<ESQLBinaryExpression<Name>>, 'subtype' | 'name' | 'args'>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLBinaryExpression<Name> => {
-        const operator = Builder.identifier({ name });
+        const operator = template?.operator ?? Builder.identifier({ name });
         return Builder.expression.func.node(
           { ...template, name, operator, args, subtype: 'binary-expression' },
           fromParser
@@ -281,6 +336,37 @@ export namespace Builder {
       template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
       fromParser?: Partial<AstNodeParserFields>
     ) => Builder.expression.func.binary('where', args, template, fromParser);
+
+    export namespace list {
+      export const literal = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          name: '',
+        };
+      };
+
+      export const tuple = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          subtype: 'tuple',
+          name: '',
+        };
+      };
+    }
 
     export namespace literal {
       /**
@@ -377,20 +463,22 @@ export namespace Builder {
       };
 
       /**
-       * Constructs "time interval" literal node.
-       *
-       * @example 1337 milliseconds
+       * Constructs AST nodes from timespan literals (e.g. 1 day, 2s)
        */
-      export const qualifiedInteger = (
-        quantity: ESQLTimeInterval['quantity'],
-        unit: ESQLTimeInterval['unit'],
+      export const timespan = (
+        quantity: ESQLTimeDurationLiteral['quantity'],
+        unit: ESQLTimeDurationLiteral['unit'],
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLTimeInterval => {
+      ): ESQLTimeDurationLiteral | ESQLDatePeriodLiteral => {
         return {
           ...Builder.parserFields(fromParser),
-          type: 'timeInterval',
+          type: 'literal',
+          literalType: TIME_DURATION_UNITS.has(unit.toLowerCase())
+            ? 'time_duration'
+            : 'date_period',
           unit,
           quantity,
+          value: `${quantity} ${unit}`,
           name: `${quantity} ${unit}`,
         };
       };
@@ -404,15 +492,16 @@ export namespace Builder {
           Partial<Pick<ESQLStringLiteral, 'name'>>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLStringLiteral => {
-        const value =
-          '"' +
-          valueUnquoted
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t') +
-          '"';
+        const value = !!template?.unquoted
+          ? valueUnquoted
+          : '"' +
+            valueUnquoted
+              .replace(/\\/g, '\\\\')
+              .replace(/"/g, '\\"')
+              .replace(/\n/g, '\\n')
+              .replace(/\r/g, '\\r')
+              .replace(/\t/g, '\\t') +
+            '"';
         const name = template?.name ?? value;
         const node: ESQLStringLiteral = {
           ...template,
@@ -426,19 +515,43 @@ export namespace Builder {
 
         return node;
       };
-
-      export const list = (
-        template: Omit<AstNodeTemplate<ESQLList>, 'name'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLList => {
-        return {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'list',
-          name: '',
-        };
-      };
     }
+
+    export const map = (
+      template: Omit<AstNodeTemplate<ESQLMap>, 'name' | 'entries'> &
+        Partial<Pick<ESQLMap, 'entries'>> = {},
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLMap => {
+      const entries = template.entries ?? [];
+
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'map',
+        entries,
+      };
+    };
+
+    export const entry = (
+      key: string | ESQLMapEntry['key'],
+      value: ESQLMapEntry['value'],
+      fromParser?: Partial<AstNodeParserFields>,
+      template?: Omit<AstNodeTemplate<ESQLMapEntry>, 'key' | 'value'>
+    ): ESQLMapEntry => {
+      if (typeof key === 'string') {
+        key = Builder.expression.literal.string(key);
+      }
+
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'map-entry',
+        key,
+        value,
+      };
+    };
   }
 
   export const identifier = (
@@ -545,5 +658,47 @@ export namespace Builder {
         return Builder.param.named({ ...options, paramKind, value }, fromParser);
       }
     };
+  }
+
+  export namespace header {
+    export interface HeaderCommandBuilder {
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name>;
+
+      set: (
+        args: ESQLAstSetHeaderCommand['args'],
+        template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ) => ESQLAstSetHeaderCommand;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    export const command: HeaderCommandBuilder = Object.assign(
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name> => {
+        return {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          args: template.args ?? [],
+          type: 'header-command',
+        };
+      },
+      {
+        set: (
+          args: ESQLAstSetHeaderCommand['args'],
+          template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+          fromParser?: Partial<AstNodeParserFields>
+        ): ESQLAstSetHeaderCommand => {
+          return Builder.header.command(
+            { args, ...template, name: 'set' },
+            fromParser
+          ) as ESQLAstSetHeaderCommand;
+        },
+      }
+    );
   }
 }

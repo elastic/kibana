@@ -118,3 +118,21 @@ export const queryRuleTypePreviewLogs: RulePreviewLogs[] = [
     ],
   },
 ];
+
+export const mlRuleTypePreviewLogs: RulePreviewLogs[] = [
+  {
+    errors: [],
+    warnings: [],
+    startedAt: '2025-04-04T16:54:26.303Z',
+    duration: 43,
+    requests: [
+      {
+        request:
+          'POST /.ml-anomalies-*/_search\n{\n  "fields": [\n    {\n      "field": "*",\n      "include_unmapped": true\n    }\n  ],\n  "query": {\n    "bool": {\n      "filter": [\n        {\n          "query_string": {\n            "query": "result_type:record",\n            "analyze_wildcard": false\n          }\n        },\n        {\n          "term": {\n            "is_interim": false\n          }\n        },\n        {\n          "bool": {\n            "must": [\n              {\n                "range": {\n                  "timestamp": {\n                    "gte": 1743767606303,\n                    "lte": 1743785666303,\n                    "format": "epoch_millis"\n                  }\n                }\n              },\n              {\n                "range": {\n                  "record_score": {\n                    "gte": 50\n                  }\n                }\n              },\n              {\n                "query_string": {\n                  "analyze_wildcard": false,\n                  "query": "job_id:auth_high_count_logon_events"\n                }\n              }\n            ]\n          }\n        }\n      ]\n    }\n  },\n  "size": 100,\n  "sort": [\n    {\n      "record_score": {\n        "order": "desc"\n      }\n    }\n  ]\n}',
+        description: 'Find all anomalies',
+        duration: 12,
+        request_type: 'findAnomalies',
+      },
+    ],
+  },
+];

@@ -239,7 +239,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                 defaultMessage:
                   'Document count found is based on a smaller set of sampled records.',
               })}
-              type="questionInCircle"
+              type="question"
             />
           </div>
         ),
@@ -303,6 +303,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                         defaultMessage: 'Hide distributions',
                       })
                 }
+                disableScreenReaderOutput={true}
               >
                 <EuiButtonIcon
                   style={{ marginLeft: 4 }}
@@ -310,7 +311,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                   iconType={!showDistributions ? 'eye' : 'eyeClosed'}
                   onClick={() => toggleShowDistribution()}
                   aria-label={
-                    showDistributions
+                    !showDistributions
                       ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
                           defaultMessage: 'Show distributions',
                         })
@@ -388,6 +389,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const $panelWidthS = `calc(max(20%, 225px))`;
   const $panelWidthM = `calc(max(30%, 300px))`;
+  const $panelWidthL = `calc(max(35%, 400px))`;
 
   const dvTableCss = css({
     thead: {
@@ -439,11 +441,12 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         },
       },
       '& .dvTopValues__wrapper': {
-        minWidth: 'fit-content',
+        minWidth: $panelWidthM,
+        maxWidth: $panelWidthL,
       },
       '& .dvPanel__wrapper': {
         '&.dvPanel--compressed': {
-          width: $panelWidthS,
+          minWidth: $panelWidthS,
         },
         '&.dvPanel--uniform': {
           minWidth: $panelWidthS,
@@ -458,6 +461,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
 
       '& .dvMap__wrapper': {
+        minWidth: $panelWidthL,
         height: '240px',
       },
       '& .dvText__wrapper': {
@@ -489,7 +493,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <EuiInMemoryTable<T>
-            message={message}
+            noItemsMessage={message}
             css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}

@@ -15,13 +15,15 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { FormHook } from '../../../../../shared_imports';
-import { Document } from '../../types';
+import type { FormHook } from '../../../../../shared_imports';
+import type { Document } from '../../types';
 
-import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
-import { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
+import type { TestPipelineFlyoutTab } from './test_pipeline_tabs';
+import { Tabs, OutputTab, DocumentsTab } from './test_pipeline_tabs';
+import type { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
 
 export interface Props {
   onClose: () => void;
@@ -62,6 +64,8 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 }) => {
   let tabContent;
 
+  const pipelineTitleId = useGeneratedHtmlId();
+
   if (selectedTab === 'output') {
     tabContent = (
       <OutputTab
@@ -85,10 +89,15 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiFlyout maxWidth={550} onClose={onClose} data-test-subj="testPipelineFlyout">
+    <EuiFlyout
+      maxWidth={550}
+      onClose={onClose}
+      data-test-subj="testPipelineFlyout"
+      aria-labelledby={pipelineTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2 data-test-subj="title">
+          <h2 data-test-subj="title" id={pipelineTitleId}>
             <FormattedMessage
               id="xpack.ingestPipelines.testPipelineFlyout.title"
               defaultMessage="Test pipeline"
@@ -118,6 +127,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         {testingError ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.testPipelineFlyout.executePipelineError"

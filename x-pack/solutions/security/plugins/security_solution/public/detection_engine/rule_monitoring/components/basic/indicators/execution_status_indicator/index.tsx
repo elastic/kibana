@@ -10,11 +10,11 @@ import { EuiHealth } from '@elastic/eui';
 
 import type { RuleExecutionStatus } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RuleStatusBadge } from '../../../../../../detections/components/rules/rule_execution_status';
+import { RuleStatusBadge } from '../../../../../common/components/rule_execution_status';
 import {
   getCapitalizedStatusText,
   getStatusColor,
-} from '../../../../../../detections/components/rules/rule_execution_status/utils';
+} from '../../../../../common/components/rule_execution_status/utils';
 
 const EMPTY_STATUS_TEXT = getEmptyTagValue();
 

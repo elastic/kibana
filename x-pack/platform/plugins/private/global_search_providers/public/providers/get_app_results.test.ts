@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { AppStatus, PublicAppInfo, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { AppLink, appToResult, getAppResults, scoreApp } from './get_app_results';
+import type { PublicAppInfo } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { AppLink } from './get_app_results';
+import { appToResult, getAppResults, scoreApp } from './get_app_results';
 
 const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'app1',

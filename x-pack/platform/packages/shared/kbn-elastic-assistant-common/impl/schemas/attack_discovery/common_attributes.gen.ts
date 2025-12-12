@@ -16,8 +16,9 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
+import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 /**
  * An attack discovery generated from one or more alerts
@@ -55,7 +56,7 @@ export const AttackDiscovery = z.object({
   /**
    * The time the attack discovery was generated
    */
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
 });
 
 /**
@@ -185,65 +186,159 @@ export const AttackDiscoveryResponse = z.object({
   failureReason: z.string().optional(),
 });
 
-export type AttackDiscoveryUpdateProps = z.infer<typeof AttackDiscoveryUpdateProps>;
-export const AttackDiscoveryUpdateProps = z.object({
-  id: NonEmptyString,
+export type CreateAttackDiscoveryAlertsParams = z.infer<typeof CreateAttackDiscoveryAlertsParams>;
+export const CreateAttackDiscoveryAlertsParams = z.object({
   /**
-   * LLM API configuration.
+   * The number of alerts provided as context to the LLM
    */
-  apiConfig: ApiConfig.optional(),
+  alertsContextCount: z.number().int(),
   /**
-   * The number of alerts in the context.
+   * The anonymized alerts that were used to generate the attack discovery
    */
-  alertsContextCount: z.number().int().optional(),
+  anonymizedAlerts: z.array(
+    z.object({
+      id: z.string().optional(),
+      metadata: z.object({}),
+      pageContent: z.string(),
+    })
+  ),
   /**
-   * The attack discoveries.
+   * LLM API configuration
    */
-  attackDiscoveries: AttackDiscoveries.optional(),
+  apiConfig: ApiConfig,
   /**
-   * The status of the attack discovery.
-   */
-  status: AttackDiscoveryStatus.optional(),
-  replacements: Replacements.optional(),
-  /**
-   * The most 5 recent generation intervals
-   */
-  generationIntervals: z.array(GenerationInterval).optional(),
-  /**
-   * The backing index required for update requests.
-   */
-  backingIndex: z.string(),
-  /**
-   * The reason for a status of failed.
-   */
-  failureReason: z.string().optional(),
-  /**
-   * The last time attack discovery was viewed in the browser.
-   */
-  lastViewedAt: z.string().optional(),
-});
-
-export type AttackDiscoveryCreateProps = z.infer<typeof AttackDiscoveryCreateProps>;
-export const AttackDiscoveryCreateProps = z.object({
-  /**
-   * The attack discovery id.
-   */
-  id: z.string().optional(),
-  /**
-   * The status of the attack discovery.
-   */
-  status: AttackDiscoveryStatus,
-  /**
-   * The number of alerts in the context.
-   */
-  alertsContextCount: z.number().int().optional(),
-  /**
-   * The attack discoveries.
+   * The generated Attack discoveries
    */
   attackDiscoveries: AttackDiscoveries,
+  /**
+   * The name of the connector that generated the attack discovery
+   */
+  connectorName: z.string(),
+  /**
+   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+   */
+  enableFieldRendering: z.boolean(),
+  /**
+   * The generation ID of the run that created the attack discovery
+   */
+  generationUuid: z.string(),
+  /**
+   * Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
+   */
+  replacements: Replacements.optional(),
+  /**
+   * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+   */
+  withReplacements: z.boolean(),
+});
+
+export type FindAttackDiscoveryAlertsParams = z.infer<typeof FindAttackDiscoveryAlertsParams>;
+export const FindAttackDiscoveryAlertsParams = z.object({
+  /**
+   * filter by alert IDs within Attack discovery
+   */
+  alertIds: z.array(z.string()).optional(),
+  /**
+   * filter by connector names
+   */
+  connectorNames: z.array(z.string()).optional(),
+  /**
+   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+   */
+  enableFieldRendering: z.boolean(),
+  /**
+   * filter by end date (relative or absolute)
+   */
+  end: z.string().optional(),
+  /**
+   * filter by execution UUID
+   */
+  executionUuid: z.string().optional(),
+  /**
+   * whether to include attack alert IDs in the response
+   */
+  includeUniqueAlertIds: z.boolean().optional(),
+  /**
+   * filter by Attack discovery IDs
+   */
+  ids: z.array(z.string()).optional(),
+  page: z.number().int().min(1).optional().default(1),
+  perPage: z.number().int().min(0).optional().default(10),
+  /**
+   * filter by search query
+   */
+  search: z.string().optional(),
+  /**
+   * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.
+   */
+  shared: z.boolean().optional(),
+  sortField: z.string().optional().default('@timestamp'),
+  sortOrder: z.string().optional(),
+  /**
+   * filter by start date (relative or absolute)
+   */
+  start: z.string().optional(),
+  /**
+   * filter by kibana.alert.workflow.status
+   */
+  status: z.array(z.string()).optional(),
+  /**
+   * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+   */
+  withReplacements: z.boolean(),
+});
+
+export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;
+export const AttackDiscoveryGenerationConfig = z.object({
+  /** 
+      * The (space specific) index pattern that contains the alerts to use as
+context for the attack discovery.
+Example: .alerts-security.alerts-default
+ 
+      */
+  alertsIndexPattern: z.string(),
+  /**
+   * The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.
+   */
+  anonymizationFields: z.array(AnonymizationFieldResponse),
   /**
    * LLM API configuration.
    */
   apiConfig: ApiConfig,
+  connectorName: z.string().optional(),
+  end: z.string().optional(),
+  /** 
+      * An Elasticsearch-style query DSL object used to filter alerts. For example:
+```json {
+  "filter": {
+    "bool": {
+      "must": [],
+      "filter": [
+        {
+          "bool": {
+            "should": [
+              {
+                "term": {
+                  "user.name": { "value": "james" }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ],
+      "should": [],
+      "must_not": []
+    }
+  }
+} ``` 
+      */
+  filter: z.object({}).catchall(z.unknown()).optional(),
+  langSmithProject: z.string().optional(),
+  langSmithApiKey: z.string().optional(),
+  model: z.string().optional(),
   replacements: Replacements.optional(),
+  size: z.number(),
+  start: z.string().optional(),
+  subAction: z.enum(['invokeAI', 'invokeStream']),
 });

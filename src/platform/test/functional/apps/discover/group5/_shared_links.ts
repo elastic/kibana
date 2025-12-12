@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -143,12 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.get(currentUrl, false);
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
-          const { title } = await toasts.getErrorByIndex(1, true);
-          expect(title).to.contain(
-            'Unable to completely restore the URL, be sure to use the share functionality.'
-          );
         });
-        await toasts.dismissAll();
       });
     });
   });

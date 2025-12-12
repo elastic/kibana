@@ -31,8 +31,6 @@ const ExternalServiceSchema = schema.object({
   pushed_by: UserSchema,
 });
 
-const SettingsSchema = schema.object({ syncAlerts: schema.boolean() });
-
 const CustomFieldsSchema = schema.arrayOf(
   schema.object({
     key: schema.string(),
@@ -54,7 +52,9 @@ export const casesSchema = schema.object({
   duration: schema.nullable(schema.number()),
   external_service: schema.nullable(ExternalServiceSchema),
   owner: schema.string(),
-  settings: SettingsSchema,
+  settings: schema.object({
+    syncAlerts: schema.boolean(),
+  }),
   severity: schema.oneOf([
     schema.literal(10),
     schema.literal(20),

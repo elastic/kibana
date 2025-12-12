@@ -9,7 +9,7 @@
 
 import * as t from 'io-ts';
 import { merge as lodashMerge } from 'lodash';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 
 type PlainObject = Record<string | number | symbol, any>;
 

@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import * as example1 from './examples/1_using_existing_format';
 import * as example2 from './examples/2_creating_custom_formatter';
 // @ts-ignore
@@ -168,7 +168,7 @@ const CreatingCustomFieldFormatEditor: React.FC<{ deps: Deps }> = (props) => {
 
 export const App: React.FC<{ deps: Deps }> = (props) => {
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <EuiPageTemplate offset={0}>
         <EuiPageTemplate.Header pageTitle="Field formats examples" />
         <EuiPageTemplate.Section grow={false}>

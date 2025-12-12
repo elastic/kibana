@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
@@ -25,12 +26,8 @@ import type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPublicPluginStartUi,
 } from './types';
-import { createFilterAction } from './actions/apply_filter_action';
-import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
-import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
+import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions/constants';
 import { FiltersBuilderLazy } from './filters_builder';
-
-import './index.scss';
 
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
@@ -53,11 +50,6 @@ export class UnifiedSearchPublicPlugin
 
     uiActions.registerTrigger(updateFilterReferencesTrigger);
 
-    uiActions.registerAction(
-      createFilterAction(query.filterManager, query.timefilter.timefilter, core)
-    );
-
-    uiActions.registerAction(createUpdateFilterReferencesAction(query.filterManager));
     this.usageCollection = usageCollection;
 
     return {
@@ -70,7 +62,13 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
+    {
+      data,
+      dataViews,
+      uiActions,
+      screenshotMode,
+      cps: crossProjectSearch,
+    }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setCoreStart(core);
     setIndexPatterns(dataViews);
@@ -95,13 +93,24 @@ export class UnifiedSearchPublicPlugin
         unifiedSearch: {
           autocomplete: autocompleteStart,
         },
+        cps: crossProjectSearch,
       });
 
     const SearchBar = getCustomSearchBar();
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);
+    uiActions.addTriggerActionAsync(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER, async () => {
+      const { createFilterAction } = await import('./actions/actions_module');
+      return createFilterAction(data.query.filterManager, data.query.timefilter.timefilter, core);
+    });
 
-    uiActions.attachAction(UPDATE_FILTER_REFERENCES_TRIGGER, UPDATE_FILTER_REFERENCES_ACTION);
+    uiActions.addTriggerActionAsync(
+      UPDATE_FILTER_REFERENCES_TRIGGER,
+      UPDATE_FILTER_REFERENCES_ACTION,
+      async () => {
+        const { createUpdateFilterReferencesAction } = await import('./actions/actions_module');
+        return createUpdateFilterReferencesAction(data.query.filterManager);
+      }
+    );
 
     return {
       ui: {

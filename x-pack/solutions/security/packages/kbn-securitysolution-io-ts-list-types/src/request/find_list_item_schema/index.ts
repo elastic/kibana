@@ -13,7 +13,7 @@ import { cursor } from '../../common/cursor';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
 import { list_id } from '../../common/list_id';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const findListItemSchema = t.intersection([
   t.exact(t.type({ list_id })),

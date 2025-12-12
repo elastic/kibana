@@ -9,18 +9,22 @@
 
 import React from 'react';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import camelCase from 'lodash/camelCase';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import type { FieldHook } from '../../hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
   euiFieldProps?: Record<string, any>;
   idAria?: string;
+  name?: string;
   [key: string]: any;
 }
 
-export const RadioGroupField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+export const RadioGroupField = ({ field, euiFieldProps = {}, idAria, name, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const radioGroupName = name || camelCase(field.label || 'optionsGroup');
 
   return (
     <EuiFormRow
@@ -37,6 +41,7 @@ export const RadioGroupField = ({ field, euiFieldProps = {}, idAria, ...rest }: 
         options={[]}
         onChange={field.setValue}
         data-test-subj="input"
+        name={radioGroupName}
         {...euiFieldProps}
       />
     </EuiFormRow>

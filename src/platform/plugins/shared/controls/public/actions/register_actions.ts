@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from './constants';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from './controls_hover_trigger';
 

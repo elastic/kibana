@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CollapseFunction } from '@kbn/visualizations-plugin/common';
+import type { CollapseFunction } from '@kbn/lens-common';
 import type { Metric } from '../../../../common/types';
 
 const functionMap: Partial<Record<string, CollapseFunction>> = {

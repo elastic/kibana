@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
+import type { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserDataView } from './has_user_data_view';
@@ -35,6 +35,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     includeEmptyFields,
     abortSignal,
     runtimeMappings,
+    allowHidden,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, {
       uiSettingsClient: this.uiSettingsClient,
@@ -52,6 +53,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         includeEmptyFields,
         abortSignal,
         runtimeMappings,
+        allowHidden,
       })
       .catch((err) => {
         if (

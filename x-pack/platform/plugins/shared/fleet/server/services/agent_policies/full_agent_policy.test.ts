@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-
 import omit from 'lodash/omit';
 
 import type { AgentPolicy, Output, DownloadSource, PackageInfo } from '../../types';
-import { createAppContextStartContractMock } from '../../mocks';
+import {
+  createAppContextStartContractMock,
+  createMessageSigningServiceMock,
+  createSavedObjectClientMock,
+} from '../../mocks';
 
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
@@ -36,7 +38,7 @@ const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as j
 >;
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
-const soClientMock = savedObjectsClientMock.create();
+const soClientMock = createSavedObjectClientMock();
 const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
 const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as jest.Mock<
   ReturnType<typeof getFleetServerHostsForAgentPolicy>
@@ -98,6 +100,16 @@ jest.mock('../output', () => {
       type: 'remote_elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
     },
+    'test-streams-id': {
+      id: 'test-streams-id',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'streams output',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+      write_to_logs_streams: true,
+    },
   };
   return {
     outputService: {
@@ -121,7 +133,7 @@ jest.mock('../download_source', () => {
   return {
     downloadSourceService: {
       getDefaultDownloadSourceId: async () => 'default-download-source-id',
-      get: async (soClient: any, id: string): Promise<DownloadSource> => {
+      get: async (id: string): Promise<DownloadSource> => {
         if (id === 'test-ds-1') {
           return {
             id: 'test-ds-1',
@@ -166,6 +178,9 @@ function getAgentPolicyUpdateMock() {
 
 describe('getFullAgentPolicy', () => {
   beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getMessageSigningService').mockReturnValue(undefined);
+
     mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
       name: 'default Fleet Server',
       id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -222,7 +237,7 @@ describe('getFullAgentPolicy', () => {
     mockAgentPolicy({
       revision: 1,
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -254,7 +269,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['logs'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -291,7 +306,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['metrics'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -328,7 +343,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['traces'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -364,7 +379,7 @@ describe('getFullAgentPolicy', () => {
       keep_monitoring_alive: true,
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy?.agent?.monitoring).toEqual({
       enabled: true,
@@ -380,7 +395,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['metrics'],
     });
-    await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(mockedGetElasticAgentMonitoringPermissions).toHaveBeenCalledWith(
       expect.anything(),
@@ -400,7 +415,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       monitoring_output_id: 'monitoring-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -412,7 +427,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       data_output_id: 'data-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -425,7 +440,7 @@ describe('getFullAgentPolicy', () => {
       data_output_id: 'data-output-id',
       monitoring_output_id: 'monitoring-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -442,7 +457,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_output_id: 'test-id',
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy?.outputs.default).toBeDefined();
   });
@@ -459,7 +474,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_output_id: 'test-remote-id',
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy?.outputs['test-remote-id']).toBeDefined();
   });
@@ -578,7 +593,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     const agentPolicy = await getFullAgentPolicy(
-      savedObjectsClientMock.create(),
+      createSavedObjectClientMock(),
       'integration-output-policy'
     );
     expect(agentPolicy).toMatchSnapshot();
@@ -698,7 +713,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     const agentPolicy = await getFullAgentPolicy(
-      savedObjectsClientMock.create(),
+      createSavedObjectClientMock(),
       'integration-output-policy'
     );
     expect(agentPolicy).toMatchSnapshot();
@@ -711,7 +726,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       download_source_id: 'test-ds-1',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -746,6 +761,7 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
   it('should return agent binary with secrets if there are any present', async () => {
     mockAgentPolicy({
       namespace: 'default',
@@ -753,7 +769,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       download_source_id: 'test-ds-secrets',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -799,7 +815,7 @@ describe('getFullAgentPolicy', () => {
         { name: 'feature2', enabled: true },
       ],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -836,10 +852,11 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should populate agent.protection and signed properties if encryption is available', async () => {
-    appContextService.start(createAppContextStartContractMock());
-
+    (appContextService.getMessageSigningService as jest.Mock).mockReturnValue(
+      createMessageSigningServiceMock()
+    );
     mockAgentPolicy({});
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy!.agent!.protection).toMatchObject({
       enabled: false,
@@ -850,6 +867,16 @@ describe('getFullAgentPolicy', () => {
       data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7ImZlYXR1cmVzIjp7fSwicHJvdGVjdGlvbiI6eyJlbmFibGVkIjpmYWxzZSwidW5pbnN0YWxsX3Rva2VuX2hhc2giOiIiLCJzaWduaW5nX2tleSI6InRoaXNpc2FwdWJsaWNrZXkifX0sImlucHV0cyI6W119',
       signature: 'thisisasignature',
     });
+  });
+
+  it('should not populate agent.protection and signed properties for standalone policies', async () => {
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy', {
+      standalone: true,
+    });
+
+    expect(agentPolicy!.agent!.protection).toBeUndefined();
+    expect(agentPolicy!.signed).toBeUndefined();
   });
 
   it('should compile full policy with correct namespaces', async () => {
@@ -963,7 +990,7 @@ describe('getFullAgentPolicy', () => {
       is_protected: false,
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(omit(agentPolicy, 'signed', 'secret_references', 'agent.protection')).toEqual({
       agent: {
@@ -1070,6 +1097,83 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should return a policy with logs permissions when write_to_logs_streams is enabled', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'somelogs.log',
+        },
+      ],
+    } as PackageInfo);
+    mockAgentPolicy({
+      data_output_id: 'test-streams-id',
+      package_policies: [
+        {
+          name: 'test-policy',
+          namespace: 'defaultspace',
+          id: 'package-policy-uuid-test-123',
+          enabled: true,
+          policy_ids: ['agent-policy'],
+          package: {
+            name: 'somelogs',
+            title: 'Some logs',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logfile',
+              enabled: true,
+              streams: [
+                {
+                  id: 'logfile-somelogs.log',
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'somelogs.log',
+                    type: 'logs',
+                  },
+                },
+              ],
+            },
+          ],
+          revision: 1,
+          created_at: '2020-01-01',
+          created_by: '',
+          updated_at: '2020-01-01',
+          updated_by: '',
+        },
+      ],
+    });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      output_permissions: {
+        'test-streams-id': {
+          _elastic_agent_checks: {
+            cluster: ['monitor'],
+          },
+          'package-policy-uuid-test-123': {
+            indices: [
+              {
+                names: ['logs-somelogs.log-defaultspace'],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
+          },
+          _write_to_logs_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
   it('should return a policy with advanced settings', async () => {
     mockAgentPolicy({
       advanced_settings: {
@@ -1081,7 +1185,7 @@ describe('getFullAgentPolicy', () => {
         agent_logging_files_interval: '7h',
       },
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -1114,7 +1218,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     mockAgentPolicy({});
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
     expect(agentPolicy?.outputs).toMatchObject({
       default: {
         hosts: ['http://127.0.0.1:9201'],
@@ -1344,6 +1448,39 @@ ssl.test: 123
     `);
   });
 
+  it('should keep ssl fields for es output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "preset": "balanced",
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [],
+        },
+        "type": "elasticsearch",
+      }
+    `);
+  });
+
   it('should works with proxy', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
@@ -1425,6 +1562,78 @@ ssl.test: 123
     `);
   });
 
+  it('should not override advanced yaml ssl fields for logstash output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['host.fr:3332'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'logstash',
+        config_yaml: 'ssl:\n  verification_mode: "none" ',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "host.fr:3332",
+        ],
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [],
+          "verification_mode": "none",
+        },
+        "type": "logstash",
+      }
+    `);
+  });
+
+  it('should not override advanced yaml ssl fields for elasticsearch output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+        config_yaml:
+          'ssl:\n  verification_mode: "none"\n  certificate_authorities: ["/tmp/ssl/ca.crt"] ',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "preset": "balanced",
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [
+            "/tmp/ssl/ca.crt",
+          ],
+          "verification_mode": "none",
+        },
+        "type": "elasticsearch",
+      }
+    `);
+  });
+
   it('should work with kafka output', () => {
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',
@@ -1481,26 +1690,11 @@ ssl.test: 123
 });
 
 describe('generateFleetConfig', () => {
-  const agentPolicy = {
-    id: 'agent-policy',
-    status: 'active',
-    package_policies: [],
-    is_managed: false,
-    namespace: 'default',
-    revision: 1,
-    name: 'Policy',
-    updated_at: '2020-01-01',
-    updated_by: 'qwerty',
-    is_protected: false,
-  } as any;
-
   it('should work without proxy', () => {
     const res = generateFleetConfig(
-      agentPolicy,
       {
         host_urls: ['https://test.fr'],
       } as any,
-      [],
       []
     );
 
@@ -1515,7 +1709,6 @@ describe('generateFleetConfig', () => {
 
   it('should work with proxy', () => {
     const res = generateFleetConfig(
-      agentPolicy,
       {
         host_urls: ['https://test.fr'],
         proxy_id: 'proxy-1',
@@ -1525,8 +1718,7 @@ describe('generateFleetConfig', () => {
           id: 'proxy-1',
           url: 'https://proxy.fr',
         } as any,
-      ],
-      []
+      ]
     );
 
     expect(res).toMatchInlineSnapshot(`
@@ -1541,7 +1733,6 @@ describe('generateFleetConfig', () => {
 
   it('should work with proxy with headers and certificate authorities', () => {
     const res = generateFleetConfig(
-      agentPolicy,
       {
         host_urls: ['https://test.fr'],
         proxy_id: 'proxy-1',
@@ -1553,8 +1744,7 @@ describe('generateFleetConfig', () => {
           certificate_authorities: ['/tmp/ssl/ca.crt'],
           proxy_headers: { Authorization: 'xxx' },
         } as any,
-      ],
-      []
+      ]
     );
 
     expect(res).toMatchInlineSnapshot(`
@@ -1581,7 +1771,6 @@ describe('generateFleetConfig', () => {
 
   it('should work with proxy with headers and certificate authorities and certificate and key', () => {
     const res = generateFleetConfig(
-      agentPolicy,
       {
         host_urls: ['https://test.fr'],
         proxy_id: 'proxy-1',
@@ -1595,8 +1784,7 @@ describe('generateFleetConfig', () => {
           certificate: 'my-cert',
           certificate_key: 'my-key',
         } as any,
-      ],
-      []
+      ]
     );
 
     expect(res).toMatchInlineSnapshot(`
@@ -1624,250 +1812,32 @@ describe('generateFleetConfig', () => {
   });
 
   it('should generate ssl config when a default ES output has ssl options', () => {
-    const outputs = [
+    const res = generateFleetConfig(
       {
-        id: 'output-1',
-        name: 'Output 1',
-        type: 'elasticsearch',
-        is_default_monitoring: true,
-        is_default: true,
-        hosts: ['http://test.fr:9200'],
+        host_urls: ['https://test.fr'],
         ssl: {
-          certificate_authorities: ['/tmp/ssl/ca.crt'],
-          certificate: 'my-cert',
+          agent_certificate_authorities: ['/tmp/ssl/ca.crt'],
+          agent_certificate: 'my-cert',
+        },
+        secrets: {
+          ssl: {
+            agent_key: 'my-key',
+          },
+        },
+      } as any,
+      []
+    );
+
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+      },
+      secrets: {
+        ssl: {
           key: 'my-key',
         },
-      },
-      {
-        id: 'output-2',
-        name: 'Output 2',
-        type: 'remote_elasticsearch',
-        is_default_monitoring: false,
-        hosts: ['http://test.fr:9200'],
-        is_default: false,
-      },
-    ] as any;
-
-    const res = generateFleetConfig(
-      agentPolicy,
-      {
-        host_urls: ['https://test.fr'],
-      } as any,
-      [], // no proxies
-      outputs
-    );
-
-    expect(res).toEqual({
-      hosts: ['https://test.fr'],
-      ssl: {
-        certificate: 'my-cert',
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
-        key: 'my-key',
-      },
-    });
-  });
-
-  it('should generate ssl config when a default remote_elasticsearch output has ssl options', () => {
-    const outputs = [
-      {
-        id: 'output-1',
-        name: 'Output 1',
-        type: 'remote_elasticsearch',
-        is_default_monitoring: true,
-        is_default: true,
-        hosts: ['http://test.fr:9200'],
-        ssl: {
-          certificate_authorities: ['/tmp/ssl/ca.crt'],
-          certificate: 'my-cert',
-          key: 'my-key',
-        },
-      },
-      {
-        id: 'output-2',
-        name: 'Output 2',
-        type: 'remote_elasticsearch',
-        is_default_monitoring: false,
-        hosts: ['http://test.fr:9200'],
-        is_default: false,
-      },
-    ] as any;
-
-    const res = generateFleetConfig(
-      agentPolicy,
-      {
-        host_urls: ['https://test.fr'],
-      } as any,
-      [], // no proxies
-      outputs
-    );
-
-    expect(res).toEqual({
-      hosts: ['https://test.fr'],
-      ssl: {
-        certificate: 'my-cert',
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
-        key: 'my-key',
-      },
-    });
-  });
-
-  it('should generate ssl config when a ES custom output has ssl options', () => {
-    const outputs = [
-      {
-        id: 'output-1',
-        name: 'Output 1',
-        type: 'elasticsearch',
-        is_default: true,
-        hosts: ['http://test.fr:9200'],
-      },
-      {
-        id: 'output-2',
-        name: 'Output 2',
-        type: 'elasticsearch',
-        is_default_monitoring: false,
-        hosts: ['http://test.fr:9200'],
-        is_default: false,
-        ssl: {
-          certificate_authorities: ['/tmp/ssl/ca.crt'],
-          certificate: 'my-cert',
-        },
-        secrets: {
-          ssl: {
-            key: { id: 'my-key' },
-          },
-        },
-      },
-    ] as any;
-
-    const agentPolicyWithCustomOutput = { ...agentPolicy, data_output_id: 'output-2' };
-    const res = generateFleetConfig(
-      agentPolicyWithCustomOutput,
-      {
-        host_urls: ['https://test.fr'],
-      } as any,
-      [], // no proxies
-      outputs
-    );
-
-    expect(res).toEqual({
-      hosts: ['https://test.fr'],
-      secrets: {
-        ssl: {
-          key: { id: 'my-key' },
-        },
-      },
-      ssl: {
-        certificate: 'my-cert',
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
-      },
-    });
-  });
-
-  it('should generate ssl config when a remote_elasticsearch custom output has ssl options', () => {
-    const outputs = [
-      {
-        id: 'output-1',
-        name: 'Output 1',
-        type: 'elasticsearch',
-        is_default: true,
-        hosts: ['http://test.fr:9200'],
-      },
-      {
-        id: 'output-2',
-        name: 'Output 2',
-        type: 'remote_elasticsearch',
-        is_default_monitoring: false,
-        hosts: ['http://test.fr:9200'],
-        is_default: false,
-        ssl: {
-          certificate_authorities: ['/tmp/ssl/ca.crt'],
-          certificate: 'my-cert',
-        },
-        secrets: {
-          ssl: {
-            key: { id: 'my-key' },
-          },
-        },
-      },
-    ] as any;
-
-    const agentPolicyWithCustomOutput = { ...agentPolicy, data_output_id: 'output-2' };
-    const res = generateFleetConfig(
-      agentPolicyWithCustomOutput,
-      {
-        host_urls: ['https://test.fr'],
-      } as any,
-      [], // no proxies
-      outputs
-    );
-
-    expect(res).toEqual({
-      hosts: ['https://test.fr'],
-      secrets: {
-        ssl: {
-          key: {
-            id: 'my-key',
-          },
-        },
-      },
-      ssl: {
-        certificate: 'my-cert',
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
-      },
-    });
-  });
-
-  it('should use secrets key if both keys are present', () => {
-    const outputs = [
-      {
-        id: 'output-1',
-        name: 'Output 1',
-        type: 'elasticsearch',
-        is_default: true,
-        hosts: ['http://test.fr:9200'],
-      },
-      {
-        id: 'output-2',
-        name: 'Output 2',
-        type: 'remote_elasticsearch',
-        is_default_monitoring: false,
-        hosts: ['http://test.fr:9200'],
-        is_default: false,
-        ssl: {
-          certificate_authorities: ['/tmp/ssl/ca.crt'],
-          certificate: 'my-cert',
-          key: { id: 'my-key' },
-        },
-        secrets: {
-          ssl: {
-            key: { id: 'my-secret-key' },
-          },
-        },
-      },
-    ] as any;
-
-    const agentPolicyWithCustomOutput = { ...agentPolicy, data_output_id: 'output-2' };
-    const res = generateFleetConfig(
-      agentPolicyWithCustomOutput,
-      {
-        host_urls: ['https://test.fr'],
-      } as any,
-      [],
-      outputs
-    );
-
-    expect(res).toEqual({
-      hosts: ['https://test.fr'],
-      secrets: {
-        ssl: {
-          key: {
-            id: 'my-secret-key',
-          },
-        },
-      },
-      ssl: {
-        certificate: 'my-cert',
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
       },
     });
   });
@@ -2012,7 +1982,7 @@ describe('getBinarySourceSettings', () => {
   } as any;
 
   it('should return sourceURI for agent download config', () => {
-    expect(getBinarySourceSettings(downloadSource, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSource, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
     });
   });
@@ -2026,20 +1996,13 @@ describe('getBinarySourceSettings', () => {
         key: 'KEY1',
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSSL, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSSL, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       ssl: {
         certificate: 'cert',
         certificate_authorities: ['ca'],
         key: 'KEY1',
       },
-    });
-  });
-
-  it('should return agent download config when there is a proxy', () => {
-    expect(getBinarySourceSettings(downloadSource, 'http://proxy_uri.it')).toEqual({
-      proxy_url: 'http://proxy_uri.it',
-      sourceURI: 'http://custom-registry-test',
     });
   });
 
@@ -2052,7 +2015,7 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       secrets: {
         ssl: {
@@ -2075,7 +2038,7 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       ssl: {
         certificate: 'cert',
@@ -2088,6 +2051,7 @@ describe('getBinarySourceSettings', () => {
       },
     });
   });
+
   it('should return agent download config using secrets key if both keys are present', () => {
     const downloadSourceSecrets = {
       ...downloadSource,
@@ -2102,7 +2066,7 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       ssl: {
         certificate: 'cert',
@@ -2113,6 +2077,94 @@ describe('getBinarySourceSettings', () => {
           key: { id: 'secretkeyid' },
         },
       },
+    });
+  });
+
+  describe('with proxy', () => {
+    const proxy = {
+      id: 'proxy_1',
+      name: 'proxy1',
+      url: 'http://proxy_uri.it',
+      certificate: 'proxy_cert',
+      certificate_authorities: 'PROXY_CA',
+      certificate_key: 'PROXY_KEY1',
+      proxy_headers: { ProxyHeader1: 'Test' },
+      is_preconfigured: false,
+    };
+
+    it('should return config with ssl options coming from the proxy', () => {
+      expect(getBinarySourceSettings(downloadSource, proxy)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        proxy_headers: { ProxyHeader1: 'Test' },
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
+    });
+
+    it('should return no proxy_headers if they are not present in proxy', () => {
+      const proxyWithNoHeaders = {
+        id: 'proxy_1',
+        name: 'proxy1',
+        url: 'http://proxy_uri.it',
+        certificate: 'proxy_cert',
+        certificate_authorities: 'PROXY_CA',
+        certificate_key: 'PROXY_KEY1',
+        is_preconfigured: false,
+      };
+      expect(getBinarySourceSettings(downloadSource, proxyWithNoHeaders)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
+    });
+
+    it('should use proxy SSL options when present', () => {
+      expect(getBinarySourceSettings(downloadSource, proxy)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        proxy_headers: { ProxyHeader1: 'Test' },
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
+    });
+
+    it('should keep SSL secrets when present', () => {
+      const downloadSourceSecrets = {
+        ...downloadSource,
+        secrets: {
+          ssl: {
+            key: { id: 'keyid' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceSecrets, proxy)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        secrets: {
+          ssl: {
+            key: {
+              id: 'keyid',
+            },
+          },
+        },
+        proxy_headers: { ProxyHeader1: 'Test' },
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
     });
   });
 });

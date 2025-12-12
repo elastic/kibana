@@ -10,7 +10,7 @@
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { fireEvent, within } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -71,16 +71,16 @@ export const getConsoleSelectorsAndActionMock = (
   dataTestSubj: string = 'test'
 ): ConsoleTestSetup['selectors'] => {
   const getLeftOfCursorInputText: ConsoleSelectorsAndActionsMock['getLeftOfCursorInputText'] =
-    () => {
-      return renderResult.getByTestId(`${dataTestSubj}-cmdInput-leftOfCursor`).textContent ?? '';
-    };
+    getInputTextLeftOfCursor.bind(null, renderResult, dataTestSubj);
+
   const getRightOfCursorInputText: ConsoleSelectorsAndActionsMock['getRightOfCursorInputText'] =
-    () => {
-      return renderResult.getByTestId(`${dataTestSubj}-cmdInput-rightOfCursor`).textContent ?? '';
-    };
-  const getInputText: ConsoleSelectorsAndActionsMock['getInputText'] = () => {
-    return getLeftOfCursorInputText() + getRightOfCursorInputText();
-  };
+    getInputTextRightOfCursor.bind(null, renderResult, dataTestSubj);
+
+  const getInputText: ConsoleSelectorsAndActionsMock['getInputText'] = getInputTextFullValue.bind(
+    null,
+    renderResult,
+    dataTestSubj
+  );
 
   const isHelpPanelOpen = (): boolean => {
     return Boolean(renderResult.queryByTestId(`${dataTestSubj}-sidePanel-helpContent`));
@@ -88,17 +88,26 @@ export const getConsoleSelectorsAndActionMock = (
 
   const openHelpPanel: ConsoleSelectorsAndActionsMock['openHelpPanel'] = () => {
     if (!isHelpPanelOpen()) {
-      renderResult.getByTestId(`${dataTestSubj}-header-helpButton`).click();
+      act(() => {
+        renderResult.getByTestId(`${dataTestSubj}-header-helpButton`).click();
+      });
     }
   };
+
   const closeHelpPanel: ConsoleSelectorsAndActionsMock['closeHelpPanel'] = () => {
     if (isHelpPanelOpen()) {
-      renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
+      act(() => {
+        renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
+      });
     }
   };
+
   const submitCommand: ConsoleSelectorsAndActionsMock['submitCommand'] = () => {
-    renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
+    act(() => {
+      renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
+    });
   };
+
   const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = async (
     cmd,
     options = {}
@@ -115,6 +124,45 @@ export const getConsoleSelectorsAndActionMock = (
     submitCommand,
     enterCommand,
   };
+};
+
+/**
+ * Get the text in the console's input area to the left of the cursor position
+ * @param renderResult
+ * @param dataTestSubj
+ */
+const getInputTextLeftOfCursor = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): string => {
+  return renderResult.getByTestId(`${dataTestSubj}-cmdInput-leftOfCursor`).textContent ?? '';
+};
+
+/**
+ * Get the text in the console's input ara to the right of the cusror position
+ * @param renderResult
+ * @param dataTestSubj
+ */
+const getInputTextRightOfCursor = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): string => {
+  return renderResult.getByTestId(`${dataTestSubj}-cmdInput-rightOfCursor`).textContent ?? '';
+};
+
+/**
+ * Get the full text in the console's input area'
+ * @param renderResult
+ * @param dataTestSubj
+ */
+const getInputTextFullValue = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): string => {
+  return (
+    getInputTextLeftOfCursor(renderResult, dataTestSubj) +
+    getInputTextRightOfCursor(renderResult, dataTestSubj)
+  );
 };
 
 /**
@@ -139,6 +187,7 @@ export const enterConsoleCommand = async (
     dataTestSubj: string;
   }> = {}
 ): Promise<void> => {
+  const inputTextPriorToKeyboardInput = getInputTextFullValue(renderResult, dataTestSubj);
   const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
 
   if (keyCaptureInput === null) {
@@ -146,7 +195,6 @@ export const enterConsoleCommand = async (
   }
 
   if (useKeyboard) {
-    await user.click(keyCaptureInput);
     await user.keyboard(cmd);
   } else {
     await user.type(keyCaptureInput, cmd);
@@ -157,8 +205,43 @@ export const enterConsoleCommand = async (
     // so this uses fireEvent instead for the time being.
     // See here for a related discussion: https://github.com/testing-library/user-event/discussions/1164
     // await user.keyboard('[Enter]');
-    fireEvent.keyDown(keyCaptureInput, { key: 'enter', keyCode: 13 });
+    fireEvent.keyDown(keyCaptureInput, { key: 'enter', keyCode: 13, code: 'Enter' });
   }
+
+  await waitFor(
+    () => {
+      expect(getInputTextFullValue(renderResult, dataTestSubj)).not.toEqual(
+        inputTextPriorToKeyboardInput
+      );
+    },
+    { interval: 1, timeout: 3 }
+  ).catch(() => {
+    // Ignore errors. We just needed for the console to process state, which can be done async
+  });
+};
+
+/**
+ * Triggers a keyboard event on the console command input for testing purposes. Used mostly
+ * when needing to test combination of keys - like `CTRL+a`, etc.
+ *
+ * @param renderResult - The result from rendering the component using testing-library
+ * @param event - The keyboard event object to trigger
+ * @param options
+ * @param options.dataTestSubj - Optional test subject identifier prefix, defaults to 'test'
+ */
+export const triggerConsoleCommandInputEvent = async (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  event: object,
+  { dataTestSubj = 'test' }: Partial<{ dataTestSubj: string }> = {}
+): Promise<void> => {
+  const keyCaptureInputTestId = `${dataTestSubj}-keyCapture-input`;
+  const keyCaptureInput = renderResult.getByTestId(keyCaptureInputTestId);
+
+  if (keyCaptureInput === null) {
+    throw new Error(`No input found with test-subj: ${keyCaptureInputTestId}`);
+  }
+
+  fireEvent.keyDown(keyCaptureInput, event);
 };
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {

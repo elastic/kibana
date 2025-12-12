@@ -31,7 +31,9 @@
       "preference": "",
       "refresh": "__flag__",
       "request_cache": "__flag__",
-      "requests_per_second": "",
+      "requests_per_second": [
+        "-1"
+      ],
       "routing": "",
       "q": "",
       "scroll": [
@@ -75,7 +77,7 @@
     "patterns": [
       "{index}/_delete_by_query"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-by-query",
     "availability": {
       "stack": true,
       "serverless": true

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { setTimeout as timer } from 'timers/promises';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { startElasticsearch } from './elasticsearch';
 import { prepareModelVersionTestKit } from './test_kit';
 import type { ModelVersionTestBed } from './types';
@@ -76,7 +77,7 @@ export const createModelVersionTestBed = (): ModelVersionTestBed => {
       throw new Error('Elasticsearch not started');
     }
     await elasticsearch.stop();
-    await delay(10);
+    await timer(10_000);
     elasticsearch = undefined;
   };
 
@@ -86,5 +87,3 @@ export const createModelVersionTestBed = (): ModelVersionTestBed => {
     prepareTestKit: prepareModelVersionTestKit,
   };
 };
-
-const delay = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));

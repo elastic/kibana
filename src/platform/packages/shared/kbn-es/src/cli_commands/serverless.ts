@@ -17,18 +17,23 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { basename } from 'path';
 import { SERVERLESS_RESOURCES_PATHS } from '../paths';
 import { Cluster } from '../cluster';
+import type { ServerlessOptions } from '../utils';
 import {
   ES_SERVERLESS_REPO_ELASTICSEARCH,
   ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
-  ServerlessOptions,
-  isServerlessProjectType,
-  serverlessProjectTypes,
+  isEsServerlessProjectType,
+  esServerlessProjectTypes,
+  isServerlessProjectTier,
+  serverlessProductTiers,
+  kbnProjectTypeFromEs,
 } from '../utils';
-import { Command } from './types';
+import type { ServerlessProjectType } from '../utils';
+import type { Command } from './types';
 import { createCliError } from '../errors';
 
-const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();
+const supportedProjectTypesStr = Array.from(esServerlessProjectTypes).join(' | ').trim();
+const supportedProductTiersStr = Array.from(serverlessProductTiers).join(' | ').trim();
 
 export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
@@ -37,7 +42,8 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --projectType       Serverless project type: ${supportedProjectTypesStr}
+      --esProjectType     Serverless project type: ${supportedProjectTypesStr}
+      --productTier       Serverless product tier: ${supportedProductTiersStr}
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
@@ -58,14 +64,15 @@ export const serverless: Command = {
                           ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(
                             ' | '
                           )}
+      --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support.
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
 
     Examples:
 
-      es serverless --projectType es --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
-      es serverless --projectType oblt --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+      es serverless --projectType elasticsearch_general_purpose --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
+      es serverless --projectType observability --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
     `;
   },
   run: async (defaults = {}) => {
@@ -90,12 +97,12 @@ export const serverless: Command = {
         basePath: 'base-path',
         esArgs: 'E',
         files: 'F',
-        projectType: 'project-type',
+        esProjectType: ['projectType', 'project-type'], // ensure BWC: can still run with `--projectType`
         dataPath: 'data-path',
       },
 
       string: [
-        'projectType',
+        'esProjectType',
         'tag',
         'image',
         'basePath',
@@ -104,7 +111,7 @@ export const serverless: Command = {
         'kibanaUrl',
         'dataPath',
       ],
-      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
+      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady', 'uiam'],
 
       default: {
         ...defaults,
@@ -114,17 +121,32 @@ export const serverless: Command = {
       },
     }) as unknown as ServerlessOptions;
 
-    if (!options.projectType) {
+    if (!options.esProjectType) {
       throw createCliError(
         `--projectType flag is required and must be a string: ${supportedProjectTypesStr}`
       );
     }
 
-    if (!isServerlessProjectType(options.projectType)) {
+    if (options.productTier) {
+      if (options.productTier === 'search_ai_lake' && options.esProjectType !== 'security') {
+        throw createCliError(
+          `--productTier flag 'search_ai_lake' can only be used with projectType 'security'`
+        );
+      }
+      if (!isServerlessProjectTier(options.productTier)) {
+        throw createCliError(
+          `--productTier flag and must be a string: ${supportedProductTiersStr}`
+        );
+      }
+    }
+
+    if (!isEsServerlessProjectType(options.esProjectType)) {
       throw createCliError(
-        `Invalid projectType '${options.projectType}', supported values: ${supportedProjectTypesStr}`
+        `Invalid projectType '${options.esProjectType}', supported values: ${supportedProjectTypesStr}`
       );
     }
+    // also provide the Kibana project type, e.g. for role file selection
+    options.projectType = kbnProjectTypeFromEs.get(options.esProjectType) as ServerlessProjectType;
 
     // In case `--no-ssl` CLI argument is provided.
     if (!options.ssl) {

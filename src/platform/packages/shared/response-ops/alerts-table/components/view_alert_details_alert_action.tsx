@@ -21,11 +21,13 @@ import { typedMemo } from '../utils/react';
 export const ViewAlertDetailsAlertAction = typedMemo(
   <AC extends AdditionalContext = AdditionalContext>({
     alert,
-    openAlertInFlyout,
+    rowIndex,
+    onExpandedAlertIndexChange,
     onActionExecuted,
     isAlertDetailsEnabled,
     resolveAlertPagePath,
     tableId,
+    openLinksInNewTab,
   }: AlertActionsProps<AC>) => {
     const {
       services: {
@@ -45,6 +47,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
           key="viewAlertDetailsPage"
           size="s"
           href={linkToAlert}
+          target={openLinksInNewTab ? '_blank' : undefined}
         >
           {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
             defaultMessage: 'View alert details',
@@ -60,7 +63,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
         size="s"
         onClick={() => {
           onActionExecuted?.();
-          openAlertInFlyout(alert._id);
+          onExpandedAlertIndexChange(rowIndex);
         }}
       >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {

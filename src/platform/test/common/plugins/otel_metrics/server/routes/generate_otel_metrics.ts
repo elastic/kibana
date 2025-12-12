@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKibanaResponse, IRouter } from '@kbn/core/server';
-import { Metrics } from '../monitoring/metrics';
+import type { IKibanaResponse, IRouter } from '@kbn/core/server';
+import type { Metrics } from '../monitoring/metrics';
 
 export const generateOtelMetrics = (router: IRouter, metrics: Metrics) => {
   router.post(
     {
       path: '/api/generate_otel_metrics',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (_context, _req, res): Promise<IKibanaResponse<{}>> {

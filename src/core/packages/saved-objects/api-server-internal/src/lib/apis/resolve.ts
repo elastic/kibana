@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
 import { incrementCounterInternal } from './internals/increment_counter_internal';
 

@@ -14,9 +14,9 @@ import { share } from 'rxjs';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '../../common';
+import type { IInterpreterRenderHandlers } from '../../common';
 import { ExpressionLoader } from '../loader';
-import { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
+import type { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
 
 jest.mock('../loader', () => {
   return {
@@ -336,9 +336,7 @@ describe('ExpressionRenderer', () => {
     });
 
     const instance = mount(<ReactExpressionRenderer className="myClassName" expression="" />);
-    // Counte is 2 because the class is applied to ReactExpressionRenderer + internal component
-    expect(instance.find('.myClassName').length).toBe(2);
 
-    instance.unmount();
+    expect(instance.find('div.myClassName').length).toBe(1);
   });
 });

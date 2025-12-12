@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { KbnClientRequester, pathWithSpace } from './kbn_client_requester';
+import type { KbnClientRequester } from './kbn_client_requester';
+import { pathWithSpace } from './kbn_client_requester';
 
 export type UiSettingValues = Record<string, string | number | boolean | string[]>;
 interface UiSettingsApiResponse {

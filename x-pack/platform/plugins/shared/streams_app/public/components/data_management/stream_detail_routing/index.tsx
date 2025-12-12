@@ -5,34 +5,82 @@
  * 2.0.
  */
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
-import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { StreamDeleteModal } from '../../stream_delete_modal';
-import { useRoutingState } from './hooks/routing_state';
-import { ControlBar } from './control_bar';
-import { PreviewPanel } from './preview_panel';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { ManagementBottomBar } from '../management_bottom_bar';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { ChildStreamList } from './child_stream_list';
+import { PreviewPanel } from './preview_panel';
+import {
+  StreamRoutingContextProvider,
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+} from './state_management/stream_routing_state_machine';
+import { buildRoutingSaveRequestPayload, routingConverter } from './utils';
 
-export function StreamDetailRouting({
-  definition,
-  refreshDefinition,
-}: {
-  definition?: WiredStreamGetResponse;
+interface StreamDetailRoutingProps {
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
-}) {
+}
+
+export function StreamDetailRouting(props: StreamDetailRoutingProps) {
+  const router = useStreamsAppRouter();
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
+  const {
+    data,
+    streams: { streamsRepositoryClient },
+  } = dependencies.start;
+
+  const { timeState$ } = useTimefilter();
+
+  return (
+    <StreamRoutingContextProvider
+      definition={props.definition}
+      refreshDefinition={props.refreshDefinition}
+      core={core}
+      data={data}
+      timeState$={timeState$}
+      streamsRepositoryClient={streamsRepositoryClient}
+      forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
+      telemetryClient={telemetryClient}
+    >
+      <StreamDetailRoutingImpl />
+    </StreamRoutingContextProvider>
+  );
+}
+
+export function StreamDetailRoutingImpl() {
   const { appParams, core } = useKibana();
-  const theme = useEuiTheme().euiTheme;
-  const routingAppState = useRoutingState({ definition, toasts: core.notifications.toasts });
+
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+
+  const definition = routingSnapshot.context.definition;
+
+  const shouldDisplayBottomBar =
+    routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
+    routingSnapshot.can({ type: 'routingRule.save' });
 
   const {
     dependencies: {
@@ -44,28 +92,41 @@ export function StreamDetailRouting({
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
-        signal,
-      });
+      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal });
     },
-    [streamsRepositoryClient]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [streamsRepositoryClient, definition] // Refetch streams when the definition changes
   );
 
-  const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
-      Boolean(routingAppState.childUnderEdit) || routingAppState.hasChildStreamsOrderChanged,
+      routingSnapshot.can({ type: 'routingRule.save' }) ||
+      routingSnapshot.can({ type: 'routingRule.fork' }) ||
+      routingSnapshot.can({ type: 'suggestion.saveSuggestion' }),
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
 
-  if (!definition) {
-    return null;
-  }
+  const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
 
-  const closeModal = () => routingAppState.setShowDeleteModal(false);
+  const onBottomBarViewCodeClick = () => {
+    const routing = routingSnapshot.context.routing.map(routingConverter.toAPIDefinition);
+    const body = buildRoutingSaveRequestPayload(routingSnapshot.context.definition, routing);
+
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_ingest`,
+      body,
+    });
+  };
 
   return (
     <EuiFlexItem
@@ -74,15 +135,6 @@ export function StreamDetailRouting({
       `}
       grow
     >
-      {routingAppState.showDeleteModal && routingAppState.childUnderEdit && (
-        <StreamDeleteModal
-          closeModal={closeModal}
-          clearChildUnderEdit={() => routingAppState.selectChildUnderEdit(undefined)}
-          refreshDefinition={refreshDefinition}
-          name={routingAppState.childUnderEdit.child.destination}
-          availableStreams={availableStreams}
-        />
-      )}
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
@@ -92,62 +144,104 @@ export function StreamDetailRouting({
       >
         <EuiPanel
           hasShadow={false}
-          hasBorder
           className={css`
             display: flex;
             max-width: 100%;
             overflow: auto;
             flex-grow: 1;
           `}
-          paddingSize="xs"
+          paddingSize="none"
         >
           <EuiResizableContainer>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
-                  initialSize={30}
-                  minSize="300px"
+                  initialSize={40}
+                  minSize="400px"
                   tabIndex={0}
-                  paddingSize="s"
+                  paddingSize="l"
+                  color="subdued"
                   className={css`
-                    background-color: ${theme.colors.backgroundBaseSubdued};
                     overflow: auto;
                     display: flex;
                   `}
                 >
-                  <ChildStreamList
-                    definition={definition}
-                    routingAppState={routingAppState}
-                    availableStreams={availableStreams}
-                  />
+                  <ChildStreamList availableStreams={availableStreams} />
                 </EuiResizablePanel>
 
-                <EuiResizableButton accountForScrollbars="both" />
+                <EuiResizableButton indicator="border" />
 
                 <EuiResizablePanel
-                  initialSize={70}
+                  initialSize={60}
                   tabIndex={0}
                   minSize="300px"
-                  paddingSize="s"
+                  paddingSize="l"
                   className={css`
                     display: flex;
                     flex-direction: column;
                   `}
                 >
-                  <PreviewPanel definition={definition} routingAppState={routingAppState} />
+                  <PreviewPanel />
                 </EuiResizablePanel>
               </>
             )}
           </EuiResizableContainer>
         </EuiPanel>
-        <EuiFlexItem grow={false}>
-          <ControlBar
-            definition={definition}
-            routingAppState={routingAppState}
-            refreshDefinition={refreshDefinition}
-          />
-        </EuiFlexItem>
+        {shouldDisplayBottomBar && (
+          <EuiFlexItem grow={false}>
+            <ManagementBottomBar
+              confirmButtonText={i18n.translate('xpack.streams.streamDetailRouting.change', {
+                defaultMessage: 'Change routing',
+              })}
+              onCancel={cancelChanges}
+              onConfirm={saveChanges}
+              isLoading={routingSnapshot.matches({
+                ready: { reorderingRules: 'updatingStream' },
+              })}
+              disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
+              insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
+              onViewCodeClick={onBottomBarViewCodeClick}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
+      {isRequestPreviewFlyoutOpen && (
+        <RequestPreviewFlyout
+          codeContent={requestPreviewFlyoutCodeContent}
+          onClose={closeRequestPreviewFlyout}
+        />
+      )}
     </EuiFlexItem>
   );
 }
+
+const createForkSuccessNofitier =
+  ({ core, router }: { core: CoreStart; router: StatefulStreamsAppRouter }) =>
+  (streamName: string) =>
+    core.notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
+        defaultMessage: 'Stream saved',
+      }),
+      text: toMountPoint(
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
+              size="s"
+              target="_blank"
+              href={router.link('/{key}/management/{tab}', {
+                path: {
+                  key: streamName,
+                  tab: 'partitioning',
+                },
+              })}
+            >
+              {i18n.translate('xpack.streams.streamDetailRouting.view', {
+                defaultMessage: 'Open stream in new tab',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>,
+        core
+      ),
+    });

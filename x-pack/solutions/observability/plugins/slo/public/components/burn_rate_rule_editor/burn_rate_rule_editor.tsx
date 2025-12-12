@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
-import { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
+import type { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
 import { SloSelector } from './slo_selector';
-import { ValidationBurnRateRuleResult } from './validation';
+import type { ValidationBurnRateRuleResult } from './validation';
 import { createNewWindow, Windows } from './windows';
 import { BURN_RATE_DEFAULTS } from './constants';
 import { AlertTimeTable } from './alert_time_table';
@@ -78,6 +79,7 @@ export function BurnRateRuleEditor(props: Props) {
         <>
           <EuiSpacer size="l" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.rules.groupByMessage', {

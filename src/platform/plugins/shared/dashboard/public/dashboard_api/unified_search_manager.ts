@@ -7,34 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import {
-  GlobalQueryStateFromUrl,
-  RefreshInterval,
-  connectToQueryState,
-  extractSearchSourceReferences,
-  syncGlobalQueryStateWithUrl,
-} from '@kbn/data-plugin/public';
-import {
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-  compareFilters,
-  isFilterPinned,
-} from '@kbn/es-query';
-import { ESQLControlVariable } from '@kbn/esql-types';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
+import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
-  Observable,
   Subject,
   Subscription,
   combineLatest,
+  combineLatestWith,
   debounceTime,
   distinctUntilChanged,
   finalize,
@@ -44,15 +35,17 @@ import {
   tap,
 } from 'rxjs';
 import { dataService } from '../services/kibana_services';
-import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { DashboardCreationOptions, DashboardState } from './types';
+import type { DashboardCreationOptions } from './types';
+import type { DashboardState } from '../../common';
+import { cleanFiltersForSerialize } from '../../common';
+
+export const COMPARE_DEBOUNCE = 100;
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
-  timeRestore$: PublishingSubject<boolean | undefined>,
+  timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
   creationOptions?: DashboardCreationOptions
@@ -63,9 +56,8 @@ export function initializeUnifiedSearchManager(
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
 
-  const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const panelsReload$ = new Subject<void>();
+  const reload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
   function setQuery(query: Query) {
@@ -74,7 +66,7 @@ export function initializeUnifiedSearchManager(
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
-    initialState.refreshInterval
+    initialState.refresh_interval
   );
   function setRefreshInterval(refreshInterval: RefreshInterval) {
     if (!fastIsEqual(refreshInterval, refreshInterval$.value)) {
@@ -89,7 +81,7 @@ export function initializeUnifiedSearchManager(
       timefilterService.setRefreshInterval(refreshIntervalOrDefault);
     }
   }
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.time_range);
   function setTimeRange(timeRange: TimeRange) {
     if (!fastIsEqual(timeRange, timeRange$.value)) {
       timeRange$.next(timeRange);
@@ -105,7 +97,7 @@ export function initializeUnifiedSearchManager(
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
-  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[]) {
+  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
       unifiedSearchFilters$.next(unifiedSearchFilters);
     }
@@ -141,7 +133,6 @@ export function initializeUnifiedSearchManager(
       }
     )
   );
-  controlGroupSubscriptions.add(controlGroupFilters$.subscribe(() => panelsReload$.next()));
   controlGroupSubscriptions.add(
     controlGroupTimeslice$.subscribe((timeslice) => {
       if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
@@ -231,7 +222,7 @@ export function initializeUnifiedSearchManager(
           return;
         }
 
-        const lastSavedTimeRange = getLastSavedState()?.timeRange;
+        const lastSavedTimeRange = getLastSavedState()?.time_range;
         if (timeRestore$.value && lastSavedTimeRange) {
           setAndSyncTimeRange(lastSavedTimeRange);
           return;
@@ -251,7 +242,7 @@ export function initializeUnifiedSearchManager(
           return;
         }
 
-        const lastSavedRefreshInterval = getLastSavedState()?.refreshInterval;
+        const lastSavedRefreshInterval = getLastSavedState()?.refresh_interval;
         if (timeRestore$.value && lastSavedRefreshInterval) {
           setAndSyncRefreshInterval(lastSavedRefreshInterval);
           return;
@@ -265,8 +256,7 @@ export function initializeUnifiedSearchManager(
         .getAutoRefreshFetch$()
         .pipe(
           tap(() => {
-            controlGroupReload$.next();
-            panelsReload$.next();
+            reload$.next();
           }),
           switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))
         )
@@ -274,13 +264,65 @@ export function initializeUnifiedSearchManager(
     );
   }
 
+  const comparators = {
+    filters: (a, b) =>
+      compareFilters(
+        (a ?? []).filter((f) => !isFilterPinned(f)),
+        (b ?? []).filter((f) => !isFilterPinned(f)),
+        COMPARE_ALL_OPTIONS
+      ),
+    query: 'deepEquality',
+    refresh_interval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
+      timeRestore$.value ? fastIsEqual(a, b) : true,
+    time_range: (a: TimeRange | undefined, b: TimeRange | undefined) => {
+      if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
+      if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
+        return false;
+      }
+      return true;
+    },
+  } as StateComparators<
+    Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>
+  >;
+
+  const getState = (): Pick<
+    DashboardState,
+    'filters' | 'query' | 'refresh_interval' | 'time_range'
+  > => {
+    // pinned filters are not serialized when saving the dashboard
+    const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
+
+    const timeRange =
+      timeRestore$.value && timeRange$.value
+        ? {
+            from: timeRange$.value.from,
+            to: timeRange$.value.to,
+          }
+        : undefined;
+
+    const refreshInterval =
+      timeRestore$.value && refreshInterval$.value
+        ? {
+            pause: refreshInterval$.value.pause,
+            value: refreshInterval$.value.value,
+          }
+        : undefined;
+
+    return {
+      query: query$.value,
+      ...(serializableFilters?.length && { filters: serializableFilters }),
+      ...(refreshInterval && { refresh_interval: refreshInterval }),
+      ...(timeRange && { time_range: timeRange }),
+    };
+  };
+
   return {
     api: {
+      reload$,
       filters$,
       esqlVariables$,
       forceRefresh: () => {
-        controlGroupReload$.next();
-        panelsReload$.next();
+        reload$.next();
       },
       query$,
       refreshInterval$,
@@ -291,81 +333,45 @@ export function initializeUnifiedSearchManager(
       timeslice$,
       unifiedSearchFilters$,
     },
-    comparators: {
-      filters: [
-        unifiedSearchFilters$,
-        setUnifiedSearchFilters,
-        // exclude pinned filters from comparision because pinned filters are not part of application state
-        (a, b) =>
-          compareFilters(
-            (a ?? []).filter((f) => !isFilterPinned(f)),
-            (b ?? []).filter((f) => !isFilterPinned(f)),
-            COMPARE_ALL_OPTIONS
-          ),
-      ],
-      query: [query$, setQuery, fastIsEqual],
-      refreshInterval: [
-        refreshInterval$,
-        (refreshInterval: RefreshInterval | undefined) => {
-          if (timeRestore$.value) setAndSyncRefreshInterval(refreshInterval);
-        },
-        (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
-          timeRestore$.value ? fastIsEqual(a, b) : true,
-      ],
-      timeRange: [
-        timeRange$,
-        (timeRange: TimeRange | undefined) => {
-          if (timeRestore$.value) setAndSyncTimeRange(timeRange);
-        },
-        (a: TimeRange | undefined, b: TimeRange | undefined) => {
-          if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-          if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
-            return false;
-          }
-          return true;
-        },
-      ],
-    } as StateComparators<
-      Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
-    >,
     internalApi: {
-      controlGroupReload$,
-      panelsReload$,
+      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+        return combineLatest([
+          unifiedSearchFilters$,
+          query$,
+          refreshInterval$,
+          timeRange$,
+          timeRestore$,
+        ]).pipe(
+          debounceTime(COMPARE_DEBOUNCE),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          map(([filters, query, refresh_interval, time_range]) => ({
+            filters,
+            query,
+            refresh_interval,
+            time_range,
+          })),
+          combineLatestWith(lastSavedState$),
+          map(([latestState, lastSavedState]) =>
+            diffComparators(comparators, lastSavedState, latestState)
+          )
+        );
+      },
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
-          ...lastSavedState.filters,
+          ...(lastSavedState.filters ?? []),
         ]);
-        setQuery(lastSavedState.query);
-        if (lastSavedState.timeRestore) {
-          setAndSyncRefreshInterval(lastSavedState.refreshInterval);
-          setAndSyncTimeRange(lastSavedState.timeRange);
+        if (lastSavedState.query) {
+          setQuery(lastSavedState.query);
+        }
+        if (lastSavedState.time_range) {
+          setAndSyncTimeRange(lastSavedState.time_range);
+        }
+        if (lastSavedState.refresh_interval) {
+          setAndSyncRefreshInterval(lastSavedState.refresh_interval);
         }
       },
-      getState: (): {
-        state: Pick<
-          DashboardState,
-          'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
-        >;
-        references: SavedObjectReference[];
-      } => {
-        // pinned filters are not serialized when saving the dashboard
-        const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
-        const [{ filter, query }, references] = extractSearchSourceReferences({
-          filter: serializableFilters,
-          query: query$.value,
-        });
-        return {
-          state: {
-            filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
-            query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
-            refreshInterval: refreshInterval$.value,
-            timeRange: timeRange$.value,
-            timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
-          },
-          references,
-        };
-      },
+      getState,
     },
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();

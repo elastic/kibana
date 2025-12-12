@@ -383,21 +383,29 @@ _meta:
     expect(esClient.indices.putIndexTemplate.mock.calls).toEqual([
       [
         {
-          body: {
-            _meta: meta,
-            composed_of: [
-              'logs-endpoint.metadata_current-template@package',
-              'endpoint@custom',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default'],
-            priority: 250,
-            template: { mappings: undefined, settings: undefined },
-            ignore_missing_component_templates: [
-              'endpoint@custom',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
+          _meta: meta,
+          composed_of: [
+            'logs-endpoint.metadata_current-template@package',
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+            'ecs@mappings',
+          ],
+          index_patterns: ['.metrics-endpoint.metadata_united_default'],
+          priority: 250,
+          template: {
+            mappings: undefined,
+            settings: {
+              index: {
+                mapping: {
+                  ignore_malformed: true,
+                },
+              },
+            },
           },
+          ignore_missing_component_templates: [
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
           name: 'logs-endpoint.metadata_current-template',
         },
         { ignore: [404] },
@@ -673,21 +681,29 @@ _meta:
     expect(esClient.indices.putIndexTemplate.mock.calls).toEqual([
       [
         {
-          body: {
-            _meta: meta,
-            composed_of: [
-              'logs-endpoint.metadata_current-template@package',
-              'endpoint@custom',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default'],
-            priority: 250,
-            template: { mappings: undefined, settings: undefined },
-            ignore_missing_component_templates: [
-              'endpoint@custom',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
+          _meta: meta,
+          composed_of: [
+            'logs-endpoint.metadata_current-template@package',
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+            'ecs@mappings',
+          ],
+          index_patterns: ['.metrics-endpoint.metadata_united_default'],
+          priority: 250,
+          template: {
+            mappings: undefined,
+            settings: {
+              index: {
+                mapping: {
+                  ignore_malformed: true,
+                },
+              },
+            },
           },
+          ignore_missing_component_templates: [
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
           name: 'logs-endpoint.metadata_current-template',
         },
         { ignore: [404] },
@@ -940,21 +956,29 @@ _meta:
     expect(esClient.indices.putIndexTemplate.mock.calls).toEqual([
       [
         {
-          body: {
-            _meta: meta,
-            composed_of: [
-              'logs-endpoint.metadata_current-template@package',
-              'endpoint@custom',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default'],
-            priority: 250,
-            template: { mappings: undefined, settings: undefined },
-            ignore_missing_component_templates: [
-              'endpoint@custom',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
+          _meta: meta,
+          composed_of: [
+            'logs-endpoint.metadata_current-template@package',
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+            'ecs@mappings',
+          ],
+          index_patterns: ['.metrics-endpoint.metadata_united_default'],
+          priority: 250,
+          template: {
+            mappings: undefined,
+            settings: {
+              index: {
+                mapping: {
+                  ignore_malformed: true,
+                },
+              },
+            },
           },
+          ignore_missing_component_templates: [
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
           name: 'logs-endpoint.metadata_current-template',
         },
         { ignore: [404] },

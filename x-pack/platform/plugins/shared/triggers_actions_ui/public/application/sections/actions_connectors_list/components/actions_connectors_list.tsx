@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import type { Criteria } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -17,16 +18,18 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiEmptyPrompt,
-  Criteria,
   EuiButtonEmpty,
   EuiBadge,
   EuiPageTemplate,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -34,13 +37,9 @@ import {
   hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import './actions_connectors_list.scss';
-import {
-  ActionConnector,
-  ActionConnectorTableItem,
-  ActionTypeIndex,
-  EditConnectorTabs,
-} from '../../../../types';
+
+import type { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import { EditConnectorTabs } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
@@ -92,6 +91,7 @@ const ActionsConnectorsList = ({
     docLinks,
   } = useKibana().services;
 
+  const { euiTheme } = useEuiTheme();
   const { connectorId } = useParams<{ connectorId?: string }>();
   const history = useHistory();
   const location = useLocation();
@@ -104,6 +104,19 @@ const ActionsConnectorsList = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
+  const disabledActConnectorCss = css`
+    .actConnectorsList__tableRowDisabled {
+      background-color: ${euiTheme.colors.lightestShade};
+
+      .actConnectorsList__tableCellDisabled {
+        color: ${euiTheme.colors.darkShade};
+      }
+      .euiLink + .euiToolTipAnchor {
+        margin-left: ${euiTheme.size.xs};
+      }
+    }
+  `;
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -252,11 +265,7 @@ const ActionsConnectorsList = ({
         ) : (
           <>
             {link}
-            <EuiIconTip
-              type="questionInCircle"
-              content={checkEnabledResult.message}
-              position="right"
-            />
+            <EuiIconTip type="question" content={checkEnabledResult.message} position="right" />
           </>
         );
       },
@@ -306,46 +315,45 @@ const ActionsConnectorsList = ({
     {
       name: '',
       render: (item: ActionConnectorTableItem) => {
+        if (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]) {
+          return null;
+        }
+
+        const actionType = actionTypesIndex[item.actionTypeId];
+        const showFixButton = item.isMissingSecrets && actionType?.enabled;
+        const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
+
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
-            {item.isMissingSecrets ? (
-              <>
-                {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
-                  <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
-                        { defaultMessage: 'Fix connector configuration' }
-                      )}
-                    >
-                      <EuiButtonEmpty
-                        size="xs"
-                        data-test-subj="fixConnectorButton"
-                        onClick={() => editItem(item, EditConnectorTabs.Configuration, true)}
-                      >
-                        {i18n.translate(
-                          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
-                          {
-                            defaultMessage: 'Fix',
-                          }
-                        )}
-                      </EuiButtonEmpty>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                ) : null}
-              </>
-            ) : (
+            {showFixButton && (
+              <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
+                    { defaultMessage: 'Fix connector configuration' }
+                  )}
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    data-test-subj="fixConnectorButton"
+                    onClick={() => editItem(item, EditConnectorTabs.Configuration, true)}
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
+                      {
+                        defaultMessage: 'Fix',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {!showFixButton && (
               <RunOperation
                 canExecute={
-                  !!(
-                    actionTypesIndex &&
-                    actionTypesIndex[item.actionTypeId] &&
-                    hasExecuteActionsCapability(
-                      capabilities,
-                      actionTypesIndex[item.actionTypeId].subFeature
-                    )
-                  )
+                  isStackConnector &&
+                  hasExecuteActionsCapability(capabilities, actionType?.subFeature)
                 }
                 item={item}
                 onRun={() => editItem(item, EditConnectorTabs.Test)}
@@ -364,6 +372,7 @@ const ActionsConnectorsList = ({
       sorting={true}
       itemId="id"
       columns={actionsTableColumns}
+      css={disabledActConnectorCss}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
           !item.isPreconfigured &&
@@ -587,11 +596,11 @@ const RunOperation: React.FunctionComponent<{
           canExecute
             ? i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDescription',
-                { defaultMessage: 'Run this connector' }
+                { defaultMessage: 'Test this connector' }
               )
             : i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription',
-                { defaultMessage: 'Unable to run connectors' }
+                { defaultMessage: 'Unable to test this connector' }
               )
         }
       >
@@ -600,7 +609,7 @@ const RunOperation: React.FunctionComponent<{
           data-test-subj="runConnector"
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorName',
-            { defaultMessage: 'Run' }
+            { defaultMessage: 'Test' }
           )}
           onClick={onRun}
           iconType={'play'}

@@ -198,7 +198,8 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     bucketSpan: string,
     layerIndex?: number
   ) {
-    // @TODO: ask ML team to check if ES|QL query here is ok
+    // we should not have got this far if the query is ES|QL
+    // but just in case, throw an error if it is
     if (isOfAggregateQueryType(chartInfo.query)) {
       throw new Error('Cannot create job, query is of aggregate type');
     }

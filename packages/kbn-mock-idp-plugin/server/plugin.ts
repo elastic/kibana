@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { existsSync } from 'fs';
 import { resolve } from 'path';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -18,7 +19,10 @@ import {
   SERVERLESS_ROLES_ROOT_PATH,
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
+import type { ServerlessProductTier } from '@kbn/es/src/utils';
 import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+
+import type { ConfigType } from './config';
 
 export interface PluginSetupDependencies {
   cloud: CloudSetup;
@@ -36,15 +40,28 @@ const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  // TODO add new 'chat' solution
-  // https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
-  // https://github.com/elastic/kibana/issues/213469
+  ['workplaceai', 'workplaceai'],
 ]);
 
-const readServerlessRoles = (projectType: string) => {
+const tierSpecificRolesFileExists = (filePath: string): boolean => {
+  try {
+    return existsSync(filePath);
+  } catch (e) {
+    return false;
+  }
+};
+
+const readServerlessRoles = (projectType: string, productTier?: ServerlessProductTier) => {
   if (projectToAlias.has(projectType)) {
     const alias = projectToAlias.get(projectType)!;
-    const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+
+    const tierSpecificRolesResourcePath =
+      productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml');
+    const rolesResourcePath =
+      tierSpecificRolesResourcePath && tierSpecificRolesFileExists(tierSpecificRolesResourcePath)
+        ? tierSpecificRolesResourcePath
+        : resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+
     return readRolesFromResource(rolesResourcePath);
   } else {
     throw new Error(`Unsupported projectType: ${projectType}`);
@@ -58,12 +75,12 @@ const readStatefulRoles = () => {
 
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
-export const plugin: PluginInitializer<
-  void,
-  void,
-  PluginSetupDependencies
-> = async (): Promise<Plugin> => ({
+export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
+  initializerContext
+): Promise<Plugin> => ({
   setup(core, plugins: PluginSetupDependencies) {
+    const logger = initializerContext.logger.get();
+    const config = initializerContext.config.get<ConfigType>();
     const router = core.http.createRouter();
 
     core.http.resources.register(
@@ -71,6 +88,7 @@ export const plugin: PluginInitializer<
         path: MOCK_IDP_LOGIN_PATH,
         validate: false,
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         return response.renderAnonymousCoreApp();
@@ -85,12 +103,16 @@ export const plugin: PluginInitializer<
         path: '/mock_idp/supported_roles',
         validate: false,
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       (context, request, response) => {
         try {
           if (roles.length === 0) {
             const projectType = plugins.cloud?.serverless?.projectType;
-            roles.push(...(projectType ? readServerlessRoles(projectType) : readStatefulRoles()));
+            const productTier = plugins.cloud?.serverless?.productTier;
+            roles.push(
+              ...(projectType ? readServerlessRoles(projectType, productTier) : readStatefulRoles())
+            );
           }
           return response.ok({
             body: {
@@ -110,22 +132,39 @@ export const plugin: PluginInitializer<
           body: createSAMLResponseSchema,
         },
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         const { protocol, hostname, port } = core.http.getServerInfo();
         const pathname = core.http.basePath.prepend('/api/security/saml/callback');
 
-        return response.ok({
-          body: {
-            SAMLResponse: await createSAMLResponse({
-              kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
-              username: request.body.username,
-              full_name: request.body.full_name ?? undefined,
-              email: request.body.email ?? undefined,
-              roles: request.body.roles,
-            }),
-          },
-        });
+        const serverlessOptions = plugins.cloud?.serverless
+          ? {
+              serverless: {
+                organizationId: plugins.cloud.organizationId!,
+                projectType: plugins.cloud.serverless.projectType!,
+                uiamEnabled: !!config.uiam?.enabled,
+              },
+            }
+          : {};
+
+        try {
+          return response.ok({
+            body: {
+              SAMLResponse: await createSAMLResponse({
+                kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+                username: request.body.username,
+                full_name: request.body.full_name ?? undefined,
+                email: request.body.email ?? undefined,
+                roles: request.body.roles,
+                ...serverlessOptions,
+              }),
+            },
+          });
+        } catch (err) {
+          logger.error(`Failed to create SAMLResponse: ${err}`, err);
+          throw err;
+        }
       }
     );
 
@@ -134,6 +173,7 @@ export const plugin: PluginInitializer<
         path: MOCK_IDP_LOGOUT_PATH,
         validate: false,
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         return response.redirected({ headers: { location: '/' } });

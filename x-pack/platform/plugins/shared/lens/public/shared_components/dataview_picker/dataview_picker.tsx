@@ -8,10 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableProps } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { css } from '@emotion/react';
-import { type IndexPatternRef } from '../../types';
+import { type IndexPatternRef } from '@kbn/lens-common';
 import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 
 const MAX_WIDTH = 600;

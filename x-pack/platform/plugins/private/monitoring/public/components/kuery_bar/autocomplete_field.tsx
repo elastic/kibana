@@ -7,15 +7,10 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFieldSearch,
-  EuiOutsideClickDetector,
-  EuiPanel,
-  logicalCSS,
-  UseEuiTheme,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel, logicalCSS } from '@elastic/eui';
 
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 
 import { composeStateUpdaters } from '../../lib/typed_react';
 import { SuggestionItem } from './suggestion_item';

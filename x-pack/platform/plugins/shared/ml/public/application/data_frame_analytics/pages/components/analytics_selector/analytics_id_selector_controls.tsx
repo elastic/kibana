@@ -24,6 +24,8 @@ import {
   FlyoutType,
   useJobInfoFlyouts,
 } from '../../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 interface Props {
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   selectedId?: string;
@@ -51,6 +53,7 @@ const SelectorControl = ({ analyticsId, 'data-test-subj': dataTestSubj }: Select
               defaultMessage: 'Job details',
             }),
             icon: 'eye',
+            'data-test-subj': `mlAnalyticsJobDetailsFlyoutButton-${analyticsId}`,
             onClick: () => {
               setActiveJobId(analyticsId);
               setActiveFlyout(FlyoutType.DATA_FRAME_ANALYTICS_DETAILS);
@@ -92,14 +95,21 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
   setIsIdSelectorFlyoutVisible,
   selectedId,
 }) => {
+  const [canGetDataFrameAnalytics, canCreateDataFrameAnalytics] = usePermissionCheck([
+    'canGetDataFrameAnalytics',
+    'canCreateDataFrameAnalytics',
+  ]);
+
+  const redirectToDfaJobManagement = useCreateAndNavigateToManagementMlLink('', 'analytics');
+
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           {selectedId ? (
             <SelectorControl
               key={`${selectedId}-id`}
-              data-test-subj={`mlAnalyticsIdSelectionBadge ${selectedId}`}
+              data-test-subj={`mlAnalyticsIdSelectionBadge-${selectedId}`}
               analyticsId={selectedId}
             />
           ) : null}
@@ -118,6 +128,13 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             iconType="pencil"
             onClick={setIsIdSelectorFlyoutVisible.bind(null, true)}
             data-test-subj="mlButtonEditAnalyticsIdSelection"
+            aria-label={i18n.translate(
+              'xpack.ml.overview.dataFrameAnalytics.analyticsIdSelector.editSelectionForAriaLabel',
+              {
+                defaultMessage: 'Edit selection for {id}',
+                values: { id: selectedId },
+              }
+            )}
           >
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.editSelection"
@@ -125,6 +142,37 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
+        <EuiFlexItem />
+
+        {canGetDataFrameAnalytics ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              color="primary"
+              onClick={redirectToDfaJobManagement}
+              disabled={!canGetDataFrameAnalytics}
+              data-test-subj="mlJobSelectorManageJobsButton"
+              aria-label={i18n.translate(
+                'xpack.ml.overview.dataFrameAnalytics.jobSelector.manageJobsForAriaLabel',
+                {
+                  defaultMessage: 'Manage jobs',
+                }
+              )}
+            >
+              {canCreateDataFrameAnalytics ? (
+                <FormattedMessage
+                  id="xpack.ml.jobSelector.manageJobsLinkLabel"
+                  defaultMessage="Manage jobs"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.jobSelector.viewJobsLinkLabel"
+                  defaultMessage="View jobs"
+                />
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule />
     </>

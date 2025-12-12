@@ -31,7 +31,7 @@ export function isLoggedIn(user: User) {
 export function createUser(): User {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
-  const userName = faker.internet.userName({ firstName, lastName });
+  const userName = faker.internet.username({ firstName, lastName });
   return {
     id: userName,
     name: `${firstName} ${lastName}`,

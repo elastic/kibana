@@ -30,6 +30,7 @@ import {
   transformRawActionsToDomainSystemActions,
 } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 import { fieldsToExcludeFromPublicApi } from '../rules_client';
+import { transformRawArtifactsToDomainArtifacts } from '../../application/rule/transforms/transform_raw_artifacts_to_domain_artifacts';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -123,6 +124,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     snoozeSchedule,
     lastRun,
     isSnoozedUntil: DoNotUseIsSnoozedUntil,
+    artifacts,
     ...partialRawRule
   } = rawRule;
 
@@ -169,6 +171,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           omitGeneratedValues,
         })
       : [],
+    artifacts: transformRawArtifactsToDomainArtifacts(opts.id, artifacts, opts.references),
     params: injectReferencesIntoParams(
       opts.id,
       opts.ruleType,

@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
 import { FIXED_PROGRESSION } from '@kbn/coloring';
 
@@ -41,6 +42,7 @@ export function PalettePanelContainer(props: {
               content={i18n.translate('xpack.lens.colorMapping.editColors', {
                 defaultMessage: 'Edit colors',
               })}
+              disableScreenReaderOutput
             >
               <EuiButtonIcon
                 data-test-subj="lns_colorEditing_trigger"

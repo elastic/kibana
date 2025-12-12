@@ -26,7 +26,7 @@ import type {
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
-import { registerProductFeatures, getSecurityProductTier } from './product_features';
+import { registerProductFeatures, getSecurityAiSocProductTier } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
 import {
@@ -70,19 +70,24 @@ export class SecuritySolutionServerlessPlugin
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
   }
 
-  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+  public setup(
+    coreSetup: CoreSetup<SecuritySolutionServerlessPluginStartDeps>,
+    pluginsSetup: SecuritySolutionServerlessPluginSetupDeps
+  ) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
     // Register product features
     const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
-    registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
+    registerProductFeatures(pluginsSetup, enabledProductFeatures);
 
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
+    const projectSettings = SECURITY_PROJECT_SETTINGS;
+
     // Setup project uiSettings whitelisting
-    pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
+    pluginsSetup.serverless.setupProjectSettings(projectSettings);
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
@@ -131,7 +136,7 @@ export class SecuritySolutionServerlessPlugin
     this.nlpCleanupTask = new NLPCleanupTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
-      productTier: getSecurityProductTier(this.config, this.logger),
+      productTier: getSecurityAiSocProductTier(this.config, this.logger),
       taskManager: pluginsSetup.taskManager,
     });
 

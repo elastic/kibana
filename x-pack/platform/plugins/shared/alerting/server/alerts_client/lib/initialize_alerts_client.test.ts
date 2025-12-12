@@ -71,6 +71,8 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 const mockedRule: RuleData<Record<string, unknown>> = {
+  muteAll: false,
+  mutedInstanceIds: [],
   id: '1',
   name: 'rule-name',
   tags: ['rule-', '-tags'],
@@ -96,6 +98,7 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -125,6 +128,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -155,6 +160,7 @@ describe('initializeAlertsClient', () => {
       alertsService,
       context: {
         alertingEventLogger,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,
@@ -185,6 +191,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -217,6 +225,7 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -246,6 +255,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -286,6 +297,7 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,
@@ -317,6 +329,8 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muteAll: false,
+        mutedInstanceIds: [],
         parameters: {
           bar: true,
         },

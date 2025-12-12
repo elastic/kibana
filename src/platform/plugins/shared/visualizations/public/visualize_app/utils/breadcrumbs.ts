@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',
@@ -19,7 +19,7 @@ export function getLandingBreadcrumbs() {
   return [
     {
       text: i18n.translate('visualizations.listing.breadcrumb', {
-        defaultMessage: 'Visualize Library',
+        defaultMessage: 'Visualize library',
       }),
       href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
     },

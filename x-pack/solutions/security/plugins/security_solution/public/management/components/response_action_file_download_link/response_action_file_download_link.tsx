@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, type CSSProperties } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiSkeletonText,
@@ -14,9 +14,12 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  type EuiTextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useHttp } from '../../../common/lib/kibana';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
@@ -27,9 +30,9 @@ import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 
-const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
+const STYLE_INHERIT_FONT_FAMILY = {
   fontFamily: 'inherit',
-});
+};
 
 const DEFAULT_BUTTON_TITLE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.downloadButtonLabel',
@@ -104,7 +107,7 @@ export interface ResponseActionFileDownloadLinkProps {
   canAccessFileDownloadLink: boolean;
   isTruncatedFile?: boolean;
   'data-test-subj'?: string;
-  textSize?: 's' | 'xs';
+  textSize?: EuiTextProps['size'];
   /**
    * If zip file needs a passcode to be opened. If `false`, then the passcode text will not be displayed.
    * Default is `true`
@@ -131,17 +134,26 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
   }) => {
     const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const http = useHttp();
+
+    const isCompleted = useMemo(() => {
+      return agentId ? action.agentState[agentId]?.isCompleted : action.isCompleted;
+    }, [action.agentState, action.isCompleted, agentId]);
+
+    const wasSuccessful = useMemo(() => {
+      return agentId ? action.agentState[agentId]?.wasSuccessful : action.wasSuccessful;
+    }, [action.agentState, action.wasSuccessful, agentId]);
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
-      return action.isCompleted && action.wasSuccessful;
-    }, [action.isCompleted, action.wasSuccessful]);
+      return isCompleted && wasSuccessful;
+    }, [isCompleted, wasSuccessful]);
 
     const downloadUrl: string = useMemo(() => {
-      return `${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
+      return `${http.basePath.get()}${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
         file_id: getFileDownloadId(action, agentId),
       })}?apiVersion=2023-10-31`;
-    }, [action, agentId]);
+    }, [action, agentId, http.basePath]);
 
     const {
       isLoading,
@@ -151,7 +163,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       enabled: canAccessFileDownloadLink && shouldFetchFileInfo,
     });
 
-    if (!canAccessFileDownloadLink || !action.isCompleted || !action.wasSuccessful) {
+    if (!canAccessFileDownloadLink || !isCompleted || !wasSuccessful) {
       return null;
     }
 
@@ -171,7 +183,15 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         </EuiText>
       );
     } else if (error) {
-      return <FormattedError error={error} data-test-subj={getTestId('apiError')} />;
+      return (
+        <EuiText size={textSize} color="warning">
+          <FormattedMessage
+            id="xpack.securitySolution.responseActionFileDownloadLink.apiError"
+            defaultMessage="Attempt to retrieve file download information failed."
+          />
+          <FormattedError error={error} data-test-subj={getTestId('apiError')} />
+        </EuiText>
+      );
     }
 
     return (
@@ -181,7 +201,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           iconType="download"
           data-test-subj={getTestId('downloadButton')}
           flush="left"
-          style={STYLE_INHERIT_FONT_FAMILY}
+          css={STYLE_INHERIT_FONT_FAMILY}
           iconSize="s"
           download
         >

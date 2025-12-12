@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { SavedObject } from '@kbn/core/server';
-import { StoredSLODefinition } from '../domain/models';
+import type { SavedObjectMigrationFn, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core/server';
+import type { StoredSLODefinition } from '../domain/models';
 
 type StoredSLOBefore890 = StoredSLODefinition & {
   timeWindow: {
@@ -36,7 +36,6 @@ export const slo: SavedObjectsType = {
   name: SO_SLO_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [

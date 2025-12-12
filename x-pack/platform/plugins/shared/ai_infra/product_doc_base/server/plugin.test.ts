@@ -10,18 +10,21 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import { ProductDocBasePlugin } from './plugin';
-import { ProductDocBaseSetupDependencies, ProductDocBaseStartDependencies } from './types';
+import type { ProductDocBaseSetupDependencies, ProductDocBaseStartDependencies } from './types';
 
 jest.mock('./services/package_installer');
 jest.mock('./services/search');
 jest.mock('./services/doc_install_status');
+jest.mock('./services/doc_manager');
 jest.mock('./routes');
 jest.mock('./tasks');
 import { registerRoutes } from './routes';
 import { PackageInstaller } from './services/package_installer';
 import { registerTaskDefinitions, scheduleEnsureUpToDateTask } from './tasks';
+import { DocumentationManager } from './services/doc_manager';
 
 const PackageInstallMock = PackageInstaller as jest.Mock;
+const DocumentationManagerMock = DocumentationManager as jest.Mock;
 
 describe('ProductDocBasePlugin', () => {
   let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
@@ -41,6 +44,15 @@ describe('ProductDocBasePlugin', () => {
     };
 
     PackageInstallMock.mockReturnValue({ ensureUpToDate: jest.fn().mockResolvedValue({}) });
+
+    DocumentationManagerMock.mockReturnValue({
+      install: jest.fn().mockResolvedValue({}),
+      update: jest.fn().mockResolvedValue({}),
+      uninstall: jest.fn().mockResolvedValue({}),
+      getStatus: jest.fn().mockResolvedValue({}),
+      getStatuses: jest.fn().mockResolvedValue({}),
+      updateAll: jest.fn().mockResolvedValue({}),
+    });
   });
 
   afterEach(() => {
@@ -78,9 +90,11 @@ describe('ProductDocBasePlugin', () => {
       expect(startContract).toEqual({
         management: {
           getStatus: expect.any(Function),
+          getStatuses: expect.any(Function),
           install: expect.any(Function),
           uninstall: expect.any(Function),
           update: expect.any(Function),
+          updateAll: expect.any(Function),
         },
         search: expect.any(Function),
       });
@@ -89,8 +103,7 @@ describe('ProductDocBasePlugin', () => {
     it('schedules the update task', () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
       plugin.start(coreMock.createStart(), pluginStartDeps);
-
-      expect(scheduleEnsureUpToDateTask).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
     });
   });
 });

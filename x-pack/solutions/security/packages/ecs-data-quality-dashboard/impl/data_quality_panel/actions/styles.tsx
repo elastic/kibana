@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
 
 export const linkTextCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
   display: 'flex',

@@ -6,8 +6,8 @@
  */
 
 import { has, merge } from 'lodash/fp';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { EventHit } from '../../../../../common/search_strategy';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EventHit } from '../../../../../common/search_strategy';
 import { ECS_METADATA_FIELDS, TIMELINE_EVENTS_FIELDS } from './constants';
 import { getTimestamp } from './get_timestamp';
 import { buildObjectRecursive } from './build_object_recursive';
@@ -15,15 +15,16 @@ import { getNestedParentPath } from './get_nested_parent_path';
 
 export const buildEcsObjects = (hit: EventHit): Ecs => {
   const ecsFields = [...TIMELINE_EVENTS_FIELDS];
+  const fieldsKeys = Object.keys(hit.fields ?? {});
   return ecsFields.reduce(
     (acc, field) => {
-      const nestedParentPath = getNestedParentPath(field, hit.fields);
+      const nestedParentPath = getNestedParentPath(field, fieldsKeys);
       if (
         nestedParentPath != null ||
         has(field, hit.fields) ||
         ECS_METADATA_FIELDS.includes(field)
       ) {
-        return merge(acc, buildObjectRecursive(field, hit.fields));
+        return merge(acc, buildObjectRecursive(field, hit.fields, fieldsKeys));
       }
       return acc;
     },

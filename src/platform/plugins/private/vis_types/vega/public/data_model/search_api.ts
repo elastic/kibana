@@ -11,14 +11,13 @@ import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs';
 import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import type { IEsSearchResponse } from '@kbn/search-types';
-import {
-  getSearchParamsFromRequest,
-  SearchRequest,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import type { SearchRequest, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { search as dataPluginSearch } from '@kbn/data-plugin/public';
 import type { RequestResponder } from '@kbn/inspector-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
+import { sanitizeProjectRoutingForES } from '@kbn/es-query';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 
 /** @internal **/
@@ -58,7 +57,8 @@ export class SearchAPI {
     private readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters,
     private readonly searchSessionId?: string,
-    private readonly executionContext?: KibanaExecutionContext
+    private readonly executionContext?: KibanaExecutionContext,
+    private readonly projectRouting?: ProjectRouting
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -86,8 +86,14 @@ export class SearchAPI {
               requestResponders[requestId].json(params);
             }
           }),
-          switchMap((params) =>
-            search
+          switchMap((params) => {
+            const sanitizedRouting = sanitizeProjectRoutingForES(this.projectRouting);
+            if (sanitizedRouting) {
+              // @ts-ignore it will not throw ts error once ES client supports it
+              params.body.project_routing = sanitizedRouting;
+            }
+
+            return search
               .search(
                 { params },
                 {
@@ -109,10 +115,10 @@ export class SearchAPI {
                 ),
                 map((data) => ({
                   name: requestId,
-                  rawResponse: data.rawResponse,
+                  rawResponse: structuredClone(data.rawResponse),
                 }))
-              )
-          )
+              );
+          })
         );
       })
     );

@@ -9,7 +9,7 @@
 
 import type {
   ControlGroupRuntimeState,
-  OptionsListControlState,
+  OptionsListDSLControlState,
   ControlPanelState,
 } from '@kbn/controls-plugin/public';
 
@@ -25,7 +25,7 @@ export const getFilterItemObjListFromControlState = (controlState: ControlGroupR
   const panels = getPanelsInOrderFromControlsState(controlState);
   return panels.map((panel) => {
     const { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar } =
-      panel as ControlPanelState<OptionsListControlState>;
+      panel as ControlPanelState<OptionsListDSLControlState>;
 
     return {
       fieldName: fieldName as string,

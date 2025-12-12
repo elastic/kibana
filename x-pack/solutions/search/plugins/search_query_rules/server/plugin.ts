@@ -5,36 +5,43 @@
  * 2.0.
  */
 
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
-  DEFAULT_APP_CATEGORIES,
+  Logger,
 } from '@kbn/core/server';
-
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import {
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type {
   SearchQueryRulesPluginSetup,
   SearchQueryRulesPluginSetupDependencies,
   SearchQueryRulesPluginStart,
 } from './types';
 
+import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
 
 export class SearchQueryRulesPlugin
   implements Plugin<SearchQueryRulesPluginSetup, SearchQueryRulesPluginStart, {}, {}>
 {
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public setup(core: CoreSetup, plugins: SearchQueryRulesPluginSetupDependencies) {
+    const router = core.http.createRouter();
+
+    defineRoutes({ router, logger: this.logger });
+
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       name: PLUGIN_TITLE,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', PLUGIN_ID],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       catalogue: [PLUGIN_ID],
       privileges: {
         all: {

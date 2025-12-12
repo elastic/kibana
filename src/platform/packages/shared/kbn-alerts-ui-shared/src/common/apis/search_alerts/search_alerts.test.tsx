@@ -9,8 +9,9 @@
 
 import { of, Subject, throwError } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SearchAlertsResult, searchAlerts, SearchAlertsParams } from './search_alerts';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SearchAlertsResult, SearchAlertsParams } from './search_alerts';
+import { searchAlerts } from './search_alerts';
 
 const searchResponse = {
   id: '0',
@@ -85,6 +86,7 @@ const parsedAlerts = {
     {
       _index: '.internal.alerts-security.alerts-default-000001',
       _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
+      _score: 1,
       '@timestamp': ['2022-03-22T16:48:07.518Z'],
       'host.name': ['Host-4dbzugdlqd'],
       'kibana.alert.reason': [
@@ -99,6 +101,7 @@ const parsedAlerts = {
     {
       _index: '.internal.alerts-security.alerts-default-000001',
       _id: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
+      _score: 1,
       '@timestamp': ['2022-03-22T16:17:50.769Z'],
       'host.name': ['Host-4dbzugdlqd'],
       'kibana.alert.reason': [
@@ -130,6 +133,7 @@ const parsedAlerts = {
       host: { name: ['Host-4dbzugdlqd'] },
       _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
       _index: '.internal.alerts-security.alerts-default-000001',
+      _score: 1,
     },
     {
       kibana: {
@@ -148,6 +152,7 @@ const parsedAlerts = {
       host: { name: ['Host-4dbzugdlqd'] },
       _id: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
       _index: '.internal.alerts-security.alerts-default-000001',
+      _score: 1,
     },
   ],
   oldAlertsData: [
@@ -169,6 +174,10 @@ const parsedAlerts = {
         field: '_id',
         value: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
       },
+      {
+        field: '_score',
+        value: 1,
+      },
       { field: '_index', value: '.internal.alerts-security.alerts-default-000001' },
     ],
     [
@@ -188,6 +197,10 @@ const parsedAlerts = {
       {
         field: '_id',
         value: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
+      },
+      {
+        field: '_score',
+        value: 1,
       },
       { field: '_index', value: '.internal.alerts-security.alerts-default-000001' },
     ],
@@ -266,10 +279,9 @@ describe('searchAlerts', () => {
         ...expectedResponse,
         alerts: [],
         total: 0,
+        error: 'simulated search error',
       })
     );
-
-    expect(mockDataPlugin.search.showError).toHaveBeenCalled();
   });
 
   it("doesn't return while the response is still running", async () => {
@@ -332,5 +344,48 @@ describe('searchAlerts', () => {
     const result = await searchAlerts(params);
 
     expect(result.alerts).toEqual([]);
+  });
+
+  it('handles shard failure error', async () => {
+    const obs$ = of<IKibanaSearchResponse>({
+      ...searchResponse,
+      rawResponse: {
+        ...searchResponse.rawResponse,
+        hits: {
+          ...searchResponse.rawResponse.hits,
+          hits: [],
+          max_score: null,
+          total: 0,
+        },
+        _shards: {
+          total: 2,
+          successful: 1,
+          skipped: 0,
+          failed: 1,
+          failures: [
+            {
+              shard: 0,
+              index: '.internal.alerts-dataset.quality.alerts-default-000001',
+              reason: {
+                type: 'query_shard_exception',
+                reason: 'No mapping found for [kibana.alert.title] in order to sort on',
+                index: '.internal.alerts-dataset.quality.alerts-default-000001',
+              },
+            },
+          ],
+        },
+      },
+    });
+    mockDataPlugin.search.search.mockReturnValue(obs$);
+    const result = await searchAlerts(params);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        ...expectedResponse,
+        alerts: [],
+        total: 0,
+        error: new Error('No mapping found for [kibana.alert.title] in order to sort on'),
+      })
+    );
   });
 });

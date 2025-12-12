@@ -21,11 +21,13 @@ const KEY = 'investigation';
 
 /**
  * Second section of the overview tab in details flyout.
- * It contains investigation guide (alerts only) and highlighted fields
+ * It contains investigation guide (alerts only) and highlighted fields.
  */
 export const InvestigationSection = memo(() => {
-  const { getFieldsData } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, getFieldsData, investigationFields, scopeId } =
+    useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+  const ancestorIndex = getField(getFieldsData('signal.ancestors.index')) ?? '';
 
   const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
@@ -48,7 +50,14 @@ export const InvestigationSection = memo(() => {
           <EuiSpacer size="m" />
         </>
       )}
-      <HighlightedFields />
+      <HighlightedFields
+        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+        investigationFields={investigationFields}
+        scopeId={scopeId}
+        showCellActions={true}
+        showEditButton={true}
+        ancestorsIndexName={ancestorIndex}
+      />
     </ExpandableSection>
   );
 });

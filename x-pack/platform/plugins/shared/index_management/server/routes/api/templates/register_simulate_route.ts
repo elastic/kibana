@@ -5,9 +5,10 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const bodySchema = schema.object({}, { unknowns: 'allow' });
@@ -40,7 +41,6 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       const params: estypes.IndicesSimulateTemplateRequest = templateName
         ? {
             name: templateName,
-            index_patterns,
           }
         : {
             ...template,

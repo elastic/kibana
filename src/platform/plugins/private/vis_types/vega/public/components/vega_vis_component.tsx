@@ -8,14 +8,21 @@
  */
 
 import React, { useEffect, useRef, useCallback } from 'react';
-import { EuiResizeObserver, EuiResizeObserverProps, useEuiTheme } from '@elastic/eui';
+import {
+  EuiResizeObserver,
+  type EuiResizeObserverProps,
+  euiScrollBarStyles,
+  type UseEuiTheme,
+} from '@elastic/eui';
 
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createVegaVisualization } from '../vega_visualization';
-import { VegaVisualizationDependencies } from '../plugin';
-import { VegaParser } from '../data_model/vega_parser';
+import type { VegaVisualizationDependencies } from '../plugin';
+import type { VegaParser } from '../data_model/vega_parser';
 
-import { GlobalVegaVisStyles, wrapperStyles } from './vega_vis.styles';
+import { GlobalVegaVisStyles } from './vega_vis.styles';
 
 interface VegaVisComponentProps {
   deps: VegaVisualizationDependencies;
@@ -27,6 +34,15 @@ interface VegaVisComponentProps {
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
 
+const vegaVisStyles = {
+  wrapperStyles: (euiTheme: UseEuiTheme) => css`
+    ${euiScrollBarStyles(euiTheme)}
+    display: flex;
+    flex: 1 1 0;
+    overflow: auto;
+  `,
+};
+
 export const VegaVisComponent = ({
   visData,
   fireEvent,
@@ -34,6 +50,7 @@ export const VegaVisComponent = ({
   deps,
   renderMode,
 }: VegaVisComponentProps) => {
+  const styles = useMemoCss(vegaVisStyles);
   const chartDiv = useRef<HTMLDivElement>(null);
   const renderCompleted = useRef(false);
   const visController = useRef<VegaVisController | null>(null);
@@ -67,14 +84,12 @@ export const VegaVisComponent = ({
     }
   }, []);
 
-  const euiTheme = useEuiTheme();
-
   return (
     <>
       <GlobalVegaVisStyles />
       <EuiResizeObserver onResize={onContainerResize}>
         {(resizeRef) => (
-          <div className="vgaVis__wrapper" css={wrapperStyles(euiTheme)} ref={resizeRef}>
+          <div css={styles.wrapperStyles} ref={resizeRef}>
             <div ref={chartDiv} />
           </div>
         )}

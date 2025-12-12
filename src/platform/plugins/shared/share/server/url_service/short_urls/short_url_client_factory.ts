@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { ShortUrlStorage } from './types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ShortUrlStorage } from './types';
 import type { IShortUrlClientFactory, ILocatorClient } from '../../../common/url_service';
 import { ServerShortUrlClient } from './short_url_client';
 import { SavedObjectShortUrlStorage } from './storage/saved_object_short_url_storage';

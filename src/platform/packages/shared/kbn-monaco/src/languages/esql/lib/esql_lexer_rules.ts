@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../monaco_imports';
+import type { monaco } from '../../../monaco_imports';
 
 const brackets = [
   { open: '[', close: ']', token: 'delimiter.square' },
@@ -28,6 +28,7 @@ export const keywords = [
   'limit',
   'mv_expand',
   'rename',
+  'rerank',
   'row',
   'show',
   'sort',
@@ -186,6 +187,7 @@ export const builtinFunctions = [
   'WEIGHTED_AVG',
 ];
 
+// These ESQL lexer rules are only used for highlighting nested ESQL in Console requests
 export const lexerRules = {
   defaultToken: 'invalid',
   ignoreCase: true,
@@ -206,9 +208,8 @@ export const lexerRules = {
         },
       ],
       [/[()]/, '@brackets'],
-      [/--.*$/, 'comment'],
+      [/\/\/.*$/, 'comment'],
       [/\/\*/, 'comment', '@comment'],
-      [/\/.*$/, 'comment'],
 
       [/".*?"/, 'string'],
 

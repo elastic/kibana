@@ -43,7 +43,7 @@ export default defineCypressConfig({
 
     setupNodeEvents(on, config) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
-      return require('./cypress/plugins')(on, config);
+      return require('@kbn/fleet-plugin-cypress/plugins')(on, config);
     },
   },
 });

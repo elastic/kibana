@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ActionConnector } from './api';
-import { DynamicSettings } from '../../../../../common/runtime_types';
+import type { ActionConnector } from './api';
+import type { DynamicSettings } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getDynamicSettingsAction = createAsyncAction<void, DynamicSettings>(
@@ -16,7 +16,5 @@ export const setDynamicSettingsAction = createAsyncAction<DynamicSettings, Dynam
   'SET_DYNAMIC_SETTINGS'
 );
 export const getConnectorsAction = createAsyncAction<void, ActionConnector[]>('GET CONNECTORS');
-
-export const syncGlobalParamsAction = createAsyncAction<void, boolean>('SYNC GLOBAL PARAMS');
 
 export const getLocationMonitorsAction = createAsyncAction<void, any>('GET LOCATION MONITORS');

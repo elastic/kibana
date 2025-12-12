@@ -6,25 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 import { coerce } from 'semver';
-import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { Plugin } from './plugin';
-import { EsContext } from './es';
-import { EventLogService } from './event_log_service';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Plugin } from './plugin';
+import type { EsContext } from './es';
+import type { EventLogService } from './event_log_service';
 import { millisToNanos } from '../common';
-import {
-  IEvent,
-  IValidatedEvent,
-  IEventLogger,
-  IEventLogService,
-  ECS_VERSION,
-  EventSchema,
-} from './types';
+import type { IEvent, IValidatedEvent, IEventLogger, IEventLogService } from './types';
+import { ECS_VERSION, EventSchema } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
-import { Doc, InternalFields } from './es/cluster_client_adapter';
+import type { Doc, DocWithOptionalId, InternalFields } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -68,7 +62,7 @@ export class EventLogger implements IEventLogger {
   }
 
   // non-blocking, but spawns an async task to do the work
-  logEvent(eventProperties: IEvent): void {
+  logEvent(eventProperties: IEvent, id?: string): void {
     const event: IEvent = {};
     const fixedProperties = {
       ecs: {
@@ -95,7 +89,8 @@ export class EventLogger implements IEventLogger {
       return;
     }
 
-    const doc: Doc = {
+    const doc: DocWithOptionalId = {
+      id,
       index: this.esContext.esNames.dataStream,
       body: validatedEvent,
     };
@@ -182,8 +177,12 @@ function validateEvent(eventLogService: IEventLogService, event: IEvent): IValid
 
 export const EVENT_LOGGED_PREFIX = `event logged: `;
 
-function logEventDoc(logger: Logger, doc: Doc): void {
-  logger.info(`event logged: ${JSON.stringify(doc.body)}`);
+function logEventDoc(logger: Logger, doc: DocWithOptionalId): void {
+  if (doc.id) {
+    logger.info(`event logged: ${JSON.stringify({ id: doc.id, ...doc.body })}`);
+  } else {
+    logger.info(`event logged: ${JSON.stringify(doc.body)}`);
+  }
 }
 
 function logUpdateEventDoc(logger: Logger, docs: Array<Required<Doc>>): void {

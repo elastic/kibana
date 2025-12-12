@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   RULES_SETTINGS_FEATURE_ID,
   READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
@@ -17,6 +16,8 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
   READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
+  ALL_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID,
+  READ_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID,
 } from '../../common';
 
 export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureConfig {
@@ -26,7 +27,6 @@ export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureCon
       defaultMessage: 'Rules Settings',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     management: {
       insightsAndAlerting: ['triggersActions'],
@@ -90,6 +90,43 @@ export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureCon
                   read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
                 },
                 ui: ['readFlappingSettingsUI'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.alerting.feature.alertDeleteSettingsSubFeatureName', {
+          defaultMessage: 'Alert deletion',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                api: [
+                  API_PRIVILEGES.READ_ALERT_DELETE_SETTINGS,
+                  API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
+                ],
+                name: 'All',
+                id: ALL_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID,
+                includeIn: 'all',
+                savedObject: {
+                  all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+                  read: [],
+                },
+                ui: ['writeAlertDeleteSettingsUI', 'readAlertDeleteSettingsUI'],
+              },
+              {
+                api: [API_PRIVILEGES.READ_ALERT_DELETE_SETTINGS],
+                name: 'Read',
+                id: READ_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID,
+                includeIn: 'read',
+                savedObject: {
+                  all: [],
+                  read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+                },
+                ui: ['readAlertDeleteSettingsUI'],
               },
             ],
           },

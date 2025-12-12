@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import { ElasticsearchClientMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
-import { createRequestHash } from './utils';
+import { faker } from '@faker-js/faker';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ConfigSchema } from '../../config';
-import type { AuthenticatedUser } from '@kbn/core/server';
+import type { ConfigSchema } from '../../config';
+import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -29,7 +26,7 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let elasticsearchClient: ElasticsearchClientMock;
+  let asCurrentUserElasticsearchClient: ElasticsearchClientMock;
   let service: SearchSessionService;
 
   const MOCK_STRATEGY = 'ese';
@@ -67,7 +64,7 @@ describe('SearchSessionService', () => {
   describe('Feature disabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
-      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+      asCurrentUserElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {
@@ -94,9 +91,10 @@ describe('SearchSessionService', () => {
     });
 
     it('trackId ignores', async () => {
-      await service.trackId({ savedObjectsClient }, mockUser1, { params: {} }, '123', {
+      await service.trackId({ savedObjectsClient }, mockUser1, '123', {
         sessionId: '321',
         strategy: MOCK_STRATEGY,
+        requestHash: faker.string.alpha(64),
       });
 
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
@@ -132,9 +130,9 @@ describe('SearchSessionService', () => {
   });
 
   describe('Feature enabled', () => {
+    let mockLogger: jest.Mocked<any>;
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
-      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {
@@ -147,7 +145,7 @@ describe('SearchSessionService', () => {
           },
         },
       } as unknown as ConfigSchema;
-      const mockLogger: any = {
+      mockLogger = {
         debug: jest.fn(),
         warn: jest.fn(),
         error: jest.fn(),
@@ -293,7 +291,10 @@ describe('SearchSessionService', () => {
 
         const options = { page: 0, perPage: 5 };
         const response = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           mockUser1,
           options
         );
@@ -381,14 +382,20 @@ describe('SearchSessionService', () => {
 
         const options1 = { filter: 'foobar' };
         const response1 = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           mockUser1,
           options1
         );
 
         const options2 = { filter: nodeBuilder.is('foo', 'bar') };
         const response2 = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           mockUser1,
           options2
         );
@@ -567,7 +574,10 @@ describe('SearchSessionService', () => {
 
         const options = { page: 0, perPage: 5 };
         const response = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           null,
           options
         );
@@ -682,9 +692,27 @@ describe('SearchSessionService', () => {
     });
 
     describe('trackId', () => {
+      it('logs error and returns if requestHash not provided', async () => {
+        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
+          sessionId,
+          strategy: MOCK_STRATEGY,
+          // requestHash not provided
+        } as any);
+
+        expect(savedObjectsClient.update).not.toHaveBeenCalled();
+        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `SearchSessionService: trackId | Missing requestHash | sessionId: "${sessionId}" | searchId:"${searchId}"`
+          )
+        );
+      });
+
       it('updates the saved object if search session already exists', async () => {
-        const searchRequest = { params: {} };
-        const requestHash = createRequestHash(searchRequest.params);
+        const requestHash = faker.string.alpha(64);
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
 
         const mockUpdateSavedObject = {
@@ -693,9 +721,10 @@ describe('SearchSessionService', () => {
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
           strategy: MOCK_STRATEGY,
+          requestHash,
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -713,12 +742,12 @@ describe('SearchSessionService', () => {
       });
 
       it('passes retryOnConflict param to es', async () => {
-        const searchRequest = { params: {} };
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
 
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
           strategy: MOCK_STRATEGY,
+          requestHash: faker.string.alpha(64),
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -731,16 +760,13 @@ describe('SearchSessionService', () => {
         const sessionId1 = 'sessiondId1';
         const sessionId2 = 'sessiondId2';
 
-        const searchRequest1 = { params: { 1: '1' } };
-        const requestHash1 = createRequestHash(searchRequest1.params);
+        const requestHash1 = faker.string.alpha(64);
         const searchId1 = 'searchId1';
 
-        const searchRequest2 = { params: { 2: '2' } };
-        const requestHash2 = createRequestHash(searchRequest2.params);
+        const requestHash2 = faker.string.alpha(64);
         const searchId2 = 'searchId1';
 
-        const searchRequest3 = { params: { 3: '3' } };
-        const requestHash3 = createRequestHash(searchRequest3.params);
+        const requestHash3 = faker.string.alpha(64);
         const searchId3 = 'searchId3';
 
         const mockUpdateSavedObject = {
@@ -750,17 +776,20 @@ describe('SearchSessionService', () => {
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
         await Promise.all([
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest1, searchId1, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId1, {
             sessionId: sessionId1,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash1,
           }),
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest2, searchId2, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId2, {
             sessionId: sessionId1,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash2,
           }),
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest3, searchId3, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId3, {
             sessionId: sessionId2,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash3,
           }),
         ]);
 
@@ -821,7 +850,7 @@ describe('SearchSessionService', () => {
             isStored: false,
           })
         ).rejects.toMatchInlineSnapshot(
-          `[Error: Cannot get search ID from a session that is not stored]`
+          `[Error: Cannot get search ID from a search that is not stored]`
         );
       });
 
@@ -835,13 +864,13 @@ describe('SearchSessionService', () => {
             isRestore: false,
           })
         ).rejects.toMatchInlineSnapshot(
-          `[Error: Get search ID is only supported when restoring a session]`
+          `[Error: Get search ID is only supported when restoring a background search]`
         );
       });
 
       it('returns the search ID from the saved object ID mapping', async () => {
         const searchRequest = { params: {} };
-        const requestHash = createRequestHash(searchRequest.params);
+        const requestHash = faker.string.alpha(64);
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
         const mockSession = {
           ...mockSavedObject,
@@ -860,6 +889,7 @@ describe('SearchSessionService', () => {
           sessionId,
           isStored: true,
           isRestore: true,
+          requestHash,
         });
 
         expect(id).toBe(searchId);

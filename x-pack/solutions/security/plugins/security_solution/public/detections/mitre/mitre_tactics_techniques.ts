@@ -357,17 +357,6 @@ export const techniques: MitreTechnique[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserExtensionsDescription',
-      { defaultMessage: 'Browser Extensions (T1176)' }
-    ),
-    id: 'T1176',
-    name: 'Browser Extensions',
-    reference: 'https://attack.mitre.org/techniques/T1176/',
-    tactics: ['persistence'],
-    value: 'browserExtensions',
-  },
-  {
-    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserInformationDiscoveryDescription',
       { defaultMessage: 'Browser Information Discovery (T1217)' }
     ),
@@ -431,6 +420,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1651/',
     tactics: ['execution'],
     value: 'cloudAdministrationCommand',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.cloudApplicationIntegrationDescription',
+      { defaultMessage: 'Cloud Application Integration (T1671)' }
+    ),
+    id: 'T1671',
+    name: 'Cloud Application Integration',
+    reference: 'https://attack.mitre.org/techniques/T1671/',
+    tactics: ['persistence'],
+    value: 'cloudApplicationIntegration',
   },
   {
     label: i18n.translate(
@@ -874,6 +874,28 @@ export const techniques: MitreTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.esXiAdministrationCommandDescription',
+      { defaultMessage: 'ESXi Administration Command (T1675)' }
+    ),
+    id: 'T1675',
+    name: 'ESXi Administration Command',
+    reference: 'https://attack.mitre.org/techniques/T1675/',
+    tactics: ['execution'],
+    value: 'esXiAdministrationCommand',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.emailBombingDescription',
+      { defaultMessage: 'Email Bombing (T1667)' }
+    ),
+    id: 'T1667',
+    name: 'Email Bombing',
+    reference: 'https://attack.mitre.org/techniques/T1667/',
+    tactics: ['impact'],
+    value: 'emailBombing',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.emailCollectionDescription',
       { defaultMessage: 'Email Collection (T1114)' }
     ),
@@ -882,6 +904,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1114/',
     tactics: ['collection'],
     value: 'emailCollection',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.emailSpoofingDescription',
+      { defaultMessage: 'Email Spoofing (T1672)' }
+    ),
+    id: 'T1672',
+    name: 'Email Spoofing',
+    reference: 'https://attack.mitre.org/techniques/T1672/',
+    tactics: ['defense-evasion'],
+    value: 'emailSpoofing',
   },
   {
     label: i18n.translate(
@@ -937,6 +970,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1546/',
     tactics: ['privilege-escalation', 'persistence'],
     value: 'eventTriggeredExecution',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exclusiveControlDescription',
+      { defaultMessage: 'Exclusive Control (T1668)' }
+    ),
+    id: 'T1668',
+    name: 'Exclusive Control',
+    reference: 'https://attack.mitre.org/techniques/T1668/',
+    tactics: ['persistence'],
+    value: 'exclusiveControl',
   },
   {
     label: i18n.translate(
@@ -1347,6 +1391,17 @@ export const techniques: MitreTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.inputInjectionDescription',
+      { defaultMessage: 'Input Injection (T1674)' }
+    ),
+    id: 'T1674',
+    name: 'Input Injection',
+    reference: 'https://attack.mitre.org/techniques/T1674/',
+    tactics: ['execution'],
+    value: 'inputInjection',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.interProcessCommunicationDescription',
       { defaultMessage: 'Inter-Process Communication (T1559)' }
     ),
@@ -1424,13 +1479,24 @@ export const techniques: MitreTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyCloudResourceHierarchyDescription',
+      { defaultMessage: 'Modify Cloud Resource Hierarchy (T1666)' }
+    ),
+    id: 'T1666',
+    name: 'Modify Cloud Resource Hierarchy',
+    reference: 'https://attack.mitre.org/techniques/T1666/',
+    tactics: ['defense-evasion'],
+    value: 'modifyCloudResourceHierarchy',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyRegistryDescription',
       { defaultMessage: 'Modify Registry (T1112)' }
     ),
     id: 'T1112',
     name: 'Modify Registry',
     reference: 'https://attack.mitre.org/techniques/T1112/',
-    tactics: ['defense-evasion'],
+    tactics: ['defense-evasion', 'persistence'],
     value: 'modifyRegistry',
   },
   {
@@ -1765,14 +1831,14 @@ export const techniques: MitreTechnique[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteAccessSoftwareDescription',
-      { defaultMessage: 'Remote Access Software (T1219)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteAccessToolsDescription',
+      { defaultMessage: 'Remote Access Tools (T1219)' }
     ),
     id: 'T1219',
-    name: 'Remote Access Software',
+    name: 'Remote Access Tools',
     reference: 'https://attack.mitre.org/techniques/T1219/',
     tactics: ['command-and-control'],
-    value: 'remoteAccessSoftware',
+    value: 'remoteAccessTools',
   },
   {
     label: i18n.translate(
@@ -1993,6 +2059,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1518/',
     tactics: ['discovery'],
     value: 'softwareDiscovery',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.softwareExtensionsDescription',
+      { defaultMessage: 'Software Extensions (T1176)' }
+    ),
+    id: 'T1176',
+    name: 'Software Extensions',
+    reference: 'https://attack.mitre.org/techniques/T1176/',
+    tactics: ['persistence'],
+    value: 'softwareExtensions',
   },
   {
     label: i18n.translate(
@@ -2326,6 +2403,17 @@ export const techniques: MitreTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.virtualMachineDiscoveryDescription',
+      { defaultMessage: 'Virtual Machine Discovery (T1673)' }
+    ),
+    id: 'T1673',
+    name: 'Virtual Machine Discovery',
+    reference: 'https://attack.mitre.org/techniques/T1673/',
+    tactics: ['discovery'],
+    value: 'virtualMachineDiscovery',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.virtualizationSandboxEvasionDescription',
       { defaultMessage: 'Virtualization/Sandbox Evasion (T1497)' }
     ),
@@ -2356,6 +2444,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1102/',
     tactics: ['command-and-control'],
     value: 'webService',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.wiFiNetworksDescription',
+      { defaultMessage: 'Wi-Fi Networks (T1669)' }
+    ),
+    id: 'T1669',
+    name: 'Wi-Fi Networks',
+    reference: 'https://attack.mitre.org/techniques/T1669/',
+    tactics: ['initial-access'],
+    value: 'wiFiNetworks',
   },
   {
     label: i18n.translate(
@@ -2501,6 +2600,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1098',
     value: 'additionalEmailDelegatePermissions',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.additionalLocalOrDomainGroupsT1098Description',
+      { defaultMessage: 'Additional Local or Domain Groups (T1098.007)' }
+    ),
+    id: 'T1098.007',
+    name: 'Additional Local or Domain Groups',
+    reference: 'https://attack.mitre.org/techniques/T1098/007/',
+    tactics: ['persistence', 'privilege-escalation'],
+    techniqueId: 'T1098',
+    value: 'additionalLocalOrDomainGroups',
   },
   {
     label: i18n.translate(
@@ -2708,6 +2819,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bandwidthHijackingT1496Description',
+      { defaultMessage: 'Bandwidth Hijacking (T1496.002)' }
+    ),
+    id: 'T1496.002',
+    name: 'Bandwidth Hijacking',
+    reference: 'https://attack.mitre.org/techniques/T1496/002/',
+    tactics: ['impact'],
+    techniqueId: 'T1496',
+    value: 'bandwidthHijacking',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bashHistoryT1552Description',
       { defaultMessage: 'Bash History (T1552.003)' }
     ),
@@ -2741,6 +2864,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['defense-evasion'],
     techniqueId: 'T1027',
     value: 'binaryPadding',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.bindMountsT1564Description',
+      { defaultMessage: 'Bind Mounts (T1564.013)' }
+    ),
+    id: 'T1564.013',
+    name: 'Bind Mounts',
+    reference: 'https://attack.mitre.org/techniques/T1564/013/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1564',
+    value: 'bindMounts',
   },
   {
     label: i18n.translate(
@@ -2789,6 +2924,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'breakProcessTrees',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.browserExtensionsT1176Description',
+      { defaultMessage: 'Browser Extensions (T1176.001)' }
+    ),
+    id: 'T1176.001',
+    name: 'Browser Extensions',
+    reference: 'https://attack.mitre.org/techniques/T1176/001/',
+    tactics: ['persistence'],
+    techniqueId: 'T1176',
+    value: 'browserExtensions',
   },
   {
     label: i18n.translate(
@@ -2861,6 +3008,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'cachedDomainCredentials',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ccacheFilesT1558Description',
+      { defaultMessage: 'Ccache Files (T1558.005)' }
+    ),
+    id: 'T1558.005',
+    name: 'Ccache Files',
+    reference: 'https://attack.mitre.org/techniques/T1558/005/',
+    tactics: ['credential-access'],
+    techniqueId: 'T1558',
+    value: 'ccacheFiles',
   },
   {
     label: i18n.translate(
@@ -2957,6 +3116,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['defense-evasion'],
     techniqueId: 'T1070',
     value: 'clearWindowsEventLogs',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clickOnceT1127Description',
+      { defaultMessage: 'ClickOnce (T1127.002)' }
+    ),
+    id: 'T1127.002',
+    name: 'ClickOnce',
+    reference: 'https://attack.mitre.org/techniques/T1127/002/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1127',
+    value: 'clickOnce',
   },
   {
     label: i18n.translate(
@@ -3077,6 +3248,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['credential-access'],
     techniqueId: 'T1555',
     value: 'cloudSecretsManagementStores',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudServiceHijackingT1496Description',
+      { defaultMessage: 'Cloud Service Hijacking (T1496.004)' }
+    ),
+    id: 'T1496.004',
+    name: 'Cloud Service Hijacking',
+    reference: 'https://attack.mitre.org/techniques/T1496/004/',
+    tactics: ['impact'],
+    techniqueId: 'T1496',
+    value: 'cloudServiceHijacking',
   },
   {
     label: i18n.translate(
@@ -3236,6 +3419,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compressionT1027Description',
+      { defaultMessage: 'Compression (T1027.015)' }
+    ),
+    id: 'T1027.015',
+    name: 'Compression',
+    reference: 'https://attack.mitre.org/techniques/T1027/015/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'compression',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.compromiseHardwareSupplyChainT1195Description',
       { defaultMessage: 'Compromise Hardware Supply Chain (T1195.003)' }
     ),
@@ -3269,6 +3464,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['initial-access'],
     techniqueId: 'T1195',
     value: 'compromiseSoftwareSupplyChain',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.computeHijackingT1496Description',
+      { defaultMessage: 'Compute Hijacking (T1496.001)' }
+    ),
+    id: 'T1496.001',
+    name: 'Compute Hijacking',
+    reference: 'https://attack.mitre.org/techniques/T1496/001/',
+    tactics: ['impact'],
+    techniqueId: 'T1496',
+    value: 'computeHijacking',
   },
   {
     label: i18n.translate(
@@ -3464,6 +3671,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.customerRelationshipManagementSoftwareT1213Description',
+      { defaultMessage: 'Customer Relationship Management Software (T1213.004)' }
+    ),
+    id: 'T1213.004',
+    name: 'Customer Relationship Management Software',
+    reference: 'https://attack.mitre.org/techniques/T1213/004/',
+    tactics: ['collection'],
+    techniqueId: 'T1213',
+    value: 'customerRelationshipManagementSoftware',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dcSyncT1003Description',
       { defaultMessage: 'DCSync (T1003.006)' }
     ),
@@ -3488,27 +3707,15 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dllSearchOrderHijackingT1574Description',
-      { defaultMessage: 'DLL Search Order Hijacking (T1574.001)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dllT1574Description',
+      { defaultMessage: 'DLL (T1574.001)' }
     ),
     id: 'T1574.001',
-    name: 'DLL Search Order Hijacking',
+    name: 'DLL',
     reference: 'https://attack.mitre.org/techniques/T1574/001/',
     tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
-    value: 'dllSearchOrderHijacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dllSideLoadingT1574Description',
-      { defaultMessage: 'DLL Side-Loading (T1574.002)' }
-    ),
-    id: 'T1574.002',
-    name: 'DLL Side-Loading',
-    reference: 'https://attack.mitre.org/techniques/T1574/002/',
-    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
-    techniqueId: 'T1574',
-    value: 'dllSideLoading',
+    value: 'dll',
   },
   {
     label: i18n.translate(
@@ -4208,6 +4415,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.evilTwinT1557Description',
+      { defaultMessage: 'Evil Twin (T1557.004)' }
+    ),
+    id: 'T1557.004',
+    name: 'Evil Twin',
+    reference: 'https://attack.mitre.org/techniques/T1557/004/',
+    tactics: ['credential-access', 'collection'],
+    techniqueId: 'T1557',
+    value: 'evilTwin',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.executableInstallerFilePermissionsWeaknessT1574Description',
       { defaultMessage: 'Executable Installer File Permissions Weakness (T1574.005)' }
     ),
@@ -4349,6 +4568,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['resource-development'],
     techniqueId: 'T1588',
     value: 'exploits',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.extendedAttributesT1564Description',
+      { defaultMessage: 'Extended Attributes (T1564.014)' }
+    ),
+    id: 'T1564.014',
+    name: 'Extended Attributes',
+    reference: 'https://attack.mitre.org/techniques/T1564/014/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1564',
+    value: 'extendedAttributes',
   },
   {
     label: i18n.translate(
@@ -4604,6 +4835,42 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hypervisorCliT1059Description',
+      { defaultMessage: 'Hypervisor CLI (T1059.012)' }
+    ),
+    id: 'T1059.012',
+    name: 'Hypervisor CLI',
+    reference: 'https://attack.mitre.org/techniques/T1059/012/',
+    tactics: ['execution'],
+    techniqueId: 'T1059',
+    value: 'hypervisorCli',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ideExtensionsT1176Description',
+      { defaultMessage: 'IDE Extensions (T1176.002)' }
+    ),
+    id: 'T1176.002',
+    name: 'IDE Extensions',
+    reference: 'https://attack.mitre.org/techniques/T1176/002/',
+    tactics: ['persistence'],
+    techniqueId: 'T1176',
+    value: 'ideExtensions',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ideTunnelingT1219Description',
+      { defaultMessage: 'IDE Tunneling (T1219.001)' }
+    ),
+    id: 'T1219.001',
+    name: 'IDE Tunneling',
+    reference: 'https://attack.mitre.org/techniques/T1219/001/',
+    tactics: ['command-and-control'],
+    techniqueId: 'T1219',
+    value: 'ideTunneling',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.iisComponentsT1505Description',
       { defaultMessage: 'IIS Components (T1505.004)' }
     ),
@@ -4808,6 +5075,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.jamPlusT1127Description',
+      { defaultMessage: 'JamPlus (T1127.003)' }
+    ),
+    id: 'T1127.003',
+    name: 'JamPlus',
+    reference: 'https://attack.mitre.org/techniques/T1127/003/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1127',
+    value: 'jamPlus',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.javaScriptT1059Description',
       { defaultMessage: 'JavaScript (T1059.007)' }
     ),
@@ -4817,6 +5096,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'javaScript',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.junkCodeInsertionT1027Description',
+      { defaultMessage: 'Junk Code Insertion (T1027.016)' }
+    ),
+    id: 'T1027.016',
+    name: 'Junk Code Insertion',
+    reference: 'https://attack.mitre.org/techniques/T1027/016/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'junkCodeInsertion',
   },
   {
     label: i18n.translate(
@@ -5000,6 +5291,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.lifecycleTriggeredDeletionT1485Description',
+      { defaultMessage: 'Lifecycle-Triggered Deletion (T1485.001)' }
+    ),
+    id: 'T1485.001',
+    name: 'Lifecycle-Triggered Deletion',
+    reference: 'https://attack.mitre.org/techniques/T1485/001/',
+    tactics: ['impact'],
+    techniqueId: 'T1485',
+    value: 'lifecycleTriggeredDeletion',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.linkTargetT1608Description',
       { defaultMessage: 'Link Target (T1608.005)' }
     ),
@@ -5144,6 +5447,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.luaT1059Description',
+      { defaultMessage: 'Lua (T1059.011)' }
+    ),
+    id: 'T1059.011',
+    name: 'Lua',
+    reference: 'https://attack.mitre.org/techniques/T1059/011/',
+    tactics: ['execution'],
+    techniqueId: 'T1059',
+    value: 'lua',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.mmcT1218Description',
       { defaultMessage: 'MMC (T1218.014)' }
     ),
@@ -5189,6 +5504,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1134',
     value: 'makeAndImpersonateToken',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.maliciousCopyAndPasteT1204Description',
+      { defaultMessage: 'Malicious Copy and Paste (T1204.004)' }
+    ),
+    id: 'T1204.004',
+    name: 'Malicious Copy and Paste',
+    reference: 'https://attack.mitre.org/techniques/T1204/004/',
+    tactics: ['execution'],
+    techniqueId: 'T1204',
+    value: 'maliciousCopyAndPaste',
   },
   {
     label: i18n.translate(
@@ -5276,6 +5603,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.masqueradeAccountNameT1036Description',
+      { defaultMessage: 'Masquerade Account Name (T1036.010)' }
+    ),
+    id: 'T1036.010',
+    name: 'Masquerade Account Name',
+    reference: 'https://attack.mitre.org/techniques/T1036/010/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1036',
+    value: 'masqueradeAccountName',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.masqueradeFileTypeT1036Description',
       { defaultMessage: 'Masquerade File Type (T1036.008)' }
     ),
@@ -5300,15 +5639,15 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.matchLegitimateNameOrLocationT1036Description',
-      { defaultMessage: 'Match Legitimate Name or Location (T1036.005)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.matchLegitimateResourceNameOrLocationT1036Description',
+      { defaultMessage: 'Match Legitimate Resource Name or Location (T1036.005)' }
     ),
     id: 'T1036.005',
-    name: 'Match Legitimate Name or Location',
+    name: 'Match Legitimate Resource Name or Location',
     reference: 'https://attack.mitre.org/techniques/T1036/005/',
     tactics: ['defense-evasion'],
     techniqueId: 'T1036',
-    value: 'matchLegitimateNameOrLocation',
+    value: 'matchLegitimateResourceNameOrLocation',
   },
   {
     label: i18n.translate(
@@ -5321,6 +5660,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'mavinject',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.messagingApplicationsT1213Description',
+      { defaultMessage: 'Messaging Applications (T1213.005)' }
+    ),
+    id: 'T1213.005',
+    name: 'Messaging Applications',
+    reference: 'https://attack.mitre.org/techniques/T1213/005/',
+    tactics: ['collection'],
+    techniqueId: 'T1213',
+    value: 'messagingApplications',
   },
   {
     label: i18n.translate(
@@ -5381,6 +5732,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['command-and-control'],
     techniqueId: 'T1090',
     value: 'multiHopProxy',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.mutualExclusionT1480Description',
+      { defaultMessage: 'Mutual Exclusion (T1480.002)' }
+    ),
+    id: 'T1480.002',
+    name: 'Mutual Exclusion',
+    reference: 'https://attack.mitre.org/techniques/T1480/002/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1480',
+    value: 'mutualExclusion',
   },
   {
     label: i18n.translate(
@@ -5660,6 +6023,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.overwriteProcessArgumentsT1036Description',
+      { defaultMessage: 'Overwrite Process Arguments (T1036.011)' }
+    ),
+    id: 'T1036.011',
+    name: 'Overwrite Process Arguments',
+    reference: 'https://attack.mitre.org/techniques/T1036/011/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1036',
+    value: 'overwriteProcessArguments',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.parentPidSpoofingT1134Description',
       { defaultMessage: 'Parent PID Spoofing (T1134.004)' }
     ),
@@ -5816,6 +6191,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.polymorphicCodeT1027Description',
+      { defaultMessage: 'Polymorphic Code (T1027.014)' }
+    ),
+    id: 'T1027.014',
+    name: 'Polymorphic Code',
+    reference: 'https://attack.mitre.org/techniques/T1027/014/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'polymorphicCode',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.portKnockingT1205Description',
       { defaultMessage: 'Port Knocking (T1205.001)' }
     ),
@@ -5960,15 +6347,15 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.protocolImpersonationT1001Description',
-      { defaultMessage: 'Protocol Impersonation (T1001.003)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.protocolOrServiceImpersonationT1001Description',
+      { defaultMessage: 'Protocol or Service Impersonation (T1001.003)' }
     ),
     id: 'T1001.003',
-    name: 'Protocol Impersonation',
+    name: 'Protocol or Service Impersonation',
     reference: 'https://attack.mitre.org/techniques/T1001/003/',
     tactics: ['command-and-control'],
     techniqueId: 'T1001',
-    value: 'protocolImpersonation',
+    value: 'protocolOrServiceImpersonation',
   },
   {
     label: i18n.translate(
@@ -5993,6 +6380,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['defense-evasion'],
     techniqueId: 'T1216',
     value: 'pubPrn',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.publishSubscribeProtocolsT1071Description',
+      { defaultMessage: 'Publish/Subscribe Protocols (T1071.005)' }
+    ),
+    id: 'T1071.005',
+    name: 'Publish/Subscribe Protocols',
+    reference: 'https://attack.mitre.org/techniques/T1071/005/',
+    tactics: ['command-and-control'],
+    techniqueId: 'T1071',
+    value: 'publishSubscribeProtocols',
   },
   {
     label: i18n.translate(
@@ -6128,6 +6527,30 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.relocateMalwareT1070Description',
+      { defaultMessage: 'Relocate Malware (T1070.010)' }
+    ),
+    id: 'T1070.010',
+    name: 'Relocate Malware',
+    reference: 'https://attack.mitre.org/techniques/T1070/010/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1070',
+    value: 'relocateMalware',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteAccessHardwareT1219Description',
+      { defaultMessage: 'Remote Access Hardware (T1219.003)' }
+    ),
+    id: 'T1219.003',
+    name: 'Remote Access Hardware',
+    reference: 'https://attack.mitre.org/techniques/T1219/003/',
+    tactics: ['command-and-control'],
+    techniqueId: 'T1219',
+    value: 'remoteAccessHardware',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteDataStagingT1074Description',
       { defaultMessage: 'Remote Data Staging (T1074.002)' }
     ),
@@ -6152,6 +6575,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteDesktopSoftwareT1219Description',
+      { defaultMessage: 'Remote Desktop Software (T1219.002)' }
+    ),
+    id: 'T1219.002',
+    name: 'Remote Desktop Software',
+    reference: 'https://attack.mitre.org/techniques/T1219/002/',
+    tactics: ['command-and-control'],
+    techniqueId: 'T1219',
+    value: 'remoteDesktopSoftware',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.remoteEmailCollectionT1114Description',
       { defaultMessage: 'Remote Email Collection (T1114.002)' }
     ),
@@ -6164,15 +6599,15 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.renameSystemUtilitiesT1036Description',
-      { defaultMessage: 'Rename System Utilities (T1036.003)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.renameLegitimateUtilitiesT1036Description',
+      { defaultMessage: 'Rename Legitimate Utilities (T1036.003)' }
     ),
     id: 'T1036.003',
-    name: 'Rename System Utilities',
+    name: 'Rename Legitimate Utilities',
     reference: 'https://attack.mitre.org/techniques/T1036/003/',
     tactics: ['defense-evasion'],
     techniqueId: 'T1036',
-    value: 'renameSystemUtilities',
+    value: 'renameLegitimateUtilities',
   },
   {
     label: i18n.translate(
@@ -6320,6 +6755,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.smsPumpingT1496Description',
+      { defaultMessage: 'SMS Pumping (T1496.003)' }
+    ),
+    id: 'T1496.003',
+    name: 'SMS Pumping',
+    reference: 'https://attack.mitre.org/techniques/T1496/003/',
+    tactics: ['impact'],
+    techniqueId: 'T1496',
+    value: 'smsPumping',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.snmpMibDumpT1602Description',
       { defaultMessage: 'SNMP (MIB Dump) (T1602.001)' }
     ),
@@ -6377,6 +6824,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['lateral-movement'],
     techniqueId: 'T1563',
     value: 'sshHijacking',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.svgSmugglingT1027Description',
+      { defaultMessage: 'SVG Smuggling (T1027.017)' }
+    ),
+    id: 'T1027.017',
+    name: 'SVG Smuggling',
+    reference: 'https://attack.mitre.org/techniques/T1027/017/',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'svgSmuggling',
   },
   {
     label: i18n.translate(
@@ -6980,6 +7439,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemctlT1569Description',
+      { defaultMessage: 'Systemctl (T1569.003)' }
+    ),
+    id: 'T1569.003',
+    name: 'Systemctl',
+    reference: 'https://attack.mitre.org/techniques/T1569/003/',
+    tactics: ['execution'],
+    techniqueId: 'T1569',
+    value: 'systemctl',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.systemdServiceT1543Description',
       { defaultMessage: 'Systemd Service (T1543.002)' }
     ),
@@ -7205,6 +7676,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1484',
     value: 'trustModification',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.udevRulesT1546Description',
+      { defaultMessage: 'Udev Rules (T1546.017)' }
+    ),
+    id: 'T1546.017',
+    name: 'Udev Rules',
+    reference: 'https://attack.mitre.org/techniques/T1546/017/',
+    tactics: ['persistence', 'privilege-escalation'],
+    techniqueId: 'T1546',
+    value: 'udevRules',
   },
   {
     label: i18n.translate(
@@ -7602,6 +8085,18 @@ export const subtechniques: MitreSubTechnique[] = [
     techniqueId: 'T1559',
     value: 'xpcServices',
   },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.vSphereInstallationBundlesT1505Description',
+      { defaultMessage: 'vSphere Installation Bundles (T1505.006)' }
+    ),
+    id: 'T1505.006',
+    name: 'vSphere Installation Bundles',
+    reference: 'https://attack.mitre.org/techniques/T1505/006/',
+    tactics: ['persistence'],
+    techniqueId: 'T1505',
+    value: 'vSphereInstallationBundles',
+  },
 ];
 
 /**
@@ -7632,6 +8127,46 @@ export const getMockThreatData = () => [
   },
   {
     tactic: {
+      name: 'Defense Evasion',
+      id: 'TA0005',
+      reference: 'https://attack.mitre.org/tactics/TA0005/',
+    },
+    technique: {
+      name: 'Indicator Removal',
+      id: 'T1070',
+      reference: 'https://attack.mitre.org/techniques/T1070/',
+      tactics: ['defense-evasion'],
+    },
+    subtechnique: {
+      name: 'Clear Network Connection History and Configurations',
+      id: 'T1070.007',
+      reference: 'https://attack.mitre.org/techniques/T1070/007/',
+      tactics: ['defense-evasion'],
+      techniqueId: 'T1070',
+    },
+  },
+  {
+    tactic: {
+      name: 'Credential Access',
+      id: 'TA0006',
+      reference: 'https://attack.mitre.org/tactics/TA0006/',
+    },
+    technique: {
+      name: 'Adversary-in-the-Middle',
+      id: 'T1557',
+      reference: 'https://attack.mitre.org/techniques/T1557/',
+      tactics: ['credential-access', 'collection'],
+    },
+    subtechnique: {
+      name: 'DHCP Spoofing',
+      id: 'T1557.003',
+      reference: 'https://attack.mitre.org/techniques/T1557/003/',
+      tactics: ['credential-access', 'collection'],
+      techniqueId: 'T1557',
+    },
+  },
+  {
+    tactic: {
       name: 'Discovery',
       id: 'TA0007',
       reference: 'https://attack.mitre.org/tactics/TA0007/',
@@ -7643,51 +8178,11 @@ export const getMockThreatData = () => [
       tactics: ['discovery'],
     },
     subtechnique: {
-      name: 'Cloud Account',
-      id: 'T1087.004',
-      reference: 'https://attack.mitre.org/techniques/T1087/004/',
+      name: 'Email Account',
+      id: 'T1087.003',
+      reference: 'https://attack.mitre.org/techniques/T1087/003/',
       tactics: ['discovery'],
       techniqueId: 'T1087',
-    },
-  },
-  {
-    tactic: {
-      name: 'Command and Control',
-      id: 'TA0011',
-      reference: 'https://attack.mitre.org/tactics/TA0011/',
-    },
-    technique: {
-      name: 'Web Service',
-      id: 'T1102',
-      reference: 'https://attack.mitre.org/techniques/T1102/',
-      tactics: ['command-and-control'],
-    },
-    subtechnique: {
-      name: 'Dead Drop Resolver',
-      id: 'T1102.001',
-      reference: 'https://attack.mitre.org/techniques/T1102/001/',
-      tactics: ['command-and-control'],
-      techniqueId: 'T1102',
-    },
-  },
-  {
-    tactic: {
-      name: 'Defense Evasion',
-      id: 'TA0005',
-      reference: 'https://attack.mitre.org/tactics/TA0005/',
-    },
-    technique: {
-      name: 'Obfuscated Files or Information',
-      id: 'T1027',
-      reference: 'https://attack.mitre.org/techniques/T1027/',
-      tactics: ['defense-evasion'],
-    },
-    subtechnique: {
-      name: 'Encrypted/Encoded File',
-      id: 'T1027.013',
-      reference: 'https://attack.mitre.org/techniques/T1027/013/',
-      tactics: ['defense-evasion'],
-      techniqueId: 'T1027',
     },
   },
 ];

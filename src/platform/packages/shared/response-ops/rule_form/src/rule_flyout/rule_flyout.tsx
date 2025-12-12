@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { useRuleFlyoutUIContext } from '../../lib';
 import type { RuleFormData, RuleTypeMetaData } from '../types';
 import { RuleFormStepId } from '../constants';
@@ -23,6 +24,8 @@ interface RuleFlyoutProps {
   onCancel?: () => void;
   onSave: (formData: RuleFormData) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
+  initialEditStep?: RuleFormStepId;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 // This component is only responsible for the CONTENT of the EuiFlyout. See `flyout/rule_form_flyout.tsx` for the
@@ -38,8 +41,10 @@ export const RuleFlyout = ({
   // we're displaying the confirmation modal for closing the flyout.
   onCancel: onClose = () => {},
   onChangeMetaData = () => {},
+  initialEditStep,
+  focusTrapProps,
 }: RuleFlyoutProps) => {
-  const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(undefined);
+  const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(initialEditStep);
   const [isConfirmCloseModalVisible, setIsConfirmCloseModalVisible] = useState(false);
 
   const {
@@ -106,7 +111,11 @@ export const RuleFlyout = ({
         />
       )}
       {isConfirmCloseModalVisible && (
-        <ConfirmRuleClose onCancel={onCancelClose} onConfirm={onClose} />
+        <ConfirmRuleClose
+          onCancel={onCancelClose}
+          onConfirm={onClose}
+          focusTrapProps={focusTrapProps}
+        />
       )}
     </>
   );

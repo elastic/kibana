@@ -11,14 +11,11 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getExternalAlertLensAttributes } from './external_alert';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('a3c54471-615f-4ff9-9fda-69b5b2ea3eef')
-    .mockReturnValueOnce('37bdf546-3c11-4b08-8c5d-e37debc44f1d')
-    .mockReturnValueOnce('0a923af2-c880-4aa3-aa93-a0b9c2801f6d')
-    .mockReturnValueOnce('42334c6e-98d9-47a2-b4cb-a445abb44c93'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../sourcerer/containers', () => ({
@@ -41,6 +38,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getExternalAlertLensAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+  });
+
   it('should render', () => {
     const { result } = renderHook(
       () =>

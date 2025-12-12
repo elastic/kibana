@@ -6,10 +6,12 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useFetchSloList } from '../hooks/use_fetch_slo_list';
 export interface SloItem {
   id: string;

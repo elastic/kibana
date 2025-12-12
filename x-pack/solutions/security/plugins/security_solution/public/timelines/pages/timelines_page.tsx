@@ -16,15 +16,27 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
+import { PageScope } from '../../data_view_manager/constants';
+import { useSourcererDataView } from '../../sourcerer/containers';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { PageLoader } from '../../common/components/page_loader';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
-  const { indicesExist } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { indicesExist: oldIndicesExist } = useSourcererDataView();
+
+  const { dataView, status } = useDataView(PageScope.default);
+  const experimentalIndicesExist = dataView?.hasMatchedIndices();
+
+  const indicesExist = newDataViewPickerEnabled ? experimentalIndicesExist : oldIndicesExist;
+
   const {
     timelinePrivileges: { crud: canWriteTimeline },
   } = useUserPrivileges();
@@ -36,6 +48,10 @@ export const TimelinesPage = React.memo(() => {
 
   const timelineType =
     tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <SecurityRoutePageWrapper pageName={SecurityPageName.timelines}>

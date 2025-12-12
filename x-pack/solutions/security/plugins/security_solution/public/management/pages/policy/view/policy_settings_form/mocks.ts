@@ -6,31 +6,12 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import { createTestSubjGenerator } from '../../../../mocks/utils';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import {
   AntivirusRegistrationModes,
   ProtectionModes,
 } from '../../../../../../common/endpoint/types';
-
-interface TestSubjGenerator {
-  (suffix?: string): string;
-  withPrefix: (prefix: string) => TestSubjGenerator;
-}
-
-export const createTestSubjGenerator = (testSubjPrefix: string): TestSubjGenerator => {
-  const testSubjGenerator: TestSubjGenerator = (suffix) => {
-    if (suffix) {
-      return `${testSubjPrefix}-${suffix}`;
-    }
-    return testSubjPrefix;
-  };
-
-  testSubjGenerator.withPrefix = (prefix: string): TestSubjGenerator => {
-    return createTestSubjGenerator(testSubjGenerator(prefix));
-  };
-
-  return testSubjGenerator;
-};
 
 export const getPolicySettingsFormTestSubjects = (
   formTopLevelTestSubj: string = 'endpointPolicyForm'
@@ -46,6 +27,7 @@ export const getPolicySettingsFormTestSubjects = (
   const linuxEventsTestSubj = genTestSubj.withPrefix('linuxEvents');
   const antivirusTestSubj = genTestSubj.withPrefix('antivirusRegistration');
   const attackSurfaceTestSubj = genTestSubj.withPrefix('attackSurface');
+  const deviceControlTestSubj = genTestSubj.withPrefix('deviceControl');
 
   return {
     form: genTestSubj(),
@@ -138,6 +120,7 @@ export const getPolicySettingsFormTestSubjects = (
       card: linuxEventsTestSubj(),
       osValueContainer: linuxEventsTestSubj('osValueContainer'),
       optionsContainer: linuxEventsTestSubj('options'),
+      dnsCheckbox: linuxEventsTestSubj('dns'),
       fileCheckbox: linuxEventsTestSubj('file'),
       networkCheckbox: linuxEventsTestSubj('network'),
       processCheckbox: linuxEventsTestSubj('process'),
@@ -151,6 +134,15 @@ export const getPolicySettingsFormTestSubjects = (
       enabledRadioButton: antivirusTestSubj(AntivirusRegistrationModes.enabled),
       syncRadioButton: antivirusTestSubj(AntivirusRegistrationModes.sync),
       osValueContainer: antivirusTestSubj('osValueContainer'),
+    },
+    deviceControl: {
+      card: deviceControlTestSubj(),
+      lockedCard: deviceControlTestSubj('locked'),
+      lockedCardTitle: deviceControlTestSubj('locked-title'),
+      enableDisableSwitch: deviceControlTestSubj('enableDisableSwitch'),
+      protectionAuditRadio: deviceControlTestSubj('protectionLevel-auditRadio'),
+      notifyUserCheckbox: deviceControlTestSubj('notifyUser-checkbox'),
+      osValuesContainer: deviceControlTestSubj('osValues'),
     },
     advancedSection: {
       container: advancedSectionTestSubj(''),

@@ -7,18 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OtelKubernetesPanel } from '../quickstart_flows/otel_kubernetes/otel_kubernetes_panel';
 import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
-import { type ObservabilityOnboardingAppServices } from '../..';
+import { useManagedOtlpServiceTechPreviewVisibility } from '../shared/use_managed_otlp_service_tech_preview_visibility';
 
 export const OtelKubernetesPage = () => {
-  const {
-    services: {
-      context: { isServerless },
-    },
-  } = useKibana<ObservabilityOnboardingAppServices>();
+  const showTechPreviewBadge = useManagedOtlpServiceTechPreviewVisibility();
 
   return (
     <PageTemplate
@@ -37,7 +32,7 @@ export const OtelKubernetesPage = () => {
               defaultMessage: 'Unified Kubernetes observability with the OpenTelemetry Operator',
             }
           )}
-          isTechnicalPreview={isServerless}
+          isTechnicalPreview={showTechPreviewBadge}
         />
       }
     >

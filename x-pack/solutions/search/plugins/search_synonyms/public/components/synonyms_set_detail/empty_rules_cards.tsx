@@ -45,7 +45,7 @@ export const SynonymsSetEmptyRulesCards: React.FC<SynonymsSetEmptyRulesCardsProp
           description={i18n.translate(
             'xpack.searchSynonyms.synonymsSetEmptyRulesCards.equivalent.description',
             {
-              defaultMessage: 'Defines groups of words that are the same.',
+              defaultMessage: 'Interchangeable words that will match each other.',
             }
           )}
           footer={
@@ -122,7 +122,7 @@ export const SynonymsSetEmptyRulesCards: React.FC<SynonymsSetEmptyRulesCardsProp
           description={i18n.translate(
             'xpack.searchSynonyms.synonymsSetEmptyRulesCards.explicit.description',
             {
-              defaultMessage: 'Matches a group of words to another word.',
+              defaultMessage: 'Words that expand to include the terms on the right.',
             }
           )}
           footer={

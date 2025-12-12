@@ -27,6 +27,7 @@ export interface WaterfallContextProps {
   showCriticalPath: boolean;
   maxLevelOpen: number;
   isOpen: boolean;
+  isEmbeddable: boolean;
 }
 
 export const WaterfallContext = React.createContext<
@@ -36,6 +37,7 @@ export const WaterfallContext = React.createContext<
     traceList: IWaterfallNodeFlatten[];
     getErrorCount: (waterfallItemId: string) => number;
     updateTreeNode: (newTree: IWaterfallNodeFlatten) => void;
+    isEmbeddable: boolean;
   } & Pick<WaterfallContextProps, 'showCriticalPath'>
 >({
   criticalPathSegmentsById: {} as Dictionary<CriticalPathSegment[]>,
@@ -43,6 +45,7 @@ export const WaterfallContext = React.createContext<
   traceList: [],
   getErrorCount: () => 0,
   updateTreeNode: () => undefined,
+  isEmbeddable: false,
 });
 
 export function WaterfallContextProvider({
@@ -51,6 +54,7 @@ export function WaterfallContextProvider({
   maxLevelOpen,
   children,
   isOpen,
+  isEmbeddable,
 }: PropsWithChildren<WaterfallContextProps>) {
   const [tree, setTree] = useState<IWaterfallNode | null>(null);
   const criticalPathSegmentsById = useMemo(() => {
@@ -114,6 +118,7 @@ export function WaterfallContextProvider({
         getErrorCount,
         traceList,
         updateTreeNode,
+        isEmbeddable,
       }}
     >
       {children}

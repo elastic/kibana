@@ -8,14 +8,15 @@
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
-  savedObjectsClientMock,
   httpServerMock,
   coreMock,
+  savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -23,6 +24,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
@@ -36,12 +38,17 @@ import type {
   PostPackagePolicyPostCreateCallback,
   PostPackagePolicyDeleteCallback,
   UpdatePackagePolicy,
+  AssetsMap,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
 import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
-import { createAppContextStartContractMock, xpackMocks } from '../mocks';
+import {
+  createAppContextStartContractMock,
+  createSavedObjectClientMock,
+  xpackMocks,
+} from '../mocks';
 
 import type {
   PostDeletePackagePoliciesResponse,
@@ -51,10 +58,12 @@ import type {
   PackagePolicyPackage,
   DeletePackagePoliciesResponse,
   PackagePolicyAssetsMap,
+  PreconfiguredInputs,
+  ArchiveEntry,
 } from '../../common/types';
-import { packageToPackagePolicy } from '../../common/services';
+import { packageToPackagePolicy, packageToPackagePolicyInputs } from '../../common/services';
 
-import { FleetError, PackagePolicyValidationError } from '../errors';
+import { FleetError, PackagePolicyValidationError, CloudConnectorUpdateError } from '../errors';
 
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
@@ -65,8 +74,10 @@ import {
   _applyIndexPrivileges,
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
+  _normalizePackagePolicyKuery,
+  _getAssetForTemplatePath,
 } from './package_policy';
-import { appContextService } from './app_context';
+import { appContextService } from '.';
 
 import { getPackageInfo } from './epm/packages';
 import { sendTelemetryEvents } from './upgrade_sender';
@@ -74,6 +85,7 @@ import { auditLoggingService } from './audit_logging';
 import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
+import { cloudConnectorService } from './cloud_connector';
 
 jest.mock('./spaces/helpers');
 
@@ -131,7 +143,49 @@ async function mockedGetInstallation(params: any) {
 async function mockedGetPackageInfo(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
-  if (params.pkgName === 'aws') pkg = { name: 'aws', version: '0.3.3' };
+  if (params.pkgName === 'aws') {
+    pkg = {
+      name: 'aws',
+      version: '0.3.3',
+      policy_templates: [
+        {
+          name: 'aws',
+          inputs: [
+            {
+              title: 'AWS',
+              type: 'aws',
+              description: 'AWS input',
+              vars: [
+                {
+                  name: 'role_arn',
+                  required: false,
+                  type: 'text',
+                },
+                {
+                  name: 'external_id',
+                  required: false,
+                  secret: true,
+                  type: 'password',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      data_streams: [
+        {
+          dataset: 'test',
+          type: 'logs',
+          streams: [
+            {
+              input: 'aws',
+              template_path: 'test-template.yml',
+            },
+          ],
+        },
+      ],
+    };
+  }
   if (params.pkgName === 'endpoint') pkg = { name: 'endpoint', version: params.pkgVersion };
   if (params.pkgName === 'test') {
     pkg = {
@@ -185,12 +239,21 @@ jest.mock('./epm/registry', () => ({
 
 jest.mock('./epm/packages/get', () => ({
   getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
-  getAgentTemplateAssetsMap: jest.fn().mockResolvedValue(new Map()),
+  getAgentTemplateAssetsMap: jest.fn().mockImplementation(async (params) => {
+    const assetsMap = new Map();
+    // Add mock template data for aws package
+    if (params.packageInfo.name === 'aws') {
+      assetsMap.set('test-template.yml', {
+        buffer: Buffer.from('mock template content'),
+        path: 'test-template.yml',
+      });
+    }
+    return assetsMap;
+  }),
 }));
 
 jest.mock('./agent_policy');
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-
 jest.mock('./epm/packages/cleanup', () => {
   return {
     removeOldAssets: jest.fn(),
@@ -208,24 +271,35 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 
 jest.mock('./secrets', () => ({
   isSecretStorageEnabled: jest.fn(),
+  toCompiledSecretRef: jest.fn((id: string) => ({
+    id,
+    isSecretRef: true,
+  })),
+  extractAndWriteSecrets: jest.fn(),
 }));
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
-const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
+const mockAgentPolicyGet = (spaceIds: string[] = ['default'], additionalProps?: any) => {
+  const basePolicy = {
+    id: 'agentPolicy1',
+    name: 'Test Agent Policy',
+    namespace: 'test',
+    status: 'active',
+    is_managed: false,
+    updated_at: new Date().toISOString(),
+    updated_by: 'test',
+    revision: 1,
+    is_protected: false,
+    space_ids: spaceIds,
+    ...additionalProps,
+  };
+
   mockAgentPolicyService.get.mockImplementation(
-    (_soClient: SavedObjectsClientContract, id: string, _force = false, _errorMessage?: string) => {
+    (_soClient: SavedObjectsClientContract, id: string, _force = false, _options) => {
       return Promise.resolve({
         id,
-        name: 'Test Agent Policy',
-        namespace: 'test',
-        status: 'active',
-        is_managed: false,
-        updated_at: new Date().toISOString(),
-        updated_by: 'test',
-        revision: 1,
-        is_protected: false,
-        space_ids: spaceIds,
+        ...basePolicy,
       });
     }
   );
@@ -235,15 +309,7 @@ const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
       return Promise.resolve(
         ids.map((id) => ({
           id,
-          name: 'Test Agent Policy',
-          namespace: 'test',
-          status: 'active',
-          is_managed: false,
-          updated_at: new Date().toISOString(),
-          updated_by: 'test',
-          revision: 1,
-          is_protected: false,
-          space_ids: spaceIds,
+          ...basePolicy,
         }))
       );
     }
@@ -270,7 +336,7 @@ describe('Package policy service', () => {
     });
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -304,6 +370,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'create',
         id: 'test-package-policy',
+        name: 'Test Package Policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -312,7 +379,7 @@ describe('Package policy service', () => {
       jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
 
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -347,11 +414,966 @@ describe('Package policy service', () => {
         /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
     });
-  });
 
+    it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      // Mock an agentless agent policy
+      mockAgentPolicyGet(undefined, { supports_agentless: true });
+
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [
+              {
+                type: 'tcp', // tcp input is in the blocklist for agentless
+                enabled: true,
+                streams: [],
+              },
+            ],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'test-package-policy', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should handle cloud connector variables when supports_cloud_connector is true', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      const packagePolicyWithCloudConnector = {
+        name: 'test-package-policy',
+        enabled: true,
+        policy_id: 'test',
+        policy_ids: ['test'],
+        cloud_connector_id: undefined,
+        supports_cloud_connector: true,
+        package: {
+          name: 'aws',
+          title: 'AWS',
+          version: '0.3.3',
+        },
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: packagePolicyWithCloudConnector,
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(undefined, {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+          },
+        },
+      });
+
+      const result = await packagePolicyService.create(
+        soClient,
+        esClient,
+        packagePolicyWithCloudConnector
+      );
+
+      expect(result.supports_cloud_connector).toBe(true);
+      expect(result.inputs[0].streams[0].vars).toHaveProperty('role_arn');
+      expect(result.inputs[0].streams[0].vars).toHaveProperty('external_id');
+    });
+
+    it('should not process cloud connector variables and create cloud connector when supports_cloud_connector is false', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      const packagePolicyWithoutCloudConnector = {
+        name: 'test-package-policy',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test',
+        policy_ids: ['test'],
+        supports_cloud_connector: false,
+        package: {
+          name: 'aws',
+          title: 'AWS',
+          version: '0.3.3',
+        },
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: packagePolicyWithoutCloudConnector,
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(['test', 'default'], {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+          },
+        },
+      });
+
+      const result = await packagePolicyService.create(
+        soClient,
+        esClient,
+        packagePolicyWithoutCloudConnector
+      );
+
+      expect(result.supports_cloud_connector).toBe(false);
+    });
+  });
+  describe('createCloudConnectorForPackagePolicy', () => {
+    it('should create cloud connector when all conditions are met', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock the cloud connector service
+      const mockCloudConnector = {
+        id: 'cloud-connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/TestRole',
+            type: 'text',
+          },
+          external_id: {
+            type: 'password',
+            value: {
+              id: 'ABCDEFGHIJKLMNOPQRST',
+              isSecretRef: true,
+            },
+          },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      // Mock the cloudConnectorService.create method
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy
+        );
+
+        expect(result).toEqual(mockCloudConnector);
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
+          name: 'aws-cloud-connector: test-package-policy',
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+            external_id: {
+              value: {
+                id: 'ABCDEFGHIJKLMNOPQRST',
+                isSecretRef: true,
+              },
+              type: 'password',
+            },
+          },
+          cloudProvider: 'aws',
+        });
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+
+    it('should return undefined when cloud connector setup is not required', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: false, // Not supported
+        cloud_connector_id: undefined,
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when agentless cloud connectors are disabled', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: false, // Disabled
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock to ensure no service calls are made
+      const originalCreate = cloudConnectorService.create;
+      const originalUpdate = cloudConnectorService.update;
+      const createSpy = jest.fn();
+      const updateSpy = jest.fn();
+      cloudConnectorService.create = createSpy;
+      cloudConnectorService.update = updateSpy;
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy
+        );
+
+        expect(result).toBeUndefined();
+        // Should not call create or update when cloud connectors are disabled
+        expect(createSpy).not.toHaveBeenCalled();
+        expect(updateSpy).not.toHaveBeenCalled();
+        expect(soClient.get).not.toHaveBeenCalled();
+      } finally {
+        // Restore original methods
+        cloudConnectorService.create = originalCreate;
+        cloudConnectorService.update = originalUpdate;
+      }
+    });
+
+    it('should return undefined when agentless configuration is missing', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        // Missing agentless configuration completely
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should update existing cloud connector when cloud_connector_id is provided', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-id',
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/UpdatedRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'UPDATEDEXTERNALID123',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock existing cloud connector
+      const existingCloudConnector = {
+        id: 'existing-connector-id',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'existing-connector',
+          namespace: '*',
+          cloudProvider: 'aws',
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/OldRole',
+              type: 'text',
+            },
+            external_id: {
+              value: {
+                id: 'OLDEXTERNALID1234567',
+                isSecretRef: true,
+              },
+              type: 'password',
+            },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      };
+
+      // Mock updated cloud connector response
+      const updatedCloudConnector = {
+        id: 'existing-connector-id',
+        name: 'existing-connector',
+        namespace: '*',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/UpdatedRole',
+            type: 'text',
+          },
+          external_id: {
+            value: {
+              id: 'UPDATEDEXTERNALID123',
+              isSecretRef: true,
+            },
+            type: 'password',
+          },
+        },
+        packagePolicyCount: 2, // Incremented
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T02:00:00.000Z',
+      };
+
+      // Mock soClient.get for the existing connector
+      soClient.get = jest.fn().mockResolvedValue(existingCloudConnector);
+
+      // Mock the cloudConnectorService.update method
+      const originalUpdate = cloudConnectorService.update;
+      cloudConnectorService.update = jest.fn().mockResolvedValue(updatedCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy
+        );
+
+        expect(result).toEqual(updatedCloudConnector);
+        expect(soClient.get).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          'existing-connector-id'
+        );
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(
+          soClient,
+          'existing-connector-id',
+          {
+            vars: {
+              role_arn: {
+                value: 'arn:aws:iam::123456789012:role/UpdatedRole',
+                type: 'text',
+              },
+              external_id: {
+                value: {
+                  id: 'UPDATEDEXTERNALID123',
+                  isSecretRef: true,
+                },
+                type: 'password',
+              },
+            },
+            packagePolicyCount: 2, // Original count (1) + 1
+          }
+        );
+      } finally {
+        // Restore the original method
+        cloudConnectorService.update = originalUpdate;
+      }
+    });
+
+    it('should throw CloudConnectorUpdateError when cloud connector update fails', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-id',
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/UpdatedRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'UPDATEDEXTERNALID123',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock existing cloud connector
+      const existingCloudConnector = {
+        id: 'existing-connector-id',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'existing-connector',
+          namespace: '*',
+          cloudProvider: 'aws',
+          vars: {},
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      };
+
+      // Mock soClient.get for the existing connector
+      soClient.get = jest.fn().mockResolvedValue(existingCloudConnector);
+
+      // Mock the cloudConnectorService.update method to throw an error
+      const originalUpdate = cloudConnectorService.update;
+      cloudConnectorService.update = jest
+        .fn()
+        .mockRejectedValue(new Error('Cloud connector update failed'));
+
+      try {
+        await expect(
+          (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+            soClient,
+            enrichedPackagePolicy,
+            agentPolicy
+          )
+        ).rejects.toThrow(CloudConnectorUpdateError);
+
+        // Verify that get was called but create was not
+        expect(soClient.get).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          'existing-connector-id'
+        );
+        expect(cloudConnectorService.update).toHaveBeenCalled();
+      } finally {
+        // Restore the original method
+        cloudConnectorService.update = originalUpdate;
+      }
+    });
+
+    it('should not update cloud connector when cloud_connector_id is provided but no cloud connector vars found', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-id',
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {}, // No cloud connector variables
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+      // Should not call get or update when no vars are found
+      expect(soClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should not update cloud connector when supports_cloud_connector is false even with cloud_connector_id', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: false, // Not supported
+        cloud_connector_id: 'existing-connector-id',
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+      // Should not call get or update when supports_cloud_connector is false
+      expect(soClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should return undefined when no cloud connector variables are found', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {}, // No cloud connector variables
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should throw error when cloud connector creation fails', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock the cloudConnectorService.create method to throw an error
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest
+        .fn()
+        .mockRejectedValue(new Error('Cloud connector creation failed'));
+
+      try {
+        await expect(
+          (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+            soClient,
+            enrichedPackagePolicy,
+            agentPolicy
+          )
+        ).rejects.toThrow(
+          'Error creating cloud connector in Fleet, Cloud connector creation failed'
+        );
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+
+    it('should create cloud connector with generated name when no cloud_connector_name is provided', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-cspm-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                  // Note: no cloud_connector_name provided
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock the cloud connector service
+      const mockCloudConnector = {
+        id: 'cloud-connector-generated-id',
+        name: 'aws-cloud-connector: test-cspm-policy',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/TestRole',
+            type: 'text',
+          },
+          external_id: {
+            type: 'password',
+            value: {
+              id: 'ABCDEFGHIJKLMNOPQRST',
+              isSecretRef: true,
+            },
+          },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      // Mock the cloudConnectorService.create method
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy
+        );
+
+        expect(result).toEqual(mockCloudConnector);
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
+          name: 'aws-cloud-connector: test-cspm-policy',
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+            external_id: {
+              value: {
+                id: 'ABCDEFGHIJKLMNOPQRST',
+                isSecretRef: true,
+              },
+              type: 'password',
+            },
+          },
+          cloudProvider: 'aws',
+        });
+
+        // Verify the name was auto-generated with the correct format
+        expect(mockCloudConnector.name).toBe('aws-cloud-connector: test-cspm-policy');
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+  });
   describe('inspect', () => {
     it('should return compiled inputs', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -402,7 +1424,7 @@ describe('Package policy service', () => {
   describe('bulkCreate', () => {
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
 
       soClient.bulkCreate.mockResolvedValueOnce({
         saved_objects: [
@@ -447,12 +1469,14 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'create',
         id: 'test-package-policy-1',
+        name: 'Test Package Policy 1',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'create',
         id: 'test-package-policy-2',
+        name: 'Test Package Policy 2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -460,12 +1484,16 @@ describe('Package policy service', () => {
 
   describe('get', () => {
     it('should call audit logger', async () => {
-      const soClient = savedObjectsClientMock.create();
-      soClient.get.mockResolvedValueOnce({
-        id: 'test-package-policy',
-        attributes: {},
-        references: [],
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      const soClient = createSavedObjectClientMock();
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            attributes: { name: 'Test' },
+            references: [],
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
       });
 
       await packagePolicyService.get(soClient, 'test-package-policy');
@@ -473,6 +1501,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-package-policy',
+        name: 'Test',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -480,18 +1509,18 @@ describe('Package policy service', () => {
 
   describe('getByIDs', () => {
     it('should call audit logger', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
             id: 'test-package-policy-1',
-            attributes: {},
+            attributes: { name: 'Test 1' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-package-policy-2',
-            attributes: {},
+            attributes: { name: 'Test 2' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
@@ -505,12 +1534,14 @@ describe('Package policy service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
+        name: 'Test 1',
         id: 'test-package-policy-1',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
+        name: 'Test 2',
         id: 'test-package-policy-2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -519,7 +1550,7 @@ describe('Package policy service', () => {
 
   describe('list', () => {
     it('should call audit logger', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       soClient.find.mockResolvedValueOnce({
         total: 1,
         page: 1,
@@ -527,14 +1558,14 @@ describe('Package policy service', () => {
         saved_objects: [
           {
             id: 'test-package-policy-1',
-            attributes: {},
+            attributes: { name: 'Test 1' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
           {
             id: 'test-package-policy-2',
-            attributes: {},
+            attributes: { name: 'Test 2' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
@@ -550,12 +1581,14 @@ describe('Package policy service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
+        name: 'Test 1',
         id: 'test-package-policy-1',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
+        name: 'Test 2',
         id: 'test-package-policy-2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -1014,14 +2047,22 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockAgentPolicyGet();
+    });
     it('should fail to update on version conflict', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'test',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes: createPackagePolicyMock(),
+      const savedObjectsClient = createSavedObjectClientMock();
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
       });
       savedObjectsClient.update.mockImplementation(
         async (
@@ -1043,7 +2084,7 @@ describe('Package policy service', () => {
     });
 
     it('should fail to update if the name already exists on another policy', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       savedObjectsClient.find.mockResolvedValue({
         total: 1,
         per_page: 1,
@@ -1071,12 +2112,16 @@ describe('Package policy service', () => {
           },
         ],
       });
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'the-package-policy-id',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes: {},
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'the-package-policy-id',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: {},
+          },
+        ],
       });
       savedObjectsClient.update.mockImplementation(
         async (
@@ -1084,12 +2129,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'the-package-policy-id',
-            type,
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'the-package-policy-id',
+                type,
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1121,7 +2170,7 @@ describe('Package policy service', () => {
     });
 
     it('should not fail to update if skipUniqueNameVerification when the name already exists on another policy', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       savedObjectsClient.find.mockResolvedValue({
         total: 1,
         per_page: 1,
@@ -1149,12 +2198,16 @@ describe('Package policy service', () => {
           },
         ],
       });
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'the-package-policy-id',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes: {},
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'the-package-policy-id',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: {},
+          },
+        ],
       });
       savedObjectsClient.update.mockImplementation(
         async (
@@ -1162,12 +2215,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'the-package-policy-id',
-            type,
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'the-package-policy-id',
+                type,
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1197,7 +2254,7 @@ describe('Package policy service', () => {
     });
 
     it('should not fail to update if skipUniqueNameVerification: false when the name is not updated but duplicates exists', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       savedObjectsClient.find.mockResolvedValue({
         total: 1,
         per_page: 1,
@@ -1225,14 +2282,18 @@ describe('Package policy service', () => {
           },
         ],
       });
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'the-package-policy-id',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes: {
-          name: 'endpoint-1',
-        },
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'the-package-policy-id',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: {
+              name: 'endpoint-1',
+            },
+          },
+        ],
       });
       savedObjectsClient.update.mockImplementation(
         async (
@@ -1240,12 +2301,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'the-package-policy-id',
-            type,
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'the-package-policy-id',
+                type,
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1275,7 +2340,7 @@ describe('Package policy service', () => {
     });
 
     it('should throw if the user try to update input vars that are frozen', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -1359,12 +2424,16 @@ describe('Package policy service', () => {
         inputs: mockInputs,
       };
 
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'test',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes,
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
       });
 
       savedObjectsClient.update.mockImplementation(
@@ -1373,12 +2442,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'test',
-            type: 'abcd',
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'test',
+                type: 'abcd',
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1396,7 +2469,7 @@ describe('Package policy service', () => {
     });
 
     it('should allow to update input vars that are frozen with the force flag', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -1480,12 +2553,16 @@ describe('Package policy service', () => {
         inputs: mockInputs,
       };
 
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'test',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes,
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
       });
 
       savedObjectsClient.update.mockImplementation(
@@ -1494,12 +2571,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'test',
-            type: 'abcd',
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'test',
+                type: 'abcd',
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1523,7 +2604,7 @@ describe('Package policy service', () => {
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
     });
     it('should add new input vars when updating', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -1603,12 +2684,16 @@ describe('Package policy service', () => {
         inputs: mockInputs,
       };
 
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'test',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes,
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
       });
 
       savedObjectsClient.update.mockImplementation(
@@ -1617,12 +2702,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'test',
-            type: 'abcd',
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'test',
+                type: 'abcd',
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1646,7 +2735,7 @@ describe('Package policy service', () => {
     });
 
     it('should update elasticsearch.priviles.cluster when updating', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
 
       const attributes = {
@@ -1664,12 +2753,16 @@ describe('Package policy service', () => {
         } as PackageInfo);
       });
 
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'test',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes,
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
       });
 
       savedObjectsClient.update.mockImplementation(
@@ -1678,12 +2771,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'test',
-            type: 'abcd',
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'test',
+                type: 'abcd',
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1701,7 +2798,7 @@ describe('Package policy service', () => {
     });
 
     it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
 
       const attributes = {
@@ -1709,12 +2806,16 @@ describe('Package policy service', () => {
         inputs: [],
       };
 
-      savedObjectsClient.get.mockResolvedValue({
-        id: 'test',
-        type: 'abcd',
-        references: [],
-        version: 'test',
-        attributes,
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
       });
 
       savedObjectsClient.update.mockImplementation(
@@ -1723,12 +2824,16 @@ describe('Package policy service', () => {
           id: string,
           attrs: any
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
-            id: 'test',
-            type: 'abcd',
-            references: [],
-            version: 'test',
-            attributes: attrs,
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'test',
+                type: 'abcd',
+                references: [],
+                version: 'test',
+                attributes: attrs,
+              },
+            ],
           });
           return attrs;
         }
@@ -1750,7 +2855,7 @@ describe('Package policy service', () => {
     });
 
     it('should call audit logger', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       const mockPackagePolicy = createPackagePolicyMock();
@@ -1760,11 +2865,15 @@ describe('Package policy service', () => {
         inputs: [],
       };
 
-      soClient.get.mockResolvedValue({
-        id: 'test-package-policy',
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes,
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes,
+          },
+        ],
       });
 
       soClient.update.mockResolvedValue({
@@ -1781,13 +2890,14 @@ describe('Package policy service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
+        name: 'endpoint-1',
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
 
     it('should run "packagePolicyPostUpdate" external callbacks', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const mockPackagePolicy = createPackagePolicyMock();
       const attributes = {
@@ -1797,11 +2907,15 @@ describe('Package policy service', () => {
 
       jest.spyOn(appContextService, 'getExternalCallbacks');
 
-      soClient.get.mockResolvedValue({
-        id: 'test-package-policy',
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes,
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes,
+          },
+        ],
       });
 
       soClient.update.mockResolvedValue({
@@ -1826,7 +2940,7 @@ describe('Package policy service', () => {
         mockAgentPolicyService.bumpRevision.mockReset();
       });
 
-      const generateAttributes = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
         name: 'endpoint-12',
         description: '',
         namespace: 'default',
@@ -1841,7 +2955,7 @@ describe('Package policy service', () => {
         ...overrides,
       });
 
-      const generateSO = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateSO = (overrides: Record<string, unknown> = {}) => ({
         id: 'existing-package-policy',
         type: 'ingest-package-policies',
         references: [],
@@ -1854,19 +2968,32 @@ describe('Package policy service', () => {
       const setupSOClientMocks = (
         savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
         initialPolicies: string[],
-        updatesPolicies: string[]
+        updatesPolicies: string[],
+        overrides: Record<string, unknown> = {}
       ) => {
-        savedObjectsClient.get.mockResolvedValueOnce(
-          generateSO({ name: 'test-package-policy', policy_ids: initialPolicies })
-        );
-
-        savedObjectsClient.get.mockResolvedValueOnce(
-          generateSO({ name: 'test-package-policy-1', policy_ids: updatesPolicies })
-        );
-
-        savedObjectsClient.get.mockResolvedValueOnce(
-          generateSO({ name: 'test-package-policy-1', policy_ids: updatesPolicies })
-        );
+        savedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            generateSO({ name: 'test-package-policy', policy_ids: initialPolicies, ...overrides }),
+          ],
+        });
+        savedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            generateSO({
+              name: 'test-package-policy-1',
+              policy_ids: updatesPolicies,
+              ...overrides,
+            }),
+          ],
+        });
+        savedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            generateSO({
+              name: 'test-package-policy-1',
+              policy_ids: updatesPolicies,
+              ...overrides,
+            }),
+          ],
+        });
       };
 
       const callPackagePolicyServiceUpdate = async (
@@ -1886,7 +3013,7 @@ describe('Package policy service', () => {
       };
 
       it('should not remove protections if policy_ids is not changed', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         setupSOClientMocks(savedObjectsClient, testedPolicyIds, testedPolicyIds);
@@ -1910,7 +3037,7 @@ describe('Package policy service', () => {
       });
 
       it('should remove protections if policy_ids is changed, only affected policies', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         const updatedPolicyIds = [...testedPolicyIds].splice(1, 2);
@@ -1936,7 +3063,7 @@ describe('Package policy service', () => {
       });
 
       it('should remove protections from all agent policies if updated policy_ids is empty', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         setupSOClientMocks(savedObjectsClient, testedPolicyIds, []);
@@ -1956,7 +3083,7 @@ describe('Package policy service', () => {
       });
 
       it('should set protections to false on new policy assignment', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         const updatedPolicyIds = [...testedPolicyIds, 'test-agent-policy-4'];
@@ -1982,7 +3109,7 @@ describe('Package policy service', () => {
       });
 
       it('should set protections to false on all new policy assignment', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         setupSOClientMocks(savedObjectsClient, [], testedPolicyIds);
@@ -2000,6 +3127,91 @@ describe('Package policy service', () => {
           );
         });
       });
+
+      it('should never remove protections for non-endpoint packages, regardless of policy_ids change', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const testPolicyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
+
+        // Ensure both old and new policies are NOT endpoint
+        setupSOClientMocks(
+          savedObjectsClient,
+          testPolicyIds,
+          [],
+          // Add package override for both old and new policies
+          { package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' } }
+        );
+
+        await packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          generateSO({
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }).id,
+          generateAttributes({
+            policy_ids: [],
+            name: 'test-package-policy-1',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          })
+        );
+
+        const calls = mockAgentPolicyService.bumpRevision.mock.calls;
+        expect(calls).toHaveLength(testPolicyIds.length);
+
+        calls.forEach((call, idx) => {
+          expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
+          expect(call[3]).toMatchObject({ removeProtection: false });
+        });
+      });
+
+      it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Mock existing package policy
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'test',
+              type: 'abcd',
+              references: [],
+              version: 'test',
+              attributes: createPackagePolicyMock(),
+            },
+          ],
+        });
+
+        // Mock agentless agent policy
+        mockAgentPolicyGet(undefined, { supports_agentless: true });
+
+        await expect(
+          packagePolicyService.update(
+            savedObjectsClient,
+            elasticsearchClient,
+            'the-package-policy-id',
+            {
+              name: 'test-policy',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'test',
+              policy_ids: ['test'],
+              inputs: [
+                {
+                  type: 'tcp', // tcp input is in the blocklist for agentless
+                  enabled: true,
+                  streams: [],
+                },
+              ],
+              package: {
+                name: 'test',
+                title: 'Test',
+                version: '0.0.1',
+              },
+            }
+          )
+        ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
+      });
     });
   });
 
@@ -2009,7 +3221,7 @@ describe('Package policy service', () => {
     });
 
     it('should throw if the user try to update input vars that are frozen', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -2149,7 +3361,7 @@ describe('Package policy service', () => {
     });
 
     it('should allow to update input vars that are frozen with the force flag', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -2291,7 +3503,7 @@ describe('Package policy service', () => {
     });
 
     it('should add new input vars when updating', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -2429,7 +3641,7 @@ describe('Package policy service', () => {
     });
 
     it('should update elasticsearch.privileges.cluster when updating', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
 
       const attributes = {
@@ -2497,7 +3709,7 @@ describe('Package policy service', () => {
     });
 
     it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
 
       const attributes = {
@@ -2559,7 +3771,7 @@ describe('Package policy service', () => {
     });
 
     it('should send telemetry event when upgrading a package policy', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -2660,7 +3872,7 @@ describe('Package policy service', () => {
     });
 
     it('should not send telemetry event when updating a package policy without upgrade', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -2760,25 +3972,25 @@ describe('Package policy service', () => {
     });
 
     it('should call audit logger', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       const mockPackagePolicies = [
         {
           id: 'test-package-policy-1',
           type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
+          attributes: createPackagePolicyMock(),
           references: [],
         },
         {
           id: 'test-package-policy-2',
           type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
+          attributes: createPackagePolicyMock(),
           references: [],
         },
       ];
 
-      soClient.bulkGet.mockResolvedValueOnce({
+      soClient.bulkGet.mockResolvedValue({
         saved_objects: [...mockPackagePolicies],
       });
 
@@ -2808,11 +4020,69 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should call external callbacks', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const callbackOne = jest.fn().mockImplementation((p) => p);
+      appContextService.addExternalCallback('packagePolicyPostUpdate', callbackOne);
+      const callbackTwo = jest.fn().mockImplementation((p) => p);
+      appContextService.addExternalCallback('packagePolicyPostUpdate', callbackTwo);
+      const mockPackagePolicies = [
+        {
+          id: 'test-package-policy-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createPackagePolicyMock(),
+          references: [],
+        },
+        {
+          id: 'test-package-policy-2',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createPackagePolicyMock(),
+          references: [],
+        },
+      ];
+
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [...mockPackagePolicies],
+      });
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [...mockPackagePolicies],
+      });
+
+      soClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [...mockPackagePolicies],
+      });
+
+      await packagePolicyService.bulkUpdate(soClient, esClient, [
+        {
+          id: 'test-package-policy-1',
+          name: 'Test Package Policy 1',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test-agent-policy',
+          policy_ids: ['test-agent-policy'],
+          inputs: [],
+        },
+        {
+          id: 'test-package-policy-2',
+          name: 'Test Package Policy 2',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test-agent-policy',
+          policy_ids: ['test-agent-policy'],
+          inputs: [],
+        },
+      ]);
+
+      expect(callbackOne).toBeCalledTimes(2);
+      expect(callbackTwo).toBeCalledTimes(2);
+    });
+
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
       });
-      const generateAttributes = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
         name: 'endpoint-12',
         description: '',
         namespace: 'default',
@@ -2827,7 +4097,7 @@ describe('Package policy service', () => {
         ...overrides,
       });
 
-      const generateSO = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateSO = (overrides: Record<string, unknown> = {}) => ({
         id: 'existing-package-policy',
         type: 'ingest-package-policies',
         references: [],
@@ -2903,7 +4173,7 @@ describe('Package policy service', () => {
       };
 
       it('should not remove protections if policy_ids is not changed', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
 
         setupSOClientMocks(savedObjectsClient);
 
@@ -2929,7 +4199,7 @@ describe('Package policy service', () => {
       });
 
       it('should remove protections if policy_ids is changed, only affected policies', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
 
         setupSOClientMocks(savedObjectsClient);
 
@@ -2959,7 +4229,7 @@ describe('Package policy service', () => {
       });
 
       it('should remove protections from all agent policies if updated policy_ids is empty', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
 
         setupSOClientMocks(savedObjectsClient);
 
@@ -2990,7 +4260,7 @@ describe('Package policy service', () => {
       });
 
       it('should remove protections from all newly assigned policies', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
+        const savedObjectsClient = createSavedObjectClientMock();
 
         setupSOClientMocks(savedObjectsClient, [
           generateSO({
@@ -3025,23 +4295,279 @@ describe('Package policy service', () => {
           );
         });
       });
+      it('should never remove protections for non-endpoint packages, regardless of policy_ids change', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+
+        // All non-endpoint policies
+        const nonEndpointPoliciesSO = [
+          generateSO({
+            name: 'not-endpoint-policy',
+            policy_ids: ['test-agent-policy-1'],
+            id: 'not-endpoint-1',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }),
+          generateSO({
+            name: 'not-endpoint-policy-2',
+            policy_ids: ['test-agent-policy-2'],
+            id: 'not-endpoint-2',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }),
+        ];
+
+        const nonEndpointTestedPolicies = nonEndpointPoliciesSO.map((so) => so.attributes);
+
+        setupSOClientMocks(savedObjectsClient, nonEndpointPoliciesSO);
+
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        await callPackagePolicyServiceBulkUpdate(
+          savedObjectsClient,
+          elasticsearchClient,
+          nonEndpointTestedPolicies
+        );
+
+        const calls = mockAgentPolicyService.bumpRevision.mock.calls;
+        expect(calls).toHaveLength(2);
+        calls.forEach((call, idx) => {
+          expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
+          expect(call[3]).toMatchObject({ removeProtection: false });
+        });
+      });
+
+      it('should only set removeProtection for endpoint package in a mixed bulkUpdate', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+
+        const mixedPoliciesSO = [
+          generateSO({
+            name: 'endpoint-policy',
+            policy_ids: ['test-agent-policy-1'],
+            id: 'endpoint-1',
+            package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
+          }),
+          generateSO({
+            name: 'not-endpoint-policy',
+            policy_ids: ['test-agent-policy-2'],
+            id: 'not-endpoint-1',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }),
+        ];
+        const mixedTestedPolicies = [
+          { ...mixedPoliciesSO[0].attributes, policy_ids: [] }, // endpoint policy IDs removed
+          { ...mixedPoliciesSO[1].attributes, policy_ids: ['test-agent-policy-2'] }, // not-endpoint unchanged
+        ];
+
+        setupSOClientMocks(savedObjectsClient, mixedPoliciesSO);
+
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        await callPackagePolicyServiceBulkUpdate(
+          savedObjectsClient,
+          elasticsearchClient,
+          mixedTestedPolicies
+        );
+
+        const calls = mockAgentPolicyService.bumpRevision.mock.calls;
+        expect(calls).toHaveLength(2);
+
+        // Find by id, not by order
+        const endpointCall = calls.find((call) => call[2] === 'test-agent-policy-1');
+        const nonEndpointCall = calls.find((call) => call[2] === 'test-agent-policy-2');
+
+        expect(endpointCall?.[3]).toMatchObject({ removeProtection: true });
+        expect(nonEndpointCall?.[3]).toMatchObject({ removeProtection: false });
+      });
     });
   });
 
   describe('delete', () => {
-    // TODO: Add tests
-    it('should allow to delete a package policy', async () => {});
+    const mockPackagePolicy = {
+      id: 'test-package-policy',
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      attributes: createPackagePolicyMock(),
+      references: [],
+    };
 
-    it('should call audit logger', async () => {
-      const soClient = savedObjectsClientMock.create();
+    it('should allow to delete package policies from ES index', async () => {
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const mockPackagePolicy = {
-        id: 'test-package-policy',
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {},
-        references: [],
-      };
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: idToDelete, type: 'ingest-package-policies' }],
+        { force: true }
+      );
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: `${idToDelete}:prev`, type: 'ingest-package-policies' }],
+        { force: true }
+      );
+    });
+    it('should allow to delete orphaned package policies from ES index', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      // agent policy not found
+      mockAgentPolicyService.get.mockRejectedValueOnce({
+        output: { statusCode: 404, payload: { message: 'policy not found' } },
+      });
+
+      mockAgentPolicyService.getByIds.mockResolvedValueOnce([
+        {
+          id: 'agentPolicy1',
+          name: 'Test Agent Policy',
+          namespace: 'test',
+          status: 'active',
+          is_managed: false,
+          updated_at: new Date().toISOString(),
+          updated_by: 'test',
+          revision: 1,
+          is_protected: false,
+          space_ids: ['default'],
+        },
+      ]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: idToDelete, type: 'ingest-package-policies' }],
+        { force: true }
+      );
+    });
+
+    it('should not allow to delete managed package policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+      const managedAgentPolicy = {
+        id: 'agentPolicy1',
+        name: 'Test Agent Policy',
+        namespace: 'test',
+        status: 'active',
+        is_managed: true,
+        updated_at: new Date().toISOString(),
+        updated_by: 'test',
+        revision: 1,
+        is_protected: false,
+        space_ids: ['default'],
+      } as any;
+      // agent policy not found
+      mockAgentPolicyService.get.mockResolvedValueOnce(managedAgentPolicy);
+
+      mockAgentPolicyService.getByIds.mockResolvedValueOnce([managedAgentPolicy]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+
+      expect(await packagePolicyService.delete(soClient, esClient, [idToDelete])).toEqual([
+        {
+          body: {
+            message:
+              'Cannot remove integrations of hosted agent policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+          },
+          id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
+          statusCode: 400,
+          success: false,
+        },
+      ]);
+
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [{ ...mockPackagePolicy }],
@@ -3062,6 +4588,13 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should return empty array if no package policies are found', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
+      expect(res).toEqual([]);
     });
   });
 
@@ -3088,7 +4621,7 @@ describe('Package policy service', () => {
     });
 
     it('should execute external callbacks', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       await packagePolicyService.runPostDeleteExternalCallbacks(
@@ -3115,7 +4648,7 @@ describe('Package policy service', () => {
     });
 
     it("should execute all external callbacks even if one throw's", async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       callbackOne.mockImplementation(async (deletedPolicies) => {
@@ -3133,7 +4666,7 @@ describe('Package policy service', () => {
     });
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       let error: FleetError;
@@ -3156,7 +4689,7 @@ describe('Package policy service', () => {
         });
 
       expect(error!.message).toEqual(
-        '2 encountered while executing package post delete external callbacks'
+        '2 errors encountered while executing package post delete external callbacks'
       );
       expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
       expect(callingOrder).toEqual(['one', 'two']);
@@ -3183,7 +4716,7 @@ describe('Package policy service', () => {
     });
 
     it('should execute external callbacks', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       await packagePolicyService.runDeleteExternalCallbacks(packagePolicies, soClient, esClient);
 
@@ -3193,7 +4726,7 @@ describe('Package policy service', () => {
     });
 
     it("should execute all external callbacks even if one throw's", async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       callbackOne.mockImplementation(async (deletedPolicies) => {
         callingOrder.push('one');
@@ -3206,7 +4739,7 @@ describe('Package policy service', () => {
     });
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       let error: FleetError;
       const callbackOneError = new Error('foo 1');
@@ -3228,7 +4761,7 @@ describe('Package policy service', () => {
         });
 
       expect(error!.message).toEqual(
-        '2 encountered while executing package delete external callbacks'
+        '2 errors encountered while executing package delete external callbacks'
       );
       expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
       expect(callingOrder).toEqual(['one', 'two']);
@@ -3306,7 +4839,7 @@ describe('Package policy service', () => {
     });
 
     it('should call external callbacks in expected order', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
@@ -3334,7 +4867,7 @@ describe('Package policy service', () => {
     });
 
     it('should feed package policy returned by last callback', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       appContextService.addExternalCallback('packagePolicyCreate', callbackOne);
@@ -3388,7 +4921,7 @@ describe('Package policy service', () => {
       });
 
       it('should fail to execute remaining callbacks after a callback exception', async () => {
-        const soClient = savedObjectsClientMock.create();
+        const soClient = createSavedObjectClientMock();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         try {
@@ -3412,7 +4945,7 @@ describe('Package policy service', () => {
       });
 
       it('should fail to return the package policy', async () => {
-        const soClient = savedObjectsClientMock.create();
+        const soClient = createSavedObjectClientMock();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         await expect(
           packagePolicyService.runExternalCallbacks(
@@ -3424,6 +4957,49 @@ describe('Package policy service', () => {
             request
           )
         ).rejects.toThrow('callbackThree threw error on purpose');
+      });
+    });
+
+    describe('with validation errors', () => {
+      it('should convert ValidationError to PackagePolicyValidationError', async () => {
+        const soClient = createSavedObjectClientMock();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Create a callback that returns an invalid package policy (uppercase namespace)
+        const invalidCallback: CombinedExternalCallback = jest.fn(async (ds) => {
+          return {
+            ...ds,
+            namespace: 'InvalidNamespace', // This should cause a validation error
+          };
+        });
+
+        appContextService.addExternalCallback('packagePolicyCreate', invalidCallback);
+
+        await expect(
+          packagePolicyService.runExternalCallbacks(
+            'packagePolicyCreate',
+            newPackagePolicy,
+            soClient,
+            esClient,
+            coreMock.createCustomRequestHandlerContext(context),
+            request
+          )
+        ).rejects.toThrow(PackagePolicyValidationError);
+
+        // Verify the error message contains the validation details
+        try {
+          await packagePolicyService.runExternalCallbacks(
+            'packagePolicyCreate',
+            newPackagePolicy,
+            soClient,
+            esClient,
+            coreMock.createCustomRequestHandlerContext(context),
+            request
+          );
+        } catch (error) {
+          expect(error).toBeInstanceOf(PackagePolicyValidationError);
+          expect(error.message).toContain('Namespace must be lowercase');
+        }
       });
     });
   });
@@ -3495,7 +5071,7 @@ describe('Package policy service', () => {
     });
 
     it('should execute PostPackagePolicyPostCreateCallback external callbacks', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
@@ -3622,7 +5198,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
       });
@@ -3719,7 +5295,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
@@ -3817,7 +5393,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
@@ -3969,7 +5545,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         expect(result.inputs).toHaveLength(2);
@@ -4189,7 +5765,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
 
         const template1Inputs = result.inputs.filter(
@@ -4301,7 +5877,7 @@ describe('Package policy service', () => {
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
           // that it no longer causes unresolvable type errors when used directly
-          inputsOverride as InputsOverride[]
+          inputsOverride as PreconfiguredInputs[]
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
       });
@@ -4510,6 +6086,96 @@ describe('Package policy service', () => {
       });
     });
 
+    describe('when a variable is defined in original object, but not in override', () => {
+      it('it is removed from the resulting object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: 'template_1',
+            vars: {
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs[0]?.vars?.path).toBeUndefined();
+        expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
+      });
+    });
+
     describe('when variable is undefined in original object and policy_template is undefined', () => {
       it('adds the variable definition to the resulting object', () => {
         const basePackagePolicy: NewPackagePolicy = {
@@ -4609,8 +6275,8 @@ describe('Package policy service', () => {
       });
     });
 
-    describe('when an input of the same type exists under multiple policy templates', () => {
-      it('adds variable definitions to the proper streams', () => {
+    describe('global variables', () => {
+      it('adds the global variable definitions to the resulting object when they are not defined in the original policy', () => {
         const basePackagePolicy: NewPackagePolicy = {
           name: 'base-package-policy',
           description: 'Base Package Policy',
@@ -4643,9 +6309,117 @@ describe('Package policy service', () => {
                 },
               ],
             },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          vars: [
+            {
+              name: 'global_var_1',
+              type: 'text',
+              default: 'value1',
+            },
+            {
+              name: 'global_var_2',
+              type: 'text',
+            },
+          ],
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'log_file_path',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.vars).toBeDefined();
+        expect(result.vars?.global_var_1).toBeDefined();
+        expect(result.vars?.global_var_1.value).toBe('value1');
+        expect(result.vars?.global_var_2).toBeDefined();
+        expect(result.vars?.global_var_2.value).toBeUndefined();
+      });
+
+      it('removes the global variable definitions in the resulting object when they are not defined in the package', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          vars: {
+            global_var_1: {
+              type: 'text',
+              value: 'value1',
+            },
+            global_var_2: {
+              type: 'text',
+              value: 'value2',
+            },
+          },
+          inputs: [
             {
               type: 'logs',
-              policy_template: 'template_2',
+              policy_template: 'template_1',
               enabled: true,
               streams: [
                 {
@@ -4684,14 +6458,377 @@ describe('Package policy service', () => {
                   type: 'logs',
                   title: 'Log',
                   description: 'Log Input',
-                  vars: [],
+                  vars: [
+                    {
+                      name: 'log_file_path',
+                      type: 'text',
+                    },
+                  ],
                 },
               ],
             },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.vars).toBeUndefined();
+      });
+
+      describe('when global vars are defined in the original policy and defined in the package', () => {
+        it('preserves existing global vars values, and adds new ones', () => {
+          const basePackagePolicy: NewPackagePolicy = {
+            name: 'base-package-policy',
+            description: 'Base Package Policy',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: {
+              name: 'test-package',
+              title: 'Test Package',
+              version: '0.0.1',
+            },
+            vars: {
+              global_var_1: {
+                type: 'text',
+                value: 'value1',
+              },
+              global_var_2: {
+                type: 'text',
+                value: 'value2',
+              },
+            },
+            inputs: [
+              {
+                type: 'logs',
+                policy_template: 'template_1',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: {
+                      dataset: 'test.logs',
+                      type: 'logfile',
+                    },
+                    vars: {
+                      log_file_path: {
+                        type: 'text',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const packageInfo: PackageInfo = {
+            name: 'test-package',
+            description: 'Test Package',
+            title: 'Test Package',
+            version: '0.0.1',
+            latestVersion: '0.0.1',
+            release: 'experimental',
+            format_version: '1.0.0',
+            owner: { github: 'elastic/fleet' },
+            vars: [
+              {
+                name: 'global_var_1',
+                type: 'text',
+                default: 'newValue1',
+              },
+              {
+                name: 'global_var_2',
+                type: 'text',
+              },
+              {
+                name: 'global_var_3',
+                type: 'text',
+                default: 'newValue3',
+              },
+            ],
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'logs',
+                    title: 'Log',
+                    description: 'Log Input',
+                    vars: [
+                      {
+                        name: 'log_file_path',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            // @ts-ignore
+            assets: {},
+          };
+
+          const inputsOverride: NewPackagePolicyInput[] = [
             {
-              name: 'template_2',
-              title: 'Template 2',
-              description: 'Template 2',
+              type: 'logs',
+              enabled: true,
+              policy_template: 'template_1',
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                      value: '/var/log/template1-logfile.log',
+                    },
+                  },
+                },
+              ],
+            },
+          ];
+
+          const result = updatePackageInputs(
+            basePackagePolicy,
+            packageInfo,
+            inputsOverride as InputsOverride[],
+            false
+          );
+
+          expect(result.vars).toBeDefined();
+          expect(result.vars?.global_var_1).toBeDefined();
+          expect(result.vars?.global_var_1.value).toBe('value1');
+          expect(result.vars?.global_var_2).toBeDefined();
+          expect(result.vars?.global_var_2.value).toBe('value2');
+          expect(result.vars?.global_var_3).toBeDefined();
+          expect(result.vars?.global_var_3.value).toBe('newValue3');
+        });
+
+        it('preserves existing global vars values, and removes ones no longer defined in the package', () => {
+          const basePackagePolicy: NewPackagePolicy = {
+            name: 'base-package-policy',
+            description: 'Base Package Policy',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: {
+              name: 'test-package',
+              title: 'Test Package',
+              version: '0.0.1',
+            },
+            vars: {
+              global_var_1: {
+                type: 'text',
+                value: 'value1',
+              },
+              global_var_2: {
+                type: 'text',
+                value: 'value2',
+              },
+            },
+            inputs: [
+              {
+                type: 'logs',
+                policy_template: 'template_1',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: {
+                      dataset: 'test.logs',
+                      type: 'logfile',
+                    },
+                    vars: {
+                      log_file_path: {
+                        type: 'text',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const packageInfo: PackageInfo = {
+            name: 'test-package',
+            description: 'Test Package',
+            title: 'Test Package',
+            version: '0.0.1',
+            latestVersion: '0.0.1',
+            release: 'experimental',
+            format_version: '1.0.0',
+            owner: { github: 'elastic/fleet' },
+            vars: [
+              {
+                name: 'global_var_1',
+                type: 'text',
+                default: 'newValue1',
+              },
+              {
+                name: 'global_var_2',
+                type: 'text',
+              },
+              {
+                name: 'global_var_3',
+                type: 'text',
+                default: 'newValue3',
+              },
+            ],
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'logs',
+                    title: 'Log',
+                    description: 'Log Input',
+                    vars: [
+                      {
+                        name: 'log_file_path',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            // @ts-ignore
+            assets: {},
+          };
+
+          const inputsOverride: NewPackagePolicyInput[] = [
+            {
+              type: 'logs',
+              enabled: true,
+              policy_template: 'template_1',
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                      value: '/var/log/template1-logfile.log',
+                    },
+                  },
+                },
+              ],
+            },
+          ];
+
+          const result = updatePackageInputs(
+            basePackagePolicy,
+            packageInfo,
+            inputsOverride as InputsOverride[],
+            false
+          );
+
+          expect(result.vars).toBeDefined();
+          expect(result.vars?.global_var_1).toBeDefined();
+          expect(result.vars?.global_var_1.value).toBe('value1');
+          expect(result.vars?.global_var_2).toBeDefined();
+          expect(result.vars?.global_var_2.value).toBe('value2');
+          expect(result.vars?.global_var_3).toBeDefined();
+          expect(result.vars?.global_var_3.value).toBe('newValue3');
+        });
+      });
+    });
+    describe('when a variable is no longer defined in the new version of a stream', () => {
+      it('the old variable definition is removed', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                    old_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
               inputs: [
                 {
                   type: 'logs',
@@ -4727,26 +6864,6 @@ describe('Package policy service', () => {
               },
             ],
           },
-          {
-            type: 'logs',
-            enabled: true,
-            policy_template: 'template_2',
-            streams: [
-              {
-                enabled: true,
-                data_stream: {
-                  dataset: 'test.logs',
-                  type: 'logfile',
-                },
-                vars: {
-                  log_file_path: {
-                    type: 'text',
-                    value: '/var/log/template2-logfile.log',
-                  },
-                },
-              },
-            ],
-          },
         ];
 
         const result = updatePackageInputs(
@@ -4758,25 +6875,16 @@ describe('Package policy service', () => {
           false
         );
 
-        expect(result.inputs).toHaveLength(2);
+        expect(result.inputs).toHaveLength(1);
 
         const template1Input = result.inputs.find(
           (input) => input.policy_template === 'template_1'
         );
-        const template2Input = result.inputs.find(
-          (input) => input.policy_template === 'template_2'
-        );
-
         expect(template1Input).toBeDefined();
-        expect(template2Input).toBeDefined();
-
         expect(template1Input?.streams[0].vars?.log_file_path.value).toBe(
           '/var/log/template1-logfile.log'
         );
-
-        expect(template2Input?.streams[0].vars?.log_file_path.value).toBe(
-          '/var/log/template2-logfile.log'
-        );
+        expect(template1Input?.streams[0].vars?.old_file_path).toBeUndefined();
       });
     });
 
@@ -5195,6 +7303,172 @@ describe('Package policy service', () => {
         expect(result.inputs[0]?.policy_template).toBe('template_1');
       });
     });
+
+    describe('when updating to an input package ', () => {
+      it('it should keep stream ids', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              id: 'input-1',
+              type: 'logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'dataset.test123',
+                    type: 'log',
+                  },
+                  vars: {
+                    path: {
+                      type: 'text',
+                      value: ['/var/log/test123.log'],
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          type: 'input',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              input: 'logs',
+              type: 'logs',
+              vars: [
+                {
+                  name: 'path',
+                  type: 'text',
+                },
+                {
+                  name: 'path_2',
+                  type: 'text',
+                  default: '/var/log/custom.log',
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = packageToPackagePolicyInputs(packageInfo);
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs.length).toBe(1);
+        expect(result.inputs[0]?.streams[0]?.id).toEqual('stream-1');
+        expect(result.inputs[0]?.streams[0]?.vars?.path.value).toEqual(['/var/log/test123.log']);
+        expect(result.inputs[0]?.streams[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
+        expect(result.inputs[0]?.policy_template).toBe('template_1');
+      });
+    });
+
+    describe('when updating a limited package', () => {
+      it('should not add new inputs', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              enabled: true,
+              type: 'connectors-py',
+              policy_template: 'github',
+              streams: [],
+            },
+          ],
+        };
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              multiple: false,
+              name: 'github',
+              description: 'test',
+              title: 'github',
+              template_path: 'agent.yml.hbs',
+              type: 'connectors-py',
+              input: 'connectors-py',
+            },
+            {
+              multiple: false,
+              type: 'connectors-py',
+              name: 'gmail',
+              description: 'test',
+              title: 'gmail',
+              template_path: 'agent.yml.hbs',
+              input: 'connectors-py',
+            },
+          ],
+        } as any;
+
+        const inputsOverride: NewPackagePolicyInput[] = packageToPackagePolicyInputs(packageInfo);
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs.length).toBe(2);
+        const enabledInputs = result.inputs.filter((input) => input.enabled);
+        const disabledInputs = result.inputs.filter((input) => !input.enabled);
+        expect(enabledInputs.length).toBe(1);
+        expect(disabledInputs.length).toBe(1);
+        expect(enabledInputs[0]?.type).toBe('connectors-py');
+        expect(enabledInputs[0]?.policy_template).toBe('github');
+        expect(disabledInputs[0]?.type).toBe('connectors-py');
+        expect(disabledInputs[0]?.policy_template).toBe('gmail');
+      });
+    });
   });
 
   describe('enrich package policy on create', () => {
@@ -5235,7 +7509,7 @@ describe('Package policy service', () => {
         policy_ids: ['1'],
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        savedObjectsClientMock.create(),
+        createSavedObjectClientMock(),
         newPolicy
       );
       expect(result).toEqual({
@@ -5267,67 +7541,6 @@ describe('Package policy service', () => {
                 },
               },
             ],
-          },
-        ],
-        vars: {
-          paths: {
-            value: ['/var/log/apache2/access.log*'],
-            type: 'text',
-          },
-        },
-      });
-    });
-
-    it('should disable inputs if supports_agentless == true if inputs are not allowed', async () => {
-      const newPolicy = {
-        name: 'apache-1',
-        inputs: [
-          { type: 'logfile', enabled: false },
-          { type: 'tcp', enabled: true },
-        ],
-        package: { name: 'apache', version: '0.3.3' },
-        policy_id: '1',
-        policy_ids: ['1'],
-        supports_agentless: true,
-      } as NewPackagePolicy;
-      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        savedObjectsClientMock.create(),
-        newPolicy
-      );
-      expect(result).toEqual({
-        name: 'apache-1',
-        namespace: '',
-        description: '',
-        output_id: undefined,
-        package: {
-          name: 'apache',
-          title: 'Apache',
-          version: '1.0.0',
-          experimental_data_stream_features: undefined,
-        },
-        enabled: true,
-        policy_id: '1',
-        policy_ids: ['1'],
-        supports_agentless: true,
-        inputs: [
-          {
-            enabled: false,
-            type: 'logfile',
-            policy_template: 'log',
-            streams: [
-              {
-                enabled: false,
-                data_stream: {
-                  type: 'logs',
-                  dataset: 'apache.access',
-                },
-              },
-            ],
-          },
-          {
-            enabled: false,
-            type: 'tcp',
-            streams: undefined,
           },
         ],
         vars: {
@@ -5381,7 +7594,7 @@ describe('Package policy service', () => {
         policy_ids: ['1'],
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        savedObjectsClientMock.create(),
+        createSavedObjectClientMock(),
         newPolicy
       );
       expect(result).toEqual({
@@ -5443,7 +7656,7 @@ describe('Package policy service', () => {
         package: { name: 'apache', version: '1.0.0' } as PackagePolicyPackage,
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        savedObjectsClientMock.create(),
+        createSavedObjectClientMock(),
         newPolicy
       );
       expect(result).toEqual({
@@ -5483,7 +7696,7 @@ describe('Package policy service', () => {
     let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
 
     beforeEach(() => {
-      soClientMock = savedObjectsClientMock.create();
+      soClientMock = createSavedObjectClientMock();
 
       soClientMock.find
         .mockResolvedValueOnce(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse())
@@ -5521,7 +7734,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: undefined,
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
         })
       );
     });
@@ -5541,7 +7754,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: 'one=two',
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
         })
       );
     });
@@ -5551,7 +7764,7 @@ describe('Package policy service', () => {
     let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
 
     beforeEach(() => {
-      soClientMock = savedObjectsClientMock.create();
+      soClientMock = createSavedObjectClientMock();
 
       soClientMock.find
         .mockResolvedValueOnce(PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse())
@@ -5595,7 +7808,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: undefined,
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
         })
       );
     });
@@ -5613,7 +7826,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: undefined,
+          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
         })
       );
     });
@@ -5634,7 +7847,7 @@ describe('Package policy service', () => {
           perPage: 12,
           sortField: 'updated_by',
           sortOrder: 'desc',
-          filter: 'one=two',
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
         })
       );
     });
@@ -5642,9 +7855,11 @@ describe('Package policy service', () => {
 
   describe('removeOutputFromAll', () => {
     it('should update policies using deleted output', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const updateSpy = jest.spyOn(packagePolicyService, 'update');
+
+      mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -5660,21 +7875,40 @@ describe('Package policy service', () => {
           },
         ],
       } as any);
-      soClient.get.mockImplementation((type, id, options): any => {
-        if (id === 'package-policy-1') {
+      soClient.bulkGet.mockImplementation((objects): any => {
+        if (objects.some(({ id }) => id === 'package-policy-1')) {
           return Promise.resolve({
-            id,
-            attributes: {
-              name: 'policy1',
-              enabled: true,
-              policy_ids: ['agent-policy-1'],
-              output_id: 'output-id-123',
-              inputs: [],
-              package: { name: 'test-package', version: '1.0.0' },
-            },
+            saved_objects: [
+              {
+                id: 'package-policy-1',
+                attributes: {
+                  name: 'policy1',
+                  enabled: true,
+                  policy_ids: ['agent-policy-1'],
+                  output_id: 'output-id-123',
+                  inputs: [],
+                  package: { name: 'test-package', version: '1.0.0' },
+                },
+              },
+            ],
           });
         }
+
+        return Promise.resolve({ saved_objects: [] });
       });
+
+      soClient.get.mockResolvedValue({
+        id: 'package-policy-1',
+        attributes: {
+          name: 'policy1',
+          enabled: true,
+          policy_ids: ['agent-policy-1'],
+          output_id: 'output-id-123',
+          inputs: [],
+          package: { name: 'test-package', version: '1.0.0' },
+        },
+      } as any);
+
       appContextService.start(
         createAppContextStartContractMock(undefined, false, {
           internal: soClient,
@@ -5696,11 +7930,616 @@ describe('Package policy service', () => {
           policy_ids: ['agent-policy-1'],
           output_id: null,
           inputs: [],
+          package: { name: 'test-package', version: '1.0.0' },
         },
         {
           force: undefined,
         }
       );
+    });
+  });
+
+  describe('Package policy rollback', () => {
+    const mockSoClient = createSavedObjectClientMock();
+    const id = 'test-package-policy';
+    const mockPackagePolicySO: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'default',
+          policy_id: '12345',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.3.2' },
+          revision: 3,
+          latest_revision: true,
+          created_at: '2025-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2025-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}:prev`,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'default',
+          policy_id: '12345',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.2.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-myspace`,
+        namespaces: ['myspace'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'myspace',
+          policy_id: '6789',
+          policy_ids: ['6789'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.3.2' },
+          revision: 3,
+          latest_revision: true,
+          created_at: '2025-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2025-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-myspace:prev`,
+        namespaces: ['myspace'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'myspace',
+          policy_id: '6789',
+          policy_ids: ['6789'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.2.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+    ];
+    const mockRollbackResult = {
+      updatedPolicies: {
+        default: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id,
+            namespaces: ['default'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'default',
+              policy_id: '12345',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 4,
+              latest_revision: true,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+        myspace: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}-myspace`,
+            namespaces: ['myspace'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'myspace',
+              policy_id: '6789',
+              policy_ids: ['6789'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 4,
+              latest_revision: true,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      copiedPolicies: {
+        default: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}:copy`,
+            namespaces: ['default'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'default',
+              policy_id: '12345',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.3.2' },
+              revision: 3,
+              latest_revision: true,
+              created_at: '2025-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2025-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+        myspace: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}-myspace:copy`,
+            namespaces: ['myspace'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'myspace',
+              policy_id: '6789',
+              policy_ids: ['6789'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.3.2' },
+              revision: 3,
+              latest_revision: true,
+              created_at: '2025-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2025-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      previousVersionPolicies: {
+        default: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}:prev`,
+            namespaces: ['default'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'default',
+              policy_id: '12345',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 1,
+              latest_revision: false,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+        myspace: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}-myspace:prev`,
+            namespaces: ['myspace'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'myspace',
+              policy_id: '6789',
+              policy_ids: ['6789'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 1,
+              latest_revision: false,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+    };
+
+    describe('rollback', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should create temporary saved objects to back up package policies before updating them', async () => {
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        expect(mockSoClient.bulkCreate).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}:copy`,
+              namespaces: ['default'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'default',
+                policy_id: '12345',
+                policy_ids: ['12345'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+          action: 'create',
+          id: `${id}:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkCreate).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}-myspace:copy`,
+              namespaces: ['myspace'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'myspace',
+                policy_id: '6789',
+                policy_ids: ['6789'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+          action: 'create',
+          id: `${id}-myspace:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should update package policies', async () => {
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id,
+              namespaces: ['default'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'default',
+                policy_id: '12345',
+                policy_ids: ['12345'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.2.0' },
+                revision: 4,
+                latest_revision: true,
+                created_at: '2024-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2024-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(3, {
+          action: 'update',
+          id,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}-myspace`,
+              namespaces: ['myspace'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'myspace',
+                policy_id: '6789',
+                policy_ids: ['6789'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.2.0' },
+                revision: 4,
+                latest_revision: true,
+                created_at: '2024-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2024-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(4, {
+          action: 'update',
+          id: `${id}-myspace`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should return the updated and backed up package policies, and the old previous revisions', async () => {
+        const rollbackResult = await packagePolicyService.rollback(
+          mockSoClient,
+          mockPackagePolicySO
+        );
+        expect(rollbackResult).toStrictEqual(mockRollbackResult);
+      });
+    });
+
+    describe('restoreRollback', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockSoClient.bulkDelete.mockResolvedValue({
+          statuses: [{ id, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true }],
+        });
+      });
+
+      it('should update package policies to their status before rollback', async () => {
+        await packagePolicyService.restoreRollback(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id,
+              namespaces: ['default'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'default',
+                policy_id: '12345',
+                policy_ids: ['12345'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+          action: 'update',
+          id,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}-myspace`,
+              namespaces: ['myspace'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'myspace',
+                policy_id: '6789',
+                policy_ids: ['6789'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(3, {
+          action: 'update',
+          id: `${id}-myspace`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should delete the temporary package policy copies', async () => {
+        await packagePolicyService.restoreRollback(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              id: `${id}:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+          action: 'delete',
+          id: `${id}:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              id: `${id}-myspace:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(4, {
+          action: 'delete',
+          id: `${id}-myspace:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+    });
+
+    describe('cleanupRollbackSavedObjects', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should delete the temporary package policy copies', async () => {
+        await packagePolicyService.cleanupRollbackSavedObjects(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              id: `${id}:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+          action: 'delete',
+          id: `${id}:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              id: `${id}-myspace:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+          action: 'delete',
+          id: `${id}-myspace:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should delete the package policy previous revisions', async () => {
+        await packagePolicyService.cleanupRollbackSavedObjects(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          3,
+          [
+            {
+              id: `${id}:prev`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(3, {
+          action: 'delete',
+          id: `${id}:prev`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          4,
+          [
+            {
+              id: `${id}-myspace:prev`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(4, {
+          action: 'delete',
+          id: `${id}-myspace:prev`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
     });
   });
 });
@@ -6015,5 +8854,122 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         pkgInfo: { ...pkgInfo, type: 'integration' },
       })
     ).not.toThrow();
+  });
+});
+
+describe('_normalizePackagePolicyKuery', () => {
+  it('should work for ingest-agent-policies.attributes with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies.attributes without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies.attributes with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies.attributes without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+});
+
+describe('_getAssetForTemplatePath()', () => {
+  it('should return the asset for the given template path', () => {
+    const pkgInfo: PackageInfo = {
+      name: 'test_package',
+      version: '1.0.0',
+      type: 'integration',
+    } as any;
+    const datasetPath = 'test_data_stream';
+    const templatePath = 'log.yml.hbs';
+    const assetsMap: AssetsMap = new Map();
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/syslog.yml.hbs`,
+      Buffer.from('wrong match asset')
+    );
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/log.yml.hbs`,
+      Buffer.from('exact match asset')
+    );
+
+    const expectedAsset: ArchiveEntry = {
+      path: 'test_package-1.0.0/data_stream/test_data_stream/agent/stream/log.yml.hbs',
+      buffer: Buffer.from('exact match asset'),
+    };
+    const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
+    expect(asset).toEqual(expectedAsset);
+  });
+  it('should return fallback asset it exact match is not found', () => {
+    // representing the scenario where the templatePath has the default value 'stream.yml.hbs'
+    // but the actual asset uses a prefixed name like 'filestream.yml.hbs'
+    const pkgInfo: PackageInfo = {
+      name: 'test_package',
+      version: '1.0.0',
+      type: 'integration',
+    } as any;
+    const datasetPath = 'test_data_stream';
+    const templatePath = 'stream.yml.hbs';
+    const assetsMap: AssetsMap = new Map();
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/filestream.yml.hbs`,
+      Buffer.from('ends with match asset')
+    );
+
+    const expectedFallbackAsset: ArchiveEntry = {
+      path: 'test_package-1.0.0/data_stream/test_data_stream/agent/stream/filestream.yml.hbs',
+      buffer: Buffer.from('ends with match asset'),
+    };
+    const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
+    expect(asset).toEqual(expectedFallbackAsset);
   });
 });

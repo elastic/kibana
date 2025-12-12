@@ -15,36 +15,27 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
-import { IngestStreamGetResponse, IngestStreamLifecycleILM } from '@kbn/streams-schema';
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { type Streams, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 
-import { LocatorPublic } from '@kbn/share-plugin/public';
-import type { StreamDetailsResponse } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { IlmLink } from '../../data_management/stream_detail_lifecycle/ilm_link';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { IlmLink } from '../../data_management/stream_detail_lifecycle/general_data/ilm_link';
 import {
   formatBytes,
   formatIngestionRate,
 } from '../../data_management/stream_detail_lifecycle/helpers/format_bytes';
-import { DataStreamStats } from '../../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
+import { useDataStreamStats } from '../../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
+import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 
 interface StreamStatsPanelProps {
-  definition?: IngestStreamGetResponse;
-  dataStreamStats?: DataStreamStats;
-  docCount?: StreamDetailsResponse;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
+  definition: Streams.ingest.all.GetResponse;
 }
 
-const RetentionDisplay = ({
-  definition,
-  ilmLocator,
-}: {
-  definition?: IngestStreamGetResponse;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
-}) => {
+const RetentionDisplay = ({ definition }: { definition: Streams.ingest.all.GetResponse }) => {
   if (!definition) return <>-</>;
 
-  if ('dsl' in definition.effective_lifecycle) {
+  if (isDslLifecycle(definition.effective_lifecycle)) {
     return (
       <>
         {definition?.effective_lifecycle.dsl.data_retention ||
@@ -55,12 +46,11 @@ const RetentionDisplay = ({
     );
   }
 
-  return (
-    <IlmLink
-      lifecycle={definition.effective_lifecycle as IngestStreamLifecycleILM}
-      ilmLocator={ilmLocator}
-    />
-  );
+  if (isIlmLifecycle(definition.effective_lifecycle)) {
+    return <IlmLink lifecycle={definition.effective_lifecycle} />;
+  }
+
+  return <>-</>;
 };
 
 interface StatItemProps {
@@ -98,12 +88,9 @@ const StatItem = ({ label, value, withBorder = false }: StatItemProps) => {
   );
 };
 
-export function StreamStatsPanel({
-  definition,
-  dataStreamStats,
-  docCount,
-  ilmLocator,
-}: StreamStatsPanelProps) {
+export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
+  const { timeState } = useTimefilter();
+  const data = useDataStreamStats({ definition, timeState }).stats;
   const retentionLabel = i18n.translate('xpack.streams.entityDetailOverview.retention', {
     defaultMessage: 'Data retention',
   });
@@ -121,7 +108,7 @@ export function StreamStatsPanel({
   });
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s">
+    <EuiFlexGroup direction="row" gutterSize="m">
       <EuiFlexItem grow={3}>
         <EuiPanel hasShadow={false} hasBorder>
           <EuiFlexGroup direction="column" gutterSize="xs">
@@ -129,7 +116,7 @@ export function StreamStatsPanel({
               {retentionLabel}
             </EuiText>
             <EuiText size="m">
-              <RetentionDisplay definition={definition} ilmLocator={ilmLocator} />
+              <RetentionDisplay definition={definition} />
             </EuiText>
           </EuiFlexGroup>
         </EuiPanel>
@@ -139,25 +126,30 @@ export function StreamStatsPanel({
           <EuiFlexGroup>
             <StatItem
               label={documentCountLabel}
-              value={docCount ? formatNumber(docCount.details.count || 0, 'decimal0') : '-'}
+              value={
+                <PrivilegesWarningIconWrapper
+                  hasPrivileges={definition.privileges.monitor}
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.totaldoccountLabel',
+                    { defaultMessage: 'Total doc count' }
+                  )}
+                >
+                  {data ? formatNumber(data.ds.stats.totalDocs || 0, 'decimal0') : '-'}
+                </PrivilegesWarningIconWrapper>
+              }
             />
             <StatItem
-              label={
-                <>
-                  {storageSizeLabel}
-                  <EuiIconTip
-                    content={i18n.translate('xpack.streams.streamDetailOverview.sizeTip', {
-                      defaultMessage:
-                        'Estimated size based on the number of documents in the current time range and the total size of the stream.',
-                    })}
-                    position="right"
-                  />
-                </>
-              }
+              label={storageSizeLabel}
               value={
-                dataStreamStats && docCount
-                  ? formatBytes(getStorageSizeForTimeRange(dataStreamStats, docCount))
-                  : '-'
+                <PrivilegesWarningIconWrapper
+                  hasPrivileges={definition.privileges.monitor}
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.sizebytesLabel',
+                    { defaultMessage: 'Size in bytes' }
+                  )}
+                >
+                  {data && data.ds.stats.sizeBytes ? formatBytes(data.ds.stats.sizeBytes) : '-'}
+                </PrivilegesWarningIconWrapper>
               }
               withBorder
             />
@@ -170,7 +162,7 @@ export function StreamStatsPanel({
                       'xpack.streams.streamDetailLifecycle.ingestionRateDetails',
                       {
                         defaultMessage:
-                          'Estimated average (stream total size divided by the number of days since creation).',
+                          'Approximate average (stream total size divided by the number of days since creation).',
                       }
                     )}
                     position="right"
@@ -178,7 +170,15 @@ export function StreamStatsPanel({
                 </>
               }
               value={
-                dataStreamStats ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true) : '-'
+                <PrivilegesWarningIconWrapper
+                  hasPrivileges={definition.privileges.monitor}
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.ingestionrateLabel',
+                    { defaultMessage: 'Ingestion rate' }
+                  )}
+                >
+                  {data?.ds.stats ? formatIngestionRate(data.ds.stats.bytesPerDay || 0, true) : '-'}
+                </PrivilegesWarningIconWrapper>
               }
               withBorder
             />
@@ -187,18 +187,4 @@ export function StreamStatsPanel({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
-
-function getStorageSizeForTimeRange(
-  dataStreamStats: DataStreamStats,
-  docCount: StreamDetailsResponse
-) {
-  const storageSize = dataStreamStats.sizeBytes;
-  const totalCount = dataStreamStats.totalDocs;
-  const countForTimeRange = docCount.details.count;
-  if (!storageSize || !totalCount || !countForTimeRange) {
-    return 0;
-  }
-  const bytesPerDoc = totalCount ? storageSize / totalCount : 0;
-  return bytesPerDoc * countForTimeRange;
 }

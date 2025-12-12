@@ -6,7 +6,7 @@
  */
 
 import type { APMQueryParams } from '../url_helpers';
-import { useAPMHref } from './apm_link';
+import { useAPMHref } from './apm_link_hooks';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'host',
@@ -17,7 +17,8 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 
 export function useServiceNodeOverviewHref(serviceName: string) {
   return useAPMHref({
-    path: `/services/${serviceName}/nodes`,
+    path: '/services/{serviceName}/nodes',
+    pathParams: { serviceName },
     persistedFilters,
   });
 }

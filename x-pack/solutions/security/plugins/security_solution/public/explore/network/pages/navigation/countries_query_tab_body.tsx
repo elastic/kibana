@@ -22,7 +22,6 @@ export const CountriesQueryTabBody = ({
   filterQuery,
   flowTarget,
   indexNames,
-  indexPattern,
   ip,
   setQuery,
   skip,
@@ -56,7 +55,6 @@ export const CountriesQueryTabBody = ({
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       flowTargeted={flowTarget}
       id={id}
-      indexPattern={indexPattern}
       inspect={inspect}
       isInspect={isInspected}
       loading={loading}

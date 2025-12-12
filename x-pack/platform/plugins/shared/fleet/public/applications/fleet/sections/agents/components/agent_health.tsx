@@ -42,9 +42,11 @@ type Props = EuiBadgeProps & {
 
 function getStatusComponent({
   status,
+  upgradeDetails,
   ...restOfProps
 }: {
   status: Agent['status'];
+  upgradeDetails?: Agent['upgrade_details'];
 } & EuiBadgeProps): React.ReactElement {
   switch (status) {
     case 'error':
@@ -97,7 +99,14 @@ function getStatusComponent({
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
-      return (
+      return isAgentInFailedUpgradeState(upgradeDetails) ? (
+        <EuiBadge color="danger" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.upgradingFailedStatusText"
+            defaultMessage="Upgrade failed"
+          />
+        </EuiBadge>
+      ) : (
         <EuiBadge color="primary" {...restOfProps}>
           <FormattedMessage
             id="xpack.fleet.agentHealth.updatingStatusText"
@@ -185,7 +194,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
             <p>{lastCheckinText}</p>
             <p>{lastCheckInMessageText}</p>
             {isStuckInUpdating(agent) ? (
-              isAgentInFailedUpgradeState(agent) ? (
+              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                 <FormattedMessage
                   id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
                   defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
@@ -206,6 +215,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
           <div className="eui-textNoWrap">
             {getStatusComponent({
               status: agent.status,
+              upgradeDetails: agent.upgrade_details,
               ...restOfProps,
             })}
             &nbsp;
@@ -215,6 +225,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
           <>
             {getStatusComponent({
               status: agent.status,
+              upgradeDetails: agent.upgrade_details,
               ...restOfProps,
             })}
             {previousToOfflineStatus
@@ -234,7 +245,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
             size="m"
             color="warning"
             title={
-              isAgentInFailedUpgradeState(agent) ? (
+              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                 <FormattedMessage
                   id="xpack.fleet.agentHealth.failedUpgradeTitle"
                   defaultMessage="Agent upgrade is stuck in failed state."
@@ -252,7 +263,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 id="xpack.fleet.agentHealth.stuckUpdatingText"
                 defaultMessage="{stuckMessage} Consider restarting the upgrade. {learnMore}"
                 values={{
-                  stuckMessage: isAgentInFailedUpgradeState(agent)
+                  stuckMessage: isAgentInFailedUpgradeState(agent.upgrade_details)
                     ? 'Agent upgrade failed.'
                     : 'Agent has been updating for a while, and may be stuck.',
                   learnMore: (

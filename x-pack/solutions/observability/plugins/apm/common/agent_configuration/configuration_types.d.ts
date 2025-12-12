@@ -15,4 +15,5 @@ export type AgentConfiguration = {
   applied_by_agent?: boolean;
   etag: string;
   agent_name?: string;
+  error?: string;
 } & AgentConfigurationIntake;

@@ -8,8 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import { TimeStrings } from '../../../page_objects/common_page';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { TimeStrings } from '../../../page_objects/common_page';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return actualCount <= expectedCount;
       });
       const newDurationHours = await timePicker.getTimeDurationInHours();
-      expect(Math.round(newDurationHours)).to.be(24); // might fail if histogram's width changes
+      expect(Math.round(newDurationHours)).to.be(23); // might fail if histogram's width changes
 
       await retry.waitFor('doc table containing the documents of the brushed range', async () => {
         const rowData = await discover.getDocTableField(1);
@@ -303,30 +303,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should reset all histogram state when resetting the saved search', async () => {
       await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       const savedSearch = 'histogram state';
       await discover.saveSearch(savedSearch);
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await discover.chooseBreakdownField('extension.keyword');
       await discover.setChartInterval('Second');
-      let requestData =
-        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
-      expect(JSON.parse(requestData)).to.eql({
-        dataViewId: 'long-window-logstash-*',
-        timeField: '@timestamp',
-        timeInterval: 's',
-        breakdownField: 'extension.keyword',
+      await retry.try(async () => {
+        const requestData =
+          (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
+        expect(JSON.parse(requestData)).to.eql({
+          dataViewId: 'long-window-logstash-*',
+          timeField: '@timestamp',
+          timeInterval: 's',
+          breakdownField: 'extension.keyword',
+        });
       });
       await discover.toggleChartVisibility();
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await discover.revertUnsavedChanges();
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      requestData =
-        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
-      expect(JSON.parse(requestData)).to.eql({
-        dataViewId: 'long-window-logstash-*',
-        timeField: '@timestamp',
-        timeInterval: 'auto',
+      await retry.try(async () => {
+        const requestData =
+          (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
+        expect(JSON.parse(requestData)).to.eql({
+          dataViewId: 'long-window-logstash-*',
+          timeField: '@timestamp',
+          timeInterval: 'auto',
+        });
       });
     });
   });

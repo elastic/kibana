@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { RulesSettingsProperties } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { updateFlappingSettings } from '../lib/rule_api/update_flapping_settings';
@@ -47,14 +47,14 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
     },
     onSuccess: () => {
       toasts.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsSuccess', {
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.updateRulesSettingsSuccess', {
           defaultMessage: 'Rules settings updated successfully.',
         })
       );
     },
     onError: () => {
       toasts.addDanger(
-        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsFailure', {
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.updateRulesSettingsFailure', {
           defaultMessage: 'Failed to update rules settings.',
         })
       );

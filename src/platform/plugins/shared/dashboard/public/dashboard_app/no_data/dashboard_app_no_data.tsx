@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import { v4 as uuidv4 } from 'uuid';
 import {
   getESQLAdHocDataview,
   getESQLQueryColumns,
@@ -18,9 +17,8 @@ import {
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-
 import {
   coreServices,
   dataService,
@@ -31,11 +29,7 @@ import {
   lensService,
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-
-function generateId() {
-  return uuidv4();
-}
+import { dashboardClient } from '../../dashboard_client';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -75,7 +69,11 @@ export const DashboardAppNoDataPage = ({
       const abc = new AbortController();
       const { dataViews } = dataService;
       const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-      const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+      const dataView = await getESQLAdHocDataview({
+        dataViewsService: dataViews,
+        query: `FROM ${indexName}`,
+        http: coreServices.http,
+      });
       const esqlQuery = getInitialESQLQuery(dataView);
 
       try {
@@ -100,27 +98,28 @@ export const DashboardAppNoDataPage = ({
         if (chartSuggestions?.length) {
           const [suggestion] = chartSuggestions;
 
-          const attrs = getLensAttributesFromSuggestion({
-            filters: [],
-            query: {
-              esql: esqlQuery,
-            },
-            suggestion,
-            dataView,
-          }) as TypedLensByValueInput['attributes'];
-
-          const lensEmbeddableInput = {
-            attributes: attrs,
-            id: generateId(),
-          };
-
-          await embeddableService.getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
-            state: {
-              type: 'lens',
-              input: lensEmbeddableInput,
-            },
-            path: '#/create',
-          });
+          await embeddableService
+            .getStateTransfer()
+            .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
+              state: [
+                {
+                  type: 'lens',
+                  serializedState: {
+                    rawState: {
+                      attributes: getLensAttributesFromSuggestion({
+                        filters: [],
+                        query: {
+                          esql: esqlQuery,
+                        },
+                        suggestion,
+                        dataView,
+                      }),
+                    },
+                  },
+                },
+              ],
+              path: '#/create',
+            });
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
@@ -158,8 +157,8 @@ export const isDashboardAppInNoDataState = async () => {
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
-  const { total } = await getDashboardContentManagementService()
-    .findDashboards.search({ search: '', size: 1 })
+  const { total } = await dashboardClient
+    .search({ search: '', per_page: 1 })
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 

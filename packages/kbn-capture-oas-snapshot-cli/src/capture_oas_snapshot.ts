@@ -8,17 +8,13 @@
  */
 
 import fs from 'node:fs/promises';
-import { encode } from 'node:querystring';
 import type { ChildProcess } from 'node:child_process';
-import fetch from 'node-fetch';
 import * as Rx from 'rxjs';
 import { startTSWorker } from '@kbn/dev-utils';
-import { createTestEsCluster } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import type { Result } from './kibana_worker';
 import { sortAndPrettyPrint } from './run_capture_oas_snapshot_cli';
-import { buildFlavourEnvArgName } from './common';
+import { buildFlavourEnvArgName, filtersJsonEnvArgName } from './common';
 
 interface CaptureOasSnapshotArgs {
   log: ToolingLog;
@@ -42,8 +38,6 @@ export async function captureOasSnapshot({
   outputFile,
 }: CaptureOasSnapshotArgs): Promise<void> {
   const { excludePathsMatching = [], pathStartsWith } = filters;
-  // internal consts
-  const port = 5622;
   // We are only including /api/status for now
   excludePathsMatching.push(
     '/{path*}',
@@ -51,59 +45,44 @@ export async function captureOasSnapshot({
     '/XXXXXXXXXXXX/'
   );
 
-  let esCluster: undefined | { stop(): Promise<void> };
-  let kbWorker: undefined | ChildProcess;
-
   try {
-    log.info('Starting es...');
-    esCluster = await log.indent(4, async () => {
-      if (buildFlavour === 'serverless') {
-        const { startES } = createTestServerlessInstances();
-        return await startES();
-      }
-      const cluster = createTestEsCluster({ log });
-      await cluster.start();
-      return { stop: () => cluster.cleanup() };
-    });
-
     log.info('Starting Kibana...');
-    kbWorker = await log.indent(4, async () => {
+
+    const currentOas = await log.indent(4, async () => {
       log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
-      const { msg$, proc } = startTSWorker<Result>({
-        log,
-        src: require.resolve('./kibana_worker'),
-        env: { ...process.env, [buildFlavourEnvArgName]: buildFlavour },
-      });
-      await Rx.firstValueFrom(
-        msg$.pipe(
-          Rx.map((msg) => {
-            if (msg !== 'ready')
-              throw new Error(`received unexpected message from worker (expected "ready"): ${msg}`);
-          })
-        )
-      );
-      return proc;
+      let proc: undefined | ChildProcess;
+      try {
+        const worker = startTSWorker<Result>({
+          log,
+          src: require.resolve('./kibana_worker'),
+          env: {
+            ...process.env,
+            [buildFlavourEnvArgName]: buildFlavour,
+            [filtersJsonEnvArgName]: JSON.stringify({
+              access: 'public',
+              version: '2023-10-31', // hard coded for now, we can make this configurable later
+              pathStartsWith,
+              excludePathsMatching,
+            }),
+          },
+        });
+        proc = worker.proc;
+        return await Rx.firstValueFrom(
+          worker.msg$.pipe(
+            Rx.map((result) => {
+              try {
+                return JSON.parse(result);
+              } catch (e) {
+                throw new Error('expected JSON, received:' + result);
+              }
+            })
+          )
+        );
+      } finally {
+        proc?.kill('SIGKILL');
+      }
     });
 
-    const qs = encode({
-      access: 'public',
-      version: '2023-10-31', // hard coded for now, we can make this configurable later
-      pathStartsWith,
-      excludePathsMatching,
-    });
-    const url = `http://localhost:${port}/api/oas?${qs}`;
-    log.info(`Fetching OAS at ${url}...`);
-    const result = await fetch(url, {
-      headers: {
-        'kbn-xsrf': 'kbn-oas-snapshot',
-        authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
-      },
-    });
-    if (result.status !== 200) {
-      log.error(`Failed to fetch OAS: ${JSON.stringify(result, null, 2)}`);
-      throw new Error(`Failed to fetch OAS: ${result.status}`);
-    }
-    const currentOas = await result.json();
     log.info(`Recieved OAS, writing to ${outputFile}...`);
     if (update) {
       await fs.writeFile(outputFile, sortAndPrettyPrint(currentOas));
@@ -117,10 +96,7 @@ export async function captureOasSnapshot({
       );
     }
   } catch (err) {
-    log.error(`Failed to capture OAS: ${JSON.stringify(err, null, 2)}`);
+    log.error(`Failed to capture OAS: ${err}`);
     throw err;
-  } finally {
-    kbWorker?.kill('SIGILL');
-    await esCluster?.stop();
   }
 }

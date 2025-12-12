@@ -8,11 +8,11 @@
 import type { FunctionComponent } from 'react';
 import React, { isValidElement, cloneElement, Children, useMemo } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import type { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
 import type { LayoutProps } from '../types';
 
 type SubSectionProps = LayoutProps & {
-  id: InventoryMetric;
+  id: InventoryTsvbType;
   label?: string;
 };
 
@@ -34,7 +34,6 @@ export const SubSection: FunctionComponent<React.PropsWithChildren<SubSectionPro
   const childrenWithProps = Children.map(children, (child) => {
     if (isValidElement(child)) {
       return cloneElement(child, {
-        // @ts-expect-error upgrade typescript v4.9.5
         metric,
         id,
         onChangeRangeTime,

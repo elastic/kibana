@@ -23,38 +23,10 @@ export const LAST_MONTH = i18n.translate('xpack.securitySolution.stepDefineRule.
   defaultMessage: 'Last month',
 });
 
-export const QUERY_PREVIEW_BUTTON = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.previewQueryButton',
-  {
-    defaultMessage: 'Preview results',
-  }
-);
-
-export const QUICK_PREVIEW_TOGGLE_BUTTON = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.quickPreviewToggleButton',
-  {
-    defaultMessage: 'Quick query preview',
-  }
-);
-
-export const ADVANCED_PREVIEW_TOGGLE_BUTTON = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.advancedPreviewToggleButton',
-  {
-    defaultMessage: 'Advanced query preview',
-  }
-);
-
 export const PREVIEW_TIMEOUT_WARNING = i18n.translate(
   'xpack.securitySolution.stepDefineRule.previewTimeoutWarning',
   {
     defaultMessage: 'Preview timed out after 60 seconds',
-  }
-);
-
-export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
-  'xpack.securitySolution.stepDefineRule.previewQueryAriaLabel',
-  {
-    defaultMessage: 'Query preview timeframe select',
   }
 );
 
@@ -100,13 +72,6 @@ export const QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_MESSAGE = i18n.transl
   }
 );
 
-export const QUERY_GRAPH_COUNT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel',
-  {
-    defaultMessage: 'Count',
-  }
-);
-
 export const QUERY_GRAPH_HITS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewTitle',
   {
@@ -119,13 +84,6 @@ export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
   {
     defaultMessage:
       'Noise warning: This rule may cause a lot of noise. Consider narrowing your query. This is based on a linear progression of 1 alert per hour.',
-  }
-);
-
-export const QUERY_PREVIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError',
-  {
-    defaultMessage: 'Error fetching preview',
   }
 );
 

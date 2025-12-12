@@ -31,7 +31,6 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
-  isServiceMapApiV2Enabled,
 }: {
   environment: Environment;
   kuery: string;
@@ -39,7 +38,6 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
-  isServiceMapApiV2Enabled: boolean;
 }) => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -69,7 +67,6 @@ export const useServiceMap = ({
             serviceName,
             serviceGroup: serviceGroupId,
             kuery,
-            useV2: isServiceMapApiV2Enabled,
           },
         },
       });
@@ -83,7 +80,6 @@ export const useServiceMap = ({
       serviceGroupId,
       kuery,
       config.serviceMapEnabled,
-      isServiceMapApiV2Enabled,
     ],
     { preservePreviousData: false }
   );

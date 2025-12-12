@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldTextProps } from '@elastic/eui';
+import type { Ref } from 'react';
+import React from 'react';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
@@ -14,11 +16,17 @@ import { selectAgentPolicies } from '../../../state/agent_policies';
 import { BrowserMonitorCallout } from './browser_monitor_callout';
 import { SpaceSelector } from '../components/spaces_select';
 import { TagsField } from '../components/tags_field';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField } from './policy_hosts';
 
-export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
+export const LocationForm = ({
+  privateLocations,
+  privateLocationToEdit,
+}: {
+  privateLocations: PrivateLocation[];
+  privateLocationToEdit?: PrivateLocation;
+}) => {
   const { data } = useSelector(selectAgentPolicies);
   const { control, register } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
@@ -27,6 +35,8 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
     const tags = item.tags || [];
     return [...acc, ...tags];
   }, [] as string[]);
+
+  const isEditingLocation = privateLocationToEdit !== undefined;
 
   return (
     <>
@@ -48,7 +58,8 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
                 message: NAME_REQUIRED,
               },
               validate: (val: string) => {
-                return privateLocations.some((loc) => loc.label === val)
+                return privateLocations.some((loc) => loc.label === val) &&
+                  val !== privateLocationToEdit?.label
                   ? NAME_ALREADY_EXISTS
                   : undefined;
               },
@@ -56,13 +67,13 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField privateLocations={privateLocations} />
+        <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />
         <BrowserMonitorCallout />
         <EuiSpacer />
-        <SpaceSelector helpText={LOCATION_HELP_TEXT} />
+        <SpaceSelector helpText={LOCATION_HELP_TEXT} isDisabled={isEditingLocation} />
       </EuiForm>
     </>
   );

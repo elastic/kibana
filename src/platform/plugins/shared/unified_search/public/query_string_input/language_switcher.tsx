@@ -7,24 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
-  PopoverAnchorPosition,
   EuiContextMenuItem,
   toSentenceCase,
   EuiHorizontalRule,
   EuiButtonIcon,
+  EuiSelectable,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 export const strings = {
   getSwitchLanguageButtonText: () =>
     i18n.translate('unifiedSearch.switchLanguage.buttonText', {
       defaultMessage: 'Switch language button.',
+    }),
+  getFilterLanguageLabel: () =>
+    i18n.translate('unifiedSearch.switchLanguage.filterLanguageLabel', {
+      defaultMessage: 'Filter language',
+    }),
+  documentationLabel: () =>
+    i18n.translate('unifiedSearch.switchLanguage.documentationLabel', {
+      defaultMessage: 'Documentation',
     }),
 };
 
@@ -54,7 +63,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
 
   const button = (
     <EuiButtonIcon
-      size="m"
+      size="s"
       iconType="filter"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       className="kqlQueryBar__languageSwitcherButton"
@@ -64,28 +73,38 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
     />
   );
 
+  const isKqlSelected = language === 'kuery';
+
   const languageMenuItem = (
-    <div>
-      <EuiContextMenuItem
-        key="KQL"
-        icon={language === 'kuery' ? 'check' : 'empty'}
-        data-test-subj="kqlLanguageMenuItem"
-        onClick={() => {
-          onSelectLanguage('kuery');
+    <>
+      <EuiSelectable
+        aria-label={strings.getFilterLanguageLabel()}
+        options={[
+          {
+            key: 'kuery',
+            label: 'KQL',
+            'data-test-subj': 'kqlLanguageMenuItem',
+            checked: isKqlSelected ? 'on' : undefined,
+          },
+          {
+            key: nonKqlMode,
+            label: toSentenceCase(nonKqlMode),
+            'data-test-subj': 'luceneLanguageMenuItem',
+            checked: !isKqlSelected ? 'on' : undefined,
+          },
+        ]}
+        onChange={(newOptions) => {
+          const selectedOptions = newOptions.find((option) => option.checked === 'on');
+
+          if (selectedOptions) {
+            onSelectLanguage(selectedOptions.key);
+          }
         }}
+        singleSelection={true}
+        listProps={{ bordered: false }}
       >
-        KQL
-      </EuiContextMenuItem>
-      <EuiContextMenuItem
-        key={nonKqlMode}
-        icon={language === 'kuery' ? 'empty' : 'check'}
-        data-test-subj="luceneLanguageMenuItem"
-        onClick={() => {
-          onSelectLanguage(nonKqlMode);
-        }}
-      >
-        {toSentenceCase(nonKqlMode)}
-      </EuiContextMenuItem>
+        {(list) => list}
+      </EuiSelectable>
       <EuiHorizontalRule margin="none" />
       <EuiContextMenuItem
         key={'documentation'}
@@ -93,9 +112,9 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
         href={kueryQuerySyntaxDocs}
         target="_blank"
       >
-        Documentation
+        {strings.documentationLabel()}
       </EuiContextMenuItem>
-    </div>
+    </>
   );
 
   const languageQueryStringComponent = (

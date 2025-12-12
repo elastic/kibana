@@ -20,7 +20,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 import { DEPRECATION_TYPE_MAP } from '../../../constants';
 
@@ -59,7 +59,7 @@ export const DefaultDeprecationFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={false} />
+        <DeprecationBadge level={deprecation.level} isResolved={false} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="defaultDeprecationDetailsFlyoutTitle">{message}</h2>

@@ -21,7 +21,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
           description: The field to sort by.
         - name: sort_direction
           in: query

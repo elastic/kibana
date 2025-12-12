@@ -20,12 +20,13 @@ import {
   ScaleType,
   Settings,
   Tooltip,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { kibanaFieldFormat } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
+import { useColumnChartStyles } from '../field_data_row/column_chart_styles';
 
 export interface MetricDistributionChartData {
   x: number;
@@ -62,7 +63,11 @@ export const MetricDistributionChart: FC<Props> = ({
     }
   );
 
-  const theme = useDataVizChartTheme();
+  const theme = useDataVizChartTheme({ disableGridLines: true });
+
+  const styles = useColumnChartStyles();
+
+  const chartBaseTheme = useElasticChartsTheme();
 
   const headerFormatter: TooltipHeaderFormatter = (tooltipData) => {
     const xValue = tooltipData.value;
@@ -80,18 +85,10 @@ export const MetricDistributionChart: FC<Props> = ({
   };
 
   return (
-    <div
-      data-test-subj="dataVisualizerFieldDataMetricDistributionChart"
-      className="dataGridChart__histogram"
-    >
+    <div data-test-subj="dataVisualizerFieldDataMetricDistributionChart" css={styles.histogram}>
       <Chart size={{ width, height }}>
         <Tooltip headerFormatter={headerFormatter} />
-        <Settings
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
-          theme={theme}
-          locale={i18n.getLocale()}
-        />
+        <Settings baseTheme={chartBaseTheme} theme={theme} locale={i18n.getLocale()} />
         <Axis
           id="bottom"
           position={Position.Bottom}

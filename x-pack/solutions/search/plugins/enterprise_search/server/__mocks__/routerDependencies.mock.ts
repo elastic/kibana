@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
-import { ConfigType } from '..';
+import type { ConfigType } from '..';
 import { GlobalConfigService } from '../services/global_config_service';
 
 export const mockLogger = loggingSystemMock.createLogger().get();

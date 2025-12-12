@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
@@ -20,7 +21,7 @@ import type {
 } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { PanelSelectedNode } from './project_navigation';
+import type { SolutionId } from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -79,6 +80,11 @@ export interface ChromeStart {
    * Override the current badge
    */
   setBadge(badge?: ChromeBadge): void;
+
+  /**
+   * Set global footer; Meant to be used by developer toolbar
+   */
+  setGlobalFooter(node: ReactNode): void;
 
   /**
    * Get an observable of the current list of breadcrumbs
@@ -151,11 +157,6 @@ export interface ChromeStart {
   getHelpSupportUrl$(): Observable<string>;
 
   /**
-   * Get an observable of the current locked state of the nav drawer.
-   */
-  getIsNavDrawerLocked$(): Observable<boolean>;
-
-  /**
    * Set the banner that will appear on top of the chrome header.
    *
    * @remarks Using `undefined` when invoking this API will remove the banner.
@@ -191,20 +192,6 @@ export interface ChromeStart {
     setIsCollapsed(isCollapsed: boolean): void;
 
     /**
-     * Get an observable of the selected nav node that opens the side nav panel.
-     */
-    getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
-
-    /**
-     * Set the selected nav node that opens the side nav panel.
-     *
-     * @param node The selected nav node that opens the side nav panel. If a string is provided,
-     * it will be used as the **id** of the selected nav node. If `null` is provided, the side nav panel
-     * will be closed.
-     */
-    setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
-
-    /**
      * Get an observable of the visibility state of the feedback button in the side nav.
      */
     getIsFeedbackBtnVisible$: () => Observable<boolean>;
@@ -219,5 +206,5 @@ export interface ChromeStart {
   /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
-  getActiveSolutionNavId$(): Observable<string | null>;
+  getActiveSolutionNavId$(): Observable<SolutionId | null>;
 }

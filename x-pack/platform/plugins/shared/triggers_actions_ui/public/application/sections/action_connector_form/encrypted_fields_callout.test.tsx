@@ -9,7 +9,8 @@ import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormTestProvider } from '../../components/test_utils';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 const renderWithSecretFields = ({
   isEdit,
@@ -34,6 +35,8 @@ const renderWithSecretFields = ({
           />
         );
       })}
+      {/* will be ignored because it has no label */}
+      <UseField path="secrets.authType" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={isMissingSecrets} />
     </FormTestProvider>
   );

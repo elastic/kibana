@@ -24,7 +24,6 @@ describe('AddFilterButton component', () => {
             disabled={false}
             flush="left"
             iconType="plusInCircleFilled"
-            isLoading={false}
             onClick={[Function]}
             size="s"
           >
@@ -33,7 +32,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}
@@ -91,7 +90,6 @@ describe('AddFilterButton component', () => {
             disabled={false}
             flush="left"
             iconType="plusInCircleFilled"
-            isLoading={false}
             onClick={[Function]}
             size="s"
           >
@@ -100,7 +98,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}
@@ -145,7 +143,6 @@ describe('AddFilterButton component', () => {
             disabled={true}
             flush="left"
             iconType="plusInCircleFilled"
-            isLoading={false}
             onClick={[Function]}
             size="s"
           >
@@ -154,7 +151,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}

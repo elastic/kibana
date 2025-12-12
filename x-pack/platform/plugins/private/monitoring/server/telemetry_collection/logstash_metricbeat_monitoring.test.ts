@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashMetricbeatMonitoring } from './logstash_metricbeat_monitoring';
 import {
   INDEX_PATTERN_LOGSTASH_MONITORING,
@@ -53,15 +53,17 @@ describe('LogstashMetricbeatMonitoring', () => {
   });
 
   test('should set and get indexPattern correctly', () => {
-    metricbeatMonitoring.setIndexPattern('legacy');
+    metricbeatMonitoring.setIndexPattern('metricbeat');
     const indexPatternForLegacy = metricbeatMonitoring.getIndexPattern();
     expect(indexPatternForLegacy.stats).toBe(INDEX_PATTERN_LOGSTASH_MONITORING);
     expect(indexPatternForLegacy.state).toBe(INDEX_PATTERN_LOGSTASH_MONITORING);
+    expect(metricbeatMonitoring.getMonitoringType()).toBe('metricbeat');
 
     metricbeatMonitoring.setIndexPattern('stack');
     const indexPatternForStack = metricbeatMonitoring.getIndexPattern();
     expect(indexPatternForStack.stats).toBe(INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS);
     expect(indexPatternForStack.state).toBe(INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE);
+    expect(metricbeatMonitoring.getMonitoringType()).toBe('stack');
   });
 
   describe('Logstash metricbeat monitoring query test', () => {

@@ -9,9 +9,9 @@
 
 import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { FormatFactory } from '../types';
-import {
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { FormatFactory } from '../types';
+import type {
   CommonXYDataLayerConfig,
   DataDecorationConfig,
   YAxisConfig,
@@ -19,7 +19,7 @@ import {
   YAxisConfigResult,
   XAxisConfigResult,
 } from '../../common';
-import { LayersFieldFormats } from './layers';
+import type { LayersFieldFormats } from './layers';
 
 export interface Series {
   layer: string;

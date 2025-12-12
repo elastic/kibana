@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { UiActionsPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -18,8 +18,6 @@ export type {
   UiActionsPublicSetup as UiActionsSetup,
   UiActionsPublicStart as UiActionsStart,
 } from './plugin';
-export type { UiActionsServiceParams } from './service';
-export { UiActionsService } from './service';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
 export { ActionInternal, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';

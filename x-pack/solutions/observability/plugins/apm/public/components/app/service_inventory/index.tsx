@@ -29,6 +29,7 @@ import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { orderServiceItems } from './service_list/order_service_items';
+import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -114,10 +115,8 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 }
 
 function useServicesDetailedStatisticsFetcher({
-  mainStatisticsFetch,
   renderedItems,
 }: {
-  mainStatisticsFetch: ReturnType<typeof useServicesMainStatisticsFetcher>;
   renderedItems: ServiceListItem[];
 }) {
   const {
@@ -133,20 +132,14 @@ function useServicesDetailedStatisticsFetcher({
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
   });
-
-  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
+  const itemsToFetch = useMemo(
+    () => renderedItems.map(({ serviceName }) => serviceName),
+    [renderedItems]
+  );
 
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      const serviceNames = renderedItems.map(({ serviceName }) => serviceName);
-
-      if (
-        start &&
-        end &&
-        serviceNames.length > 0 &&
-        mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-        dataSourceOptions
-      ) {
+      if (start && end && itemsToFetch.length > 0 && dataSourceOptions) {
         return callApmApi('POST /internal/apm/services/detailed_statistics', {
           params: {
             query: {
@@ -161,7 +154,7 @@ function useServicesDetailedStatisticsFetcher({
             },
             body: {
               // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-              serviceNames: JSON.stringify(serviceNames.sort()),
+              serviceNames: JSON.stringify(itemsToFetch),
             },
           },
         });
@@ -170,7 +163,7 @@ function useServicesDetailedStatisticsFetcher({
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, renderedItems, offset, comparisonEnabled],
+    [itemsToFetch, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -180,8 +173,8 @@ function useServicesDetailedStatisticsFetcher({
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
-  const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
     query: { rangeFrom, rangeTo },
@@ -204,7 +197,6 @@ export function ServiceInventory() {
   const initialSortDirection = 'desc';
 
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
-    mainStatisticsFetch,
     renderedItems,
   });
 
@@ -296,11 +288,11 @@ export function ServiceInventory() {
       });
     }
   }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, rangeFrom, rangeTo]);
-
   return (
     <>
       <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
+        <TracesInDiscoverCallout />
         {displayMlCallout && mlCallout}
         <EuiFlexItem>
           <ApmServicesTable
@@ -317,8 +309,8 @@ export function ServiceInventory() {
             initialPageSize={INITIAL_PAGE_SIZE}
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
-            maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
             onChangeRenderedItems={setRenderedItems}
+            maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

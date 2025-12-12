@@ -26,6 +26,8 @@ import {
   hasInstallServersInputs,
 } from '../../../../../../../../../../common/services';
 
+import { getAgentPoliciesWithNonFipsIntegrations } from '../../../../../../../hooks/use_agent_policies_with_fips';
+
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
@@ -89,6 +91,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       fleetServerHost,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
+      nonFipsIntegrations: getAgentPoliciesWithNonFipsIntegrations(agentPolicy),
     }),
   ];
 

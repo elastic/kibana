@@ -1,5 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Data table columns Summary column returns eui grid columns with summary column 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <Memo(MemoizedFormattedMessage)
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <Memo(MemoizedFormattedMessage)
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [],
+    "display": <Memo(UnifiedDataTableSummaryColumnHeader)
+      columnDisplayName="Summary"
+      headerRowHeight={5}
+    />,
+    "displayAsText": "Summary",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
+    "id": "_source",
+    "isSortable": false,
+    "schema": "kibana-json",
+    "visibleCellActions": undefined,
+  },
+]
+`;
+
 exports[`Data table columns Textbased languages grid columns returns columns in correct format when column customisation is provided 1`] = `
 Array [
   Object {
@@ -33,6 +90,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -87,6 +145,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -174,6 +233,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -307,6 +367,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -376,6 +437,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -452,6 +514,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -510,6 +573,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -584,6 +648,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -647,6 +712,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -734,6 +800,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -792,6 +859,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -879,6 +947,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1015,6 +1084,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1143,6 +1213,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1276,6 +1347,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1345,6 +1417,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -1421,6 +1494,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1478,6 +1552,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -1552,6 +1627,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1685,6 +1761,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1764,6 +1841,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -1855,6 +1933,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1912,6 +1991,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -2003,6 +2083,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [

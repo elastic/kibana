@@ -20,6 +20,6 @@ export function getStorageExplorerFeedbackHref() {
 
 export function getKibanaAdvancedSettingsHref(core: CoreStart) {
   return core.application.getUrlForApp('management', {
-    path: '/kibana/settings?query=category:(observability)',
+    path: '/kibana/settings?query=categories:(observability)',
   });
 }

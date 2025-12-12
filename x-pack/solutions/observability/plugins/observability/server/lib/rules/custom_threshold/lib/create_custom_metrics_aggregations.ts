@@ -7,10 +7,8 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
-} from '../../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import {
   createLastValueAggBucket,
   createLastValueAggBucketScript,
@@ -40,6 +38,20 @@ export const createCustomMetricsAggregations = (
         },
       };
     }
+    if (aggregation === Aggregators.MED) {
+      bucketsPath[metric.name] = key;
+      return {
+        ...acc,
+        [key]: {
+          percentiles: {
+            field: metric.field,
+            percents: [50],
+            keyed: true,
+          },
+        },
+      };
+    }
+
     if (aggregation === Aggregators.P95 || aggregation === Aggregators.P99) {
       bucketsPath[metric.name] = key;
       return {

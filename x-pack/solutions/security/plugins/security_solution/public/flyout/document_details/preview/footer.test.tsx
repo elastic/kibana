@@ -59,7 +59,7 @@ describe('<PreviewPanelFooter />', () => {
   it('should not render the take action dropdown if preview mode', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isRulePreview: true }}>
           <PreviewPanelFooter />
         </DocumentDetailsContext.Provider>
       </TestProviders>

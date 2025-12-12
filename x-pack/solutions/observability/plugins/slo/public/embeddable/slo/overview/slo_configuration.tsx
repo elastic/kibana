@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -198,14 +199,21 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   const [overviewMode, setOverviewMode] = useState<OverviewMode>(
     initialInput?.overviewMode ?? 'single'
   );
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'overviewConfigurationFlyout',
+  });
 
   return (
-    <EuiFlyout data-test-subj="sloSingleOverviewConfiguration" onClose={onCancel}>
+    <EuiFlyout
+      data-test-subj="sloSingleOverviewConfiguration"
+      onClose={onCancel}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <EuiTitle>
-              <h2>
+              <h2 id={flyoutTitleId}>
                 {i18n.translate('xpack.slo.overviewEmbeddable.config.sloSelector.headerTitle', {
                   defaultMessage: 'Overview configuration',
                 })}

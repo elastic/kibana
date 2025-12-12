@@ -6,14 +6,20 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { ApiPrivileges } from '@kbn/security-authorization-core-common';
+import { ApiPrivileges } from '@kbn/core-security-server';
+import { schema } from '@kbn/config-schema';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type {
+  InstallationStatusResponse,
+  PerformInstallResponse,
+  PerformUpdateResponse,
+  UninstallResponse,
+} from '../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
-  InstallationStatusResponse,
-  PerformInstallResponse,
-  UninstallResponse,
+  UPDATE_ALL_API_PATH,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
 
@@ -27,7 +33,11 @@ export const registerInstallationRoutes = ({
   router.get(
     {
       path: INSTALLATION_STATUS_API_PATH,
-      validate: false,
+      validate: {
+        query: schema.object({
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+        }),
+      },
       options: {
         access: 'internal',
       },
@@ -39,11 +49,17 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { installClient, documentationManager } = getServices();
-      const installStatus = await installClient.getInstallationStatus();
-      const { status: overallStatus } = await documentationManager.getStatus();
+      const inferenceId = req.query?.inferenceId;
+      const installStatus = await installClient.getInstallationStatus({
+        inferenceId,
+      });
+      const { status: overallStatus } = await documentationManager.getStatus({
+        inferenceId,
+      });
 
       return res.ok<InstallationStatusResponse>({
         body: {
+          inferenceId,
           perProducts: installStatus,
           overall: overallStatus,
         },
@@ -54,7 +70,11 @@ export const registerInstallationRoutes = ({
   router.post(
     {
       path: INSTALL_ALL_API_PATH,
-      validate: false,
+      validate: {
+        body: schema.object({
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+        }),
+      },
       options: {
         access: 'internal',
         timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
@@ -68,18 +88,31 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const { documentationManager } = getServices();
 
+      const inferenceId = req.body?.inferenceId;
+
       await documentationManager.install({
         request: req,
         force: false,
         wait: true,
+        inferenceId,
       });
 
       // check status after installation in case of failure
-      const { status } = await documentationManager.getStatus();
+      const { status, installStatus } = await documentationManager.getStatus({
+        inferenceId,
+      });
 
+      let failureReason = null;
+      if (status === 'error' && installStatus) {
+        failureReason = Object.values(installStatus)
+          .filter((product) => product.status === 'error' && product.failureReason)
+          .map((product) => product.failureReason)
+          .join('\n');
+      }
       return res.ok<PerformInstallResponse>({
         body: {
           installed: status === 'installed',
+          ...(failureReason ? { failureReason } : {}),
         },
       });
     }
@@ -87,8 +120,52 @@ export const registerInstallationRoutes = ({
 
   router.post(
     {
+      path: UPDATE_ALL_API_PATH,
+      validate: {
+        body: schema.object({
+          forceUpdate: schema.boolean({ defaultValue: false }),
+          inferenceIds: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+      options: {
+        access: 'internal',
+        timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const { forceUpdate } = req.body ?? {};
+
+      const { documentationManager } = getServices();
+
+      const updated = await documentationManager.updateAll({
+        request: req,
+        forceUpdate,
+        // If inferenceIds is provided, use it, otherwise use all previously installed inference IDs
+        inferenceIds: req.body.inferenceIds ?? [],
+      });
+
+      // check status after installation in case of failure
+      const statuses: Record<string, PerformUpdateResponse> =
+        await documentationManager.getStatuses({ inferenceIds: updated.inferenceIds });
+      return res.ok<Record<string, PerformUpdateResponse>>({
+        body: statuses,
+      });
+    }
+  );
+
+  router.post(
+    {
       path: UNINSTALL_ALL_API_PATH,
-      validate: false,
+      validate: {
+        body: schema.object({
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+        }),
+      },
       options: {
         access: 'internal',
       },
@@ -104,6 +181,7 @@ export const registerInstallationRoutes = ({
       await documentationManager.uninstall({
         request: req,
         wait: true,
+        inferenceId: req.body?.inferenceId,
       });
 
       return res.ok<UninstallResponse>({

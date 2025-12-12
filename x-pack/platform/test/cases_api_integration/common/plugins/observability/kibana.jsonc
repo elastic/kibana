@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-fixtures-plugin",
+  "owner": "@elastic/kibana-cases",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "observabilityFixtures",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "features",
+      "cases"
+    ],
+    "optionalPlugins": [
+      "security",
+      "spaces"
+    ]
+  }
+}

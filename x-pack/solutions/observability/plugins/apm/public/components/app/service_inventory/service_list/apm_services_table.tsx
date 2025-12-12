@@ -45,7 +45,12 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
-import type { ITableColumn, SortFunction, TableSearchBar } from '../../../shared/managed_table';
+import type {
+  ITableColumn,
+  SortFunction,
+  TableSearchBar,
+  VisibleItemsStartEnd,
+} from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
@@ -294,8 +299,9 @@ interface Props {
   sortFn: SortFunction<ServiceListItem>;
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
-  onChangeSearchQuery: (searchQuery: string) => void;
-  onChangeRenderedItems: (renderedItems: ServiceListItem[]) => void;
+  onChangeSearchQuery?: (searchQuery: string) => void;
+  onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
+  onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 }
 export function ApmServicesTable({
   status,
@@ -313,6 +319,7 @@ export function ApmServicesTable({
   maxCountExceeded,
   onChangeSearchQuery,
   onChangeRenderedItems,
+  onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core } = useApmPluginContext();
@@ -394,7 +401,7 @@ export function ApmServicesTable({
           <EuiFlexItem grow={false}>
             <EuiIconTip
               position="top"
-              type="questionInCircle"
+              type="question"
               color="subdued"
               content={i18n.translate('xpack.apm.servicesTable.tooltip.metricsExplanation', {
                 defaultMessage:
@@ -423,6 +430,7 @@ export function ApmServicesTable({
           initialPageSize={initialPageSize}
           sortFn={sortFn}
           onChangeRenderedItems={onChangeRenderedItems}
+          onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
         />
       </EuiFlexItem>

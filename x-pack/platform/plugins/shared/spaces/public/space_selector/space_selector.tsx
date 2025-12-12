@@ -8,7 +8,10 @@
 import './space_selector.scss';
 
 import {
+  EuiButtonGroup,
   EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
@@ -25,17 +28,22 @@ import type { Observable, Subscription } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { SpaceCards } from './components';
+import { SpaceCards, SpaceTable } from './components';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
+
+// Number of spaces above which the selector defaults to table view for better scalability
+const VIEW_MODE_THRESHOLD = 20;
+
+type ViewMode = 'grid' | 'table';
 
 interface Props {
   spacesManager: SpacesManager;
@@ -49,6 +57,7 @@ interface State {
   spaces: Space[];
   error?: Error;
   customLogo?: string;
+  viewMode: ViewMode;
 }
 
 export class SpaceSelector extends Component<Props, State> {
@@ -62,6 +71,7 @@ export class SpaceSelector extends Component<Props, State> {
       loading: false,
       searchTerm: '',
       spaces: [],
+      viewMode: 'grid',
     };
   }
 
@@ -96,6 +106,7 @@ export class SpaceSelector extends Component<Props, State> {
         this.setState({
           loading: false,
           spaces,
+          viewMode: spaces.length > VIEW_MODE_THRESHOLD ? 'table' : 'grid',
         });
       })
       .catch((err) => {
@@ -131,14 +142,7 @@ export class SpaceSelector extends Component<Props, State> {
         `}
         data-test-subj="kibanaSpaceSelector"
       >
-        {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
-        <EuiPortal>
-          <div
-            className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-            role="presentation"
-          />
-        </EuiPortal>
-
+        <BackgroundPortal />
         <KibanaPageTemplate.Section color="transparent" paddingSize="xl">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
@@ -180,13 +184,16 @@ export class SpaceSelector extends Component<Props, State> {
           </EuiText>
           <EuiSpacer size="xl" />
 
-          {this.getSearchField()}
+          {this.getSearchAndToggle()}
 
           {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
-          {!this.state.loading && (
-            <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
-          )}
+          {!this.state.loading &&
+            (this.state.viewMode === 'grid' ? (
+              <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+            ) : (
+              <SpaceTable spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+            ))}
 
           {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
             <Fragment>
@@ -269,18 +276,112 @@ export class SpaceSelector extends Component<Props, State> {
       searchTerm: searchTerm.trim().toLowerCase(),
     });
   };
+
+  public onViewModeChange = (viewMode: ViewMode) => {
+    this.setState({ viewMode });
+  };
+
+  public getViewToggle = () => {
+    const { viewMode } = this.state;
+
+    const toggleOptions = [
+      {
+        id: 'grid',
+        label: i18n.translate('xpack.spaces.spaceSelector.gridViewLabel', {
+          defaultMessage: 'Grid view',
+        }),
+        iconType: 'apps',
+      },
+      {
+        id: 'table',
+        label: i18n.translate('xpack.spaces.spaceSelector.tableViewLabel', {
+          defaultMessage: 'Table view',
+        }),
+        iconType: 'list',
+      },
+    ];
+
+    return (
+      <EuiButtonGroup
+        css={css`
+          .euiButtonGroup__buttons .euiButtonGroupButton {
+            min-width: 40px;
+            width: 40px;
+          }
+        `}
+        legend={i18n.translate('xpack.spaces.spaceSelector.viewToggleLegend', {
+          defaultMessage: 'View options',
+        })}
+        options={toggleOptions}
+        idSelected={viewMode}
+        onChange={(id) => this.onViewModeChange(id as ViewMode)}
+        buttonSize="m"
+        isIconOnly
+      />
+    );
+  };
+
+  public getSearchAndToggle = () => {
+    const { spaces } = this.state;
+
+    // Show search field and toggle if we have enough spaces to warrant them
+    const showSearchAndToggle = spaces && spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD;
+
+    if (!showSearchAndToggle) {
+      return null;
+    }
+
+    const inputLabel = i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
+      defaultMessage: 'Find a space',
+    });
+
+    return (
+      <>
+        <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="center">
+          {showSearchAndToggle && (
+            <EuiFlexItem grow={false}>
+              <div
+                css={css`
+                  width: ${euiThemeVars.euiFormMaxWidth};
+                  max-width: 100%;
+                `}
+              >
+                <EuiFieldSearch
+                  placeholder={inputLabel}
+                  aria-label={inputLabel}
+                  incremental={true}
+                  onSearch={this.onSearch}
+                />
+              </div>
+            </EuiFlexItem>
+          )}
+          {showSearchAndToggle && <EuiFlexItem grow={false}>{this.getViewToggle()}</EuiFlexItem>}
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+      </>
+    );
+  };
 }
 
 export const renderSpaceSelectorApp = (
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>,
+  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile' | 'rendering'>,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) => {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <SpaceSelector {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<SpaceSelector {...props} />), element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };
+
+// portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners
+const BackgroundPortal = React.memo(function BackgroundPortal() {
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
+  return (
+    <EuiPortal>
+      <div
+        className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
+        css={kbnFullScreenBgCss}
+        role="presentation"
+      />
+    </EuiPortal>
+  );
+});

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFilterButton,
   EuiPopover,
-  EuiFilterSelectItem,
   EuiFilterGroup,
+  EuiSelectable,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -29,9 +30,31 @@ export interface Filters {
   [key: string]: Filter;
 }
 
-export function FilterListButton({ onChange, filters }: Props) {
+const useStyles = () => {
   const { euiTheme } = useEuiTheme();
+
+  return {
+    container: css`
+      box-shadow: none;
+      height: ${euiTheme.size.xxl}; /* Align the height with the search input height */
+
+      &,
+      & > :first-child .euiFilterButton {
+        /* EUI specificity override */
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      &::after {
+        border: ${euiTheme.border.thin};
+      }
+    `,
+  };
+};
+
+export function FilterListButton({ onChange, filters }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const styles = useStyles();
 
   const activeFilters = Object.values(filters).filter((v) => (v as Filter).checked === 'on');
 
@@ -42,6 +65,13 @@ export function FilterListButton({ onChange, filters }: Props) {
   const closePopover = () => {
     setIsPopoverOpen(false);
   };
+
+  const selectableOptions = Object.entries(filters).map(([filter, item]) => ({
+    key: filter,
+    label: (item as Filter).name,
+    checked: (item as Filter).checked,
+    'data-test-subj': 'filterItem',
+  }));
 
   const toggleFilter = (filter: string) => {
     const previousValue = filters[filter].checked;
@@ -74,7 +104,7 @@ export function FilterListButton({ onChange, filters }: Props) {
   );
 
   return (
-    <EuiFilterGroup className="componentTemplates__filterListButton">
+    <EuiFilterGroup css={styles.container}>
       <EuiPopover
         ownFocus
         button={button}
@@ -83,21 +113,23 @@ export function FilterListButton({ onChange, filters }: Props) {
         panelPaddingSize="none"
         data-test-subj="filterList"
       >
-        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
-            instead of EuiFilterSelectItem (which is pending deprecation).
-            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
-        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
-          {Object.entries(filters).map(([filter, item], index) => (
-            <EuiFilterSelectItem
-              checked={(item as Filter).checked}
-              key={index}
-              onClick={() => toggleFilter(filter)}
-              data-test-subj="filterItem"
-            >
-              {(item as Filter).name}
-            </EuiFilterSelectItem>
-          ))}
-        </div>
+        <EuiSelectable
+          allowExclusions
+          listProps={{
+            onFocusBadge: false,
+            style: {
+              minWidth: 150,
+            },
+          }}
+          options={selectableOptions}
+          onChange={(newOptions, event, changedOption) => {
+            if (changedOption) {
+              toggleFilter(changedOption.key);
+            }
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
       </EuiPopover>
     </EuiFilterGroup>
   );

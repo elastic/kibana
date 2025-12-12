@@ -13,11 +13,11 @@ import { TaskCost, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTaskBulk, setupTestServers, retry } from './lib';
-import { CreateMonitoringStatsOpts } from '../monitoring';
+import type { CreateMonitoringStatsOpts } from '../monitoring';
 import { filter, map } from 'rxjs';
 import { isTaskManagerWorkerUtilizationStatEvent } from '../task_events';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { Ok } from '../lib/result_type';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { Ok } from '../lib/result_type';
 
 const POLLING_INTERVAL = 5000;
 const { TaskPollingLifecycle: TaskPollingLifecycleMock } = jest.requireMock('../polling_lifecycle');

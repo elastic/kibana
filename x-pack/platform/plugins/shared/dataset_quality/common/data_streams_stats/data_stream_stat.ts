@@ -6,10 +6,10 @@
  */
 
 import { DEFAULT_DATASET_QUALITY, DEFAULT_QUALITY_DOC_STATS } from '../constants';
-import { DataStreamType, QualityIndicators } from '../types';
+import type { DataStreamType, QualityIndicators } from '../types';
 import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
-import { Integration } from './integration';
-import { DataStreamStatType } from './types';
+import type { Integration } from './integration';
+import type { DataStreamStatType } from './types';
 
 interface QualityStat {
   percentage: number;
@@ -32,6 +32,9 @@ export class DataStreamStat {
   docsInTimeRange?: number;
   degradedDocs: QualityStat;
   failedDocs: QualityStat;
+  hasFailureStore?: DataStreamStatType['hasFailureStore'];
+  defaultRetentionPeriod?: DataStreamStatType['defaultRetentionPeriod'];
+  customRetentionPeriod?: DataStreamStatType['customRetentionPeriod'];
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.rawName;
@@ -49,6 +52,9 @@ export class DataStreamStat {
     this.docsInTimeRange = dataStreamStat.docsInTimeRange;
     this.degradedDocs = dataStreamStat.degradedDocs;
     this.failedDocs = dataStreamStat.failedDocs;
+    this.hasFailureStore = dataStreamStat.hasFailureStore;
+    this.defaultRetentionPeriod = dataStreamStat.defaultRetentionPeriod;
+    this.customRetentionPeriod = dataStreamStat.customRetentionPeriod;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -56,6 +62,7 @@ export class DataStreamStat {
 
     const dataStreamStatProps = {
       rawName: dataStreamStat.name,
+      hasFailureStore: dataStreamStat.hasFailureStore,
       type,
       name: dataset,
       title: dataset,
@@ -68,6 +75,8 @@ export class DataStreamStat {
       quality: DEFAULT_DATASET_QUALITY,
       degradedDocs: DEFAULT_QUALITY_DOC_STATS,
       failedDocs: DEFAULT_QUALITY_DOC_STATS,
+      defaultRetentionPeriod: dataStreamStat.defaultRetentionPeriod,
+      customRetentionPeriod: dataStreamStat.customRetentionPeriod,
     };
 
     return new DataStreamStat(dataStreamStatProps);
@@ -79,17 +88,20 @@ export class DataStreamStat {
     failedDocStat,
     datasetIntegrationMap,
     totalDocs,
+    hasFailureStore,
   }: {
     datasetName: string;
     degradedDocStat: QualityStat;
     failedDocStat: QualityStat;
     datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
     totalDocs: number;
+    hasFailureStore?: boolean;
   }) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(datasetName);
 
     const dataStreamStatProps = {
       rawName: datasetName,
+      hasFailureStore,
       type,
       name: dataset,
       title: datasetIntegrationMap[dataset]?.title || dataset,

@@ -1,13 +1,14 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "__mocks__/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
@@ -73,7 +74,6 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
-    "@kbn/react-kibana-context-render",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-analytics-browser-mocks",
@@ -92,8 +92,10 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server-utils",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/css-utils",
+    "@kbn/licensing-types",
+    "@kbn/lazy-object"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

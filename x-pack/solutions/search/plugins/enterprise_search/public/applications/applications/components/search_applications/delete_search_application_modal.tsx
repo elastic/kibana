@@ -8,7 +8,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
@@ -28,14 +28,18 @@ export const DeleteSearchApplicationModal: React.FC<DeleteSearchApplicationModal
   const { deleteSearchApplication } = useActions(SearchApplicationsListLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { isDeleteLoading } = useValues(SearchApplicationsListLogic);
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate(
         'xpack.enterpriseSearch.searchApplications.list.deleteSearchApplicationModal.title',
         {
           defaultMessage: 'Permanently delete this search application?',
         }
       )}
+      titleProps={{ id: modalTitleId }}
       onCancel={onClose}
       onConfirm={() => {
         deleteSearchApplication({ searchApplicationName });

@@ -31,7 +31,7 @@ describe('SloSummaryCleanupTask', () => {
     task.fetchSloSummariesIds = jest.fn().mockReturnValue({ sloSummaryIds: [] });
 
     task.findSloDefinitions = jest.fn();
-    await task.runTask();
+    await task.runTask(new AbortController());
   });
 
   it('should run some slos', async function () {
@@ -55,7 +55,7 @@ describe('SloSummaryCleanupTask', () => {
       ],
     });
 
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalled();
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
@@ -69,6 +69,8 @@ describe('SloSummaryCleanupTask', () => {
           ],
         },
       },
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
     });
   });
@@ -94,11 +96,13 @@ describe('SloSummaryCleanupTask', () => {
       ],
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(1);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
@@ -152,13 +156,16 @@ describe('SloSummaryCleanupTask', () => {
       };
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
 
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      conflicts: 'proceed',
+      slices: 'auto',
+      wait_for_completion: false,
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -169,12 +176,13 @@ describe('SloSummaryCleanupTask', () => {
           ]),
         },
       },
-      wait_for_completion: false,
     });
 
     expect(esClient.deleteByQuery).toHaveBeenLastCalledWith({
-      wait_for_completion: false,
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -226,11 +234,13 @@ describe('SloSummaryCleanupTask', () => {
       };
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
@@ -245,6 +255,8 @@ describe('SloSummaryCleanupTask', () => {
       },
     });
     expect(esClient.deleteByQuery).toHaveBeenLastCalledWith({
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
@@ -293,12 +305,14 @@ describe('SloSummaryCleanupTask', () => {
       };
     });
     await task.start(taskManagerStart, soClient, esClient);
-    await task.runTask();
+    await task.runTask(new AbortController());
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
 
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {

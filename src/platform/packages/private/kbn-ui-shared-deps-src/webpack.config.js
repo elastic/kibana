@@ -20,8 +20,8 @@ const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const DOMPURIFY_SRC = require.resolve('dompurify/purify.js');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 /** @returns {import('webpack').Configuration} */
 module.exports = {
@@ -61,6 +61,10 @@ module.exports = {
       {
         test: /\.peggy$/,
         use: [require.resolve('@kbn/peggy-loader')],
+      },
+      {
+        test: /\.text$/,
+        use: [require.resolve('@kbn/dot-text-loader')],
       },
       {
         test: /\.css$/,
@@ -106,6 +110,10 @@ module.exports = {
     ],
   },
 
+  cache: {
+    type: 'filesystem',
+  },
+
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
     mainFields: ['browser', 'module', 'main'],
@@ -147,5 +155,12 @@ module.exports = {
       context: REPO_ROOT,
       manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
     }),
+
+    // Replace Monaco Editor's bundled DOMPurify 3.0.5 with the project's DOMPurify 3.2.4
+    // Monaco Editor imports DOMPurify using relative paths like './dompurify/dompurify.js' or '../../dompurify/dompurify.js'
+    new webpack.NormalModuleReplacementPlugin(
+      /(\.\.\/)*(\.\/)?dompurify[/\\]dompurify\.js$/,
+      DOMPURIFY_SRC
+    ),
   ],
 };

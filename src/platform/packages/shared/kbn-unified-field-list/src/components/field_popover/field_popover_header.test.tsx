@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { FieldPopoverHeader } from './field_popover_header';
 
@@ -17,23 +18,23 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   it('should render correctly without actions', async () => {
     const mockClose = jest.fn();
     const fieldName = 'extension';
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader
         field={dataView.fields.find((field) => field.name === fieldName)!}
         closePopover={mockClose}
       />
     );
 
-    expect(wrapper.text()).toBe(fieldName);
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
+    expect(await screen.findByText(fieldName)).toBeVisible();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('should render correctly with all actions', async () => {
     const mockClose = jest.fn();
-    const fieldName = 'extension';
+    const fieldName = 'extension.keyword';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
     jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader
         field={field}
         closePopover={mockClose}
@@ -45,23 +46,13 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
       />
     );
 
-    expect(wrapper.text()).toBe(fieldName);
-    expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_addBreakdownField-${fieldName}"]`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_addField-${fieldName}"]`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_addExistsFilter-${fieldName}"]`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_editField-${fieldName}"]`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_deleteField-${fieldName}"]`).exists()
-    ).toBeTruthy();
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(5);
+    expect(screen.getByText(fieldName)).toBeVisible();
+    expect(screen.getByTestId(`fieldPopoverHeader_addBreakdownField-${fieldName}`)).toBeVisible();
+    expect(screen.getByTestId(`fieldPopoverHeader_addField-${fieldName}`)).toBeVisible();
+    expect(screen.getByTestId(`fieldPopoverHeader_addExistsFilter-${fieldName}`)).toBeVisible();
+    expect(screen.getByTestId(`fieldPopoverHeader_editField-${fieldName}`)).toBeVisible();
+    expect(screen.getByTestId(`fieldPopoverHeader_deleteField-${fieldName}`)).toBeVisible();
+    expect(screen.getAllByRole('button')).toHaveLength(5);
   });
 
   it('should correctly handle add-breakdown-field action', async () => {
@@ -69,7 +60,7 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
     const mockAddBreakdownField = jest.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader
         field={field}
         closePopover={mockClose}
@@ -77,10 +68,7 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
       />
     );
 
-    wrapper
-      .find(`[data-test-subj="fieldPopoverHeader_addBreakdownField-${fieldName}"]`)
-      .first()
-      .simulate('click');
+    await userEvent.click(screen.getByTestId(`fieldPopoverHeader_addBreakdownField-${fieldName}`));
 
     expect(mockClose).toHaveBeenCalled();
     expect(mockAddBreakdownField).toHaveBeenCalledWith(field);
@@ -91,7 +79,7 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
     const mockAddField = jest.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader
         field={field}
         closePopover={mockClose}
@@ -99,10 +87,7 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
       />
     );
 
-    wrapper
-      .find(`[data-test-subj="fieldPopoverHeader_addField-${fieldName}"]`)
-      .first()
-      .simulate('click');
+    await userEvent.click(screen.getByTestId(`fieldPopoverHeader_addField-${fieldName}`));
 
     expect(mockClose).toHaveBeenCalled();
     expect(mockAddField).toHaveBeenCalledWith(field);
@@ -115,24 +100,27 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
     const field = dataView.fields.find((f) => f.name === fieldName)!;
 
     // available
-    let wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onAddFilter={mockAddFilter} />
     );
-    wrapper
-      .find(`[data-test-subj="fieldPopoverHeader_addExistsFilter-${fieldName}"]`)
-      .first()
-      .simulate('click');
+    await userEvent.click(screen.getByTestId(`fieldPopoverHeader_addExistsFilter-${fieldName}`));
     expect(mockClose).toHaveBeenCalled();
     expect(mockAddFilter).toHaveBeenCalledWith('_exists_', fieldName, '+');
+  });
 
-    // hidden
+  it('should correctly handle hidden add-exists-filter action', async () => {
+    const mockClose = jest.fn();
+    const mockAddFilter = jest.fn();
+    const fieldName = 'extension';
+    const field = dataView.fields.find((f) => f.name === fieldName)!;
+
     jest.spyOn(field, 'filterable', 'get').mockImplementation(() => false);
-    wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onAddFilter={mockAddFilter} />
     );
     expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_addExistsFilter-${fieldName}"]`).exists()
-    ).toBeFalsy();
+      screen.queryByTestId(`fieldPopoverHeader_addExistsFilter-${fieldName}`)
+    ).not.toBeInTheDocument();
   });
 
   it('should correctly handle edit-field action', async () => {
@@ -143,25 +131,28 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
 
     // available
     jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
-    let wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onEditField={mockEditField} />
     );
-    wrapper
-      .find(`[data-test-subj="fieldPopoverHeader_editField-${fieldName}"]`)
-      .first()
-      .simulate('click');
+    await userEvent.click(screen.getByTestId(`fieldPopoverHeader_editField-${fieldName}`));
     expect(mockClose).toHaveBeenCalled();
     expect(mockEditField).toHaveBeenCalledWith(fieldName);
+  });
 
-    // hidden
+  it('should correctly handle hidden edit-field action', async () => {
+    const mockClose = jest.fn();
+    const mockEditField = jest.fn();
+    const fieldName = 'extension';
+    const field = dataView.fields.find((f) => f.name === fieldName)!;
+
     jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => false);
     jest.spyOn(field, 'type', 'get').mockImplementation(() => 'unknown');
-    wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onEditField={mockEditField} />
     );
     expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_editField-${fieldName}"]`).exists()
-    ).toBeFalsy();
+      screen.queryByTestId(`fieldPopoverHeader_editField-${fieldName}`)
+    ).not.toBeInTheDocument();
   });
 
   it('should correctly handle delete-field action', async () => {
@@ -172,23 +163,50 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
 
     // available
     jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
-    let wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onDeleteField={mockDeleteField} />
     );
-    wrapper
-      .find(`[data-test-subj="fieldPopoverHeader_deleteField-${fieldName}"]`)
-      .first()
-      .simulate('click');
+    await userEvent.click(screen.getByTestId(`fieldPopoverHeader_deleteField-${fieldName}`));
     expect(mockClose).toHaveBeenCalled();
     expect(mockDeleteField).toHaveBeenCalledWith(fieldName);
+  });
 
-    // hidden
+  it('should correctly handle hidden delete-field action', async () => {
+    const mockClose = jest.fn();
+    const mockDeleteField = jest.fn();
+    const fieldName = 'extension';
+    const field = dataView.fields.find((f) => f.name === fieldName)!;
+
     jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => false);
-    wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onDeleteField={mockDeleteField} />
     );
     expect(
-      wrapper.find(`[data-test-subj="fieldPopoverHeader_deleteField-${fieldName}"]`).exists()
-    ).toBeFalsy();
+      screen.queryByTestId(`fieldPopoverHeader_deleteField-${fieldName}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should render correctly the field type icon on the header', () => {
+    const fieldName = 'extension';
+    const field = dataView.fields.find((f) => f.name === fieldName)!;
+    renderWithI18n(<FieldPopoverHeader field={field} closePopover={jest.fn()} />);
+
+    expect(screen.getByTestId(`fieldPopoverHeader_icon-${fieldName}`)).toBeVisible();
+  });
+
+  it('should handle getCustomFieldType', () => {
+    const mockGetCustomFieldType = jest.fn().mockReturnValue('custom');
+    const fieldName = 'extension';
+    const field = dataView.fields.find((f) => f.name === fieldName)!;
+    renderWithI18n(
+      <FieldPopoverHeader
+        field={field}
+        closePopover={jest.fn()}
+        getCustomFieldType={mockGetCustomFieldType}
+      />
+    );
+
+    expect(mockGetCustomFieldType).toHaveBeenCalledWith(field);
+    expect(screen.getByTitle('custom')).toBeVisible();
   });
 });

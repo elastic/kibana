@@ -19,6 +19,8 @@ import { getAllFtrConfigsAndManifests } from './ftr_configs_manifest';
 const THIS_PATH =
   'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts';
 
+const IGNORED_FOLDERS = ['.buildkite/'];
+
 const IGNORED_PATHS = [
   THIS_PATH,
   'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts',
@@ -29,6 +31,25 @@ const IGNORED_PATHS = [
 export async function runCheckFtrConfigsCli() {
   run(
     async ({ log }) => {
+      const { ftrConfigEntries, manifestPaths } = getAllFtrConfigsAndManifests();
+      const duplicateEntries = Array.from(ftrConfigEntries.entries()).filter(
+        ([, paths]) => paths.length > 1
+      );
+
+      if (duplicateEntries.length > 0) {
+        const errorMessage = duplicateEntries
+          .map(
+            ([config, paths]) =>
+              `Config path: ${Path.relative(REPO_ROOT, config)}\nFound in manifests:\n${paths.join(
+                '\n'
+              )}`
+          )
+          .join('\n\n');
+        throw createFailError(
+          `Duplicate FTR config entries detected. Please remove the duplicates:\n\n${errorMessage}`
+        );
+      }
+
       const { stdout } = await execa('git', [
         'ls-tree',
         '--full-tree',
@@ -46,6 +67,10 @@ export async function runCheckFtrConfigsCli() {
 
       const possibleConfigs = files.filter((file) => {
         if (IGNORED_PATHS.map((rel) => Path.resolve(REPO_ROOT, rel)).includes(file)) {
+          return false;
+        }
+
+        if (IGNORED_FOLDERS.some((folder) => file.startsWith(Path.resolve(REPO_ROOT, folder)))) {
           return false;
         }
 
@@ -70,7 +95,7 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (file.match(/(jest(\.integration)?)\.config\.(t|j)s$/)) {
+        if (file.match(/jest(\.integration)?\.config(\.\w+)?\.(t|j)s$/)) {
           return false;
         }
 
@@ -133,8 +158,7 @@ export async function runCheckFtrConfigsCli() {
         log.info(`${loadingConfigs.length} files were loaded as FTR configs for validation`);
       }
 
-      const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
-
+      const allFtrConfigs = Array.from(ftrConfigEntries.keys());
       const invalid = possibleConfigs.filter((path) => !allFtrConfigs.includes(path));
       if (invalid.length) {
         const invalidList =
@@ -152,7 +176,8 @@ Serverless tests:\n${(manifestPaths.serverless as string[]).join('\n')}
       }
     },
     {
-      description: 'Check that all FTR configs are listed in manifest files',
+      description:
+        'Check that all FTR configs are listed in manifest files and there are no duplicates',
     }
   );
 }

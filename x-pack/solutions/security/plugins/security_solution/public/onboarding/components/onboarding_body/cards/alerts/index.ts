@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RULES_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ALERTS_CARD_TITLE } from './translations';
@@ -24,4 +25,5 @@ export const alertsCardConfig: OnboardingCardConfig = {
         './alerts_card'
       )
   ),
+  capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE],
 };

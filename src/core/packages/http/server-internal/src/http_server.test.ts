@@ -8,7 +8,7 @@
  */
 
 import { setTlsConfigMock } from './http_server.test.mocks';
-import { Server } from 'http';
+import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
@@ -25,12 +25,13 @@ import type {
 } from '@kbn/core-http-server';
 import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
 import { createServer } from '@kbn/server-http-tools';
-import { HttpConfig } from './http_config';
+import type { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
-import { of, Observable, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 
@@ -211,6 +212,11 @@ test('valid params', async () => {
           test: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.params.test });
@@ -240,6 +246,11 @@ test('invalid params', async () => {
         params: schema.object({
           test: schema.number(),
         }),
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
       },
     },
     (context, req, res) => {
@@ -276,6 +287,11 @@ test('valid query', async () => {
           quux: schema.number(),
         }),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.query });
@@ -305,6 +321,11 @@ test('invalid query', async () => {
         query: schema.object({
           bar: schema.number(),
         }),
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
       },
     },
     (context, req, res) => {
@@ -340,6 +361,11 @@ test('valid body', async () => {
           bar: schema.string(),
           baz: schema.number(),
         }),
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
       },
     },
     (context, req, res) => {
@@ -377,6 +403,11 @@ test('valid body with validate function', async () => {
           } else {
             return badRequest('Wrong payload', ['body']);
           }
+        },
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
         },
       },
     },
@@ -422,6 +453,11 @@ test('not inline validation - specifying params', async () => {
       validate: {
         body: bodyValidation,
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.body });
@@ -464,6 +500,11 @@ test('not inline validation - specifying validation handler', async () => {
       path: '/',
       validate: {
         body: bodyValidation,
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
       },
     },
     (context, req, res) => {
@@ -517,6 +558,11 @@ test('not inline handler - KibanaRequest', async () => {
           }
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     handler
   );
@@ -566,6 +612,11 @@ test('not inline handler - RequestHandler', async () => {
           }
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     handler
   );
@@ -597,6 +648,11 @@ test('invalid body', async () => {
         body: schema.object({
           bar: schema.number(),
         }),
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
       },
     },
     (context, req, res) => {
@@ -633,6 +689,11 @@ test('handles putting', async () => {
           key: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.body });
@@ -663,6 +724,11 @@ test('handles deleting', async () => {
         params: schema.object({
           id: schema.number(),
         }),
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
       },
     },
     (context, req, res) => {
@@ -695,9 +761,29 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     } as HttpConfig;
 
     const router = new Router('/', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ body: 'value:/foo' })
+    router.get(
+      {
+        path: '/',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: 'value:/' })
+    );
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: 'value:/foo' })
     );
 
     const { registerRouter, server: innerServer } = await server.setup({
@@ -752,9 +838,29 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     } as HttpConfig;
 
     const router = new Router('/', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ body: 'value:/foo' })
+    router.get(
+      {
+        path: '/',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: 'value:/' })
+    );
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: 'value:/foo' })
     );
 
     const { registerRouter, server: innerServer } = await server.setup({
@@ -804,7 +910,18 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
 
 test('with defined `redirectHttpFromPort`', async () => {
   const router = new Router('/', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: 'value:/' })
+  );
 
   const { registerRouter } = await server.setup({ config$: configWithSSL$ });
   registerRouter(router);
@@ -834,11 +951,30 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/with-tags', validate: false, options: { tags } }, (context, req, res) =>
-    res.ok({ body: { tags: req.route.options.tags } })
+  router.get(
+    {
+      path: '/with-tags',
+      validate: false,
+      options: { tags },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { tags: req.route.options.tags } })
   );
-  router.get({ path: '/without-tags', validate: false }, (context, req, res) =>
-    res.ok({ body: { tags: req.route.options.tags } })
+  router.get(
+    {
+      path: '/without-tags',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { tags: req.route.options.tags } })
   );
   registerRouter(router);
 
@@ -853,11 +989,30 @@ test('allows declaring route access to flag a route as public or internal', asyn
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/with-access', validate: false, options: { access } }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/with-access',
+      validate: false,
+      options: { access },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
-  router.get({ path: '/without-access', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/without-access',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
   registerRouter(router);
 
@@ -871,18 +1026,54 @@ test(`sets access flag to 'internal' if not defined`, async () => {
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/internal/foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/internal/foo',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
-  router.get({ path: '/random/foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/random/foo',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
-  router.get({ path: '/random/internal/foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/random/internal/foo',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
 
-  router.get({ path: '/api/foo/internal/my-foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/api/foo/internal/my-foo',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
   registerRouter(router);
 
@@ -902,7 +1093,18 @@ test('exposes route details of incoming request to a route handler', async () =>
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
   registerRouter(router);
 
   await server.start();
@@ -918,6 +1120,11 @@ test('exposes route details of incoming request to a route handler', async () =>
         access: 'internal',
         tags: [],
         timeout: {},
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
       },
     });
 });
@@ -933,7 +1140,18 @@ describe('conditional compression', () => {
       body: 'hello'.repeat(500),
       headers: { 'Content-Type': 'text/html; charset=UTF-8' },
     };
-    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(largeRequest));
+    router.get(
+      {
+        path: '/',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (_context, _req, res) => res.ok(largeRequest)
+    );
     registerRouter(router);
     await server.start();
     return innerServer.listener;
@@ -1038,7 +1256,18 @@ describe('response headers', () => {
     });
 
     const router = new Router('', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+    router.get(
+      {
+        path: '/',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
     registerRouter(router);
 
     await server.start();
@@ -1055,7 +1284,18 @@ describe('response headers', () => {
     const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
     const router = new Router('', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+    router.get(
+      {
+        path: '/',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
     registerRouter(router);
 
     await server.start();
@@ -1082,6 +1322,11 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       path: '/',
       validate: { body: schema.object({ test: schema.number() }) },
       options: { body: { accepts: 'application/json' } },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     (context, req, res) => res.ok({ body: req.route })
   );
@@ -1103,6 +1348,11 @@ test('exposes route details of incoming request to a route handler (POST + paylo
         timeout: {
           payload: 10000,
         },
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
         body: {
           parse: true, // hapi populates the default
           maxBytes: 1024, // hapi populates the default
@@ -1123,6 +1373,11 @@ describe('body options', () => {
         path: '/',
         validate: { body: schema.object({ test: schema.number() }) },
         options: { body: { accepts: 'multipart/form-data' } }, // supertest sends 'application/json'
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
       },
       (context, req, res) => res.ok({ body: req.route })
     );
@@ -1145,6 +1400,11 @@ describe('body options', () => {
         path: '/',
         validate: { body: schema.object({ test: schema.number() }) },
         options: { body: { maxBytes: 1 } },
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
       },
       (context, req, res) => res.ok({ body: req.route })
     );
@@ -1167,6 +1427,11 @@ describe('body options', () => {
         path: '/',
         validate: { body: schema.buffer() },
         options: { body: { parse: false } },
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
       },
       (context, req, res) => {
         expect(req.body).toBeInstanceOf(Buffer);
@@ -1198,6 +1463,11 @@ describe('timeout options', () => {
           options: {
             timeout: {
               payload: 300000,
+            },
+          },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
             },
           },
         },
@@ -1234,6 +1504,11 @@ describe('timeout options', () => {
               payload: 300000,
             },
           },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         },
         (context, req, res) => {
           return res.ok({
@@ -1267,6 +1542,11 @@ describe('timeout options', () => {
               payload: 300000,
             },
           },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         },
         (context, req, res) => {
           return res.ok({
@@ -1298,6 +1578,11 @@ describe('timeout options', () => {
           options: {
             timeout: {
               payload: 300000,
+            },
+          },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
             },
           },
         },
@@ -1335,6 +1620,11 @@ describe('timeout options', () => {
         {
           path: '/',
           validate: { body: schema.maybe(schema.any()) },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         },
         (context, req, res) => {
           return res.ok({
@@ -1371,6 +1661,11 @@ describe('timeout options', () => {
           path: '/',
           validate: { body: schema.maybe(schema.any()) },
           options: { timeout: { idleSocket: 12000 } },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         },
         (context, req, res) => {
           return res.ok({
@@ -1407,6 +1702,11 @@ describe('timeout options', () => {
               idleSocket: 10,
             },
           },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         },
         (context, req, res) => {
           return res.ok({ body: { timeout: req.route.options.timeout } });
@@ -1429,6 +1729,11 @@ test('should return a stream in the body', async () => {
       path: '/',
       validate: { body: schema.stream() },
       options: { body: { output: 'stream' } },
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     },
     (context, req, res) => {
       expect(req.body).toBeInstanceOf(Readable);
@@ -1454,11 +1759,33 @@ test('closes sockets on timeout', async () => {
   });
   const router = new Router('', logger, enhanceWithContext, routerOptions);
 
-  router.get({ path: '/a', validate: false }, async (context, req, res) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return res.ok({});
-  });
-  router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+  router.get(
+    {
+      path: '/a',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    async (context, req, res) => {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return res.ok({});
+    }
+  );
+  router.get(
+    {
+      path: '/b',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({})
+  );
 
   registerRouter(router);
 
@@ -1558,7 +1885,16 @@ describe('setup contract', () => {
         1,
         expect.objectContaining({
           options: {
-            app: { access: 'public' },
+            app: {
+              access: 'public',
+              excludeFromRateLimiter: true,
+              security: {
+                authz: {
+                  enabled: false,
+                  reason: 'Route serves static assets',
+                },
+              },
+            },
             auth: false,
             cache: {
               privacy: 'public',

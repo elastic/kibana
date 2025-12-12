@@ -57,7 +57,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   }, [oldSearch, search]);
 
   const oldId = previousTimeline?.id;
-  const { id: newId, activeTab, graphEventId } = currentTimeline || {};
+  const { id: newId, activeTab } = currentTimeline || {};
 
   const queryTimelineById = useQueryTimelineById();
 
@@ -66,12 +66,11 @@ export const useQueryTimelineByIdOnUrlChange = () => {
       queryTimelineById({
         activeTimelineTab: activeTab ?? TimelineTabs.query,
         duplicate: false,
-        graphEventId,
         timelineId: newId,
         openTimeline: true,
       });
     }
-  }, [timelineIdFromReduxStore, oldId, newId, activeTab, graphEventId, queryTimelineById]);
+  }, [timelineIdFromReduxStore, oldId, newId, activeTab, queryTimelineById]);
 };
 
 export const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>

@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AddDocumentsCodeExample, exampleTexts } from './add_documents_code_example';
 import { generateSampleDocument } from '../../utils/document_generation';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../utils/language', () => ({
   getDefaultCodingLanguage: jest.fn().mockReturnValue('python'),
@@ -66,10 +67,10 @@ describe('AddDocumentsCodeExample', () => {
       };
 
       render(
-        <AddDocumentsCodeExample indexName={indexName} mappingProperties={mappingProperties} />
+        <MemoryRouter>
+          <AddDocumentsCodeExample indexName={indexName} mappingProperties={mappingProperties} />
+        </MemoryRouter>
       );
-
-      expect(generateSampleDocument).toHaveBeenCalledTimes(3);
 
       exampleTexts.forEach((text, index) => {
         expect(generateSampleDocument).toHaveBeenNthCalledWith(index + 1, mappingProperties, text);
@@ -79,12 +80,14 @@ describe('AddDocumentsCodeExample', () => {
     it('pass basic examples when mapping is not passed', () => {
       const indexName = 'test-index';
 
-      render(<AddDocumentsCodeExample indexName={indexName} mappingProperties={{}} />);
-
-      expect(generateSampleDocument).toHaveBeenCalledTimes(3);
+      render(
+        <MemoryRouter>
+          <AddDocumentsCodeExample indexName={indexName} mappingProperties={{}} />
+        </MemoryRouter>
+      );
 
       const mappingProperties: Record<string, MappingProperty> = {
-        text: { type: 'text' },
+        text: { type: 'semantic_text' },
       };
 
       exampleTexts.forEach((text, index) => {
@@ -105,7 +108,9 @@ describe('AddDocumentsCodeExample', () => {
       };
 
       render(
-        <AddDocumentsCodeExample indexName={indexName} mappingProperties={mappingProperties} />
+        <MemoryRouter>
+          <AddDocumentsCodeExample indexName={indexName} mappingProperties={mappingProperties} />
+        </MemoryRouter>
       );
 
       expect(generateSampleDocument).toHaveBeenCalledTimes(3);

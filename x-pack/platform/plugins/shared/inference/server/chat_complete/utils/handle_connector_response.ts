@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { OperatorFunction, Observable, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
+import type { OperatorFunction, Observable } from 'rxjs';
+import { switchMap, throwError } from 'rxjs';
+import type { Readable } from 'stream';
+import { isReadable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
 import type { InferenceInvokeResult } from './inference_executor';
 import { convertUpstreamError } from './convert_upstream_error';

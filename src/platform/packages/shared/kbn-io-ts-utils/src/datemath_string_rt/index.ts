@@ -9,8 +9,8 @@
 
 import * as rt from 'io-ts';
 import dateMath from '@kbn/datemath';
-import { chain } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { chain } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 
 const isValidDatemath = (value: string): boolean => {
   const parsedValue = dateMath.parse(value);

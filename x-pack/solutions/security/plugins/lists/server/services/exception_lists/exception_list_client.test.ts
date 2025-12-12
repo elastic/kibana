@@ -9,10 +9,8 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
-import {
-  ExtensionPointStorageContextMock,
-  createExtensionPointStorageMock,
-} from '../extension_points/extension_point_storage.mock';
+import type { ExtensionPointStorageContextMock } from '../extension_points/extension_point_storage.mock';
+import { createExtensionPointStorageMock } from '../extension_points/extension_point_storage.mock';
 import type { ExtensionPointCallbackDataArgument } from '../extension_points';
 
 import {
@@ -142,6 +140,7 @@ describe('exception_list_client', () => {
             extensionPointCallback.mockImplementation(async (args) => {
               const {
                 data: { entries, ...rest },
+                // @ts-expect-error upgrade typescript v5.9.3
               } = args as { data: ExtensionPointCallbackDataArgument };
 
               expect(entries).toBeTruthy(); // Test entries to exist since we exclude it.

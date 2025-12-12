@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
-export function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
+export async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
+  // Skip actions if the combobox has been opened already
+  if (
+    document.querySelector('[role="listbox"]') ||
+    document.querySelector('.euiComboBoxOptionsList__empty')
+  ) {
+    return;
+  }
+
+  await act(() => {
+    fireEvent.click(comboBoxToggleButton);
+  });
 
   return waitFor(() => {
     const listWithOptionsElement = document.querySelector('[role="listbox"]');
@@ -30,14 +40,14 @@ type SelectEuiComboBoxOptionParameters =
       optionIndex?: undefined;
     };
 
-export function selectEuiComboBoxOption({
+export async function selectEuiComboBoxOption({
   comboBoxToggleButton,
   optionIndex,
   optionText,
 }: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
+  await act(async () => {
     const options = Array.from(
       document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
     );
@@ -49,14 +59,47 @@ export function selectEuiComboBoxOption({
         fireEvent.click(optionToSelect);
       } else {
         throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
+          `Could not find option with text "${optionText}". Available options: [${options
             .map((option) => option.textContent)
-            .join(', ')}`
+            .join(', ')}]`
         );
       }
     } else {
       fireEvent.click(options[optionIndex]);
     }
+  });
+
+  if (document.querySelector('[role="listbox"]')) {
+    await act(() => {
+      fireEvent.click(comboBoxToggleButton);
+    });
+  }
+
+  // wait for the combobox options popover to disappear
+  return waitFor(() => {
+    expect(document.querySelector('[role="listbox"]')).not.toBeInTheDocument();
+  });
+}
+
+interface AddEuiComboBoxOptionParameters {
+  wrapper: HTMLElement;
+  optionText: string;
+}
+
+export async function addEuiComboBoxOption({
+  wrapper,
+  optionText,
+}: AddEuiComboBoxOptionParameters): Promise<void> {
+  const input = within(wrapper).getByRole('combobox');
+
+  await act(async () => {
+    fireEvent.change(input, {
+      target: { value: optionText },
+    });
+  });
+
+  await act(async () => {
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
   });
 }
 
@@ -68,12 +111,21 @@ export function selectFirstEuiComboBoxOption({
   return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }
 
-export function clearEuiComboBoxSelection({
+export async function clearEuiComboBoxSelection({
   clearButton,
 }: {
   clearButton: HTMLElement;
 }): Promise<void> {
-  return act(async () => {
+  const toggleButton = clearButton.nextElementSibling;
+
+  await act(async () => {
     fireEvent.click(clearButton);
   });
+
+  if (toggleButton) {
+    // Make sure options list gets closed
+    await act(async () => {
+      fireEvent.click(toggleButton);
+    });
+  }
 }

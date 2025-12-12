@@ -5,14 +5,17 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
+import type { RouteMap } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { StreamDetailView } from '../components/stream_detail_view';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
+import { StreamDetailRoot } from '../components/stream_root';
+import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
+import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
 
 /**
  * The array of route definitions to be used when the application
@@ -33,8 +36,18 @@ const streamsAppRoutes = {
       </StreamsAppRouterBreadcrumb>
     ),
     children: {
+      '/': {
+        element: <StreamListView />,
+      },
+      '/_discovery': {
+        element: <SignificantEventsDiscoveryPage />,
+      },
       '/{key}': {
-        element: <Outlet />,
+        element: (
+          <StreamDetailRoot>
+            <Outlet />
+          </StreamDetailRoot>
+        ),
         params: t.type({
           path: t.type({
             key: t.string,
@@ -42,45 +55,53 @@ const streamsAppRoutes = {
         }),
         children: {
           '/{key}': {
-            element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,
-          },
-          '/{key}/management': {
             element: (
-              <RedirectTo
-                path="/{key}/management/{subtab}"
-                params={{ path: { subtab: 'overview' } }}
-              />
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
             ),
           },
-          '/{key}/management/{subtab}': {
-            element: <StreamDetailView />,
-            params: t.type({
-              path: t.type({
-                subtab: t.string,
-              }),
-            }),
-          },
+          /**
+           * This route matching the StreamDetailView will be temporarily disable as it does not provide additional value than the stream list and retention view
+           */
+          // '/{key}/{tab}': {
+          //   element: <StreamDetailView />,
+          //   params: t.type({
+          //     path: t.type({
+          //       tab: t.string,
+          //     }),
+          //   }),
+          // },
+          /**
+           * This route is added as a replacement of the old StreamDetailView routing to redirect from existing overview/dashboard links into the management page
+           */
           '/{key}/{tab}': {
-            element: <StreamDetailView />,
+            element: (
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
+            ),
             params: t.type({
               path: t.type({
                 tab: t.string,
               }),
             }),
           },
-          '/{key}/{tab}/{subtab}': {
-            element: <StreamDetailView />,
+          '/{key}/management/{tab}': {
+            element: <StreamDetailManagement />,
             params: t.type({
               path: t.type({
                 tab: t.string,
-                subtab: t.string,
               }),
             }),
+          },
+          /**
+           * This route is added as a catch-all route to redirect to the retention tab in case of a
+           * invalid subtab or a missing subtab.
+           * Works on more in-depth routes as well, e.g. /{key}/management/{tab}/{subtab}/random-path.
+           */
+          '/*': {
+            element: (
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
+            ),
           },
         },
-      },
-      '/': {
-        element: <StreamListView />,
       },
     },
   },

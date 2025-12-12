@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeleteBackfill } from '../../api/hooks/use_delete_backfill';
 import * as i18n from '../../translations';
@@ -15,6 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 export const StopBackfill = ({ backfill }: { backfill: BackfillRow }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const { telemetry } = useKibana().services;
   const { addSuccess, addError } = useAppToasts();
   const deleteBackfillMutation = useDeleteBackfill({
@@ -53,6 +54,8 @@ export const StopBackfill = ({ backfill }: { backfill: BackfillRow }) => {
       </EuiButtonEmpty>
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           data-test-subj="rule-backfills-delete-modal"
           title={i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_TITLE}
           onCancel={closeModal}

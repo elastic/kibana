@@ -15,7 +15,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
-import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
@@ -31,9 +31,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  onFullScreenChange,
   ...props
 }) => {
-  const { dataView } = props;
+  const { dataView, setExpandedDoc, renderDocumentView } = props;
   const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
   const getRowIndicator = useMemo(() => {
     return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -44,9 +45,12 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   );
   const rowAdditionalLeadingControls = useMemo(() => {
     return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
+      actions: {
+        updateESQLQuery: onUpdateESQLQuery,
+        setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
+      },
       dataView,
       query,
-      updateESQLQuery: onUpdateESQLQuery,
     });
   }, [
     customRowAdditionalLeadingControls,
@@ -54,6 +58,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     getRowAdditionalLeadingControlsAccessor,
     onUpdateESQLQuery,
     query,
+    setExpandedDoc,
+    renderDocumentView,
   ]);
 
   const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
@@ -62,6 +68,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       paginationMode: DEFAULT_PAGINATION_MODE,
     }))();
   }, [getPaginationConfigAccessor]);
+
+  const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
+  const customGridColumnsConfiguration = useMemo(() => {
+    return getColumnsConfigurationAccessor(() => ({}))();
+  }, [getColumnsConfigurationAccessor]);
 
   return (
     <UnifiedDataTable
@@ -74,6 +85,9 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
       paginationMode={paginationModeConfig.paginationMode}
+      customGridColumnsConfiguration={customGridColumnsConfiguration}
+      shouldKeepAdHocDataViewImmutable
+      onFullScreenChange={onFullScreenChange}
       {...props}
     />
   );

@@ -8,28 +8,24 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/public';
-import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesESQLVariables } from '@kbn/esql-types';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { GridLayoutData } from '@kbn/grid-layout';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type {
+  CanAddNewSection,
   CanExpandPanels,
-  HasRuntimeChildState,
-  HasSaveNotification,
+  HasLastSavedChildState,
   HasSerializedChildState,
+  PassThroughContext,
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
-  TracksOverlays,
 } from '@kbn/presentation-containers';
-import {
-  SerializedPanelState,
+import type {
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -38,33 +34,39 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
-  PublishesTitle,
+  PublishesPauseFetch,
   PublishesSavedObjectId,
+  PublishesTitle,
   PublishesUnifiedSearch,
+  PublishesProjectRouting,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
+  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { Observable, Subject } from 'rxjs';
-import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
-import type { DashboardPanel } from '../../server/content_management';
-import {
-  LoadDashboardReturn,
-  SaveDashboardReturn,
-} from '../services/dashboard_content_management_service/types';
+import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { type TracksOverlays } from '@kbn/presentation-util';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { DashboardLocatorParams } from '../../common';
+import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
+import type { SaveDashboardReturn } from './save_modal/types';
+import type { DashboardLayout } from './layout_manager/types';
+import type { DashboardSettings } from './settings_manager';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
-export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardState>;
+export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+export interface DashboardCreationOptions {
+  getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
+
+  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
+
+  getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -72,7 +74,10 @@ export interface DashboardCreationOptions {
     sessionIdUrlChangeObservable?: Observable<string | undefined>;
     getSearchSessionIdFromURL: () => string | undefined;
     removeSessionIdFromUrl: () => void;
-    createSessionRestorationDataProvider: (dashboardApi: DashboardApi) => SearchSessionInfoProvider;
+    createSessionRestorationDataProvider: (
+      dashboardApi: DashboardApi,
+      dashboardInternalApi: DashboardInternalApi
+    ) => SearchSessionInfoProvider;
   };
 
   useSessionStorageIntegration?: boolean;
@@ -80,7 +85,9 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+  validateLoadedSavedObject?: (
+    result: DashboardReadResponseBody
+  ) => 'valid' | 'invalid' | 'redirected';
 
   fullScreenMode?: boolean;
   isEmbeddedExternally?: boolean;
@@ -88,105 +95,30 @@ export interface DashboardCreationOptions {
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
-export type DashboardSettings = DashboardOptions & {
-  description?: DashboardAttributes['description'];
-  tags: string[];
-  timeRestore: DashboardAttributes['timeRestore'];
-  title: DashboardAttributes['description'];
-};
-
-export interface DashboardState extends DashboardSettings {
-  query: Query;
-  filters: Filter[];
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
-  panels: DashboardPanelMap;
-
-  /**
-   * Temporary. Currently Dashboards are in charge of providing references to all of their children.
-   * Eventually this will be removed in favour of the Dashboard injecting references serverside.
-   */
-  references?: Reference[];
-
-  /**
-   * Serialized control group state.
-   * Contains state loaded from dashboard saved object
-   */
-  controlGroupInput?: ControlGroupSerializedState | undefined;
-  /**
-   * Runtime control group state.
-   * Contains state passed from dashboard locator
-   * Use runtime state when building input for portable dashboards
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState>;
-}
-
-export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
-> & {
-  /**
-   * If given, the dashboard saved object with this id will be loaded. If not given,
-   * a new, unsaved dashboard will be loaded up.
-   */
-  dashboardId?: string;
-
-  /**
-   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-   * whether to hash the data in the url to avoid url length issues.
-   */
-  useHash?: boolean;
-
-  /**
-   * When `true` filters from saved filters from destination dashboard as merged with applied filters
-   * When `false` applied filters take precedence and override saved filters
-   *
-   * true is default
-   */
-  preserveSavedFilters?: boolean;
-
-  /**
-   * Search search session ID to restore.
-   * (Background search)
-   */
-  searchSessionId?: string;
-
-  /**
-   * List of dashboard panels
-   */
-  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
-
-  /**
-   * Control group changes
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
-};
-
-export interface UnsavedPanelState {
-  [key: string]: object | undefined;
-}
-
 export type DashboardApi = CanExpandPanels &
+  CanAddNewSection &
   HasAppContext &
   HasExecutionContext &
-  HasRuntimeChildState &
-  HasSaveNotification &
+  HasLastSavedChildState &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
+  PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
-  Pick<PublishesTitle, 'title$'> &
+  Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
   PublishesReload &
   PublishesSavedObjectId &
   PublishesESQLVariables &
   PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &
+  PublishesProjectRouting &
   PublishesViewMode &
   PublishesWritableViewMode &
+  PublishesPauseFetch &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
@@ -197,10 +129,14 @@ export type DashboardApi = CanExpandPanels &
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
-      attributes: DashboardAttributes;
+      attributes: DashboardState;
       references: Reference[];
     };
-    getDashboardPanelFromId: (id: string) => DashboardPanelState;
+    getDashboardPanelFromId: (id: string) => {
+      type: string;
+      grid: GridData;
+      serializedState: SerializedPanelState;
+    };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
@@ -208,30 +144,36 @@ export type DashboardApi = CanExpandPanels &
     isEmbeddedExternally: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
-    panels$: PublishingSubject<DashboardPanelMap>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
+    scrollToBottom: () => void;
+    scrollToBottom$: Subject<void>;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
-    setPanels: (panels: DashboardPanelMap) => void;
     setQuery: (query?: Query | undefined) => void;
+    setProjectRouting: (projectRouting?: ProjectRouting) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
-    untilEmbeddableLoaded: (id: string) => Promise<unknown | undefined>;
   };
 
 export interface DashboardInternalApi {
-  controlGroupReload$: Subject<void>;
-  panelsReload$: Subject<void>;
-  getRuntimeStateForControlGroup: () => object | undefined;
-  getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
+  layout$: BehaviorSubject<DashboardLayout>;
+  gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
+  isSectionCollapsed: (sectionId?: string) => boolean;
+  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
+  setDashboardContainerRef: (ref: HTMLElement | null) => void;
+  serializeControls: () => {
+    controlGroupInput: ControlsGroupState | undefined;
+    controlGroupReferences: Reference[];
+  };
 }

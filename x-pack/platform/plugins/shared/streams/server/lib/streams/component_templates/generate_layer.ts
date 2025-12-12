@@ -5,33 +5,34 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterPutComponentTemplateRequest,
   MappingDateProperty,
-  MappingProperty,
+  MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  WiredStreamDefinition,
-  getAdvancedParameters,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isRoot,
-} from '@kbn/streams-schema';
+import type {
+  AllowedMappingProperty,
+  StreamsMappingProperties,
+} from '@kbn/streams-schema/src/fields';
+import type { Streams } from '@kbn/streams-schema';
+import { getAdvancedParameters, isRoot, namespacePrefixes } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { logsSettings } from './logs_layer';
+import { logsSettings, otelEquivalentLookupMap } from './logs_layer';
 import { getComponentTemplateName } from './name';
+import { baseMappings } from './logs_layer';
 
 export function generateLayer(
   name: string,
-  definition: WiredStreamDefinition,
+  definition: Streams.WiredStream.Definition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
-  const properties: Record<string, MappingProperty> = {};
+  const properties: StreamsMappingProperties = {};
+  const aliases: MappingTypeMapping['properties'] = {};
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
     if (props.type === 'system') {
       return;
     }
-    const property: MappingProperty = {
+    const property: AllowedMappingProperty = {
       type: props.type,
     };
 
@@ -50,17 +51,45 @@ export function generateLayer(
     }
 
     properties[field] = property;
+    const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
+    if (matchingPrefix) {
+      const aliasName = field.substring(matchingPrefix.length);
+      aliases[aliasName] = {
+        type: 'alias',
+        path: field,
+      };
+    }
+  });
+
+  // check whether the field has an otel equivalent. If yes, set the ECS equivalent as an alias
+  // This needs to be done after the initial properties are set, so the ECS equivalent aliases win out
+  Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
+    const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
+    if (matchingPrefix) {
+      const aliasName = field.substring(matchingPrefix.length);
+      const otelEquivalent = otelEquivalentLookupMap[aliasName];
+      if (otelEquivalent) {
+        aliases[otelEquivalent] = {
+          type: 'alias',
+          path: field,
+        };
+      }
+    }
   });
 
   return {
     name: getComponentTemplateName(name),
     template: {
-      lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
       mappings: {
-        subobjects: false,
         dynamic: false,
-        properties,
+        properties: isRoot(name)
+          ? {
+              ...baseMappings,
+              ...properties,
+              ...aliases,
+            }
+          : { ...properties, ...aliases },
       },
     },
     version: ASSET_VERSION,
@@ -71,53 +100,7 @@ export function generateLayer(
   };
 }
 
-function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
-  const lifecycle = definition.ingest.lifecycle;
-  if (isServerless) {
-    // dlm cannot be disabled in serverless
-    return {
-      data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-    };
-  }
-
-  if (isIlmLifecycle(lifecycle)) {
-    return { enabled: false };
-  }
-
-  if (isDslLifecycle(lifecycle)) {
-    return {
-      enabled: true,
-      data_retention: lifecycle.dsl.data_retention,
-    };
-  }
-
-  return undefined;
-}
-
-function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
+function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
   const baseSettings = isRoot(definition.name) ? logsSettings : {};
-  const lifecycle = definition.ingest.lifecycle;
-
-  if (isServerless) {
-    return baseSettings;
-  }
-
-  if (isIlmLifecycle(lifecycle)) {
-    return {
-      ...baseSettings,
-      'index.lifecycle.prefer_ilm': true,
-      'index.lifecycle.name': lifecycle.ilm.policy,
-    };
-  }
-
-  if (isDslLifecycle(lifecycle)) {
-    return {
-      ...baseSettings,
-      'index.lifecycle.prefer_ilm': false,
-      'index.lifecycle.name': undefined,
-    };
-  }
-
-  // don't specify any lifecycle property when lifecyle is disabled or inherited
   return baseSettings;
 }

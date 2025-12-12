@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { PageTitle } from '../../../../components/page_title';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -214,10 +215,14 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   return (
     <Fragment>
       <MlPageHeader>
-        <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
-          <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
-          {jobCreatorTitle}
-        </div>
+        <PageTitle
+          title={
+            <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+              <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
+              {jobCreatorTitle}
+            </div>
+          }
+        />
       </MlPageHeader>
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>

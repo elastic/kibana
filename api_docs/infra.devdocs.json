@@ -142,7 +142,7 @@
             "label": "featureFlags",
             "description": [],
             "signature": [
-              "{ customThresholdAlertsEnabled: boolean; logsUIEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; ruleFormV2Enabled: boolean; }"
+              "{ customThresholdAlertsEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; ruleFormV2Enabled: boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
@@ -260,26 +260,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-server.InfraRequestHandlerContext.entityManager",
-            "type": "Object",
-            "tags": [],
-            "label": "entityManager",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "entityManager",
-                "scope": "server",
-                "docId": "kibEntityManagerPluginApi",
-                "section": "def-server.EntityManagerServerPluginStart",
-                "text": "EntityManagerServerPluginStart"
-              }
-            ],
-            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

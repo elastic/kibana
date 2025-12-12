@@ -10,12 +10,12 @@
 import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import type { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 
 interface Props {
   onSave: () => Promise<void>;
-  resetUnsavedChanges: () => void;
-  unsavedChanges$: PublishesUnsavedChanges['unsavedChanges$'];
+  resetUnsavedChanges: PublishesUnsavedChanges['resetUnsavedChanges'];
+  hasUnsavedChanges$: PublishesUnsavedChanges['hasUnsavedChanges$'];
 }
 
 export function TopNav(props: Props) {
@@ -23,14 +23,14 @@ export function TopNav(props: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   useEffect(() => {
-    const subscription = props.unsavedChanges$.subscribe((unsavedChanges) => {
-      setHasUnsavedChanges(unsavedChanges !== undefined);
+    const subscription = props.hasUnsavedChanges$.subscribe((nextHasUnsavedChanges) => {
+      setHasUnsavedChanges(nextHasUnsavedChanges);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [props.unsavedChanges$]);
+  }, [props.hasUnsavedChanges$]);
 
   return (
     <EuiFlexGroup>

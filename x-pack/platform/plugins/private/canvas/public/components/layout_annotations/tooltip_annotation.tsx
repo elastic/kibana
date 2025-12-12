@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   transformMatrix: TransformMatrix3d;
@@ -27,6 +28,7 @@ export const TooltipAnnotation: FC<Props> = ({ transformMatrix, text }) => {
 };
 
 TooltipAnnotation.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   text: PropTypes.string.isRequired,
 };

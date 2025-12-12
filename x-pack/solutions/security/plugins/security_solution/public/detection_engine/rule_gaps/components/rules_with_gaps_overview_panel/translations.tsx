@@ -8,35 +8,43 @@
 import { i18n } from '@kbn/i18n';
 
 export const RULE_GAPS_OVERVIEW_PANEL_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.label',
+  'xpack.securitySolution.detectionEngine.ruleGaps.overviewPanel.label',
   {
-    defaultMessage: 'Total rules with gaps:',
-  }
-);
-export const RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.showRulesWithGapsLabel',
-  {
-    defaultMessage: 'Only rules with gaps',
+    defaultMessage: 'Rules with gaps',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.last24HoursLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleGaps.overviewPanel.tooltip',
   {
-    defaultMessage: 'Last 24 hours',
+    defaultMessage: 'Total rules with gaps / rules that currently have in-progress gaps',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_LAST_3_DAYS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.last3DaysLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLabel',
   {
-    defaultMessage: 'Last 3 days',
+    defaultMessage: 'Auto gap fill status:',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_LAST_7_DAYS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.last7DaysLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOn',
   {
-    defaultMessage: 'Last 7 days',
+    defaultMessage: 'On',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LOADING = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLoading',
+  {
+    defaultMessage: 'Loading',
   }
 );

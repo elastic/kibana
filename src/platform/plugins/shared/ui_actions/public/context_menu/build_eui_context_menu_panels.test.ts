@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
-import { Action, createAction } from '../actions';
-import { PresentableGrouping } from '@kbn/ui-actions-browser';
+import type { Action, ActionExecutionContext } from '../actions';
+import { createAction } from '../actions';
+import type { PresentableGrouping } from '@kbn/ui-actions-browser';
 
 const createTestAction = ({
   type,
@@ -18,19 +19,21 @@ const createTestAction = ({
   order,
   grouping = undefined,
   disabled,
+  execute = async () => {},
 }: {
   type?: string;
   displayName: string;
   order?: number;
   grouping?: PresentableGrouping;
   disabled?: boolean;
+  execute?: (context: ActionExecutionContext<object>) => Promise<void>;
 }) =>
   createAction({
     id: type as string,
     type,
     getDisplayName: () => displayName,
     order,
-    execute: async () => {},
+    execute,
     grouping,
     disabled,
   });
@@ -495,4 +498,65 @@ test('it creates disabled actions', async () => {
       },
     ]
   `);
+});
+
+test('it calls execute with the right context when the target is a link', async () => {
+  const mockExecute = jest.fn();
+  const mockMouseEvent = new MouseEvent('click') as unknown as React.MouseEvent;
+  // We need to make sure that the current target is a HTMLAnchorElement
+  Object.defineProperty(mockMouseEvent, 'currentTarget', {
+    value: document.createElement('a'),
+  });
+
+  const actions = [
+    createTestAction({
+      order: 1,
+      displayName: 'Foo',
+      execute: mockExecute,
+    }),
+  ];
+
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
+  });
+
+  // Simulate clicking the first menu item
+  const firstMenuItem = menu[0].items![0];
+  if (firstMenuItem.onClick) {
+    firstMenuItem.onClick(mockMouseEvent as any);
+  }
+
+  expect(mockExecute).toHaveBeenCalledTimes(1);
+  expect(mockExecute).toHaveBeenCalledWith({
+    trigger: { id: 'TEST' },
+  });
+});
+
+test('it calls execute with the right context when the target is not a link', async () => {
+  const mockExecute = jest.fn();
+  const mockMouseEvent = new MouseEvent('click') as unknown as React.MouseEvent;
+
+  const actions = [
+    createTestAction({
+      order: 1,
+      displayName: 'Foo',
+      execute: mockExecute,
+    }),
+  ];
+
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
+  });
+
+  // Simulate clicking the first menu item
+  const firstMenuItem = menu[0].items![0];
+  if (firstMenuItem.onClick) {
+    firstMenuItem.onClick(mockMouseEvent as any);
+  }
+
+  expect(mockExecute).toHaveBeenCalledTimes(1);
+  expect(mockExecute).toHaveBeenCalledWith({
+    trigger: { id: 'TEST' },
+    event: mockMouseEvent,
+  });
 });

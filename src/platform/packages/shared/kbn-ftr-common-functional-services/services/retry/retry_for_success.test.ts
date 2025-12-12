@@ -9,6 +9,7 @@
 
 import { retryForSuccess } from './retry_for_success';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import * as testJestHelpers from '@kbn/test-jest-helpers';
 
 describe('Retry for success', () => {
   it(`should print out attempt counts with the retryCount parameter`, async () => {
@@ -66,5 +67,21 @@ describe('Retry for success', () => {
         " [2mdebg[22m handled failure",
       ]
     `);
+  });
+  it('should call delay with initialDelay if initialDelay is provided', async () => {
+    const delaySpy = jest.spyOn(testJestHelpers, 'delay').mockResolvedValue(undefined);
+    const log = new ToolingLog();
+    const block = async () => 42;
+    const initialDelay = 1234;
+
+    await retryForSuccess(log, {
+      block,
+      timeout: 2000,
+      methodName: 'retryForSuccess initialDelay test',
+      initialDelay,
+    });
+
+    expect(delaySpy).toHaveBeenCalledWith(initialDelay);
+    delaySpy.mockRestore();
   });
 });

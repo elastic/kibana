@@ -55,8 +55,8 @@ export function PromptPage({
 }: Props) {
   const content = (
     <I18nProvider>
-      <EuiProvider colorMode="light" cache={emotionCache}>
-        <EuiPageTemplate data-test-subj="promptPage">
+      <EuiProvider colorMode="light" cache={emotionCache} highContrastMode={false}>
+        <EuiPageTemplate data-test-subj="promptPage" grow={false}>
           <EuiPageTemplate.EmptyPrompt
             iconType="warning"
             iconColor="danger"

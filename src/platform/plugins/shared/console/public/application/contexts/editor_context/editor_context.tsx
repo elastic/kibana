@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, Dispatch, useReducer } from 'react';
+import type { Dispatch } from 'react';
+import React, { createContext, useReducer } from 'react';
 import * as editor from '../../stores/editor';
-import { DevToolsSettings } from '../../../services';
+import type { DevToolsSettings } from '../../../services';
 import { createUseContext } from '../create_use_context';
 
 const EditorReadContext = createContext<editor.Store>(editor.initialValue);
@@ -18,12 +19,18 @@ const EditorActionContext = createContext<Dispatch<editor.Action>>(() => {});
 export interface EditorContextArgs {
   children: JSX.Element;
   settings: DevToolsSettings;
+  customParsedRequestsProvider?: (model: any) => any;
 }
 
-export function EditorContextProvider({ children, settings }: EditorContextArgs) {
+export function EditorContextProvider({
+  children,
+  settings,
+  customParsedRequestsProvider,
+}: EditorContextArgs) {
   const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, (value) => ({
     ...value,
     settings,
+    customParsedRequestsProvider,
   }));
   return (
     <EditorReadContext.Provider value={state}>

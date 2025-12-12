@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PercentageModeConfig } from '../../types';
-import { ExtendedPaletteParams } from './types';
+import type { PercentageModeConfig } from '../../types';
+import type { ExtendedPaletteParams } from './types';
 
 export const getPercentageModeConfig = (
   params: ExtendedPaletteParams,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { EuiErrorBoundary } from '@elastic/eui';
 
 const Bee = React.lazy(() => import('./bee'));

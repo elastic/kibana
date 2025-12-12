@@ -10,7 +10,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { setCollectionDisabled } from '../../../../lib/elasticsearch_settings/set/collection_disabled';
 import { handleError } from '../../../../lib/errors';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 
 export function disableElasticsearchInternalCollectionRoute(server: MonitoringCore) {
   server.route({

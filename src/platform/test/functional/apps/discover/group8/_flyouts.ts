@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -20,23 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const retry = getService('retry');
   const dataGrid = getService('dataGrid');
   const esql = getService('esql');
-  const testSubjects = getService('testSubjects');
 
   describe('discover flyouts', function () {
-    async function isLensEditFlyoutOpen() {
-      return await testSubjects.exists('lnsChartSwitchPopover');
-    }
-
-    async function openLensEditFlyout() {
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      await retry.waitFor('flyout', async () => {
-        return await isLensEditFlyoutOpen();
-      });
-    }
-
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
@@ -80,9 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('doc viewer flyout should get dismissed on opening Lens Edit flyout', async function () {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       expect(await dataGrid.isShowingDocViewer()).to.be(true);
-      await openLensEditFlyout();
+      await discover.openLensEditFlyout();
       expect(await dataGrid.isShowingDocViewer()).to.be(false);
-      expect(await isLensEditFlyoutOpen()).to.be(true);
+      expect(await discover.isLensEditFlyoutOpen()).to.be(true);
     });
 
     it('ESQL docs flyout should get dismissed on opening doc viewer flyout', async function () {
@@ -96,17 +83,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('ESQL docs flyout should get dismissed on opening Lens Edit flyout', async function () {
       await esql.openQuickReferenceFlyout();
       expect(await esql.isOpenQuickReferenceFlyout()).to.be(true);
-      await openLensEditFlyout();
-      expect(await isLensEditFlyoutOpen()).to.be(true);
+      await discover.openLensEditFlyout();
+      expect(await discover.isLensEditFlyoutOpen()).to.be(true);
       expect(await esql.isOpenQuickReferenceFlyout()).to.be(false);
     });
 
     it('Lens Edit flyout should get dismissed on opening doc viewer flyout', async function () {
-      await openLensEditFlyout();
-      expect(await isLensEditFlyoutOpen()).to.be(true);
+      await discover.openLensEditFlyout();
+      expect(await discover.isLensEditFlyoutOpen()).to.be(true);
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       expect(await dataGrid.isShowingDocViewer()).to.be(true);
-      expect(await isLensEditFlyoutOpen()).to.be(false);
+      expect(await discover.isLensEditFlyoutOpen()).to.be(false);
     });
   });
 }

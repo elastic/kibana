@@ -10,6 +10,17 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
+    artifacts: {
+      properties: {
+        investigation_guide: {
+          properties: {
+            blob: {
+              type: 'text',
+            },
+          },
+        },
+      },
+    },
     enabled: {
       type: 'boolean',
     },
@@ -228,6 +239,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     // flapping: {
     //   index: false,
     //   properties: {
+    //     enabled: {
+    //       type: 'boolean',
+    //     },
     //     lookBackWindow: {
     //       type: 'long',
     //     },

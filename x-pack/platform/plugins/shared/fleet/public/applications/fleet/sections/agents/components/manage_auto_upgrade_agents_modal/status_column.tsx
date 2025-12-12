@@ -18,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetAutoUpgradeAgentsStatusQuery, useLink } from '../../../../../../hooks';
-
 export const StatusColumn: React.FunctionComponent<{
   agentPolicyId: string;
   version: string;
@@ -26,17 +25,25 @@ export const StatusColumn: React.FunctionComponent<{
 }> = ({ agentPolicyId, version, percentage }) => {
   const { getHref } = useLink();
   const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicyId);
-
   const getAgentsHref = useCallback(
     (failed?: boolean): string => {
+      const currentVersionAgentStatus = autoUpgradeAgentsStatus?.currentVersions.find(
+        (value) => value.version === version
+      );
       const kuery = failed
-        ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"`
-        : `policy_id:"${agentPolicyId}" AND agent.version:"${version}"`;
+        ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"${
+            currentVersionAgentStatus && currentVersionAgentStatus.failedUpgradeActionIds?.length
+              ? ` AND (${currentVersionAgentStatus.failedUpgradeActionIds
+                  .map((id) => `upgrade_details.action_id:"${id}"`)
+                  .join(' OR ')})`
+              : ''
+          }`
+        : `policy_id:"${agentPolicyId}" AND (agent.version:"${version}" OR upgrade_details.target_version:"${version}") `;
       return getHref('agent_list', {
-        kuery,
+        kuery: encodeURIComponent(kuery),
       });
     },
-    [getHref, agentPolicyId, version]
+    [getHref, agentPolicyId, version, autoUpgradeAgentsStatus]
   );
 
   const calcPercentage = useCallback(
@@ -53,6 +60,7 @@ export const StatusColumn: React.FunctionComponent<{
         version,
         agents: 0,
         failedUpgradeAgents: 0,
+        inProgressUpgradeAgents: 0,
       }
     );
   }, [autoUpgradeAgentsStatus, version]);
@@ -103,7 +111,10 @@ export const StatusColumn: React.FunctionComponent<{
 
     if (agentVersionCounts.failedUpgradeAgents > 0) {
       statusButton = failedStatus;
-    } else if (agentVersionCounts.agents === 0) {
+    } else if (
+      agentVersionCounts.agents === 0 &&
+      agentVersionCounts.inProgressUpgradeAgents === 0
+    ) {
       statusButton = notStartedStatus;
     } else {
       const currPercentage = calcPercentage(agentVersionCounts.agents);
@@ -120,7 +131,7 @@ export const StatusColumn: React.FunctionComponent<{
           agentVersionCounts.agents > 0 ? (
             <FormattedMessage
               id="xpack.fleet.manageAutoUpgradeAgents.currentStatusTooltip"
-              defaultMessage="{agents} agents on target version"
+              defaultMessage="{agents, plural, one {# agent} other {# agents}} on target version"
               values={{
                 agents: agentVersionCounts.agents,
               }}

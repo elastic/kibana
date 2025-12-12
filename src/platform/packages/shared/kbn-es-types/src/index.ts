@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   InferSearchResponseOf,
   AggregateOf as AggregationResultOf,
   AggregateOfMap as AggregationResultOfMap,

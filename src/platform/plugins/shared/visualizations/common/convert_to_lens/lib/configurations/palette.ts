@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import color from 'color';
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
-import { PaletteParams } from './types';
-import { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { getValidColor } from '@kbn/coloring';
+import type { PaletteConfig } from '../../../utils';
+import { getStopsWithColorsFromRanges } from '../../../utils';
+import type { PaletteParams } from './types';
+import type { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
 
 type ColorStopsWithMinMax = Pick<
   CustomPaletteParams,
@@ -25,11 +26,11 @@ const buildPaletteParams = ({ color: colors, stop }: PaletteConfig): ColorStopsW
     rangeMax: stop[stop.length - 1],
     continuity: 'none',
     colorStops: colorsWithoutStartColor.map((c, index) => ({
-      color: color(c!).hex(),
+      color: getValidColor(c, { shouldBeCompatibleWithColorJs: true }).hex(),
       stop: stop[index],
     })),
     stops: colorsWithoutStartColor.map((c, index) => ({
-      color: color(c!).hex(),
+      color: getValidColor(c, { shouldBeCompatibleWithColorJs: true }).hex(),
       stop: stop[index + 1],
     })),
   };

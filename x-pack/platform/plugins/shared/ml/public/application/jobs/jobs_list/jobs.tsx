@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
@@ -19,15 +19,27 @@ import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
+import {
+  AnomalyDetectionSettingsButton,
+  SuppliedConfigurationsButton,
+  SynchronizeSavedObjectsButton,
+} from './components/top_level_actions';
+import { NewJobButton } from './components/new_job_button';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
+import { ExportJobsFlyout } from '../../components/import_export_jobs';
+import { PageTitle } from '../../components/page_title';
 
 interface PageUrlState {
-  pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
+  pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL;
   pageUrlState: ListingPageUrlState;
 }
 
 interface JobsPageProps {
   isMlEnabledInSpace?: boolean;
   lastRefresh?: number;
+  refreshList: () => void;
 }
 
 export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState => ({
@@ -37,27 +49,50 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortDirection: 'asc',
 });
 
-export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
+export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, refreshList }) => {
   const [pageState, setPageState] = usePageUrlState<PageUrlState>(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL,
     getDefaultAnomalyDetectionJobsListState()
   );
   const {
-    services: { docLinks },
+    services: {
+      docLinks,
+      mlServices: { mlApi },
+    },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
+  getMlNodeCount(mlApi);
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
+  const [canCreateJob] = usePermissionCheck(['canCreateJob']);
 
   return (
     <>
-      <MlPageHeader>
-        <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly Detection Jobs" />
+      <MlPageHeader
+        wrapHeader
+        rightSideItems={[
+          <SuppliedConfigurationsButton />,
+          <AnomalyDetectionSettingsButton />,
+          <SynchronizeSavedObjectsButton refreshJobs={refreshList} />,
+          <ExportJobsFlyout isDisabled={!canCreateJob} currentTab={'anomaly-detector'} />,
+          <ImportJobsFlyout isDisabled={!canCreateJob} onImportComplete={refreshList} />,
+          <NewJobButton size="m" />,
+        ]}
+      >
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.jobsList.title"
+              defaultMessage="Anomaly Detection Jobs"
+            />
+          }
+        />
       </MlPageHeader>
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
+      <EuiSpacer size="m" />
       <JobsListView
         euiTheme={euiTheme}
         isMlEnabledInSpace={isMlEnabledInSpace}
@@ -65,6 +100,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
         jobsViewState={pageState}
         onJobsViewStateUpdate={setPageState}
         showNodeInfo={showNodeInfo}
+        canCreateJob={canCreateJob}
       />
       <HelpMenu docLink={helpLink} />
     </>

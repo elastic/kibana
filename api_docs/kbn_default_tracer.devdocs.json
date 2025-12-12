@@ -1,0 +1,46 @@
+{
+  "id": "@kbn/default-tracer",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/default-tracer",
+        "id": "def-common.getDefaultTracer",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultTracer",
+        "description": [],
+        "signature": [
+          "() => ",
+          "Tracer"
+        ],
+        "path": "src/platform/packages/shared/kbn-default-tracer/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

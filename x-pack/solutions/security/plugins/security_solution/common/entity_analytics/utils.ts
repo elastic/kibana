@@ -4,15 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExperimentalFeatures } from '../experimental_features';
+
+import { DEFAULT_ALERTS_INDEX } from '../constants';
 import { EntityType } from './types';
 
-export const getAllEntityTypes = (): EntityType[] => Object.values(EntityType);
+const ENTITY_ANALYTICS_ENTITY_TYPES = [EntityType.user, EntityType.host, EntityType.service];
 
-export const getDisabledEntityTypes = (
-  experimentalFeatures: ExperimentalFeatures
-): EntityType[] => {
-  const disabledEntityTypes: EntityType[] = [];
+export const getEntityAnalyticsEntityTypes = (): EntityType[] => ENTITY_ANALYTICS_ENTITY_TYPES;
 
-  return disabledEntityTypes;
+export const getEnabledEntityTypes = (genericDefinitionEnabled: boolean): EntityType[] => {
+  const entities = Object.values(EntityType);
+
+  if (genericDefinitionEnabled) {
+    return entities;
+  }
+
+  // Remove the index of generic
+  entities.splice(entities.indexOf(EntityType.generic), 1);
+
+  return entities;
 };
+
+export const getAlertsIndex = (spaceId = 'default') => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;

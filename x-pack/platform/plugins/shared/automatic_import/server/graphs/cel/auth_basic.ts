@@ -6,10 +6,10 @@
  */
 
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { CelInputState } from '../../types';
+import type { CelInputState } from '../../types';
 import { SAMPLE_CEL_PROGRAMS } from './constants';
 import { CEL_AUTH_BASIC_PROMPT } from './prompts';
-import { CelInputNodeParams } from './types';
+import type { CelInputNodeParams } from './types';
 
 export async function handleUpdateProgramBasic({
   state,

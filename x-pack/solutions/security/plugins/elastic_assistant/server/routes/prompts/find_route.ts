@@ -9,14 +9,12 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
-import {
-  FindPromptsRequestQuery,
-  FindPromptsResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import type { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { FindPromptsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
+import type { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
 import { transformESSearchToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
 import { performChecks } from '../helpers';
 
@@ -63,10 +61,8 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: query.filter
-              ? `${decodeURIComponent(
-                  query.filter
-                )} and not (prompt_type: "system" and is_default: true)`
-              : 'not (prompt_type: "system" and is_default: true)',
+              ? `${decodeURIComponent(query.filter)} and not (is_default: true)`
+              : 'not (is_default: true)',
             fields: query.fields,
           });
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AvailableMetricIcon } from '@kbn/expression-metric-vis-plugin/common';
+import type { AvailableMetricIcon } from '@kbn/expression-metric-vis-plugin/common';
 import { type IconSet } from '@kbn/visualization-ui-components';
 
 export const iconsSet: IconSet<AvailableMetricIcon> = [
@@ -85,7 +85,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
   },
   {
     // @ts-ignore
-    value: 'iInCircle',
+    value: 'info',
     label: i18n.translate('xpack.observability.metric.iconSelect.infoLabel', {
       defaultMessage: 'Info',
     }),

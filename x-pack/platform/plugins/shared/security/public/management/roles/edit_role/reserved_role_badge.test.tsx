@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -69,7 +69,7 @@ const unreservedRole = {
 
 test('it renders without crashing', () => {
   const wrapper = shallow(<ReservedRoleBadge role={reservedRole} />);
-  expect(wrapper.find(EuiIcon)).toHaveLength(1);
+  expect(wrapper.find(EuiIconTip)).toHaveLength(1);
 });
 
 test('it renders nothing for an unreserved role', () => {

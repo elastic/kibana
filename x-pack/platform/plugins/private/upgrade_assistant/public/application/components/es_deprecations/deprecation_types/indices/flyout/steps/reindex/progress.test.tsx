@@ -8,7 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../../../common/types';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
@@ -32,6 +33,7 @@ describe('ReindexProgress', () => {
               isReadonly: false,
               isInDataStream: false,
               isClosedIndex: false,
+              isFollowerIndex: false,
             },
           } as ReindexState
         }
@@ -101,6 +103,7 @@ describe('ReindexProgress', () => {
                         "aliases": Array [],
                         "indexName": "foo",
                         "isClosedIndex": false,
+                        "isFollowerIndex": false,
                         "isFrozen": false,
                         "isInDataStream": false,
                         "isReadonly": false,
@@ -185,6 +188,7 @@ describe('ReindexProgress', () => {
               isReadonly: false,
               isInDataStream: false,
               isClosedIndex: false,
+              isFollowerIndex: false,
             },
           } as ReindexState
         }

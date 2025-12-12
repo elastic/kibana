@@ -179,6 +179,9 @@ describe('When using scan action from response actions console', () => {
   });
 
   it('should work with a single `--comment` argument', async () => {
+    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
+      () => new Promise((r) => setTimeout(r, 100))
+    );
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two" --comment "Scan folder"');
 
@@ -194,11 +197,21 @@ describe('When using scan action from response actions console', () => {
     await enterConsoleCommand(renderResult, user, 'scan --help');
 
     expect(renderResult.getByTestId('test-helpOutput').textContent).toEqual(
-      'AboutScan the host for malwareUsagescan --path [--comment]Examplescan --path "/full/path/to/folder" --comment "Scan folder for malware"Required parameters--path - The absolute path to a file or directory to be scannedOptional parameters--comment - A comment to go along with the action'
+      'About' +
+        'Scan the host for malware' +
+        'Usage' +
+        'scan --path [--comment]' +
+        'Required parameters--path - The absolute path to a file or directory to be scanned' +
+        'Optional parameters--comment - A comment to go along with the action' +
+        'Examples' +
+        'can --path "/full/path/to/folder" --comment "Scan folder for malware"'
     );
   });
 
   it('should display pending message', async () => {
+    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
+      () => new Promise((r) => setTimeout(r, 100))
+    );
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
@@ -243,16 +256,19 @@ describe('When using scan action from response actions console', () => {
     });
   });
 
-  it.each(['ra_scan_error_not-found', 'ra_scan_error_invalid-input', 'ra_scan_error_queue-quota'])(
-    'should show detailed error if `scan` failure returned code: %s',
-    async (outputCode) => {
-      const mockData = apiMocks.responseProvider.actionDetails({
-        path: '/api/endpoint/action/agent-a',
-      }).data;
+  it.each([
+    'ra_scan_error_not-found',
+    'ra_scan_error_invalid-input',
+    'ra_scan_error_queue-quota',
+    'ra_scan_error_processing',
+    'ra_scan_error_processing-interrupted',
+  ])('should show detailed error if `scan` failure returned code: %s', async (outputCode) => {
+    const mockData = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/agent-a',
+    }).data;
 
-      const actionDetailsApiResponseMock: ReturnType<
-        typeof apiMocks.responseProvider.actionDetails
-      > = {
+    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
+      {
         data: {
           ...mockData,
           id: '123',
@@ -282,16 +298,15 @@ describe('When using scan action from response actions console', () => {
         },
       };
 
-      apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
-      await render();
-      await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"');
+    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+    await render();
+    await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"');
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
-          // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
-          new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
-        );
-      });
-    }
-  );
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
+        // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
+        new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
+      );
+    });
+  });
 });

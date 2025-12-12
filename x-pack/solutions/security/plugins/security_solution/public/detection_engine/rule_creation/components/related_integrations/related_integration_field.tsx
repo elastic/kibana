@@ -12,17 +12,17 @@ import semver from 'semver';
 import { css } from '@emotion/css';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiTextTruncate,
   EuiButtonIcon,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
-import { useIntegrations } from '../../../../detections/components/rules/related_integrations/use_integrations';
+import { useIntegrations } from '../../../common/components/related_integrations/use_integrations';
 import { IntegrationStatusBadge } from './integration_status_badge';
 import * as i18n from './translations';
 
@@ -85,15 +85,19 @@ export function RelatedIntegrationField({
   );
 
   const handleVersionChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) =>
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const version = e.target.value;
+
       field.setValue((oldValue) => ({
         ...oldValue,
-        version: e.target.value,
-      })),
+        version,
+      }));
+    },
     [field]
   );
 
   const hasError = Boolean(packageErrorMessage) || Boolean(versionErrorMessage);
+  const isVersionInputDisabled = !field.value.package || !integrations;
 
   return (
     <EuiFormRow
@@ -120,10 +124,12 @@ export function RelatedIntegrationField({
         </EuiFlexItem>
         <EuiFlexItem grow={3} className={MIN_WIDTH_VERSION_CONSTRAIN_STYLE}>
           <EuiFieldText
-            placeholder={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER}
+            placeholder={
+              isVersionInputDisabled ? '' : i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER
+            }
             prepend={i18n.INTEGRATION_VERSION}
             isLoading={isInitialLoading}
-            disabled={!field.value.package || !integrations}
+            disabled={isVersionInputDisabled}
             aria-label={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL}
             value={field.value.version}
             onChange={handleVersionChange}

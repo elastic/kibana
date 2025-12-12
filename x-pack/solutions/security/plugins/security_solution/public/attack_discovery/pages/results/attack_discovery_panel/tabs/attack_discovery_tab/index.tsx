@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { AttackChain } from './attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../../../common/components/event_details/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../../../../detections/components/alerts_table/actions';
@@ -18,11 +19,15 @@ import { getTacticMetadata } from '../../../../../helpers';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_markdown_formatter';
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
+import { SECURITY_FEATURE_ID } from '../../../../../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAttackDiscoveryAttachment } from '../../../use_attack_discovery_attachment';
 
-const scrollable: React.CSSProperties = {
-  overflowX: 'auto',
-  scrollbarWidth: 'thin',
-};
+const scrollable = css`
+  overflow-x: auto;
+  scrollbar-width: thin;
+`;
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -35,6 +40,17 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   replacements,
   showAnonymized = false,
 }) => {
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/218731
+  //  For the EASE we need to hide cell actions and all preview links that could open non-EASE flyouts
+  const disabledActions = useMemo(
+    () => showAnonymized || Boolean(capabilities[SECURITY_FEATURE_ID].configurations),
+    [capabilities, showAnonymized]
+  );
+
   const { euiTheme } = useEuiTheme();
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => attackDiscovery, [attackDiscovery]);
 
@@ -65,15 +81,19 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const filters = useMemo(() => buildAlertsKqlFilter('_id', originalAlertIds), [originalAlertIds]);
 
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+
   return (
     <div data-test-subj="attackDiscoveryTab">
       <EuiTitle data-test-subj="summaryTitle" size="xs">
         <h2>{i18n.SUMMARY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <div style={scrollable} data-test-subj="summaryContent">
+      <div css={scrollable} data-test-subj="summaryContent">
         <AttackDiscoveryMarkdownFormatter
-          disableActions={showAnonymized}
+          disableActions={disabledActions}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
         />
       </div>
@@ -85,9 +105,9 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <div style={scrollable} data-test-subj="detailsContent">
+      <div css={scrollable} data-test-subj="detailsContent">
         <AttackDiscoveryMarkdownFormatter
-          disableActions={showAnonymized}
+          disableActions={disabledActions}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
         />
       </div>
@@ -105,9 +125,13 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         </>
       )}
 
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
+          {isAgentBuilderEnabled ? (
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+          ) : (
+            <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
+          )}
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
@@ -121,6 +145,8 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
               alignItems="center"
               data-test-subj="investigateInTimelineButton"
               gutterSize="xs"
+              responsive={false}
+              wrap={false}
             >
               <EuiFlexItem grow={false}>
                 <EuiIcon data-test-subj="timelineIcon" type="timeline" />

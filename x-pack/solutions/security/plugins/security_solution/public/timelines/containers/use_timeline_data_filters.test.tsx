@@ -6,10 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { mockGlobalState, TestProviders, createMockStore } from '../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import React from 'react';
-import { SourcererScopeName } from '../../sourcerer/store/model';
+
+import { PageScope } from '../../data_view_manager/constants';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -29,8 +30,8 @@ const store = createMockStore({
     },
     sourcererScopes: {
       ...mockGlobalState.sourcerer.sourcererScopes,
-      [SourcererScopeName.analyzer]: {
-        ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+      [PageScope.analyzer]: {
+        ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
         selectedPatterns: [timelinePattern],
       },
     },
@@ -56,15 +57,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useTimelineDataFilters', () => {
   describe('on alerts page', () => {
-    it('uses the same selected patterns throughout the app', () => {
-      const { result } = renderHook(() => useTimelineDataFilters(false), { wrapper });
-      const { result: timelineResult } = renderHook(() => useTimelineDataFilters(true), {
-        wrapper,
-      });
-
-      expect(result.current.selectedPatterns).toEqual(timelineResult.current.selectedPatterns);
-    });
-
     it('allows the other parts of the query to remain unique', () => {
       const { result } = renderHook(() => useTimelineDataFilters(false), { wrapper });
       const { result: timelineResult } = renderHook(() => useTimelineDataFilters(true), {

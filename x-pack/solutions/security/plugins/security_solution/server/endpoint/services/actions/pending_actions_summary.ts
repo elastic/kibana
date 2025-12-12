@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getActionList } from '..';
-import type { EndpointMetadataService } from '../metadata';
 import type {
   ActionListApiResponse,
   EndpointPendingActions,
 } from '../../../../common/endpoint/types';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
@@ -20,19 +19,17 @@ const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
  * Returns an array containing the pending action summary for each of the Agent IDs provided on input
  */
 export const getPendingActionsSummary = async (
-  esClient: ElasticsearchClient,
-  metadataService: EndpointMetadataService,
-  logger: Logger,
+  endpointService: EndpointAppContextService,
+  spaceId: string,
   /** The Fleet Agent IDs to be checked */
   agentIDs: string[]
 ): Promise<EndpointPendingActions[]> => {
   const { data: unExpiredActionList } = await getActionList({
-    esClient,
-    metadataService,
+    spaceId,
+    endpointService,
     unExpiredOnly: true,
     elasticAgentIds: agentIDs,
     pageSize: ACTIONS_SEARCH_PAGE_SIZE,
-    logger,
   });
 
   // Store a map of `agent_id => array of actions`
@@ -53,7 +50,6 @@ export const getPendingActionsSummary = async (
     );
 
   const pending: EndpointPendingActions[] = [];
-
   let endpointMetadataLastUpdated: Record<string, Date> | undefined;
 
   for (const agentID of agentIDs) {
@@ -68,6 +64,7 @@ export const getPendingActionsSummary = async (
       pending_actions: agentPendingActions,
     });
 
+    const metadataService = endpointService.getEndpointMetadataService(spaceId);
     const agentUnexpiredActions = unExpiredByAgentId[agentID] ?? [];
 
     for (const unExpiredAction of agentUnexpiredActions) {

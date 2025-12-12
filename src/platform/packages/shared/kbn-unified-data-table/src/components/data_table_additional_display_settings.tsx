@@ -8,10 +8,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps, useEuiTheme } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
+import type { RowHeightSettingsProps } from './row_height_settings';
+import { RowHeightSettings } from './row_height_settings';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
@@ -21,15 +23,15 @@ export const RANGE_STEP_SAMPLE_SIZE = 10;
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
   onChangeRowHeight?: (rowHeight: RowHeightSettingsProps['rowHeight']) => void;
-  onChangeRowHeightLines?: (rowHeightLines: number) => void;
+  onChangeRowHeightLines?: (rowHeightLines: number, isValid: boolean) => void;
   headerRowHeight: RowHeightSettingsProps['rowHeight'];
   onChangeHeaderRowHeight?: (headerRowHeight: RowHeightSettingsProps['rowHeight']) => void;
-  onChangeHeaderRowHeightLines?: (headerRowHeightLines: number) => void;
+  onChangeHeaderRowHeightLines?: (headerRowHeightLines: number, isValid: boolean) => void;
   maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize?: (sampleSize: number) => void;
-  lineCountInput: number;
-  headerLineCountInput: number;
+  lineCountInput: number | undefined;
+  headerLineCountInput: number | undefined;
   densityControl?: React.ReactNode;
 }
 

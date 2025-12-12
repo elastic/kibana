@@ -125,7 +125,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   title,
   titleNode,
 }) => (
-  <>
+  <div data-test-subj="header-page">
     <EuiPageHeader alignItems="center" rightSideItems={rightSideItems}>
       <EuiPageHeaderSection css={headerPageStyles.headerSection}>
         {backOptions && <HeaderLinkBack backOptions={backOptions} />}
@@ -162,7 +162,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     )}
     {/* Manually add a 'padding-bottom' to header */}
     <EuiSpacer size="l" />
-  </>
+  </div>
 );
 
 export const HeaderPage = React.memo(HeaderPageComponent);

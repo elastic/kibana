@@ -23,6 +23,7 @@ export {
   getKibanaCliArg,
   getKibanaCliLoggers,
   cleanupElasticsearch,
+  fipsIsEnabled,
 } from './src/functional_tests/lib';
 
 export { initLogsDir } from './src/functional_tests/lib';
@@ -70,6 +71,8 @@ export { getUrl } from './src/jest/get_url';
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
 export { runJest } from './src/jest/run';
+
+export { runJestAll } from './src/jest/run_all';
 
 export * from './src/kbn_archiver_cli';
 

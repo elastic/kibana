@@ -53,6 +53,7 @@ import {
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -73,9 +74,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetPackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(PackagePolicyResponseSchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -86,6 +89,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 
   // Get bulk
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .post({
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -106,12 +110,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: BulkGetPackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => BulkGetPackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -122,6 +129,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 
   // Get one
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -143,15 +151,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOnePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   item: PackagePolicyResponseSchema,
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -161,6 +172,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES,
       fleetAuthz: {
@@ -174,9 +186,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => OrphanedPackagePoliciesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -186,8 +200,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   // Create
-  // Authz check moved to service here: https://github.com/elastic/kibana/pull/140458
   router.versioned
+    // @ts-ignore Authz check moved to service here: https://github.com/elastic/kibana/pull/140458
     .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       summary: 'Create a package policy',
@@ -202,12 +216,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: CreatePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => CreatePackagePolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             409: {
+              description: 'A conflict occurred.',
               body: genericErrorResponse,
             },
           },
@@ -218,6 +235,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 
   // Update
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .put({
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -239,15 +257,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: UpdatePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   item: PackagePolicyResponseSchema,
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             403: {
+              description: 'Forbidden.',
               body: genericErrorResponse,
             },
           },
@@ -281,9 +302,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeletePackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeletePackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -316,9 +339,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeleteOnePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteOnePackagePolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -352,9 +377,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: UpgradePackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => UpgradePackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -387,9 +414,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DryRunPackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DryRunPackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

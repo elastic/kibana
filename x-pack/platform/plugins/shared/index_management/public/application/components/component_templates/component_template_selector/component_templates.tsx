@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+  EuiEmptyPrompt,
+  EuiButton,
+  useEuiTheme,
+} from '@elastic/eui';
 
-import { ComponentTemplateListItem } from '../../../../../common';
+import type { ComponentTemplateListItem } from '../../../../../common';
 import { FilterListButton } from './components';
 import { ComponentTemplatesList } from './component_templates_list';
-import { Props as ComponentTemplatesListItemProps } from './component_templates_list_item';
-
-import './component_templates.scss';
+import type { Props as ComponentTemplatesListItemProps } from './component_templates_list_item';
 
 interface Props {
   isLoading: boolean;
@@ -27,6 +32,58 @@ interface Props {
 interface Filters {
   [key: string]: { name: string; checked: 'on' | 'off' };
 }
+
+const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+  const heightHeader = `calc(${euiTheme.size.l} * 2)`;
+
+  return {
+    container: css`
+      border: ${euiTheme.border.thin};
+      border-radius: ${euiTheme.border.radius.medium};
+      border-top: none;
+      height: 100%;
+    `,
+    header: css`
+      height: ${heightHeader};
+
+      .euiFormControlLayout {
+        max-width: initial;
+      }
+    `,
+    searchBox: css`
+      border-bottom: ${euiTheme.border.thin};
+      border-top: ${euiTheme.border.thin};
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      box-shadow: none;
+      max-width: initial;
+    `,
+    filterListButton: css`
+      box-shadow: none;
+      height: ${euiTheme.size.xxl}; /* Align the height with the search input height */
+
+      &,
+      & > :first-child .euiFilterButton {
+        /* EUI specificity override */
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      &::after {
+        border: ${euiTheme.border.thin};
+      }
+    `,
+    listWrapper: css`
+      height: calc(100% - ${heightHeader});
+
+      ${isSearchResultEmpty &&
+      css`
+        display: flex; /* Will center vertically the empty search result */
+      `}
+    `,
+  };
+};
 
 /**
  * Copied from https://stackoverflow.com/a/9310752
@@ -117,6 +174,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
   }, [isLoading, components, searchValue, filters]);
 
   const isSearchResultEmpty = filteredComponents.length === 0 && components.length > 0;
+  const styles = useStyles({ isSearchResultEmpty });
 
   if (isLoading) {
     return null;
@@ -153,8 +211,8 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
   };
 
   return (
-    <div className="componentTemplates" data-test-subj="componentTemplates">
-      <div className="componentTemplates__header">
+    <div css={styles.container} data-test-subj="componentTemplates">
+      <div css={styles.header}>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             <EuiFieldSearch
@@ -164,7 +222,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
                 setSearchValue(e.target.value);
               }}
               aria-label={i18nTexts.searchBoxPlaceholder}
-              className="componentTemplates__searchBox"
+              css={styles.searchBox}
               data-test-subj="componentTemplateSearchBox"
             />
           </EuiFlexItem>
@@ -173,11 +231,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <div
-        className={classNames('eui-yScrollWithShadows componentTemplates__listWrapper', {
-          'componentTemplates__listWrapper--is-empty': isSearchResultEmpty,
-        })}
-      >
+      <div css={[styles.listWrapper]} className="eui-yScrollWithShadows">
         {isSearchResultEmpty ? (
           renderEmptyResult()
         ) : (

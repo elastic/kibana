@@ -143,7 +143,7 @@ export class RemoteClusterTable extends Component {
                   data-test-subj="remoteClustersTableListClusterDefinedByNodeTooltip"
                 >
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={
                       <FormattedMessage
@@ -306,7 +306,7 @@ export class RemoteClusterTable extends Component {
                   );
 
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="remoteClusterTableRowEditButton"
                     aria-label={label}

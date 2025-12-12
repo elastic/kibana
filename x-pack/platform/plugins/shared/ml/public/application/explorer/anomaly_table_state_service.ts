@@ -27,10 +27,13 @@ import { ML_JOB_AGGREGATION, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { MlJobService } from '../services/job_service';
 import type { MlApi } from '../services/ml_api_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import type { TableSeverity } from '../components/controls/select_severity/select_severity';
+import type { TableSeverityState } from '../components/controls/select_severity';
+import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { TableInterval } from '../components/controls/select_interval/select_interval';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import type { AnomaliesTableData, AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -53,6 +56,7 @@ import type { Refresh } from '../routing/use_refresh';
 export class AnomalyTableStateService extends StateService {
   private _tableData$ = new BehaviorSubject<AnomaliesTableData | null>(null);
   private _tableDataLoading$ = new BehaviorSubject<boolean>(true);
+  private _tableError$ = new BehaviorSubject<string | null>(null);
   private _timeBounds$: Observable<TimeRangeBounds>;
   private _refreshSubject$: Observable<Refresh>;
 
@@ -63,7 +67,7 @@ export class AnomalyTableStateService extends StateService {
     private readonly timefilter: TimefilterContract,
     private readonly anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private readonly anomalyTimelineStateService: AnomalyTimelineStateService,
-    private readonly tableSeverityUrlStateService: UrlStateService<TableSeverity>,
+    private readonly tableSeverityUrlStateService: UrlStateService<TableSeverityState>,
     private readonly tableIntervalUrlStateService: UrlStateService<TableInterval>
   ) {
     super();
@@ -87,6 +91,12 @@ export class AnomalyTableStateService extends StateService {
 
   public get tableDataLoading(): boolean {
     return this._tableDataLoading$.getValue();
+  }
+
+  public readonly tableError$ = this._tableError$.asObservable();
+
+  public get tableError(): string | null {
+    return this._tableError$.getValue();
   }
 
   protected _initSubscriptions(): Subscription {
@@ -123,13 +133,18 @@ export class AnomalyTableStateService extends StateService {
               tableSeverity,
               influencersFilterQuery,
             ]) => {
+              // Resolve the severity format in case it's in the old format
+              const resolvedSeverity = resolveSeverityFormat(tableSeverity.val);
+
+              // Clear previous error before starting a new load cycle
+              this._tableError$.next(null);
               return this.loadAnomaliesTableData(
                 selectedCells,
                 selectedJobs,
                 // viewBySwimlaneFieldName is guaranteed to be defined by the skipWhile
                 viewBySwimlaneFieldName!,
                 tableInterval.val,
-                tableSeverity.val,
+                resolvedSeverity,
                 influencersFilterQuery
               ).pipe(
                 map((tableData) => ({
@@ -137,7 +152,9 @@ export class AnomalyTableStateService extends StateService {
                   tableDataLoading: false,
                 })),
                 catchError((error) => {
-                  return of({ tableData: null });
+                  const message = extractErrorMessage(error);
+                  this._tableError$.next(message);
+                  return of({ tableData: null, tableDataLoading: false });
                 })
               );
             }
@@ -158,7 +175,7 @@ export class AnomalyTableStateService extends StateService {
     selectedJobs: ExplorerJob[],
     fieldName: string,
     tableInterval: string,
-    tableSeverity: number,
+    tableSeverity: SeverityThreshold[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Observable<AnomaliesTableData | null> {
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
@@ -230,9 +247,6 @@ export class AnomalyTableStateService extends StateService {
             showViewSeriesLink: true,
             jobIds,
           };
-        }),
-        catchError((error) => {
-          return of(null);
         })
       );
   }

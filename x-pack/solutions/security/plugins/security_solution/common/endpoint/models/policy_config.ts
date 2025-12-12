@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { AntivirusRegistrationModes, ProtectionModes } from '../types';
+import { AntivirusRegistrationModes, DeviceControlAccessLevel, ProtectionModes } from '../types';
 
 import { isBillablePolicy } from './policy_config_helpers';
 
@@ -44,6 +44,10 @@ export const policyFactory = ({
         registry: true,
         security: true,
       },
+      device_control: {
+        enabled: true,
+        usb_storage: DeviceControlAccessLevel.deny_all,
+      },
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
@@ -79,6 +83,10 @@ export const policyFactory = ({
           message: '',
           enabled: true,
         },
+        device_control: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
         file: 'info',
@@ -95,14 +103,20 @@ export const policyFactory = ({
     },
     mac: {
       events: {
+        dns: true,
         process: true,
         file: true,
         network: true,
+        security: true,
       },
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
         on_write_scan: true,
+      },
+      device_control: {
+        enabled: true,
+        usb_storage: DeviceControlAccessLevel.deny_all,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
@@ -126,6 +140,10 @@ export const policyFactory = ({
           message: '',
           enabled: true,
         },
+        device_control: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
         file: 'info',
@@ -136,8 +154,9 @@ export const policyFactory = ({
     },
     linux: {
       events: {
-        process: true,
+        dns: true,
         file: true,
+        process: true,
         network: true,
         session_data: false,
         tty_io: false,
@@ -193,6 +212,34 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
   return {
     ...policy,
     global_manifest_version: 'latest',
+    windows: {
+      ...policy.windows,
+      device_control: {
+        enabled: false,
+        usb_storage: DeviceControlAccessLevel.audit,
+      },
+      popup: {
+        ...policy.windows.popup,
+        device_control: {
+          enabled: false,
+          message: '',
+        },
+      },
+    },
+    mac: {
+      ...policy.mac,
+      device_control: {
+        enabled: false,
+        usb_storage: DeviceControlAccessLevel.audit,
+      },
+      popup: {
+        ...policy.mac.popup,
+        device_control: {
+          enabled: false,
+          message: '',
+        },
+      },
+    },
   };
 };
 
@@ -248,6 +295,10 @@ export const policyFactoryWithoutPaidFeatures = (
           enabled: false,
         },
       },
+      device_control: {
+        enabled: false,
+        usb_storage: DeviceControlAccessLevel.audit,
+      },
       popup: {
         ...policy.windows.popup,
         malware: {
@@ -266,6 +317,10 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: false,
         },
+        device_control: {
+          message: '',
+          enabled: false,
+        },
       },
     },
     mac: {
@@ -279,6 +334,10 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      device_control: {
+        enabled: false,
+        usb_storage: DeviceControlAccessLevel.audit,
+      },
       popup: {
         ...policy.mac.popup,
         malware: {
@@ -290,6 +349,10 @@ export const policyFactoryWithoutPaidFeatures = (
           enabled: false,
         },
         behavior_protection: {
+          message: '',
+          enabled: false,
+        },
+        device_control: {
           message: '',
           enabled: false,
         },
@@ -378,3 +441,4 @@ export const policyFactoryWithSupportedFeatures = (
  */
 export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
 export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';
+export const DefaultPolicyDeviceNotificationMessage = 'Device Control activity was detected';

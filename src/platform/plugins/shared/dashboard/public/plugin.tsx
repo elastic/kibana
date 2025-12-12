@@ -13,16 +13,18 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import {
-  APP_WRAPPER_CLASS,
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type {
   App,
   AppMountParameters,
   AppUpdater,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
+} from '@kbn/core/public';
+import {
+  APP_WRAPPER_CLASS,
+  DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
 } from '@kbn/core/public';
@@ -30,7 +32,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -59,25 +61,23 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
-import { DashboardMountContextProps } from './dashboard_app/types';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import type { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
-  LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
-} from './plugin_constants';
-import {
-  GetPanelPlacementSettings,
-  registerDashboardPanelPlacementSetting,
-} from './panel_placement';
-import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
+} from '../common/page_bundle_constants';
+import type { GetPanelPlacementSettings } from './panel_placement';
+import { registerDashboardPanelSettings } from './panel_placement';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
-import type { ConfigSchema } from '../server/config';
+import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
+import type { FindDashboardsService } from './dashboard_client';
+import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -117,6 +117,7 @@ export interface DashboardStartDependencies {
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  cps?: CPSPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -124,7 +125,7 @@ interface DashboardSetup {}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
+  registerDashboardPanelSettings: <SerializedState extends object = object>(
     embeddableType: string,
     getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
@@ -134,7 +135,7 @@ export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
@@ -144,7 +145,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
+    { share, home, data, urlForwarding }: DashboardSetupDependencies
   ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
@@ -156,14 +157,13 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ getDashboardContentManagementService }] = await Promise.all([
-              import('./services/dashboard_content_management_service'),
+            const [{ dashboardClient }] = await Promise.all([
+              import('./dashboard_client'),
               untilPluginStartServicesReady(),
             ]);
-            return (
-              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
-            );
+
+            const result = await dashboardClient.get(dashboardId);
+            return result.data.filters ?? [];
           },
         })
       );
@@ -228,10 +228,14 @@ export class DashboardPlugin
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
+        performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        await untilPluginStartServicesReady();
-        const { mountApp } = await import('./dashboard_app/dashboard_router');
+        const [{ mountApp }] = await Promise.all([
+          import('./dashboard_app/dashboard_router'),
+          import('./dashboard_renderer/dashboard_module'),
+          untilPluginStartServicesReady(),
+        ]);
         appMounted();
 
         const [coreStart] = await core.getStartServices();
@@ -253,24 +257,9 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
-    urlForwarding.forwardApp(DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-      const [, tail] = /(\?.*)/.exec(path) || [];
-      // carry over query if it exists
-      return `#/list${tail || ''}`;
-    });
-    urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-      const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
-      if (!id && !tail) {
-        // unrecognized sub url
-        return '#/list';
-      }
-      if (!id && tail) {
-        // unsaved dashboard, but probably state in URL
-        return `#/create${tail || ''}`;
-      }
-      // persisted dashboard, probably with url state
-      return `#/view/${id}${tail || ''}`;
-    });
+
+    setupUrlForwarding(urlForwarding);
+
     const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
     });
@@ -294,36 +283,29 @@ export class DashboardPlugin
       });
     }
 
-    // register content management
-    contentManagement.registry.register({
-      id: CONTENT_ID,
-      version: {
-        latest: LATEST_VERSION,
-      },
-      name: dashboardAppTitle,
-    });
-
     return {};
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => {
-      registerActions({
-        plugins,
-        allowByValueEmbeddables:
-          this.initializerContext.config.get<ConfigSchema>()?.allowByValueEmbeddables ?? true,
-      });
+    registerActions(plugins);
+
+    plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
+      const { searchAction } = await import('./dashboard_client');
+      return searchAction;
+    });
+
+    plugins.uiActions.registerActionAsync('getDashboardsByIdsAction', async () => {
+      const { getDashboardsByIdsAction } = await import('./dashboard_client');
+      return getDashboardsByIdsAction;
     });
 
     return {
-      registerDashboardPanelPlacementSetting,
+      registerDashboardPanelSettings,
       findDashboardsService: async () => {
-        const { getDashboardContentManagementService } = await import(
-          './services/dashboard_content_management_service'
-        );
-        return getDashboardContentManagementService().findDashboards;
+        const { findService } = await import('./dashboard_client');
+        return findService;
       },
     };
   }

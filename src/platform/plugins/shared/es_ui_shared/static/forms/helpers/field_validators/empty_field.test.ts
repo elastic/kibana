@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValidationFuncArg } from '../../hook_form_lib';
+import type { ValidationFuncArg } from '../../hook_form_lib';
 import { emptyField } from './empty_field';
 
 describe('emptyField', () => {

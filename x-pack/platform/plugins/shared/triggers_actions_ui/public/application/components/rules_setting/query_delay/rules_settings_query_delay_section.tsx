@@ -6,11 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import {
-  MAX_QUERY_DELAY,
-  MIN_QUERY_DELAY,
-  RulesSettingsQueryDelayProperties,
-} from '@kbn/alerting-plugin/common';
+import type { RulesSettingsQueryDelayProperties } from '@kbn/alerting-plugin/common';
+import { MAX_QUERY_DELAY, MIN_QUERY_DELAY } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -25,7 +22,7 @@ import {
 import { RuleSettingsRangeInput } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_range_input';
 
 const queryDelayDescription = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.queryDelayDescription',
+  'xpack.triggersActionsUI.rulesSettings.queryDelayDescription',
   {
     defaultMessage:
       'Delay all rule queries to mitigate the impact of index refresh intervals on data availability.',
@@ -45,7 +42,7 @@ export const RulesSettingsQueryDelayErrorPrompt = memo(() => {
       title={
         <h4>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.queryDelayErrorPromptTitle"
+            id="xpack.triggersActionsUI.rulesSettings.queryDelayErrorPromptTitle"
             defaultMessage="Unable to load your query delay settings"
           />
         </h4>
@@ -53,7 +50,7 @@ export const RulesSettingsQueryDelayErrorPrompt = memo(() => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.queryDelayErrorPromptBody"
+            id="xpack.triggersActionsUI.rulesSettings.queryDelayErrorPromptBody"
             defaultMessage="There was an error loading your query delay settings. Contact your administrator for help"
           />
         </p>
@@ -100,7 +97,7 @@ export const RulesSettingsQueryDelaySection = memo((props: RulesSettingsQueryDel
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             <p>{queryDelayDescription}</p>

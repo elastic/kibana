@@ -7,22 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DocViewer } from '@kbn/unified-doc-viewer';
+
 import { getUnifiedDocViewerServices } from '../../plugin';
 
-export function UnifiedDocViewer({ docViewsRegistry, ...props }: DocViewRenderProps) {
-  const { unifiedDocViewer } = getUnifiedDocViewerServices();
+export const UnifiedDocViewer = forwardRef<DocViewerApi, DocViewRenderProps>(
+  ({ docViewsRegistry, ...props }, ref) => {
+    const { unifiedDocViewer } = getUnifiedDocViewerServices();
 
-  const registry = useMemo(() => {
-    if (docViewsRegistry) {
-      return typeof docViewsRegistry === 'function'
-        ? docViewsRegistry(unifiedDocViewer.registry.clone())
-        : docViewsRegistry;
-    }
-    return unifiedDocViewer.registry;
-  }, [docViewsRegistry, unifiedDocViewer.registry]);
+    const registry = useMemo(() => {
+      if (docViewsRegistry) {
+        return typeof docViewsRegistry === 'function'
+          ? docViewsRegistry(unifiedDocViewer.registry.clone())
+          : docViewsRegistry;
+      }
+      return unifiedDocViewer.registry;
+    }, [docViewsRegistry, unifiedDocViewer.registry]);
 
-  return <DocViewer docViews={registry.getAll()} {...props} />;
-}
+    return <DocViewer ref={ref} docViews={registry.getAll()} {...props} />;
+  }
+);

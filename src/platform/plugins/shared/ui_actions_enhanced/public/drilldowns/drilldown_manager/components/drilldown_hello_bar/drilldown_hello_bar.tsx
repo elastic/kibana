@@ -33,7 +33,7 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, 
     <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="help" />
+          <EuiIcon type="question" />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiText size={'s'}>

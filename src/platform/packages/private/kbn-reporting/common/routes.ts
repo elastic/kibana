@@ -24,7 +24,15 @@ export const INTERNAL_ROUTES = {
     DELETE_PREFIX: prefixInternalPath + '/jobs/delete', // docId is added to the final path
     DOWNLOAD_PREFIX: prefixInternalPath + '/jobs/download', // docId is added to the final path
   },
+  SCHEDULED: {
+    LIST: prefixInternalPath + '/scheduled/list',
+    BULK_DISABLE: prefixInternalPath + '/scheduled/bulk_disable',
+    BULK_DELETE: prefixInternalPath + '/scheduled/bulk_delete',
+    BULK_ENABLE: prefixInternalPath + '/scheduled/bulk_enable',
+  },
+  HEALTH: prefixInternalPath + '/_health',
   GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path
+  SCHEDULE_PREFIX: prefixInternalPath + '/schedule', // exportTypeId is added to the final path
 };
 
 const prefixPublicPath = '/api/reporting';

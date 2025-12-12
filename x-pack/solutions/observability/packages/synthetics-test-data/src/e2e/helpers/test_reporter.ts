@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Journey, Step } from '@elastic/synthetics/dist/dsl';
-import { Reporter, ReporterOptions } from '@elastic/synthetics';
-import {
+import type { Journey, Step } from '@elastic/synthetics/dist/dsl';
+import type { Reporter, ReporterOptions } from '@elastic/synthetics';
+import type {
   JourneyEndResult,
   JourneyStartResult,
   StepEndResult,

@@ -107,7 +107,7 @@ function updatePackageMap(repoRoot, manifestPaths) {
 }
 
 /**
- * Resolves to an array of BazelPackage instances which parse the manifest files,
+ * Resolves to an array of Package instances which parse the manifest files,
  * package.json files, and provide useful metadata about each package.
  * @param {string} repoRoot
  * @returns {Package[]}

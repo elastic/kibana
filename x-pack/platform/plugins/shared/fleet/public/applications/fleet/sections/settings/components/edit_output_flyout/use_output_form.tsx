@@ -76,7 +76,6 @@ import {
   validateDynamicKafkaTopics,
   validateKibanaURL,
   validateKibanaAPIKey,
-  validateKibanaAPIKeySecret,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -92,6 +91,7 @@ export interface OutputFormInputsType {
   diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
   diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
   compressionLevelInput: ReturnType<typeof useSelectInput>;
+  logstashEnableSSLInput: ReturnType<typeof useSwitchInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
   presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
@@ -103,7 +103,7 @@ export interface OutputFormInputsType {
   syncIntegrationsInput: ReturnType<typeof useSwitchInput>;
   kibanaURLInput: ReturnType<typeof useInput>;
   kibanaAPIKeyInput: ReturnType<typeof useInput>;
-  kibanaAPIKeySecretInput: ReturnType<typeof useSecretInput>;
+  syncUninstalledIntegrationsInput: ReturnType<typeof useSwitchInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -142,6 +142,7 @@ export interface OutputFormInputsType {
   kafkaSslKeyInput: ReturnType<typeof useInput>;
   kafkaSslKeySecretInput: ReturnType<typeof useSecretInput>;
   kafkaSslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  writeToStreams: ReturnType<typeof useSwitchInput>;
 }
 
 function extractKafkaOutputSecrets(
@@ -193,7 +194,7 @@ export function extractDefaultDynamicKafkaTopics(
   ];
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
+export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
 
@@ -254,7 +255,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const isServerless = cloud?.isServerlessEnabled;
   // Set the hosts to default for new ES output in serverless.
   const elasticsearchUrlDefaultValue =
-    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
+    isServerless && !output?.hosts ? defaultOutput?.hosts || [] : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -293,16 +294,15 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isDisabled('kibana_api_key')
   );
 
-  const kibanaAPIKeySecretInput = useSecretInput(
-    (output as NewRemoteElasticsearchOutput)?.secrets?.kibana_api_key ?? '',
-    syncIntegrationsInput.value ? validateKibanaAPIKeySecret : undefined,
-    isDisabled('kibana_api_key')
-  );
-
   const kibanaURLInput = useInput(
     (output as NewRemoteElasticsearchOutput)?.kibana_url ?? '',
     (val) => validateKibanaURL(val, syncIntegrationsInput.value),
     isDisabled('kibana_url')
+  );
+
+  const syncUninstalledIntegrationsInput = useSwitchInput(
+    (output as NewRemoteElasticsearchOutput)?.sync_uninstalled_integrations ?? false,
+    isDisabled('sync_uninstalled_integrations')
   );
   /*
   Shipper feature flag - currently depends on the content of the yaml
@@ -329,15 +329,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const diskQueuePathInput = useInput(
     output?.shipper?.disk_queue_path ?? '',
     undefined,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueMaxSizeInput = useNumberInput(
     output?.shipper?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
     undefined,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueEncryptionEnabled = useSwitchInput(
     output?.shipper?.disk_queue_encryption_enabled ?? false,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const loadBalanceEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
@@ -352,7 +355,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     });
   const compressionLevelInput = useSelectInput(
     options,
+    // @ts-expect-error upgrade typescript v5.9.3
     `${output?.shipper?.compression_level}` ?? options[0].value,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueCompressionEnabled.value ?? false
   );
 
@@ -362,6 +367,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const isSSLEditable = isDisabled('ssl');
   // Logstash inputs
+  const logstashEnableSSLInput = useSwitchInput(
+    output?.type === 'logstash' ? Boolean(output?.ssl) : true,
+    isSSLEditable
+  );
+
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
     output?.hosts ?? [],
@@ -376,18 +386,20 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    output?.type === 'logstash' ? validateSSLCertificate : undefined,
+    output?.type === 'logstash' && logstashEnableSSLInput.value
+      ? validateSSLCertificate
+      : undefined,
     isSSLEditable
   );
   const sslKeyInput = useInput(
     output?.ssl?.key ?? '',
-    output?.type === 'logstash' ? validateSSLKey : undefined,
+    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKey : undefined,
     isSSLEditable
   );
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    output?.type === 'logstash' ? validateSSLKeySecret : undefined,
+    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKeySecret : undefined,
     isSSLEditable
   );
 
@@ -568,6 +580,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const kafkaKeyInput = useInput(kafkaOutput?.key, undefined, isDisabled('key'));
 
+  // Write to streams input - defaults to false
+  const writeToStreams = useSwitchInput(
+    (output as any)?.write_to_logs_streams ?? false,
+    false // Not disabled for now
+  );
+
   const isLogstash = typeInput.value === outputType.Logstash;
   const isKafka = typeInput.value === outputType.Kafka;
   const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
@@ -582,6 +600,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     diskQueueMaxSizeInput,
     diskQueueCompressionEnabled,
     compressionLevelInput,
+    logstashEnableSSLInput,
     logstashHostsInput,
     presetInput,
     additionalYamlConfigInput,
@@ -591,9 +610,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     serviceTokenInput,
     serviceTokenSecretInput,
     kibanaAPIKeyInput,
-    kibanaAPIKeySecretInput,
     syncIntegrationsInput,
     kibanaURLInput,
+    syncUninstalledIntegrationsInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -632,6 +651,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaTopicsInput,
     kafkaStaticTopicInput,
     kafkaDynamicTopicInput,
+    writeToStreams,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -654,7 +674,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     const serviceTokenValid = serviceTokenInput.validate();
     const serviceTokenSecretValid = serviceTokenSecretInput.validate();
     const kibanaAPIKeyValid = kibanaAPIKeyInput.validate();
-    const kibanaAPIKeySecretValid = kibanaAPIKeySecretInput.validate();
     const kibanaURLInputValid = kibanaURLInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
@@ -680,7 +699,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         additionalYamlConfigValid &&
         nameInputValid &&
         sslCertificateValid &&
-        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
+        (sslKeyValid || sslKeySecretValid)
       );
     }
     if (isKafka) {
@@ -710,8 +729,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
           (serviceTokenSecretInput.value && serviceTokenSecretValid)) &&
         ((!syncIntegrationsInput.value && kibanaURLInputValid) ||
           (syncIntegrationsInput.value &&
-            ((kibanaAPIKeyInput.value && kibanaAPIKeyValid) ||
-              (kibanaAPIKeySecretInput.value && kibanaAPIKeySecretValid)) &&
+            kibanaAPIKeyInput.value &&
+            kibanaAPIKeyValid &&
             kibanaURLInputValid))
       );
     } else {
@@ -742,7 +761,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     serviceTokenInput,
     serviceTokenSecretInput,
     kibanaAPIKeyInput,
-    kibanaAPIKeySecretInput,
     syncIntegrationsInput,
     kibanaURLInput,
     sslCertificateInput,
@@ -923,7 +941,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
                 ? {
-                    topic: kafkaDynamicTopicInput.value,
+                    topic: `%{[${kafkaDynamicTopicInput.value}]}`,
                   }
                 : {}),
               headers: kafkaHeadersInput.value,
@@ -943,19 +961,23 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              ssl: {
-                certificate: sslCertificateInput.value,
-                key: sslKeyInput.value || undefined,
-                certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
-                  (val) => val !== ''
-                ),
-              },
+              ssl: logstashEnableSSLInput.value
+                ? {
+                    certificate: sslCertificateInput.value,
+                    key: sslKeyInput.value || undefined,
+                    certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                      (val) => val !== ''
+                    ),
+                  }
+                : null,
               ...(!sslKeyInput.value &&
                 sslKeySecretInput.value && {
                   secrets: {
-                    ssl: {
-                      key: sslKeySecretInput.value,
-                    },
+                    ssl: logstashEnableSSLInput.value
+                      ? {
+                          key: sslKeySecretInput.value,
+                        }
+                      : undefined,
                   },
                 }),
               proxy_id: proxyIdValue,
@@ -968,12 +990,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 service_token: serviceTokenSecretInput.value,
               };
             }
-            if (!kibanaAPIKeyInput.value && kibanaAPIKeySecretInput.value) {
-              secrets = {
-                ...(secrets ?? {}),
-                kibana_api_key: kibanaAPIKeySecretInput.value,
-              };
-            }
+
             if (!sslKeyInput.value && sslKeySecretInput.value) {
               secrets = {
                 ...(secrets ?? {}),
@@ -995,7 +1012,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               ...(secrets ? { secrets } : {}),
               sync_integrations: syncIntegrationsInput.value,
               kibana_url: kibanaURLInput.value || null,
+              sync_uninstalled_integrations: syncUninstalledIntegrationsInput.value,
               proxy_id: proxyIdValue,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ssl: {
                 certificate: sslCertificateInput.value,
@@ -1017,6 +1036,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               config_yaml: additionalYamlConfigInput.value,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ssl: {
                 certificate: sslCertificateInput.value,
@@ -1116,6 +1136,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
+    logstashEnableSSLInput.value,
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
@@ -1126,10 +1147,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
     kibanaAPIKeyInput.value,
-    kibanaAPIKeySecretInput.value,
     syncIntegrationsInput.value,
+    syncUninstalledIntegrationsInput.value,
     kibanaURLInput.value,
     caTrustedFingerprintInput.value,
+    writeToStreams.value,
     confirm,
     notifications.toasts,
   ]);

@@ -11,9 +11,11 @@ import { format } from 'util';
 
 import chalk from 'chalk';
 
-import { LogLevel, parseLogLevel, ParsedLogLevel } from './log_levels';
-import { Writer } from './writer';
-import { Message, MessageTypes } from './message';
+import { castArray } from 'lodash';
+import type { LogLevel, ParsedLogLevel } from './log_levels';
+import { parseLogLevel } from './log_levels';
+import type { Writer } from './writer';
+import type { Message, MessageTypes } from './message';
 
 const { magentaBright, yellow, red, blue, green, dim } = chalk;
 const PREFIX_INDENT = ' '.repeat(6);
@@ -56,7 +58,7 @@ function shouldWriteType(level: ParsedLogLevel, type: MessageTypes) {
   return Boolean(level.flags[type === 'success' ? 'info' : type]);
 }
 
-function stringifyError(error: string | Error) {
+function stringifyError(error: string | Error, depth: number = 0): string {
   if (typeof error !== 'string' && !(error instanceof Error)) {
     error = new Error(`"${error}" thrown`);
   }
@@ -65,7 +67,18 @@ function stringifyError(error: string | Error) {
     return error;
   }
 
-  return error.stack || error.message || error;
+  if (error instanceof AggregateError) {
+    return [error.stack, ...error.errors.map(stringifyError)].join('\n');
+  }
+
+  const msg = error.stack || error.message || String(error);
+
+  // log Error.cause if set
+  if (depth <= 3 && error.cause && error.cause instanceof Error && error.cause !== error) {
+    return [msg, `Caused by: ${stringifyError(error.cause, depth + 1)}`].join('\n');
+  }
+
+  return msg;
 }
 
 export class ToolingLogTextWriter implements Writer {
@@ -105,7 +118,13 @@ export class ToolingLogTextWriter implements Writer {
     }
 
     let prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
-    prefix = msg.context ? prefix + `[${msg.context}] ` : prefix;
+    prefix = msg.context
+      ? prefix +
+        castArray(msg.context ?? [])
+          .map((ctx) => `[${ctx}]`)
+          .join(' ') +
+        ' '
+      : prefix;
     ToolingLogTextWriter.write(this.writeTo, prefix, msg);
     return true;
   }

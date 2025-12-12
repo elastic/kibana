@@ -21,6 +21,168 @@
     "functions": [
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.appendFilteringWhereClauseForCascadeLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "appendFilteringWhereClauseForCascadeLayout",
+        "description": [
+          "\nHandles the computation and appending of a filtering where clause,\nfor ES|QL query containing a stats command in the cascade layout experience"
+        ],
+        "signature": [
+          "<T extends string = string>(query: string, esqlVariables: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", fieldName: string, value: T extends ",
+          "SupportedFieldTypes",
+          " ? unknown : unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType?: (T extends ",
+          "SupportedFieldTypes",
+          " ? T : string) | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$4",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$5",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T extends ",
+              "SupportedFieldTypes",
+              " ? unknown : unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$6",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "operation",
+            "description": [],
+            "signature": [
+              "\"+\" | \"-\" | \"is_not_null\" | \"is_null\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$7",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "fieldType",
+            "description": [],
+            "signature": [
+              "(T extends ",
+              "SupportedFieldTypes",
+              " ? T : string) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.appendStatsByToQuery",
         "type": "Function",
         "tags": [],
@@ -210,6 +372,192 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.constructCascadeQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "constructCascadeQuery",
+        "description": [
+          "\nConstructs a cascade query from the provided query, based on the node type, node path and node path map."
+        ],
+        "signature": [
+          "({ query, dataView, esqlVariables, nodeType, nodePath, nodePathMap, }: ",
+          "CascadeQueryArgs",
+          ") => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.constructCascadeQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  query,\n  dataView,\n  esqlVariables,\n  nodeType,\n  nodePath,\n  nodePathMap,\n}",
+            "description": [],
+            "signature": [
+              "CascadeQueryArgs"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.convertTimeseriesCommandToFrom",
+        "type": "Function",
+        "tags": [],
+        "label": "convertTimeseriesCommandToFrom",
+        "description": [
+          "\nConverts timeseries (TS) commands to FROM commands in an ES|QL query"
+        ],
+        "signature": [
+          "(esql: string | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.convertTimeseriesCommandToFrom.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "- The ES|QL query string"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The modified query with TS commands converted to FROM commands"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.extractCategorizeTokens",
+        "type": "Function",
+        "tags": [],
+        "label": "extractCategorizeTokens",
+        "description": [
+          "\nExtracts \"tokens\" from a regex string (produced by the categorize function) by stripping leading/trailing '.*?'\nand splitting the remainder by '.+?'.\n"
+        ],
+        "signature": [
+          "(regexString: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/extract_categorize_tokens.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.extractCategorizeTokens.$1",
+            "type": "string",
+            "tags": [],
+            "label": "regexString",
+            "description": [
+              "The regular expression string."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/extract_categorize_tokens.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of extracted \"keywords\"."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.fixESQLQueryWithVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "fixESQLQueryWithVariables",
+        "description": [],
+        "signature": [
+          "(queryString: string, esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.fixESQLQueryWithVariables.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.fixESQLQueryWithVariables.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.formatESQLColumns",
         "type": "Function",
         "tags": [],
@@ -266,13 +614,209 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getArgsFromRenameFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "getArgsFromRenameFunction",
+        "description": [
+          "\nExtracts the original and renamed columns from a rename function.\nRENAME original AS renamed Vs RENAME renamed = original"
+        ],
+        "signature": [
+          "(renameFunction: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLFunction",
+            "text": "ESQLFunction"
+          },
+          "<",
+          "FunctionSubtype",
+          ", string>) => { original: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLColumn",
+            "text": "ESQLColumn"
+          },
+          "; renamed: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLColumn",
+            "text": "ESQLColumn"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getArgsFromRenameFunction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "renameFunction",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLFunction",
+                "text": "ESQLFunction"
+              },
+              "<",
+              "FunctionSubtype",
+              ", string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getCategorizeColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategorizeColumns",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getCategorizeColumns.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getCategorizeField",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategorizeField",
+        "description": [
+          "\nExtracts the fields used in the CATEGORIZE function from an ESQL query."
+        ],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getCategorizeField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              ": string - The ESQL query string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getEditorExtensions",
+        "type": "Function",
+        "tags": [],
+        "label": "getEditorExtensions",
+        "description": [
+          "\nFetches editor extensions from the registry based on the provided query string and active solution ID."
+        ],
+        "signature": [
+          "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
+          "HttpSetup",
+          ", queryString: string, activeSolutionId: \"security\" | \"workplaceai\" | \"oblt\" | \"es\") => Promise<{ recommendedQueries: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.RecommendedQuery",
+            "text": "RecommendedQuery"
+          },
+          "[]; recommendedFields: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.RecommendedField",
+            "text": "RecommendedField"
+          },
+          "[]; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [
+          "A promise that resolves to the editor extensions."
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getEditorExtensions.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/utils/cache.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLAdHocDataview",
         "type": "Function",
         "tags": [],
         "label": "getESQLAdHocDataview",
-        "description": [],
+        "description": [
+          "\nCreates an ad-hoc DataView for ES|QL queries.\n\nSome applications need to have a DataView to work properly with ES|QL queries.\nThis helper creates an ad-hoc DataView with an ID constructed from the index pattern.\nSince there are no runtime fields, field formatters, or default time fields,\nthe same ad-hoc DataView can be constructed/reused, which solves caching issues\ndescribed in https://github.com/elastic/kibana/issues/168131.\n\nThe function automatically detects the time field by making an HTTP request to determine\nif '@timestamp' exists across all indices in the query. If all indices contain the field,\nit sets '@timestamp' as the time field; otherwise, no time field is set.\n"
+        ],
         "signature": [
-          "(query: string, dataViewsService: ",
+          "({\n  dataViewsService,\n  query,\n  options,\n  http,\n}: { dataViewsService: ",
           {
             "pluginId": "dataViews",
             "scope": "public",
@@ -280,7 +824,9 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          ") => Promise<",
+          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined; http?: ",
+          "HttpSetup",
+          " | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -297,41 +843,360 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getESQLAdHocDataview.$1",
-            "type": "string",
+            "type": "Object",
             "tags": [],
-            "label": "query",
+            "label": "{\n  dataViewsService,\n  query,\n  options,\n  http,\n}",
             "description": [],
-            "signature": [
-              "string"
-            ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLAdHocDataview.$1.dataViewsService",
+                "type": "Object",
+                "tags": [],
+                "label": "dataViewsService",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "public",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-public.DataViewsServicePublic",
+                    "text": "DataViewsServicePublic"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLAdHocDataview.$1.query",
+                "type": "string",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLAdHocDataview.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLAdHocDataview.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "Promise that resolves to the created DataView with the detected time field (if any)"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getEsqlColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsqlColumns",
+        "description": [
+          "\nGets the columns of an ESQL query, formatted as ESQLFieldWithMetadata"
+        ],
+        "signature": [
+          "({ esqlQuery, search, variables, signal, timeRange, }: { search: ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.ISearchGeneric",
+            "text": "ISearchGeneric"
           },
+          "; esqlQuery?: string | undefined; variables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; signal?: AbortSignal | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLFieldWithMetadata",
+            "text": "ESQLFieldWithMetadata"
+          },
+          "[]>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/columns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.getESQLAdHocDataview.$2",
+            "id": "def-common.getEsqlColumns.$1",
             "type": "Object",
             "tags": [],
-            "label": "dataViewsService",
+            "label": "{\n  esqlQuery,\n  search,\n  variables,\n  signal,\n  timeRange,\n}",
             "description": [],
-            "signature": [
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
-                "pluginId": "dataViews",
-                "scope": "public",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-public.DataViewsServicePublic",
-                "text": "DataViewsServicePublic"
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getEsqlColumns.$1.search",
+                "type": "Function",
+                "tags": [],
+                "label": "search",
+                "description": [],
+                "signature": [
+                  "<SearchStrategyRequest extends ",
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.IKibanaSearchRequest",
+                    "text": "IKibanaSearchRequest"
+                  },
+                  "<any> = ",
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.IEsSearchRequest",
+                    "text": "IEsSearchRequest"
+                  },
+                  "<",
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.ISearchRequestParams",
+                    "text": "ISearchRequestParams"
+                  },
+                  ">, SearchStrategyResponse extends ",
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.IKibanaSearchResponse",
+                    "text": "IKibanaSearchResponse"
+                  },
+                  "<any> = ",
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.IEsSearchResponse",
+                    "text": "IEsSearchResponse"
+                  },
+                  "<any>>(request: SearchStrategyRequest, options?: ",
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.ISearchOptions",
+                    "text": "ISearchOptions"
+                  },
+                  " | undefined) => ",
+                  "Observable",
+                  "<SearchStrategyResponse>"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/columns.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/esql-utils",
+                    "id": "def-common.getEsqlColumns.$1.search.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "SearchStrategyRequest"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/esql-utils",
+                    "id": "def-common.getEsqlColumns.$1.search.$2",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/search-types",
+                        "scope": "common",
+                        "docId": "kibKbnSearchTypesPluginApi",
+                        "section": "def-common.ISearchOptions",
+                        "text": "ISearchOptions"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getEsqlColumns.$1.esqlQuery",
+                "type": "string",
+                "tags": [],
+                "label": "esqlQuery",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/columns.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getEsqlColumns.$1.variables",
+                "type": "Array",
+                "tags": [],
+                "label": "variables",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLControlVariable",
+                    "text": "ESQLControlVariable"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/columns.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getEsqlColumns.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/columns.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getEsqlColumns.$1.timeRange",
+                "type": "Object",
+                "tags": [],
+                "label": "timeRange",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/columns.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
+            ]
+          }
+        ],
+        "returnComment": [
+          "A promise that resolves to an array of ESQLFieldWithMetadata"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getEsqlPolicies",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsqlPolicies",
+        "description": [
+          "\nFetches the list of enrich policies from the server, formatted as EsqlPolicy objects."
+        ],
+        "signature": [
+          "(http: ",
+          "HttpSetup",
+          ") => Promise<EsqlPolicy[]>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getEsqlPolicies.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "The HTTP service to use for the request."
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/policies.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A promise that resolves to an array of EsqlPolicy objects."
+        ],
         "initialIsOpen": false
       },
       {
@@ -342,7 +1207,7 @@
         "label": "getESQLQueryColumns",
         "description": [],
         "signature": [
-          "({\n  esqlQuery,\n  search,\n  signal,\n  timeRange,\n}: { esqlQuery: string; search: ",
+          "({\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}: { esqlQuery: string; search: ",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -350,7 +1215,7 @@
             "section": "def-common.ISearchGeneric",
             "text": "ISearchGeneric"
           },
-          "; signal?: AbortSignal | undefined; timeRange?: ",
+          "; signal?: AbortSignal | undefined; filter?: unknown; dropNullColumns?: boolean | undefined; timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -358,7 +1223,15 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; }) => Promise<",
+          " | undefined; variables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; }) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -377,7 +1250,7 @@
             "id": "def-common.getESQLQueryColumns.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  timeRange,\n}",
+            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
             "deprecated": false,
@@ -512,6 +1385,34 @@
               },
               {
                 "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLQueryColumns.$1.filter",
+                "type": "Unknown",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLQueryColumns.$1.dropNullColumns",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropNullColumns",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
                 "id": "def-common.getESQLQueryColumns.$1.timeRange",
                 "type": "Object",
                 "tags": [],
@@ -526,6 +1427,27 @@
                     "text": "TimeRange"
                   },
                   " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLQueryColumns.$1.variables",
+                "type": "Array",
+                "tags": [],
+                "label": "variables",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLControlVariable",
+                    "text": "ESQLControlVariable"
+                  },
+                  "[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
                 "deprecated": false,
@@ -545,7 +1467,7 @@
         "label": "getESQLQueryColumnsRaw",
         "description": [],
         "signature": [
-          "({\n  esqlQuery,\n  search,\n  signal,\n  timeRange,\n}: { esqlQuery: string; search: ",
+          "({\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}: { esqlQuery: string; search: ",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -553,7 +1475,7 @@
             "section": "def-common.ISearchGeneric",
             "text": "ISearchGeneric"
           },
-          "; signal?: AbortSignal | undefined; timeRange?: ",
+          "; signal?: AbortSignal | undefined; dropNullColumns?: boolean | undefined; filter?: unknown; timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -561,7 +1483,15 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; }) => Promise<",
+          " | undefined; variables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/es-types",
             "scope": "common",
@@ -580,7 +1510,7 @@
             "id": "def-common.getESQLQueryColumnsRaw.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  timeRange,\n}",
+            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
             "deprecated": false,
@@ -715,6 +1645,34 @@
               },
               {
                 "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLQueryColumnsRaw.$1.dropNullColumns",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropNullColumns",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLQueryColumnsRaw.$1.filter",
+                "type": "Unknown",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
                 "id": "def-common.getESQLQueryColumnsRaw.$1.timeRange",
                 "type": "Object",
                 "tags": [],
@@ -729,6 +1687,27 @@
                     "text": "TimeRange"
                   },
                   " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLQueryColumnsRaw.$1.variables",
+                "type": "Array",
+                "tags": [],
+                "label": "variables",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLControlVariable",
+                    "text": "ESQLControlVariable"
+                  },
+                  "[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
                 "deprecated": false,
@@ -1043,6 +2022,124 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLSources",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLSources",
+        "description": [
+          "Fetches ESQL sources including indices, aliases, data streams, and integrations."
+        ],
+        "signature": [
+          "(core: Pick<",
+          "CoreStart",
+          ", \"application\" | \"http\">, getLicense: (() => Promise<",
+          {
+            "pluginId": "@kbn/licensing-types",
+            "scope": "common",
+            "docId": "kibKbnLicensingTypesPluginApi",
+            "section": "def-common.ILicense",
+            "text": "ILicense"
+          },
+          " | undefined>) | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLSourceResult",
+            "text": "ESQLSourceResult"
+          },
+          "[]>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLSources.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [
+              "The core start contract to make HTTP requests and access application capabilities."
+            ],
+            "signature": [
+              "Pick<",
+              "CoreStart",
+              ", \"application\" | \"http\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLSources.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicense",
+            "description": [
+              "An optional function to retrieve the current license information."
+            ],
+            "signature": [
+              "(() => Promise<",
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.ILicense",
+                "text": "ILicense"
+              },
+              " | undefined>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "A promise that resolves to an array of ESQLSourceResult objects."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLStatsQueryMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLStatsQueryMeta",
+        "description": [],
+        "signature": [
+          "(queryString: string) => ",
+          "ESQLStatsQueryMeta"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLStatsQueryMeta.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLWithSafeLimit",
         "type": "Function",
         "tags": [],
@@ -1158,11 +2255,13 @@
         "type": "Function",
         "tags": [],
         "label": "getIndexPatternFromESQLQuery",
-        "description": [],
+        "description": [
+          "\nRetrieves the index pattern from an ES|QL query using AST parsing.\nHandles both main queries and subqueries within FROM/TS commands.\n"
+        ],
         "signature": [
           "(esql: string | undefined) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1172,17 +2271,69 @@
             "type": "string",
             "tags": [],
             "label": "esql",
-            "description": [],
+            "description": [
+              "- The ES|QL query string to parse"
+            ],
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "Comma-separated string of unique index names, or empty string if no sources found"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getInferenceEndpoints",
+        "type": "Function",
+        "tags": [],
+        "label": "getInferenceEndpoints",
+        "description": [
+          "\nFetches inference endpoints based on the provided task type."
+        ],
+        "signature": [
+          "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
+          "HttpSetup",
+          ", taskType: ",
+          "InferenceTaskType",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.InferenceEndpointsAutocompleteResult",
+            "text": "InferenceEndpointsAutocompleteResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/inference.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [
+          "A promise that resolves to an InferenceEndpointsAutocompleteResult object."
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getInferenceEndpoints.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/utils/cache.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1192,7 +2343,7 @@
         "tags": [],
         "label": "getInitialESQLQuery",
         "description": [
-          "\nBuilds an ES|QL query for the provided dataView\nIf there is @timestamp field in the index, we don't add the WHERE clause\nIf there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName"
+          "\nBuilds an ES|QL query for the provided dataView\nIf there is @timestamp field in the index, we don't add the WHERE clause\nIf there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName\nIf the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command"
         ],
         "signature": [
           "(dataView: ",
@@ -1203,7 +2354,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", query: ",
+          ", removeLimit: boolean | undefined, query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1241,6 +2392,21 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getInitialESQLQuery.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "removeLimit",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getInitialESQLQuery.$3",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -1259,6 +2425,132 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getJoinIndices",
+        "type": "Function",
+        "tags": [],
+        "label": "getJoinIndices",
+        "description": [
+          "\nFetches join indices based on the provided ESQL query."
+        ],
+        "signature": [
+          "(query: string, http: ",
+          "HttpSetup",
+          ", cacheOptions?: { forceRefresh?: boolean | undefined; } | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.IndicesAutocompleteResult",
+            "text": "IndicesAutocompleteResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/lookup_indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getJoinIndices.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "The ESQL query string to extract remote clusters from."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/lookup_indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getJoinIndices.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "The HTTP service to use for the request."
+            ],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/lookup_indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getJoinIndices.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "cacheOptions",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/lookup_indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getJoinIndices.$3.forceRefresh",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "forceRefresh",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/lookup_indices.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "A promise that resolves to an IndicesAutocompleteResult object."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getKqlSearchQueries",
+        "type": "Function",
+        "tags": [],
+        "label": "getKqlSearchQueries",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getKqlSearchQueries.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1299,6 +2591,47 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getLookupIndicesFromQuery",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "getLookupIndicesFromQuery",
+        "description": [
+          "\nExtracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.\n"
+        ],
+        "signature": [
+          "(esqlQuery: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_lookup_indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getLookupIndicesFromQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esqlQuery",
+            "description": [
+              "- The ESQL query string to parse and analyze for lookup indices."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_lookup_indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of unique lookup index names found in the query."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getNamedParams",
         "type": "Function",
         "tags": [],
@@ -1321,7 +2654,7 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined) => Record<string, string | number | Record<string, string | number> | undefined>[]"
+          "[] | undefined) => Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
         "deprecated": false,
@@ -1418,6 +2751,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getRemoteClustersFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getRemoteClustersFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string | undefined) => string[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getRemoteClustersFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1527,6 +2893,48 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getTimeseriesIndices",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeseriesIndices",
+        "description": [],
+        "signature": [
+          "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
+          "HttpSetup",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.IndicesAutocompleteResult",
+            "text": "IndicesAutocompleteResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/timeseries_indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getTimeseriesIndices.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/utils/cache.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getValuesFromQueryField",
         "type": "Function",
         "tags": [],
@@ -1578,6 +2986,77 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.hasDateBreakdown",
+        "type": "Function",
+        "tags": [],
+        "label": "hasDateBreakdown",
+        "description": [
+          "\nChecks if the ESQL query contains a timeseries bucket aggregation."
+        ],
+        "signature": [
+          "(esql: string, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.hasDateBreakdown.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              ": string - The ESQL query string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.hasDateBreakdown.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [
+              ": DatatableColumn[] - The columns of the datatable"
+            ],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "true if the query contains a timeseries bucket aggregation, false otherwise"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.hasStartEndParams",
         "type": "Function",
         "tags": [],
@@ -1615,7 +3094,9 @@
         "type": "Function",
         "tags": [],
         "label": "hasTransformationalCommand",
-        "description": [],
+        "description": [
+          "\nDetermines if an ES|QL query contains transformational commands.\n\nFor ES|QL, we consider the following as transformational commands:\n- `stats`: Performs aggregations and transformations\n- `keep`: Filters and selects specific fields\n- `fork` commands where ALL branches contain only transformational commands\n"
+        ],
         "signature": [
           "(esql: string | undefined) => boolean"
         ],
@@ -1629,7 +3110,9 @@
             "type": "string",
             "tags": [],
             "label": "esql",
-            "description": [],
+            "description": [
+              "- The ES|QL query string to analyze"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1639,7 +3122,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "true if the query contains transformational commands or fork commands with all transformational branches"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1797,39 +3282,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.isQueryWrappedByPipes",
-        "type": "Function",
-        "tags": [],
-        "label": "isQueryWrappedByPipes",
-        "description": [],
-        "signature": [
-          "(query: string) => boolean"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.isQueryWrappedByPipes.$1",
-            "type": "string",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.mapVariableToColumn",
         "type": "Function",
         "tags": [],
@@ -1941,13 +3393,84 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.mutateQueryStatsGrouping",
+        "type": "Function",
+        "tags": [],
+        "label": "mutateQueryStatsGrouping",
+        "description": [
+          "\nModifies the provided ESQL query to only include the specified columns in the stats by option."
+        ],
+        "signature": [
+          "(query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          ", pick: string[]) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.mutateQueryStatsGrouping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.mutateQueryStatsGrouping.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "pick",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.prettifyQuery",
         "type": "Function",
         "tags": [],
         "label": "prettifyQuery",
         "description": [],
         "signature": [
-          "(query: string, isWrapped: boolean) => string"
+          "(src: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
         "deprecated": false,
@@ -1958,25 +3481,10 @@
             "id": "def-common.prettifyQuery.$1",
             "type": "string",
             "tags": [],
-            "label": "query",
+            "label": "src",
             "description": [],
             "signature": [
               "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.prettifyQuery.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "isWrapped",
-            "description": [],
-            "signature": [
-              "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
             "deprecated": false,
@@ -2081,6 +3589,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.replaceESQLQueryIndexPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceESQLQueryIndexPattern",
+        "description": [],
+        "signature": [
+          "(esql: string, replacements: Record<string, string>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/replace_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.replaceESQLQueryIndexPattern.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/replace_index_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.replaceESQLQueryIndexPattern.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "replacements",
+            "description": [],
+            "signature": [
+              "Record<string, string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/replace_index_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

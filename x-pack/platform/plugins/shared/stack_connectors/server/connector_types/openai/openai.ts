@@ -5,47 +5,48 @@
  * 2.0.
  */
 
+import type { SSLSettings } from '@kbn/actions-utils';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
-import type { IncomingMessage } from 'http';
+import type { Agent as HttpsAgent } from 'https';
+import type { Agent as HttpAgent, IncomingMessage } from 'http';
 import type {
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
+import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { removeEndpointFromUrl } from './lib/openai_utils';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
+import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import {
+  DEFAULT_MODEL,
+  DEFAULT_TIMEOUT_MS,
+  OpenAiProviderType,
+  SUB_ACTION,
   RunActionParamsSchema,
   RunActionResponseSchema,
   DashboardActionParamsSchema,
   StreamActionParamsSchema,
   StreamingResponseSchema,
   InvokeAIActionParamsSchema,
-} from '../../../common/openai/schema';
+} from '@kbn/connector-schemas/openai';
 import type {
   Config,
   Secrets,
   RunActionParams,
   RunActionResponse,
   StreamActionParams,
-} from '../../../common/openai/types';
-import {
-  DEFAULT_OPENAI_MODEL,
-  DEFAULT_TIMEOUT_MS,
-  OpenAiProviderType,
-  SUB_ACTION,
-} from '../../../common/openai/constants';
-import type {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-} from '../../../common/openai/types';
+} from '@kbn/connector-schemas/openai';
+import { removeEndpointFromUrl } from './lib/openai_utils';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   getAxiosOptions,
@@ -54,20 +55,22 @@ import {
   pipeStreamingResponse,
   sanitizeRequest,
 } from './lib/utils';
+import { getPKISSLOverrides, pkiErrorHandler } from './lib/other_openai_utils';
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
-  private url;
-  private provider;
-  private key;
-  private openAI;
-  private headers;
+  private url: string;
+  private provider: OpenAiProviderType;
+  private key: string;
+  private openAI: OpenAI;
+  private headers: Record<string, string>;
+  private sslOverrides?: SSLSettings;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
-
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
-    this.key = this.secrets.apiKey;
+    // apiKey could be undefined if PKI, use mock value when this is the case
+    this.key = 'apiKey' in this.secrets && this.secrets.apiKey ? this.secrets.apiKey : '';
     this.headers = {
       ...this.config.headers,
       ...('organizationId' in this.config
@@ -76,26 +79,88 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       ...('projectId' in this.config ? { 'OpenAI-Project': this.config.projectId } : {}),
     };
 
-    this.openAI =
-      this.config.apiProvider === OpenAiProviderType.AzureAi
-        ? new OpenAI({
-            apiKey: this.secrets.apiKey,
-            baseURL: this.config.apiUrl,
-            defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
-            defaultHeaders: {
-              ...this.headers,
-              'api-key': this.secrets.apiKey,
-            },
-          })
-        : new OpenAI({
-            baseURL: removeEndpointFromUrl(this.config.apiUrl),
-            apiKey: this.secrets.apiKey,
-            defaultHeaders: {
-              ...this.headers,
-            },
-          });
+    try {
+      let httpAgent;
+      let baseURL = this.config.apiUrl;
+      const defaultHeaders = { ...this.headers };
+      let defaultQuery: Record<string, string> | undefined;
+
+      const isHttps = this.url.toLowerCase().startsWith('https');
+
+      if (
+        this.provider === OpenAiProviderType.Other &&
+        (('certificateData' in this.secrets && this.secrets.certificateData) ||
+          ('caData' in this.secrets && this.secrets.caData) ||
+          ('privateKeyData' in this.secrets && this.secrets.privateKeyData)) &&
+        'verificationMode' in this.config &&
+        this.config.verificationMode
+      ) {
+        this.sslOverrides = getPKISSLOverrides({
+          logger: this.logger,
+          // ! These two values must be defined for PKI use. If undefined, will throw error
+          certificateData: this.secrets.certificateData!,
+          privateKeyData: this.secrets.privateKeyData!,
+          caData: this.secrets.caData,
+          verificationMode: this.config.verificationMode,
+        });
+        const agents = getCustomAgents(
+          this.configurationUtilities,
+          this.logger,
+          this.url,
+          this.sslOverrides
+        );
+        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
+        baseURL = removeEndpointFromUrl(this.url);
+      } else {
+        const agents = getCustomAgents(this.configurationUtilities, this.logger, this.url);
+        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
+        if (this.config.apiProvider === OpenAiProviderType.AzureAi) {
+          baseURL = this.config.apiUrl;
+          defaultHeaders['api-key'] = this.key;
+          const apiVersion = getAzureApiVersionParameter(this.config.apiUrl);
+          if (apiVersion) {
+            defaultQuery = { 'api-version': apiVersion };
+          }
+        } else {
+          baseURL = removeEndpointFromUrl(this.config.apiUrl);
+        }
+      }
+
+      this.openAI = this.createOpenAIClient({
+        apiKey: this.key,
+        baseURL,
+        defaultHeaders,
+        httpAgent,
+        defaultQuery,
+      });
+    } catch (error) {
+      this.logger.error(`Error initializing OpenAI client: ${error.message}`);
+      throw error;
+    }
 
     this.registerSubActions();
+  }
+
+  private createOpenAIClient({
+    apiKey,
+    baseURL,
+    defaultHeaders,
+    httpAgent,
+    defaultQuery,
+  }: {
+    apiKey: string;
+    baseURL: string;
+    defaultHeaders: Record<string, string>;
+    httpAgent?: HttpsAgent | HttpAgent;
+    defaultQuery?: Record<string, string>;
+  }): OpenAI {
+    return new OpenAI({
+      apiKey,
+      baseURL,
+      defaultHeaders,
+      httpAgent,
+      defaultQuery,
+    });
   }
 
   private registerSubActions() {
@@ -160,40 +225,57 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     }
     return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
+
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-
   public async runApi(
     { body, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
       body,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
+
+    parentSpan?.setAttribute('openai.raw_request', sanitizedBody);
+
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
-    const response = await this.request(
-      {
-        url: this.url,
-        method: 'post',
-        responseSchema: RunActionResponseSchema,
-        data: sanitizedBody,
-        signal,
-        // give up to 2 minutes for response
-        timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-        ...axiosOptions,
-        headers: {
-          ...this.headers,
-          ...axiosOptions.headers,
+
+    try {
+      const response = await this.request(
+        {
+          url: this.url,
+          method: 'post',
+          responseSchema: RunActionResponseSchema,
+          data: sanitizedBody,
+          signal,
+          // give up to 2 minutes for response
+          timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+          ...axiosOptions,
+          headers: {
+            ...this.headers,
+            ...axiosOptions.headers,
+          },
+          sslOverrides: this.sslOverrides,
         },
-      },
-      connectorUsageCollector
-    );
-    return response.data;
+        connectorUsageCollector
+      );
+
+      return response.data;
+    } catch (error) {
+      // special error handling for PKI errors
+      const errorMessage = pkiErrorHandler(error);
+      if (errorMessage?.length) {
+        throw new Error(errorMessage);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -208,6 +290,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     { body, stream, signal, timeout }: StreamActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
@@ -216,25 +300,38 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
 
-    const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+    parentSpan?.setAttribute('openai.raw_request', executeBody);
 
-    const response = await this.request(
-      {
-        url: this.url,
-        method: 'post',
-        responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
-        data: executeBody,
-        signal,
-        ...axiosOptions,
-        headers: {
-          ...this.headers,
-          ...axiosOptions.headers,
+    const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+    try {
+      const response = await this.request(
+        {
+          url: this.url,
+          method: 'post',
+          responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
+          data: executeBody,
+          signal,
+          ...axiosOptions,
+          headers: {
+            ...this.headers,
+            ...axiosOptions.headers,
+          },
+          timeout,
+          sslOverrides: this.sslOverrides,
         },
-        timeout,
-      },
-      connectorUsageCollector
-    );
-    return stream ? pipeStreamingResponse(response) : response.data;
+        connectorUsageCollector
+      );
+
+      // @ts-expect-error upgrade typescript v5.9.3
+      return stream ? pipeStreamingResponse(response) : response.data;
+    } catch (error) {
+      // special error handling for PKI errors
+      const errorMessage = pkiErrorHandler(error);
+      if (errorMessage?.length) {
+        throw new Error(errorMessage);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -318,13 +415,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
+      let model: string = DEFAULT_MODEL;
+      if (rest.model) {
+        model = rest.model;
+      } else if ('defaultModel' in this.config && this.config.defaultModel) {
+        model = this.config.defaultModel;
+      }
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
         stream: true,
         messages,
-        model:
-          rest.model ??
-          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+        model,
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
@@ -338,6 +439,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
+
+      // Based on the OpenAI API documentation, the error contains the status code in the `status` property
+      if (e.status === 429) {
+        throw createTaskRunError(new Error(errorMessage), TaskErrorSource.USER);
+      }
+
       throw new Error(errorMessage);
     }
   }

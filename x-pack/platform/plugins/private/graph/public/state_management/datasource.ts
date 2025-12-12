@@ -8,7 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { createSelector } from 'reselect';
-import { GraphState } from './store';
+import type { GraphState } from './store';
 import { reset } from './global';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');

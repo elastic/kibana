@@ -12,7 +12,7 @@ import { lastValueFrom } from 'rxjs';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '../expression_functions';
+import type { ExpressionFunctionDefinition } from '../expression_functions';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

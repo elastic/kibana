@@ -5,48 +5,50 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { Phases } from '../../../../../../common/types';
-import './phase_icon.scss';
+import type { Phases } from '../../../../../../common/types';
+import { usePhaseColors } from '../../../../lib';
+
+const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const phaseIconColors = usePhaseColors();
+
+  return {
+    container: css`
+      width: ${enabled ? euiTheme.size.xl : euiTheme.size.base};
+      height: ${enabled ? euiTheme.size.xl : euiTheme.size.base};
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      background-color: ${!enabled
+        ? euiTheme.colors.backgroundBaseFormsPrepend
+        : phaseIconColors[phase as keyof typeof phaseIconColors]};
+      ${!enabled && `margin: ${euiTheme.size.s};`}
+    `,
+    icon:
+      phase === 'delete'
+        ? euiTheme.colors.backgroundFilledText
+        : euiTheme.colors.backgroundBasePlain,
+  };
+};
 interface Props {
   enabled: boolean;
   phase: string & keyof Phases;
 }
 export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
-
-  const phaseIconColors = {
-    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVisBehindText9,
-    warm: isBorealis
-      ? euiTheme.colors.vis.euiColorVis9
-      : euiTheme.colors.vis.euiColorVisBehindText5,
-    cold: isBorealis
-      ? euiTheme.colors.vis.euiColorVis2
-      : euiTheme.colors.vis.euiColorVisBehindText1,
-    frozen: isBorealis
-      ? euiTheme.colors.vis.euiColorVis4
-      : euiTheme.colors.vis.euiColorVisBehindText4,
-    delete: euiTheme.colors.darkShade,
-  };
+  const styles = useStyles({ enabled, phase });
 
   return (
-    <div
-      className={`ilmPhaseIcon ilmPhaseIcon--${phase} ${enabled ? '' : 'ilmPhaseIcon--disabled'}`}
-    >
+    <div css={styles.container}>
       {enabled ? (
-        <EuiIcon
-          css={css`
-            fill: ${phaseIconColors[phase]};
-          `}
-          type={phase === 'delete' ? 'trash' : 'checkInCircleFilled'}
-          size={phase === 'delete' ? 'm' : 'l'}
-        />
+        <EuiIcon color={styles.icon} type={phase === 'delete' ? 'trash' : 'check'} />
       ) : (
-        <EuiIcon className="ilmPhaseIcon__inner--disabled" type={'dot'} size={'s'} />
+        <EuiIcon type={'dot'} size={'s'} />
       )}
     </div>
   );

@@ -7,4 +7,4 @@
 
 export * from './dataset_quality_locator';
 export * from './dataset_quality_details_locator';
-export * from './types';
+export type * from './types';

@@ -8,14 +8,8 @@
  */
 
 import React from 'react';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  IconType,
-} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export function hasIcon(icon: string | undefined): icon is string {
@@ -28,6 +22,10 @@ export type IconSet<T> = Array<{
   icon?: T | IconType;
   shouldRotate?: boolean;
 }>;
+
+const iconDecorationLabel = i18n.translate('visualizationUiComponents.iconSelect.label', {
+  defaultMessage: 'Icon decoration',
+});
 
 const IconView = (props: { value?: string; label: string; icon?: IconType }) => {
   if (!props.value) return null;
@@ -74,6 +72,7 @@ export function IconSelect<Icon extends string>({
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
       compressed
+      aria-label={iconDecorationLabel}
       prepend={
         hasIcon(selectedIcon.value) ? (
           <EuiIcon type={selectedIcon.icon ?? selectedIcon.value} />
@@ -95,13 +94,7 @@ export function IconSelectSetting<Icon extends string = string>({
   defaultIcon?: string;
 }) {
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      fullWidth
-      label={i18n.translate('visualizationUiComponents.iconSelect.label', {
-        defaultMessage: 'Icon decoration',
-      })}
-    >
+    <EuiFormRow display="columnCompressed" fullWidth label={iconDecorationLabel}>
       <IconSelect
         defaultIcon={defaultIcon}
         customIconSet={customIconSet}

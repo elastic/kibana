@@ -95,7 +95,14 @@ const stories: Meta<Args> = {
             transactionTypeStatus: FETCH_STATUS.SUCCESS,
             transactionTypes: ['request'],
             serviceAgentStatus: FETCH_STATUS.SUCCESS,
-            serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
+            indexSettings: [
+              {
+                configurationName: 'span',
+                defaultValue: 'traces-*',
+                savedValue: 'traces-*, apm-*',
+              },
+            ],
+            indexSettingsStatus: FETCH_STATUS.SUCCESS,
           }}
         >
           <StoryComponent />

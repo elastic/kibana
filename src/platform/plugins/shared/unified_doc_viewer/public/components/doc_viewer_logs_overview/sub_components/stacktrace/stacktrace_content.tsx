@@ -8,7 +8,8 @@
  */
 
 import { EuiCodeBlock } from '@elastic/eui';
-import { DataTableRecord, fieldConstants, getFieldValue } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { fieldConstants, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';

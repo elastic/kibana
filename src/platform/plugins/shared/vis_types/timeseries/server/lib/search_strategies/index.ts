@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
-import { AbstractSearchStrategy } from './strategies';
+import type { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
+import type { AbstractSearchStrategy } from './strategies';
 
 export { SearchStrategyRegistry } from './search_strategy_registry';
 export { AbstractSearchStrategy, RollupSearchStrategy, DefaultSearchStrategy } from './strategies';

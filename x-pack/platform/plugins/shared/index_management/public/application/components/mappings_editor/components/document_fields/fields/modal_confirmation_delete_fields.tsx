@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiBadge, EuiCode } from '@elastic/eui';
+import { EuiConfirmModal, EuiBadge, EuiCode, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedFields, NormalizedField } from '../../../types';
+import type { NormalizedFields, NormalizedField } from '../../../types';
 import { buildFieldTreeFromIds } from '../../../lib';
 import { FieldsTree } from '../../fields_tree';
 import { TYPE_DEFINITION } from '../../../constants';
@@ -33,6 +33,8 @@ export const ModalConfirmationDeleteFields = ({
   onCancel,
   onConfirm,
 }: Props) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const fieldsTree =
     childFields && childFields.length
       ? buildFieldTreeFromIds(childFields, byId, (fieldItem: NormalizedField) => (
@@ -60,7 +62,9 @@ export const ModalConfirmationDeleteFields = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={title}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.translate(

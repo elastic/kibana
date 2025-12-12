@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { LocationDescriptorObject } from 'history';
+import type { LocationDescriptorObject } from 'history';
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   notificationServiceMock,
   applicationServiceMock,
@@ -37,6 +38,7 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
 // We provide the minimum deps required to make the tests pass
 const appDependencies = {
   docLinks: {} as any,
+  url: sharePluginMock.createStartContract().url,
   plugins: { ml: {} as any },
   history,
 } as any;

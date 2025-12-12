@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   ClusterPutComponentTemplateRequest,
   ClusterPutComponentTemplateResponse,
   FieldCapsRequest,
@@ -33,7 +33,9 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
     search<TDocument, TParams extends DatasetQualityESSearchParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
-      return esClient.search<TDocument>(searchParams) as Promise<any>;
+      return esClient.search<TDocument>({
+        ...searchParams,
+      }) as Promise<any>;
     },
     msearch<TDocument, TParams extends DatasetQualityESSearchParams>(
       index = {} as { index?: Indices },
@@ -46,7 +48,12 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
       }) as Promise<any>;
     },
     fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
-      return esClient.fieldCaps(params);
+      return esClient.fieldCaps({
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        expand_wildcards: ['open', 'hidden'],
+        ...params,
+      });
     },
     mappings(params: { index: string }): Promise<IndicesGetMappingResponse> {
       return esClient.indices.getMapping(params);

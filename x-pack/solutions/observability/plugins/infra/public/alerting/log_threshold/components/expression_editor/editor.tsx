@@ -141,6 +141,7 @@ export const SourceStatusWrapper: FC<PropsWithChildren<unknown>> = ({ children }
         </div>
       ) : hasFailedLoading ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
             defaultMessage: 'Sorry, there was a problem loading field information',
           })}
@@ -186,8 +187,8 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
-    if (resolvedLogView?.fields) {
-      return resolvedLogView.fields.filter((field) => {
+    if (resolvedLogView?.dataViewReference.fields) {
+      return resolvedLogView.dataViewReference.fields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
@@ -196,8 +197,8 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   }, [resolvedLogView]);
 
   const groupByFields = useMemo(() => {
-    if (resolvedLogView?.fields) {
-      return resolvedLogView.fields.filter((field) => {
+    if (resolvedLogView?.dataViewReference.fields) {
+      return resolvedLogView.dataViewReference.fields.filter((field) => {
         return field.type === 'string' && field.aggregatable;
       });
     } else {
@@ -336,7 +337,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
       {shouldShowGroupByOptimizationWarning && (
         <>
           <EuiSpacer size="l" />
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount color="warning">
             {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
               defaultMessage:
                 'When setting a "group by" we highly recommend using the "{comparator}" comparator for your threshold. This can lead to significant performance improvements.',

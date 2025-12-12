@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { BUTTON_TEST_ID, BackToInvestigatedAlert } from '.';
 
 describe('BackToInvestigatedAlert component', () => {

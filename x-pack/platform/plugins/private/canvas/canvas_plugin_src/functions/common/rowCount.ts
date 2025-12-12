@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Datatable } from '../../../types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 export function rowCount(): ExpressionFunctionDefinition<'rowCount', Datatable, {}, number> {

@@ -26,6 +26,14 @@ export function useGetFleetServerHosts() {
   });
 }
 
+export function sendGetOneFleetServerHost(itemId: string) {
+  return sendRequest({
+    method: 'get',
+    path: fleetServerHostsRoutesService.getInfoPath(itemId),
+    version: API_VERSIONS.public.v1,
+  });
+}
+
 export function sendDeleteFleetServerHost(itemId: string) {
   return sendRequest({
     method: 'delete',

@@ -13,27 +13,27 @@ import {
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, type ReactNode, useCallback, type ComponentProps } from 'react';
 import { css } from '@emotion/react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import type { SidebarToggleState } from '../../../types';
+import { withRestorableState, useRestorableState } from './discover_layout_restorable_state';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 
-export const DiscoverResizableLayout = ({
-  container,
+export const InternalDiscoverResizableLayout = ({
   sidebarToggleState$,
   sidebarPanel,
   mainPanel,
 }: {
-  container: HTMLElement | null;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   sidebarPanel: ReactNode;
   mainPanel: ReactNode;
 }) => {
+  const { storage } = useDiscoverServices();
   const [sidebarPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -46,7 +46,24 @@ export const DiscoverResizableLayout = ({
   const defaultSidebarWidth = euiTheme.base * 19;
   const minMainPanelWidth = euiTheme.base * 24;
 
-  const [sidebarWidth, setSidebarWidth] = useLocalStorage(SIDEBAR_WIDTH_KEY, defaultSidebarWidth);
+  const [sidebarWidth, setSidebarWidth] = useRestorableState(
+    'sidebarWidth',
+    () => {
+      const widthInLocalStorage = Number(storage?.get(SIDEBAR_WIDTH_KEY));
+      return widthInLocalStorage || defaultSidebarWidth;
+    },
+    {
+      shouldStoreDefaultValueRightAway: true, // otherwise, it would re-initialize with the localStorage value which might get updated in the meantime
+    }
+  );
+
+  const setSidebarWidthAndUpdateInStorage = useCallback(
+    (width: number) => {
+      setSidebarWidth(width);
+      storage.set(SIDEBAR_WIDTH_KEY, width);
+    },
+    [setSidebarWidth, storage]
+  );
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
@@ -67,18 +84,21 @@ export const DiscoverResizableLayout = ({
         css={dscPageBodyContentsCss}
         mode={layoutMode}
         direction={layoutDirection}
-        container={container}
         fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
         minFixedPanelSize={minSidebarWidth}
         minFlexPanelSize={minMainPanelWidth}
         fixedPanel={<OutPortal node={sidebarPanelNode} />}
         flexPanel={<OutPortal node={mainPanelNode} />}
         data-test-subj="discoverLayout"
-        onFixedPanelSizeChange={setSidebarWidth}
+        onFixedPanelSizeChange={setSidebarWidthAndUpdateInStorage}
       />
     </>
   );
 };
+
+export const DiscoverResizableLayout = withRestorableState(InternalDiscoverResizableLayout);
+
+export type DiscoverResizableLayoutProps = ComponentProps<typeof DiscoverResizableLayout>;
 
 const dscPageBodyContentsCss = css`
   overflow: hidden;

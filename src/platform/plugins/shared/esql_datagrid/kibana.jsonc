@@ -13,11 +13,11 @@
       "uiActions",
       "fieldFormats",
       "share",
+      "dataViews"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "dataViews",
       "unifiedDocViewer"
     ]
   }

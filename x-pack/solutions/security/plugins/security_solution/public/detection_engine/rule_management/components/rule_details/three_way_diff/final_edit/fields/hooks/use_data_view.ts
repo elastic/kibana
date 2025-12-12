@@ -26,6 +26,9 @@ export function useDataView(indexPatternsOrDataViewId: UseDataViewParams): UseDa
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (dataView !== undefined) {
+      return;
+    }
     setIsLoading(true);
 
     (async () => {
@@ -51,6 +54,7 @@ export function useDataView(indexPatternsOrDataViewId: UseDataViewParams): UseDa
       }
     })();
   }, [
+    dataView,
     dataViewsService,
     indexPatternsOrDataViewId.indexPatterns,
     indexPatternsOrDataViewId.dataViewId,

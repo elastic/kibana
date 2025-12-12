@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { keys, size } from 'lodash';
 import { Alert } from '../alert';
 import { toRawAlertInstances } from './to_raw_alert_instances';
@@ -12,6 +13,8 @@ import { toRawAlertInstances } from './to_raw_alert_instances';
 describe('toRawAlertInstances', () => {
   const flapping = new Array(16).fill(false).concat([true, true, true, true]);
   const notFlapping = new Array(20).fill(false);
+  const logger = loggingSystemMock.createLogger();
+  const maxAlertLimit = 1000;
 
   describe('toRawAlertInstances', () => {
     test('should return all active alerts', () => {
@@ -19,7 +22,7 @@ describe('toRawAlertInstances', () => {
         '1': new Alert('1', { meta: { flappingHistory: flapping } }),
         '2': new Alert('2', { meta: { flappingHistory: [false, false] } }),
       };
-      const { rawActiveAlerts } = toRawAlertInstances(activeAlerts, {});
+      const { rawActiveAlerts } = toRawAlertInstances(logger, maxAlertLimit, activeAlerts, {});
       expect(size(rawActiveAlerts)).toEqual(2);
     });
 
@@ -28,7 +31,12 @@ describe('toRawAlertInstances', () => {
         '1': new Alert('1', { meta: { flappingHistory: flapping } }),
         '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
       };
-      const { rawRecoveredAlerts } = toRawAlertInstances({}, recoveredAlerts);
+      const { rawRecoveredAlerts } = toRawAlertInstances(
+        logger,
+        maxAlertLimit,
+        {},
+        recoveredAlerts
+      );
       expect(keys(rawRecoveredAlerts)).toEqual(['1', '2']);
     });
 
@@ -37,7 +45,13 @@ describe('toRawAlertInstances', () => {
         '1': new Alert('1', { meta: { flappingHistory: flapping } }),
         '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
       };
-      const { rawRecoveredAlerts } = toRawAlertInstances({}, recoveredAlerts, true);
+      const { rawRecoveredAlerts } = toRawAlertInstances(
+        logger,
+        maxAlertLimit,
+        {},
+        recoveredAlerts,
+        true
+      );
       expect(keys(rawRecoveredAlerts)).toEqual(['1']);
     });
   });

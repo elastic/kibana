@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Router } from '../router';
+import type { Router } from '../router';
 
 interface CreateMockRouterOptions {
   pluginId?: symbol;

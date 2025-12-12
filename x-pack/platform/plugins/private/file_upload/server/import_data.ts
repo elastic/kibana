@@ -12,27 +12,34 @@ import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
+
+import { INDEX_META_DATA_CREATED_BY } from '@kbn/file-upload-common';
+import { isEqual } from 'lodash';
 import type {
   ImportResponse,
   ImportFailure,
   InputData,
   IngestPipelineWrapper,
   InitializeImportResponse,
-} from '../common/types';
+} from '@kbn/file-upload-common';
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function initializeImport(
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    ingestPipelines: IngestPipelineWrapper[]
+    ingestPipelines: IngestPipelineWrapper[],
+    existingIndex: boolean = false
   ): Promise<InitializeImportResponse> {
     let createdIndex;
     const createdPipelineIds: Array<string | undefined> = [];
     const id = generateId();
     try {
-      await createIndex(index, settings, mappings);
+      if (existingIndex) {
+        await updateMappings(index, mappings);
+      } else {
+        await createIndex(index, settings, mappings);
+      }
       createdIndex = index;
 
       // create the pipeline if one has been supplied
@@ -132,9 +139,17 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     await asCurrentUser.indices.create({ index, ...body }, { maxRetries: 0 });
   }
 
+  async function updateMappings(index: string, mappings: MappingTypeMapping) {
+    const resp = await asCurrentUser.indices.getMapping({ index });
+    const existingMappings = resp[index]?.mappings;
+    if (!isEqual(existingMappings.properties, mappings.properties)) {
+      await asCurrentUser.indices.putMapping({ index, ...mappings });
+    }
+  }
+
   async function indexData(index: string, pipelineId: string | undefined, data: InputData) {
     try {
-      const body = [];
+      const body: BulkRequest['body'] = [];
       for (let i = 0; i < data.length; i++) {
         body.push({ index: {} });
         body.push(data[i]);
@@ -185,7 +200,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   }
 
   function getFailures(items: any[], data: InputData): ImportFailure[] {
-    const failures = [];
+    const failures: ImportFailure[] = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.index && item.index.error) {

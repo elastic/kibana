@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';

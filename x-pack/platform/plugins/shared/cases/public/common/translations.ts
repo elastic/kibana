@@ -273,9 +273,41 @@ export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
   }
 );
 
+export const SYNC_ALERTS = i18n.translate('xpack.cases.settings.syncAlerts', {
+  defaultMessage: 'Sync alerts',
+});
+
 export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.syncAlertHelpText', {
   defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
 });
+
+export const EXTRACT_OBSERVABLES_SWITCH_LABEL_ON = i18n.translate(
+  'xpack.cases.settings.extractObservablesSwitchLabelOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_SWITCH_LABEL_OFF = i18n.translate(
+  'xpack.cases.settings.extractObservablesSwitchLabelOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.settings.extractObservablesLabel',
+  {
+    defaultMessage: 'Extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_HELP = i18n.translate(
+  'xpack.cases.components.create.extractObservablesHelpText',
+  {
+    defaultMessage: 'Enabling this option will extract observables from the alert automatically.',
+  }
+);
 
 export const ALERT = i18n.translate('xpack.cases.common.alertLabel', {
   defaultMessage: 'Alert',
@@ -287,6 +319,10 @@ export const ALERTS = i18n.translate('xpack.cases.common.alertsLabel', {
 
 export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAddedToCase', {
   defaultMessage: 'added to case',
+});
+
+export const EVENTS = i18n.translate('xpack.cases.common.eventsLabel', {
+  defaultMessage: 'Events',
 });
 
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
@@ -331,7 +367,22 @@ export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity: number = 1) =>
 export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(
   'xpack.cases.actions.caseAlertSuccessSyncText',
   {
-    defaultMessage: 'The alert statuses are synched with the case status.',
+    defaultMessage: "Alert statuses were synced with the case's status.",
+  }
+);
+
+export const CASE_ALERT_SUCCESS_OBSERVABLES_TEXT = i18n.translate(
+  'xpack.cases.actions.caseAlertSuccessObservablesText',
+  {
+    defaultMessage: 'Observables were extracted and added to the case.',
+  }
+);
+
+export const CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT = i18n.translate(
+  'xpack.cases.actions.caseAlertSuccessSyncAndExtractText',
+  {
+    defaultMessage:
+      "Alert statuses were synced with the case's status and observables were extracted and added to the case.",
   }
 );
 

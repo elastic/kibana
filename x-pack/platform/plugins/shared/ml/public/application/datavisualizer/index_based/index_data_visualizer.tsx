@@ -9,15 +9,15 @@ import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  IndexDataVisualizerSpec,
-  ResultLink,
-  GetAdditionalLinks,
-  GetAdditionalLinksParams,
-} from '@kbn/data-visualizer-plugin/public';
+import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
+import type {
+  GetAdditionalLinksParams,
+  ResultLink,
+  GetAdditionalLinks,
+} from '@kbn/file-upload-common';
 import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -27,6 +27,8 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
+import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
+import { PageTitle } from '../../components/page_title';
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -44,6 +46,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
   const mlLocator = useMlLocator()!;
+  const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount(mlApi);
 
@@ -85,13 +88,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         icon: 'createAdvancedJob',
         type: 'file',
         getUrl: async () => {
-          return await mlLocator.getUrl({
-            page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED,
-            pageState: {
-              index: dataViewId,
-              globalState,
-            },
-          });
+          return (
+            (await mlManagementLocator?.getRedirectUrl({
+              sectionId: 'ml',
+              appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED}?index=${dataViewId}`,
+            })) ?? ''
+          );
         },
         canDisplay: async () => {
           try {
@@ -122,13 +124,13 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         icon: 'classificationJob',
         type: 'file',
         getUrl: async () => {
-          return await mlLocator.getUrl({
-            page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
-            pageState: {
-              index: dataViewId,
-              globalState,
-            },
-          });
+          if (!mlManagementLocator) return '';
+          return (
+            (await mlManagementLocator?.getRedirectUrl({
+              sectionId: 'ml',
+              appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB}?index=${dataViewId}`,
+            })) ?? ''
+          );
         },
         canDisplay: async () => {
           return (
@@ -153,13 +155,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
           icon: m.logo?.icon ?? '',
           type: 'index',
           getUrl: async () => {
-            return await mlLocator.getUrl({
-              page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
-              pageState: {
-                id: m.id,
-                index: dataViewId,
-              },
-            });
+            return (
+              (await mlManagementLocator?.getRedirectUrl({
+                sectionId: 'ml',
+                appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER}?id=${m.id}&index=${dataViewId}`,
+              })) ?? ''
+            );
           },
           canDisplay: async () => {
             try {
@@ -196,9 +197,13 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         <>
           <MlPageHeader>
             <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
-              <FormattedMessage
-                id="xpack.ml.dataVisualizer.pageHeader"
-                defaultMessage="Data Visualizer"
+              <PageTitle
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.dataVisualizer.pageHeader"
+                    defaultMessage="Data Visualizer"
+                  />
+                }
               />
               {esql ? (
                 <>

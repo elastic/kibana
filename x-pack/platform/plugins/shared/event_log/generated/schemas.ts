@@ -12,7 +12,8 @@
 // provides TypeScript and config-schema interfaces for ECS for use with
 // the event log
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
@@ -143,6 +144,11 @@ export const EventSchema = schema.maybe(
             flapping: ecsBoolean(),
             maintenance_window_ids: ecsStringMulti(),
             uuid: ecsString(),
+            deletion: schema.maybe(
+              schema.object({
+                num_deleted: ecsStringOrNumber(),
+              })
+            ),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
@@ -157,6 +163,9 @@ export const EventSchema = schema.maybe(
                     filled_duration_ms: ecsStringOrNumber(),
                     unfilled_duration_ms: ecsStringOrNumber(),
                     in_progress_duration_ms: ecsStringOrNumber(),
+                    deleted: ecsBoolean(),
+                    updated_at: ecsDate(),
+                    failed_auto_fill_attempts: ecsStringOrNumber(),
                   })
                 ),
                 execution: schema.maybe(
@@ -189,6 +198,7 @@ export const EventSchema = schema.maybe(
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
                         gap_range: ecsDateRange(),
+                        frozen_indices_queried_count: ecsStringOrNumber(),
                         rule_type_run_duration_ms: ecsStringOrNumber(),
                         process_alerts_duration_ms: ecsStringOrNumber(),
                         trigger_actions_duration_ms: ecsStringOrNumber(),
@@ -198,6 +208,7 @@ export const EventSchema = schema.maybe(
                         prepare_rule_duration_ms: ecsStringOrNumber(),
                         total_run_duration_ms: ecsStringOrNumber(),
                         total_enrichment_duration_ms: ecsStringOrNumber(),
+                        update_alerts_duration_ms: ecsStringOrNumber(),
                       })
                     ),
                   })
@@ -255,6 +266,38 @@ export const EventSchema = schema.maybe(
           schema.object({
             id: ecsString(),
             name: ecsString(),
+          })
+        ),
+        gap_auto_fill: schema.maybe(
+          schema.object({
+            execution: schema.maybe(
+              schema.object({
+                status: ecsString(),
+                start: ecsDate(),
+                end: ecsDate(),
+                duration_ms: ecsStringOrNumber(),
+                rule_ids: ecsStringMulti(),
+                task_params: schema.maybe(
+                  schema.object({
+                    name: ecsString(),
+                    num_retries: ecsStringOrNumber(),
+                    gap_fill_range: ecsString(),
+                    interval: ecsString(),
+                    max_backfills: ecsStringOrNumber(),
+                  })
+                ),
+                results: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      rule_id: ecsString(),
+                      processed_gaps: ecsStringOrNumber(),
+                      status: ecsString(),
+                      error: ecsString(),
+                    })
+                  )
+                ),
+              })
+            ),
           })
         ),
       })

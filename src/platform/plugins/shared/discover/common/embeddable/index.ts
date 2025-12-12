@@ -8,3 +8,4 @@
  */
 
 export { inject, extract } from './search_inject_extract';
+export { getSearchEmbeddableTransforms } from './search_embeddable_transforms';

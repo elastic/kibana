@@ -9,16 +9,18 @@ import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
-  SecurityAlertsTableContext,
   GetSecurityAlertsTableProp,
+  SecurityAlertsTableContext,
 } from '../../components/alerts_table/types';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 export const useCellActionsOptions = (
   tableId: TableId,
@@ -27,6 +29,9 @@ export const useCellActionsOptions = (
     'columns' | 'oldAlertsData' | 'pageIndex' | 'pageSize' | 'dataGridRef'
   >
 ) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+
   const {
     columns = [],
     oldAlertsData: data = [],
@@ -34,8 +39,10 @@ export const useCellActionsOptions = (
     pageSize = 0,
     dataGridRef,
   } = context ?? {};
-  const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
-  const dataViewId = useDataViewId(SourcererScopeName.detections);
+  const oldGetFieldSpec = useGetFieldSpec(PageScope.alerts);
+  const oldDataViewId = useDataViewId(PageScope.alerts);
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
+
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
     [dataViewId, tableId]
@@ -44,14 +51,16 @@ export const useCellActionsOptions = (
     () =>
       columns.map(
         (column) =>
-          getFieldSpec(column.id) ?? {
+          (newDataViewPickerEnabled
+            ? experimentalDataView.fields?.getByName(column.id)?.toSpec()
+            : oldGetFieldSpec(column.id)) ?? {
             name: '',
             type: '', // When type is an empty string all cell actions are incompatible
             aggregatable: false,
             searchable: false,
           }
       ),
-    [columns, getFieldSpec]
+    [columns, experimentalDataView.fields, oldGetFieldSpec, newDataViewPickerEnabled]
   );
 
   /**

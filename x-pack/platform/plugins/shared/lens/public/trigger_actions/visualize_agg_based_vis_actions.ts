@@ -12,7 +12,7 @@ import {
   ACTION_CONVERT_AGG_BASED_TO_LENS,
 } from '@kbn/visualizations-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
-import type { VisualizeEditorContext } from '../types';
+import type { VisualizeEditorContext } from '@kbn/lens-common';
 
 export const visualizeAggBasedVisAction = (application: ApplicationStart) =>
   createAction<{ [key: string]: VisualizeEditorContext }>({

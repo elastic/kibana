@@ -9,11 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import type {
   BaseIndexPatternColumn,
-  FieldBasedOperationErrorMessage,
-  OperationDefinition,
-} from '..';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import type { IndexPattern } from '../../../../../types';
+  FormulaIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
+import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';
@@ -26,21 +25,6 @@ import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_i
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
 });
-
-export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'formula';
-  params: {
-    formula?: string;
-    isFormulaBroken?: boolean;
-    // last value on numeric fields can be formatted
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
-  };
-}
 
 export function isFormulaIndexPatternColumn(
   column: BaseIndexPatternColumn
@@ -129,7 +113,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         const col = layer.columns[colId];
         return (
           !col.isBucketed &&
-          !col.isStaticValue &&
+          col.operationType !== 'static_value' &&
           col.operationType !== 'math' &&
           col.operationType !== 'formula'
         );
@@ -210,7 +194,6 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: previousFormula
           ? {
               formula: previousFormula,

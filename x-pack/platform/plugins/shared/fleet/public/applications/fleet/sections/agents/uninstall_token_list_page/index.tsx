@@ -6,13 +6,12 @@
  */
 
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiText, EuiIconTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
@@ -48,7 +47,7 @@ const TextField = ({ text, dataTestSubj }: { text: string; dataTestSubj?: string
 );
 
 const ViewUninstallCommandButton = ({ onClick }: { onClick: () => void }) => (
-  <EuiToolTip content={VIEW_UNINSTALL_COMMAND_LABEL}>
+  <EuiToolTip content={VIEW_UNINSTALL_COMMAND_LABEL} disableScreenReaderOutput>
     <EuiButtonIcon
       data-test-subj="uninstallTokensViewCommandButton"
       aria-label={VIEW_UNINSTALL_COMMAND_LABEL}
@@ -194,9 +193,7 @@ export const UninstallTokenListPage = () => {
           data-test-subj="uninstallTokensPolicyIdSearchInput"
         />
 
-        <EuiToolTip content={SEARCH_BY_POLICY_ID_OR_NAME_HINT}>
-          <EuiIcon type="iInCircle" />
-        </EuiToolTip>
+        <EuiIconTip content={SEARCH_BY_POLICY_ID_OR_NAME_HINT} type="info" />
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />

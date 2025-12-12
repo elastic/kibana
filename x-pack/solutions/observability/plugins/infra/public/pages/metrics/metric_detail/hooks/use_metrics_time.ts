@@ -10,9 +10,9 @@ import { useState, useCallback, useEffect } from 'react';
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
 import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import { constant, identity } from 'fp-ts/function';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { replaceStateKeyInQueryString } from '../../../../../common/url_state_storage_service';
 

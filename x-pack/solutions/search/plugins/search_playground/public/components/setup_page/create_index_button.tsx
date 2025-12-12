@@ -37,9 +37,7 @@ export const CreateIndexButton: React.FC = () => {
   return createIndexUrl ? (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiButton
-      color="primary"
       iconType="plusInCircle"
-      fill
       data-test-subj="createIndexButton"
       href={createIndexUrl}
       onClick={handleCreateIndexClick}
@@ -51,6 +49,7 @@ export const CreateIndexButton: React.FC = () => {
     </EuiButton>
   ) : (
     <EuiCallOut
+      announceOnMount
       title={i18n.translate('xpack.searchPlayground.createIndexCallout', {
         defaultMessage: 'You need to create an index first',
       })}

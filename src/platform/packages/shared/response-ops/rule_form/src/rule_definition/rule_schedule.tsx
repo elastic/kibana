@@ -22,7 +22,7 @@ import {
   INTERVAL_WARNING_TEXT,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { MinimumScheduleInterval } from '../common';
+import type { MinimumScheduleInterval } from '../common';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
@@ -132,6 +132,9 @@ export const RuleSchedule = () => {
             data-test-subj="ruleScheduleNumberInput"
             onChange={onIntervalNumberChange}
             onKeyDown={onKeyDown}
+            id="ruleScheduleNumberInput"
+            itemID="ruleScheduleNumberInput"
+            aria-label={SCHEDULE_TITLE_PREFIX}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>

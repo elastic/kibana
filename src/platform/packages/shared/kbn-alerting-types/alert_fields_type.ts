@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 

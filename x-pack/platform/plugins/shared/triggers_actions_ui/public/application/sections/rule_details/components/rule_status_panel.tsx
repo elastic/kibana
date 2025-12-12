@@ -20,15 +20,13 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { SnoozeSchedule } from '../../../../types';
+import type { SnoozeSchedule } from '../../../../types';
 import { RuleStatusDropdown } from '../..';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
 import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
-import { RefreshToken } from './types';
+import type { RefreshToken } from './types';
 
 export interface RuleStatusPanelProps {
   rule: any;
@@ -37,6 +35,7 @@ export interface RuleStatusPanelProps {
   healthColor: string;
   statusMessage?: string | null;
   refreshToken?: RefreshToken;
+  autoRecoverAlerts?: boolean;
 }
 
 export type RuleStatusPanelWithApiProps = Pick<
@@ -56,6 +55,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   healthColor,
   statusMessage,
   refreshToken,
+  autoRecoverAlerts,
 }) => {
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
   const isInitialized = useRef(false);
@@ -143,6 +143,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
               direction="row"
               isEditable={isEditable}
               hideSnoozeOption
+              autoRecoverAlerts={autoRecoverAlerts}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

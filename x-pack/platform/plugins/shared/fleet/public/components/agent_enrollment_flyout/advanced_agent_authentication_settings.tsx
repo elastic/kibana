@@ -212,6 +212,12 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
                   />
                 </EuiText>
               }
+              aria-label={i18n.translate(
+                'xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel',
+                {
+                  defaultMessage: 'Enrollment token',
+                }
+              )}
               onChange={(e) => {
                 onKeyChange(e.target.value);
               }}

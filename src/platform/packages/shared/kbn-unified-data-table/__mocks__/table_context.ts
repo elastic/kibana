@@ -12,7 +12,7 @@ import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from './data_view_complex';
 import { esHitsComplex } from './es_hits_complex';
 import { servicesMock } from './services';
-import { DataTableContext } from '../src/table_context';
+import type { DataTableContext } from '../src/table_context';
 import { convertValueToString } from '../src/utils/convert_value_to_string';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -25,7 +25,6 @@ const buildTableContext = (dataView: DataView, rows: DataTableRecord[]): DataTab
     getRowByIndex: jest.fn((index) => rows[index]),
     onFilter: jest.fn(),
     dataView,
-    isDarkMode: false,
     selectedDocsState: buildSelectedDocsState([]),
     pageIndex: 0,
     pageSize: 10,

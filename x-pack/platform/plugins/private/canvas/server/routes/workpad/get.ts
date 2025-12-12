@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
 import { shimWorkpad } from './shim_workpad';
@@ -17,17 +17,17 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
     .get({
       path: `${API_ROUTE_WORKPAD}/{id}`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

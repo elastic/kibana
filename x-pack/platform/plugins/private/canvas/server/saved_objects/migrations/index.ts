@@ -10,7 +10,7 @@ import {
   templateWorkpadExpressionsMigrationsFactory,
   workpadExpressionsMigrationsFactory,
 } from './expressions';
-import { CanvasSavedObjectTypeMigrationsDeps } from './types';
+import type { CanvasSavedObjectTypeMigrationsDeps } from './types';
 import { workpadMigrationsFactory as workpadMigrationsFactoryFn } from './workpad';
 
 export const workpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>

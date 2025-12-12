@@ -24,6 +24,7 @@ import {
   EuiSwitch,
   EuiConfirmModal,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type {
@@ -98,13 +99,23 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
     setDeleteModalVisible(false);
   }
 
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'editModelSnapshotFlyout',
+  });
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
-      <EuiFlyout onClose={closeWithoutReload} hideCloseButton size="m">
+      <EuiFlyout
+        onClose={closeWithoutReload}
+        hideCloseButton
+        size="m"
+        aria-labelledby={flyoutTitleId}
+      >
         <EuiFlyoutBody>
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h5>
+              <h5 id={flyoutTitleId}>
                 <FormattedMessage
                   id="xpack.ml.editModelSnapshotFlyout.title"
                   defaultMessage="Edit snapshot {ssId}"
@@ -117,6 +128,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
               <>
                 <EuiSpacer size="m" />
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
                     defaultMessage: 'Current snapshot',
@@ -194,9 +206,11 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
 
       {deleteModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteTitle', {
             defaultMessage: 'Delete snapshot?',
           })}
+          titleProps={{ id: modalTitleId }}
           onCancel={hideDeleteModal}
           onConfirm={deleteSnapshot}
           cancelButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.cancelButton', {

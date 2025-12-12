@@ -1,6 +1,6 @@
 # MV_PSERIES_WEIGHTED_SUM
 
-The MV_PSERIES_WEIGHTED_SUM function transforms a multivalued expression into a single-valued column. It does this by multiplying each element in the input list by its corresponding term in a P-Series and then calculating the sum.
+Converts a multivalued expression into a single-valued column by multiplying each element in the input list by its corresponding term in the P-Series and computing the sum.
 
 ## Syntax
 
@@ -8,15 +8,17 @@ The MV_PSERIES_WEIGHTED_SUM function transforms a multivalued expression into a 
 
 ### Parameters
 
-#### number
+#### `number`
 
-This is a multivalue expression.
+A multivalue expression.
 
-#### p
+#### `p`
 
-A number that represents the *p* parameter in the P-Series. It influences the contribution of each element to the weighted sum.
+A constant number representing the *p* parameter in the P-Series. It determines the impact of each element’s contribution to the weighted sum.
 
 ## Examples
+
+Calculating the weighted sum of a multivalued column
 
 ```esql
 ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]
@@ -24,8 +26,4 @@ ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]
 | KEEP sum
 ```
 
-```esql
-ROW b = [10.0, 20.0, 30.0, 40.0, 50.0]
-| EVAL weighted_sum = MV_PSERIES_WEIGHTED_SUM(b, 2.0)
-| KEEP weighted_sum
-```
+This example calculates the weighted sum of the multivalued column `a` using a P-Series parameter of `1.5`. The result is stored in the `sum` column.

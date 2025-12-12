@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import dateMath from '@kbn/datemath';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSuperUpdateButton,
   EuiText,
   EuiTitle,
-  EuiFormRow,
-  EuiCheckbox,
 } from '@elastic/eui';
 import moment from 'moment';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
@@ -38,7 +38,7 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
   TimeframePreviewOptions,
-} from '../../../../detections/pages/detection_engine/rules/types';
+} from '../../../common/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
@@ -270,6 +270,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {showInvocationCountWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE}
             data-test-subj="previewInvocationCountWarning"
@@ -282,6 +283,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {showRuleDefitnionInvalidWarning && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             color="warning"
             title={i18n.QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_TITLE}
             data-test-subj="previewRuleDefinitionInvalidWarning"

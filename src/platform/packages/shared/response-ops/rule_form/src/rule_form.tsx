@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
-import './rule_form.scss';
 import { RuleFormScreenContextProvider } from './rule_form_screen_context';
 import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
-import { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
+import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
+import type { RuleFormStepId } from './constants';
 
 const queryClient = new QueryClient();
 
@@ -42,7 +43,8 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
-  isServerless?: boolean;
+  initialEditStep?: RuleFormStepId;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
@@ -67,7 +69,8 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     showMustacheAutocompleteSwitch,
     initialValues,
     initialMetadata,
-    isServerless,
+    initialEditStep,
+    focusTrapProps,
   } = props;
 
   const {
@@ -86,6 +89,8 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     ruleTypeRegistry,
     actionTypeRegistry,
     fieldsMetadata,
+    contentManagement,
+    uiActions,
   } = _plugins;
 
   const ruleFormComponent = useMemo(() => {
@@ -105,6 +110,8 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
       ruleTypeRegistry,
       actionTypeRegistry,
       fieldsMetadata,
+      contentManagement,
+      uiActions,
     };
 
     // Passing the MetaData type all the way down the component hierarchy is unnecessary, this type is
@@ -123,6 +130,8 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           connectorFeatureId={connectorFeatureId}
           initialMetadata={initialMetadata}
+          initialEditStep={initialEditStep}
+          focusTrapProps={focusTrapProps}
         />
       );
     }
@@ -146,7 +155,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           initialValues={initialValues}
           initialMetadata={initialMetadata}
-          isServerless={isServerless}
+          focusTrapProps={focusTrapProps}
         />
       );
     }
@@ -177,25 +186,28 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
-    isServerless,
+    fieldsMetadata,
+    contentManagement,
+    uiActions,
+    onChangeMetaData,
     id,
     ruleTypeId,
-    validConsumers,
-    multiConsumerSelection,
     onCancel,
     onSubmit,
-    onChangeMetaData,
     isFlyout,
     showMustacheAutocompleteSwitch,
     connectorFeatureId,
     initialMetadata,
+    initialEditStep,
+    focusTrapProps,
     consumer,
+    multiConsumerSelection,
     hideInterval,
+    validConsumers,
     filteredRuleTypes,
     shouldUseRuleProducer,
     canShowConsumerSelection,
     initialValues,
-    fieldsMetadata,
   ]);
 
   return (

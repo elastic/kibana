@@ -9,17 +9,20 @@
 
 import { css } from '@emotion/react';
 import classNames from 'classnames';
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
-import {
+import type {
   EuiAvatarProps,
-  EuiCollapsibleNavGroup,
-  EuiFlyout,
   EuiFlyoutProps,
-  EuiPanel,
-  EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
+} from '@elastic/eui';
+import {
+  EuiCollapsibleNavGroup,
+  EuiFlyout,
+  EuiPanel,
+  EuiSideNav,
   EuiSpacer,
   EuiTitle,
   htmlIdGenerator,

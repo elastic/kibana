@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { sortBy } from 'lodash';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { booleanRt } from '../runtime_types/boolean_rt';
@@ -47,7 +47,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
     }
 
     case 'float': {
-      if (setting.key === 'transaction_sample_rate') {
+      if (setting.key === 'transaction_sample_rate' || setting.key === 'sampling_rate') {
         return {
           validation: floatFourDecimalPlacesRt,
           ...setting,

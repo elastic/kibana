@@ -1,0 +1,1005 @@
+openapi: 3.0.0
+info:
+  title: Post Attack discovery generate API endpoint
+  version: '2023-10-31'
+paths:
+  /api/attack_discovery/_generate:
+    post:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{
+                "alertsIndexPattern": ".alerts-security.alerts-default",
+                "anonymizationFields": [
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "@timestamp",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "aKiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.feature",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "saiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.data",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "sqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.entropy",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "s6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.extension",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "tKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.metrics",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "taiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.operation",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "tqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.path",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "t6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.score",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "uKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.version",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "uaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "_id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "Z6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "agent.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "aaiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "cloud.availability_zone",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "aqiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "cloud.provider",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "a6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "cloud.region",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "bKiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "destination.ip",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "baiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "dns.question.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "bqiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "dns.question.type",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "b6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.category",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "cKiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.dataset",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "caiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.module",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "cqiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.outcome",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "c6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.Ext.original.path",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "dKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.hash.sha256",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "daiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "dqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.path",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "d6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "group.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "eKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "group.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "eaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.asset.criticality",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "eqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.name",
+                    "allowed": true,
+                    "anonymized": true,
+                    "namespace": "default",
+                    "id": "e6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.os.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "fKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.os.version",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "faiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.risk.calculated_level",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "fqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.risk.calculated_score_norm",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "f6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.original_time",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "gKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.risk_score",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "gaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.description",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "gqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "g6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.references",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "hKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.framework",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "haiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.tactic.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "hqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.tactic.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "h6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.tactic.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "iKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "iaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "iqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "i6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.subtechnique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "jKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.subtechnique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "jaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.subtechnique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "jqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.severity",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "j6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.workflow_status",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "kKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "message",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "kaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "network.protocol",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "kqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.bytes_compressed_present",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "nKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.malware_signature.all_names",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "naiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.malware_signature.primary.matches",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "nqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.malware_signature.primary.signature.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "n6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.token.integrity_level_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "oKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.args",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "k6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.exists",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "lKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.signing_id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "laiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.status",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "lqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.subject_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "l6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.trusted",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "mKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.command_line",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "maiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.executable",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "mqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.exit_code",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "m6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.hash.md5",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "oaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.hash.sha1",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "oqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.hash.sha256",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "o6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "pKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.args",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "paiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.args_count",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "pqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.exists",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "p6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.status",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "qKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.subject_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "qaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.trusted",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "qqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.command_line",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "q6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.executable",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "rKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "raiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.pe.original_file_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "rqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.pid",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "r6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.working_directory",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "sKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "rule.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "uqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "rule.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "u6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "source.ip",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "vKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.framework",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "vaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.tactic.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "vqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.tactic.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "v6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.tactic.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "wKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "waiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "wqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "w6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.subtechnique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "xKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.subtechnique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "xaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.subtechnique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "xqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.asset.criticality",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "x6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.domain",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "yKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.name",
+                    "allowed": true,
+                    "anonymized": true,
+                    "namespace": "default",
+                    "id": "yaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.risk.calculated_level",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "yqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.risk.calculated_score_norm",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "y6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.target.name",
+                    "allowed": true,
+                    "anonymized": true,
+                    "namespace": "default",
+                    "id": "zKiJW5gB4U27o8XO8oLg"
+                  }
+                ],
+                "replacements": {},
+                "size": 100,
+                "subAction": "invokeAI",
+                "apiConfig": {
+                  "connectorId": "example-connector-id",
+                  "actionTypeId": ".gen-ai"
+                },
+                "connectorName": "GPT-5 Chat",
+                "end": "now",
+                "start": "now-24h"
+              }'
+      x-labels: [ess, serverless]
+      operationId: PostAttackDiscoveryGenerate
+      x-state: Technical Preview; added in 9.2.0
+      summary: Generate attack discoveries from alerts
+      description: >-
+        Initiates the generation of attack discoveries by analyzing security alerts using AI.
+        Returns an execution UUID that can be used to track the generation progress and
+        retrieve results. Results may also be retrieved via the find endpoint. `Technical preview`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../../common_attributes.schema.yaml#/components/schemas/AttackDiscoveryGenerationConfig'
+      responses:
+        '200':
+          description: Attack discovery generation initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  execution_uuid:
+                    $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                    description: >-
+                      The unique identifier for the attack discovery generation process.
+                      Use this UUID to track the generation progress and retrieve results
+                      via the find endpoint.
+                    example: "edd26039-0990-4d9f-9829-2a1fcacb77b5"
+                required:
+                  - execution_uuid
+        '400':
+          description: Bad request - Invalid input parameters or configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                    description: HTTP status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Error type
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: Human-readable error message describing what went wrong
+                    example: "Invalid request parameters"
+                required:
+                  - status_code
+                  - error
+                  - message
+components:
+  x-codegen-enabled: true

@@ -5,112 +5,77 @@
  * 2.0.
  */
 
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  EuiSwitch,
-  EuiSwitchEvent,
-} from '@elastic/eui';
-import React, { useCallback } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FieldDefinitionConfig } from '@kbn/streams-schema';
-import useToggle from 'react-use/lib/useToggle';
-import { SchemaField } from '../types';
+import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import type { SchemaField } from '../types';
 
 interface FieldFormFormatProps {
-  field: SchemaField;
+  value: SchemaField['format'];
   onChange: (format: SchemaField['format']) => void;
 }
 
-const DEFAULT_FORMAT = 'strict_date_optional_time||epoch_millis';
-
-const POPULAR_FORMATS = [
-  DEFAULT_FORMAT,
-  'strict_date_optional_time',
-  'date_optional_time',
-  'epoch_millis',
-  'basic_date_time',
-] as const;
-
-type PopularFormatOption = (typeof POPULAR_FORMATS)[number];
+const POPULAR_FORMATS_SUGGESTIONS = [
+  { label: 'strict_date_optional_time' },
+  { label: 'date_optional_time' },
+  { label: 'epoch_millis' },
+  { label: 'basic_date_time' },
+];
 
 export const typeSupportsFormat = (type?: FieldDefinitionConfig['type']) => {
   if (!type) return false;
   return ['date'].includes(type);
 };
 
-export const FieldFormFormat = (props: FieldFormFormatProps) => {
-  if (!typeSupportsFormat(props.field.type)) {
-    return null;
-  }
-  return <FieldFormFormatSelection {...props} />;
-};
+export const FieldFormFormat = ({ value, onChange }: FieldFormFormatProps) => {
+  const selectedOptions = useMemo(() => {
+    if (!value) return [];
 
-const FieldFormFormatSelection = (props: FieldFormFormatProps) => {
-  const [isFreeform, toggleIsFreeform] = useToggle(
-    props.field.format !== undefined && !isPopularFormat(props.field.format)
-  );
+    const matchingSuggestion = POPULAR_FORMATS_SUGGESTIONS.find(
+      (suggestion) => suggestion.label === value
+    );
+    return matchingSuggestion ? [matchingSuggestion] : [{ label: value }];
+  }, [value]);
 
-  const onToggle = useCallback(
-    (e: EuiSwitchEvent) => {
-      if (!e.target.checked && !isPopularFormat(props.field.format)) {
-        props.onChange(undefined);
-      }
-      toggleIsFreeform();
-    },
-    [props, toggleIsFreeform]
+  const handleSelectionChange = (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const selectedOption = newSelectedOptions[0];
+    const newFieldValue = selectedOption?.label ?? '';
+    onChange(newFieldValue);
+  };
+
+  const handleCreateOption = (searchValue: string) => {
+    const normalizedValue = searchValue.trim();
+    if (normalizedValue) {
+      handleSelectionChange([{ label: normalizedValue }]);
+    }
+  };
+
+  const placeholderText = i18n.translate(
+    'xpack.streams.schemaEditor.fieldFormatSelector.placeholderText',
+    { defaultMessage: 'Select or type the field format...' }
   );
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        {isFreeform ? <FreeformFormatInput {...props} /> : <PopularFormatsSelector {...props} />}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSwitch
-          label={i18n.translate('xpack.streams.fieldFormFormatSelection.freeformToggleLabel', {
-            defaultMessage: 'Use freeform mode',
-          })}
-          checked={isFreeform}
-          onChange={onToggle}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-const PopularFormatsSelector = (props: FieldFormFormatProps) => {
-  return (
-    <EuiSelect
-      hasNoInitialSelection={
-        props.field.format === undefined || !isPopularFormat(props.field.format)
-      }
-      data-test-subj="streamsAppSchemaEditorFieldFormatPopularFormats"
-      onChange={(event) => {
-        props.onChange(event.target.value as PopularFormatOption);
-      }}
-      value={props.field.format}
-      options={POPULAR_FORMATS.map((format) => ({
-        text: format,
-        value: format,
-      }))}
+    <EuiComboBox
+      data-test-subj="streamsAppSchemaEditorFieldFormFormat"
+      placeholder={placeholderText}
+      aria-label={placeholderText}
+      options={POPULAR_FORMATS_SUGGESTIONS}
+      selectedOptions={selectedOptions}
+      onChange={handleSelectionChange}
+      onCreateOption={handleCreateOption}
+      singleSelection={{ asPlainText: true }}
+      isClearable
+      fullWidth
+      customOptionText={i18n.translate(
+        'xpack.streams.schemaEditor.fieldFormatSelector.customOptionText',
+        {
+          defaultMessage: 'Add {searchValue} as a custom format',
+          values: { searchValue: '{searchValue}' },
+        }
+      )}
     />
   );
-};
-
-const FreeformFormatInput = (props: FieldFormFormatProps) => {
-  return (
-    <EuiFieldText
-      data-test-subj="streamsAppFieldFormFormatField"
-      placeholder="yyyy/MM/dd"
-      value={props.field.format ?? ''}
-      onChange={(e) => props.onChange(e.target.value)}
-    />
-  );
-};
-
-const isPopularFormat = (value?: string): value is PopularFormatOption => {
-  return POPULAR_FORMATS.includes(value as PopularFormatOption);
 };

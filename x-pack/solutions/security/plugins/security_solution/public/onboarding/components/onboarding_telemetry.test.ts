@@ -31,7 +31,7 @@ describe('useOnboardingTelemetry', () => {
 
   describe('when opening a card', () => {
     it('should report card open event on default topic', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardOpen('testCard' as OnboardingCardId);
 
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
@@ -41,7 +41,7 @@ describe('useOnboardingTelemetry', () => {
     });
 
     it('should report card open event on another topic', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardOpen('testCard2' as OnboardingCardId);
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
         OnboardingHubEventTypes.OnboardingHubStepOpen,
@@ -50,7 +50,7 @@ describe('useOnboardingTelemetry', () => {
     });
 
     it('should report card auto open event', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardOpen('testCard' as OnboardingCardId, { auto: true });
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
         OnboardingHubEventTypes.OnboardingHubStepOpen,
@@ -61,7 +61,7 @@ describe('useOnboardingTelemetry', () => {
 
   describe('when completing a card', () => {
     it('should report card complete event on the default topic', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardComplete('testCard' as OnboardingCardId);
 
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
@@ -71,7 +71,7 @@ describe('useOnboardingTelemetry', () => {
     });
 
     it('should report card complete event on the another topic', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardComplete('testCard2' as OnboardingCardId);
 
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
@@ -81,7 +81,7 @@ describe('useOnboardingTelemetry', () => {
     });
 
     it('should report card auto complete event', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardComplete('testCard' as OnboardingCardId, { auto: true });
 
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
@@ -93,7 +93,7 @@ describe('useOnboardingTelemetry', () => {
 
   describe('when clicking a card link', () => {
     it('should report card link clicked event on the default topic', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardLinkClicked('testCard' as OnboardingCardId, 'link1');
 
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
@@ -103,12 +103,34 @@ describe('useOnboardingTelemetry', () => {
     });
 
     it('should report card link clicked event on another topic', () => {
-      const { result } = renderHook(useOnboardingTelemetry);
+      const { result } = renderHook(() => useOnboardingTelemetry());
       result.current.reportCardLinkClicked('testCard2' as OnboardingCardId, 'link1');
 
       expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
         OnboardingHubEventTypes.OnboardingHubStepLinkClicked,
         { originStepId: 'testTopic#testCard2', stepLinkId: 'link1' }
+      );
+    });
+  });
+
+  describe('when clicking a card selector', () => {
+    it('should report card selector clicked event on the default topic', () => {
+      const { result } = renderHook(() => useOnboardingTelemetry());
+      result.current.reportCardSelectorClicked('testCard' as OnboardingCardId, 'selector1');
+
+      expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
+        OnboardingHubEventTypes.OnboardingHubStepSelectorClicked,
+        { originStepId: 'testCard', selectorId: 'selector1' }
+      );
+    });
+
+    it('should report card selector clicked event on another topic', () => {
+      const { result } = renderHook(() => useOnboardingTelemetry());
+      result.current.reportCardSelectorClicked('testCard2' as OnboardingCardId, 'selector2');
+
+      expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
+        OnboardingHubEventTypes.OnboardingHubStepSelectorClicked,
+        { originStepId: 'testTopic#testCard2', selectorId: 'selector2' }
       );
     });
   });

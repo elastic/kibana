@@ -9,7 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { ScoutLogger, ScoutTestConfig } from '../../types';
+import type { ScoutLogger, ScoutTestConfig } from '../../types';
 
 export function createScoutConfig(
   configDir: string,
@@ -17,11 +17,13 @@ export function createScoutConfig(
   log: ScoutLogger
 ): ScoutTestConfig {
   if (!configDir || !fs.existsSync(configDir)) {
-    throw new Error(`Directory with servers configuration is missing`);
+    throw new Error(
+      `Directory with servers configuration is missing or does not exist: ${configDir}`
+    );
   }
 
   const configPath = path.join(configDir, `${configName}.json`);
-  log.serviceMessage('config', `Reading test servers confiuration from file: ${configPath}`);
+  log.serviceMessage('config', `Reading test servers configuration from file: ${configPath}`);
 
   const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as ScoutTestConfig;
 

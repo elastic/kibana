@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EngineStatus } from '.';
-
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
-import { mockGlobalState } from '../../../../../common/mock';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseEntityStore = jest.fn();
@@ -25,11 +23,6 @@ jest.mock('../../hooks/use_entity_store', () => ({
 const mockDownloadBlob = jest.fn();
 jest.mock('../../../../../common/utils/download_blob', () => ({
   downloadBlob: () => mockDownloadBlob(),
-}));
-
-const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: () => mockedExperimentalFeatures,
 }));
 
 describe('EngineStatus', () => {

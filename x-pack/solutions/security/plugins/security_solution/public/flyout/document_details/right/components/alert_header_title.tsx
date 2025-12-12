@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
@@ -18,10 +18,16 @@ import { useRefetchByScope } from '../hooks/use_refetch_by_scope';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
+  FLYOUT_ALERT_HEADER_TITLE_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+} from './test_ids';
 import { Assignees } from './assignees';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { getAlertTitle } from '../../shared/utils';
+import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -36,17 +42,13 @@ export const AlertHeaderTitle = memo(() => {
     dataFormattedForFieldBrowser,
     eventId,
     scopeId,
-    isPreview,
+    isRulePreview,
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
-  const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
   const ruleTitle = useMemo(
     () =>
       href ? (
@@ -78,72 +80,79 @@ export const AlertHeaderTitle = memo(() => {
     refetchFlyoutData();
   }, [refetch, refetchFlyoutData]);
 
+  const riskScore = useMemo(
+    () => (
+      <AlertHeaderBlock
+        hasBorder
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
+            defaultMessage="Risk score"
+          />
+        }
+        data-test-subj={RISK_SCORE_TITLE_TEST_ID}
+      >
+        <RiskScore getFieldsData={getFieldsData} />
+      </AlertHeaderBlock>
+    ),
+    [getFieldsData]
+  );
+
+  const assignees = useMemo(
+    () => (
+      <AlertHeaderBlock
+        hasBorder
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.header.assignedTitle"
+            defaultMessage="Assignees"
+          />
+        }
+        data-test-subj={ASSIGNEES_TITLE_TEST_ID}
+      >
+        <Assignees
+          eventId={eventId}
+          assignedUserIds={alertAssignees}
+          onAssigneesUpdated={onAssigneesUpdated}
+          showAssignees={!isRulePreview}
+        />
+      </AlertHeaderBlock>
+    ),
+    [alertAssignees, eventId, isRulePreview, onAssigneesUpdated]
+  );
+
   return (
     <>
-      <DocumentSeverity />
+      <DocumentSeverity getFieldsData={getFieldsData} />
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
       {ruleTitle}
       <EuiSpacer size="m" />
-      {securitySolutionNotesDisabled ? (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem>
-            <DocumentStatus />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <RiskScore />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Assignees
-              eventId={eventId}
-              assignedUserIds={alertAssignees}
-              onAssigneesUpdated={onAssigneesUpdated}
-              isPreview={isPreview}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem style={blockStyles}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-              <EuiFlexItem>
-                <DocumentStatus />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <RiskScore />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem style={blockStyles}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-              <EuiFlexItem>
-                <Assignees
-                  eventId={eventId}
-                  assignedUserIds={alertAssignees}
-                  onAssigneesUpdated={onAssigneesUpdated}
-                  isPreview={isPreview}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Notes />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="s"
+        responsive={false}
+        wrap
+        data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+      >
+        <EuiFlexItem css={blockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <DocumentStatus />
+            </EuiFlexItem>
+            <EuiFlexItem>{riskScore}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={blockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>{assignees}</EuiFlexItem>
+            <EuiFlexItem>
+              <Notes />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 });

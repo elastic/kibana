@@ -246,6 +246,7 @@ export const BulkCreateCasesResponseRt = rt.strict({
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
   title: null,
+  'incremental_id.text': null,
 });
 
 export const CasesFindRequestSortFieldsRt = rt.keyof({
@@ -532,6 +533,27 @@ export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
 export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
 
+export const FindCasesContainingAllDocumentsRequestRt = rt.exact(
+  rt.type({
+    /**
+     * The IDs of the documents to find cases for.
+     */
+    documentIds: rt.union([rt.array(rt.string), rt.undefined]),
+    /**
+     * The IDs of the alerts to find cases for. TODO: remove this in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
+     */
+    alertIds: rt.union([rt.array(rt.string), rt.undefined]),
+    // The IDs of the cases to find alerts for.
+    caseIds: rt.array(rt.string),
+  })
+);
+
+export const FindCasesContainingAllAlertsResponseRt = rt.exact(
+  rt.type({
+    casesWithAllAttachments: rt.array(rt.string),
+  })
+);
+
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
@@ -557,3 +579,9 @@ export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
 export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;
 export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;
+export type FindCasesContainingAllDocumentsRequest = rt.TypeOf<
+  typeof FindCasesContainingAllDocumentsRequestRt
+>;
+export type FindCasesContainingAllAlertsResponse = rt.TypeOf<
+  typeof FindCasesContainingAllAlertsResponseRt
+>;

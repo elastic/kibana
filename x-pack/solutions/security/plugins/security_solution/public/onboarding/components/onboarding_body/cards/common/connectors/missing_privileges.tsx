@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
+import {
+  BasicMissingPrivilegesCallOut,
+  MissingPrivilegesDescription,
+} from '../../../../../../common/components/missing_privileges';
 import * as i18n from './translations';
-import { MissingPrivilegesCallOut, MissingPrivilegesDescription } from '../missing_privileges';
 
 const LEVEL_TRANSLATION = {
   read: i18n.REQUIRED_PRIVILEGES_CONNECTORS_READ,
@@ -20,9 +24,9 @@ ConnectorsMissingPrivilegesDescription.displayName = 'ConnectorsMissingPrivilege
 
 export const ConnectorsMissingPrivilegesCallOut = React.memo<{ level: 'read' | 'all' }>(
   ({ level }) => (
-    <MissingPrivilegesCallOut>
+    <BasicMissingPrivilegesCallOut>
       <ConnectorsMissingPrivilegesDescription level={level} />
-    </MissingPrivilegesCallOut>
+    </BasicMissingPrivilegesCallOut>
   )
 );
 ConnectorsMissingPrivilegesCallOut.displayName = 'ConnectorsMissingPrivilegesCallOut';

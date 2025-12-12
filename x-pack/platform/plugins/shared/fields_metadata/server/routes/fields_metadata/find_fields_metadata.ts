@@ -8,8 +8,8 @@
 import { createValidationFunction } from '../../../common/runtime_types';
 import { FIND_FIELDS_METADATA_URL } from '../../../common/fields_metadata';
 import * as fieldsMetadataV1 from '../../../common/fields_metadata/v1';
-import { FieldsMetadataBackendLibs } from '../../lib/shared_types';
-import { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
+import type { FieldsMetadataBackendLibs } from '../../lib/shared_types';
+import type { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
 import { PackageNotFoundError } from '../../services/fields_metadata/errors';
 
 export const initFindFieldsMetadataRoute = ({
@@ -20,17 +20,17 @@ export const initFindFieldsMetadataRoute = ({
     .get({
       access: 'internal',
       path: FIND_FIELDS_METADATA_URL,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization to keep available the access to static fields metadata such as ECS fields. For other sources (fleet integrations), appropriate checks are performed at the API level.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization to keep available the access to static fields metadata such as ECS fields. For other sources (fleet integrations), appropriate checks are performed at the API level.',
-          },
-        },
         validate: {
           request: {
             query: createValidationFunction(fieldsMetadataV1.findFieldsMetadataRequestQueryRT),
@@ -38,7 +38,7 @@ export const initFindFieldsMetadataRoute = ({
         },
       },
       async (_requestContext, request, response) => {
-        const { attributes, fieldNames, integration, dataset } = request.query;
+        const { attributes, fieldNames, integration, dataset, source } = request.query;
         const [_core, _startDeps, startContract] = await getStartServices();
 
         const fieldsMetadataClient = await startContract.getClient(request);
@@ -48,6 +48,7 @@ export const initFindFieldsMetadataRoute = ({
             fieldNames,
             integration,
             dataset,
+            source,
           });
 
           const responsePayload: FindFieldsMetadataResponsePayload = { fields: {} };

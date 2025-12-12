@@ -7,11 +7,11 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import type { ThreatMappingEntries } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
 
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 
-const entries: ThreatMappingEntries = [
+const entries: ThreatMappingEntry[] = [
   {
     field: 'field.one',
     type: 'mapping',
@@ -83,7 +83,7 @@ describe('EntryDeleteButtonComponent', () => {
   });
 
   test('it disables button if it is the only entry left and no field has been selected', () => {
-    const emptyEntries: ThreatMappingEntries = [
+    const emptyEntries: ThreatMappingEntry[] = [
       {
         field: '',
         type: 'mapping',

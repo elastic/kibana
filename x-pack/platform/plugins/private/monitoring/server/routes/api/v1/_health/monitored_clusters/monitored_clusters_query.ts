@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import type { TimeRange } from '../../../../../../common/http_api/shared';
 import {
   getBeatDataset,
   getElasticsearchDataset,

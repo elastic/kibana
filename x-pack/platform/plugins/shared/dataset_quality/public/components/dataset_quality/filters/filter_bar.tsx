@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useCallback } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const placeholder = i18n.translate('xpack.datasetQuality.filterBar.placeholder', {
   defaultMessage: 'Filter data sets',
+});
+
+const ariaLabel = i18n.translate('xpack.datasetQuality.filterBar.ariaLabel', {
+  defaultMessage: 'Type a data set name',
 });
 
 export interface FilterBarComponentProps {
@@ -34,7 +39,7 @@ export const FilterBar = ({ query, onQueryChange }: FilterBarComponentProps) => 
       value={query ?? ''}
       onChange={onChange}
       isClearable={true}
-      aria-label={placeholder}
+      aria-label={ariaLabel}
     />
   );
 };

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { AppDataType, SeriesUrl } from '../../types';
+import type { AppDataType, SeriesUrl } from '../../types';
 import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
@@ -91,7 +91,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       )}
       {series.dataType && (
         <EuiToolTip position="top" content={SELECT_DATA_TYPE_TOOLTIP}>
-          <EuiBadge>{currDataType?.label}</EuiBadge>
+          <EuiBadge tabIndex={0}>{currDataType?.label}</EuiBadge>
         </EuiToolTip>
       )}
     </>

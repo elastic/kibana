@@ -8,13 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
-import { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { initMVTRoutes } from './mvt/mvt_routes';
 import { initIndexingRoutes } from './data_indexing/indexing_routes';
-import { StartDeps } from './types';
+import type { StartDeps } from './types';
 
 export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
   const router: IRouter<DataRequestHandlerContext> = coreSetup.http.createRouter();
@@ -23,17 +23,17 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
     .get({
       path: `${FONTS_API_PATH}/{fontstack}/{range}`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is only serving static files.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because it is only serving static files.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -69,17 +69,17 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
     .get({
       path: INDEX_SETTINGS_API_PATH,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             query: schema.object({

@@ -9,27 +9,30 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
+import type {
+  HttpSetup,
+  NotificationsSetup,
+  DocLinksStart,
+  ApplicationStart,
+} from '@kbn/core/public';
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Redirect, RouteComponentProps, useLocation } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
-import {
-  createStorage,
-  createHistory,
-  createSettings,
-  AutocompleteInfo,
-  setStorage,
-} from '../services';
+import type { AutocompleteInfo } from '../services';
+import { createStorage, createHistory, createSettings, setStorage } from '../services';
 import { createUsageTracker } from '../services/tracker';
 import { loadActiveApi } from '../lib/kb';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
-import { ConsoleStartServices } from '../types';
+import type { ConsoleStartServices } from '../types';
 
 const RedirectToShell = () => {
   const location = useLocation();
@@ -41,6 +44,9 @@ export interface BootDependencies extends ConsoleStartServices {
   docLinkVersion: string;
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
+  application: ApplicationStart;
+  data: DataPublicPluginStart;
+  licensing: LicensingPluginStart;
   element: HTMLElement;
   history: RouteComponentProps['history'];
   docLinks: DocLinksStart['links'];
@@ -52,6 +58,9 @@ export async function renderApp({
   notifications,
   docLinkVersion,
   usageCollection,
+  application,
+  data,
+  licensing,
   element,
   history,
   http,
@@ -95,6 +104,9 @@ export async function renderApp({
             objectStorageClient,
             http,
             autocompleteInfo,
+            application,
+            data,
+            licensing,
           },
           config: {
             isDevMode,

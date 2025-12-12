@@ -11,6 +11,15 @@ import { formatRequest } from './format_request';
 
 describe('formatRequest', () => {
   const version = 1;
+  it('should encode the path if the optional or required param is provided', () => {
+    const pathParams = { param: 'test/Param/>?%/' };
+    const resultOptionalEnd = formatRequest(`GET /api/endpoint/{param?} ${version}`, pathParams);
+    expect(resultOptionalEnd.pathname).toBe('/api/endpoint/test%2FParam%2F%3E%3F%25%2F');
+    const resultRequiredEnd = formatRequest(`GET /api/endpoint/{param} ${version}`, pathParams);
+    expect(resultRequiredEnd.pathname).toBe('/api/endpoint/test%2FParam%2F%3E%3F%25%2F');
+    const resultRequiredMid = formatRequest(`GET /api/{param}/endpoint/ ${version}`, pathParams);
+    expect(resultRequiredMid.pathname).toBe('/api/test%2FParam%2F%3E%3F%25%2F/endpoint/');
+  });
   it('should return the correct path if the optional or required param is provided', () => {
     const pathParams = { param: 'testParam' };
     const resultOptionalEnd = formatRequest(`GET /api/endpoint/{param?} ${version}`, pathParams);

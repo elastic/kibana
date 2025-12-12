@@ -18,6 +18,39 @@ if is_pr_with_label "ci:cloud-fips-deploy"; then
   EXTRA_BUILD_ARGS=("--skip-docker-cloud")
 fi
 
+KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
+case "$KIBANA_MEMORY_SIZE" in
+  1024|2048|4096|8192)
+    echo "--- Kibana node memory size: ${KIBANA_MEMORY_SIZE}MB"
+    ;;
+  *)
+    echo "Error: KIBANA_MEMORY_SIZE must be one of: 1024, 2048, 4096, 8192. Got: $KIBANA_MEMORY_SIZE"
+    exit 1
+    ;;
+esac
+
+ES_ZONE_COUNT=${ES_ZONE_COUNT:-1}
+case "$ES_ZONE_COUNT" in
+  1|2|3)
+    echo "--- Elasticsearch zone count: ${ES_ZONE_COUNT}"
+    ;;
+  *)
+    echo "Error: ES_ZONE_COUNT must be 1, 2, or 3. Got: $ES_ZONE_COUNT"
+    exit 1
+    ;;
+esac
+
+ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-2048}
+case "$ES_HOT_TIER_MEMORY_SIZE" in
+  1024|2048|4096|8192|16384|32768)
+    echo "--- Elasticsearch hot tier memory size: ${ES_HOT_TIER_MEMORY_SIZE}MB"
+    ;;
+  *)
+    echo "Error: ES_HOT_TIER_MEMORY_SIZE must be one of: 1024, 2048, 4096, 8192, 16384, 32768. Got: $ES_HOT_TIER_MEMORY_SIZE"
+    exit 1
+    ;;
+esac
+
 echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
@@ -29,7 +62,14 @@ ELASTICSEARCH_SHA=$(curl -s $ELASTICSEARCH_MANIFEST_URL | jq -r '.sha')
 ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$VERSION-$ELASTICSEARCH_SHA"
 
 KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/$KIBANA_IMAGE_FLAVOR:$VERSION-$GIT_COMMIT"
-CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
+
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  PR_NUMBER="$GITHUB_PR_NUMBER"
+else
+  PR_NUMBER="$BUILDKITE_PULL_REQUEST"
+fi
+
+CLOUD_DEPLOYMENT_NAME="kibana-pr-$PR_NUMBER"
 
 set +e
 DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; echo $?)
@@ -49,13 +89,14 @@ else
     --docker-push \
     --skip-docker-ubi \
     --skip-docker-fips \
+    --skip-docker-cloud-fips \
     --skip-docker-wolfi \
     --skip-docker-serverless \
     --skip-docker-contexts \
     "${EXTRA_BUILD_ARGS[@]}"
 fi
 
-if is_pr_with_label "ci:cloud-redeploy"; then
+if is_pr_with_label "ci:cloud-redeploy" || is_pr_with_label "ci:entity-store-performance"; then
   echo "--- Shutdown Previous Deployment"
   CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
   if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" == "null" ]; then
@@ -75,8 +116,16 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
-    .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
+    .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'" |
+    .resources.kibana[0].plan.cluster_topology[0].size.value = '$KIBANA_MEMORY_SIZE' |
+    (.resources.elasticsearch[0].plan.cluster_topology[] | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
+    (.resources.elasticsearch[0].plan.cluster_topology[] | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
+
+  # Verify that zone_count was set (at least one topology element should have zone_count)
+  if ! jq -e '.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count' /tmp/deploy.json > /dev/null 2>&1; then
+    echo "⚠️  Warning: No cluster_topology elements with zone_count found in deployment configuration"
+  fi
 
   echo "Creating deployment..."
   ecctl deployment create --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
@@ -115,8 +164,15 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 else
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
-    (.. | select(.version? != null).version) = "'$VERSION'"
+    (.. | select(.version? != null).version) = "'$VERSION'" |
+    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
+    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
     ' > /tmp/deploy.json
+
+  # Verify that zone_count was set (at least one topology element should have zone_count)
+  if ! jq -e '.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count' /tmp/deploy.json > /dev/null 2>&1; then
+    echo "⚠️  Warning: No cluster_topology elements with zone_count found in deployment update payload"
+  fi
 
   echo "Updating deployment..."
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"

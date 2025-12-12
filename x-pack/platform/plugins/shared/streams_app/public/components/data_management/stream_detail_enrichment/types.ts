@@ -5,34 +5,77 @@
  * 2.0.
  */
 
-import {
-  DateProcessorConfig,
-  DissectProcessorConfig,
-  FieldDefinitionType,
-  GrokProcessorConfig,
-  ProcessorDefinition,
-  ProcessorTypeOf,
-} from '@kbn/streams-schema';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type {
+  ConvertProcessor,
+  DateProcessor,
+  DissectProcessor,
+  DropDocumentProcessor,
+  GrokProcessor,
+  ManualIngestPipelineProcessor,
+  ReplaceProcessor,
+  SetProcessor,
+  StreamlangConditionBlockWithUIAttributes,
+} from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
 
-export type WithUIAttributes<T extends ProcessorDefinition> = T & {
+/**
+ * Processors' types
+ */
+
+export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
+  patterns: DraftGrokExpression[];
+};
+
+export type DissectFormState = DissectProcessor;
+export type DateFormState = DateProcessor;
+export type DropFormState = DropDocumentProcessor;
+export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
+export type ConvertFormState = ConvertProcessor;
+export type ReplaceFormState = ReplaceProcessor;
+
+export type SetFormState = SetProcessor;
+
+export type SpecialisedFormState =
+  | GrokFormState
+  | DissectFormState
+  | DateFormState
+  | DropFormState
+  | ManualIngestPipelineFormState
+  | ConvertFormState
+  | ReplaceFormState
+  | SetFormState;
+
+export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;
+
+export type ExtractBooleanFields<TInput> = NonNullable<
+  TInput extends Record<string, unknown>
+    ? {
+        [K in keyof TInput]: boolean extends TInput[K] ? K : never;
+      }[keyof TInput]
+    : never
+>;
+
+/**
+ * Data sources types
+ */
+export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
   id: string;
-  type: ProcessorTypeOf<T>;
 };
 
-export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
+export type RandomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'latest-samples' }
+>;
 
-export interface DetectedField {
-  name: string;
-  type?: FieldDefinitionType | 'system';
-}
+export type KqlSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'kql-samples' }
+>;
 
-export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
-  type: 'grok';
-  patterns: Array<{ value: string }>;
-};
-
-export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
-
-export type DateFormState = DateProcessorConfig & { type: 'date' };
-
-export type ProcessorFormState = GrokFormState | DissectFormState | DateFormState;
+export type CustomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'custom-samples' }
+>;

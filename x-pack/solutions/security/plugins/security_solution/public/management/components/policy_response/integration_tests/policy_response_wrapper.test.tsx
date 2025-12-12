@@ -24,6 +24,7 @@ import {
   LINUX_DEADLOCK_MESSAGE,
   policyResponseTitles,
 } from '../policy_response_friendly_names';
+import { set } from '@kbn/safer-lodash-set';
 
 jest.mock('../../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
@@ -238,8 +239,8 @@ describe('when on the policy response', () => {
     const component = await renderOpenedTree();
 
     const artifacts = [
-      ...commonPolicyResponse.Endpoint.policy.applied.artifacts.global.identifiers,
-      ...commonPolicyResponse.Endpoint.policy.applied.artifacts.user.identifiers,
+      ...(commonPolicyResponse.Endpoint.policy.applied.artifacts.global.identifiers ?? []),
+      ...(commonPolicyResponse.Endpoint.policy.applied.artifacts.user.identifiers ?? []),
     ];
 
     const names = component.queryAllByTestId('endpointPolicyResponseArtifactName');
@@ -253,6 +254,22 @@ describe('when on the policy response', () => {
     expect(names[1].textContent).toBe(artifacts[1].name);
     expect(sha256s[0].textContent).toContain(artifacts[0].sha256.substring(0, 5)); // Rendered sha256 is truncated
     expect(sha256s[1].textContent).toContain(artifacts[1].sha256.substring(0, 5));
+  });
+
+  it('should handle artifacts.global or artifacts.user being empty objects', async () => {
+    const policyResponse = createPolicyResponse();
+    set(policyResponse, 'Endpoint.policy.applied.artifacts.global', {});
+    set(policyResponse, 'Endpoint.policy.applied.artifacts.user', {});
+
+    runMock(policyResponse);
+    const component = await renderOpenedTree();
+    const names = component.queryAllByTestId('endpointPolicyResponseArtifactName');
+    const sha256s = component.queryAllByTestId('endpointPolicyResponseArtifactSha256');
+    const copyButtons = component.queryAllByTestId('endpointPolicyResponseArtifactCopyButton');
+
+    expect(names).toHaveLength(0);
+    expect(sha256s).toHaveLength(0);
+    expect(copyButtons).toHaveLength(0);
   });
 
   it('should not show any numbered badges if all actions are successful', async () => {

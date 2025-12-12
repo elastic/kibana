@@ -7,8 +7,6 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
@@ -18,10 +16,24 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/email';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  serviceParamValueToKbnSettingMap as emailKbnSettings,
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/email';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
@@ -30,10 +42,10 @@ import {
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
-import { portSchema } from '../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -47,9 +59,6 @@ export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ActionParamsType
 >;
 
-// config definition
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
-
 // these values for `service` require users to fill in host/port/secure
 export const CUSTOM_HOST_PORT_SERVICES: string[] = [AdditionalEmailServices.OTHER];
 
@@ -61,31 +70,41 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
-const ConfigSchemaProps = {
-  service: schema.string({ defaultValue: 'other' }),
-  host: schema.nullable(schema.string()),
-  port: schema.nullable(portSchema()),
-  secure: schema.nullable(schema.boolean()),
-  from: schema.string(),
-  hasAuth: schema.boolean({ defaultValue: true }),
-  tenantId: schema.nullable(schema.string()),
-  clientId: schema.nullable(schema.string()),
-  oauthTokenUrl: schema.nullable(schema.string()),
-};
-
-const ConfigSchema = schema.object(ConfigSchemaProps);
-
 function validateConfig(
   configObject: ConnectorTypeConfigType,
   validatorServices: ValidatorServices
 ) {
   const config = configObject;
   const { configurationUtilities } = validatorServices;
+  const awsSesConfig = configurationUtilities.getAwsSesConfig();
+  const enabledServices = configurationUtilities.getEnabledEmailServices();
+
+  const serviceKey = config.service as keyof typeof emailKbnSettings;
+  if (
+    !enabledServices.includes('*') &&
+    config.service in emailKbnSettings &&
+    !enabledServices.includes(emailKbnSettings[serviceKey])
+  ) {
+    throw new Error(
+      `[service]: "${
+        emailKbnSettings[serviceKey]
+      }" is not in the list of enabled email services: ${enabledServices.join(',')}`
+    );
+  }
 
   const emails = [config.from];
-  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
+    isSender: true,
+  });
   if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
+  }
+
+  const { oauthTokenUrl } = config;
+  if (oauthTokenUrl && !configurationUtilities.isUriAllowed(oauthTokenUrl)) {
+    throw new Error(
+      `[oauthTokenUrl]: host name value for '${oauthTokenUrl}' is not in the allowedHosts configuration`
+    );
   }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
@@ -105,6 +124,21 @@ function validateConfig(
 
     if (config.tenantId == null) {
       throw new Error('[tenantId] is required');
+    }
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
+    if (awsSesConfig.host !== config.host && awsSesConfig.port !== config.port) {
+      throw new Error(
+        '[ses.host]/[ses.port] does not match with the configured AWS SES host/port combination'
+      );
+    }
+    if (awsSesConfig.host !== config.host) {
+      throw new Error('[ses.host] does not match with the configured AWS SES host');
+    }
+    if (awsSesConfig.port !== config.port) {
+      throw new Error('[ses.port] does not match with the configured AWS SES port');
+    }
+    if (awsSesConfig.secure !== config.secure) {
+      throw new Error(`[ses.secure] must be ${awsSesConfig.secure} for AWS SES`);
     }
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // If configured `service` requires custom host/port/secure settings, validate that they are set
@@ -136,43 +170,6 @@ function validateConfig(
     }
   }
 }
-
-// secrets definition
-
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-
-const SecretsSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  clientSecret: schema.nullable(schema.string()),
-};
-
-const SecretsSchema = schema.object(SecretsSchemaProps);
-
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-const ParamsSchemaProps = {
-  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  subject: schema.string(),
-  message: schema.string(),
-  messageHTML: schema.nullable(schema.string()),
-  // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
-  // provide a more contextual URL in the footer (ex: URL to the alert details page)
-  kibanaFooterLink: schema.object({
-    path: schema.string({ defaultValue: '/' }),
-    text: schema.string({
-      defaultValue: i18n.translate('xpack.stackConnectors.email.kibanaFooterLinkText', {
-        defaultMessage: 'Go to Elastic',
-      }),
-    }),
-  }),
-};
-
-export const ParamsSchema = schema.object(ParamsSchemaProps);
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
@@ -220,19 +217,17 @@ function validateConnector(
 }
 
 // connector type definition
-export const ConnectorTypeId = '.email';
 export function getConnectorType(params: GetConnectorTypeParams): EmailConnectorType {
   const { publicBaseUrl } = params;
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.email.title', {
-      defaultMessage: 'Email',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {
@@ -287,6 +282,7 @@ async function executor(
     connectorUsageCollector,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
+  const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
   let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
@@ -294,7 +290,9 @@ async function executor(
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
   }
 
-  invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from]);
+  invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from], {
+    isSender: true,
+  });
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[from]: ${invalidEmailsMessage}` };
   }
@@ -305,6 +303,16 @@ async function executor(
         status: 'error',
         actionId,
         message: `HTML email can only be sent via notifications`,
+      };
+    }
+  }
+
+  if (params.attachments != null) {
+    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+      return {
+        status: 'error',
+        actionId,
+        message: `Email attachments can only be sent via notifications`,
       };
     }
   }
@@ -328,6 +336,10 @@ async function executor(
     if (config.oauthTokenUrl !== null) {
       transport.oauthTokenUrl = config.oauthTokenUrl;
     }
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
+    transport.host = awsSesConfig.host;
+    transport.port = awsSesConfig.port;
+    transport.secure = awsSesConfig.secure;
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // use configured host/port/secure values
     // already validated service or host/port is not null ...
@@ -344,15 +356,31 @@ async function executor(
     transport.service = config.service;
   }
 
-  let actualMessage = params.message;
-  const actualHTMLMessage = params.messageHTML;
+  let actualMessage: string | null | undefined = params.message;
+  let actualHTMLMessage: string | null | undefined = params.messageHTML;
+
+  actualMessage = trimMessageIfRequired(
+    actionId,
+    logger,
+    'message',
+    actualMessage,
+    configurationUtilities
+  );
+
+  actualHTMLMessage = trimMessageIfRequired(
+    actionId,
+    logger,
+    'messageHTML',
+    actualHTMLMessage,
+    configurationUtilities
+  );
 
   if (configurationUtilities.enableFooterInEmail()) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,
       kibanaFooterLink: params.kibanaFooterLink,
     });
-    actualMessage = `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
+    actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
   const sendEmailOptions: SendEmailOptions = {
@@ -366,11 +394,12 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: actualMessage,
+      message: actualMessage || 'no message set',
       messageHTML: actualHTMLMessage,
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
+    attachments: params.attachments,
   };
 
   let result;
@@ -409,6 +438,29 @@ async function executor(
 }
 
 // utilities
+
+function trimMessageIfRequired(
+  connectorId: string,
+  logger: Logger,
+  paramName: string,
+  message: string | null | undefined,
+  configurationUtilities: ActionsConfigurationUtilities
+): string | null | undefined {
+  if (!message) return message;
+
+  const maxLength = configurationUtilities.getMaxEmailBodyLength();
+
+  if (message.length < maxLength) {
+    return message;
+  }
+
+  const logMessage = `connector "${connectorId}" email parameter ${paramName} length ${message.length} exceeds xpack.actions.email.maximum_body_length bytes (${maxLength}) and has been trimmed`;
+  logger.warn(logMessage);
+
+  const warningMessage = `Your message's length of ${message.length} exceeded the ${maxLength} bytes limit that is set for the connector "${connectorId}" and was trimmed. You can modify the limit by increasing the value specified for the xpack.actions.email.maximum_body_length setting.`;
+  const trimmedMessage = message.slice(0, maxLength);
+  return `${warningMessage}\n\n${trimmedMessage}`;
+}
 
 function getServiceNameHost(service: string): string | null {
   if (service === AdditionalEmailServices.ELASTIC_CLOUD) {

@@ -6,7 +6,7 @@
  */
 
 import { euiPaletteForStatus } from '@elastic/eui';
-import { ConfigProps, SeriesConfig } from '../../types';
+import type { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   FILTER_RECORDS,

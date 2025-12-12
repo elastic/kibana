@@ -16,7 +16,7 @@ interface PopoverTooltipProps {
 
 export function PopoverTooltip({
   ariaLabel,
-  iconType = 'questionInCircle',
+  iconType = 'question',
   children,
 }: PopoverTooltipProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

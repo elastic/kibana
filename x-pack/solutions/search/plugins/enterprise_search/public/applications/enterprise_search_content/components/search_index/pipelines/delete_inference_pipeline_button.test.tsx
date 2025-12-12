@@ -11,7 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 

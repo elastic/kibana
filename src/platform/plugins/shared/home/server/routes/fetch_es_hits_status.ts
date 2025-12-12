@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
 export const registerHitsStatusRoute = (router: IRouter) => {
   router.post(

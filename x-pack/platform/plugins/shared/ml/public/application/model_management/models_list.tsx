@@ -13,14 +13,13 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   type EuiSearchBarProps,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -381,9 +380,7 @@ export const ModelsList: FC<Props> = ({
                 {tooltipContent ? (
                   <>
                     &nbsp;
-                    <EuiToolTip content={tooltipContent}>
-                      <EuiIcon type={'warning'} color="warning" />
-                    </EuiToolTip>
+                    <EuiIconTip content={tooltipContent} type="warning" color="warning" />
                   </>
                 ) : null}
               </EuiText>
@@ -585,7 +582,7 @@ export const ModelsList: FC<Props> = ({
   }
 
   return (
-    <>
+    <div data-test-subj="mlTrainedModelsList">
       <SpaceManagementContextWrapper>
         <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -656,6 +653,7 @@ export const ModelsList: FC<Props> = ({
               isElserCalloutVisible ? (
                 <>
                   <EuiCallOut
+                    announceOnMount={false}
                     size="s"
                     title={
                       <FormattedMessage
@@ -744,6 +742,6 @@ export const ModelsList: FC<Props> = ({
           />
         ) : null}
       </SpaceManagementContextWrapper>
-    </>
+    </div>
   );
 };

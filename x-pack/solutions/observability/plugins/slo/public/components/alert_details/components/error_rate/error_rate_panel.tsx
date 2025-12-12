@@ -21,12 +21,12 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_EVALUATION_VALUE, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { GetSLOResponse } from '@kbn/slo-schema';
+import type { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ErrorRateChart } from '../../../slo/error_rate_chart';
-import { TimeRange } from '../../../slo/error_rate_chart/use_lens_definition';
-import { BurnRateAlert } from '../../types';
+import type { TimeRange } from '../../../slo/error_rate_chart/use_lens_definition';
+import type { BurnRateAlert } from '../../types';
 import { getActionGroupWindow } from '../../utils/alert';
 import { getLastDurationInUnit } from '../../utils/last_duration_i18n';
 import { getDataTimeRange } from '../../utils/time_range';
@@ -55,7 +55,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="loading" />;
+    return <EuiLoadingChart size="m" data-test-subj="loading" />;
   }
 
   if (!slo) {

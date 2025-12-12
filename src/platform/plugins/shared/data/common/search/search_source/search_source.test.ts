@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
+import type Rx from 'rxjs';
+import { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { buildExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { SearchFieldValue, SearchSource, SearchSourceDependencies, SortDirection } from '.';
-import { AggConfigs, AggTypesRegistryStart } from '../..';
+import type { SearchFieldValue, SearchSourceDependencies } from '.';
+import { SearchSource, SortDirection } from '.';
+import type { AggTypesRegistryStart } from '../..';
+import { AggConfigs } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
-import { SearchSourceSearchOptions } from './types';
+import type { SearchSourceSearchOptions } from './types';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -1098,6 +1102,53 @@ describe('SearchSource', () => {
     });
   });
 
+  describe('projectRouting field', () => {
+    test('should accept projectRouting as a field', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      expect(searchSource.getField('projectRouting')).toBe('_alias:_origin');
+    });
+
+    test('should serialize projectRouting in getSerializedFields', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBe('_alias:_origin');
+    });
+
+    test('should serialize undefined projectRouting', () => {
+      searchSource.setField('projectRouting', undefined);
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBeUndefined();
+    });
+
+    test('should include projectRouting in serialize()', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(JSON.parse(searchSourceJSON).projectRouting).toBe('_alias:_origin');
+    });
+
+    test('should include project_routing in ES request body when projectRouting is set to _alias:_origin', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const request = searchSource.getSearchRequestBody();
+      expect(request.project_routing).toBe('_alias:_origin');
+    });
+
+    test('should not include project_routing in ES request body when projectRouting is set to ALL (sanitized)', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', 'ALL');
+      const request = searchSource.getSearchRequestBody();
+      // 'ALL' gets sanitized to undefined since it means "search all projects" which is the default
+      expect(request.project_routing).toBeUndefined();
+    });
+
+    test('should not include project_routing in ES request body when projectRouting is undefined', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', undefined);
+      const request = searchSource.getSearchRequestBody();
+      expect(request.project_routing).toBeUndefined();
+    });
+  });
+
   describe('fetch$', () => {
     describe('responses', () => {
       test('should return partial results', async () => {
@@ -1614,6 +1665,49 @@ describe('SearchSource', () => {
       expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatch(
         'kibana_context'
       );
+    });
+  });
+
+  describe('parseActiveIndexPatternFromQueryString', () => {
+    it.each([
+      {
+        indexPattern: '_index: logs-2024-06-27',
+        expectedResult: ['logs-2024-06-27'],
+        description: 'a single index name without wildcards',
+      },
+      {
+        indexPattern: '_index: logs-*',
+        expectedResult: ['logs-*'],
+        description: 'a single index name with wildcards',
+      },
+      {
+        indexPattern: '_index: logs-2024-06-27 or _index: foo-2024-06-27',
+        expectedResult: ['logs-2024-06-27', 'foo-2024-06-27'],
+        description: 'multiple index names',
+      },
+      {
+        indexPattern: "_index: 'logs-2024-06-27'",
+        expectedResult: ['logs-2024-06-27'],
+        description: 'index names with single quotes',
+      },
+      {
+        indexPattern: '_index: "logs-2024-06-27"',
+        expectedResult: ['logs-2024-06-27'],
+        description: 'index names with double quotes',
+      },
+      {
+        indexPattern: '_index: "logs-2024-06-27\'',
+        expectedResult: [],
+        description: 'index pattern with mixed quotes',
+      },
+      {
+        indexPattern: 'foo: bar',
+        expectedResult: [],
+        description: 'no index pattern when _index is not present',
+      },
+    ])('should extract $description', ({ indexPattern: actualIndexPattern, expectedResult }) => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString(actualIndexPattern);
+      expect(result).toEqual(expectedResult);
     });
   });
 });

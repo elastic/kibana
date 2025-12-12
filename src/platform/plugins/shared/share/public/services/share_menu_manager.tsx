@@ -10,49 +10,52 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, ThemeServiceStart, ToastsSetup, UserProfileService } from '@kbn/core/public';
-import { ShowShareMenuOptions } from '../types';
-import { ShareMenuRegistryStart } from './share_menu_registry';
-import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService, ShareMenuItemV2 } from '../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import type { ShowShareMenuOptions } from '../types';
+import type { ShareRegistry } from './share_menu_registry';
+import type { ShareConfigs } from '../types';
 import { ShareMenu } from '../components/share_tabs';
+import { ExportMenu } from '../components/export_integrations';
+
+interface ShareMenuManagerStartDeps {
+  core: CoreStart;
+  isServerless: boolean;
+  resolveShareItemsForShareContext: ShareRegistry['resolveShareItemsForShareContext'];
+}
 
 export class ShareMenuManager {
   private isOpen = false;
-
   private container = document.createElement('div');
 
-  start(
-    core: CoreStart,
-    urlService: BrowserUrlService,
-    shareRegistry: ShareMenuRegistryStart,
-    disableEmbed: boolean,
-    anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
-  ) {
+  start({ core, resolveShareItemsForShareContext, isServerless }: ShareMenuManagerStartDeps) {
     return {
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
        * the given `anchorElement`. If the context menu is already opened, a call to this method closes it.
        * @param options
        */
-      toggleShareContextMenu: (options: ShowShareMenuOptions) => {
+      toggleShareContextMenu: async (options: ShowShareMenuOptions) => {
         const onClose = () => {
           this.onClose();
           options.onClose?.();
         };
-        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
-        const anonymousAccess = anonymousAccessServiceProvider?.();
-        this.toggleShareContextMenu({
+
+        const menuItems = await resolveShareItemsForShareContext({
           ...options,
-          allowEmbed: disableEmbed ? false : options.allowEmbed,
+          isServerless,
           onClose,
-          menuItems,
-          urlService,
-          anonymousAccess,
-          toasts: core.notifications.toasts,
-          publicAPIEnabled: !disableEmbed,
-          ...core,
         });
+
+        this.toggleShareContextMenu(
+          {
+            ...options,
+            onClose,
+            menuItems,
+            publicAPIEnabled: !isServerless,
+          },
+          core.rendering
+        );
       },
     };
   }
@@ -62,41 +65,29 @@ export class ShareMenuManager {
     this.isOpen = false;
   };
 
-  private toggleShareContextMenu({
-    anchorElement,
-    allowEmbed,
-    allowShortUrl,
-    objectId,
-    objectType,
-    objectTypeMeta,
-    sharingData,
-    menuItems,
-    shareableUrl,
-    shareableUrlLocatorParams,
-    embedUrlParamExtensions,
-    showPublicUrlSwitch,
-    urlService,
-    anonymousAccess,
-    snapshotShareWarning,
-    onClose,
-    disabledShareUrl,
-    isDirty,
-    toasts,
-    delegatedShareUrlHandler,
-    publicAPIEnabled,
-    ...startServices
-  }: ShowShareMenuOptions & {
-    anchorElement: HTMLElement;
-    menuItems: ShareMenuItemV2[];
-    urlService: BrowserUrlService;
-    anonymousAccess: AnonymousAccessServiceContract | undefined;
-    onClose: () => void;
-    isDirty: boolean;
-    toasts: ToastsSetup;
-    userProfile: UserProfileService;
-    theme: ThemeServiceStart;
-    i18n: CoreStart['i18n'];
-  }) {
+  private toggleShareContextMenu(
+    {
+      anchorElement,
+      allowShortUrl,
+      objectId,
+      objectType,
+      objectTypeAlias,
+      objectTypeMeta,
+      sharingData,
+      menuItems,
+      shareableUrl,
+      shareableUrlLocatorParams,
+      onClose,
+      isDirty,
+      asExport,
+      publicAPIEnabled,
+      onSave,
+    }: ShowShareMenuOptions & {
+      menuItems: ShareConfigs[];
+      onClose: () => void;
+    },
+    rendering: RenderingService
+  ) {
     if (this.isOpen) {
       onClose();
       return;
@@ -108,36 +99,28 @@ export class ShareMenuManager {
     let unmount: ReturnType<ReturnType<typeof toMountPoint>>;
 
     const mount = toMountPoint(
-      <ShareMenu
-        shareContext={{
-          publicAPIEnabled,
-          anchorElement,
-          allowEmbed,
-          allowShortUrl,
+      React.createElement(asExport ? ExportMenu : ShareMenu, {
+        shareContext: {
           objectId,
           objectType,
+          objectTypeAlias,
           objectTypeMeta,
+          anchorElement,
+          publicAPIEnabled,
+          allowShortUrl,
           sharingData,
           shareableUrl,
           shareableUrlLocatorParams,
-          delegatedShareUrlHandler,
-          embedUrlParamExtensions,
-          anonymousAccess,
-          showPublicUrlSwitch,
-          urlService,
-          snapshotShareWarning,
-          disabledShareUrl,
           isDirty,
           shareMenuItems: menuItems,
-          toasts,
           onClose: () => {
             onClose();
             unmount();
           },
-          ...startServices,
-        }}
-      />,
-      startServices
+          onSave,
+        },
+      }),
+      rendering
     );
 
     const openModal = () => {

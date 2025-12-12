@@ -10,7 +10,7 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostKnowledgeBaseRequest } from '../../__mocks__/request';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Post Knowledge Base Route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -20,7 +20,7 @@ describe('Post Knowledge Base Route', () => {
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
   const mockUser = {
-    username: 'my_username',
+    username: 'elastic',
     authentication_realm: {
       type: 'my_realm_type',
       name: 'my_realm_name',

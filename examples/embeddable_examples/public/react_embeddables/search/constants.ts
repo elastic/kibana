@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SEARCH_EMBEDDABLE_ID = 'searchEmbeddableDemo';
+export const SEARCH_EMBEDDABLE_TYPE = 'search_embeddable';
 export const ADD_SEARCH_ACTION_ID = 'create_search_demo';

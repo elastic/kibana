@@ -40,7 +40,7 @@ interface CellActionsProps {
  * Security cell action wrapper for document details flyout
  */
 export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
-  const { scopeId, isPreview } = useDocumentDetailsContext();
+  const { scopeId, isRulePreview } = useDocumentDetailsContext();
   const { alertsTableRef } = useAlertsContext();
 
   const data = useMemo(() => ({ field, value }), [field, value]);
@@ -49,8 +49,9 @@ export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray,
     [scopeId, isObjectArray, alertsTableRef]
   );
   const disabledActionTypes = useMemo(
-    () => (isPreview ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN] : []),
-    [isPreview]
+    () =>
+      isRulePreview ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN] : [],
+    [isRulePreview]
   );
 
   return (

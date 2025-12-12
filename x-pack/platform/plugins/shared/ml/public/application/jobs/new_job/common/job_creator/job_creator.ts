@@ -483,7 +483,7 @@ export class JobCreator {
 
   /**
    * Extends assigned calendars with created job id.
-   * @private
+   * @internal
    */
   private async _updateCalendars() {
     if (this._calendars.length === 0) {

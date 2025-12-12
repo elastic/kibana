@@ -6,14 +6,21 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
-import { InferenceUsageInfo } from '../../../../../types';
+import type { InferenceUsageInfo } from '../../../../../types';
 import { RenderMessageWithIcon } from '../../component/render_message_with_icon';
 import { ScanUsageResults } from '../../component/scan_usage_results';
 
@@ -28,6 +35,8 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
   onConfirm,
   inferenceEndpoint,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [listOfUsages, setListOfUsages] = useState<InferenceUsageInfo[]>([]);
   const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
@@ -68,6 +77,8 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       buttonColor="danger"
       cancelButtonText={i18n.CANCEL}
       confirmButtonText={i18n.DELETE_ACTION_LABEL}

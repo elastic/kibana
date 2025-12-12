@@ -33,27 +33,28 @@ export const useLayoutStyles = () => {
       --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
         ${euiTheme.colors.vis.euiColorVis0};
 
-      &.kbnGrid {
-        // remove margin top + bottom on grid in favour of padding in row
-        padding-bottom: 0px;
+      --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
+        ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
+
+      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
+        ${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
+        0 -${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
+
+      .kbnGridSection--targeted {
+        background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+          calc((var(--kbnGridGutterSize) / 2) * -1px);
+        background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
+          calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
+        background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
+          ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
+        background-origin: content-box;
       }
 
-      .kbnGridRow {
-        // use padding in grid row so that dotted grid is not cut off
-        padding-bottom: calc(var(--kbnGridGutterSize) * 1px);
+      // styles for the area where the panel and/or section header will be dropped
+      .kbnGridPanel--dragPreview,
+      .kbnGridSection--dragPreview {
+        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
 
-        &--targeted {
-          background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
-            calc((var(--kbnGridGutterSize) / 2) * -1px);
-          background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
-            calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-          background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
-            ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
-          background-origin: content-box;
-        }
-      }
-
-      .kbnGridPanel--dragPreview {
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
       }
 
@@ -71,7 +72,7 @@ export const useLayoutStyles = () => {
           mask-position: bottom ${euiTheme.size.s} right ${euiTheme.size.s};
           mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cg clip-path='url(%23clip0_472_172810)'%3E%3Ccircle cx='7' cy='1' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip1_472_172810)'%3E%3Ccircle cx='4' cy='4' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='4' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip2_472_172810)'%3E%3Ccircle cx='1' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='4' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='7' r='1' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E");
 
-          background-color: ${euiTheme.colors.borderBaseFormsControl};
+          background-color: ${euiTheme.colors.borderBaseProminent};
         }
         &:hover,
         &:focus-visible {
@@ -84,11 +85,59 @@ export const useLayoutStyles = () => {
       .kbnGridPanel--active {
         // overwrite the border style on panels + hover actions for active panels
         --hoverActionsBorderStyle: var(--dashboardActivePanelBorderStyle);
+        --hoverActionsBoxShadowStyle: var(--dashboardHoverActionsActivePanelBoxShadow);
+        --hoverActionsSingleWrapperBoxShadowStyle: var(
+          --dashboardHoverActionsActivePanelBoxShadow--singleWrapper
+        );
 
         // prevent the hover actions transition when active to prevent "blip" on resize
         .embPanel__hoverActions {
           transition: none;
         }
+      }
+
+      // styling for what the grid section header looks like when being dragged
+      .kbnGridSectionHeader--active {
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        outline: var(--dashboardActivePanelBorderStyle);
+        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+        padding-left: 8px;
+        // hide accordian arrow + panel count text when row is being dragged
+        & .kbnGridSectionTitle--button svg,
+        & .kbnGridLayout--panelCount {
+          display: none;
+        }
+      }
+
+      // styling for the section footer
+      .kbnGridSectionFooter {
+        height: ${euiTheme.size.s};
+        display: block;
+        border-top: ${euiTheme.border.thin};
+        // highlight the footer of a targeted section to make it clear where the section ends
+        &--targeted {
+          border-top: ${euiTheme.border.width.thick} solid
+            ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.5)};
+        }
+      }
+      // hide footer border when section is being dragged
+      &:has(.kbnGridSectionHeader--active) .kbnGridSectionHeader--active + .kbnGridSectionFooter {
+        border-top: none;
+      }
+
+      // apply a "fade out" effect when dragging a section header over another section, indicating that dropping is not allowed
+      .kbnGridSection--blocked {
+        z-index: 1;
+        background-color: ${transparentize(euiTheme.colors.backgroundBaseSubdued, 0.5)};
+        // the oulines of panels extend past 100% by 1px on each side, so adjust for that
+        margin-left: -1px;
+        margin-top: -1px;
+        width: calc(100% + 2px);
+        height: calc(100% + 2px);
+      }
+
+      &:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle {
+        cursor: not-allowed !important;
       }
     `;
   }, [euiTheme]);

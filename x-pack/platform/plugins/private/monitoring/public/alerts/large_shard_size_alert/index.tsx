@@ -15,12 +15,11 @@ import {
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import type { MonitoringConfig } from '../../types';
-import {
-  LazyExpression,
-  LazyExpressionProps,
-} from '../components/param_details_form/lazy_expression';
+import type { LazyExpressionProps } from '../components/param_details_form/lazy_expression';
+import { LazyExpression } from '../components/param_details_form/lazy_expression';
+import { getDescriptionFields } from '../get_description_fields';
 
-interface ValidateOptions extends RuleTypeParams {
+export interface ValidateOptions extends RuleTypeParams {
   indexPattern: string;
 }
 
@@ -60,5 +59,6 @@ export function createLargeShardSizeAlertType(
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+    getDescriptionFields,
   };
 }

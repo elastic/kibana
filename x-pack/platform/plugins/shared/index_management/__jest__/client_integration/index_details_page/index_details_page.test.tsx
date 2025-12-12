@@ -6,13 +6,16 @@
  */
 
 import { setupEnvironment } from '../helpers';
-import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
+import type { IndexDetailsPageTestBed } from './index_details_page.helpers';
+import { setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 
 import React from 'react';
 
-import { IndexDetailsSection, IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
-import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
+import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
+import { IndexDetailsSection } from '../../../common/constants';
+import type { Index } from '../../../common';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 
 import {
   breadcrumbService,
@@ -55,6 +58,15 @@ const requestOptions = {
   query: undefined,
   version: undefined,
 };
+const mockIndexMappingResponse: any = {
+  ...testIndexMappings.mappings,
+  properties: {
+    ...testIndexMappings.mappings.properties,
+    name: {
+      type: 'text',
+    },
+  },
+};
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -78,7 +90,7 @@ describe('<IndexDetailsPage />', () => {
         dependencies: {
           url: {
             locators: {
-              get: () => ({ navigate: jest.fn() }),
+              get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }),
             },
           },
         },
@@ -222,13 +234,12 @@ describe('<IndexDetailsPage />', () => {
       expect(tabContent).toEqual(JSON.stringify(testIndexStats, null, 2));
     });
 
-    it('sets the docs link href from the documenation service', async () => {
+    it('sets the docs link href from the documentation service', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       const docsLinkHref = testBed.actions.stats.getDocsLinkHref();
-      // the url from the mocked docs mock
-      expect(docsLinkHref).toEqual(
-        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/indices-stats.html'
-      );
+
+      expect(docsLinkHref).toMatch(/^https:\/\/www\.elastic\.co\//);
+      expect(docsLinkHref).toContain('indices-stats');
     });
 
     it('renders a warning message if an index is not open', async () => {
@@ -534,23 +545,12 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Semantic Text Banner', () => {
-    const mockIndexMappingResponseWithoutSemanticText: any = {
-      ...testIndexMappings.mappings,
-      properties: {
-        ...testIndexMappings.mappings.properties,
-        name: {
-          type: 'text',
-        },
-      },
-    };
+    const mockIndexMappingResponseWithoutSemanticText: any = mockIndexMappingResponse;
 
     const mockIndexMappingResponseWithSemanticText: any = {
-      ...testIndexMappings.mappings,
+      ...mockIndexMappingResponse,
       properties: {
-        ...testIndexMappings.mappings.properties,
-        name: {
-          type: 'text',
-        },
+        ...mockIndexMappingResponse.properties,
         sem_text: {
           type: 'semantic_text',
           inference_id: '.elser-2-elasticsearch',
@@ -615,6 +615,7 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsFilter')).toBe(true);
+      expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(false);
     });
 
     it('displays the mappings in the table view', async () => {
@@ -644,20 +645,47 @@ describe('<IndexDetailsPage />', () => {
     it('sets the docs link href from the documentation service', async () => {
       const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
       // the url from the mocked docs mock
-      expect(docsLinkHref).toEqual(
-        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
-      );
+      expect(docsLinkHref).toContain('mapping');
+    });
+    describe('No saved mapping fields', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: {
+            properties: {},
+          },
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      });
+      it('displays empty mappings prompt', async () => {
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(true);
+      });
+      it('hides filter, search and toggle while adding fields', async () => {
+        await testBed.actions.mappings.clickAddFieldButton();
+        expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsFilter')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsSaveMappings')).toBe(true);
+      });
+      it('does not display empty prompt after adding a field', async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(true);
+        await testBed.actions.mappings.clickAddFieldButton();
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(false);
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'name', type: 'text' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(false);
+      });
     });
     describe('Filter field by filter Type', () => {
-      const mockIndexMappingResponse: any = {
-        ...testIndexMappings.mappings,
-        properties: {
-          ...testIndexMappings.mappings.properties,
-          name: {
-            type: 'text',
-          },
-        },
-      };
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
           mappings: mockIndexMappingResponse,
@@ -672,6 +700,7 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.mappings.clickFilterByFieldType();
         expect(testBed.exists('euiSelectableList')).toBe(true);
         expect(testBed.exists('indexDetailsMappingsFilterByFieldTypeSearch')).toBe(true);
+        expect(testBed.exists('clearFilters')).toBe(true);
         expect(testBed.exists('euiSelectableList')).toBe(true);
       });
       test('can select a field type and list view changes', async () => {
@@ -684,6 +713,23 @@ describe('<IndexDetailsPage />', () => {
         );
         expect(testBed.find('@timestampField-fieldName')).not.toContain('@timestamp');
       });
+
+      test('can clear selected field types', async () => {
+        expect(testBed.find('fieldName')).toHaveLength(2);
+        await testBed.actions.mappings.clickFilterByFieldType();
+        expect(testBed.actions.mappings.isClearFilterFieldTypeDisabled()).toBe(true);
+
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+        expect(testBed.actions.mappings.isClearFilterFieldTypeDisabled()).toBe(false);
+        expect(testBed.find('fieldName')).toHaveLength(1);
+
+        await testBed.actions.mappings.clearFilterFieldType();
+
+        expect(testBed.find('fieldName')).toHaveLength(2);
+      });
+
       test('can search field with filter', async () => {
         expect(testBed.find('fieldName')).toHaveLength(2);
 
@@ -700,15 +746,6 @@ describe('<IndexDetailsPage />', () => {
       });
     });
     describe('Add a new field ', () => {
-      const mockIndexMappingResponse: any = {
-        ...testIndexMappings.mappings,
-        properties: {
-          ...testIndexMappings.mappings.properties,
-          name: {
-            type: 'text',
-          },
-        },
-      };
       beforeEach(async () => {
         await act(async () => {
           testBed = await setup({ httpSetup });
@@ -894,6 +931,8 @@ describe('<IndexDetailsPage />', () => {
                           switch (id) {
                             case INFERENCE_LOCATOR:
                               return mockInferenceManagementLocator;
+                            case 'DISCOVER_APP_LOCATOR':
+                              return createMockLocator('DISCOVER_APP_LOCATOR');
                             default:
                               throw new Error(`Unknown locator id: ${id}`);
                           }
@@ -970,28 +1009,6 @@ describe('<IndexDetailsPage />', () => {
         expect(testBed.actions.mappings.isErrorDisplayed()).toBe(true);
       });
     });
-
-    it('renders the content set via the extensions service', async () => {
-      const mappingsContent = 'test mappings extension';
-      await act(async () => {
-        testBed = await setup({
-          httpSetup,
-          dependencies: {
-            services: {
-              extensionsService: {
-                _indexMappingsContent: {
-                  renderContent: () => mappingsContent,
-                },
-              },
-            },
-          },
-        });
-      });
-      testBed.component.update();
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      const content = testBed.actions.getActiveTabContent();
-      expect(content).toContain(mappingsContent);
-    });
   });
 
   describe('Settings tab', () => {
@@ -1022,9 +1039,7 @@ describe('<IndexDetailsPage />', () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       const docsLinkHref = testBed.actions.settings.getDocsLinkHref();
       // the url from the mocked docs mock
-      expect(docsLinkHref).toEqual(
-        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/index-modules.html#index-modules-settings'
-      );
+      expect(docsLinkHref).toContain('index-settings');
     });
 
     describe('error loading settings', () => {

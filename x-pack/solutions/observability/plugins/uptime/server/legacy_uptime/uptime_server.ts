@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { getRequestValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION } from '../../common/constants';
 import { DynamicSettingsSchema } from './routes/dynamic_settings';
-import { UptimeRouter } from '../types';
+import type { UptimeRouter } from '../types';
 import { uptimeRequests } from './lib/requests';
 import {
   createRouteWithAuth,
@@ -18,7 +18,7 @@ import {
   legacyUptimeRestApiRoutes,
   uptimeRouteWrapper,
 } from './routes';
-import { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';
+import type { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';
 
 import { statusCheckAlertFactory } from './lib/alerts/status_check';
 import { tlsAlertFactory } from './lib/alerts/tls';
@@ -89,11 +89,11 @@ export const initUptimeServer = (
             options: {
               tags: options?.tags,
             },
+            security,
           })
           .addVersion(
             {
               version: INITIAL_REST_VERSION,
-              security,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,
@@ -117,11 +117,11 @@ export const initUptimeServer = (
             options: {
               tags: options?.tags,
             },
+            security,
           })
           .addVersion(
             {
               version: INITIAL_REST_VERSION,
-              security,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,

@@ -7,23 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniqBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable, of, switchMap } from 'rxjs';
-
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  apiPublishesDataViews,
-  PublishesDataViews,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
-
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { dataService } from '../services/kibana_services';
+import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesDataViews } from '@kbn/presentation-publishing';
+import { uniqBy } from 'lodash';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, of, switchMap } from 'rxjs';
 
 export function initializeDataViewsManager(
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
-  children$: PublishingSubject<{ [key: string]: unknown }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 
@@ -44,16 +40,6 @@ export function initializeDataViewsManager(
     .pipe(
       switchMap(async ([controlGroupDataViews, childDataViews]) => {
         const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews];
-        if (allDataViews.length === 0) {
-          try {
-            const defaultDataView = await dataService.dataViews.getDefaultDataView();
-            if (defaultDataView) {
-              allDataViews.push(defaultDataView);
-            }
-          } catch (error) {
-            // ignore error getting default data view
-          }
-        }
         return uniqBy(allDataViews, 'id');
       })
     )

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { HoverActionComponentProps } from './types';
+import type { HoverActionComponentProps } from './types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { COPY_TO_CLIPBOARD, SUCCESS_TOAST_TITLE } from './translations';
 import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';

@@ -9,18 +9,26 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetActivitiesResponse,
   SentinelOneGetRemoteScriptsResponse,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { merge } from 'lodash';
+import { merge, pick } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type {
+  RunScriptActionRequestBody,
+  SentinelOneRunScriptActionRequestParams,
+} from '../../../../../../common/api/endpoint';
+import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
+import type { KillOrSuspendProcessRequestBody } from '../../../../../../common/endpoint/types';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
-import type { NormalizedExternalConnectorClient } from '../../..';
+import type { NormalizedExternalConnectorClient, ResponseActionsClientMethods } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
+import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 
 export interface SentinelOneActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;
@@ -65,7 +73,7 @@ const createSentinelOneAgentDetailsMock = (
       groupId: '9999999999999',
       groupIp: '108.77.84.x',
       groupName: 'Default Group',
-      id: '1845174760470303882',
+      id: '1-2-3',
       inRemoteShellSession: false,
       infected: false,
       installerType: '.deb',
@@ -306,15 +314,79 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
 };
 
 const createConstructorOptionsMock = (): SentinelOneActionsClientOptionsMock => {
-  return {
+  const options = {
     ...responseActionsClientMock.createConstructorOptions(),
     connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(
       createConnectorActionsClientMock()
     ),
   };
+
+  // Mock some of the Endpoint services methods
+
+  // Mock some of the ES queries against S1 indexes
+  const esClientMock = options.esClient;
+  const generator = new SentinelOneDataGenerator('seed');
+
+  applyEsClientSearchMock({
+    esClientMock,
+    index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+    response: set(
+      generator.generateAgentEsSearchResponse(),
+      'hits.hits[0].inner_hits.most_recent.hits.hits[0]._source',
+      generator.generateAgentEsDoc({ sentinel_one: { agent: { agent: { id: '1-2-3' } } } })
+    ),
+  });
+
+  return options;
+};
+
+const createKillProcessOptionsMock = (
+  overrides: Partial<KillOrSuspendProcessRequestBody> = {}
+): KillOrSuspendProcessRequestBody => {
+  return responseActionsClientMock.createKillProcessOptions({
+    // @ts-expect-error
+    parameters: { process_name: 'foo' },
+    ...overrides,
+  });
+};
+
+const createRunScriptOptionsMock = (
+  overrides: Partial<RunScriptActionRequestBody<SentinelOneRunScriptActionRequestParams>> = {}
+): RunScriptActionRequestBody<SentinelOneRunScriptActionRequestParams> => {
+  const mock =
+    responseActionsClientMock.createRunScriptOptions<SentinelOneRunScriptActionRequestParams>({
+      parameters: {
+        scriptId: createSentinelOneGetRemoteScriptsApiResponseMock().data[0].id,
+        scriptInput: '--some-option=abc',
+      },
+      ...overrides,
+    });
+
+  // Ensure only S1 parameters are defined
+  mock.parameters = pick(mock.parameters, ['scriptId', 'scriptInput']);
+
+  return mock;
+};
+
+const getOptionsForResponseActionMethodMockOverride = (method: ResponseActionsClientMethods) => {
+  if (method === 'killProcess') {
+    return createKillProcessOptionsMock();
+  }
+
+  if (method === 'runscript') {
+    return createRunScriptOptionsMock();
+  }
+
+  return responseActionsClientMock.getOptionsForResponseActionMethod(method);
 };
 
 export const sentinelOneMock = {
+  ...responseActionsClientMock,
+
+  createKillProcessOptions: createKillProcessOptionsMock,
+  createRunScriptOptions: createRunScriptOptionsMock,
+  getOptionsForResponseActionMethod: getOptionsForResponseActionMethodMockOverride,
+
   createGetAgentsResponse: createSentinelOneGetAgentsApiResponseMock,
   createSentinelOneAgentDetails: createSentinelOneAgentDetailsMock,
   createConnectorActionsClient: createConnectorActionsClientMock,

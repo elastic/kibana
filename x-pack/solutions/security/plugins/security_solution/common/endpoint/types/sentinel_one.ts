@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/connector-schemas/sentinelone';
+
 /**
  * The `activity` document ingested from SentinelOne via the integration
  *
@@ -28,6 +30,27 @@ export interface SentinelOneActivityEsDoc<TData = unknown> {
       type: number;
       /** Activity specific data */
       data: TData;
+    };
+  };
+}
+
+/**
+ * The `agent` records that are ingested by the SentinelOne integration into Elasticsearch
+ *
+ * NOTE:  not all properties are currently mapped below. Check the index definition if wanting to
+ *        see what else is available and add it below if needed
+ */
+export interface SentinelOneAgentEsDoc {
+  agent: {
+    id: string;
+    type: string;
+    version: string;
+  };
+  sentinel_one: {
+    agent: {
+      agent: {
+        id: string;
+      };
     };
   };
 }
@@ -141,3 +164,30 @@ export interface SentinelOneKillProcessResponseMeta {
   /** The SentinelOne task ID associated with the completion of the kill-process action */
   taskId: string;
 }
+
+export interface SentinelRunScriptRequestMeta extends SentinelOneIsolationRequestMeta {
+  /**
+   * The Parent Task Is that is executing script in SentinelOne.
+   * Used to check on the status of that action
+   */
+  parentTaskId: string;
+}
+
+export interface SentinelOneRunScriptResponseMeta {
+  /** The SentinelOne task ID associated with the completion of the run script action */
+  taskId: string;
+}
+
+/**
+ * A subset of properties from the SentinelOne Script API response
+ */
+export type SentinelOneScript = Pick<
+  SentinelOneGetRemoteScriptsResponse['data'][number],
+  | 'id'
+  | 'scriptDescription'
+  | 'osTypes'
+  | 'inputInstructions'
+  | 'inputExample'
+  | 'inputRequired'
+  | 'shortFileName'
+>;

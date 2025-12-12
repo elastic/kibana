@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  Dispatch,
-  PropsWithChildren,
-  SetStateAction,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
-import { AlertsGroupingState, GroupModel } from '../types';
+import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { AlertsGroupingState, GroupModel } from '../types';
 
 const initialActiveGroups = ['none'];
 
@@ -24,8 +16,11 @@ export const AlertsGroupingContext = createContext({
   setGroupingState: (() => {}) as Dispatch<SetStateAction<AlertsGroupingState>>,
 });
 
-export const AlertsGroupingContextProvider = ({ children }: PropsWithChildren<{}>) => {
-  const [groupingState, setGroupingState] = useState<AlertsGroupingState>({});
+export const AlertsGroupingContextProvider = ({
+  initialState = {},
+  children,
+}: PropsWithChildren<{ initialState?: AlertsGroupingState }>) => {
+  const [groupingState, setGroupingState] = useState<AlertsGroupingState>(initialState);
   return (
     <AlertsGroupingContext.Provider
       value={useMemo(

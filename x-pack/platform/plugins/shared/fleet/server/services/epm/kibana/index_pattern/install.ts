@@ -12,7 +12,7 @@ import { dataTypes, installationStatuses } from '../../../../../common/constants
 import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
 import { MAX_CONCURRENT_INDEX_PATTERN_OPERATIONS } from '../../../../constants';
-const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
+export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics];
 

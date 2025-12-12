@@ -22,12 +22,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
-import omit from 'lodash/omit';
+import { omit } from 'lodash';
 import type { SearchHit } from '@kbn/es-types';
 
 import styled from 'styled-components';
-
-import { useStartServices, useIsGuidedOnboardingActive } from '../../../../../../../hooks';
 
 import type { PackageInfo } from '../../../../../../../../common';
 
@@ -109,7 +107,7 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
       {previewData.map((hit) => (
         <div id={hit._id}>
           <EuiFlexGroup gutterSize={'xs'}>
-            <EuiFlexItem style={{ minWidth: '220px' }}>
+            <EuiFlexItem css={{ minWidth: '220px' }}>
               <HitTimestamp hit={hit} />
             </EuiFlexItem>
 
@@ -131,28 +129,19 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   setAgentDataConfirmed,
   troubleshootLink,
 }) => {
-  const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData({
+  const { incomingData, dataPreview, hasReachedTimeout } = usePollingIncomingData({
     agentIds,
     previewData: true,
     stopPollingAfterPreviewLength: MAX_AGENT_DATA_PREVIEW_COUNT,
   });
-  const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(incomingData, packageInfo);
+  const { numAgentsWithData } = useGetAgentIncomingData(incomingData, packageInfo);
 
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo?.name);
-  const { guidedOnboarding } = useStartServices();
-  if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
-    setAgentDataConfirmed(true);
-    if (isGuidedOnboardingActive) {
-      guidedOnboarding?.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
-        packageInfo?.name
-      );
-    }
-  }
   if (!agentDataConfirmed) {
     return (
       <>
         <EuiText>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="primary"
             iconType={EuiLoadingSpinner}

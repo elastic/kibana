@@ -16,5 +16,6 @@ export interface BannerConfiguration {
   placement: BannerPlacement;
   textContent: string;
   textColor: string;
+  linkColor: string;
   backgroundColor: string;
 }

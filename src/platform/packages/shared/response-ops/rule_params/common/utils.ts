@@ -125,7 +125,7 @@ export function validateAggType(aggType: string): string | undefined {
 }
 
 export function validateGroupBy(groupBy: string): string | undefined {
-  if (groupBy === 'all' || groupBy === 'top') {
+  if (groupBy === 'all' || groupBy === 'top' || groupBy === 'row') {
     return;
   }
 

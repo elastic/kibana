@@ -8,13 +8,12 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { OperationDefinition } from '.';
-import {
-  ReferenceBasedIndexPatternColumn,
+import type {
   GenericIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
-import type { IndexPattern } from '../../../../types';
+  StaticValueIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
+import type { OperationDefinition } from '.';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
 import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
@@ -37,14 +36,6 @@ function ofName(value: number | string | undefined) {
     defaultMessage: 'Static value: {value}',
     values: { value },
   });
-}
-
-export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'static_value';
-  params: {
-    value?: string;
-    format?: ValueFormatConfig;
-  };
 }
 
 function isStaticValueColumnLike(
@@ -129,9 +120,7 @@ export const staticValueOperation: OperationDefinition<
       label: ofName(previousParams.value),
       dataType: 'number',
       operationType: 'static_value',
-      isStaticValue: true,
       isBucketed: false,
-      scale: 'ratio',
       params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
       references: [],
     };
@@ -239,6 +228,7 @@ export const staticValueOperation: OperationDefinition<
         }
       >
         <EuiFieldNumber
+          isInvalid={!inputValueIsValid}
           fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
           compressed

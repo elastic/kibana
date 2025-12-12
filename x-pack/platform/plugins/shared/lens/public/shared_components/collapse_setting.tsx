@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CollapseFunction } from '../../common/expressions';
+import type { CollapseFunction } from '../../common/expressions';
 
 const options = [
   { text: i18n.translate('xpack.lens.collapse.none', { defaultMessage: 'None' }), value: '' },
@@ -21,9 +21,11 @@ const options = [
 export function CollapseSetting({
   value,
   onChange,
+  display,
 }: {
   value: string;
   onChange: (value: CollapseFunction) => void;
+  display?: 'rowCompressed' | 'columnCompressed';
 }) {
   return (
     <>
@@ -38,14 +40,14 @@ export function CollapseSetting({
                 'Do not show this dimension in the visualization and aggregate all metric values which have the same value for this dimension into a single number.',
             })}
           >
-            <span>
+            <span tabIndex={0}>
               {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
               {''}
-              <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+              <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
             </span>
           </EuiToolTip>
         }
-        display="rowCompressed"
+        display={display ?? 'rowCompressed'}
         fullWidth
       >
         <EuiSelect

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FoundExceptionListItemSchema } from '.';
+import type { FoundExceptionListItemSchema } from '.';
 import { getExceptionListItemSchemaMock } from '../exception_list_item_schema/index.mock';
 
 export const getFoundExceptionListItemSchemaMock = (): FoundExceptionListItemSchema => ({

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-plugin",
-  "owner": ["@elastic/obs-ai-assistant"],
+  "owner": ["@elastic/obs-ai-team"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -16,9 +16,11 @@
       "security",
       "taskManager",
       "dataViews",
-      "inference"
+      "inference",
+      "llmTasks",
+      "productDocBase"
     ],
-    "optionalPlugins": ["cloud", "serverless"],
+    "optionalPlugins": ["cloud", "serverless", "usageCollection"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []

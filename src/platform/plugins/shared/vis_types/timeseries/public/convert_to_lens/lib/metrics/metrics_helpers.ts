@@ -10,8 +10,9 @@
 import { utc } from 'moment';
 import { search } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
-import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { TimeScaleUnit } from '@kbn/lens-common';
 import { getUISettings } from '../../../services';
 import type { Metric, Panel, Series } from '../../../../common/types';
 import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
@@ -19,7 +20,7 @@ import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { buildCounterRateFormula } from './counter_rate_formula';
 import { getPipelineSeriesFormula } from './pipeline_formula';
-import { AdditionalArgs } from '../../types';
+import type { AdditionalArgs } from '../../types';
 
 const shouldCalculateReducedTimeRange = (timeRangeMode?: string) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;

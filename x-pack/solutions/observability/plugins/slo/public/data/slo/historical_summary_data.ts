@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ALL_VALUE, FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
+import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 export const SLO_NO_DATA = 'SLO_NO_DATA';
 export const NO_DATA_TO_HEALTHY_ROLLING_SLO = 'NO_DATA_TO_HEALTHY_ROLLING_SLO';

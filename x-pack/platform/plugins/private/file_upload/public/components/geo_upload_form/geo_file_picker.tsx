@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MB } from '../../../common/constants';
+import { MB } from '@kbn/file-upload-common/src/constants';
 import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
 import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
 
@@ -151,6 +151,7 @@ export class GeoFilePicker extends Component<Props, State> {
           helpText={this._renderHelpText()}
         >
           <EuiFilePicker
+            isInvalid={!!this.state.error}
             initialPromptText={i18n.translate('xpack.fileUpload.geoFilePicker.filePicker', {
               defaultMessage: 'Select or drag and drop a file',
             })}

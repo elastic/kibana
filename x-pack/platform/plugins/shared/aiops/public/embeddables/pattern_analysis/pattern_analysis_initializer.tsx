@@ -29,29 +29,28 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
+import { getCategorizationDataViewField } from '@kbn/aiops-utils';
+import { RANDOM_SAMPLER_OPTION } from '@kbn/ml-random-sampler-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
-import type { PatternAnalysisEmbeddableRuntimeState } from './types';
 import { PatternAnalysisSettings } from '../../components/log_categorization/log_categorization_for_embeddable/embeddable_menu';
 import { TimeFieldWarning } from '../../components/time_field_warning';
 import { RandomSampler } from '../../components/log_categorization/sampling_menu';
-import {
-  DEFAULT_PROBABILITY,
-  RANDOM_SAMPLER_OPTION,
-} from '../../components/log_categorization/sampling_menu/random_sampler';
-import {
-  DEFAULT_MINIMUM_TIME_RANGE_OPTION,
-  type MinimumTimeRangeOption,
-} from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
-import { getMessageField } from '../../components/log_categorization/utils';
+import { DEFAULT_PROBABILITY } from '../../components/log_categorization/sampling_menu/random_sampler';
+import { DEFAULT_MINIMUM_TIME_RANGE_OPTION } from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
+
 import { FieldSelector } from '../../components/log_categorization/log_categorization_for_embeddable/field_selector';
 import { SamplingPanel } from '../../components/log_categorization/sampling_menu/sampling_panel';
+import type {
+  MinimumTimeRangeOption,
+  PatternAnalysisEmbeddableState,
+} from '../../../common/embeddables/pattern_analysis/types';
 
 export interface PatternAnalysisInitializerProps {
-  initialInput?: Partial<PatternAnalysisEmbeddableRuntimeState>;
-  onCreate: (props: PatternAnalysisEmbeddableRuntimeState) => void;
+  initialInput?: Partial<PatternAnalysisEmbeddableState>;
+  onCreate: (props: PatternAnalysisEmbeddableState) => void;
   onCancel: () => void;
-  onPreview: (update: PatternAnalysisEmbeddableRuntimeState) => Promise<void>;
+  onPreview: (update: PatternAnalysisEmbeddableState) => Promise<void>;
   isNewPanel: boolean;
 }
 
@@ -70,7 +69,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
     },
   } = useAiopsAppContext();
 
-  const [formInput, setFormInput] = useState<PatternAnalysisEmbeddableRuntimeState>(
+  const [formInput, setFormInput] = useState<PatternAnalysisEmbeddableState>(
     pick(
       initialInput ?? {
         minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
@@ -84,7 +83,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
         'randomSamplerMode',
         'randomSamplerProbability',
       ]
-    ) as PatternAnalysisEmbeddableRuntimeState
+    ) as PatternAnalysisEmbeddableState
   );
   const [isFormValid, setIsFormValid] = useState(true);
 
@@ -95,7 +94,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
         ? i18n.translate('xpack.aiops.embeddablePatternAnalysis.attachmentTitle', {
             defaultMessage: 'Pattern analysis: {fieldName}',
             values: {
-              fieldName: formInput.fieldName,
+              fieldName: (formInput as PatternAnalysisEmbeddableState).fieldName,
             },
           })
         : '',
@@ -157,7 +156,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
               autoFocus={!formInput.dataViewId}
               fullWidth
               compressed
-              indexPatternId={formInput.dataViewId}
+              indexPatternId={formInput.dataViewId ?? ''}
               placeholder={i18n.translate(
                 'xpack.aiops.embeddablePatternAnalysis.config.dataViewSelectorPlaceholder',
                 {
@@ -223,8 +222,8 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
 };
 
 export const FormControls: FC<{
-  formInput: PatternAnalysisEmbeddableRuntimeState;
-  onChange: (update: PatternAnalysisEmbeddableRuntimeState) => void;
+  formInput: PatternAnalysisEmbeddableState;
+  onChange: (update: PatternAnalysisEmbeddableState) => void;
   onValidationChange: (isValid: boolean) => void;
 }> = ({ formInput, onChange, onValidationChange }) => {
   const dataViewId = formInput.dataViewId;
@@ -272,7 +271,7 @@ export const FormControls: FC<{
             setSelectedField(null);
             return;
           }
-          const { dataViewFields, messageField } = getMessageField(dataView);
+          const { dataViewFields, messageField } = getCategorizationDataViewField(dataView);
           setFields(dataViewFields);
           const field = dataViewFields.find((f) => f.name === formInput.fieldName);
           if (formInput.fieldName === undefined) {

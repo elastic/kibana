@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiMarkdownEditorProps } from '@elastic/eui';
+import type { EuiMarkdownEditorProps } from '@elastic/eui';
 
 /** Props for the `Markdown` component. */
 export type MarkdownProps = Partial<

@@ -20,8 +20,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
@@ -109,7 +108,7 @@ function isValid(itemValidation: ItemValidation): boolean {
 
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
+  ({ item, onChange, mode, error: submitError }) => {
     const [nameVisited, setNameVisited] = useState(false);
     const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
@@ -224,13 +223,16 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const valueLabel = useMemo(() => {
       return (
         <div>
-          <EuiToolTip
+          {VALUE_LABEL}&nbsp;
+          <EuiIconTip
+            color="subdued"
+            type="info"
+            className="eui-alignTop"
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
             content={displaySingleValueInput ? SINGLE_VALUE_LABEL_HELPER : VALUE_LABEL_HELPER}
-          >
-            <>
-              {VALUE_LABEL} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-            </>
-          </EuiToolTip>
+          />
         </div>
       );
     }, [displaySingleValueInput]);
@@ -552,6 +554,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           fullWidth
         >
           <EuiFieldText
+            isInvalid={nameVisited && !!Object.keys(errorsRef.current.name).length}
             name="name"
             value={item.name}
             onChange={handleOnNameChange}
@@ -669,9 +672,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             <EuiFormRow fullWidth>
               <EffectedPolicySelect
                 item={item}
-                options={policies}
                 onChange={handleEffectedPolicyOnChange}
-                isLoading={policiesIsLoading}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
               />

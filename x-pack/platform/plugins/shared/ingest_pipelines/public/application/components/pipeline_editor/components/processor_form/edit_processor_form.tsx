@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,17 +22,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { Form, FormDataProvider, FormHook, useFormIsModified } from '../../../../../shared_imports';
-import { ProcessorInternal } from '../../types';
+import type { FormHook } from '../../../../../shared_imports';
+import { Form, FormDataProvider, useFormIsModified } from '../../../../../shared_imports';
+import type { ProcessorInternal } from '../../types';
 import { useTestPipelineContext } from '../../context';
 import { getProcessorDescriptor } from '../shared';
 
 import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
 import { ProcessorOutput } from './processor_output';
-import { Fields } from './processor_form.container';
+import type { Fields } from './processor_form.container';
 
 export interface Props {
   isOnFailure: boolean;
@@ -42,6 +45,7 @@ export interface Props {
   resetProcessors: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
   getProcessor: () => ProcessorInternal;
+  buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
 }
 
 const updateButtonLabel = i18n.translate(
@@ -102,6 +106,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   closeFlyout,
   handleSubmit,
   resetProcessors,
+  buttonRef,
 }) => {
   const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
   const {
@@ -154,6 +159,8 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   }
 
   const isFormDirty = useFormIsModified({ form });
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <Form data-test-subj="editProcessorForm" form={form} onSubmit={handleSubmit}>
       <EuiFlyout
@@ -164,13 +171,27 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
           closeFlyout();
         }}
         outsideClickCloses={!isFormDirty}
+        aria-labelledby={flyoutTitleId}
+        focusTrapProps={{
+          returnFocus: (triggerElement) => {
+            if (buttonRef?.current) {
+              // Using setTimeout here to postpone focus until after the flyout has finished unmounting and cleaning up its focus traps.
+              // Without this, the focus gets applied too early and it's overridden by the browser's default focus behavior.
+              setTimeout(() => {
+                buttonRef.current?.focus();
+              }, 0);
+              return false;
+            }
+            return true;
+          },
+        }}
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <div>
                 <EuiTitle size="m">
-                  <h2>{getFlyoutTitle(isOnFailure)}</h2>
+                  <h2 id={flyoutTitleId}>{getFlyoutTitle(isOnFailure)}</h2>
                 </EuiTitle>
               </div>
             </EuiFlexItem>
@@ -183,7 +204,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
                     return (
                       <DocumentationButton
                         processorLabel={formDescriptor.label}
-                        docLink={esDocsBasePath + formDescriptor.docLinkPath}
+                        docLink={formDescriptor.docLinkPath}
                       />
                     );
                   }

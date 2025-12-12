@@ -36,6 +36,10 @@ export function Sort({ type, onChange }: Props) {
   return (
     <EuiSelect
       data-test-subj="apmSortSelect"
+      aria-label={i18n.translate('xpack.apm.serviceGroups.list.sort.ariaLabel', {
+        defaultMessage: 'Sort service groups by',
+      })}
+      compressed
       options={options}
       value={type}
       onChange={(e) => onChange(e.target.value as ServiceGroupsSortType)}

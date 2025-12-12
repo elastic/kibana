@@ -6,7 +6,7 @@
  */
 
 import { extractColorFromStyleProperty } from './extract_color_from_style_property';
-import {
+import type {
   ColorDynamicOptions,
   ColorDynamicStylePropertyDescriptor,
   ColorStaticOptions,
@@ -137,7 +137,7 @@ describe('dynamic', () => {
             fieldMetaOptions,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
-        expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe('#9dc3ff');
+        expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe('#98c0ff');
       });
     });
 

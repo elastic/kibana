@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import React from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
+
 export const host1Name = 'nice-host';
 export const host2Name = 'cool-host';
 
@@ -48,9 +52,6 @@ export const mockGroupingProps = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 1,
           },
@@ -80,9 +81,6 @@ export const mockGroupingProps = {
                 doc_count: 1,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 1,
@@ -115,9 +113,6 @@ export const mockGroupingProps = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 11,
-          },
           usersCountAggregation: {
             value: 11,
           },
@@ -140,13 +135,12 @@ export const mockGroupingProps = {
   renderChildComponent: () => <p>{'child component'}</p>,
   onGroupClose: () => {},
   selectedGroup: 'host.name',
-  takeActionItems: () => [
-    <EuiContextMenuItem key="acknowledged" onClick={() => {}}>
-      {'Mark as acknowledged'}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="closed" onClick={() => {}}>
-      {'Mark as closed'}
-    </EuiContextMenuItem>,
-  ],
+  takeActionItems: () => ({
+    items: [
+      { key: '1', name: 'Mark as acknowledged' },
+      { key: '1', name: 'Mark as closed' },
+    ] as EuiContextMenuPanelItemDescriptor[],
+    panels: [] as EuiContextMenuPanelDescriptor[],
+  }),
   tracker: () => {},
 };

@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiHorizontalRule, EuiListGroup } from '@elastic/eui';
 import { ExpandPopoverListItem } from '../styles';
 import { GraphPopover } from '../../..';
@@ -53,6 +54,10 @@ export interface ItemExpandPopoverListItemProps {
   label: string;
   onClick: () => void;
   testSubject: string;
+  disabled?: boolean;
+  showToolTip?: boolean;
+  toolTipText?: string;
+  toolTipProps?: Partial<EuiToolTipProps>;
 }
 
 export interface SeparatorExpandPopoverListItemProps {
@@ -68,17 +73,17 @@ export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
 
     return (
       <GraphPopover
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         anchorPosition="rightCenter"
         isOpen={isOpen}
         anchorElement={anchorElement}
         closePopover={closePopover}
         data-test-subj={testSubject}
       >
-        <EuiListGroup gutterSize="none" bordered={false} flush={true}>
+        <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
           {listItems.map((item, index) => {
             if (item.type === 'separator') {
-              return <EuiHorizontalRule key={index} margin="xs" />;
+              return <EuiHorizontalRule key={index} margin="none" size="full" />;
             }
             return (
               <ExpandPopoverListItem
@@ -86,7 +91,11 @@ export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
                 iconType={item.iconType}
                 label={item.label}
                 onClick={item.onClick}
+                disabled={item.disabled}
                 data-test-subj={item.testSubject}
+                showToolTip={item.showToolTip}
+                toolTipText={item.toolTipText}
+                toolTipProps={item.toolTipProps}
               />
             );
           })}

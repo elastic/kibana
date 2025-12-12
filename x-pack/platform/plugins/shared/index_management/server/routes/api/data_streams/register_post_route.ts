@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { RouteDependencies } from '../../../types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const getDataStreams = (client: IScopedClusterClient, name = '*') => {
@@ -59,8 +60,7 @@ export function registerPostOneApplyLatestMappings({
           }
           await client.asCurrentUser.indices.putMapping({
             index: name,
-            // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-            body: mappings,
+            ...mappings,
             write_index_only: true,
           });
 

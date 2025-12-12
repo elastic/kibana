@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -18,15 +17,11 @@ export const NodeDetail = () => {
     params: { type: nodeType },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
-  return (
-    <EuiErrorBoundary>
-      {nodeType === 'host' || nodeType === 'container' ? (
-        <AssetDetailPage />
-      ) : (
-        <MetricsTimeProvider>
-          <MetricDetailPage />
-        </MetricsTimeProvider>
-      )}
-    </EuiErrorBoundary>
+  return nodeType === 'host' || nodeType === 'container' ? (
+    <AssetDetailPage />
+  ) : (
+    <MetricsTimeProvider>
+      <MetricDetailPage />
+    </MetricsTimeProvider>
   );
 };

@@ -6,14 +6,23 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
-export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
+export const useMetricsCharts = ({
+  indexPattern,
+  schema,
+}: {
+  indexPattern?: string;
+  schema?: DataSchemaFormat | null;
+}) => {
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, disk, memory, network } = await model.metrics.getCharts();
+    const { cpu, disk, memory, network } = await model.metrics.getCharts({
+      schema: schema ?? 'ecs',
+    });
 
     return [
       cpu.xy.cpuUsage,
@@ -41,13 +50,13 @@ export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
             }
           : layer
       ),
-      ...(dataViewId && {
+      ...(indexPattern && {
         dataset: {
-          index: dataViewId,
+          index: indexPattern,
         },
       }),
     }));
-  }, [dataViewId]);
+  }, [schema, indexPattern]);
 
   return charts;
 };

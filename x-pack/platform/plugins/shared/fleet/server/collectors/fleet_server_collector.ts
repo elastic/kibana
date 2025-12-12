@@ -45,7 +45,7 @@ export const getFleetServerUsage = async (
     return DEFAULT_USAGE;
   }
 
-  const fleetServerHosts = await fleetServerHostService.list(soClient);
+  const fleetServerHosts = await fleetServerHostService.list();
   const numHostsUrls = fleetServerHosts.items.flatMap((host) => host.host_urls).length;
 
   // Find all policies with Fleet server than query agent status
@@ -56,7 +56,7 @@ export const getFleetServerUsage = async (
     const res = await packagePolicyService.list(soClient, {
       page: page++,
       perPage: 20,
-      kuery: 'ingest-package-policies.package.name:fleet_server',
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
     });
 
     for (const item of res.items) {

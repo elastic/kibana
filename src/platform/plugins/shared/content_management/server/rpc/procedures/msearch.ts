@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
+
 import { rpcSchemas } from '../../../common/schemas';
 import type { MSearchIn, MSearchOut } from '../../../common';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
 import { getMSearchClientFactory } from '../../content_client';
 
-export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
+export const getMSearch = (
+  logger: Logger
+): ProcedureDefinition<Context, MSearchIn, MSearchOut> => ({
   schemas: rpcSchemas.mSearch,
   fn: async (ctx, { contentTypes, query }) => {
     const clientFactory = getMSearchClientFactory({
       contentRegistry: ctx.contentRegistry,
       mSearchService: ctx.mSearchService,
+      logger,
     });
     const mSearchClient = clientFactory(ctx);
 
     return mSearchClient.msearch({ contentTypes, query });
   },
-};
+});

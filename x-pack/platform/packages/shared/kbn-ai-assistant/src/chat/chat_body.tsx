@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -16,7 +17,6 @@ import {
   euiScrollBarStyles,
   EuiSpacer,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -34,17 +34,21 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
+  InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
-import { useGenAIConnectors } from '../hooks/use_genai_connectors';
+import type { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
-import { FlyoutPositionMode } from './chat_flyout';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
+import type { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
@@ -54,6 +58,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
+import { useConversationContextMenu, useScopes } from '../hooks';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -99,8 +104,8 @@ const fadeInAnimation = keyframes`
 
 const animClassName = (euiTheme: UseEuiTheme['euiTheme']) => css`
   height: 100%;
-  opacity: 0;
   ${euiCanAnimate} {
+    opacity: 0;
     animation: ${fadeInAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}
       ${euiTheme.animation.normal} forwards;
   }
@@ -129,6 +134,7 @@ export function ChatBody({
   refreshConversations,
   updateDisplayedConversation,
   onConversationDuplicate,
+  navigateToConnectorsManagementApp,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
@@ -145,6 +151,7 @@ export function ChatBody({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
+  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -162,6 +169,8 @@ export function ChatBody({
     aiAssistantSimulatedFunctionCalling,
     false
   );
+
+  const scopes = useScopes();
 
   const {
     conversation,
@@ -229,6 +238,7 @@ export function ChatBody({
         namespace,
         public: isPublic,
         '@timestamp': timestamp,
+        archived,
       } = conversation.value;
 
       const conversationWithoutMessagesAndTitle: ChatFeedback['conversation'] = {
@@ -238,14 +248,19 @@ export function ChatBody({
         numeric_labels: numericLabels,
         namespace,
         public: isPublic,
+        archived,
         conversation: { id, last_updated: lastUpdated },
       };
+
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
 
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
           feedback,
           conversation: conversationWithoutMessagesAndTitle,
+          connector,
+          scopes,
         },
       });
     }
@@ -288,75 +303,96 @@ export function ChatBody({
     }
   });
 
-  const handleActionClick = ({
-    message,
-    payload,
-  }: {
-    message: Message;
-    payload: ChatActionClickPayload;
-  }) => {
-    setStickToBottom(true);
-    switch (payload.type) {
-      case ChatActionClickType.executeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'execute_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                }),
-                trigger: MessageRole.User,
+  const handleActionClick = useCallback(
+    ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
+      setStickToBottom(true);
+      switch (payload.type) {
+        case ChatActionClickType.executeEsqlQuery: {
+          const now = new Date().toISOString();
+          next(
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Display results for the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
+                },
               },
-            },
-          })
-        );
-        break;
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'execute_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
+          );
+          break;
+        }
 
-      case ChatActionClickType.updateVisualization:
-        const visualizeQueryResponse = message;
+        case ChatActionClickType.updateVisualization:
+          const visualizeQueryResponse = message;
 
-        const visualizeQueryResponseData = JSON.parse(visualizeQueryResponse.message.data ?? '{}');
+          const visualizeQueryResponseData = JSON.parse(
+            visualizeQueryResponse.message.data ?? '{}'
+          );
 
-        next(
-          messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              name: 'visualize_query',
-              content: visualizeQueryResponse.message.content,
-              data: JSON.stringify({
-                ...visualizeQueryResponseData,
-                userOverrides: payload.userOverrides,
-              }),
-              role: MessageRole.User,
-            },
-          })
-        );
-        break;
-      case ChatActionClickType.visualizeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
+          next(
+            messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
                 name: 'visualize_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                content: visualizeQueryResponse.message.content,
+                data: JSON.stringify({
+                  ...visualizeQueryResponseData,
+                  userOverrides: payload.userOverrides,
                 }),
-                trigger: MessageRole.User,
+                role: MessageRole.User,
               },
-            },
-          })
-        );
-        break;
-    }
-  };
+            })
+          );
+          break;
+        case ChatActionClickType.visualizeEsqlQuery: {
+          const now = new Date().toISOString();
+          next(
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Visualize the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
+                },
+              },
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'visualize_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                      intention: VisualizeESQLUserIntention.visualizeAuto,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
+          );
+          break;
+        }
+      }
+    },
+    [messages, next]
+  );
 
   const handleConversationAccessUpdate = async (access: ConversationAccess) => {
     await updateConversationAccess(access);
@@ -364,10 +400,44 @@ export function ChatBody({
     refreshConversations();
   };
 
+  const { copyConversationToClipboard, copyUrl, deleteConversation, archiveConversation } =
+    useConversationContextMenu({
+      setIsUpdatingConversationList,
+      refreshConversations,
+    });
+
+  const handleArchiveConversation = async (id: string, isArchived: boolean) => {
+    await archiveConversation(id, isArchived);
+    conversation.refresh();
+  };
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    !!elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
+
+  const showKnowledgeBaseReIndexingCallout =
+    knowledgeBase.status.value?.enabled === true &&
+    knowledgeBase.status.value?.inferenceModelState === InferenceModelState.READY &&
+    knowledgeBase.status.value?.isReIndexing === true;
+
   const isPublic = conversation.value?.public;
-  const showPromptEditor = !isPublic || isConversationOwnedByCurrentUser;
-  const bannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
+  const isArchived = !!conversation.value?.archived;
+  const showPromptEditor = !isArchived && (!isPublic || isConversationOwnedByCurrentUser);
+
+  const sharedBannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
     defaultMessage: 'This conversation is shared with your team.',
+  });
+  const viewerDescription = i18n.translate('xpack.aiAssistant.banner.viewerDescription', {
+    defaultMessage:
+      "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
+  });
+  const duplicateButton = i18n.translate('xpack.aiAssistant.duplicateButton', {
+    defaultMessage: 'Duplicate',
   });
 
   let sharedBanner = null;
@@ -375,16 +445,11 @@ export function ChatBody({
   if (isPublic && !isConversationOwnedByCurrentUser) {
     sharedBanner = (
       <ChatBanner
-        title={bannerTitle}
-        description={i18n.translate('xpack.aiAssistant.shareBanner.viewerDescription', {
-          defaultMessage:
-            "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
-        })}
+        title={sharedBannerTitle}
+        description={viewerDescription}
         button={
           <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
-            {i18n.translate('xpack.aiAssistant.duplicateButton', {
-              defaultMessage: 'Duplicate',
-            })}
+            {duplicateButton}
           </EuiButton>
         }
       />
@@ -392,11 +457,53 @@ export function ChatBody({
   } else if (isConversationOwnedByCurrentUser && isPublic) {
     sharedBanner = (
       <ChatBanner
-        title={bannerTitle}
+        title={sharedBannerTitle}
         description={i18n.translate('xpack.aiAssistant.shareBanner.ownerDescription', {
           defaultMessage:
             'Any further edits you do to this conversation will be shared with the rest of the team.',
         })}
+      />
+    );
+  }
+
+  let archivedBanner = null;
+  const archivedBannerTitle = i18n.translate('xpack.aiAssistant.archivedBanner.title', {
+    defaultMessage: 'This conversation has been archived.',
+  });
+
+  if (isConversationOwnedByCurrentUser) {
+    archivedBanner = (
+      <ChatBanner
+        title={archivedBannerTitle}
+        icon="folderOpen"
+        description={i18n.translate('xpack.aiAssistant.archivedBanner.ownerDescription', {
+          defaultMessage:
+            "You can't edit or continue this conversation as it's been archived, but you can unarchive it.",
+        })}
+        button={
+          <EuiButton
+            onClick={() => handleArchiveConversation(conversationId!, !isArchived)}
+            iconType="folderOpen"
+            size="s"
+          >
+            {i18n.translate('xpack.aiAssistant.unarchiveButton', {
+              defaultMessage: 'Unarchive',
+            })}
+          </EuiButton>
+        }
+      />
+    );
+  } else {
+    archivedBanner = (
+      <ChatBanner
+        title={archivedBannerTitle}
+        icon="folderOpen"
+        description={viewerDescription}
+        button={
+          <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
+            {duplicateButton}
+          </EuiButton>
+        }
       />
     );
   }
@@ -458,12 +565,13 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               ) : (
                 <ChatTimeline
                   conversationId={conversationId}
                   messages={messages}
-                  knowledgeBase={knowledgeBase}
                   chatService={chatService}
                   currentUser={conversationUser}
                   isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
@@ -483,6 +591,9 @@ export function ChatBody({
                   }
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
+                  isArchived={isArchived}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               )}
             </EuiPanel>
@@ -496,12 +607,13 @@ export function ChatBody({
         ) : null}
 
         <>
-          {conversationId ? sharedBanner : null}
+          {conversationId && !isArchived ? sharedBanner : null}
+          {conversationId && isArchived ? archivedBanner : null}
           {showPromptEditor ? (
             <EuiFlexItem
               grow={false}
               className={promptEditorClassname(euiTheme)}
-              style={{ height: promptEditorHeight }}
+              css={{ height: promptEditorHeight }}
             >
               <EuiHorizontalRule margin="none" />
               <EuiPanel
@@ -544,6 +656,7 @@ export function ChatBody({
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
@@ -574,6 +687,7 @@ export function ChatBody({
       >
         {conversation.error ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
@@ -605,11 +719,15 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
-          setIsUpdatingConversationList={setIsUpdatingConversationList}
-          refreshConversations={refreshConversations}
           updateDisplayedConversation={updateDisplayedConversation}
           handleConversationAccessUpdate={handleConversationAccessUpdate}
           isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
+          copyConversationToClipboard={copyConversationToClipboard}
+          copyUrl={copyUrl}
+          deleteConversation={deleteConversation}
+          handleArchiveConversation={handleArchiveConversation}
+          isConversationApp={!showLinkToConversationsApp}
+          navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -7,19 +7,21 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
   EuiPopover,
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import { Dashboard } from '../../../../common/api_types';
+import type { Integration } from '../../../../common/data_streams_stats/integration';
+import type { Dashboard } from '../../../../common/api_types';
 import { useDatasetQualityDetailsState, useIntegrationActions } from '../../../hooks';
 
 const integrationActionsText = i18n.translate(

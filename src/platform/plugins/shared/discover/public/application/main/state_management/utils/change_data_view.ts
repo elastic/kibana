@@ -14,11 +14,17 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import type { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
-import { internalStateActions, type InternalStateStore, type RuntimeStateManager } from '../redux';
+import {
+  internalStateActions,
+  selectTabRuntimeState,
+  type InternalStateStore,
+  type RuntimeStateManager,
+  type TabActionInjector,
+  type TabState,
+} from '../redux';
 
 /**
  * Function executed when switching data view in the UI
@@ -28,22 +34,27 @@ export async function changeDataView({
   services,
   internalState,
   runtimeStateManager,
-  appState,
+  injectCurrentTab,
+  getCurrentTab,
 }: {
   dataViewId: string | DataView;
   services: DiscoverServices;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  appState: DiscoverAppStateContainer;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
 }) {
   addLog('[ui] changeDataView', { id: dataViewId });
 
   const { dataViews, uiSettings } = services;
-  const currentDataView = runtimeStateManager.currentDataView$.getValue();
-  const state = appState.getState();
+  const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+  const currentDataView = currentDataView$.getValue();
+
   let nextDataView: DataView | null = null;
 
-  internalState.dispatch(internalStateActions.setIsDataViewLoading(true));
+  internalState.dispatch(
+    injectCurrentTab(internalStateActions.setIsDataViewLoading)({ isDataViewLoading: true })
+  );
 
   try {
     nextDataView =
@@ -62,30 +73,38 @@ export async function changeDataView({
   if (nextDataView && currentDataView) {
     // Reset the default profile state if we are switching to a different data view
     internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
+      injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+        },
       })
     );
 
+    const currentAppState = getCurrentTab().appState;
     const nextAppState = getDataViewAppState(
       currentDataView,
       nextDataView,
       uiSettings.get(DEFAULT_COLUMNS_SETTING, []),
-      state.columns || [],
-      (state.sort || []) as SortOrder[],
+      currentAppState.columns || [],
+      (currentAppState.sort || []) as SortOrder[],
       uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
       uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-      state.query
+      currentAppState.query
     );
 
-    appState.update(nextAppState);
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.updateAppState)({ appState: nextAppState })
+    );
 
     if (internalState.getState().expandedDoc) {
-      internalState.dispatch(internalStateActions.setExpandedDoc(undefined));
+      internalState.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
     }
   }
 
-  internalState.dispatch(internalStateActions.setIsDataViewLoading(false));
+  internalState.dispatch(
+    injectCurrentTab(internalStateActions.setIsDataViewLoading)({ isDataViewLoading: false })
+  );
 }

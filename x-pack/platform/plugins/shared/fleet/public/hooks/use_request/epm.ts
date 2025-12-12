@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useState } from 'react';
-
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
@@ -31,9 +29,17 @@ import type {
   GetInputsTemplatesResponse,
 } from '../../types';
 import type {
+  BulkUpgradePackagesRequest,
+  BulkOperationPackagesResponse,
   FleetErrorResponse,
   GetEpmDataStreamsResponse,
+  GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
+  BulkUninstallPackagesRequest,
+  DeletePackageDatastreamAssetsRequest,
+  DeletePackageDatastreamAssetsResponse,
+  BulkRollbackPackagesRequest,
+  RollbackAvailableCheckResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -68,7 +74,10 @@ export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {})
         query,
         version: API_VERSIONS.public.v1,
       }),
-    { retry: (_, error) => !isRegistryConnectionError(error), refetchOnWindowFocus: false }
+    {
+      retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
+      refetchOnWindowFocus: false,
+    }
   );
 }
 
@@ -104,7 +113,7 @@ export const useGetPackagesQuery = (
         query,
       }),
     enabled: options?.enabled,
-    retry: (_, error) => !isRegistryConnectionError(error),
+    retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
     refetchOnWindowFocus: false,
   });
 };
@@ -125,6 +134,20 @@ export const useGetLimitedPackages = () => {
     version: API_VERSIONS.public.v1,
   });
 };
+export const useUpdateCustomIntegration = async (
+  id: string,
+  fields: { readMeData: string | undefined; categories: string[] }
+) => {
+  return sendRequest({
+    path: epmRouteService.getUpdateCustomIntegrationsPath(id),
+    method: 'put',
+    version: API_VERSIONS.public.v1,
+    body: {
+      readMeData: fields.readMeData,
+      categories: fields.categories,
+    },
+  });
+};
 
 export const useGetPackageInfoByKeyQuery = (
   pkgName: string,
@@ -139,6 +162,7 @@ export const useGetPackageInfoByKeyQuery = (
   queryOptions: {
     // If enabled is false, the query will not be fetched
     enabled?: boolean;
+    suspense?: boolean;
     refetchOnMount?: boolean | 'always';
   } = {
     enabled: true,
@@ -162,9 +186,10 @@ export const useGetPackageInfoByKeyQuery = (
         },
       }),
     {
+      suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
-      retry: (_, error) => !isRegistryConnectionError(error),
+      retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
   );
@@ -255,8 +280,8 @@ export const useGetFileByPath = (filePath: string) => {
 };
 
 export const useGetFileByPathQuery = (filePath: string) => {
-  return useQuery<SendRequestResponse<string>, RequestError>(['get-file', filePath], () =>
-    sendRequest<string>({
+  return useQuery<string, RequestError>(['get-file', filePath], () =>
+    sendRequestForRq<string>({
       path: epmRouteService.getFilePath(filePath),
       method: 'get',
       version: API_VERSIONS.public.v1,
@@ -305,6 +330,73 @@ export const sendBulkInstallPackages = (
   });
 };
 
+export const sendBulkUpgradePackagesForRq = (params: BulkUpgradePackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkUpgradePath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
+export const sendBulkUninstallPackagesForRq = (params: BulkUninstallPackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkUninstallPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
+export const sendGetOneBulkUpgradePackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getOneBulkUpgradePath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendGetOneBulkUninstallPackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getOneBulkUninstallPath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendBulkRollbackPackagesForRq = (params: BulkRollbackPackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
+export const sendGetBulkRollbackInfoPackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackInfoPath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const useGetRollbackAvailableCheck = (pkgName: string) => {
+  const response = useQuery<RollbackAvailableCheckResponse, RequestError>(
+    ['get-rollback-available-check', pkgName],
+    () =>
+      sendRequestForRq<RollbackAvailableCheckResponse>({
+        path: epmRouteService.getRollbackAvailableCheckPath(pkgName),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      })
+  );
+  return response.data ?? { isAvailable: false };
+};
+
+/**
+ * @deprecated use sendRemovePackageForRq instead
+ */
 export function sendRemovePackage(
   { pkgName, pkgVersion }: DeletePackageRequest['params'],
   query?: DeletePackageRequest['query']
@@ -317,16 +409,37 @@ export function sendRemovePackage(
   });
 }
 
+export function sendRemovePackageForRq(
+  { pkgName, pkgVersion }: DeletePackageRequest['params'],
+  query?: DeletePackageRequest['query']
+) {
+  return sendRequestForRq<DeletePackageResponse>({
+    path: epmRouteService.getRemovePath(pkgName, pkgVersion),
+    method: 'delete',
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+}
+
 export const sendRequestReauthorizeTransforms = (
   pkgName: string,
   pkgVersion: string,
   transforms: Array<{ transformId: string }>
 ) => {
-  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getReauthorizeTransformsPath(pkgName, pkgVersion),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: { transforms },
+  });
+};
+
+export const sendRequestInstallRuleAssets = (pkgName: string, pkgVersion: string) => {
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getInstallRuleAssetsPath(pkgName, pkgVersion),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {},
   });
 };
 
@@ -339,6 +452,7 @@ interface UpdatePackageArgs {
 interface InstallKibanaAssetsArgs {
   pkgName: string;
   pkgVersion: string;
+  spaceIds?: string[];
 }
 
 export const useUpdatePackageMutation = () => {
@@ -365,11 +479,16 @@ export const useInstallKibanaAssetsMutation = () => {
   });
 };
 
-export const sendInstallKibanaAssetsForRq = ({ pkgName, pkgVersion }: InstallKibanaAssetsArgs) =>
+export const sendInstallKibanaAssetsForRq = ({
+  pkgName,
+  pkgVersion,
+  spaceIds,
+}: InstallKibanaAssetsArgs) =>
   sendRequestForRq({
     path: epmRouteService.getInstallKibanaAssetsPath(pkgName, pkgVersion),
     method: 'post',
     version: API_VERSIONS.public.v1,
+    body: spaceIds ? { space_ids: spaceIds } : undefined,
   });
 
 export const sendUpdatePackage = (
@@ -394,6 +513,18 @@ export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
   });
 };
 
+export const sendDeletePackageDatastreamAssets = (
+  { pkgName, pkgVersion }: DeletePackageDatastreamAssetsRequest['params'],
+  query: DeletePackageDatastreamAssetsRequest['query']
+) => {
+  return sendRequest<DeletePackageDatastreamAssetsResponse>({
+    path: epmRouteService.getDeletePackageDatastreamAssets(pkgName, pkgVersion),
+    method: 'delete',
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+};
+
 export function useGetInputsTemplatesQuery(
   { pkgName, pkgVersion }: GetInputsTemplatesRequest['params'],
   query: GetInputsTemplatesRequest['query']
@@ -412,4 +543,8 @@ export function useGetInputsTemplatesQuery(
 
 function isRegistryConnectionError(error: RequestError) {
   return error.statusCode === 502;
+}
+
+function isUserError(error: RequestError) {
+  return error.statusCode && error.statusCode >= 400 && error.statusCode < 500;
 }

@@ -15,10 +15,11 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { Repository, S3Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { Repository, S3Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
@@ -54,13 +55,15 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       readonly,
     },
   } = repository;
+  const clientId = useGeneratedHtmlId({ prefix: 's3ClientInput' });
+  const bucketId = useGeneratedHtmlId({ prefix: 's3BucketInput' });
+  const basePathId = useGeneratedHtmlId({ prefix: 's3BasePathInput' });
 
   const cannedAclOptions = [
     'private',
     'public-read',
     'public-read-write',
     'authenticated-read',
-    'log-delivery-write',
     'bucket-owner-read',
     'bucket-owner-full-control',
   ].map((option) => ({
@@ -109,10 +112,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.clientLabel"
-              defaultMessage="Client"
-            />
+            <span id={clientId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.clientLabel"
+                defaultMessage="Client"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
@@ -121,20 +126,20 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={client || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    client: e.target.value,
-                  });
-                }}
-                data-test-subj="clientInput"
-                disabled={isManagedRepository}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={client || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  client: e.target.value,
+                });
+              }}
+              data-test-subj="clientInput"
+              disabled={isManagedRepository}
+              aria-labelledby={clientId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -160,10 +165,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.bucketLabel"
-              defaultMessage="Bucket (required)"
-            />
+            <span id={bucketId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.bucketLabel"
+                defaultMessage="Bucket (required)"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
@@ -172,20 +179,20 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={bucket || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    bucket: e.target.value,
-                  });
-                }}
-                data-test-subj="bucketInput"
-                disabled={isManagedRepository}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={bucket || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  bucket: e.target.value,
+                });
+              }}
+              data-test-subj="bucketInput"
+              disabled={isManagedRepository}
+              aria-labelledby={bucketId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -211,10 +218,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.basePathLabel"
-              defaultMessage="Base path"
-            />
+            <span id={basePathId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.basePathLabel"
+                defaultMessage="Base path"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
@@ -223,20 +232,20 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={basePath || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    basePath: e.target.value,
-                  });
-                }}
-                data-test-subj="basePathInput"
-                disabled={isManagedRepository}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={basePath || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  basePath: e.target.value,
+                });
+              }}
+              data-test-subj="basePathInput"
+              disabled={isManagedRepository}
+              aria-labelledby={basePathId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -381,6 +390,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.bufferSize)}
             defaultValue={bufferSize || ''}
             fullWidth
             onChange={(e) => {
@@ -425,6 +435,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           error={settingErrors.cannedAcl}
         >
           <EuiSelect
+            isInvalid={Boolean(hasErrors && settingErrors.cannedAcl)}
             options={cannedAclOptions}
             value={cannedAcl || cannedAclOptions[0].value}
             onChange={(e) => {
@@ -470,6 +481,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           error={settingErrors.storageClass}
         >
           <EuiSelect
+            isInvalid={Boolean(hasErrors && settingErrors.storageClass)}
             options={storageClassOptions}
             value={storageClass || storageClassOptions[0].value}
             onChange={(e) => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Trigger } from '.';
+import type { Trigger } from '.';
 
 export const VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
 export const visualizeFieldTrigger: Trigger = {

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelPackage } from './presentation_container';
+import type { PanelPackage } from './presentation_container';
 
 /**
  * This API can add a new panel as a child.
  */
 export interface CanAddNewPanel {
-  addNewPanel: <SerializedState extends object, ApiType extends unknown = unknown>(
-    panel: PanelPackage<SerializedState>,
+  addNewPanel: <StateType extends object, ApiType extends unknown = unknown>(
+    panel: PanelPackage<StateType>,
     displaySuccessMessage?: boolean
   ) => Promise<ApiType | undefined>;
 }

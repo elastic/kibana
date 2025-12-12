@@ -6,7 +6,8 @@
  */
 
 import { useCallback } from 'react';
-import { OperatorFunction, ReplaySubject } from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { share, tap } from 'rxjs';
 import type {
   IKibanaSearchResponse,
@@ -15,7 +16,7 @@ import type {
 } from '@kbn/search-types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { tapUnsubscribe, useObservable } from '../use_observable';
-import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
+import type { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 
 export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (
   ...args: Args

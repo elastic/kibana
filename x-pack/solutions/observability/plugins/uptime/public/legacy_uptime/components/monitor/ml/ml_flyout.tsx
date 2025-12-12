@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTitle,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
@@ -42,11 +43,18 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
 
   const isLoadingMLJob = false;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="uptimeMLFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      size="s"
+      data-test-subj="uptimeMLFlyout"
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>{labels.ENABLE_ANOMALY_DETECTION}</h2>
+          <h2 id={flyoutTitleId}>{labels.ENABLE_ANOMALY_DETECTION}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
@@ -74,9 +82,10 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
         <EuiSpacer />
         {!canCreateMLJob && (
           <EuiCallOut
+            announceOnMount
             title={labels.ADD_JOB_PERMISSIONS_NEEDED}
             color="primary"
-            iconType="iInCircle"
+            iconType="info"
           >
             <p>
               <FormattedMessage

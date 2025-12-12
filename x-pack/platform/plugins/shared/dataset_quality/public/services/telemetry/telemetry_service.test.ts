@@ -7,9 +7,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { datasetQualityEbtEvents } from './telemetry_events';
 import { TelemetryService } from './telemetry_service';
-import {
-  NavigationTarget,
-  NavigationSource,
+import type {
   DatasetDetailsNavigatedEbtProps,
   DatasetDetailsEbtProps,
   WithTrackingId,
@@ -17,6 +15,7 @@ import {
   DatasetEbtProps,
   DatasetNavigatedEbtProps,
 } from './types';
+import { NavigationTarget, NavigationSource } from './types';
 
 // Mock uuidv4
 jest.mock('uuid', () => {
@@ -96,6 +95,8 @@ describe('TelemetryService', () => {
       ...defaultEbtProps,
       sort: defaultSort,
       filters: defaultFilters,
+      target: NavigationTarget.Discover,
+      source: NavigationSource.Table,
     };
 
     telemetry.trackDatasetNavigated(exampleEventData);

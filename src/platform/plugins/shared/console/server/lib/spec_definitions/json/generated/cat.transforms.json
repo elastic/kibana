@@ -4,6 +4,14 @@
       "format": [
         "text"
       ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "from": "",
       "h": [
         "changes_last_detection_time",
         "checkpoint",
@@ -39,7 +47,6 @@
         "trigger_count",
         "version"
       ],
-      "help": "__flag__",
       "s": [
         "changes_last_detection_time",
         "checkpoint",
@@ -75,13 +82,6 @@
         "trigger_count",
         "version"
       ],
-      "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "allow_no_match": "__flag__",
-      "from": "",
       "time": [
         "nanos",
         "micros",
@@ -102,7 +102,7 @@
       "_cat/transforms",
       "_cat/transforms/{transform_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-transforms.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-transforms",
     "availability": {
       "stack": true,
       "serverless": true

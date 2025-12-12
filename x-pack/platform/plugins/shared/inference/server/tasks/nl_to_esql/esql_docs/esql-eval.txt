@@ -1,6 +1,6 @@
 # EVAL
 
-The EVAL command allows you to append new columns with calculated values to your data.
+The `EVAL` command allows you to add new columns with calculated values to your dataset.
 
 ## Syntax
 
@@ -8,13 +8,16 @@ The EVAL command allows you to append new columns with calculated values to your
 
 ### Parameters
 
-#### {columnX}
+#### `columnX`
 
-This is the name of the column. If a column with the same name already exists, it will be replaced. If a column name is used more than once, only the rightmost duplicate will create a column.
+- The name of the column to be added or updated.
+- If a column with the same name already exists, it will be replaced by the new column.
+- If a column name is used multiple times, only the rightmost definition is applied.
 
-#### {valueX}
+#### `valueX`
 
-This is the value for the column. It can be a literal, an expression, or a function. Columns defined to the left of this one can be used.
+- The value to assign to the column. This can be a literal, an expression, or a function.
+- You can reference columns defined earlier in the same `EVAL` command.
 
 ## Notes
 
@@ -30,7 +33,9 @@ Aggregation functions are NOT supported for EVAL.
 
 ## Examples
 
-The following example multiplies the `height` column by 3.281 and 100 to create new columns `height_feet` and `height_cm`:
+### Adding new calculated columns
+
+Add two new columns, `height_feet` and `height_cm`, by performing calculations on the `height` column:
 
 ```esql
 FROM employees
@@ -39,7 +44,9 @@ FROM employees
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 ```
 
-If the specified column already exists, the existing column will be replaced, and the new column will be appended to the table:
+### Overwriting an existing column
+
+Replace the `height` column with a new value calculated by converting it to feet:
 
 ```esql
 FROM employees
@@ -48,7 +55,9 @@ FROM employees
 | EVAL height = height * 3.281
 ```
 
-Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query adds a column named `height*3.281`:
+### Adding a column without specifying a name
+
+If no column name is provided, the new column will be named after the expression itself. For example, this query adds a column named `height*3.281`:
 
 ```esql
 FROM employees
@@ -57,7 +66,9 @@ FROM employees
 | EVAL height * 3.281
 ```
 
-Because this name contains special characters, it needs to be quoted with backticks (`) when using it in subsequent commands:
+### Using a column with special characters in subsequent commands
+
+When a column name contains special characters, enclose it in backticks (`) to reference it in later commands:
 
 ```esql
 FROM employees

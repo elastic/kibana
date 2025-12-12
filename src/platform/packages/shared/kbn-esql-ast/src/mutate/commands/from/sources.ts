@@ -8,11 +8,12 @@
  */
 
 import { Builder } from '../../../builder';
-import { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
+import type { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
 import { Visitor } from '../../../visitor';
 import * as generic from '../../generic';
 import * as util from '../../util';
 import type { Predicate } from '../../types';
+import { isSubQuery } from '../../../ast/is';
 
 export const list = (
   ast: ESQLAstQueryExpression | ESQLCommand<'from'>
@@ -22,6 +23,8 @@ export const list = (
       for (const argument of ctx.arguments()) {
         if (argument.type === 'source') {
           yield argument;
+        } else if (isSubQuery(argument)) {
+          yield* list(argument.child);
         }
       }
     })
@@ -52,10 +55,10 @@ export const find = (
   cluster?: string
 ): ESQLSource | undefined => {
   return findByPredicate(ast, (source) => {
-    if (index !== source.index) {
+    if (index !== source.index?.valueUnquoted) {
       return false;
     }
-    if (typeof cluster === 'string' && cluster !== source.cluster) {
+    if (cluster && typeof cluster === 'string' && cluster !== source.prefix?.valueUnquoted) {
       return false;
     }
 
@@ -91,7 +94,7 @@ export const insert = (
     return;
   }
 
-  const source = Builder.expression.indexSource(indexName, clusterName);
+  const source = Builder.expression.source.index(indexName, clusterName);
 
   if (index === -1) {
     generic.commands.args.append(command, source);

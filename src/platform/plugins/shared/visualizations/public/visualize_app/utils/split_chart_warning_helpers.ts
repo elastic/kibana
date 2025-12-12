@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
-import { AggConfigs } from '@kbn/data-plugin/common';
+import type { $Values } from '@kbn/utility-types';
+import type { AggConfigs } from '@kbn/data-plugin/common';
 import { NEW_GAUGE_CHARTS_LIBRARY } from '../constants';
 
 export const CHARTS_WITHOUT_SMALL_MULTIPLES = {

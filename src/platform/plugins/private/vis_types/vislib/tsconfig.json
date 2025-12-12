@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -11,6 +11,7 @@
     "public/fixtures/dispatch_heatmap_d3.json",
     "public/fixtures/dispatch_heatmap_config.json",
     "public/fixtures/dispatch_heatmap_data_point.json",
+    "../../../../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -38,6 +39,10 @@
     "@kbn/config-schema",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/ui-actions-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/chart-expressions-common",
+    "@kbn/visualizations-common",
   ],
   "exclude": [
     "target/**/*",

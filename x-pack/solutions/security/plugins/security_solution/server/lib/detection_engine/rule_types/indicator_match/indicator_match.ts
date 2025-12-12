@@ -7,17 +7,12 @@
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import type { WrapSuppressedHits, SecuritySharedParams, CreateRuleOptions } from '../types';
+import type { WrapSuppressedHits, SecuritySharedParams, SecurityRuleServices } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import type { ThreatRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const indicatorMatchExecutor = async ({
   sharedParams,
@@ -25,16 +20,14 @@ export const indicatorMatchExecutor = async ({
   eventsTelemetry,
   wrapSuppressedHits,
   licensing,
-  experimentalFeatures,
   scheduleNotificationResponseActionsService,
 }: {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   eventsTelemetry: ITelemetryEventsSender | undefined;
   wrapSuppressedHits: WrapSuppressedHits;
   licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
-  experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }) => {
   return withSecuritySpan('indicatorMatchExecutor', async () => {
     return createThreatSignals({
@@ -43,7 +36,6 @@ export const indicatorMatchExecutor = async ({
       services,
       wrapSuppressedHits,
       licensing,
-      experimentalFeatures,
       scheduleNotificationResponseActionsService,
     });
   });

@@ -9,15 +9,15 @@
 
 import { firstValueFrom, type Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
-import { RequestHandlerContext, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
 } from '@kbn/telemetry-collection-manager-plugin/server';
-import { RequestHandler } from '@kbn/core-http-server';
+import type { RequestHandler } from '@kbn/core-http-server';
 import { OptInRoute } from '../../common/routes';
-import { OptInBody, v2 } from '../../common/types';
+import type { OptInBody, v2 } from '../../common/types';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 import {
   getTelemetrySavedObject,
@@ -26,7 +26,7 @@ import {
   updateTelemetrySavedObject,
 } from '../saved_objects';
 
-import { TelemetryConfigType } from '../config';
+import type { TelemetryConfigType } from '../config';
 import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
 
 interface RegisterOptInRoutesParams {
@@ -126,17 +126,20 @@ export function registerTelemetryOptInRoutes({
   };
 
   router.versioned
-    .post({ access: 'internal', path: OptInRoute })
+    .post({
+      access: 'internal',
+      path: OptInRoute,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: v2Validations,
       },
       v2Handler

@@ -26,14 +26,17 @@ import { css } from '@emotion/react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
-import { Category } from './types';
+import type { Category } from './types';
 import { useCustomCards } from './use_custom_cards';
-import { LogoIcon, SupportedLogo } from '../shared/logo_icon';
-import { ObservabilityOnboardingAppServices } from '../..';
+import type { SupportedLogo } from '../shared/logo_icon';
+import { LogoIcon } from '../shared/logo_icon';
+import type { ObservabilityOnboardingAppServices } from '../..';
 import { PackageList } from '../package_list/package_list';
+import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
 interface UseCaseOption {
   id: Category;
@@ -44,6 +47,32 @@ interface UseCaseOption {
 }
 
 export const OnboardingFlowForm: FunctionComponent = () => {
+  const {
+    services: {
+      context: { isCloud },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
+
+  const applicationUseCaseOption: UseCaseOption = {
+    id: 'application',
+    label: i18n.translate(
+      'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
+      { defaultMessage: 'Application' }
+    ),
+    description: i18n.translate(
+      'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
+      {
+        defaultMessage:
+          'Monitor your frontend and backend applications, set up synthetic monitors, and track application performance across your stack',
+      }
+    ),
+    logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
+  };
+
   const options: UseCaseOption[] = [
     {
       id: 'host',
@@ -51,13 +80,18 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.hostLabel',
         { defaultMessage: 'Host' }
       ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.hostDescription',
-        {
-          defaultMessage:
-            'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
-        }
-      ),
+      description: metricsOnboardingEnabled
+        ? i18n.translate('xpack.observability_onboarding.onboardingFlowForm.hostDescription', {
+            defaultMessage:
+              'Track your host and its services by setting up SLOs, receiving alerts, and remediating performance issues',
+          })
+        : i18n.translate(
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
+            {
+              defaultMessage:
+                'Ingest and analyze logs on your host such as OS, service, application and other logs',
+            }
+          ),
       logos: ['opentelemetry', 'apache', 'mysql'],
     },
     {
@@ -66,30 +100,23 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.kubernetesLabel',
         { defaultMessage: 'Kubernetes' }
       ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
-        {
-          defaultMessage:
-            'Observe your Kubernetes cluster, and your container workloads using logs, metrics, traces and profiling data',
-        }
-      ),
+      description: metricsOnboardingEnabled
+        ? i18n.translate(
+            'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
+            {
+              defaultMessage:
+                'Monitor your Kubernetes cluster and container workloads using logs, metrics, traces, and profiling data',
+            }
+          )
+        : i18n.translate(
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
+            {
+              defaultMessage: 'Observe logs from your Kubernetes environments',
+            }
+          ),
       logos: ['kubernetes', 'opentelemetry'],
     },
-    {
-      id: 'application',
-      label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
-        { defaultMessage: 'Application' }
-      ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
-        {
-          defaultMessage:
-            'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
-        }
-      ),
-      logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
-    },
+    ...(metricsOnboardingEnabled ? [applicationUseCaseOption] : []),
     {
       id: 'cloud',
       label: i18n.translate(
@@ -99,18 +126,14 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.cloudDescription',
         {
-          defaultMessage: 'Ingest telemetry data from the Cloud for your applications and services',
+          defaultMessage:
+            'Ingest telemetry data from your cloud services to better understand application behavior and ensure service availability',
         }
       ),
       logos: ['azure', 'aws', 'gcp'],
     },
   ];
 
-  const {
-    services: {
-      context: { isCloud },
-    },
-  } = useKibana<ObservabilityOnboardingAppServices>();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
   const categorySelectorTitleId = useGeneratedHtmlId();
   const packageListTitleId = useGeneratedHtmlId();
@@ -197,7 +220,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         </strong>
       </EuiTitle>
       <EuiSpacer />
-      <EuiFlexGrid columns={2} role="group" aria-labelledby={categorySelectorTitleId}>
+      <EuiFlexGrid
+        columns={metricsOnboardingEnabled ? 2 : 3}
+        role="group"
+        aria-labelledby={categorySelectorTitleId}
+        data-test-subj="observabilityOnboardingUseCaseGrid"
+      >
         {options.map((option) => (
           <EuiFlexItem
             key={option.id}
@@ -241,8 +269,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                         {option.showIntegrationsBadge && (
                           <EuiBadge color="hollow">
                             <FormattedMessage
-                              defaultMessage="+ Integrations"
                               id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
+                              defaultMessage="+ Integrations"
                               description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
                             />
                           </EuiBadge>

@@ -7,22 +7,29 @@
 
 import type { ExclusiveUnion } from '@elastic/eui';
 import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { DecoratedError } from '@kbn/core-saved-objects-server';
 import type {
   CasesConnectorConfigSchema,
   CasesConnectorSecretsSchema,
-  CasesConnectorRunParamsSchema,
   CasesConnectorRuleActionParamsSchema,
   CasesConnectorParamsSchema,
+  CasesGroupedAlertsSchema,
+  ZCasesConnectorRunParamsSchema,
 } from './schema';
 
-export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
-export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
+export interface CaseAlert {
+  _id: string;
+  _index: string;
+  [x: string]: unknown;
+}
+export type CasesConnectorConfig = z.infer<typeof CasesConnectorConfigSchema>;
+export type CasesConnectorSecrets = z.infer<typeof CasesConnectorSecretsSchema>;
 export type CasesConnectorRunParams = Omit<
-  TypeOf<typeof CasesConnectorRunParamsSchema>,
+  z.infer<typeof ZCasesConnectorRunParamsSchema>,
   'alerts'
-> & { alerts: Array<{ _id: string; _index: string; [x: string]: unknown }> };
+> & { alerts: CaseAlert[] };
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
@@ -79,13 +86,6 @@ export type BulkUpdateOracleRecordRequest = Array<{
   payload: Pick<OracleRecordAttributes, 'counter'>;
 }>;
 
-export interface BackoffStrategy {
-  nextBackOff: () => number;
-}
-
-export interface BackoffFactory {
-  create: () => BackoffStrategy;
-}
-
 export type CasesConnectorRuleActionParams = TypeOf<typeof CasesConnectorRuleActionParamsSchema>;
 export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;
+export type CasesGroupedAlerts = TypeOf<typeof CasesGroupedAlertsSchema>;

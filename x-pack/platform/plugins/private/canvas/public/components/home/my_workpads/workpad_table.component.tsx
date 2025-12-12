@@ -7,21 +7,23 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiInMemoryTable,
+import type {
   EuiInMemoryTableProps,
   EuiTableActionsColumnType,
   EuiBasicTableColumn,
+  EuiTableSelectionType,
+} from '@elastic/eui';
+import {
+  EuiInMemoryTable,
   EuiToolTip,
   EuiButtonIcon,
-  EuiTableSelectionType,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
 
 import { RoutingLink } from '../../routing';
-import { FoundWorkpad } from '../../../services/canvas_workpad_service';
+import type { FoundWorkpad } from '../../../services/canvas_workpad_service';
 import { WorkpadTableTools } from './workpad_table_tools';
 import { WorkpadImport } from './workpad_import';
 
@@ -59,7 +61,7 @@ export const WorkpadTable = ({
       render: (workpad: FoundWorkpad) => (
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={strings.getExportToolTip()}>
+            <EuiToolTip content={strings.getExportToolTip()} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="exportAction"
                 onClick={() => onExport(workpad.id)}
@@ -138,7 +140,8 @@ export const WorkpadTable = ({
       itemId="id"
       items={workpads}
       columns={columns}
-      message={strings.getNoWorkpadsFoundMessage()}
+      tableCaption={strings.getTableCaption()}
+      noItemsMessage={strings.getNoWorkpadsFoundMessage()}
       search={search}
       sorting={{
         sort: {
@@ -180,6 +183,10 @@ const strings = {
   getWorkpadSearchPlaceholder: () =>
     i18n.translate('xpack.canvas.workpadTable.searchPlaceholder', {
       defaultMessage: 'Find workpad',
+    }),
+  getTableCaption: () =>
+    i18n.translate('xpack.canvas.workpadTable.table.caption', {
+      defaultMessage: 'Canvas workpads list',
     }),
   getTableCreatedColumnTitle: () =>
     i18n.translate('xpack.canvas.workpadTable.table.createdColumnTitle', {

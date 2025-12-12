@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header } = getPageObjects(['dashboard', 'header']);
@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lists unsaved changes to existing dashboards', async () => {
-      await dashboard.loadSavedDashboard(dashboardTitle);
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode(dashboardTitle);
       // change dashboard by adding panel
       await dashboardAddPanel.addVisualization('Rendering-Test: metric');
 
@@ -104,8 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `discard-unsaved-${dashboardTitle.split(' ').join('-')}`
       );
       await dashboard.expectUnsavedChangesListingDoesNotExist(dashboardTitle);
-      await dashboard.loadSavedDashboard(dashboardTitle);
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode(dashboardTitle);
       const currentPanelCount = await dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(originalPanelCount);
       await dashboard.gotoDashboardLandingPage();
@@ -131,8 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('does not list unsaved changes when unsaved version of the dashboard is the same', async () => {
-      await dashboard.loadSavedDashboard(newDashboartTitle);
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode(newDashboartTitle);
 
       // add another panel so we can delete it later
       await dashboardAddPanel.addVisualization('Rendering-Test: heatmap');

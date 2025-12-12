@@ -29,6 +29,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type {
   ActionConnector,
   UserConfiguredActionConnector,
@@ -52,6 +53,7 @@ export interface SearchPlaygroundPluginStart {}
 export interface AppPluginSetupDependencies {
   cloud?: CloudSetup;
   share: SharePluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export interface AppPluginStartDependencies {
@@ -69,14 +71,25 @@ export interface AppPluginStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export type AppServicesContext = CoreStart & AppPluginStartDependencies;
+export interface PlaygroundLicenseStatus {
+  hasRequiredLicense: boolean;
+  hasExpiredLicense: boolean;
+}
 
-export enum ChatFormFields {
+export type AppServices = AppPluginStartDependencies & {
+  licenseManagement?: LicenseManagementUIPluginSetup;
+  getLicenseStatus: () => PlaygroundLicenseStatus;
+};
+
+export type AppServicesContext = CoreStart & AppServices;
+
+export enum PlaygroundFormFields {
   question = 'question',
   citations = 'citations',
   prompt = 'prompt',
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
+  userElasticsearchQuery = 'user_elasticsearch_query',
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'doc_size',
@@ -84,18 +97,33 @@ export enum ChatFormFields {
   searchQuery = 'search_query',
 }
 
-export interface ChatForm {
-  [ChatFormFields.question]: string;
-  [ChatFormFields.prompt]: string;
-  [ChatFormFields.citations]: boolean;
-  [ChatFormFields.indices]: string[];
-  [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
-  [ChatFormFields.sourceFields]: { [index: string]: string[] };
-  [ChatFormFields.docSize]: number;
-  [ChatFormFields.queryFields]: { [index: string]: string[] };
-  [ChatFormFields.searchQuery]: string;
+export interface PlaygroundForm {
+  [PlaygroundFormFields.question]: string;
+  [PlaygroundFormFields.prompt]: string;
+  [PlaygroundFormFields.citations]: boolean;
+  [PlaygroundFormFields.indices]: string[];
+  [PlaygroundFormFields.summarizationModel]: LLMModel | undefined;
+  [PlaygroundFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
+  [PlaygroundFormFields.sourceFields]: { [index: string]: string[] };
+  [PlaygroundFormFields.docSize]: number;
+  [PlaygroundFormFields.queryFields]: { [index: string]: string[] };
+  [PlaygroundFormFields.searchQuery]: string;
+  [PlaygroundFormFields.userElasticsearchQuery]: string | null | undefined;
 }
+
+enum SavedPlaygroundFields {
+  name = 'name',
+}
+
+export type SavedPlaygroundFormFields = PlaygroundFormFields | SavedPlaygroundFields;
+export const SavedPlaygroundFormFields = { ...PlaygroundFormFields, ...SavedPlaygroundFields };
+export interface SavedPlaygroundForm extends PlaygroundForm {
+  [SavedPlaygroundFields.name]: string;
+}
+
+export type SavedPlaygroundFormFetchError = SavedPlaygroundForm & {
+  error: Error;
+};
 
 export interface Message {
   id: string;
@@ -159,8 +187,6 @@ export interface ElasticsearchIndex {
   };
   uuid?: Uuid;
 }
-
-export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | JSONValue[];
 
 export interface ChatRequestOptions {
   options?: RequestOptions;
@@ -228,11 +254,18 @@ export interface LLMModel {
   icon: string;
   disabled: boolean;
   promptTokenLimit?: number;
+  isElasticConnector?: boolean;
 }
 
 export type { ActionConnector, UserConfiguredActionConnector };
 export type InferenceActionConnector = ActionConnector & {
-  config: { provider: ServiceProviderKeys; inferenceId: string };
+  config: {
+    providerConfig?: {
+      model_id?: string;
+    };
+    provider: ServiceProviderKeys;
+    inferenceId: string;
+  };
 };
 export type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };
 
@@ -247,4 +280,15 @@ export enum PlaygroundViewMode {
 export interface PlaygroundRouterParameters {
   pageMode: PlaygroundPageMode;
   viewMode?: PlaygroundViewMode;
+}
+
+export interface SavedPlaygroundRouterParameters {
+  playgroundId: string;
+  pageMode?: PlaygroundPageMode;
+  viewMode?: PlaygroundViewMode;
+}
+
+export interface SavedPlaygroundLoadErrors {
+  missingIndices: string[];
+  missingModel?: string;
 }

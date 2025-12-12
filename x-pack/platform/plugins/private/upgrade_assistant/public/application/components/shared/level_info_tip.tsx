@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 
@@ -23,5 +24,5 @@ interface Props {
 }
 
 export const LevelInfoTip: FunctionComponent<Props> = ({ level }) => {
-  return <EuiIconTip content={i18nTexts[level]} position="top" type="iInCircle" />;
+  return <EuiIconTip content={i18nTexts[level]} position="top" type="info" />;
 };

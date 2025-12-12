@@ -6,81 +6,158 @@
  */
 
 import {
-  StreamGetResponse,
-  WiredStreamGetResponse,
+  Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
-  isGroupStreamDefinition,
-  isUnwiredStreamDefinition,
+  getInheritedSettings,
+  findInheritedFailureStore,
 } from '@kbn/streams-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { AssetClient } from '../../../lib/streams/assets/asset_client';
-import { StreamsClient } from '../../../lib/streams/client';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
+import type {
+  DataStreamWithFailureStore,
+  WiredIngestStreamEffectiveFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
+import type { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
+  getFailureStore,
+  getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
+import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
+import type { QueryLink } from '../../../../common/assets';
+import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
   name,
   assetClient,
+  attachmentClient,
   streamsClient,
   scopedClusterClient,
 }: {
   name: string;
   assetClient: AssetClient;
+  attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<StreamGetResponse> {
-  const [streamDefinition, dashboards] = await Promise.all([
+}): Promise<Streams.all.GetResponse> {
+  const [streamDefinition, { [name]: assets }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetIds({
-      entityId: name,
-      entityType: 'stream',
-      assetType: 'dashboard',
-    }),
+    assetClient.getAssetLinks([name], ['query']),
+    attachmentClient.getAttachments(name),
   ]);
 
-  if (isGroupStreamDefinition(streamDefinition)) {
+  const { dashboards, rules } = attachments.reduce(
+    (acc, attachment) => {
+      if (attachment.type === 'dashboard') {
+        acc.dashboards.push(attachment.id);
+      } else if (attachment.type === 'rule') {
+        acc.rules.push(attachment.id);
+      }
+      return acc;
+    },
+    { dashboards: [] as string[], rules: [] as string[] }
+  );
+
+  const assetsByType = assets.reduce(
+    (acc, asset) => {
+      const assetType = asset[ASSET_TYPE];
+      if (assetType === 'query') {
+        acc.queries.push(asset);
+      }
+      return acc;
+    },
+    {
+      queries: [] as QueryLink[],
+    }
+  );
+
+  const queries = assetsByType.queries.map((query) => {
+    return query.query;
+  });
+
+  if (Streams.GroupStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       dashboards,
+      rules,
+      queries,
     };
   }
+
+  const privileges = await streamsClient.getPrivileges(name);
 
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream] = await Promise.all([
+  const [ancestors, dataStream, dataStreamSettings] = await Promise.all([
     streamsClient.getAncestors(name),
-    streamsClient.getDataStream(name).catch((e) => {
-      if (e.statusCode === 404) {
-        return null;
-      }
-      throw e;
-    }),
+    privileges.view_index_metadata
+      ? streamsClient.getDataStream(name).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
+    privileges.view_index_metadata
+      ? scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
   ]);
 
-  if (isUnwiredStreamDefinition(streamDefinition)) {
+  if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
-      elasticsearch_assets: dataStream
-        ? await getUnmanagedElasticsearchAssets({
-            dataStream,
-            scopedClusterClient,
-          })
-        : [],
+      privileges,
+      elasticsearch_assets:
+        dataStream && privileges.manage
+          ? await getUnmanagedElasticsearchAssets({
+              dataStream,
+              scopedClusterClient,
+            })
+          : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
+      effective_settings: getDataStreamSettings(dataStreamSettings?.data_streams[0]),
       dashboards,
-      inherited_fields: {},
-    };
+      rules,
+      queries,
+      effective_failure_store: getFailureStore({
+        dataStream: dataStream as DataStreamWithFailureStore,
+      }),
+    } satisfies Streams.ClassicStream.GetResponse;
   }
 
-  const body: WiredStreamGetResponse = {
+  const inheritedFields = addAliasesForNamespacedFields(
+    streamDefinition,
+    getInheritedFieldsFromAncestors(ancestors)
+  );
+
+  const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
+
+  const effectiveFailureStore: WiredIngestStreamEffectiveFailureStore = dataStream
+    ? {
+        ...getFailureStore({ dataStream: dataStream as DataStreamWithFailureStore }),
+        from: inheritedFailureStore.from,
+      }
+    : inheritedFailureStore;
+
+  const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
+    rules,
+    privileges,
+    queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    inherited_fields: getInheritedFieldsFromAncestors(ancestors),
+    effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
+    inherited_fields: inheritedFields,
+    effective_failure_store: effectiveFailureStore,
   };
-
   return body;
 }

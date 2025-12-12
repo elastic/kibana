@@ -8,7 +8,7 @@
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
-import type { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
+import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import type { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import type { RulesClientContext } from './types';
@@ -23,7 +23,9 @@ import { snoozeRule } from '../application/rule/methods/snooze';
 import type { UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { unsnoozeRule } from '../application/rule/methods/unsnooze';
 import type { GetRuleParams } from '../application/rule/methods/get';
+import type { BulkGetRulesParams } from '../application/rule/methods/bulk_get';
 import { getRule } from '../application/rule/methods/get';
+import { bulkGetRules } from '../application/rule/methods/bulk_get';
 import type { ResolveParams } from '../application/rule/methods/resolve';
 import { resolveRule } from '../application/rule/methods/resolve';
 import type { GetAlertStateParams } from './methods/get_alert_state';
@@ -54,6 +56,8 @@ import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bu
 import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
 import type { BulkEditOptions } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import { bulkEditRules } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
+import type { BulkEditRuleParamsOptions } from '../application/rule/methods/bulk_edit_params/types';
+import { bulkEditRuleParamsWithReadAuth } from '../application/rule/methods/bulk_edit_params/bulk_edit_rule_params';
 import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
@@ -63,7 +67,10 @@ import { muteInstance } from '../application/rule/methods/mute_alert/mute_instan
 import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
-import { runSoon } from './methods/run_soon';
+import { bulkMuteUnmuteInstances } from '../application/rule/methods/bulk_mute_unmute_alerts/bulk_mute_unmute_instances';
+import type { BulkMuteUnmuteAlertsParams } from '../application/rule/types';
+import type { RunSoonParams } from '../application/rule/methods/run_soon';
+import { runSoon } from '../application/rule/methods/run_soon';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import type { BulkUntrackBody } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
@@ -76,15 +83,36 @@ import { deleteBackfill } from '../application/backfill/methods/delete';
 import type { FindBackfillParams } from '../application/backfill/methods/find/types';
 import type { DisableRuleParams } from '../application/rule/methods/disable';
 import type { EnableRuleParams } from '../application/rule/methods/enable_rule';
-import { findGaps } from '../application/rule/methods/find_gaps';
-import { fillGapById } from '../application/rule/methods/fill_gap_by_id';
-import type { FillGapByIdParams } from '../application/rule/methods/fill_gap_by_id/types';
-import type { GetRuleIdsWithGapsParams } from '../application/rule/methods/get_rule_ids_with_gaps/types';
+import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
+import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
+import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
+import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
+import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
+import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
+import { createGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/create/create_gap_auto_fill_scheduler';
+import type { CreateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/create/types';
+import { getGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/get/get_gap_auto_fill_scheduler';
+import type { GetGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/types';
+import { deleteGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/delete/delete_gap_auto_fill_scheduler';
+import { updateGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/update/update_gap_auto_fill_scheduler';
+import type { UpdateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/update/types';
 
-import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_with_gaps';
-import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
-import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import type { FindGapsParams } from '../lib/rule_gaps/types';
+// Gap methods
+import { findGaps } from '../application/gaps/methods/find_gaps';
+import { fillGapById } from '../application/gaps/methods/fill_gap_by_id';
+import type { FillGapByIdParams } from '../application/gaps/methods/fill_gap_by_id/types';
+import type { GetRuleIdsWithGapsParams } from '../application/gaps/methods/get_rule_ids_with_gaps/types';
+import { getRuleIdsWithGaps } from '../application/gaps/methods/get_rule_ids_with_gaps';
+import { getGapsSummaryByRuleIds } from '../application/gaps/methods/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryByRuleIdsParams } from '../application/gaps/methods/get_gaps_summary_by_rule_ids/types';
+import type { FindGapsParams } from '../application/gaps/types';
+import { bulkFillGapsByRuleIds } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids';
+import type {
+  BulkFillGapsByRuleIdsOptions,
+  BulkFillGapsByRuleIdsParams,
+} from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { FindGapAutoFillSchedulerLogsParams } from '../application/gap_auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
+import { findGapAutoFillSchedulerLogs } from '../application/gap_auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -161,15 +189,22 @@ export class RulesClient {
     getRuleExecutionKPI(this.context, params);
   public getGlobalExecutionKpiWithAuth = (params: GetGlobalExecutionKPIParams) =>
     getGlobalExecutionKpiWithAuth(this.context, params);
+  public getGlobalExecutionSummaryWithAuth = (params: GetGlobalExecutionSummaryParams) =>
+    getGlobalExecutionSummaryWithAuth(this.context, params);
   public getActionErrorLog = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLog(this.context, params);
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
+  public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
+    bulkGetRules<Params>(this.context, params);
   public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
+  public bulkEditRuleParamsWithReadAuth = <Params extends RuleTypeParams>(
+    options: BulkEditRuleParamsOptions<Params>
+  ) => bulkEditRuleParamsWithReadAuth<Params>(this.context, options);
   public bulkEnableRules = (params: BulkEnableRulesParams) => bulkEnableRules(this.context, params);
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
@@ -183,12 +218,17 @@ export class RulesClient {
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
-  public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
+  public muteInstance = (options: { params: MuteAlertParams; query: MuteAlertQuery }) =>
+    muteInstance(this.context, options);
+  public bulkMuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
+    bulkMuteUnmuteInstances(this.context, { params: options, mute: true });
+  public bulkUnmuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
+    bulkMuteUnmuteInstances(this.context, { params: options, mute: false });
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
-  public runSoon = (options: { id: string }) => runSoon(this.context, options);
+  public runSoon = (options: RunSoonParams) => runSoon(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 
@@ -215,15 +255,44 @@ export class RulesClient {
 
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
+  public getTemplate = (params: GetRuleTemplateParams) => getRuleTemplate(this.context, params);
+
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
   public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
 
   public fillGapById = (params: FillGapByIdParams) => fillGapById(this.context, params);
 
+  public bulkFillGapsByRuleIds = (
+    params: BulkFillGapsByRuleIdsParams,
+    options: BulkFillGapsByRuleIdsOptions
+  ) => bulkFillGapsByRuleIds(this.context, params, options);
+
   public getRuleIdsWithGaps = (params: GetRuleIdsWithGapsParams) =>
     getRuleIdsWithGaps(this.context, params);
 
   public getGapsSummaryByRuleIds = (params: GetGapsSummaryByRuleIdsParams) =>
     getGapsSummaryByRuleIds(this.context, params);
+
+  public getRuleTypesByQuery = (params: GetRuleTypesByQueryParams) =>
+    getRuleTypesByQuery(this.context, params);
+
+  public createGapAutoFillScheduler = (params: CreateGapAutoFillSchedulerParams) =>
+    createGapAutoFillScheduler(this.context, params);
+
+  public getGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    getGapAutoFillScheduler(this.context, params);
+
+  public updateGapAutoFillScheduler = (params: UpdateGapAutoFillSchedulerParams) =>
+    updateGapAutoFillScheduler(this.context, params);
+
+  public deleteGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    deleteGapAutoFillScheduler(this.context, params);
+
+  public findGapAutoFillSchedulerLogs = (params: FindGapAutoFillSchedulerLogsParams) =>
+    findGapAutoFillSchedulerLogs(this.context, params);
+
+  public getContext() {
+    return this.context;
+  }
 }

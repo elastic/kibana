@@ -6,7 +6,7 @@
  */
 
 import type { ApmIndicesConfig, UXMetrics } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityApp } from '@kbn/observability-shared-plugin/typings/common';
+import type { ObservabilityApp } from '@kbn/observability-shared-plugin/typings/common';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
@@ -69,13 +69,18 @@ export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData<T extends ObservabilityFetchDataPlugins> = (
+export type HasData<T extends keyof ObservabilityHasDataResponse> = (
   params?: HasDataParams
 ) => Promise<ObservabilityHasDataResponse[T]>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'fleet' | 'synthetics' | 'profiling' | 'observability-onboarding'
+  | 'observability-overview'
+  | 'fleet'
+  | 'synthetics'
+  | 'profiling'
+  | 'observability-onboarding'
+  | 'alerts'
 >;
 
 export interface DataHandler<

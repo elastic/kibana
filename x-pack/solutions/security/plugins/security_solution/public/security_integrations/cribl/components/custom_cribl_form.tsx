@@ -213,6 +213,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
         {missingReqPermissions && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               size="s"
               title={i18n.translate(
                 'xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutTitle',
@@ -220,7 +221,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
                   defaultMessage: 'Be sure you have the necessary privileges',
                 }
               )}
-              iconType="help"
+              iconType="question"
             >
               <p>
                 <FormattedMessage

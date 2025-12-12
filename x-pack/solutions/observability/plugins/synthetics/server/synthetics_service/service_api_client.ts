@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { concat, forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { Observable } from 'rxjs';
+import { concat, forkJoin, from as rxjsFrom, of } from 'rxjs';
 import { catchError, tap } from 'rxjs';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
-import { Logger } from '@kbn/core/server';
-import { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsServerSetup } from '../types';
-import {
-  convertToDataStreamFormat,
-  DataStreamConfig,
-} from './formatters/public_formatters/convert_to_data_stream';
+import type { Logger } from '@kbn/core/server';
+import type { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsServerSetup } from '../types';
+import type { DataStreamConfig } from './formatters/public_formatters/convert_to_data_stream';
+import { convertToDataStreamFormat } from './formatters/public_formatters/convert_to_data_stream';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
-import {
+import type {
   MonitorFields,
   PublicLocations,
   ServiceLocation,
   ServiceLocationErrors,
 } from '../../common/runtime_types';
-import { ServiceConfig } from '../config';
+import type { ServiceConfig } from '../config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -111,8 +111,8 @@ export class ServiceAPIClient {
 
           const { allowed, signupUrl } = data;
           return { allowed, signupUrl };
-        } catch (e) {
-          this.logger.error(e);
+        } catch (error) {
+          this.logger.error(`Error getting isAllowed status, Error: ${error.message}`, { error });
         }
       }
     } else {
@@ -177,8 +177,8 @@ export class ServiceAPIClient {
   async syncMonitors(data: ServiceData) {
     try {
       return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error(`Error syncing Synthetics monitors, Error: ${error.message}`, { error });
     }
   }
 
@@ -343,7 +343,9 @@ export class ServiceAPIClient {
   ) {
     const reason = err.response?.data?.reason ?? '';
 
-    err.message = `Failed to call service location ${url}${err.request?.path} with method ${method} with ${numMonitors} monitors:  ${err.message}, ${reason}`;
+    err.message = `Failed to call service location ${url}${
+      err.request?.path ?? ''
+    } with method ${method} with ${numMonitors} monitors:  ${err.message}, ${reason}`;
     this.logger.error(err);
     sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
       reason: err.response?.data?.reason,

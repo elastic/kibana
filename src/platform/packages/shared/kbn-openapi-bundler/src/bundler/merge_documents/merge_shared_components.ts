@@ -9,11 +9,11 @@
 
 import chalk from 'chalk';
 import deepEqual from 'fast-deep-equal';
-import { OpenAPIV3 } from 'openapi-types';
-import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { extractObjectByJsonPointer } from '../../utils/extract_by_json_pointer';
 import { logger } from '../../logger';
-import { MergeOptions } from './merge_options';
+import type { MergeOptions } from './merge_options';
 
 const MERGEABLE_COMPONENT_TYPES = [
   'schemas',

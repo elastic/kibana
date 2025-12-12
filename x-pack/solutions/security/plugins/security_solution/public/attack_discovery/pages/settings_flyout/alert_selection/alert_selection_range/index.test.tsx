@@ -9,7 +9,9 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AlertSelectionRange } from '.';
-import { SEND_FEWER_ALERTS, SET_NUMBER_OF_ALERTS_TO_ANALYZE } from '../translations';
+import { SEND_FEWER_ALERTS } from '../translations';
+
+jest.mock('../../../../../common/lib/kibana');
 
 const defaultProps = {
   maxAlerts: 100,
@@ -17,12 +19,8 @@ const defaultProps = {
 };
 
 describe('AlertSelectionRange', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  it('renders the title', () => {
-    render(<AlertSelectionRange {...defaultProps} />);
-
-    expect(screen.getByTestId('title')).toHaveTextContent(SET_NUMBER_OF_ALERTS_TO_ANALYZE);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('renders the AlertsRange', () => {

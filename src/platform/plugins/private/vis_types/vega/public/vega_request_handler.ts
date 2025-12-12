@@ -9,16 +9,17 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
+import type { Filter, TimeRange, Query, ProjectRouting } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
 
-import { VegaVisualizationDependencies } from './plugin';
-import { VisParams } from './vega_fn';
+import type { VegaVisualizationDependencies } from './plugin';
+import type { VisParams } from './vega_fn';
 import { getData, getDataViews } from './services';
-import { VegaInspectorAdapters } from './vega_inspector';
+import type { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;
@@ -27,6 +28,7 @@ interface VegaRequestHandlerParams {
   visParams: VisParams;
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;
+  projectRouting?: ProjectRouting;
 }
 
 interface VegaRequestHandlerContext {
@@ -53,6 +55,7 @@ export function createVegaRequestHandler(
     visParams,
     searchSessionId,
     executionContext,
+    projectRouting,
   }: VegaRequestHandlerParams) {
     const { search } = getData();
     const dataViews = getDataViews();
@@ -67,7 +70,8 @@ export function createVegaRequestHandler(
         context.abortSignal,
         context.inspectorAdapters,
         searchSessionId,
-        executionContext
+        executionContext,
+        projectRouting
       );
     }
 
@@ -76,12 +80,13 @@ export function createVegaRequestHandler(
     let dataView: DataView;
     const firstFilterIndex = filters[0]?.meta.index;
     if (firstFilterIndex) {
+      // @ts-expect-error upgrade typescript v5.9.3
       dataView = await dataViews.get(firstFilterIndex).catch(() => undefined);
     }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
     const filtersDsl = buildEsQuery(dataView, query, filters, esQueryConfigs);
-    const { VegaParser } = await import('./data_model/vega_parser');
+    const { VegaParser } = await import('./async_services');
 
     const vp = new VegaParser(
       visParams.spec,

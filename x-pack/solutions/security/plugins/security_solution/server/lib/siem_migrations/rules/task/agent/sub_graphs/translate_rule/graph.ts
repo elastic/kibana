@@ -7,6 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
+import type { OriginalRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -16,9 +17,7 @@ import { getTranslationResultNode } from './nodes/translation_result';
 import { getValidationNode } from './nodes/validation';
 import { translateRuleState } from './state';
 import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
-
-// How many times we will try to self-heal when validation fails, to prevent infinite graph recursions
-const MAX_VALIDATION_ITERATIONS = 3;
+import { migrateRuleConfigSchema } from '../../state';
 
 export function getTranslateRuleGraph({
   model,
@@ -32,7 +31,7 @@ export function getTranslateRuleGraph({
     logger,
   });
   const translationResultNode = getTranslationResultNode();
-  const inlineQueryNode = getInlineQueryNode({ model, ruleMigrationsRetriever });
+  const inlineQueryNode = getInlineQueryNode({ model, logger });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
@@ -42,7 +41,7 @@ export function getTranslateRuleGraph({
   });
   const ecsMappingNode = getEcsMappingNode({ esqlKnowledgeBase, logger });
 
-  const translateRuleGraph = new StateGraph(translateRuleState)
+  const translateRuleGraph = new StateGraph(translateRuleState, migrateRuleConfigSchema)
     // Nodes
     .addNode('inlineQuery', inlineQueryNode)
     .addNode('retrieveIntegrations', retrieveIntegrationsNode)
@@ -52,7 +51,16 @@ export function getTranslateRuleGraph({
     .addNode('ecsMapping', ecsMappingNode)
     .addNode('translationResult', translationResultNode)
     // Edges
-    .addEdge(START, 'inlineQuery')
+    .addConditionalEdges(START, getVendorRouter('splunk'), {
+      /**
+       *  For now inlineQuery node is only for splunk rules because we resolve dependencies such as `lookups` and `macros`
+       *  in this step. For new vendors and for splunk, resolve dependencies node should be used instead of inlineQuery node.
+       *
+       *  TODO : as of now we do not want to change splunk rule migration flow, so keeping inlineQuery node for splunk as it is.
+       */
+      is_splunk: 'inlineQuery',
+      is_not_splunk: 'retrieveIntegrations',
+    })
     .addConditionalEdges('inlineQuery', translatableRouter, [
       'retrieveIntegrations',
       'translationResult',
@@ -81,15 +89,26 @@ const translatableRouter = (state: TranslateRuleState) => {
 };
 
 const validationRouter = (state: TranslateRuleState) => {
-  if (
-    state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    !isEmpty(state.validation_errors?.esql_errors)
-  ) {
+  if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
+  if (state.original_rule.vendor === 'qradar') {
+    // we do not need ecs mapping for qradar rules
+    return 'translationResult';
+  }
+
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
 
   return 'translationResult';
 };
+
+export function getVendorRouter(vendor: OriginalRule['vendor']) {
+  return function qradarConditionalEdge(state: TranslateRuleState): string {
+    if (state.original_rule.vendor === vendor) {
+      return `is_${vendor}`;
+    }
+    return `is_not_${vendor}`;
+  };
+}

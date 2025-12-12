@@ -18,6 +18,7 @@ import type {
   XYState,
 } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
+import { PageScope } from '../../../data_view_manager/constants';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -26,7 +27,6 @@ import { DEFAULT_ACTIONS, useActions } from './use_actions';
 
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
@@ -61,7 +61,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   inspectTitle,
   lensAttributes,
   onLoad,
-  scopeId = SourcererScopeName.default,
+  scopeId = PageScope.default,
   enableLegendActions = true,
   stackByField,
   timerange,
@@ -69,6 +69,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
   casesAttachmentMetadata,
+  signalIndexName,
+  esql,
 }) => {
   const styles = useMemo(
     () => getStyles(wrapperWidth, wrapperHeight),
@@ -78,7 +80,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const lensComponentStyle = useMemo(
     () => ({
       height: wrapperHeight ?? '100%',
-      minWidth: '100px',
       width: wrapperWidth ?? '100%',
     }),
     [wrapperHeight, wrapperWidth]
@@ -91,7 +92,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
+  const { loading, searchSessionId, tables } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
@@ -101,6 +102,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     scopeId,
     stackByField,
     title: '',
+    esql,
+    signalIndexName,
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
 
@@ -114,7 +117,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [enableLegendActions]
   );
   const { setInspectData } = useEmbeddableInspect(onLoad);
-  const { responses, loading } = useVisualizationResponse({ visualizationId: id });
 
   const {
     additionalRequests,
@@ -128,7 +130,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   } = useInspect({
     inputId: inputsModelId,
     isDisabled: loading,
-    multiple: responses != null && responses.length > 1,
+    multiple: tables != null && Object.keys(tables.tables).length > 1,
     queryId: id,
   });
 
@@ -208,7 +210,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return null;
   }
 
-  if (!attributes || (responses != null && responses.length === 0)) {
+  if (!attributes) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -258,6 +260,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             searchSessionId={searchSessionId}
             showInspector={false}
             style={lensComponentStyle}
+            css={{ minWidth: '100px' }}
             syncCursor={false}
             syncTooltips={false}
             timeRange={timerange}

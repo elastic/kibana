@@ -49,20 +49,22 @@ export const bulkGet = async (
         operation: Operations.bulkGetCases,
       });
 
-    const commentTotals = await attachmentService.getter.getCaseCommentStats({
+    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds: authorizedCases.map((theCase) => theCase.id),
     });
 
     const flattenedCases = authorizedCases.map((theCase) => {
-      const { userComments, alerts } = commentTotals.get(theCase.id) ?? {
+      const { userComments, alerts, events } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
+        events: 0,
       };
 
       return flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
         totalAlerts: alerts,
+        totalEvents: events,
       });
     });
 

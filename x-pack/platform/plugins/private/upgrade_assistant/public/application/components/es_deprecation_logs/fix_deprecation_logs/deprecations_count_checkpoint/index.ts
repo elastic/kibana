@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
+export { ResetCounterButton } from './deprecations_count_reset_button';
+export { DeprecationsCountCallout } from './deprecations_count_callout';

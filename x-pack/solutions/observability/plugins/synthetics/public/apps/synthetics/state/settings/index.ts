@@ -6,16 +6,15 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { DynamicSettings } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '..';
+import type { DynamicSettings } from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
 import {
   getConnectorsAction,
   getDynamicSettingsAction,
   getLocationMonitorsAction,
   setDynamicSettingsAction,
 } from './actions';
-import { ActionConnector } from './api';
-import { syncGlobalParamsAction } from './actions';
+import type { ActionConnector } from './api';
 
 export interface LocationMonitor {
   id: string;
@@ -82,34 +81,6 @@ export const dynamicSettingsReducer = createReducer(initialState, (builder) => {
     })
     .addCase(getLocationMonitorsAction.fail, (state) => {
       state.locationMonitorsLoading = false;
-    });
-});
-
-export interface SettingsState {
-  success: boolean | null;
-  loading: boolean;
-  error: IHttpSerializedFetchError | null;
-}
-
-const initialSettingState: SettingsState = {
-  success: null,
-  loading: false,
-  error: null,
-};
-
-export const settingsReducer = createReducer(initialSettingState, (builder) => {
-  builder
-    .addCase(syncGlobalParamsAction.get, (state) => {
-      state.loading = true;
-    })
-    .addCase(syncGlobalParamsAction.success, (state, action) => {
-      state.success = action.payload;
-      state.loading = false;
-    })
-    .addCase(syncGlobalParamsAction.fail, (state, action) => {
-      state.error = action.payload;
-      state.loading = false;
-      state.success = false;
     });
 });
 

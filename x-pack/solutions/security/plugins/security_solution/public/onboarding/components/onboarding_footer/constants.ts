@@ -9,7 +9,8 @@ export const TELEMETRY_FOOTER_LINK = `footer_link`;
 
 export enum OnboardingFooterLinkItemId {
   documentation = 'documentation',
-  demo = 'demo',
-  forum = 'forum',
+  expand = 'expand',
+  slack = 'slack',
   labs = 'labs',
+  manageDeployment = 'manageDeployment',
 }

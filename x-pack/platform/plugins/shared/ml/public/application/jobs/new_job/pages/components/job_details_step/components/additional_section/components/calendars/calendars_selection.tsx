@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,23 +27,19 @@ import {
 } from '../../../../../../../../../settings/calendars/dst_utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
 import type { MlCalendar } from '../../../../../../../../../../../common/types/calendars';
-import { useMlApi, useMlKibana } from '../../../../../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 import { DescriptionDst } from './description_dst';
+import { useMlManagementLink } from '../../../../../../../../../contexts/kibana/use_create_url';
+import { MANAGEMENT_SECTION_IDS } from '../../../../../../../../../management';
 
 interface Props {
   isDst?: boolean;
 }
 
 export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
-  const {
-    services: {
-      application: { getUrlForApp },
-    },
-  } = useMlKibana();
   const mlApi = useMlApi();
 
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
@@ -54,6 +51,7 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   >([]);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<MlCalendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const titleId = useGeneratedHtmlId({ prefix: 'calendarsSelection' });
 
   async function loadCalendars() {
     setIsLoading(true);
@@ -90,17 +88,22 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
     },
   };
 
-  const manageCalendarsHref = getUrlForApp(PLUGIN_ID, {
-    path: isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE,
-  });
+  const manageCalendarsHref = useMlManagementLink(
+    isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
 
   const Desc = isDst ? DescriptionDst : Description;
 
   return (
-    <Desc>
+    <Desc titleId={isDst ? `Dst${titleId}` : titleId}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
-          <EuiComboBox {...comboBoxProps} data-test-subj="mlJobWizardComboBoxCalendars" />
+          <EuiComboBox
+            {...comboBoxProps}
+            data-test-subj="mlJobWizardComboBoxCalendars"
+            aria-labelledby={isDst ? `Dst${titleId}` : titleId}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip

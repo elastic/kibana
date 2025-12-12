@@ -9,10 +9,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-const persistedLogViewReferenceSchema = schema.object({
-  logViewId: schema.string(),
-  type: schema.literal('log-view-reference'),
-});
+const persistedLogViewReferenceSchema = schema.object(
+  {
+    logViewId: schema.string(),
+    type: schema.literal('log-view-reference'),
+  },
+  { unknowns: 'ignore' }
+);
 
 // Comparators //
 enum Comparator {
@@ -41,16 +44,22 @@ const ComparatorSchema = schema.oneOf([
   schema.literal(Comparator.NOT_MATCH_PHRASE),
 ]);
 
-const ThresholdSchema = schema.object({
-  comparator: ComparatorSchema,
-  value: schema.number(),
-});
+const ThresholdSchema = schema.object(
+  {
+    comparator: ComparatorSchema,
+    value: schema.number(),
+  },
+  { unknowns: 'ignore' }
+);
 
-const criterionSchema = schema.object({
-  field: schema.string(),
-  comparator: ComparatorSchema,
-  value: schema.oneOf([schema.string(), schema.number()]),
-});
+const criterionSchema = schema.object(
+  {
+    field: schema.string(),
+    comparator: ComparatorSchema,
+    value: schema.oneOf([schema.string(), schema.number()]),
+  },
+  { unknowns: 'ignore' }
+);
 
 const countCriteriaSchema = schema.arrayOf(criterionSchema);
 const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema);
@@ -65,34 +74,33 @@ const timeUnitSchema = schema.oneOf([
 const timeSizeSchema = schema.number();
 const groupBySchema = schema.arrayOf(schema.string());
 
-const RequiredRuleParamsSchema = schema.object({
-  // NOTE: "count" would be better named as "threshold", but this would require a
-  // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
-  count: ThresholdSchema,
-  timeUnit: timeUnitSchema,
-  timeSize: timeSizeSchema,
-  logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
-});
-
-const OptionalRuleParamsSchema = schema.object({
-  groupBy: schema.maybe(groupBySchema),
-});
-
-const countRuleParamsSchema = schema.intersection([
-  schema.object({
+const countRuleParamsSchema = schema.object(
+  {
     criteria: countCriteriaSchema,
-  }),
-  RequiredRuleParamsSchema,
-  OptionalRuleParamsSchema,
-]);
+    // NOTE: "count" would be better named as "threshold", but this would require a
+    // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
+    count: ThresholdSchema,
+    timeUnit: timeUnitSchema,
+    timeSize: timeSizeSchema,
+    logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
+    groupBy: schema.maybe(groupBySchema),
+  },
+  { unknowns: 'ignore' }
+);
 
-const ratioRuleParamsSchema = schema.intersection([
-  schema.object({
+const ratioRuleParamsSchema = schema.object(
+  {
     criteria: ratioCriteriaSchema,
-  }),
-  RequiredRuleParamsSchema,
-  OptionalRuleParamsSchema,
-]);
+    // NOTE: "count" would be better named as "threshold", but this would require a
+    // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
+    count: ThresholdSchema,
+    timeUnit: timeUnitSchema,
+    timeSize: timeSizeSchema,
+    logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
+    groupBy: schema.maybe(groupBySchema),
+  },
+  { unknowns: 'ignore' }
+);
 
 export const logThresholdParamsSchema = schema.oneOf([
   countRuleParamsSchema,

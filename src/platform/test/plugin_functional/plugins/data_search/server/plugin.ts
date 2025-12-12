@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
 export interface DataSearchTestStartDeps {
   data: DataPluginStart;
@@ -22,7 +22,16 @@ export class DataSearchTestPlugin
     const router = core.http.createRouter();
 
     router.get(
-      { path: '/api/data_search_plugin/search_source/as_scoped', validate: false },
+      {
+        path: '/api/data_search_plugin/search_source/as_scoped',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const [, { data }] = await core.getStartServices();
         // Just make sure `asScoped` can be called
@@ -32,7 +41,16 @@ export class DataSearchTestPlugin
     );
 
     router.get(
-      { path: '/api/data_search_plugin/search_source/create_empty', validate: false },
+      {
+        path: '/api/data_search_plugin/search_source/create_empty',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const [, { data }] = await core.getStartServices();
         const service = await data.search.searchSource.asScoped(req);
@@ -44,6 +62,12 @@ export class DataSearchTestPlugin
     router.post(
       {
         path: '/api/data_search_plugin/search_source/create',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.object({}, { unknowns: 'allow' }),
         },

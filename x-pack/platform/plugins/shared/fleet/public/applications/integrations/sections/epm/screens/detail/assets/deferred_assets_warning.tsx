@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 
 import type { FleetAuthz } from '../../../../../../../../common';
 
@@ -68,12 +68,12 @@ export const DeferredAssetsWarning = ({
   );
 
   return (
-    <EuiToolTip
+    <EuiIconTip
       display="inlineBlock"
       content={tooltipContent}
       title={DEFERRED_ASSETS_WARNING_LABEL}
-    >
-      <EuiIcon type={'alert'} color={'warning'} />
-    </EuiToolTip>
+      type={'alert'}
+      color={'warning'}
+    />
   );
 };

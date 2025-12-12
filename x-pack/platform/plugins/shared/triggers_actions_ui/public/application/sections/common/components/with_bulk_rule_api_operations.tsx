@@ -7,17 +7,18 @@
 
 import React from 'react';
 
-import {
+import type {
   IExecutionLogResult,
   IExecutionErrorsResult,
   IExecutionKPIResult,
 } from '@kbn/alerting-plugin/common';
-import { AlertingFrameworkHealth } from '@kbn/alerting-types';
+import type { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { resolveRule } from '@kbn/response-ops-rule-form';
 import { muteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/mute_alert_instance';
 import { unmuteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unmute_alert_instance';
-import {
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import type {
   Rule,
   RuleType,
   RuleTaskState,
@@ -41,7 +42,6 @@ import type {
 import { cloneRule } from '../../../lib/rule_api/clone';
 import { loadRule } from '../../../lib/rule_api/get_rule';
 import { loadRuleSummary } from '../../../lib/rule_api/rule_summary';
-import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import {
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
@@ -140,7 +140,7 @@ export function withBulkRuleOperations<T>(
         loadRuleSummary={async (ruleId: Rule['id'], numberOfExecutions?: number) =>
           loadRuleSummary({ http, ruleId, numberOfExecutions })
         }
-        loadRuleTypes={async () => loadRuleTypes({ http })}
+        loadRuleTypes={async () => getRuleTypes({ http })}
         loadExecutionLogAggregations={async (loadProps: LoadExecutionLogAggregationsProps) =>
           loadExecutionLogAggregations({
             ...loadProps,

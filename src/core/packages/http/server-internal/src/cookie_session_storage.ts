@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Request, Server, ServerStateCookieOptions } from '@hapi/hapi';
+import type { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
 import type { Logger } from '@kbn/logging';
@@ -17,6 +17,8 @@ import type {
   SessionStorage,
   SessionStorageCookieOptions,
 } from '@kbn/core-http-server';
+
+import { isDeepStrictEqual } from 'util';
 
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
@@ -30,21 +32,41 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   public async get(): Promise<T | null> {
     try {
       const session = await this.server.auth.test('security-cookie', this.request);
+
       // A browser can send several cookies, if it's not an array, just return the session value
-      if (!Array.isArray(session)) {
+      if (!Array.isArray(session.credentials)) {
         return session.credentials as T;
       }
 
       // If we have an array with one value, we're good also
-      if (session.length === 1) {
-        return session[0] as T;
+      if (session.credentials.length === 1) {
+        return session.credentials[0] as T;
       }
 
-      // Otherwise, we have more than one and won't be authing the user because we don't
-      // know which session identifies the actual user. There's potential to change this behavior
-      // to ensure all valid sessions identify the same user, or choose one valid one, but this
-      // is the safest option.
-      this.log.warn(`Found ${session.length} auth sessions when we were only expecting 1.`);
+      // If we have more than one session, return the first one if they are all the same
+      if (session.credentials.length > 1) {
+        this.log.warn(
+          `Found multiple auth sessions. Found:[${session.credentials.length}] sessions. Checking equality...`
+        );
+        const [firstSession, ...rest] = session.credentials;
+        const allEqual = rest.every((s) => {
+          return isDeepStrictEqual(s, firstSession);
+        });
+        if (allEqual) {
+          this.log.error(
+            `Found multiple auth sessions. Found:[${session.credentials.length}] equal sessions`
+          );
+          return firstSession as T;
+        }
+      }
+
+      // Otherwise, we have more than one session that are not the same as each other
+      // and won't be authing the user because we don't know which session identifies
+      // the actual user. There's potential to change this behavior to ensure all valid sessions
+      // identify the same user, or choose one valid one, but this is the safest option.
+      this.log.error(
+        `Found multiple auth sessions. Found:[${session.credentials.length}] unequal sessions`
+      );
       return null;
     } catch (error) {
       this.log.debug(String(error));
@@ -104,22 +126,8 @@ export async function createCookieSessionStorageFactory<T extends object>(
       clearInvalid: false,
       isHttpOnly: true,
       isSameSite: cookieOptions.sameSite ?? false,
-      contextualize: (
-        definition: Omit<ServerStateCookieOptions, 'isSameSite'> & { isSameSite: string }
-      ) => {
-        /**
-         * This is a temporary solution to support the Partitioned attribute.
-         * Statehood performs validation for the params, but only before the contextualize function call.
-         * Since value for the isSameSite is used directly when making segment,
-         * we can leverage that to append the Partitioned attribute to the cookie.
-         *
-         * Once statehood is updated to support the Partitioned attribute, we can remove this.
-         * Issue: https://github.com/elastic/kibana/issues/188720
-         */
-        if (definition.isSameSite === 'None' && definition.isSecure && !disableEmbedding) {
-          definition.isSameSite = 'None;Partitioned';
-        }
-      },
+      isPartitioned:
+        cookieOptions.sameSite === 'None' && cookieOptions.isSecure && !disableEmbedding,
     },
     validate: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);

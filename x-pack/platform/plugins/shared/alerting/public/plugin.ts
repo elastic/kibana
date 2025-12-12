@@ -14,11 +14,13 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
+import { MAINTENANCE_WINDOWS_APP_ID } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
+import { getMaxAlertLimit } from '../common';
 import type { Rule } from '../common';
-import { ENABLE_MAINTENANCE_WINDOWS, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -64,6 +66,7 @@ export interface PluginStartContract {
 }
 export interface AlertingPluginSetup {
   management: ManagementSetup;
+  maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 
 export interface AlertingPluginStart {
@@ -82,6 +85,7 @@ export interface AlertingUIConfig {
       };
     };
   };
+  maintenanceWindow: { enabled: boolean };
 }
 
 export class AlertingPublicPlugin
@@ -94,7 +98,7 @@ export class AlertingPublicPlugin
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.config = this.initContext.config.get<AlertingUIConfig>();
-    this.maxAlertsPerRun = this.config.rules.run.alerts.max;
+    this.maxAlertsPerRun = getMaxAlertLimit(this.config.rules.run.alerts.max);
   }
 
   public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
@@ -115,7 +119,7 @@ export class AlertingPublicPlugin
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
-    if (ENABLE_MAINTENANCE_WINDOWS) {
+    if (plugins.maintenanceWindows && this.config.maintenanceWindow?.enabled) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: MAINTENANCE_WINDOWS_APP_ID,
         title: i18n.translate('xpack.alerting.management.section.title', {

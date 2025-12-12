@@ -8,21 +8,21 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import type {
+  TextBasedPrivateState,
+  TextBasedLayer,
+  DatasourceDimensionEditorProps,
+  DataType,
+} from '@kbn/lens-common';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
-import {
-  FormatSelector,
-  FormatSelectorProps,
-} from '../../form_based/dimension_panel/format_selector';
-import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
+import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
+import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
-import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
-import { TextBasedLayer } from '../types';
+import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
@@ -42,27 +42,30 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     indexPatterns,
     dateRange,
     expressions,
+    esqlVariables,
   } = props;
 
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
     async function fetchColumns() {
       if (query) {
-        const table = await fetchFieldsFromESQL(
+        const table = await fetchFieldsFromESQLExpression(
           { esql: `${query.esql} | limit 0` },
           expressions,
           { from: dateRange.fromDate, to: dateRange.toDate },
           undefined,
           Object.values(indexPatterns).length
             ? Object.values(indexPatterns)[0].timeFieldName
-            : undefined
+            : undefined,
+          esqlVariables
         );
+
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
           const columns = table.columns.map((col) => {
             return {
               id: col.variable ?? col.id,
-              name: col.variable ? `?${col.variable}` : col.name,
+              name: col.variable ? `??${col.variable}` : col.name,
               meta: col?.meta ?? { type: 'number' },
               variable: col.variable,
               compatible:
@@ -83,10 +86,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   }, [
     dateRange.fromDate,
     dateRange.toDate,
+    esqlVariables,
     expressions,
     indexPatterns,
     props,
-    props.expressions,
     query,
   ]);
 
@@ -125,6 +128,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         className="lnsIndexPatternDimensionEditor--padded"
       >
         <FieldSelect
+          data-test-subj="text-based-dimension-field"
           existingFields={allColumns ?? []}
           selectedField={selectedField}
           onChoose={(choice) => {
@@ -174,8 +178,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       {props.dataSectionExtra && (
         <div
           style={{
-            paddingLeft: euiThemeVars.euiSize,
-            paddingRight: euiThemeVars.euiSize,
+            paddingLeft: euiTheme.size.base,
+            paddingRight: euiTheme.size.base,
           }}
         >
           {props.dataSectionExtra}

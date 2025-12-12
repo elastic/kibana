@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect, Page } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { Page } from '@elastic/synthetics';
+import { expect } from '@elastic/synthetics';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { FormMonitorType } from '@kbn/synthetics-plugin/common/runtime_types/monitor_management';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { loginPageProvider } from '../../page_objects/login';
@@ -221,16 +222,17 @@ export function syntheticsAppPageProvider({
       }
     },
 
-    async findEditMonitorConfiguration(
-      monitorConfig: Array<[string, string]>,
-      monitorType: FormMonitorType
-    ) {
+    async findEditMonitorConfiguration(monitorConfig: Array<[string, string]>) {
       await page.click('text="Advanced options"');
 
       for (let i = 0; i < monitorConfig.length; i++) {
         const [selector, expected] = monitorConfig[i];
-        const actual = await page.inputValue(selector);
-        expect(actual).toEqual(expected);
+        if (selector.includes('codeEditorContainer')) {
+          expect(page.locator(selector)).toHaveText(expected);
+        } else {
+          const actual = await page.inputValue(selector);
+          expect(actual).toEqual(expected);
+        }
       }
     },
 

@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
@@ -46,12 +47,12 @@ export interface CreateRuleFormProps {
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
   isFlyout?: boolean;
-  isServerless?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
   initialValues?: Partial<RuleFormData>;
   initialMetadata?: RuleTypeMetaData;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -67,7 +68,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
     isFlyout,
-    isServerless = false,
     onCancel,
     onSubmit,
     onChangeMetaData,
@@ -109,7 +109,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     healthCheckError,
     connectors,
     connectorTypes,
-    aadTemplateFields,
+    alertFields,
     flappingSettings,
   } = useLoadDependencies({
     http,
@@ -138,6 +138,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           actions: newFormData.actions,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
+          artifacts: newFormData.artifacts,
         },
       });
     },
@@ -194,7 +195,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         plugins,
         connectors,
         connectorTypes,
-        aadTemplateFields,
+        alertFields,
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
         selectedRuleTypeModel: ruleTypeModel,
         selectedRuleType: ruleType,
@@ -212,7 +213,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           validConsumers,
           ruleType,
           ruleTypes,
-          isServerless,
         }),
       }}
     >
@@ -222,6 +222,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         onCancel={onCancel}
         onSave={onSave}
         onChangeMetaData={onChangeMetaData}
+        focusTrapProps={props.focusTrapProps}
       />
     </RuleFormStateProvider>
   );

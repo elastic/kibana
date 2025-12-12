@@ -21,6 +21,7 @@ import { GetEntityStoreStatusRequestQuery } from '../../../../../common/api/enti
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
+import { checkAndInitPrivilegeMonitoringResources } from '../../privilege_monitoring/check_and_init_privmon_resources';
 
 export const getEntityStoreStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -56,6 +57,7 @@ export const getEntityStoreStatusRoute = (
         const secSol = await context.securitySolution;
 
         await checkAndInitAssetCriticalityResources(context, logger);
+        await checkAndInitPrivilegeMonitoringResources(context, logger);
 
         try {
           const body: GetEntityStoreStatusResponse = await secSol

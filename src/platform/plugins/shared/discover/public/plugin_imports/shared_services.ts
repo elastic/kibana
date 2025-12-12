@@ -8,7 +8,7 @@
  */
 
 export { HistoryService } from './history_service';
-export { DiscoverEBTManager } from './discover_ebt_manager';
+export { DiscoverEBTManager } from '../ebt_manager/discover_ebt_manager';
 export { RootProfileService } from '../context_awareness/profiles/root_profile';
 export { DataSourceProfileService } from '../context_awareness/profiles/data_source_profile';
 export { DocumentProfileService } from '../context_awareness/profiles/document_profile';

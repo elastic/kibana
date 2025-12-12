@@ -7,11 +7,19 @@
 
 import os from 'os';
 import type {
+  HealthDiagnosticConfiguration,
   IndicesMetadataConfiguration,
   IngestPipelinesStatsConfiguration,
   PaginationConfiguration,
   TelemetrySenderChannelConfiguration,
+  TelemetryQueryConfiguration,
 } from './types';
+import type { RssGrowthCircuitBreakerConfig } from './diagnostic/circuit_breakers/rss_growth_circuit_breaker';
+import type { TimeoutCircuitBreakerConfig } from './diagnostic/circuit_breakers/timeout_circuit_breaker';
+import type { EventLoopUtilizationCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_utilization_circuit_breaker';
+import type { EventLoopDelayCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_delay_circuit_breaker';
+import type { ElasticsearchCircuitBreakerConfig } from './diagnostic/circuit_breakers/elastic_search_circuit_breaker';
+import type { HealthDiagnosticQueryConfig } from './diagnostic/health_diagnostic_service.types';
 
 class TelemetryConfigurationDTO {
   private readonly DEFAULT_TELEMETRY_MAX_BUFFER_SIZE = 100;
@@ -27,9 +35,13 @@ class TelemetryConfigurationDTO {
     num_docs_to_sample: 10,
   };
   private readonly DEFAULT_INDICES_METADATA_CONFIG = {
-    indices_threshold: 10000,
+    indices_threshold: 10_000,
     datastreams_threshold: 1000,
-    indices_settings_threshold: 10000,
+    indices_settings_threshold: 10_000,
+
+    index_query_size: 1024,
+    ilm_stats_query_size: 1024,
+    ilm_policy_query_size: 1024,
 
     max_prefixes: 10, // @deprecated
     max_group_size: 100, // @deprecated
@@ -38,6 +50,40 @@ class TelemetryConfigurationDTO {
   private readonly DEFAULT_INGEST_PIPELINES_STATS_CONFIG = {
     enabled: true,
   };
+  private readonly DEFAULT_HEALTH_DIAGNOSTIC_CONFIG: HealthDiagnosticConfiguration = {
+    query: {
+      maxDocuments: 10_000,
+      bufferSize: 1_000,
+    } as HealthDiagnosticQueryConfig,
+    rssGrowthCircuitBreaker: {
+      maxRssGrowthPercent: 40,
+      validationIntervalMs: 500,
+    } as RssGrowthCircuitBreakerConfig,
+    timeoutCircuitBreaker: {
+      timeoutMillis: 5000,
+      validationIntervalMs: 500,
+    } as TimeoutCircuitBreakerConfig,
+    eventLoopUtilizationCircuitBreaker: {
+      thresholdMillis: 5000,
+      validationIntervalMs: 500,
+    } as EventLoopUtilizationCircuitBreakerConfig,
+    eventLoopDelayCircuitBreaker: {
+      thresholdMillis: 500,
+      validationIntervalMs: 250,
+    } as EventLoopDelayCircuitBreakerConfig,
+    elasticsearchCircuitBreaker: {
+      maxJvmHeapUsedPercent: 90,
+      maxCpuPercent: 90,
+      expectedClusterHealth: ['green', 'yellow'],
+      validationIntervalMs: 1000,
+    } as ElasticsearchCircuitBreakerConfig,
+  };
+  private readonly DEFAULT_QUERY_CONFIG: TelemetryQueryConfiguration = {
+    pageSize: 500,
+    maxResponseSize: 10 * 1024 * 1024, // 10 MB
+    maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
+  };
+  private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {};
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -53,6 +99,10 @@ class TelemetryConfigurationDTO {
     this.DEFAULT_INDICES_METADATA_CONFIG;
   private _ingest_pipelines_stats_config: IngestPipelinesStatsConfiguration =
     this.DEFAULT_INGEST_PIPELINES_STATS_CONFIG;
+  private _health_diagnostic_config: HealthDiagnosticConfiguration =
+    this.DEFAULT_HEALTH_DIAGNOSTIC_CONFIG;
+  private _query_config: TelemetryQueryConfiguration = this.DEFAULT_QUERY_CONFIG;
+  private _encryption_public_keys: Record<string, string> = this.DEFAULT_ENCRYPTION_PUBLIC_KEYS;
 
   public get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
@@ -136,6 +186,32 @@ class TelemetryConfigurationDTO {
     return this._ingest_pipelines_stats_config;
   }
 
+  public set health_diagnostic_config(
+    healthDiagnosticConfiguration: HealthDiagnosticConfiguration
+  ) {
+    this._health_diagnostic_config = healthDiagnosticConfiguration;
+  }
+
+  public get health_diagnostic_config(): HealthDiagnosticConfiguration {
+    return this._health_diagnostic_config;
+  }
+
+  public set query_config(queryConfiguration: TelemetryQueryConfiguration) {
+    this._query_config = queryConfiguration;
+  }
+
+  public get query_config(): TelemetryQueryConfiguration {
+    return this._query_config;
+  }
+
+  public set encryption_public_keys(keys: Record<string, string>) {
+    this._encryption_public_keys = keys;
+  }
+
+  public get encryption_public_keys(): Record<string, string> {
+    return this._encryption_public_keys;
+  }
+
   public resetAllToDefault() {
     this._telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
     this._max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -146,6 +222,9 @@ class TelemetryConfigurationDTO {
     this._pagination_config = this.DEFAULT_PAGINATION_CONFIG;
     this._indices_metadata_config = this.DEFAULT_INDICES_METADATA_CONFIG;
     this._ingest_pipelines_stats_config = this.DEFAULT_INGEST_PIPELINES_STATS_CONFIG;
+    this._health_diagnostic_config = this.DEFAULT_HEALTH_DIAGNOSTIC_CONFIG;
+    this._query_config = this.DEFAULT_QUERY_CONFIG;
+    this._encryption_public_keys = this.DEFAULT_ENCRYPTION_PUBLIC_KEYS;
   }
 }
 

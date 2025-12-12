@@ -6,8 +6,9 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
 import { Overview } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
@@ -48,9 +49,20 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const clickRetryLogsButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('deprecationLogsRetryButton').simulate('click');
+    });
+
+    component.update();
+  };
+
   return {
     clickViewSystemIndicesState,
     clickRetrySystemIndicesButton,
+    clickRetryLogsButton,
   };
 };
 

@@ -76,7 +76,7 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColo
     const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html');
 
     expect(formatter(value)).toBe(
-      '<span style="color:#D36086;background-color:#ffffff">1234567890</span>'
+      '<span style="color:#D36086;background-color:#ffffff;display:inline-block;padding:0 8px;border-radius:3px">1234567890</span>'
     );
   });
 

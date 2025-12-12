@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { join } from 'path';
 import type { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { clearLog, readLog, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
+import { clearLog, readLog, startElasticsearch } from '@kbn/migrator-test-kit';
 import { getFips } from 'crypto';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 
 const logFilePath = join(__dirname, 'read_batch_size.log');
 
@@ -28,7 +29,7 @@ describe.skip('migration v2 - read batch size', () => {
 
   beforeEach(async () => {
     esServer = await startElasticsearch({
-      dataArchive: join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
+      dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
     });
     await clearLog(logFilePath);
   });
@@ -36,7 +37,7 @@ describe.skip('migration v2 - read batch size', () => {
   afterEach(async () => {
     await root?.shutdown();
     await esServer?.stop();
-    await delay(5); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
+    await timer(5_000); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
   });
 
   if (getFips() === 0) {

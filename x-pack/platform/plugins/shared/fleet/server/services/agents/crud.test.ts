@@ -45,6 +45,9 @@ jest.mock('./versions', () => {
   };
 });
 jest.mock('../spaces/helpers');
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const isSpaceAwarenessEnabledMock = _isSpaceAwarenessEnabled as jest.Mock;
@@ -181,6 +184,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -212,6 +216,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -250,6 +255,7 @@ describe('Agents CRUD test', () => {
           )
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 2,
@@ -277,6 +283,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -307,6 +314,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 100, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -344,6 +352,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -377,6 +386,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['6', '7'], 7, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: false,
         showInactive: false,
         page: 2,
@@ -411,6 +421,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
       });
 
@@ -425,6 +436,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
         sortField: 'policy_id',
       });
@@ -437,6 +449,7 @@ describe('Agents CRUD test', () => {
       });
       it('should add inactive and unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: '',
         });
@@ -448,6 +461,7 @@ describe('Agents CRUD test', () => {
 
       it('should add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: '',
         });
@@ -459,6 +473,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:unenrolled',
         });
@@ -470,6 +485,7 @@ describe('Agents CRUD test', () => {
 
       it('should add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: 'status:*',
         });
@@ -481,6 +497,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:*',
         });
@@ -488,6 +505,64 @@ describe('Agents CRUD test', () => {
         expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
           toElasticsearchQuery(_joinFilters(['status:*'])!)
         );
+      });
+    });
+
+    describe('retry functionality', () => {
+      beforeEach(() => {
+        searchMock.mockReset();
+      });
+
+      it('should retry on transient es errors', async () => {
+        const errorWithShardException = new Error('no_shard_available_action_exception: null');
+
+        searchMock
+          .mockRejectedValueOnce(errorWithShardException)
+          .mockResolvedValueOnce(getEsResponse(['1', '2'], 2, 'online'));
+
+        const result = await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(2);
+
+        expect(result).toEqual({
+          agents: [
+            {
+              access_api_key: undefined,
+              id: '1',
+              packages: [],
+              policy_revision: undefined,
+              status: 'online',
+            },
+            {
+              access_api_key: undefined,
+              id: '2',
+              packages: [],
+              policy_revision: undefined,
+              status: 'online',
+            },
+          ],
+          page: 1,
+          perPage: 20,
+          total: 2,
+        });
+      });
+
+      it('should not retry on non-transient errors', async () => {
+        const nonTransientError = new Error('Oh no!');
+
+        searchMock.mockRejectedValueOnce(nonTransientError);
+
+        await expect(
+          getAgentsByKuery(esClientMock, soClientMock, {
+            showAgentless: true,
+            showInactive: false,
+          })
+        ).rejects.toThrow('Oh no!');
+
+        expect(searchMock).toHaveBeenCalledTimes(1);
       });
     });
   });

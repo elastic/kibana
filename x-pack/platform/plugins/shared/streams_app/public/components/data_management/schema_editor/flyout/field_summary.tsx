@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams, isRoot } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -24,7 +24,7 @@ import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormType } from './field_form_type';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { EMPTY_CONTENT } from '../constants';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 
 const title = i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryTitle', {
   defaultMessage: 'Field summary',
@@ -57,14 +57,17 @@ interface FieldSummaryProps {
   field: SchemaField;
   isEditing: boolean;
   toggleEditMode: () => void;
-  stream: WiredStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
+  enableGeoPointSuggestions?: boolean;
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream } = props;
+  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions } = props;
 
   const router = useStreamsAppRouter();
+
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
 
   return (
     <>
@@ -93,7 +96,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-          ) : field.status === 'inherited' ? (
+          ) : field.status === 'inherited' && !isRoot(field.parent) ? (
             <EuiFlexItem grow={2}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
@@ -102,13 +105,13 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                     size="s"
                     color="primary"
                     iconType="popout"
-                    href={router.link('/{key}/{tab}/{subtab}', {
+                    href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: field.parent,
-                        tab: 'management',
-                        subtab: 'schemaEditor',
+                        tab: 'schema',
                       },
                     })}
+                    target="_blank"
                   >
                     {i18n.translate('xpack.streams.fieldSummary.editInParentButtonLabel', {
                       defaultMessage: 'Edit in parent stream',
@@ -128,7 +131,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               <span>
                 {FIELD_SUMMARIES.fieldStatus.label}{' '}
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   color="subdued"
                   content={i18n.translate('xpack.streams.fieldSummary.statusTooltip', {
                     defaultMessage:
@@ -160,6 +163,8 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               field={field}
               isEditing={isEditing}
               onTypeChange={(type) => onChange({ type })}
+              streamType={streamType}
+              enableGeoPointSuggestions={enableGeoPointSuggestions}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -176,7 +181,10 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
                 {isEditing ? (
-                  <FieldFormFormat field={field} onChange={(format) => onChange({ format })} />
+                  <FieldFormFormat
+                    value={field.format}
+                    onChange={(format) => onChange({ format })}
+                  />
                 ) : (
                   `${field.format ?? EMPTY_CONTENT}`
                 )}
@@ -203,7 +211,9 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
         <EuiHorizontalRule margin="xs" />
       </EuiFlexGroup>
-      {isEditing && stream.ingest.wired.routing.length > 0 ? (
+      {isEditing &&
+      Streams.WiredStream.Definition.is(stream) &&
+      stream.ingest.wired.routing.length > 0 ? (
         <EuiFlexItem grow={false}>
           <ChildrenAffectedCallout childStreams={stream.ingest.wired.routing} />
         </EuiFlexItem>

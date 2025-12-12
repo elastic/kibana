@@ -8,8 +8,12 @@
  */
 
 import { createLocation } from 'history';
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
-import { flattenNav, findActiveNodes } from './utils';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinition,
+} from '@kbn/core-chrome-browser/src';
+import { flattenNav, findActiveNodes, parseNavigationTree } from './utils';
 
 const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   id,
@@ -83,6 +87,60 @@ describe('flattenNav', () => {
     };
 
     expect(flattenNav(navTree)).toEqual(expected);
+  });
+});
+
+describe('parseNavigationTree', () => {
+  // Mock dependencies for parseNavigationTree
+  const mockDeps = {
+    deepLinks: {},
+    cloudLinks: {},
+  };
+
+  it('should parse a navigation tree with body, footer', () => {
+    const navigationTreeDef: NavigationTreeDefinition = {
+      body: [
+        {
+          id: 'test_group',
+          title: 'Test Group',
+          children: [
+            {
+              id: 'test_item',
+              title: 'Test Item',
+            },
+          ],
+        },
+      ],
+      footer: [
+        {
+          id: 'footer_item',
+          title: 'Footer Item',
+        },
+      ],
+    };
+
+    const result = parseNavigationTree('es', navigationTreeDef, mockDeps);
+
+    // Verify the result contains all sections
+    expect(result.navigationTreeUI.body).toHaveLength(1);
+    expect(result.navigationTreeUI.footer).toHaveLength(1);
+  });
+
+  it('should handle a navigation tree with only body', () => {
+    const navigationTreeDef: NavigationTreeDefinition = {
+      body: [
+        {
+          id: 'body_item',
+          title: 'Body Item',
+        },
+      ],
+    };
+
+    const result = parseNavigationTree('es', navigationTreeDef, mockDeps);
+
+    // Verify the result contains body section but not footer
+    expect(result.navigationTreeUI.body).toHaveLength(1);
+    expect(result.navigationTreeUI.footer).toBeUndefined();
   });
 });
 

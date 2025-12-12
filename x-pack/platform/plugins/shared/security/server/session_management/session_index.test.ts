@@ -54,6 +54,7 @@ describe('Session index', () => {
       runAt: new Date(),
       status: TaskStatus.Idle,
     },
+    abortController: new AbortController(),
   };
 
   const createSessionIndexOptions = (
@@ -340,7 +341,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
         index: aliasName,
-        body: getSessionIndexSettings({ indexName, aliasName }).mappings,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
 
@@ -367,7 +368,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
         index: aliasName,
-        body: getSessionIndexSettings({ indexName, aliasName }).mappings,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
 
@@ -1120,6 +1121,7 @@ describe('Session index', () => {
           ...mockRunContext.taskInstance,
           state: { shardMissingCounter: 9 },
         },
+        abortController: new AbortController(),
       };
 
       await expect(sessionIndex.cleanUp(runContext)).resolves.toEqual({

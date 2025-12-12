@@ -8,7 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { FleetFileNotFound } from '@kbn/fleet-plugin/server/errors';
 import { CustomHttpRequestError } from '../../utils/custom_http_request_error';
-import { EndpointAuthorizationError, NotFoundError } from '../errors';
+import { EndpointAuthorizationError, EndpointHttpError, NotFoundError } from '../errors';
 import { EndpointHostUnEnrolledError, EndpointHostNotFoundError } from '../services/metadata';
 
 /**
@@ -32,7 +32,7 @@ export const errorHandler = <E extends Error>(
     logger.error(error);
   }
 
-  if (error instanceof CustomHttpRequestError) {
+  if (error instanceof CustomHttpRequestError || error instanceof EndpointHttpError) {
     return res.customError({
       statusCode: error.statusCode,
       body: error,
@@ -55,6 +55,11 @@ export const errorHandler = <E extends Error>(
     return res.forbidden({ body: error });
   }
 
-  // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
-  throw error;
+  // Kibana core server handling of `500` errors does not actually return the `error.message` encountered,
+  // which can be critical in understanding what the root cause of a problem might be, so we handle
+  // `500` here to ensure that the `error.message` is returned
+  return res.customError({
+    statusCode: 500,
+    body: error,
+  });
 };

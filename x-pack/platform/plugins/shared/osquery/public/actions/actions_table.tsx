@@ -44,7 +44,7 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ act
   );
 
   return (
-    <EuiToolTip position="top" content={detailsText}>
+    <EuiToolTip position="top" content={detailsText} disableScreenReaderOutput>
       <EuiButtonIcon iconType="visTable" {...navProps} aria-label={detailsText} />
     </EuiToolTip>
   );
@@ -164,7 +164,7 @@ const ActionsTableComponent = () => {
       });
 
       return (
-        <EuiToolTip position="top" content={playText}>
+        <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="play"
             onClick={handlePlayClick(item)}

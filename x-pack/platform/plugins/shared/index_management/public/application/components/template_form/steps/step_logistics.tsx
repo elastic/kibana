@@ -19,6 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { Forms } from '../../../../shared_imports';
 import {
   useForm,
   useFormData,
@@ -26,13 +27,13 @@ import {
   getUseField,
   getFormRow,
   Field,
-  Forms,
   JsonEditorField,
   NumericField,
   RadioGroupField,
+  ToggleField,
 } from '../../../../shared_imports';
 import { UnitField, timeUnits } from '../../shared';
-import { DataRetention } from '../../../../../common';
+import type { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 import {
@@ -101,7 +102,7 @@ function getFieldsMeta(esDocsBase: string) {
     },
     indexMode: {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeTitle', {
-        defaultMessage: 'Data stream index mode',
+        defaultMessage: 'Index mode',
       }),
       description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeDescription', {
         defaultMessage:
@@ -229,6 +230,7 @@ interface LogisticsForm {
 interface LogisticsFormInternal extends LogisticsForm {
   addMeta: boolean;
   doCreateDataStream: boolean;
+  setIndexMode: boolean;
 }
 
 interface Props {
@@ -243,14 +245,22 @@ function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
     ...formData,
     addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
     doCreateDataStream: Boolean(formData.dataStream),
+    setIndexMode: Boolean(formData.indexMode),
   };
 }
 
 function getformSerializer(initialTemplateData: LogisticsForm = {}) {
   return (formData: LogisticsFormInternal): LogisticsForm => {
-    const { addMeta, doCreateDataStream, ...rest } = formData;
+    const {
+      addMeta,
+      doCreateDataStream,
+      setIndexMode,
+      indexMode: indexModeValue,
+      ...rest
+    } = formData;
     const dataStream = doCreateDataStream ? initialTemplateData.dataStream ?? {} : undefined;
-    return { ...rest, dataStream };
+    const indexMode = setIndexMode ? indexModeValue : undefined;
+    return { ...rest, dataStream, indexMode };
   };
 }
 
@@ -271,24 +281,36 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getErrors: getFormErrors,
       getFormData,
       setFieldValue,
+      updateFieldValues,
     } = form;
 
-    const [{ addMeta, doCreateDataStream, lifecycle, indexPatterns: indexPatternsField }] =
-      useFormData<{
-        addMeta: boolean;
-        lifecycle: DataRetention;
-        doCreateDataStream: boolean;
-        indexPatterns: string[];
-      }>({
-        form,
-        watch: [
-          'addMeta',
-          'lifecycle.enabled',
-          'lifecycle.infiniteDataRetention',
-          'doCreateDataStream',
-          'indexPatterns',
-        ],
-      });
+    const [
+      { addMeta, doCreateDataStream, lifecycle, indexPatterns: indexPatternsField, setIndexMode },
+    ] = useFormData<{
+      addMeta: boolean;
+      lifecycle: DataRetention;
+      doCreateDataStream: boolean;
+      indexPatterns: string[];
+      indexMode: string;
+      setIndexMode: boolean;
+    }>({
+      form,
+      watch: [
+        'addMeta',
+        'lifecycle.enabled',
+        'lifecycle.infiniteDataRetention',
+        'doCreateDataStream',
+        'indexPatterns',
+        'indexMode',
+        'setIndexMode',
+      ],
+    });
+
+    useEffect(() => {
+      if (!setIndexMode) {
+        setFieldValue('indexMode', null);
+      }
+    }, [setIndexMode, setFieldValue]);
 
     useEffect(() => {
       if (
@@ -298,9 +320,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         // Only set index mode if index pattern was changed
         defaultValue.indexPatterns !== indexPatternsField
       ) {
-        setFieldValue('indexMode', LOGSDB_INDEX_MODE);
+        updateFieldValues({
+          setIndexMode: true,
+          indexMode: LOGSDB_INDEX_MODE,
+        });
       }
-    }, [defaultValue.indexPatterns, indexPatternsField, setFieldValue]);
+    }, [defaultValue.indexPatterns, indexPatternsField, updateFieldValues]);
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
@@ -351,7 +376,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               flush="right"
               href={documentationService.getTemplatesDocumentationLink(isLegacy)}
               target="_blank"
-              iconType="help"
+              iconType="question"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"
@@ -400,19 +425,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               />
             </FormRow>
           )}
-
-          <FormRow title={indexMode.title} description={indexMode.description}>
-            <UseField
-              path="indexMode"
-              componentProps={{
-                euiFieldProps: {
-                  hasDividers: true,
-                  'data-test-subj': indexMode.testSubject,
-                  options: indexMode.options,
-                },
-              }}
-            />
-          </FormRow>
 
           {/*
             Since data stream and data retention are settings that are only allowed for non legacy,
@@ -468,6 +480,45 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               )}
             </FormRow>
           )}
+
+          {/* Index mode */}
+          <FormRow
+            title={indexMode.title}
+            description={
+              <>
+                {indexMode.description}
+                <EuiSpacer size="m" />
+                <UseField
+                  path="setIndexMode"
+                  component={ToggleField}
+                  componentProps={{
+                    'data-test-subj': 'toggleIndexMode',
+                    euiFieldProps: {
+                      label: i18n.translate(
+                        'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
+                        {
+                          defaultMessage: 'Set index mode',
+                        }
+                      ),
+                    },
+                  }}
+                />
+              </>
+            }
+          >
+            {setIndexMode && (
+              <UseField
+                path="indexMode"
+                componentProps={{
+                  euiFieldProps: {
+                    hasDividers: true,
+                    'data-test-subj': indexMode.testSubject,
+                    options: indexMode.options,
+                  },
+                }}
+              />
+            )}
+          </FormRow>
 
           {/* Order */}
           {isLegacy && (

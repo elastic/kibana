@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiPanel } from '@elastic/eui';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';

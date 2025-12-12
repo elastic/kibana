@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 
 export interface OptionalRequestParams {
   allow?: string[];

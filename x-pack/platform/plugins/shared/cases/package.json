@@ -3,5 +3,8 @@
   "name": "@kbn/cases-plugin",
   "version": "1.0.0",
   "private": true,
-  "license": "Elastic License 2.0"
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "generate:cases": "node scripts/generate_cases.js"
+  }
 }

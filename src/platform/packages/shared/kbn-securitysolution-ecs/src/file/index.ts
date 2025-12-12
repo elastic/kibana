@@ -14,7 +14,7 @@ interface Original {
 
 export interface CodeSignature {
   subject_name: string[];
-  trusted: string[];
+  trusted: boolean;
 }
 
 export interface Token {
@@ -57,6 +57,11 @@ export interface Hash {
   md5?: string[];
   sha1?: string[];
   sha256: string[];
+  cdhash?: string[];
+  sha384?: string[];
+  sha512?: string[];
+  ssdeep?: string[];
+  tlsh?: string[];
 }
 
 export interface FileEcs {
@@ -71,6 +76,8 @@ export interface FileEcs {
   Ext?: Ext;
 
   type?: string[];
+
+  code_signature?: CodeSignature;
 
   device?: string[];
 

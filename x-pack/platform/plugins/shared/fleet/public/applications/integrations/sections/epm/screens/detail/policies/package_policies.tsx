@@ -25,6 +25,7 @@ import type {
   InMemoryPackagePolicy,
   PackageInfo,
   PackagePolicy,
+  PackagePolicyPackage,
 } from '../../../../../types';
 import {
   useLink,
@@ -42,8 +43,15 @@ import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_a
 import { AgentBasedPackagePoliciesTable } from './components/agent_based_table';
 import { AgentlessPackagePoliciesTable } from './components/agentless_table';
 
-export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo }) => {
-  const { name, version } = packageInfo;
+export const PackagePoliciesPage = ({
+  packageInfo,
+  embedded,
+}: {
+  packageInfo: PackageInfo;
+  embedded?: boolean;
+}) => {
+  const { name, version, type } = packageInfo;
+
   const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const addAgentToPolicyIdFromParams = useMemo(
@@ -73,18 +81,21 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
         packagePolicy,
       }: { agentPolicies: AgentPolicy[]; packagePolicy: PackagePolicy },
       index: number
-    ) => {
-      const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
+    ): { agentPolicies: AgentPolicy[]; packagePolicy: InMemoryPackagePolicy; rowIndex: number } => {
       return {
         agentPolicies,
         packagePolicy: {
           ...packagePolicy,
-          hasUpgrade,
+          package: {
+            ...(packagePolicy?.package as PackagePolicyPackage),
+            type,
+          },
+          hasUpgrade: isPackagePolicyUpgradable(packagePolicy),
         },
         rowIndex: index,
       };
     },
-    [isPackagePolicyUpgradable]
+    [isPackagePolicyUpgradable, type]
   );
 
   // States and data for agent-based policies table
@@ -116,9 +127,10 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
     }`,
   });
   useEffect(() => {
-    setAgentBasedPackageAndAgentPolicies(
-      !agentBasedData?.items ? [] : agentBasedData.items.map(mapPoliciesData)
-    );
+    const mappedPoliciesData = !agentBasedData?.items
+      ? []
+      : agentBasedData.items.map(mapPoliciesData);
+    setAgentBasedPackageAndAgentPolicies(mappedPoliciesData);
   }, [agentBasedData, mapPoliciesData]);
 
   // States and data for agentless policies table
@@ -154,7 +166,11 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
   // Check `addAgentToPolicyIdFromParams` otherwise right after installing a new integration the flyout won't open
-  if (packageInstallStatus.status !== InstallStatus.installed && !addAgentToPolicyIdFromParams) {
+  if (
+    packageInstallStatus &&
+    packageInstallStatus.status !== InstallStatus.installed &&
+    !addAgentToPolicyIdFromParams
+  ) {
     return (
       <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
     );
@@ -170,7 +186,7 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
       }}
     >
       <EuiFlexGroup alignItems="flexStart">
-        <SideBarColumn grow={1} />
+        {embedded ? null : <SideBarColumn grow={1} />}
         <EuiFlexItem grow={7}>
           {!canHaveAgentlessPolicies ? (
             <AgentBasedPackagePoliciesTable
@@ -200,17 +216,17 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
                   >
                     <EuiFlexItem grow={false}>
                       <EuiText size="m">
-                        <h3>
+                        <h4>
                           <FormattedMessage
                             id="xpack.fleet.epm.packageDetails.integrationList.agentlessHeader"
                             defaultMessage="Agentless"
                           />
-                        </h3>
+                        </h4>
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiNotificationBadge color="subdued" size="m">
-                        <h3>{agentlessData?.total ?? 0}</h3>
+                        <h4>{agentlessData?.total ?? 0}</h4>
                       </EuiNotificationBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -244,17 +260,17 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
                   >
                     <EuiFlexItem grow={false}>
                       <EuiText size="m">
-                        <h3>
+                        <h4>
                           <FormattedMessage
                             id="xpack.fleet.epm.packageDetails.integrationList.agentBasedHeader"
                             defaultMessage="Agent-based"
                           />
-                        </h3>
+                        </h4>
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiNotificationBadge color="subdued" size="m">
-                        <h3>{agentBasedData?.total ?? 0}</h3>
+                        <h4>{agentBasedData?.total ?? 0}</h4>
                       </EuiNotificationBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>

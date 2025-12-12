@@ -12,11 +12,17 @@ import { AttackDiscoveryPanel } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 
+const defaultProps = {
+  attackDiscovery: mockAttackDiscovery,
+  isSelected: false,
+  setSelectedAttackDiscoveries: jest.fn(),
+};
+
 describe('AttackDiscoveryPanel', () => {
   it('renders the attack discovery accordion', () => {
     render(
       <TestProviders>
-        <AttackDiscoveryPanel attackDiscovery={mockAttackDiscovery} />
+        <AttackDiscoveryPanel {...defaultProps} />
       </TestProviders>
     );
 
@@ -28,7 +34,7 @@ describe('AttackDiscoveryPanel', () => {
   it('renders empty accordion content', () => {
     render(
       <TestProviders>
-        <AttackDiscoveryPanel attackDiscovery={mockAttackDiscovery} />
+        <AttackDiscoveryPanel {...defaultProps} />
       </TestProviders>
     );
 
@@ -40,7 +46,7 @@ describe('AttackDiscoveryPanel', () => {
   it('renders the attack discovery summary', () => {
     render(
       <TestProviders>
-        <AttackDiscoveryPanel attackDiscovery={mockAttackDiscovery} />
+        <AttackDiscoveryPanel {...defaultProps} />
       </TestProviders>
     );
 
@@ -52,7 +58,7 @@ describe('AttackDiscoveryPanel', () => {
   it('renders the attack discovery tabs panel when accordion is open', () => {
     render(
       <TestProviders>
-        <AttackDiscoveryPanel attackDiscovery={mockAttackDiscovery} initialIsOpen={true} />
+        <AttackDiscoveryPanel {...defaultProps} initialIsOpen={true} />
       </TestProviders>
     );
 

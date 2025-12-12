@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { EmailService, EmailServiceStart, IEmailServiceProvider } from './types';
 import type { NotificationsConfigType } from '../config';
 import { LicensedEmailService } from './licensed_email_service';

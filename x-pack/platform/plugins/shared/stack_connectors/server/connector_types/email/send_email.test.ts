@@ -10,10 +10,9 @@ import type { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
-import type { ProxySettings } from '@kbn/actions-plugin/server/types';
+import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
@@ -156,6 +155,70 @@ describe('send_email module', () => {
     `);
   });
 
+  test('handles email with attachments', async () => {
+    const sendEmailOptions = getSendEmailOptions({ transport: { service: 'other' } });
+    const result = await sendEmail(
+      mockLogger,
+      {
+        ...sendEmailOptions,
+        attachments: [
+          {
+            content: 'dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==',
+            contentType: 'test-content-type',
+            encoding: 'base64',
+            filename: 'report.pdf',
+          },
+        ],
+      },
+      connectorTokenClient,
+      connectorUsageCollector
+    );
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "auth": Object {
+            "pass": "changeme",
+            "user": "elastic",
+          },
+          "host": undefined,
+          "port": undefined,
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": true,
+          },
+        },
+      ]
+    `);
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attachments": Array [
+            Object {
+              "content": "dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==",
+              "contentType": "test-content-type",
+              "encoding": "base64",
+              "filename": "report.pdf",
+            },
+          ],
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<p>a message</p>
+      ",
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+  });
+
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
     const getOAuthClientCredentialsAccessTokenMock =
@@ -182,7 +245,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -197,6 +260,7 @@ describe('send_email module', () => {
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "attachments": Array [],
           "headers": Object {
             "Authorization": "Bearer dfjsdfgdjhfgsjdf",
             "Content-Type": "application/json",
@@ -278,7 +342,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -316,7 +380,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -350,7 +414,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -739,7 +803,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": false,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -786,7 +850,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": false,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -836,6 +900,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
+            "rejectUnauthorized": true,
           },
         },
       ]

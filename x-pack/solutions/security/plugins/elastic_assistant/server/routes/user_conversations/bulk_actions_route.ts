@@ -9,20 +9,22 @@ import moment from 'moment';
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+import type {
   ConversationsBulkActionSkipResult,
   ConversationsBulkCrudActionResponse,
   ConversationsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformBulkActionRequestBody,
   PerformBulkActionResponse,
   ConversationResponse,
+} from '@kbn/elastic-assistant-common';
+import {
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+  PerformBulkActionRequestBody,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { getUpdateScript } from '../../ai_assistant_data_clients/conversations/helpers';
 import { transformToCreateScheme } from '../../ai_assistant_data_clients/conversations/create_conversation';
@@ -30,11 +32,9 @@ import {
   transformESToConversations,
   transformESSearchToConversations,
 } from '../../ai_assistant_data_clients/conversations/transforms';
-import {
-  UpdateConversationSchema,
-  transformToUpdateScheme,
-} from '../../ai_assistant_data_clients/conversations/update_conversation';
-import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import type { UpdateConversationSchema } from '../../ai_assistant_data_clients/conversations/update_conversation';
+import { transformToUpdateScheme } from '../../ai_assistant_data_clients/conversations/update_conversation';
+import type { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
@@ -209,7 +209,7 @@ export const bulkActionConversationsRoute = (
             documentsToUpdate: body.update?.map((c) => transformToUpdateScheme(changedAt, c)),
             authenticatedUser,
             getUpdateScript: (document: UpdateConversationSchema) =>
-              getUpdateScript({ conversation: document, isPatch: true }),
+              getUpdateScript({ conversation: document }),
           });
           const created =
             docsCreated.length > 0

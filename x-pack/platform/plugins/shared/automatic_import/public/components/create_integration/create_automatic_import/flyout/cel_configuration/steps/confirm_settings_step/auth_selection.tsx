@@ -18,12 +18,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import { translateDisplayAuthToType } from './confirm_settings_step';
 
 const AUTH_OPTIONS = ['Basic', 'OAuth2', 'Digest', 'API Token'];
 
 const isRecommended = (auth: string, specDefinedAuthTypes: string[]): boolean => {
-  return specDefinedAuthTypes.includes(translateDisplayAuthToType(auth));
+  return specDefinedAuthTypes.includes(auth);
 };
 
 interface AuthSelectionProps {
@@ -82,6 +81,7 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
             <EuiFlexItem>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount={false}
                 title={i18n.AUTH_DOES_NOT_ALIGN}
                 size="s"
                 color="warning"

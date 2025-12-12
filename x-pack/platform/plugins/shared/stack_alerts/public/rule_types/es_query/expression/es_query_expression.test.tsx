@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { of, Subject } from 'rxjs';
@@ -14,9 +15,9 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EsQueryRuleParams, SearchType } from '../types';
+import type { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -153,6 +154,8 @@ describe('EsQueryRuleTypeExpression', () => {
       size: [],
       timeField: [],
       timeWindowSize: [],
+      termSize: [],
+      termField: [],
     };
 
     return await act(async () =>
@@ -220,6 +223,22 @@ describe('EsQueryRuleTypeExpression', () => {
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
     expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
+  });
+
+  test('should render EsQueryRuleTypeExpression with chosen runtime group field', async () => {
+    const result = await setup({
+      ...defaultEsQueryExpressionParams,
+      esQuery:
+        '{\n    "query":{\n      "match_all" : {}\n    },\n    "runtime_mappings": {\n      "day_of_week": {\n        "type": "keyword",\n        "script": {\n          "source": "emit(doc[\'@timestamp\'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ENGLISH))"\n        }\n      }\n    }\n  }',
+      groupBy: 'top',
+      termField: 'day_of_week',
+      termSize: 3,
+    } as unknown as EsQueryRuleParams<SearchType.esQuery>);
+
+    fireEvent.click(screen.getByTestId('groupByExpression'));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+
+    expect(result.getByTestId('fieldsExpressionSelect')).toHaveTextContent('day_of_week');
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {

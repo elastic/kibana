@@ -6,19 +6,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
+import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
 import url from 'url';
 import { curry } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/pipeable';
 
-import type { ActionsConfig, CustomHostSettings } from './config';
+import {
+  getSSLSettingsFromConfig,
+  type CustomHostSettings,
+  type ProxySettings,
+  type SSLSettings,
+} from '@kbn/actions-utils';
+import type { ActionsConfig } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import type { ProxySettings, ResponseSettings, SSLSettings } from './types';
-import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
+import type { AwsSesConfig, ResponseSettings } from './types';
 import type { ValidateEmailAddressesOptions } from '../common';
-import { validateEmailAddresses, invalidEmailsAsMessage } from '../common';
+import {
+  validateEmailAddresses,
+  invalidEmailsAsMessage,
+  DEFAULT_EMAIL_BODY_LENGTH,
+  MAX_EMAIL_BODY_LENGTH,
+} from '../common';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
@@ -55,6 +65,16 @@ export interface ActionsConfigurationUtilities {
   ): string | undefined;
   enableFooterInEmail: () => boolean;
   getMaxQueued: () => number;
+  getWebhookSettings(): {
+    ssl: {
+      pfx: {
+        enabled: boolean;
+      };
+    };
+  };
+  getAwsSesConfig: () => AwsSesConfig;
+  getEnabledEmailServices: () => string[];
+  getMaxEmailBodyLength: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -168,11 +188,16 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email == null) {
+  if (config.email?.domain_allowlist == null && config.email?.recipient_allowlist == null) {
     return;
   }
 
-  const validated = validateEmailAddresses(config.email.domain_allowlist, addresses, options);
+  const validated = validateEmailAddresses(
+    config.email.domain_allowlist,
+    addresses,
+    options,
+    config.email.recipient_allowlist
+  );
   return invalidEmailsAsMessage(validated);
 }
 
@@ -225,5 +250,38 @@ export function getActionsConfigurationUtilities(
     },
     enableFooterInEmail: () => config.enableFooterInEmail,
     getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
+    getWebhookSettings: () => {
+      return {
+        ssl: {
+          pfx: {
+            enabled: config.webhook?.ssl.pfx.enabled ?? true,
+          },
+        },
+      };
+    },
+    getAwsSesConfig: () => {
+      if (config.email?.services?.ses?.host && config.email?.services?.ses?.port) {
+        return {
+          host: config.email?.services?.ses?.host,
+          port: config.email?.services?.ses?.port,
+          secure: true,
+        };
+      }
+
+      return null;
+    },
+    getEnabledEmailServices() {
+      const emailServices = config.email?.services?.enabled;
+      if (emailServices) {
+        return Array.from(new Set(Array.from(emailServices)));
+      }
+
+      return ['*'];
+    },
+    getMaxEmailBodyLength() {
+      const configuredLength = config.email?.maximum_body_length ?? DEFAULT_EMAIL_BODY_LENGTH;
+      const nonNegativeLength = Math.max(0, configuredLength);
+      return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
+    },
   };
 }

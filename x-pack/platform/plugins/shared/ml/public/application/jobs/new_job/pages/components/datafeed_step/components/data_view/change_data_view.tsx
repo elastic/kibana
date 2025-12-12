@@ -21,12 +21,14 @@ import {
   EuiLoadingSpinner,
   EuiModalHeaderTitle,
   EuiModalBody,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import { useNavigateToManagementMlLink } from '../../../../../../../contexts/kibana/use_create_url';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -36,7 +38,7 @@ import type {
 } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
-import { useMlKibana, useMlApi, useNavigateToPath } from '../../../../../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../../../../../contexts/kibana';
 
 const fixedPageSize: number = 8;
 
@@ -57,7 +59,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       uiSettings,
     },
   } = useMlKibana();
-  const navigateToPath = useNavigateToPath();
+  const navigateToMlManagementLink = useNavigateToManagementMlLink('anomaly_detection');
   const { validateDatafeedPreview } = useMlApi();
 
   const { jobCreator: jc } = useContext(JobCreatorContext);
@@ -71,6 +73,8 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const [validationResponse, setValidationResponse] = useState<DatafeedValidationResponse | null>(
     null
   );
+
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(function initialPageLoad() {
     setCurrentDataViewTitle(jobCreator.indexPatternTitle);
@@ -119,15 +123,18 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const applyDataView = useCallback(() => {
     const newIndices = newDataViewTitle.split(',');
     jobCreator.indices = newIndices;
-    resetAdvancedJob(jobCreator, navigateToPath);
-    // exclude mlJobService from deps
-  }, [jobCreator, newDataViewTitle, navigateToPath]);
+    resetAdvancedJob(jobCreator, navigateToMlManagementLink);
+  }, [jobCreator, newDataViewTitle, navigateToMlManagementLink]);
 
   return (
     <>
-      <EuiModal onClose={onClose} data-test-subj="mlJobMgmtImportJobsFlyout">
+      <EuiModal
+        onClose={onClose}
+        data-test-subj="mlJobMgmtImportJobsFlyout"
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
               defaultMessage="Change data view"
@@ -241,6 +248,7 @@ const ValidationMessage: FC<{
   if (validationResponse === null) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.title',
           {
@@ -260,6 +268,7 @@ const ValidationMessage: FC<{
     if (validationResponse.documentsFound === true) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.title',
             {
@@ -277,6 +286,7 @@ const ValidationMessage: FC<{
     } else {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.title',
             {
@@ -296,6 +306,7 @@ const ValidationMessage: FC<{
   } else {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.title',
           {

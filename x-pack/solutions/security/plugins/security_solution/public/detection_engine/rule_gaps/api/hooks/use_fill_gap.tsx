@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { useInvalidateFindGapsQuery } from './use_find_gaps_for_rule';
 import { useInvalidateFindBackfillQuery } from './use_find_backfills_for_rules';
+import { useInvalidateGetRuleIdsWithGapsQuery } from './use_get_rule_ids_with_gaps';
 import { fillGapByIdForRule } from '../api';
 
 export const FILL_GAP_BY_ID_MUTATION_KEY = ['POST', 'FILL_GAP_BY_ID_MUTATION_KEY'];
@@ -22,11 +23,13 @@ export const useFillGapMutation = (
 ) => {
   const invalidateFindGapsQuery = useInvalidateFindGapsQuery();
   const invalidateFindBackfillsQuery = useInvalidateFindBackfillQuery();
+  const invalidateGetRuleIdsWithGapsQuery = useInvalidateGetRuleIdsWithGapsQuery();
   return useMutation((fillGapsOptions: FillGapQuery) => fillGapByIdForRule(fillGapsOptions), {
     ...options,
     onSettled: (...args) => {
       invalidateFindGapsQuery();
       invalidateFindBackfillsQuery();
+      invalidateGetRuleIdsWithGapsQuery();
       if (options?.onSettled) {
         options.onSettled(...args);
       }

@@ -9,26 +9,28 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent } from 'react';
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { isEmpty, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { sumBy } from 'lodash';
+import numeral from '@elastic/numeral';
 
 import type { Filter } from '@kbn/es-query';
 
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import {
-  showInitialLoadingSpinner,
-  createGenericSubtitle,
   createEmbeddedDataSubtitle,
+  createGenericSubtitle,
+  showInitialLoadingSpinner,
 } from './helpers';
 import * as i18n from './translations';
+import { SHOWING_ALERTS } from './translations';
 import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
@@ -38,9 +40,7 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import { useAlertHistogramCount } from '../../../hooks/alerts_visualization/use_alert_histogram_count';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
@@ -108,6 +108,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     hideQueryToggle = false,
     isExpanded,
     setIsExpanded,
+    signalIndexName,
   }) => {
     const { to, from } = useGlobalTime();
 
@@ -153,12 +154,22 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const kibana = useKibana();
     const { navigateToApp } = kibana.services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
-    const { loading: isLoadingAlerts } = useVisualizationResponse({
+    const { tables, loading: isLoadingAlerts } = useVisualizationResponse({
       visualizationId,
     });
-    const totalAlerts = useAlertHistogramCount({
-      visualizationId,
-    });
+
+    const totalTableCount = tables && tables.meta.statistics.totalCount;
+
+    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+
+    const totalAlerts = useMemo(() => {
+      const visualizationAlertsCount = totalTableCount ?? 0;
+      return SHOWING_ALERTS(
+        numeral(visualizationAlertsCount).format(defaultNumberFormat),
+        visualizationAlertsCount,
+        ''
+      );
+    }, [defaultNumberFormat, totalTableCount]);
 
     const goToDetectionEngine = useCallback(
       (ev: SyntheticEvent) => {
@@ -180,7 +191,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       return () => {
         canceled = true; // prevent long running data fetches from updating state after unmounting
       };
-    }, [isInitialLoading, isLoadingAlerts, setIsInitialLoading]);
+    }, [isInitialLoading, isLoadingAlerts, setIsInitialLoading, tables]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {
@@ -203,24 +214,10 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       [onlyField, title]
     );
 
-    const { responses, loading } = useVisualizationResponse({
-      visualizationId,
-    });
-    const embeddedDataLoaded = !loading && !isEmpty(responses);
-    const aggregationBucketsCount = useMemo(
-      () =>
-        loading
-          ? 0
-          : sumBy(responses, (responseItem) =>
-              sumBy(Object.values(responseItem.aggregations ?? {}), 'buckets.length')
-            ),
-      [loading, responses]
-    );
-
-    const embeddedDataAvailable = !!aggregationBucketsCount;
+    const embeddedDataAvailable = totalTableCount != null && totalTableCount > 0;
 
     const subtitle = showHistogram
-      ? createEmbeddedDataSubtitle(embeddedDataLoaded, embeddedDataAvailable, totalAlerts)
+      ? createEmbeddedDataSubtitle(embeddedDataAvailable, totalAlerts)
       : createGenericSubtitle(isInitialLoading, showTotalAlertsCount, totalAlerts);
 
     return (
@@ -286,6 +283,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         </HeaderSection>
         {showHistogram ? (
           <VisualizationEmbeddable
+            signalIndexName={signalIndexName}
             data-test-subj="embeddable-matrix-histogram"
             extraActions={extraActions}
             extraOptions={{
@@ -295,7 +293,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             height={chartHeight ?? CHART_HEIGHT}
             id={visualizationId}
             inspectTitle={inspectTitle ?? title}
-            scopeId={SourcererScopeName.detections}
+            scopeId={PageScope.alerts}
             stackByField={selectedStackByOption}
             timerange={timerange}
           />

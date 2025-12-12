@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
-import { SecurityRoleAndUserLoader } from '@kbn/test-suites-serverless/shared/lib';
-import type {
-  LoadedRoleAndUser,
-  YamlRoleDefinitions,
-} from '@kbn/test-suites-serverless/shared/lib';
+import { createRuntimeServices } from '@kbn/cypress-test-helper/src/services/stack_services';
+import { SecurityRoleAndUserLoader } from '../lib';
+import type { LoadedRoleAndUser, YamlRoleDefinitions } from '../lib';
 import type { LoadUserAndRoleCyTaskOptions } from './e2e';
 
 interface AdditionalDefinitions {

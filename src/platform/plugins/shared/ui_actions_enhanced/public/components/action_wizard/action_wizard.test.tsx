@@ -17,19 +17,23 @@ import {
   urlFactory,
   urlDrilldownActionFactory,
 } from './test_data';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import type { BaseActionFactoryContext } from '../../dynamic_actions';
+import { ActionFactory } from '../../dynamic_actions';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { EuiThemeProvider } from '@elastic/eui';
 
 test('Pick and configure action', () => {
   const screen = render(
-    <Demo
-      actionFactories={
-        [dashboardFactory, urlFactory] as unknown as Array<
-          ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
-        >
-      }
-    />
+    <EuiThemeProvider>
+      <Demo
+        actionFactories={
+          [dashboardFactory, urlFactory] as unknown as Array<
+            ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
+          >
+        }
+      />
+    </EuiThemeProvider>
   );
 
   // check that all factories are displayed to pick
@@ -56,15 +60,17 @@ test('Pick and configure action', () => {
 
 test('If only one actions factory is available then actionFactory selection is emitted without user input', () => {
   const screen = render(
-    <Demo
-      actionFactories={[
-        urlFactory as unknown as ActionFactory<
-          SerializableRecord,
-          object,
-          BaseActionFactoryContext
-        >,
-      ]}
-    />
+    <EuiThemeProvider>
+      <Demo
+        actionFactories={[
+          urlFactory as unknown as ActionFactory<
+            SerializableRecord,
+            object,
+            BaseActionFactoryContext
+          >,
+        ]}
+      />
+    </EuiThemeProvider>
   );
 
   // check that no factories are displayed to pick from
@@ -94,13 +100,15 @@ test('If not enough license, button is disabled', () => {
     }
   );
   const screen = render(
-    <Demo
-      actionFactories={
-        [dashboardFactory, urlWithGoldLicense] as unknown as Array<
-          ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
-        >
-      }
-    />
+    <EuiThemeProvider>
+      <Demo
+        actionFactories={
+          [dashboardFactory, urlWithGoldLicense] as unknown as Array<
+            ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
+          >
+        }
+      />
+    </EuiThemeProvider>
   );
 
   // check that all factories are displayed to pick
@@ -121,13 +129,15 @@ test('if action is beta, beta badge is shown', () => {
     }
   );
   const screen = render(
-    <Demo
-      actionFactories={
-        [dashboardFactory, betaUrl] as unknown as Array<
-          ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
-        >
-      }
-    />
+    <EuiThemeProvider>
+      <Demo
+        actionFactories={
+          [dashboardFactory, betaUrl] as unknown as Array<
+            ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
+          >
+        }
+      />
+    </EuiThemeProvider>
   );
   // Uses the single letter beta badge
   expect(screen.getByText(/^B/i)).toBeVisible();

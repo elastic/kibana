@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCopy,
@@ -20,8 +21,9 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
-  EuiSwitchEvent,
+  withEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
@@ -30,8 +32,8 @@ import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
-import { UrlParamExtension } from '../types';
-import {
+import type { ShareableUrlLocatorParams, UrlParamExtension } from '../types';
+import type {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
@@ -46,13 +48,14 @@ export interface UrlPanelContentProps {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
-    params: any;
+    params: ShareableUrlLocatorParams;
   };
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
+  theme: WithEuiThemeProps['theme'];
 }
 
 export enum ExportUrlAsType {
@@ -79,7 +82,7 @@ interface State {
   showWarningButton: boolean;
 }
 
-export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
+class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, WithEuiThemeProps> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
@@ -149,10 +152,10 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   }
 
   public render() {
+    const { theme } = this.props;
     const shortUrlSwitch = this.renderShortUrlSwitch();
     const publicUrlSwitch = this.renderPublicUrlSwitch();
     const copyButton = this.renderCopyButton();
-
     const urlRow = (!!shortUrlSwitch || !!publicUrlSwitch) && (
       <EuiFormRow
         label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
@@ -167,7 +170,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
 
     return (
       <I18nProvider>
-        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+        <EuiForm css={css({ padding: theme.euiTheme.size.base })} data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
           {urlRow}
@@ -407,7 +410,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     <EuiCopy
       beforeMessage={this.state.showWarningButton ? this.props.snapshotShareWarning : undefined}
       textToCopy={this.state.url || ''}
-      anchorClassName="eui-displayBlock"
+      tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
     >
       {(copy) => (
         <EuiButton
@@ -494,6 +497,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return (
       <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
+          name="exportUrlAs"
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}
@@ -612,3 +616,6 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     );
   };
 }
+
+export const UrlPanelContent = withEuiTheme(UrlPanelContentComponent);
+UrlPanelContent.displayName = 'UrlPanelContent';

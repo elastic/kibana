@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import '../../../index.scss';
+import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -19,11 +19,11 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
-  useEuiOverflowScroll,
   useEuiTheme,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
@@ -36,13 +36,13 @@ import {
   useEditorActionContext,
   useRequestActionContext,
 } from '../../contexts';
+import type { ConsoleTourStepProps } from '../../components';
 import {
   TopNavMenu,
   SomethingWentWrongCallout,
   HelpPopover,
   ShortcutsPopover,
   ConsoleTourStep,
-  ConsoleTourStepProps,
 } from '../../components';
 import { History } from '../history';
 import { useDataInit } from '../../hooks';
@@ -54,7 +54,6 @@ import {
   HISTORY_TAB_ID,
   CONFIG_TAB_ID,
   EDITOR_TOUR_STEP,
-  TOUR_STORAGE_KEY,
   INITIAL_TOUR_CONFIG,
   FILES_TOUR_STEP,
   EXPORT_FILE_NAME,
@@ -64,6 +63,54 @@ interface MainProps {
   currentTabProp?: string;
   isEmbeddable?: boolean;
 }
+
+const staticStyles = {
+  importConsoleFile: css`
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+  `,
+};
+
+const useStyles = (isEmbeddable: boolean) => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    ...staticStyles,
+    consoleContainer: css`
+      display: flex;
+      flex: 1 1 auto;
+      // Make sure the editor actions don't create scrollbars on this container
+      // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
+      overflow: hidden;
+      padding: ${euiTheme.size.m};
+      gap: 0;
+      ${isEmbeddable &&
+      css`
+        padding: 0;
+        gap: 0;
+      `}
+
+      /*
+      * The z-index for the autocomplete suggestions popup
+      */
+      .kibanaCodeEditor .monaco-editor .suggest-widget {
+        // the value needs to be above the z-index of the resizer bar
+        z-index: ${euiTheme.levels.header} + 2;
+      }
+    `,
+
+    consoleTabs: css`
+      padding: 0 ${euiTheme.size.s};
+    `,
+
+    // Scrollable panel with body background
+    scrollablePanelWithBackground: css`
+      ${useEuiOverflowScroll('y', false)}
+      background-color: ${euiTheme.colors.body};
+    `,
+  };
+};
 
 // 2MB limit (2 * 1024 * 1024 bytes)
 const MAX_FILE_UPLOAD_SIZE = 2 * 1024 * 1024;
@@ -77,20 +124,17 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
   const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles(isEmbeddable);
 
   const {
     docLinks,
     services: { notifications, routeHistory },
   } = useServicesContext();
 
-  const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
-  const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
-  const [tourStepProps, actions, tourState] = useEuiTour(getTourSteps(docLinks), initialTourState);
-
-  useEffect(() => {
-    localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
-  }, [tourState]);
+  const [tourStepProps, actions, tourState] = useEuiTour(
+    getTourSteps(docLinks),
+    INITIAL_TOUR_CONFIG
+  );
 
   // Clean up request output when switching tabs
   useEffect(() => {
@@ -172,10 +216,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
     }
   };
 
-  const scrollablePanelStyle = css`
-    ${useEuiOverflowScroll('y', false)}
-  `;
-
   if (error) {
     return (
       <EuiPageTemplate.EmptyPrompt color="danger">
@@ -198,7 +238,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
   const helpButton = (
     <NavIconButton
-      iconType="questionInCircle"
+      iconType="question"
       onClick={() => setIsHelpOpen(!isHelpOpen)}
       ariaLabel={MAIN_PANEL_LABELS.helpButton}
       dataTestSubj="consoleHelpButton"
@@ -207,12 +247,12 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   );
 
   return (
-    <div id="consoleRoot" className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}>
+    <div id="consoleRoot" css={styles.consoleContainer}>
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
       <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-        <EuiSplitPanel.Inner grow={false} className="consoleTabs">
+        <EuiSplitPanel.Inner grow={false} css={styles.consoleTabs}>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <TopNavMenu
@@ -239,6 +279,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                       }
                       size="xs"
                       data-test-subj="consoleExportButton"
+                      aria-label={MAIN_PANEL_LABELS.exportButtonTooltip}
                     >
                       {MAIN_PANEL_LABELS.exportButton}
                     </EuiButtonEmpty>
@@ -250,6 +291,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                         onClick={() => document.getElementById('importConsoleFile')?.click()}
                         size="xs"
                         data-test-subj="consoleImportButton"
+                        aria-label={MAIN_PANEL_LABELS.importButtonTooltip}
                       >
                         {MAIN_PANEL_LABELS.importButton}
                       </EuiButtonEmpty>
@@ -261,6 +303,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                       multiple={false}
                       name="consoleSnippets"
                       id="importConsoleFile"
+                      css={styles.importConsoleFile}
                       onChange={onFileChange}
                     />
                   </>
@@ -310,7 +353,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="none"
-          css={[scrollablePanelStyle, { backgroundColor: euiTheme.colors.body }]}
+          css={styles.scrollablePanelWithBackground}
           data-test-subj="consolePanel"
         >
           {currentTab === SHELL_TAB_ID && (
@@ -318,6 +361,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
               loading={!done}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
+              enableSuggestWidgetRepositioning={!isEmbeddable}
             />
           )}
           {currentTab === HISTORY_TAB_ID && <History />}
@@ -327,7 +371,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         <EuiSplitPanel.Inner
           paddingSize="xs"
           grow={false}
-          className="consoleVariablesBottomBar"
+          data-test-subj="console-variables-bottom-bar"
           color="plain"
         >
           <EuiButtonEmpty
@@ -335,6 +379,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
             iconType="editorCodeBlock"
             size="xs"
             color="text"
+            aria-label={MAIN_PANEL_LABELS.variablesButton}
           >
             {MAIN_PANEL_LABELS.variablesButton}
           </EuiButtonEmpty>

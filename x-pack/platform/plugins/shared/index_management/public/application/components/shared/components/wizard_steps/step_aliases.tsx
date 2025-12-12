@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 
-import { Forms } from '../../../../../shared_imports';
+import type { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 import { documentationService } from '../../../mappings_editor/shared_imports';
 
@@ -68,7 +68,7 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
               flush="right"
               href={documentationService.getBulkIndexAlias()}
               target="_blank"
-              iconType="help"
+              iconType="question"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.formWizard.stepAliases.docsButtonLabel"

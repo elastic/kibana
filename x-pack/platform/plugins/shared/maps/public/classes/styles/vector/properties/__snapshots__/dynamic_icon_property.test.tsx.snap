@@ -12,6 +12,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Icon"
@@ -24,6 +25,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -108,6 +110,7 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Icon"
@@ -120,6 +123,7 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>

@@ -12,6 +12,7 @@ import type {
   AggregationsSingleMetricAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Group } from '@kbn/alerting-rule-utils';
+import { get } from 'lodash';
 
 export const UngroupedGroupId = 'all documents';
 export interface ParsedAggregationGroup {
@@ -20,6 +21,7 @@ export interface ParsedAggregationGroup {
   hits: Array<SearchHit<unknown>>;
   sourceFields: string[];
   groups?: Group[];
+  groupingObject?: Record<string, unknown>;
   value?: number;
 }
 
@@ -28,7 +30,7 @@ export interface ParsedAggregationResults {
   truncated: boolean;
 }
 
-interface ParseAggregationResultsOpts {
+export interface ParseAggregationResultsOpts {
   isCountAgg: boolean;
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
@@ -87,39 +89,50 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName = `${groupBucket?.key}`;
+    const groupKeys = [termField ?? []].flat();
+    const groupValues = [groupBucket.key].flat();
+
     const groups =
       termField && groupBucket?.key
-        ? [termField].flat().reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
+        ? groupKeys.reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
             resultGroups.push({
               field: groupByItem,
-              value: [groupBucket.key].flat()[groupIndex],
+              value: groupValues[groupIndex],
             });
             return resultGroups;
           }, [])
         : undefined;
-    const sourceFields: { [key: string]: string[] } = {};
 
-    sourceFieldsParams.forEach((field) => {
-      if (generateSourceFieldsFromHits) {
+    const groupingObject =
+      termField && groupBucket?.key
+        ? groupKeys.reduce<Record<string, unknown>>((resultGroups, groupByItem, groupIndex) => {
+            resultGroups[groupByItem] = groupValues[groupIndex];
+            return resultGroups;
+          }, {})
+        : undefined;
+
+    const sourceFields: { [key: string]: string[] } = {};
+    if (generateSourceFieldsFromHits) {
+      sourceFieldsParams.forEach((field) => {
         const fieldsSet: string[] = [];
-        groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
-          if (hit._source && hit._source[field.label]) {
-            fieldsSet.push(hit._source[field.label]);
+        const hits = groupBucket?.topHitsAgg?.hits?.hits ?? [];
+        hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
+          const sourceField = get(hit._source, field.label);
+          if (sourceField) {
+            fieldsSet.push(sourceField);
           }
         });
-        sourceFields[field.label] = Array.from(fieldsSet);
-      } else {
-        if (groupBucket[field.label]?.buckets && groupBucket[field.label].buckets.length > 0) {
-          sourceFields[field.label] = groupBucket[field.label].buckets.map(
-            (bucket: { doc_count: number; key: string | number }) => bucket.key
-          );
+        if (fieldsSet.length > 0) {
+          const isArray = Array.isArray(fieldsSet);
+          sourceFields[field.label] = Array.from(isArray ? fieldsSet.flat() : fieldsSet);
         }
-      }
-    });
+      });
+    }
 
     const groupResult: any = {
       group: groupName,
       groups,
+      groupingObject,
       count: groupBucket?.doc_count,
       hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),

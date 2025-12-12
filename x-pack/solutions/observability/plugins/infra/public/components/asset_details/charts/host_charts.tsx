@@ -7,8 +7,10 @@
 import React from 'react';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { css, cx } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
 import { HOST_METRIC_GROUP_TITLES } from '../translations';
 import { Section } from '../components/section';
@@ -20,16 +22,18 @@ import type { MetricsChartsFields, HostMetricTypes } from './types';
 
 interface Props extends MetricsChartsFields {
   metric: Exclude<HostMetricTypes, 'kpi'>;
+  schema?: DataSchemaFormat | null;
 }
 
 const FRAGMENT_BASE = 'key-metrics';
 
 export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ assetId, dataView, dateRange, metric, onShowAll, overview = false }, ref) => {
+  ({ entityId, dataView, dateRange, metric, onShowAll, overview = false, schema }, ref) => {
     const { charts } = useHostCharts({
       metric,
-      dataViewId: dataView?.id,
+      indexPattern: dataView?.getIndexPattern(),
       overview,
+      schema,
     });
 
     return (
@@ -73,6 +77,13 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
         extraAction={
           onShowAll ? (
             <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.infra.assetDetails.charts.host.showAllButton.ariaLabel',
+                {
+                  defaultMessage: 'Show all {metric} charts',
+                  values: { metric: HOST_METRIC_GROUP_TITLES[metric] },
+                }
+              )}
               data-test-subj="infraAssetDetailsHostChartsShowAllButton"
               onClick={() => onShowAll(metric)}
               size="xs"
@@ -93,10 +104,12 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
             <Chart
               id={chart.id}
               key={chart.id}
-              assetId={assetId}
+              entityId={entityId}
               dateRange={dateRange}
+              dataView={dataView}
               lensAttributes={chart}
               queryField={findInventoryFields('host').id}
+              overrides={{ settings: { legendAction: 'ignore' } }}
             />
           ))}
         </ChartsGrid>

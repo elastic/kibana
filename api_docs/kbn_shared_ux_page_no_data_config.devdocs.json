@@ -12,7 +12,13 @@
         "description": [],
         "signature": [
           "(props: ",
-          "NoDataConfigPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-config-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageNoDataConfigTypesPluginApi",
+            "section": "def-common.NoDataConfigPageProps",
+            "text": "NoDataConfigPageProps"
+          },
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
@@ -27,7 +33,13 @@
             "label": "props",
             "description": [],
             "signature": [
-              "NoDataConfigPageProps"
+              {
+                "pluginId": "@kbn/shared-ux-page-no-data-config-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageNoDataConfigTypesPluginApi",
+                "section": "def-common.NoDataConfigPageProps",
+                "text": "NoDataConfigPageProps"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
             "deprecated": false,
@@ -48,9 +60,7 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
-          "NoDataCardKibanaDependencies",
-          ">) => React.JSX.Element"
+          "({ children, ...dependencies }: React.PropsWithChildren<KibanaDependencies>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
         "deprecated": false,
@@ -64,9 +74,7 @@
             "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "NoDataCardKibanaDependencies",
-              ">"
+              "React.PropsWithChildren<KibanaDependencies>"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
             "deprecated": false,
@@ -88,7 +96,13 @@
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "NoDataCardServices",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
@@ -104,7 +118,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "NoDataCardServices",
+              {
+                "pluginId": "@kbn/shared-ux-card-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+                "section": "def-public.Services",
+                "text": "Services"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
@@ -125,7 +145,13 @@
         "description": [],
         "signature": [
           "{ (props: Props<",
-          "NoDataConfigPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-config-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageNoDataConfigTypesPluginApi",
+            "section": "def-common.NoDataConfigPageProps",
+            "text": "NoDataConfigPageProps"
+          },
           ">): React.JSX.Element; displayName: string; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
@@ -172,11 +198,9 @@
         "label": "NoDataConfigPageKibanaDependencies",
         "description": [],
         "signature": [
-          "KibanaDependencies",
-          " & ",
-          "RedirectAppLinksKibanaDependencies"
+          "KibanaDependencies"
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -203,12 +227,18 @@
           " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
           "ComponentTypes",
           " | undefined; } & { noDataConfig?: ",
-          "NoDataPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+            "section": "def-public.NoDataPageProps",
+            "text": "NoDataPageProps"
+          },
           " | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
           "EuiPageSidebarProps",
           " | undefined; }"
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -221,11 +251,15 @@
         "label": "NoDataConfigPageServices",
         "description": [],
         "signature": [
-          "Services",
-          " & ",
-          "RedirectAppLinksServices"
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          }
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { type FileUploadResults, OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 
@@ -29,24 +30,46 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
         onUploadComplete: (results: FileUploadResults) => {
           setSelectedIndices([results.index]);
         },
+        location: 'search-playground',
       });
     }
   }, [setSelectedIndices, uiActions]);
 
   return (
     <>
-      <EuiButton
-        size={isSetup ? 'm' : 's'}
-        fill={isSetup}
-        iconType="plusInCircle"
-        onClick={() => showFileUploadFlyout()}
-        data-test-subj="uploadFileButton"
-      >
-        <FormattedMessage
-          id="xpack.searchPlayground.setupPage.uploadFileLabel"
-          defaultMessage="Upload file"
-        />
-      </EuiButton>
+      {isSetup ? (
+        <EuiButtonEmpty
+          flush="right"
+          iconType="importAction"
+          onClick={() => showFileUploadFlyout()}
+          data-test-subj="uploadFileButtonEmpty"
+          aria-label={i18n.translate(
+            'xpack.searchPlayground.setupPage.uploadFileButtonEmptyLabel',
+            {
+              defaultMessage: 'Upload a file',
+            }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.setupPage.uploadFileButtonEmptyLabel"
+            defaultMessage="Upload a file"
+          />
+        </EuiButtonEmpty>
+      ) : (
+        <EuiButton
+          color="text"
+          size="s"
+          fill={false}
+          iconType="plusInCircle"
+          onClick={() => showFileUploadFlyout()}
+          data-test-subj="uploadFileButton"
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.setupPage.uploadFileLabel"
+            defaultMessage="Upload file"
+          />
+        </EuiButton>
+      )}
     </>
   );
 };

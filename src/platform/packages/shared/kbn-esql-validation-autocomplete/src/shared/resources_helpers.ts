@@ -7,71 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst } from '@kbn/esql-ast';
-import type { ESQLCallbacks } from './types';
-import type { ESQLRealField } from '../validation/types';
-import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
-
-export const NOT_SUGGESTED_TYPES = ['unsupported'];
-
-export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
-  const prevCommand = ast[Math.max(ast.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
-}
-
-export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
-  const cacheFields = new Map<string, ESQLRealField>();
-
-  const getEcsMetadata = async () => {
-    if (!resourceRetriever?.getFieldsMetadata) {
-      return undefined;
-    }
-    const client = await resourceRetriever?.getFieldsMetadata;
-    if (client.find) {
-      // Fetch full list of ECS field
-      // This list should be cached already by fieldsMetadataClient
-      const results = await client.find({ attributes: ['type'] });
-      return results?.fields;
-    }
-  };
-
-  const getFields = async () => {
-    const metadata = await getEcsMetadata();
-    if (!cacheFields.size && queryText) {
-      const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query: queryText });
-      const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
-      for (const field of fieldsWithMetadata || []) {
-        cacheFields.set(field.name, field);
-      }
-    }
-  };
-
-  return {
-    getFieldsByType: async (
-      expectedType: Readonly<string> | Readonly<string[]> = 'any',
-      ignored: string[] = []
-    ): Promise<ESQLRealField[]> => {
-      const types = Array.isArray(expectedType) ? expectedType : [expectedType];
-      await getFields();
-      return (
-        Array.from(cacheFields.values())?.filter(({ name, type }) => {
-          const ts = Array.isArray(type) ? type : [type];
-          return (
-            !ignored.includes(name) &&
-            ts.some((t) => types[0] === 'any' || types.includes(t)) &&
-            !NOT_SUGGESTED_TYPES.includes(type)
-          );
-        }) || []
-      );
-    },
-    getFieldsMap: async () => {
-      await getFields();
-      const cacheCopy = new Map<string, ESQLRealField>();
-      cacheFields.forEach((value, key) => cacheCopy.set(key, value));
-      return cacheCopy;
-    },
-  };
-}
+import type { ESQLCallbacks } from '@kbn/esql-types';
 
 export function getPolicyHelper(resourceRetriever?: ESQLCallbacks) {
   const getPolicies = async () => {
@@ -93,4 +29,19 @@ export function getSourcesHelper(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     return (await resourceRetriever?.getSources?.()) || [];
   };
+}
+
+export async function getFromCommandHelper(resourceRetriever?: ESQLCallbacks): Promise<string> {
+  const getSources = getSourcesHelper(resourceRetriever);
+  const sources = await getSources?.();
+  const visibleSources = sources.filter((source) => !source.hidden) || [];
+
+  if (visibleSources.find((source) => source.name.startsWith('logs'))) {
+    return 'FROM logs*';
+  }
+
+  if (visibleSources.length > 0) {
+    return `FROM ${visibleSources[0].name}`;
+  }
+  return '';
 }

@@ -11,13 +11,11 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstMetricsCommand,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
-  ESQLCommandMode,
   ESQLFunction,
-  ESQLTimeInterval,
+  ESQLTimeSpanLiteral,
   ESQLLocation,
   ESQLMessage,
   ESQLSingleAstItem,
@@ -26,42 +24,29 @@ export type {
   ESQLColumn,
   ESQLLiteral,
   ESQLParamLiteral,
-  AstProviderFn,
   EditorError,
   ESQLAstNode,
+  ESQLInlineCast,
+  ESQLAstBaseItem,
+  ESQLAstChangePointCommand,
+  ESQLAstForkCommand,
+  ESQLForkParens,
 } from './src/types';
 
-export {
-  isColumn,
-  isDoubleLiteral,
-  isFunctionExpression,
-  isBinaryExpression,
-  isWhereExpression,
-  isFieldExpression,
-  isSource,
-  isIdentifier,
-  isIntegerLiteral,
-  isLiteral,
-  isParamLiteral,
-  isProperNode,
-} from './src/ast/helpers';
+export * from './src/ast/is';
+export * from './src/ast/location';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
-export {
-  getParser,
-  createParser,
-  getLexer,
-  parse,
-  parseErrors,
-  type ParseOptions,
-  type ParseResult,
-  getAstAndSyntaxErrors,
-  ESQLErrorListener,
-} from './src/parser';
+export * from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
+
 export * as synth from './src/synth';
+export { qry, cmd, exp } from './src/synth';
+export * from './src/composer';
+
+export { esql, e } from './src/composer/esql';
 
 export {
   LeafPrinter,
@@ -75,3 +60,21 @@ export {
 export { EsqlQuery } from './src/query';
 
 export * as mutate from './src/mutate';
+
+export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';
+
+export { esqlCommandRegistry } from './src/commands_registry';
+
+export * from './src/commands_registry/complete_items';
+export * from './src/commands_registry/constants';
+export * from './src/definitions/constants';
+export * from './src/definitions/types';
+export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
+export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';
+export { withAutoSuggest } from './src/definitions/utils/autocomplete/helpers';
+
+export { getNoValidCallSignatureError } from './src/definitions/utils/validation/utils';
+
+export { SuggestionOrderingEngine } from './src/sorting';
+export { SuggestionCategory } from './src/sorting';
+export type { SortingContext } from './src/sorting';

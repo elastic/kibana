@@ -13,7 +13,8 @@ import { TemplatesList } from './templates_list';
 import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../common/mock';
 
-describe('TemplatesList', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/208265
+describe.skip('TemplatesList', () => {
   const onDeleteTemplate = jest.fn();
   const onEditTemplate = jest.fn();
 

@@ -8,38 +8,60 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
 import { FailureReason, LoadingStatus } from '../../services/context_query_state';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { render, screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-describe('loading spinner', function () {
-  let component: ReactWrapper;
+const DEFAULT_BODY =
+  'Please reload or go back to the document list to select a valid anchor document.';
+const DEFAULT_TITLE = 'Failed to load the anchor document';
 
+describe('loading spinner', () => {
   it('ContextErrorMessage does not render on loading', () => {
-    component = mountWithIntl(<ContextErrorMessage status={{ value: LoadingStatus.LOADING }} />);
-    expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
+    render(<ContextErrorMessage status={{ value: LoadingStatus.LOADING }} />);
+
+    expect(screen.queryByTestId('contextErrorMessageTitle')).not.toBeInTheDocument();
   });
 
   it('ContextErrorMessage does not render on success loading', () => {
-    component = mountWithIntl(<ContextErrorMessage status={{ value: LoadingStatus.LOADED }} />);
-    expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
+    render(<ContextErrorMessage status={{ value: LoadingStatus.LOADED }} />);
+
+    expect(screen.queryByTestId('contextErrorMessageTitle')).not.toBeInTheDocument();
+  });
+
+  it('ContextErrorMessage does not render on uninitialized loading', () => {
+    render(<ContextErrorMessage status={{ value: LoadingStatus.UNINITIALIZED }} />);
+
+    expect(screen.queryByTestId('contextErrorMessageTitle')).not.toBeInTheDocument();
   });
 
   it('ContextErrorMessage renders just the title if the reason is not specifically handled', () => {
-    component = mountWithIntl(<ContextErrorMessage status={{ value: LoadingStatus.FAILED }} />);
-    expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
-    expect(findTestSubject(component, 'contextErrorMessageBody').text()).toBe('');
+    renderWithI18n(<ContextErrorMessage status={{ value: LoadingStatus.FAILED }} />);
+
+    expect(screen.getByText(DEFAULT_TITLE)).toBeVisible();
+    expect(screen.queryByText(DEFAULT_BODY)).not.toBeInTheDocument();
+  });
+
+  it('ContextErrorMessage does not render the reason for invalid tiebreaker errors', () => {
+    renderWithI18n(
+      <ContextErrorMessage
+        status={{ value: LoadingStatus.FAILED, reason: FailureReason.INVALID_TIEBREAKER }}
+      />
+    );
+
+    expect(screen.getByText(DEFAULT_TITLE)).toBeVisible();
+    expect(screen.queryByText(DEFAULT_BODY)).not.toBeInTheDocument();
   });
 
   it('ContextErrorMessage renders the reason for unknown errors', () => {
-    component = mountWithIntl(
+    renderWithI18n(
       <ContextErrorMessage
         status={{ value: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN }}
       />
     );
-    expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
-    expect(findTestSubject(component, 'contextErrorMessageBody').length).toBe(1);
+
+    expect(screen.getByText(DEFAULT_TITLE)).toBeVisible();
+    expect(screen.getByText(DEFAULT_BODY)).toBeVisible();
   });
 });

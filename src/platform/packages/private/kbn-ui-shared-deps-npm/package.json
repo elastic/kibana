@@ -2,5 +2,28 @@
   "name": "@kbn/ui-shared-deps-npm",
   "version": "1.0.0",
   "private": true,
-  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "build": "node ${REPO_ROOT:-`git rev-parse --show-toplevel`}/scripts/build_package.js $PWD --task-name shared_built_assets"
+  },
+  "buildSourcePaths": {
+    "include": [
+      "index.js",
+      "src/**/*"
+    ],
+    "exclude": [
+      "**/test_helpers.ts",
+      "**/*.config.js",
+      "**/*.mock.*",
+      "**/*.test.*",
+      "**/*.stories.*",
+      "**/__snapshots__/**",
+      "**/integration_tests/**",
+      "**/mocks/**",
+      "**/scripts/**",
+      "**/storybook/**",
+      "**/test_fixtures/**",
+      "**/test_helpers/**"
+    ]
+  }
 }

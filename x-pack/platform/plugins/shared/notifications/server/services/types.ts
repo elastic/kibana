@@ -8,6 +8,7 @@
 export interface EmailService {
   sendPlainTextEmail(payload: PlainTextEmail): Promise<void>;
   sendHTMLEmail(payload: HTMLEmail): Promise<void>;
+  sendAttachmentEmail(payload: AttachmentEmail): Promise<void>;
 }
 
 export interface EmailServiceStart {
@@ -26,6 +27,13 @@ export interface RelatedSavedObject {
   namespace?: string; // namespace is undefined for the spaceId 'default'
 }
 
+export interface Attachment {
+  content: string;
+  contentType?: string;
+  encoding?: string;
+  filename: string;
+}
+
 export interface PlainTextEmail {
   to: string[];
   subject: string;
@@ -33,6 +41,14 @@ export interface PlainTextEmail {
   context?: {
     relatedObjects?: RelatedSavedObject[];
   };
+}
+
+export interface AttachmentEmail extends Omit<PlainTextEmail, 'to'> {
+  attachments: Attachment[];
+  to?: string[];
+  bcc?: string[];
+  cc?: string[];
+  spaceId: string;
 }
 
 export interface HTMLEmail extends PlainTextEmail {

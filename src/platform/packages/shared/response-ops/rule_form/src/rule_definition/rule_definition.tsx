@@ -23,8 +23,11 @@ import {
   EuiSplitPanel,
   EuiText,
   useEuiTheme,
+  useEuiFontSize,
+  EuiTitle,
 } from '@elastic/eui';
-import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import { css } from '@emotion/react';
+import type { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
   RuleSettingsFlappingTitleTooltip,
@@ -70,8 +73,31 @@ export const RuleDefinition = () => {
     flappingSettings,
   } = useRuleFormState();
 
-  const { colorMode } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
+
+  const ruleDefinitionContainerCss = css`
+    .ruleDefinitionHeader {
+      align-items: center;
+    }
+    @container (max-width: 767px) {
+      .euiDescribedFormGroup {
+        flex-direction: column;
+      }
+      .euiDescribedFormGroup > .euiFlexItem {
+        width: 100%;
+      }
+      .ruleDefinitionHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: ${euiTheme.size.xs};
+      }
+      .ruleDefinitionHeaderRuleTypeDescription,
+      .ruleDefinitionHeaderDocsLink {
+        ${useEuiFontSize('s')}
+      }
+    }
+  `;
 
   useEffect(() => {
     // Need to do a dry run validating the params because the Missing Monitor Data rule type
@@ -100,12 +126,15 @@ export const RuleDefinition = () => {
     if (consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
+
     const selectedAvailableRuleType = availableRuleTypes.find((ruleType) => {
       return ruleType.id === selectedRuleType.id;
     });
+
     if (!selectedAvailableRuleType?.authorizedConsumers) {
       return [];
     }
+
     return getAuthorizedConsumers({
       ruleType: selectedAvailableRuleType,
       validConsumers,
@@ -191,16 +220,21 @@ export const RuleDefinition = () => {
   );
 
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
+    <EuiSplitPanel.Outer
+      hasBorder
+      hasShadow={false}
+      data-test-subj="ruleDefinition"
+      css={ruleDefinitionContainerCss}
+    >
       <EuiSplitPanel.Inner color="subdued">
         <EuiFlexGroup gutterSize="s" className="ruleDefinitionHeader">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
-            <EuiText size="xs" className="ruleDefinitionHeaderRuleTypeName">
-              <strong>{selectedRuleType.name}</strong>
-            </EuiText>
+            <EuiTitle size="s" className="ruleDefinitionHeaderRuleTypeName">
+              <h3>{selectedRuleType.name}</h3>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeDescription">
-            <EuiText size="xs" className="ruleDefinitionHeaderRuleTypeDescription">
+            <EuiText size="s" className="ruleDefinitionHeaderRuleTypeDescription">
               <p>{selectedRuleTypeModel.description}</p>
             </EuiText>
           </EuiFlexItem>
@@ -266,11 +300,7 @@ export const RuleDefinition = () => {
             <EuiText size="s">
               <p>
                 {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={SCHEDULE_TOOLTIP_TEXT}
-                />
+                <EuiIconTip position="right" type="question" content={SCHEDULE_TOOLTIP_TEXT} />
               </p>
             </EuiText>
           }
@@ -315,8 +345,9 @@ export const RuleDefinition = () => {
                       {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
                       <EuiIconTip
                         position="right"
-                        type="questionInCircle"
+                        type="question"
                         content={ALERT_DELAY_HELP_TEXT}
+                        aria-label={ALERT_DELAY_HELP_TEXT}
                       />
                     </p>
                   </EuiText>
@@ -331,14 +362,12 @@ export const RuleDefinition = () => {
                   title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
                   description={
                     <EuiText size="s">
-                      <p>
-                        {ALERT_FLAPPING_DETECTION_DESCRIPTION}
-                        <RuleSettingsFlappingTitleTooltip
-                          isOpen={isFlappingPopoverOpen}
-                          setIsPopoverOpen={setIsFlappingPopoverOpen}
-                          anchorPosition="downCenter"
-                        />
-                      </p>
+                      <p>{ALERT_FLAPPING_DETECTION_DESCRIPTION}</p>
+                      <RuleSettingsFlappingTitleTooltip
+                        isOpen={isFlappingPopoverOpen}
+                        setIsPopoverOpen={setIsFlappingPopoverOpen}
+                        anchorPosition="downCenter"
+                      />
                     </EuiText>
                   }
                 >

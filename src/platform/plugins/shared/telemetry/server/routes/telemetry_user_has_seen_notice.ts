@@ -8,11 +8,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { RequestHandler } from '@kbn/core-http-server';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { UserHasSeenNoticeRoute } from '../../common/routes';
 import { TELEMETRY_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { v2 } from '../../common/types';
+import type { v2 } from '../../common/types';
 import {
   type TelemetrySavedObjectAttributes,
   getTelemetrySavedObject,
@@ -54,17 +54,20 @@ export function registerTelemetryUserHasSeenNotice(router: IRouter, currentKiban
   };
 
   router.versioned
-    .put({ access: 'internal', path: UserHasSeenNoticeRoute })
+    .put({
+      access: 'internal',
+      path: UserHasSeenNoticeRoute,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: false,
       },
       v2Handler

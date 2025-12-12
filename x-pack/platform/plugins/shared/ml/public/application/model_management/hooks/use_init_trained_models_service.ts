@@ -12,7 +12,7 @@ import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage
 import type { ScheduledDeployment, TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { useEnabledFeatures, useMlServerInfo } from '../../contexts/ml';
+import { useMlServerInfo } from '../../contexts/ml';
 import { useCloudCheck } from '../../components/node_available_warning/hooks';
 import { getNewJobLimits } from '../../services/ml_server_info';
 import { DeploymentParamsMapper } from '../deployment_params_mapper';
@@ -34,13 +34,12 @@ export function useInitTrainedModelsService(): TrainedModelsService {
 
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
-  const { showNodeInfo } = useEnabledFeatures();
   const { nlpSettings } = useMlServerInfo();
   const cloudInfo = useCloudCheck();
   const mlServerLimits = getNewJobLimits();
 
   const deploymentParamsMapper = useMemo(
-    () => new DeploymentParamsMapper(mlServerLimits, cloudInfo, showNodeInfo, nlpSettings),
+    () => new DeploymentParamsMapper(mlServerLimits, cloudInfo, nlpSettings),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );

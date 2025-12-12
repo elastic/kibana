@@ -8,57 +8,38 @@
  */
 
 import expect from '@kbn/expect';
-import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('main', () => {
-    it('should return 201 with an updated dashboard', async () => {
+    it('should return 200 with an updated dashboard', async () => {
       const response = await supertest
-        .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
+        .put(`${DASHBOARD_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
+          data: {
             title: 'Refresh Requests (Updated)',
-            options: { useMargins: false },
-            panels: [
-              {
-                type: 'visualization',
-                gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
-                panelIndex: '1',
-                panelRefName: 'panel_1',
-                version: '7.3.0',
-              },
-            ],
-            timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-            timeRestore: true,
-            timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
           },
-          references: [
-            {
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              name: '1:panel_1',
-              type: 'visualization',
-            },
-          ],
         });
 
-      expect(response.status).to.be(201);
+      expect(response.status).to.be(200);
 
-      expect(response.body.item.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
-      expect(response.body.item.type).to.be('dashboard');
-      expect(response.body.item.attributes.title).to.be('Refresh Requests (Updated)');
+      expect(response.body.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
+      expect(response.body.data.title).to.be('Refresh Requests (Updated)');
     });
 
     it('should return 404 when updating a non-existent dashboard', async () => {
       const response = await supertest
-        .put(`${PUBLIC_API_PATH}/not-an-id`)
+        .put(`${DASHBOARD_API_PATH}/not-an-id`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
+          data: {
             title: 'Some other dashboard (updated)',
           },
         });
@@ -67,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'A dashboard with saved object ID not-an-id was not found.',
+        message: 'A dashboard with ID not-an-id was not found.',
       });
     });
   });

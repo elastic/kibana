@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { LicenseUsage, StaticTelemetryUsage } from './telemetry_usage_collector';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { LicenseUsage, StaticTelemetryUsage } from './telemetry_usage_collector';
 
 const licenseSchema: MakeSchemaFrom<LicenseUsage> = {
   uuid: { type: 'keyword' },
@@ -43,6 +43,12 @@ export const staticTelemetrySchema: MakeSchemaFrom<StaticTelemetryUsage> = {
       hash: { type: 'text' },
       date: { type: 'date' },
       version: { type: 'keyword' },
+    },
+  },
+  'start-local': {
+    version: {
+      type: 'keyword',
+      _meta: { description: 'version of the start-local script used to launch Kibana' },
     },
   },
 };

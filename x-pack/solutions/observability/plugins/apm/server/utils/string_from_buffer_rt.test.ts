@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { stringFromBufferRt } from './string_from_buffer_rt';
 
 const sourceMap = {

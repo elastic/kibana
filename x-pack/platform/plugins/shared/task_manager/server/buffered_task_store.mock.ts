@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BufferedTaskStore } from './buffered_task_store';
+import type { BufferedTaskStore } from './buffered_task_store';
 
 const createBufferedTaskStoreMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<BufferedTaskStore>> = {

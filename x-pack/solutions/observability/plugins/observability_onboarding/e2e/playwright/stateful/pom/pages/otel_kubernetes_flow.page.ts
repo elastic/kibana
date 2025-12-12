@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { Page } from '@playwright/test';
+import { expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
+import { DiscoverValidationPage } from './discover_validation.page';
 
 export class OtelKubernetesFlowPage {
   page: Page;
+  context: BrowserContext;
 
-  constructor(page: Page) {
+  private readonly exploreLogsButton: Locator;
+
+  constructor(page: Page, context: BrowserContext) {
     this.page = page;
+    this.context = context;
+
+    this.exploreLogsButton = this.page.getByText('Explore logs');
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -26,11 +33,66 @@ export class OtelKubernetesFlowPage {
       .click();
   }
 
-  public async clickClusterOverviewDashboardCTA() {
-    await this.page
+  public async switchInstrumentationInstructions(language: 'nodejs' | 'java' | 'python' | 'go') {
+    await this.page.getByTestId(language).click();
+  }
+
+  public async getAnnotateAllResourceSnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet')
+      .textContent();
+  }
+
+  public async getRestartDeploymentSnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet')
+      .textContent();
+  }
+
+  public async openClusterOverviewDashboardInNewTab(): Promise<Page> {
+    const dashboardURL = await this.page
       .getByTestId(
         'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-cluster-overview'
       )
-      .click();
+      .getAttribute('href');
+
+    if (dashboardURL) {
+      const newPage = await this.context.newPage();
+
+      await newPage.goto(dashboardURL);
+
+      return newPage;
+    } else {
+      throw new Error('Dashboard URL not found');
+    }
+  }
+
+  public async openServiceInventoryInNewTab(): Promise<Page> {
+    const serviceInventoryURL = await this.page
+      .getByTestId('observabilityOnboardingDataIngestStatusActionLink-services')
+      .getAttribute('href');
+
+    if (serviceInventoryURL) {
+      const newPage = await this.context.newPage();
+
+      await newPage.goto(serviceInventoryURL);
+
+      return newPage;
+    } else {
+      throw new Error('Service inventory URL not found');
+    }
+  }
+
+  public async assertLogsExplorationButtonVisible() {
+    await expect(this.exploreLogsButton, 'Logs exploration button should be visible').toBeVisible();
+  }
+
+  public async clickExploreLogsCTA() {
+    await this.exploreLogsButton.click();
+  }
+
+  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
+    await this.exploreLogsButton.click();
+    return new DiscoverValidationPage(this.page);
   }
 }

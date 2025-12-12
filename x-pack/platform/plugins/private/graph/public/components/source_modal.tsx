@@ -10,13 +10,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { SourcePicker, SourcePickerProps } from './source_picker';
+import type { SourcePickerProps } from './source_picker';
+import { SourcePicker } from './source_picker';
 
 export function SourceModal(props: SourcePickerProps) {
   return (
     <div css={sourceModalStyles}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id="source-modal-title">
           <FormattedMessage
             id="xpack.graph.sourceModal.title"
             defaultMessage="Select a data source"

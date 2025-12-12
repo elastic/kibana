@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { generateLatestIndexName } from './helpers/generate_component_id';
 
 export async function deleteIndices(
@@ -19,7 +19,8 @@ export async function deleteIndices(
     await esClient.indices.delete({ index, ignore_unavailable: true });
   } catch (e) {
     logger.error(
-      `Unable to remove entity definition index ${index} for definition [${definition.id}]`
+      `Unable to remove entity definition index ${index} for definition [${definition.id}]`,
+      { error: e }
     );
     throw e;
   }

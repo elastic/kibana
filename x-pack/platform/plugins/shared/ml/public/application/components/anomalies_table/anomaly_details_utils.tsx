@@ -20,18 +20,19 @@ import {
 } from '@elastic/eui';
 import {
   getAnomalyScoreExplanationImpactValue,
-  getSeverityColor,
   showActualForFunction,
   showTypicalForFunction,
   type MlAnomaliesTableRecord,
   type MlAnomalyRecordDoc,
   ML_JOB_AGGREGATION,
+  useSeverityColor,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
 import { formatValue } from '../../formatters/format_value';
 import { useMlKibana } from '../../contexts/kibana';
+import { AnomalyValueDisplay } from './anomaly_value_display';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -180,7 +181,9 @@ export const DetailsItems: FC<{
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
         defaultMessage: 'Actual',
       }),
-      description: formatValue(anomaly.actual, source.function, undefined, source),
+      description: (
+        <AnomalyValueDisplay value={anomaly.actual} function={source.function} record={source} />
+      ),
     });
   }
 
@@ -189,7 +192,9 @@ export const DetailsItems: FC<{
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
         defaultMessage: 'Typical',
       }),
-      description: formatValue(anomaly.typical, source.function, undefined, source),
+      description: (
+        <AnomalyValueDisplay value={anomaly.typical} function={source.function} record={source} />
+      ),
     });
 
     if (
@@ -201,11 +206,12 @@ export const DetailsItems: FC<{
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.upperBoundsTitle', {
           defaultMessage: 'Upper bound',
         }),
-        description: formatValue(
-          anomaly.source.anomaly_score_explanation?.upper_confidence_bound,
-          source.function,
-          undefined,
-          source
+        description: (
+          <AnomalyValueDisplay
+            value={anomaly.source.anomaly_score_explanation?.upper_confidence_bound}
+            function={source.function}
+            record={source}
+          />
         ),
       });
 
@@ -213,11 +219,12 @@ export const DetailsItems: FC<{
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.lowerBoundsTitle', {
           defaultMessage: 'Lower bound',
         }),
-        description: formatValue(
-          anomaly.source.anomaly_score_explanation?.lower_confidence_bound,
-          source.function,
-          undefined,
-          source
+        description: (
+          <AnomalyValueDisplay
+            value={anomaly.source.anomaly_score_explanation?.lower_confidence_bound}
+            function={source.function}
+            record={source}
+          />
         ),
       });
     }
@@ -240,7 +247,7 @@ export const DetailsItems: FC<{
         <EuiIconTip
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
           position="left"
           content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
@@ -263,7 +270,7 @@ export const DetailsItems: FC<{
         <EuiIconTip
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
           position="left"
           content={i18n.translate(
@@ -384,7 +391,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -425,7 +432,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(
@@ -451,7 +458,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(explanation.single_bucket_impact, 'single_bucket')}
@@ -473,7 +480,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(explanation.multi_bucket_impact, 'multi_bucket')}
@@ -495,7 +502,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -523,7 +530,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -551,7 +558,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -634,13 +641,14 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
 };
 
 const RecordScore: FC<{ score: number }> = ({ score }) => {
+  const color = useSeverityColor(score);
   return (
     <div
       css={{
         borderBottom: '2px solid',
       }}
       style={{
-        borderBottomColor: getSeverityColor(score),
+        borderBottomColor: color,
       }}
     >
       {score}

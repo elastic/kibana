@@ -6,168 +6,221 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
-import { EuiCallOut, EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
+import type { Streams } from '@kbn/streams-schema';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { StreamDescription } from '../../stream_detail_features/stream_description';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
-import { StreamDetailEnrichment } from '../stream_detail_enrichment';
-import { useKibana } from '../../../hooks/use_kibana';
-import { ManagementTabs, Wrapper } from './wrapper';
+import type { ManagementTabs } from './wrapper';
+import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
+import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { StreamDetailDataQuality } from '../../stream_data_quality';
+import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDetailAttachments } from '../../stream_detail_attachments';
 
-type ManagementSubTabs = 'enrich' | 'overview' | 'lifecycle';
+const classicStreamManagementSubTabs = [
+  'processing',
+  'advanced',
+  'dataQuality',
+  'retention',
+  'significantEvents',
+  'schemaEditor',
+  'schema',
+  'attachments',
+  'references',
+] as const;
 
-function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['enrich', 'overview', 'lifecycle'].includes(value);
+type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
+
+const tabRedirects: Record<string, { newTab: ClassicStreamManagementSubTab }> = {
+  schemaEditor: { newTab: 'schema' },
+  lifecycle: { newTab: 'retention' },
+  enrich: { newTab: 'processing' },
+};
+
+function isValidManagementSubTab(value: string): value is ClassicStreamManagementSubTab {
+  return classicStreamManagementSubTabs.includes(value as ClassicStreamManagementSubTab);
 }
 
 export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: UnwiredStreamGetResponse;
+  definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
-    path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+    path: { key, tab },
+  } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const tabs: ManagementTabs = {
-    overview: {
-      content: <UnmanagedStreamOverview definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-        defaultMessage: 'Overview',
-      }),
-    },
-  };
+  const {
+    features: { attachments },
+  } = useStreamsPrivileges();
+
+  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
+    definition,
+    refreshDefinition,
+  });
+
+  if (!definition.data_stream_exists) {
+    return (
+      <>
+        <StreamsAppPageTemplate.Header
+          bottomBorder="extended"
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                <ClassicStreamBadge />
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+          }
+        />
+        <StreamsAppPageTemplate.Body>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
+              defaultMessage: 'Data stream missing',
+            })}
+            color="danger"
+            iconType="error"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.streams.unmanagedStreamOverview.missingDatastream.description',
+                {
+                  defaultMessage:
+                    'The underlying Elasticsearch data stream for this classic stream is missing or not accessible because the view_index_metadata privilege is missing. Make sure you have sufficient privileges and the data stream actually exists.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
+
+  const tabs: ManagementTabs = {};
 
   if (definition.data_stream_exists) {
-    tabs.enrich = {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
-      }),
-    };
-
-    tabs.lifecycle = {
+    tabs.retention = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-        defaultMessage: 'Data retention',
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+            defaultMessage:
+              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+          })}
+        >
+          <span tabIndex={0}>
+            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Retention',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
+    };
+    tabs.processing = processing;
+  }
+
+  tabs.schema = {
+    content: (
+      <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+      defaultMessage: 'Schema',
+    }),
+  };
+
+  tabs.dataQuality = {
+    content: (
+      <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+          defaultMessage: 'View details about this classic stream’s data quality',
+        })}
+      >
+        <span data-test-subj="dataQualityTab" tabIndex={0}>
+          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+            defaultMessage: 'Data quality',
+          })}
+        </span>
+      </EuiToolTip>
+    ),
+  };
+
+  if (attachments?.enabled) {
+    tabs.attachments = {
+      content: <StreamDetailAttachments definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+        defaultMessage: 'Attachments',
       }),
     };
   }
 
-  if (!isValidManagementSubTab(subtab)) {
+  if (otherTabs.significantEvents) {
+    tabs.significantEvents = otherTabs.significantEvents;
+  }
+
+  if (definition.privileges.manage) {
+    tabs.advanced = {
+      content: (
+        <>
+          {otherTabs.significantEvents ? (
+            <>
+              <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+              <EuiSpacer />
+            </>
+          ) : null}
+          <UnmanagedElasticsearchAssets
+            definition={definition}
+            refreshDefinition={refreshDefinition}
+          />
+        </>
+      ),
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
+            defaultMessage:
+              'View technical details about this classic stream’s underlying index setup',
+          })}
+        >
+          <span tabIndex={0}>
+            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Advanced',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
+    };
+  }
+
+  if (isValidManagementSubTab(tab)) {
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  }
+
+  const redirectConfig = tabRedirects[tab];
+  if (redirectConfig) {
     return (
       <RedirectTo
-        path="/{key}/management/{subtab}"
-        params={{ path: { key, subtab: 'overview' } }}
+        path="/{key}/management/{tab}"
+        params={{ path: { key, tab: redirectConfig.newTab } }}
       />
     );
   }
-
-  return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
-}
-
-function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetResponse }) {
-  const {
-    core: {
-      http: { basePath },
-    },
-  } = useKibana();
-  const groupedAssets = (definition.elasticsearch_assets ?? []).reduce((acc, asset) => {
-    const title = assetToTitle(asset);
-    if (title) {
-      acc[title] = acc[title] ?? [];
-      acc[title].push(asset);
-    }
-    return acc;
-  }, {} as Record<string, Array<{ type: string; id: string }>>);
-  if (!definition.data_stream_exists) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
-          defaultMessage: 'Data stream missing',
-        })}
-        color="danger"
-        iconType="error"
-      >
-        <p>
-          {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
-            defaultMessage:
-              'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
-          })}{' '}
-        </p>
-      </EuiCallOut>
-    );
+  if (isLoading) {
+    return null;
   }
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiText>
-        <p>
-          {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-            defaultMessage:
-              'This stream is not managed. Follow the links to stack management to change the related Elasticsearch objects.',
-          })}
-        </p>
-      </EuiText>
-      {Object.entries(groupedAssets).map(([title, assets]) => (
-        <div key={title}>
-          <EuiText>
-            <h3>{title}</h3>
-          </EuiText>
-          <EuiListGroup
-            listItems={assets.map((asset) => ({
-              label: asset.id,
-              href: basePath.prepend(assetToLink(asset)),
-              iconType: 'index',
-              target: '_blank',
-            }))}
-          />
-        </div>
-      ))}
-    </EuiFlexGroup>
-  );
-}
 
-function assetToLink(asset: { type: string; id: string }) {
-  switch (asset.type) {
-    case 'index_template':
-      return `/app/management/data/index_management/templates/${asset.id}`;
-    case 'component_template':
-      return `/app/management/data/index_management/component_templates/${asset.id}`;
-    case 'data_stream':
-      return `/app/management/data/index_management/data_streams/${asset.id}`;
-    case 'ingest_pipeline':
-      return `/app/management/ingest/ingest_pipelines?pipeline=${asset.id}`;
-    default:
-      return '';
-  }
-}
-
-function assetToTitle(asset: { type: string; id: string }) {
-  switch (asset.type) {
-    case 'index_template':
-      return i18n.translate('xpack.streams.streamDetailView.indexTemplate', {
-        defaultMessage: 'Index template',
-      });
-    case 'component_template':
-      return i18n.translate('xpack.streams.streamDetailView.componentTemplate', {
-        defaultMessage: 'Component template',
-      });
-    case 'data_stream':
-      return i18n.translate('xpack.streams.streamDetailView.dataStream', {
-        defaultMessage: 'Data stream',
-      });
-    case 'ingest_pipeline':
-      return i18n.translate('xpack.streams.streamDetailView.ingestPipeline', {
-        defaultMessage: 'Ingest pipeline',
-      });
-    default:
-      return '';
-  }
+  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
 }

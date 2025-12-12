@@ -12,7 +12,6 @@ import { AwsEC2Layout } from './layouts/aws_ec2_layout';
 import { AwsRDSLayout } from './layouts/aws_rds_layout';
 import { AwsS3Layout } from './layouts/aws_s3_layout';
 import { AwsSQSLayout } from './layouts/aws_sqs_layout';
-import { ContainerLayout } from './layouts/container_layout';
 import { PodLayout } from './layouts/pod_layout';
 
 export const Layout = ({
@@ -28,8 +27,6 @@ export const Layout = ({
       return <AwsS3Layout {...layoutProps} />;
     case 'awsSQS':
       return <AwsSQSLayout {...layoutProps} />;
-    case 'container':
-      return <ContainerLayout {...layoutProps} />;
     case 'pod':
       return <PodLayout {...layoutProps} />;
     default:

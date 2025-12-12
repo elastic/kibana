@@ -9,10 +9,11 @@ import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
-import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ActionsClientChatVertexAI } from './chat_vertex';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { GeminiContent } from '@langchain/google-common';
+import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import type { GeminiContent } from '@langchain/google-common';
 import { FinishReason } from '@google/generative-ai';
 
 const connectorId = 'mock-connector-id';

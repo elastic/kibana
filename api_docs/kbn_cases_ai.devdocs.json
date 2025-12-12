@@ -1,0 +1,186 @@
+{
+  "id": "@kbn/cases-ai",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cases-ai",
+        "id": "def-public.AISummary",
+        "type": "Function",
+        "tags": [],
+        "label": "AISummary",
+        "description": [],
+        "signature": [
+          "{ ({ title, summary, isOpen, onToggle, error, loading, }: ",
+          {
+            "pluginId": "@kbn/cases-ai",
+            "scope": "public",
+            "docId": "kibKbnCasesAiPluginApi",
+            "section": "def-public.AISummaryProps",
+            "text": "AISummaryProps"
+          },
+          "): React.JSX.Element; displayName: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-ai",
+            "id": "def-public.AISummary.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  title,\n  summary,\n  isOpen,\n  onToggle,\n  error,\n  loading,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cases-ai",
+                "scope": "public",
+                "docId": "kibKbnCasesAiPluginApi",
+                "section": "def-public.AISummaryProps",
+                "text": "AISummaryProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/cases-ai",
+        "id": "def-public.AISummaryProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AISummaryProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-ai",
+            "id": "def-public.AISummaryProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-ai",
+            "id": "def-public.AISummaryProps.summary",
+            "type": "Object",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "signature": [
+              "{ content: string; generatedAt: string; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-ai",
+            "id": "def-public.AISummaryProps.isOpen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isOpen",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-ai",
+            "id": "def-public.AISummaryProps.onToggle",
+            "type": "Function",
+            "tags": [],
+            "label": "onToggle",
+            "description": [],
+            "signature": [
+              "(isOpen: boolean) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cases-ai",
+                "id": "def-public.AISummaryProps.onToggle.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOpen",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cases-ai",
+            "id": "def-public.AISummaryProps.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | null"
+            ],
+            "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-ai",
+            "id": "def-public.AISummaryProps.loading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/cases-ai/src/ai_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

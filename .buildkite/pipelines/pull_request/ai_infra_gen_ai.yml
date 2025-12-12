@@ -12,9 +12,9 @@ steps:
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
         env:
-          FTR_CONFIG: "x-pack/test/functional_gen_ai/inference/config.ts"
+          FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/config.ts'
           FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
-          FTR_GEN_AI: "1"
+          FTR_GEN_AI: '1'
         label: AppEx AI-Infra Inference APIs FTR tests
         key: ai-infra-gen-ai-inference-api
         timeout_in_minutes: 50

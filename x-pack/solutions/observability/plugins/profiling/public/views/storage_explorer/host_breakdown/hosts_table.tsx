@@ -10,7 +10,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
@@ -62,7 +62,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
               render: (_, item) => {
                 if (probabilisticValuesCountPerProjectId[item.projectId] > 1) {
                   return (
-                    <EuiToolTip
+                    <EuiIconTip
                       content={i18n.translate(
                         'xpack.profiling.storageExplorer.hostsTable.distinctProbabilisticValues',
                         {
@@ -70,9 +70,9 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
                             "We've identified distinct probabilistic profiling values for the same project",
                         }
                       )}
-                    >
-                      <EuiIcon type="warning" color="warning" />
-                    </EuiToolTip>
+                      type="warning"
+                      color="warning"
+                    />
                   );
                 }
               },
@@ -86,6 +86,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
           defaultMessage: 'Project ID',
         }),
         sortable: true,
+        'data-test-subj': 'profilingStorageExplorerHostsTableProjectId',
       },
       {
         field: 'hostName',
@@ -132,7 +133,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
                           }
                         )}
                       >
-                        <EuiBadge color="hollow" isDisabled={index > 0}>
+                        <EuiBadge color="hollow" isDisabled={index > 0} tabIndex={0}>
                           {value.value}
                         </EuiBadge>
                       </EuiToolTip>
@@ -192,6 +193,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
 
   return (
     <EuiInMemoryTable
+      data-test-subj="profilingStorageExplorerHostsTable"
       items={data}
       columns={columns}
       sorting={sorting}

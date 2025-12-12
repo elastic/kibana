@@ -17,13 +17,19 @@ import {
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
 } from '../test_subjects';
 
+const mockNavToFindings = jest.fn();
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => ({
+  useNavigateFindings: () => mockNavToFindings,
+}));
+
 describe('<BenchmarksSection />', () => {
-  const renderBenchmarks = (alterMockData = {}) =>
+  const renderBenchmarks = (alterMockData = {}, namespace?: string) =>
     render(
       <TestProvider>
         <BenchmarksSection
           complianceData={{ ...getMockDashboardData(), ...alterMockData }}
           dashboardType={KSPM_POLICY_TEMPLATE}
+          activeNamespace={namespace}
         />
       </TestProvider>
     );

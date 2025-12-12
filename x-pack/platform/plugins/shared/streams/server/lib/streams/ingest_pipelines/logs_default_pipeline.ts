@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const logsDefaultPipelineProcessors = [
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+
+export const getLogsDefaultPipelineProcessors = (): IngestProcessorContainer[] => [
   {
     set: {
       description: "If '@timestamp' is missing, set it with the ingest timestamp",
@@ -15,14 +17,7 @@ export const logsDefaultPipelineProcessors = [
     },
   },
   {
-    pipeline: {
-      name: 'logs@json-pipeline',
-      ignore_missing_pipeline: true,
-    },
-  },
-  {
-    dot_expander: {
-      field: '*',
-    },
+    // @ts-expect-error @elastic/elasticsearch field - missing in types
+    normalize_for_stream: {},
   },
 ];

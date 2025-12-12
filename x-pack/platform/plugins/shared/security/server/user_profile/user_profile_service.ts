@@ -9,6 +9,7 @@ import type {
   SecurityActivateUserProfileRequest,
   SecurityUserProfile,
 } from '@elastic/elasticsearch/lib/api/types';
+import pLimit from 'p-limit';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
 import type {
@@ -38,6 +39,8 @@ const ACTIVATION_RETRY_SCALE_DURATION_MS = 150;
 const MAX_SUGGESTIONS_COUNT = 100;
 const DEFAULT_SUGGESTIONS_COUNT = 10;
 const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
+const BULK_GET_MAX_UIDS_PER_BATCH = 50;
+const BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS = 5;
 
 export interface UserProfileServiceStartInternal extends UserProfileServiceStart {
   /**
@@ -129,7 +132,13 @@ export class UserProfileService {
     const activateRequest: SecurityActivateUserProfileRequest =
       grant.type === 'password'
         ? { grant_type: 'password', username: grant.username, password: grant.password }
-        : { grant_type: 'access_token', access_token: grant.accessToken };
+        : {
+            grant_type: 'access_token',
+            access_token: grant.accessToken,
+            ...(grant.type === 'uiamAccessToken'
+              ? { client_authentication: { scheme: 'SharedSecret', value: grant.sharedSecret } }
+              : {}),
+          };
 
     // Profile activation is a multistep process that might or might not cause profile document to be created or
     // updated. If Elasticsearch needs to handle multiple profile activation requests for the same user in parallel
@@ -243,13 +252,29 @@ export class UserProfileService {
       return [];
     }
 
+    const uidArray = [...uids];
+
+    // Because the Bulk Get User Profile API is a GET there is a limit on how many UIDs we can pass in a single request.
+    // To avoid hitting the limit we split UIDs into batches and perform multiple requests if needed
+    const batches = [];
+    for (let i = 0; i < uidArray.length; i += BULK_GET_MAX_UIDS_PER_BATCH) {
+      batches.push(uidArray.slice(i, i + BULK_GET_MAX_UIDS_PER_BATCH));
+    }
+
     try {
-      const body = await clusterClient.asInternalUser.security.getUserProfile({
-        uid: [...uids].join(','),
-        data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
+      const limit = pLimit(BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS);
+      const batchPromises = batches.map((batchUids) => {
+        return limit(async () => {
+          const body = await clusterClient.asInternalUser.security.getUserProfile({
+            uid: batchUids.join(','),
+            data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
+          });
+          return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
+        });
       });
 
-      return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
+      const batchResults = await Promise.all(batchPromises);
+      return batchResults.flat();
     } catch (error) {
       this.logger.error(`Failed to bulk get user profiles: ${getDetailedErrorMessage(error)}`);
       throw error;

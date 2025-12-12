@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="chromelessAppHome">

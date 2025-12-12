@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { ContentInsightsProvider } from '../../services';
 
 import { ViewsStats } from './views_stats';

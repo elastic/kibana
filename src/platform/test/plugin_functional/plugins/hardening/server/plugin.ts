@@ -16,6 +16,7 @@ export class HardeningPlugin implements Plugin {
       {
         path: '/api/hardening/_pollute_prototypes',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         const result = tryPollutingPrototypes();

@@ -14,13 +14,14 @@ import type {
   DocumentProfileProviderParams,
   RootContext,
 } from '../../../profiles';
-import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import { RESOLUTION_MATCH } from './__mocks__';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
@@ -31,12 +32,6 @@ describe('logDocumentProfileProvider', () => {
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
     profileId: 'data-source-profile',
     category: DataSourceCategory.Logs,
-  };
-  const RESOLUTION_MATCH = {
-    isMatch: true,
-    context: {
-      type: DocumentType.Log,
-    },
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,
@@ -64,6 +59,30 @@ describe('logDocumentProfileProvider', () => {
         }),
       })
     ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('matches records which have a stream.name set to logs', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'stream.name': 'logs.abc.def',
+        }),
+      })
+    ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('does not match records which have a different stream.name', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'stream.name': 'metrics',
+        }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
   });
 
   it('does not match records where fields prefixed with "log." are null', () => {
@@ -149,9 +168,10 @@ describe('logDocumentProfileProvider', () => {
           title: 'test title',
           docViewsRegistry: (registry) => registry,
         }),
-        { context: { type: DocumentType.Log } }
+        { context: RESOLUTION_MATCH.context }
       );
       const docViewer = getDocViewer({
+        actions: {},
         record: buildDataTableRecord({}),
       });
       const registry = new DocViewsRegistry();

@@ -6,7 +6,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-b9b43606-7ff7-46ae-a47c-85bed80fab9a",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
       "type": "index-pattern",
     },
     Object {
@@ -20,13 +20,13 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "b9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
-              "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+              "column-severity-id-generated-uuid",
+              "column-record-id-generated-uuid",
             ],
             "columns": Object {
-              "21cc4a49-3780-4b1a-be28-f02fa5303d24": Object {
+              "column-record-id-generated-uuid": Object {
                 "dataType": "number",
                 "filter": Object {
                   "language": "kuery",
@@ -41,7 +41,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
-              "a9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
+              "column-severity-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Filters",
@@ -143,17 +143,17 @@ Object {
         Object {
           "categoryDisplay": "hide",
           "emptySizeRatio": 0.85,
-          "layerId": "b9b43606-7ff7-46ae-a47c-85bed80fab9a",
+          "layerId": "layer-id-generated-uuid",
           "layerType": "data",
           "legendDisplay": "hide",
           "metrics": Array [
-            "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+            "column-record-id-generated-uuid",
           ],
           "nestedLegend": true,
           "numberDisplay": "value",
           "percentDecimals": 2,
           "primaryGroups": Array [
-            "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
+            "column-severity-id-generated-uuid",
           ],
         },
       ],

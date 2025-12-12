@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
+import type { AboutStepRule } from '../../../common/types';
+import { fillEmptySeverityMappings } from '../../../common/helpers';
 
 export const threatDefault = [
   {

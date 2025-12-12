@@ -7,14 +7,14 @@
 
 import _ from 'lodash';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 import * as esMigrationsMock from '../__fixtures__/es_deprecations';
 import type { DataSourceExclusions, FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
-import { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
 describe('getESUpgradeStatus', () => {
@@ -64,6 +64,30 @@ describe('getESUpgradeStatus', () => {
 
   // @ts-expect-error not full interface of response
   esClient.indices.resolveIndex.mockResponse(resolvedIndices);
+
+  // Mock the indices.stats API call for index sizes
+  esClient.indices.stats.mockResponse({
+    _shards: { failed: 0, successful: 1, total: 1 },
+    _all: {},
+    indices: {
+      'test-index-1': {
+        total: {
+          store: {
+            size_in_bytes: 500000000, // 500MB
+            reserved_in_bytes: 500000000, // 500MB
+          },
+        },
+      },
+      'test-index-2': {
+        total: {
+          store: {
+            size_in_bytes: 1500000000, // 1.5GB
+            reserved_in_bytes: 500000000, // 500MB
+          },
+        },
+      },
+    },
+  });
 
   it('calls /_migration/deprecations', async () => {
     await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
@@ -126,7 +150,6 @@ describe('getESUpgradeStatus', () => {
         ],
       },
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -148,7 +171,7 @@ describe('getESUpgradeStatus', () => {
       ...esMigrationsMock.getMockEsDeprecations(),
       ...esMigrationsMock.getMockMlSettingsDeprecations(),
     };
-    // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
+    // @ts-expect-error missing property definitions in ES resolve_during_rolling_upgrade and _meta
     esClient.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
@@ -217,7 +240,6 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
           _meta: {
             reindex_required: true,
@@ -228,7 +250,6 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
           _meta: {
             reindex_required: true,
@@ -238,7 +259,6 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -258,137 +278,6 @@ describe('getESUpgradeStatus', () => {
     expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 
-  it('filters out old index deprecations enterprise search indices and data streams', async () => {
-    esClient.migration.deprecations.mockResponse({
-      cluster_settings: [],
-      node_settings: [],
-      ml_settings: [],
-      index_settings: {
-        '.ent-search-1': [
-          {
-            level: 'critical',
-            message: 'Old index with a compatibility version < 8.0',
-            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0',
-            details: 'This index has version: 7.17.28-8.0.0',
-            resolve_during_rolling_upgrade: false,
-            _meta: { reindex_required: true },
-          },
-          {
-            level: 'critical',
-            message:
-              'Index [.ent-search-1] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.',
-            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html',
-            details:
-              'Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)',
-            resolve_during_rolling_upgrade: false,
-          },
-        ],
-        '.ent-search-2': [
-          {
-            level: 'critical',
-            message:
-              'Index [.ent-search-2] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.',
-            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html',
-            details:
-              'Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)',
-            resolve_during_rolling_upgrade: false,
-          },
-        ],
-      },
-      data_streams: {
-        'logs-workplace_search.test': [
-          {
-            level: 'critical',
-            message: 'Old data stream with a compatibility version < 8.0',
-            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html',
-            details:
-              'This data stream has backing indices that were created before Elasticsearch 8.0.0',
-            resolve_during_rolling_upgrade: false,
-            _meta: {
-              indices_requiring_upgrade: ['.ds-some-backing-index-5-2024.11.07-000001'],
-              indices_requiring_upgrade_count: 1,
-              total_backing_indices: 2,
-              reindex_required: true,
-            },
-          },
-        ],
-      },
-      // @ts-expect-error not in types yet
-      ilm_policies: {},
-      templates: {},
-    });
-
-    const upgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet,
-      dataSourceExclusions: {},
-    });
-
-    expect(upgradeStatus.migrationsDeprecations).toHaveLength(2);
-    expect(
-      upgradeStatus.migrationsDeprecations.find(
-        (dep) =>
-          dep.correctiveAction?.type === 'reindex' || dep.correctiveAction?.type === 'dataStream'
-      )
-    ).toBeUndefined();
-
-    expect(
-      upgradeStatus.migrationsDeprecations.find((dep) => dep.index === '.ent-search-1')
-    ).toMatchObject({
-      details: expect.stringContaining('Frozen indices'),
-    });
-    expect(
-      upgradeStatus.migrationsDeprecations.find((dep) => dep.index === '.ent-search-2')
-    ).toMatchObject({
-      details: expect.stringContaining('Frozen indices'),
-    });
-  });
-  it('filters out frozen indices if old index deprecations exist for the same indices', async () => {
-    esClient.migration.deprecations.mockResponse({
-      cluster_settings: [],
-      node_settings: [],
-      ml_settings: [],
-      index_settings: {
-        frozen_index: [
-          {
-            level: 'critical',
-            message: 'Old index with a compatibility version < 8.0',
-            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0',
-            details: 'This index has version: 7.17.28-8.0.0',
-            resolve_during_rolling_upgrade: false,
-            _meta: { reindex_required: true },
-          },
-          {
-            level: 'critical',
-            message:
-              'Index [frozen_index] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.',
-            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html',
-            details:
-              'Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)',
-            resolve_during_rolling_upgrade: false,
-          },
-        ],
-      },
-      data_streams: {},
-      // @ts-expect-error not in types yet
-      ilm_policies: {},
-      templates: {},
-    });
-
-    // @ts-expect-error not full interface of response
-    esClient.indices.resolveIndex.mockResponse(resolvedIndices);
-
-    const upgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet,
-      dataSourceExclusions: {},
-    });
-
-    expect([
-      ...upgradeStatus.migrationsDeprecations,
-      ...upgradeStatus.enrichedHealthIndicators,
-    ]).toHaveLength(1);
-    expect(upgradeStatus.totalCriticalDeprecations).toBe(1);
-  });
-
   it('returns health indicators', async () => {
     esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
@@ -398,7 +287,6 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
           _meta: {
             reindex_required: true,
@@ -408,7 +296,6 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -417,7 +304,7 @@ describe('getESUpgradeStatus', () => {
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorGreen,
-        // @ts-ignore
+        // @ts-expect-error
         shards_capacity: healthIndicatorsMock.shardCapacityIndicatorRed,
       },
     });
@@ -450,7 +337,7 @@ describe('getESUpgradeStatus', () => {
             "type": "healthIndicator",
           },
           "details": "Cluster is close to reaching the configured maximum number of shards for data nodes.",
-          "isCritical": true,
+          "level": "critical",
           "message": "Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.",
           "resolveDuringUpgrade": false,
           "type": "health_indicator",
@@ -468,7 +355,7 @@ describe('getESUpgradeStatus', () => {
           },
           "details": "This index was created using version: 6.8.13",
           "index": undefined,
-          "isCritical": true,
+          "level": "critical",
           "message": "Index created before 7.0",
           "resolveDuringUpgrade": false,
           "type": "node_settings",

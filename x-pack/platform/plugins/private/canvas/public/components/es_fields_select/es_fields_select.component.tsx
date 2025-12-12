@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FocusEventHandler } from 'react';
+import type { FocusEventHandler } from 'react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
 
 export interface ESFieldsSelectProps {
@@ -36,6 +38,9 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = ({
       onFocus={onFocus}
       onBlur={onBlur}
       compressed
+      aria-label={i18n.translate('xpack.canvas.esFieldsSelect.comboBoxAriaLabel', {
+        defaultMessage: 'Elasticsearch fields',
+      })}
     />
   );
 };

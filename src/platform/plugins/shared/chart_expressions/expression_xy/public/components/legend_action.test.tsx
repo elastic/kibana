@@ -8,18 +8,20 @@
  */
 
 import React from 'react';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
-import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
-import { mockPaletteOutput } from '../../common/__mocks__';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { LayerFieldFormats } from '../helpers';
+import type { LegendCellValueActions } from './legend_action_popover';
+import { LegendActionPopover } from './legend_action_popover';
+import { mockPaletteOutput } from '../../common/test_utils';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { InvertedRawValueMap, LayerFieldFormats } from '../helpers';
+import type { RawValue } from '@kbn/data-plugin/common';
 
 const legendCellValueActions: LegendCellValueActions = [
   { id: 'action_1', displayName: 'Action 1', iconType: 'testIcon1', execute: () => {} },
@@ -180,6 +182,9 @@ const sampleLayer: DataLayerConfig = {
 
 describe('getLegendAction', function () {
   let wrapperProps: LegendActionProps;
+  const invertedRawValueMap: InvertedRawValueMap = new Map(
+    table.columns.map((c) => [c.id, new Map<string, RawValue>()])
+  );
   const Component: React.ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     jest.fn(),
@@ -201,6 +206,7 @@ describe('getLegendAction', function () {
     {
       first: {
         table,
+        invertedRawValueMap,
         formattedColumns: {},
       },
     },

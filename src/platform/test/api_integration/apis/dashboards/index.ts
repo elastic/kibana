@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('dashboards', () => {
@@ -15,6 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete_dashboard'));
     loadTestFile(require.resolve('./get_dashboard'));
     loadTestFile(require.resolve('./update_dashboard'));
-    loadTestFile(require.resolve('./list_dashboards'));
+    loadTestFile(require.resolve('./search_dashboards'));
   });
 }

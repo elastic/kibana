@@ -4,29 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as React from 'react';
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
+  cleanup,
+  fireEvent,
   render,
   screen,
-  cleanup,
   waitFor,
   waitForElementToBeRemoved,
-  fireEvent,
 } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import * as React from 'react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
-  mockedRulesData,
-  ruleTypeFromApi,
   getDisabledByLicenseRuleTypeFromApi,
+  mockedRulesData,
   ruleType,
-} from './test_helpers';
+  ruleTypeFromApi,
+} from './test_helper';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -40,8 +41,8 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api/rule_types', () => ({
-  loadRuleTypes: jest.fn(),
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
 }));
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
@@ -91,7 +92,10 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
 }));
-jest.mock('@kbn/alerts-ui-shared', () => ({ MaintenanceWindowCallout: jest.fn(() => <></>) }));
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
+  MaintenanceWindowCallout: jest.fn(() => <></>),
+}));
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
   return {
@@ -103,12 +107,16 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
   };
 });
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
+jest.mock('@kbn/ebt-tools');
+
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
 
-const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { bulkDisableRules } = jest.requireMock('../../../lib/rule_api/bulk_disable');
 
 const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
@@ -150,7 +158,7 @@ describe('Rules list Bulk Disable', () => {
       data: mockedRulesData,
     });
     loadActionTypes.mockResolvedValue([]);
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
     loadAllActions.mockResolvedValue([]);
     loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;

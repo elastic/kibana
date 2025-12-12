@@ -16,9 +16,9 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiIcon,
+  EuiIconTip,
   EuiTitle,
-  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,6 +40,9 @@ export function Configuration({ onCreate, onCancel }: Props) {
   const [selectedSlo, setSelectedSlo] = useState<SloConfig>();
   const [duration, setDuration] = useState<string>('1h');
   const [hasError, setHasError] = useState(false);
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'burnRateConfigurationFlyout',
+  });
 
   const isDurationValid = duration.match(/^\d+[mhd]$/); // matches 1m, 78m, 1h, 6h, 1d, 24d
 
@@ -56,10 +59,10 @@ export function Configuration({ onCreate, onCancel }: Props) {
   };
 
   return (
-    <EuiFlyout onClose={onCancel} style={{ minWidth: 550 }}>
+    <EuiFlyout onClose={onCancel} css={{ minWidth: 550 }} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.slo.burnRateEmbeddable.configuration.headerTitle', {
               defaultMessage: 'Burn rate configuration',
             })}
@@ -95,7 +98,7 @@ export function Configuration({ onCreate, onCancel }: Props) {
                 onChange={(e) => setDuration(e.target.value)}
                 isInvalid={!isDurationValid}
                 append={
-                  <EuiToolTip
+                  <EuiIconTip
                     content={i18n.translate(
                       'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
                       {
@@ -103,9 +106,8 @@ export function Configuration({ onCreate, onCancel }: Props) {
                           'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
                       }
                     )}
-                  >
-                    <EuiIcon type="questionInCircle" />
-                  </EuiToolTip>
+                    type="question"
+                  />
                 }
               />
             </EuiFormRow>

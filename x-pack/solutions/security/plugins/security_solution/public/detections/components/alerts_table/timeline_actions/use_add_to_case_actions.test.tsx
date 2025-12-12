@@ -12,16 +12,10 @@ import userEvent from '@testing-library/user-event';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import {
-  AlertsCasesTourSteps,
-  sampleCase,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
-import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
+
 import type { AlertTableContextMenuItem } from '../types';
 import { allCasesPermissions } from '../../../../cases_test_utils';
 
-jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');
 
 const refetch = jest.fn();
@@ -45,9 +39,24 @@ const defaultProps = {
     event: {
       kind: ['signal'],
     },
+    host: {
+      name: ['test-host'],
+    },
   },
+  nonEcsData: [
+    { field: 'event.kind', value: ['signal'] },
+    { field: 'host.name', value: ['test-host'] },
+  ],
   refetch,
 };
+
+const mockObservable = [
+  {
+    typeKey: 'observable-type-hostname',
+    value: 'test-host',
+    description: 'Auto extracted observable',
+  },
+];
 
 const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
@@ -70,12 +79,6 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
 
 describe('useAddToCaseActions', () => {
   beforeEach(() => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 1,
-      incrementStep: () => null,
-      isTourShown: () => false,
-    });
-
     useKibanaMock.mockReturnValue({
       services: {
         cases: {
@@ -86,6 +89,7 @@ describe('useAddToCaseActions', () => {
           helpers: {
             getRuleIdFromEvent: () => null,
             canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
+            getObservablesFromEcs: jest.fn().mockReturnValue(mockObservable),
           },
         },
       },
@@ -106,14 +110,14 @@ describe('useAddToCaseActions', () => {
     );
   });
 
-  it('should not render case options when event is not alert ', () => {
+  it('should render case options when event is not alert ', () => {
     const { result } = renderHook(
       () => useAddToCaseActions({ ...defaultProps, ecsData: { _id: '123' } }),
       {
         wrapper: TestProviders,
       }
     );
-    expect(result.current.addToCaseActionItems.length).toEqual(0);
+    expect(result.current.addToCaseActionItems.length).toEqual(2);
   });
 
   it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
@@ -125,39 +129,8 @@ describe('useAddToCaseActions', () => {
     });
     expect(open).toHaveBeenCalledWith({
       attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
+      observables: mockObservable,
     });
-  });
-
-  it('should call useCasesAddToNewCaseFlyout with tour step with step is active and increment step', () => {
-    const incrementStep = jest.fn();
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: AlertsCasesTourSteps.addAlertToCase,
-      incrementStep,
-      isTourShown: () => true,
-    });
-    const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
-      wrapper: TestProviders,
-    });
-    act(() => {
-      result.current.handleAddToNewCaseClick();
-    });
-    expect(open).toHaveBeenCalledWith({
-      attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
-      headerContent: <CasesTourSteps />,
-    });
-    expect(incrementStep).toHaveBeenCalled();
-  });
-
-  it('should prefill useCasesAddToNewCaseFlyout with tour step when step is active', () => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: AlertsCasesTourSteps.addAlertToCase,
-      incrementStep: () => null,
-      isTourShown: () => true,
-    });
-    renderHook(() => useAddToCaseActions(defaultProps), {
-      wrapper: TestProviders,
-    });
-    expect(addToNewCase.mock.calls[0][0].initialValue).toEqual(sampleCase);
   });
 
   it('should not prefill useCasesAddToNewCaseFlyout with tour step when step is not active', () => {

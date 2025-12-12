@@ -14,17 +14,12 @@
  * intl context around them.
  */
 
-import { I18nProvider, IntlShape } from '@kbn/i18n-react';
-import {
-  mount,
-  ReactWrapper,
-  render,
-  shallow,
-  MountRendererProps,
-  ShallowRendererProps,
-  ComponentType,
-} from 'enzyme';
-import React, { ReactElement } from 'react';
+import type { IntlShape } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { ReactWrapper, MountRendererProps, ShallowRendererProps, ComponentType } from 'enzyme';
+import { mount, render, shallow } from 'enzyme';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 import propTypes from 'prop-types';
 import { createIntl } from '@formatjs/intl';
@@ -53,6 +48,8 @@ function getOptions(context = {}, props = {}) {
 }
 
 /**
+ *  @deprecated - use `renderWithKibanaRenderContext` or `renderWithI18n` with mocked nested components instead to switch from Enzyme to Testing Library
+ *
  *  Creates the wrapper instance using shallow with provided intl object into context
  *
  *  @param node The React element or cheerio wrapper
@@ -74,6 +71,8 @@ export function shallowWithIntl(
 }
 
 /**
+ *  @deprecated - use `renderWithKibanaRenderContext` or `renderWithI18n` instead to switch from Enzyme to Testing Library
+ *
  *  Creates the wrapper instance using mount with provided intl object into context
  *
  *  @param node The React element or cheerio wrapper
@@ -92,7 +91,9 @@ export function mountWithIntl(node: React.ReactElement, options?: MountRendererP
 }
 
 /**
- *  Creates the wrapper instance using render with provided intl object into context
+ *  @deprecated - use `renderWithKibanaRenderContext` or `renderWithI18n` instead to switch from Enzyme to Testing Library
+ *
+ * Creates the wrapper instance using render with provided intl object into context
  *
  *  @param node The React element or cheerio wrapper
  *  @param options properties to pass into render wrapper
@@ -129,6 +130,8 @@ interface ReactHookWrapper<Args, HookValue> {
 }
 
 /**
+ * @deprecated - use `renderHook` from testing-library/react instead to switch from Enzyme to Testing Library
+ *
  * Allows for execution of hooks inside of a test component which records the
  * returned values.
  *
@@ -186,6 +189,9 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   };
 };
 
+/**
+ * @deprecated - use `renderWithKibanaRenderContext` or `renderWithI18n` instead to switch from Enzyme to Testing Library
+ */
 export function shallowWithI18nProvider<T>(
   child: ReactElement<T>,
   options?: Omit<ShallowRendererProps, 'wrappingComponent'> & {
@@ -196,6 +202,9 @@ export function shallowWithI18nProvider<T>(
   return wrapped.children().dive();
 }
 
+/**
+ * @deprecated - use `renderWithKibanaRenderContext` or `renderWithI18n` instead to switch from Enzyme to Testing Library
+ */
 export function mountWithI18nProvider<T>(
   child: ReactElement<T>,
   options?: Omit<MountRendererProps, 'wrappingComponent'> & {
@@ -206,6 +215,9 @@ export function mountWithI18nProvider<T>(
   return wrapped.children().childAt(0);
 }
 
+/**
+ * @deprecated - use `renderWithKibanaRenderContext` or `renderWithI18n` instead to switch from Enzyme to Testing Library
+ */
 export function renderWithI18nProvider<T>(
   child: ReactElement<T>,
   options?: Omit<MountRendererProps, 'wrappingComponent'> & {

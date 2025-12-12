@@ -149,6 +149,7 @@ export const nextActionMap = (context: MigratorContext) => {
         searchAfter: state.lastHitSortValue,
         batchSize: context.migrationConfig.batchSize,
         query: state.outdatedDocumentsQuery,
+        seqNoPrimaryTerm: true,
       }),
     OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: (state: OutdatedDocumentsSearchTransformState) =>
       Actions.transformDocs({

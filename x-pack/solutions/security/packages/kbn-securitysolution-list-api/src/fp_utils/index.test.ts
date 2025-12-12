@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tryCatch } from 'fp-ts/lib/TaskEither';
+import { tryCatch } from 'fp-ts/TaskEither';
 
 import { toPromise } from '.';
 

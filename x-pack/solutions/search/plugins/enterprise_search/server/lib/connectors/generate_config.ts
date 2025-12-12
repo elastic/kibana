@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  Connector,
-  CONNECTORS_INDEX,
-  MANAGED_CONNECTOR_INDEX_PREFIX,
-} from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { createIndex } from '../indices/create_index';
 import { indexOrAliasExists } from '../indices/exists_index';

@@ -571,6 +571,52 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.ISavedObjectsRepository.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
+            ],
+            "signature": [
+              "<T extends ",
+              "SavedObjectsRawDocSource",
+              " = ",
+              "SavedObjectsRawDocSource",
+              ", A = unknown>(options: ",
+              "SavedObjectsSearchOptions",
+              ") => Promise<",
+              "SavedObjectsSearchResponse",
+              "<T, A>>"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                ],
+                "signature": [
+                  "SavedObjectsSearchOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsSearchResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.ISavedObjectsRepository.bulkGet",
             "type": "Function",
             "tags": [
@@ -1853,18 +1899,6 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
@@ -1872,12 +1906,16 @@
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "graph",
@@ -1892,40 +1930,8 @@
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -1950,6 +1956,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2080,66 +2098,6 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
             "plugin": "@kbn/alerting-types",
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
@@ -2200,6 +2158,74 @@
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts"
           },
           {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/common/inject_references.ts"
           },
@@ -2214,14 +2240,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "savedSearch",
@@ -2256,6 +2274,34 @@
             "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/has_workpads.ts"
           },
           {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
@@ -2272,30 +2318,6 @@
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/7.11/index.ts"
           },
@@ -2310,14 +2332,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
           }
         ],
         "children": [
@@ -3815,6 +3829,52 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsClientContract.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
+            ],
+            "signature": [
+              "<T extends ",
+              "SavedObjectsRawDocSource",
+              " = ",
+              "SavedObjectsRawDocSource",
+              ", A = unknown>(options: ",
+              "SavedObjectsSearchOptions",
+              ") => Promise<",
+              "SavedObjectsSearchResponse",
+              "<T, A>>"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                ],
+                "signature": [
+                  "SavedObjectsSearchOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsSearchResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.SavedObjectsClientContract.bulkGet",
             "type": "Function",
             "tags": [],
@@ -5145,19 +5205,19 @@
               "the point-in-time finder client"
             ],
             "signature": [
-              "{ find: <T = unknown, A = unknown>(options: ",
-              "SavedObjectsFindOptions",
-              ", internalOptions?: ",
-              "SavedObjectsFindInternalOptions",
-              " | undefined) => Promise<",
-              "SavedObjectsFindResponse",
-              "<T, A>>; closePointInTime: (id: string, options?: ",
+              "{ closePointInTime: (id: string, options?: ",
               "SavedObjectsBaseOptions",
               " | undefined, internalOptions?: ",
               "SavedObjectsFindInternalOptions",
               " | undefined) => Promise<",
               "SavedObjectsClosePointInTimeResponse",
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
+              ">; find: <T = unknown, A = unknown>(options: ",
+              "SavedObjectsFindOptions",
+              ", internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsFindResponse",
+              "<T, A>>; openPointInTimeForType: (type: string | string[], options?: ",
               "SavedObjectsOpenPointInTimeOptions",
               " | undefined, internalOptions?: ",
               "SavedObjectsFindInternalOptions",
@@ -6199,6 +6259,189 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsRawDocSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsRawDocSource",
+        "description": [
+          "\nSaved object document as stored in `_source` of doc in ES index\nSimilar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]\n"
+        ],
+        "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.migrationVersion",
+            "type": "Object",
+            "tags": [],
+            "label": "migrationVersion",
+            "description": [],
+            "signature": [
+              "SavedObjectsMigrationVersion",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[] | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[typeMapping: string]: any",
+            "description": [],
+            "signature": [
+              "[typeMapping: string]:  any"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-server.SavedObjectsRemoveReferencesToOptions",
         "type": "Interface",
         "tags": [],
@@ -6384,6 +6627,60 @@
               "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/apis/resolve.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsSearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsSearchOptions",
+        "description": [
+          "\nOptions for the saved objects raw search operation.\n\nThis interface extends the Elasticsearch `SearchRequest` type and allows using\nthe full Elasticsearch query DSL, including aggregations.\n"
+        ],
+        "signature": [
+          "SavedObjectsSearchOptions",
+          " extends Omit<",
+          "SearchRequest",
+          ", \"index\">"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsSearchOptions.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type or types of objects to find."
+            ],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsSearchOptions.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "The namespaces to search within."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6854,9 +7151,9 @@
           "\nOptions for the create point-in-time finder operation\n"
         ],
         "signature": [
-          "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
+          "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
           " | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
@@ -6883,19 +7180,19 @@
           "\nPoint-in-time finder client.\nPartially implements {@link ISavedObjectsRepository}\n"
         ],
         "signature": [
-          "{ find: <T = unknown, A = unknown>(options: ",
-          "SavedObjectsFindOptions",
-          ", internalOptions?: ",
-          "SavedObjectsFindInternalOptions",
-          " | undefined) => Promise<",
-          "SavedObjectsFindResponse",
-          "<T, A>>; closePointInTime: (id: string, options?: ",
+          "{ closePointInTime: (id: string, options?: ",
           "SavedObjectsBaseOptions",
           " | undefined, internalOptions?: ",
           "SavedObjectsFindInternalOptions",
           " | undefined) => Promise<",
           "SavedObjectsClosePointInTimeResponse",
-          ">; openPointInTimeForType: (type: string | string[], options?: ",
+          ">; find: <T = unknown, A = unknown>(options: ",
+          "SavedObjectsFindOptions",
+          ", internalOptions?: ",
+          "SavedObjectsFindInternalOptions",
+          " | undefined) => Promise<",
+          "SavedObjectsFindResponse",
+          "<T, A>>; openPointInTimeForType: (type: string | string[], options?: ",
           "SavedObjectsOpenPointInTimeOptions",
           " | undefined, internalOptions?: ",
           "SavedObjectsFindInternalOptions",
@@ -6904,6 +7201,24 @@
           ">; }"
         ],
         "path": "src/core/packages/saved-objects/api-server/src/apis/create_point_in_time_finder.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsSearchResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsSearchResponse",
+        "description": [
+          "\nResponse from the saved objects raw search operation."
+        ],
+        "signature": [
+          "SearchResponseBody",
+          "<Document, Aggregations>"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

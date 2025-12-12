@@ -6,7 +6,7 @@
  */
 
 import stats from 'stats-lite';
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { isUndefined, countBy, mapValues } from 'lodash';
 
 export interface AveragedStat extends JsonObject {
@@ -63,4 +63,18 @@ export function createMapOfRunningAveragedStats<T>(runningAverageWindowSize: num
     }
     return asRecordOfValues();
   };
+}
+
+// Use interquartile range (IQR) to determine outliers
+export function filterOutliers(values: number[]): number[] {
+  if (values.length < 4) {
+    return values;
+  }
+
+  const p25 = stats.percentile(values, 0.25);
+  const p75 = stats.percentile(values, 0.75);
+  const iqr = p75 - p25;
+  const upperBound = p75 + 1.5 * iqr;
+
+  return values.filter((v) => v <= upperBound);
 }

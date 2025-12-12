@@ -14,25 +14,28 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
+import { TimeTypeSection } from './time_type_section';
+import { useShareContext, type IShareContext } from '../../context';
+import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type LinkProps = Pick<
   IShareContext,
   | 'objectType'
   | 'objectId'
   | 'isDirty'
-  | 'urlService'
   | 'shareableUrl'
-  | 'delegatedShareUrlHandler'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
-> & { objectConfig?: ShareContextObjectTypeConfig };
+> &
+  LinkShareConfig['config'] & {
+    objectConfig?: LinkShareUIConfig;
+  };
 
 interface UrlParams {
   [extensionName: string]: {
@@ -45,17 +48,22 @@ export const LinkContent = ({
   objectType,
   objectConfig = {},
   shareableUrl,
-  urlService,
+  shortUrlService,
   shareableUrlLocatorParams,
   allowShortUrl,
-  delegatedShareUrlHandler,
 }: LinkProps) => {
+  const { onSave, isSaving } = useShareContext();
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(true);
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeRange = shareableUrlLocatorParams?.params?.timeRange;
+
+  const { delegatedShareUrlHandler, draftModeCallOut } = objectConfig;
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
@@ -80,22 +88,23 @@ export const LinkContent = ({
   }, [getUrlWithUpdatedParams, shareableUrl]);
 
   const createShortUrl = useCallback(async () => {
-    const shortUrlService = urlService.shortUrls.get(null);
-
     if (shareableUrlLocatorParams) {
-      const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
+      const shortUrl = await shortUrlService.createWithLocator(
+        shareableUrlLocatorParams,
+        isAbsoluteTime
+      );
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
-      return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
+      return (await shortUrlService.createFromLongUrl(snapshotUrl, isAbsoluteTime)).url;
     }
-  }, [shareableUrlLocatorParams, urlService.shortUrls, snapshotUrl]);
+  }, [shareableUrlLocatorParams, shortUrlService, snapshotUrl, isAbsoluteTime]);
 
   const copyUrlHelper = useCallback(async () => {
     setIsLoading(true);
 
     if (!urlToCopy.current) {
       urlToCopy.current = delegatedShareUrlHandler
-        ? delegatedShareUrlHandler()
+        ? await delegatedShareUrlHandler()
         : allowShortUrl
         ? await createShortUrl()
         : snapshotUrl;
@@ -116,22 +125,36 @@ export const LinkContent = ({
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
-  const { draftModeCallOut: DraftModeCallout } = objectConfig;
+  const handleTimeTypeChange = useCallback(
+    (isAbsolute: boolean) => {
+      if (urlToCopy?.current && isAbsolute !== isAbsoluteTime) {
+        urlToCopy.current = undefined;
+      }
+      setIsAbsoluteTime(isAbsolute);
+    },
+    [isAbsoluteTime]
+  );
 
   return (
     <>
       <EuiForm>
-        <EuiText size="s">
-          <FormattedMessage
-            id="share.link.helpText"
-            defaultMessage="Share a direct link to this {objectType}."
-            values={{ objectType }}
-          />
-        </EuiText>
-        {isDirty && DraftModeCallout && (
+        <TimeTypeSection
+          timeRange={timeRange}
+          onTimeTypeChange={handleTimeTypeChange}
+          isAbsoluteTimeByDefault={isAbsoluteTime}
+        />
+        {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            {DraftModeCallout}
+            <DraftModeCallout
+              {...draftModeCalloutContent}
+              {...(onSave && {
+                saveButtonProps: {
+                  onSave,
+                  isSaving,
+                },
+              })}
+            />
           </>
         )}
         <EuiSpacer size="l" />

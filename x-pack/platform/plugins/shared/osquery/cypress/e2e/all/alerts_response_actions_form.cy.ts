@@ -24,10 +24,9 @@ import {
 import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169785
-describe.skip(
+describe(
   'Alert Event Details - Response Actions Form',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;
@@ -163,10 +162,12 @@ describe.skip(
         cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
         cy.contains('Days of uptime');
       });
-      cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-        cy.getBySel('comboBoxSearchInput').should('have.value', packName);
-        cy.getBySel('comboBoxInput').type('{selectall}{backspace}{enter}');
-      });
+      cy.getBySel(RESPONSE_ACTIONS_ITEM_1)
+        .within(() => {
+          cy.getBySel('comboBoxSearchInput').should('have.value', packName);
+          cy.getBySel('comboBoxInput').type('{selectall}{backspace}{enter}');
+        })
+        .clickOutside();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains('select * from uptime1');
         cy.getBySel('remove-response-action').click();

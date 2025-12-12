@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, IRouter } from '@kbn/core/server';
+import type { IScopedClusterClient, IRouter } from '@kbn/core/server';
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { handleEsError } from './shared_imports';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { handleEsError } from './shared_imports';
 
 export interface SetupDependencies {
   features: FeaturesPluginSetup;

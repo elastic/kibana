@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { Workspace } from '../../types';
+import { css } from '@emotion/react';
+import type { Workspace } from '../../types';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectStyleProps {
   workspace: Workspace;
@@ -26,7 +29,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
         })}
       </div>
 
-      <div className="form-group form-group-sm gphFormGroup--small">
+      <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
         {colors.map((c) => {
           const onSelectColor = () => {
             workspace.colorSelected(c);
@@ -36,7 +39,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
             <EuiIcon
               type="stopFilled"
               color={c}
-              className="gphColorPicker__color"
+              css={colorPickerIconStyles}
               aria-hidden="true"
               onClick={onSelectColor}
             />
@@ -46,3 +49,13 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
     </div>
   );
 };
+
+const colorPickerIconStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    margin: euiTheme.size.xs,
+    cursor: 'pointer',
+
+    '&:hover, &:focus': {
+      transform: 'scale(1.4)',
+    },
+  });

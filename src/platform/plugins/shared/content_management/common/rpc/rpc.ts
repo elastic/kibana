@@ -17,9 +17,7 @@ import { deleteSchemas } from './delete';
 import { searchSchemas } from './search';
 import { mSearchSchemas } from './msearch';
 
-export const schemas: {
-  [key in ProcedureName]: ProcedureSchemas;
-} = {
+export const schemas = {
   get: getSchemas,
   bulkGet: bulkGetSchemas,
   create: createSchemas,
@@ -27,4 +25,6 @@ export const schemas: {
   delete: deleteSchemas,
   search: searchSchemas,
   mSearch: mSearchSchemas,
+} satisfies {
+  [key in ProcedureName]: ProcedureSchemas;
 };

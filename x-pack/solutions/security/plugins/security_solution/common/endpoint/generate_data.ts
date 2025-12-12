@@ -266,6 +266,7 @@ export interface TreeOptions {
   eventsDataStream?: DataStream;
   alertsDataStream?: DataStream;
   sessionEntryLeader?: string;
+  deviceEvents?: number;
 }
 
 type TreeOptionDefaults = Required<TreeOptions>;
@@ -290,6 +291,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     ancestryArraySize: options?.ancestryArraySize ?? ANCESTRY_LIMIT,
     eventsDataStream: options?.eventsDataStream ?? eventsDefaultDataStream,
     alertsDataStream: options?.alertsDataStream ?? alertsDefaultDataStream,
+    deviceEvents: options?.deviceEvents ?? 5,
   };
 }
 
@@ -528,6 +530,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
             {
               trusted: false,
               subject_name: 'bad signer',
+            },
+            {
+              trusted: true,
+              subject_name: 'a good signer',
             },
           ],
           malware_classification: {
@@ -900,6 +906,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
               trusted: false,
               subject_name: 'bad signer',
             },
+            {
+              trusted: true,
+              subject_name: 'good signer',
+            },
           ],
           user: 'SYSTEM',
           token: {
@@ -921,36 +931,34 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    * Returns the default DLLs used in alerts
    */
   private getAlertsDefaultDll() {
-    return [
-      {
-        pe: {
-          architecture: 'x64',
-        },
-        code_signature: {
-          subject_name: 'Cybereason Inc',
-          trusted: true,
-        },
+    return {
+      pe: {
+        architecture: 'x64',
+      },
+      code_signature: {
+        subject_name: 'Cybereason Inc',
+        trusted: true,
+      },
 
-        hash: {
-          md5: '1f2d082566b0fc5f2c238a5180db7451',
-          sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
-          sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
-        },
+      hash: {
+        md5: '1f2d082566b0fc5f2c238a5180db7451',
+        sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
+        sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
+      },
 
-        path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
-        Ext: {
-          compile_time: 1534424710,
-          mapped_address: 5362483200,
-          mapped_size: 0,
-          malware_classification: {
-            identifier: 'Whitelisted',
-            score: 0,
-            threshold: 0,
-            version: '3.0.0',
-          },
+      path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+      Ext: {
+        compile_time: 1534424710,
+        mapped_address: 5362483200,
+        mapped_size: 0,
+        malware_classification: {
+          identifier: 'Whitelisted',
+          score: 0,
+          threshold: 0,
+          version: '3.0.0',
         },
       },
-    ];
+    };
   }
 
   /**
@@ -1086,6 +1094,91 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       startTime: new Date(startTime),
       endTime: new Date(endTime),
     };
+  }
+
+  /**
+   * Generates a device event with randomized device fields
+   */
+  public generateDeviceEvent(options: {
+    timestamp: number;
+    hostInfo: CommonHostInfo;
+    eventsDataStream?: DataStream;
+  }): Event {
+    const deviceVendors = [
+      { name: 'TDK LoR', id: '0718' },
+      { name: 'SanDisk', id: '0781' },
+      { name: 'Samsung', id: '04e8' },
+      { name: 'Western Digital', id: '1058' },
+      { name: 'Seagate', id: '0bc2' },
+      { name: 'Kingston', id: '0951' },
+    ];
+
+    const deviceProducts = [
+      { name: 'Trans-It Drive', id: '0528' },
+      { name: 'Ultra USB 3.0', id: '5581' },
+      { name: 'Portable SSD T5', id: '61f5' },
+      { name: 'My Passport', id: '2621' },
+      { name: 'Backup Plus', id: 'ab31' },
+      { name: 'DataTraveler', id: '1666' },
+    ];
+
+    const deviceTypes = [
+      'Disk File System',
+      'USB Mass Storage',
+      'Removable Disk',
+      'External Hard Drive',
+    ];
+
+    const vendor = this.randomChoice(deviceVendors);
+    const product = this.randomChoice(deviceProducts);
+    const deviceType = this.randomChoice(deviceTypes);
+    const serialNumber = this.randomString(12).toUpperCase();
+
+    const event: Event = {
+      '@timestamp': options.timestamp,
+      agent: {
+        ...options.hostInfo.agent,
+        type: 'endpoint',
+      },
+      ecs: {
+        version: '8.10.0',
+      },
+      host: options.hostInfo.host,
+      event: {
+        category: ['host'],
+        type: ['denied', 'device'],
+        kind: 'event',
+        module: 'endpoint',
+        action: ['mount'],
+        dataset: 'endpoint.events.device',
+        outcome: this.randomChoice(['success', 'failure']),
+      },
+      device: {
+        serial_number: serialNumber,
+        vendor: {
+          name: vendor.name,
+          id: vendor.id,
+        },
+        product: {
+          name: product.name,
+          id: product.id,
+        },
+        type: deviceType,
+      },
+      user: {
+        name: this.randomChoice(['SYSTEM', 'Administrator', 'LocalService']),
+        domain: 'NT AUTHORITY',
+      },
+    };
+
+    if (options.eventsDataStream) {
+      event.data_stream = {
+        ...options.eventsDataStream,
+        dataset: 'endpoint.events.device',
+      };
+    }
+
+    return event;
   }
 
   /**
@@ -1585,6 +1678,23 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         parentEntityID: parentEntityIDSafeVersion(node),
         ancestry: ancestryArray(node),
         alertsDataStream,
+      });
+    }
+  }
+
+  /**
+   * Creates device events for a host
+   * @param deviceEvents - number of device events to create
+   * @param eventsDataStream - data stream configuration
+   */
+  public *deviceEventsGenerator(deviceEvents = 5, eventsDataStream?: DataStream) {
+    const baseTimestamp = new Date().getTime();
+    for (let i = 0; i < deviceEvents; i++) {
+      const eventTimestamp = baseTimestamp + this.randomN(3600) * 1000;
+      yield this.generateDeviceEvent({
+        timestamp: eventTimestamp,
+        hostInfo: this.commonInfo,
+        eventsDataStream,
       });
     }
   }

@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder, timeToVisualize, dashboard, common, visChart } = getPageObjects(
@@ -212,7 +212,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               include: 'win 7',
               exclude: 'ios',
             });
-            await act('viz_1', { x: 105, y: 115 });
+            await act('viz_1', { x: 143, y: 123 });
             const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
             expect(hasMachineRawFilter).to.be(true);
           });
@@ -229,7 +229,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 
-            await act('vis_2', { x: -100, y: 10 });
+            await act('vis_2', { x: -130, y: 10 });
 
             const filterPills = await filterBar.getFiltersLabel();
             expect(filterPills).to.eql(expectedFilterPills);

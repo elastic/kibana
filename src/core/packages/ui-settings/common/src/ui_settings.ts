@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 /**
  * UI element type to represent the settings.
@@ -46,11 +47,24 @@ export interface DeprecationSettings {
   docLinksKey: string;
 }
 
+/**
+ * Type for the technical preview settings.
+ * @public
+ * */
+export type TechnicalPreviewSettings =
+  | boolean
+  | {
+      /** Technical Preview message */
+      message?: string;
+      /** Key to documentation links */
+      docLinksKey?: string;
+    };
+
 export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
 
-export type UiSettingsSolution = 'es' | 'oblt' | 'security';
+export type UiSettingsSolutions = Array<SolutionId | 'classic'>;
 
 /**
  * UiSettings parameters defined by the plugins.
@@ -86,6 +100,8 @@ export interface UiSettingsParams<T = unknown> {
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
   deprecation?: DeprecationSettings;
+  /** A flag indicating that this setting is a technical preview. If true, the setting will display a tech preview badge after the title. */
+  technicalPreview?: TechnicalPreviewSettings;
   /**
    * index of the settings within its category (ascending order, smallest will be displayed first).
    * Used for ordering in the UI.
@@ -118,10 +134,12 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
-  /** The solution where this setting is applicable.
-   * This field is used to determine whether the setting should be displayed in the Advanced settings app.
-   * If undefined, the setting must be displayed in all solutions. */
-  solution?: UiSettingsSolution;
+  /** A list of solutions where this setting is applicable.
+   * This field is used to determine whether the setting should be displayed in the stateful Advanced settings app.
+   * If undefined or an empty list, the setting must be displayed in all solutions.
+   * Note: this does not affect serverless settings, since spaces in serverless don't have solution views.
+   * */
+  solutionViews?: UiSettingsSolutions;
 }
 
 /**

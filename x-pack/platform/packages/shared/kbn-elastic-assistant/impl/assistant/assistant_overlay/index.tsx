@@ -12,12 +12,14 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { createGlobalStyle } from 'styled-components';
-import {
-  LastConversation,
-  ShowAssistantOverlayProps,
-  useAssistantContext,
-} from '../../assistant_context';
+import type { ShowAssistantOverlayProps } from '../../assistant_context';
+import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
+import {
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+  type LastConversation,
+} from '../use_space_aware_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -33,14 +35,15 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
 `;
 
 export const AssistantOverlay = React.memo(() => {
+  const spaceId = useAssistantSpaceId();
   const [isModalVisible, setIsModalVisible] = useState(false);
   // id if the conversation exists in the data stream, title if it's a new conversation
   const [lastConversation, setSelectedConversation] = useState<LastConversation | undefined>(
     undefined
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getLastConversation } =
-    useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
+  const { getLastConversation } = useAssistantLastConversation({ spaceId });
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
 
@@ -78,6 +81,31 @@ export const AssistantOverlay = React.memo(() => {
     setIsModalVisible(!isModalVisible);
   }, [isModalVisible, getLastConversation, assistantTelemetry]);
 
+  const hasOpenedFromUrl = useRef(false);
+
+  const handleOpenFromUrlState = useCallback(
+    (id: string) => {
+      if (!isModalVisible) {
+        setSelectedConversation(getLastConversation({ id }));
+        assistantTelemetry?.reportAssistantInvoked({
+          invokedBy: 'url',
+        });
+        setIsModalVisible(true);
+      }
+    },
+    [isModalVisible, getLastConversation, assistantTelemetry]
+  );
+
+  useEffect(() => {
+    if (hasOpenedFromUrl.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const assistantId = params.get('assistant');
+    if (assistantId && !isModalVisible) {
+      hasOpenedFromUrl.current = true;
+      handleOpenFromUrlState(assistantId);
+    }
+  }, [handleOpenFromUrlState, isModalVisible]);
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {

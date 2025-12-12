@@ -6,7 +6,8 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { ConfigSchema, ObservabilityAIAssistantAppPlugin } from './plugin';
+import type { ConfigSchema } from './plugin';
+import { ObservabilityAIAssistantAppPlugin } from './plugin';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,

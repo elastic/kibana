@@ -22,7 +22,7 @@ export const RelatedDetectionRulesCallout = memo<{ 'data-test-subj'?: string }>(
     } = useKibana().services;
 
     return (
-      <EuiCallOut iconType="iInCircle" data-test-subj={getTestId()}>
+      <EuiCallOut iconType="info" data-test-subj={getTestId()}>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.details.detectionRulesDocsMessage"
           defaultMessage="The Endpoint Security detection rule is enabled automatically with Elastic Defend. This rule must remain enabled to receive Endpoint alerts. {detectionRulesDocsLink}."

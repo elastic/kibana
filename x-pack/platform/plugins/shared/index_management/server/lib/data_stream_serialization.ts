@@ -7,12 +7,13 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { LOGSDB_INDEX_MODE, STANDARD_INDEX_MODE } from '../../common/constants';
-import { IndexMode } from '../../common/types/data_streams';
+import type { IndexMode } from '../../common/types/data_streams';
 import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
 
 export function deserializeDataStream(
   dataStreamFromEs: EnhancedDataStreamFromEs,
-  isLogsdbEnabled: boolean
+  isLogsdbEnabled: boolean,
+  failureStoreSettings?: { enabled?: string[] | string; defaultRetentionPeriod?: string }
 ): DataStream {
   const {
     name,
@@ -34,11 +35,40 @@ export function deserializeDataStream(
     global_max_retention: globalMaxRetention,
     next_generation_managed_by: nextGenerationManagedBy,
     index_mode: indexMode,
+    failure_store: failureStore,
   } = dataStreamFromEs;
+
   const meteringStorageSize =
     meteringStorageSizeBytes !== undefined
       ? new ByteSizeValue(meteringStorageSizeBytes).toString()
       : undefined;
+
+  // Determine failure store status based on cluster settings and data stream configuration
+  let failureStoreEnabled = false;
+
+  // Check if data stream name matches any pattern in the cluster setting
+  if (failureStoreSettings?.enabled) {
+    const patterns = Array.isArray(failureStoreSettings.enabled)
+      ? failureStoreSettings.enabled
+      : [failureStoreSettings.enabled];
+
+    const matchesPattern = patterns.some((pattern) => {
+      const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+      return regex.test(name);
+    });
+
+    if (matchesPattern) {
+      // If matches pattern, enable unless explicitly disabled
+      const isExplicitlyDisabled = failureStore?.enabled === false;
+      failureStoreEnabled = !isExplicitlyDisabled;
+    }
+  }
+
+  // If explicitly enabled in data stream config, always enable
+  if (failureStore?.enabled === true) {
+    failureStoreEnabled = true;
+  }
+  const failureStoreLifecycle = failureStore?.lifecycle;
 
   return {
     name,
@@ -79,6 +109,15 @@ export function deserializeDataStream(
       globalMaxRetention,
     },
     nextGenerationManagedBy,
+    failureStoreEnabled,
+    failureStoreRetention: {
+      customRetentionPeriod:
+        failureStoreLifecycle?.enabled && failureStoreLifecycle?.data_retention
+          ? failureStoreLifecycle.data_retention
+          : undefined,
+      defaultRetentionPeriod: failureStoreSettings?.defaultRetentionPeriod,
+      retentionDisabled: failureStoreLifecycle?.enabled === false,
+    },
     indexMode: (indexMode ??
       (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
         ? LOGSDB_INDEX_MODE
@@ -88,7 +127,10 @@ export function deserializeDataStream(
 
 export function deserializeDataStreamList(
   dataStreamsFromEs: EnhancedDataStreamFromEs[],
-  isLogsdbEnabled: boolean
+  isLogsdbEnabled: boolean,
+  failureStoreSettings?: { enabled?: string[] | string }
 ): DataStream[] {
-  return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream, isLogsdbEnabled));
+  return dataStreamsFromEs.map((dataStream) =>
+    deserializeDataStream(dataStream, isLogsdbEnabled, failureStoreSettings)
+  );
 }

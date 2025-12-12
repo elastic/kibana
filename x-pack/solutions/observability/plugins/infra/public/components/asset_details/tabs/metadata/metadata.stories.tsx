@@ -12,12 +12,14 @@ import { Metadata } from './metadata';
 import {
   DecorateWithKibanaContext,
   DecorateWithAssetDetailsStateContext,
+  DecorateWithTabSwitcherContext,
 } from '../../__stories__/decorator';
 
 const stories: Meta = {
   title: 'infra/Asset Details View/Components/Metadata',
   decorators: [
     decorateWithGlobalStorybookThemeProviders,
+    DecorateWithTabSwitcherContext('metadata'),
     DecorateWithAssetDetailsStateContext,
     DecorateWithKibanaContext,
   ],

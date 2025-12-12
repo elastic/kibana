@@ -40,6 +40,7 @@ export const GetPackagesRequestSchema = {
 export const KibanaAssetReferenceSchema = schema.object({
   id: schema.string(),
   originId: schema.maybe(schema.string()),
+  deferred: schema.maybe(schema.boolean()),
   type: schema.oneOf([
     schema.oneOf([
       schema.literal('dashboard'),
@@ -70,6 +71,8 @@ export const EsAssetReferenceSchema = schema.object({
     schema.literal('data_stream_ilm_policy'),
     schema.literal('transform'),
     schema.literal('ml_model'),
+    schema.literal('knowledge_base'),
+    schema.literal('esql_view'),
   ]),
   deferred: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
@@ -127,6 +130,9 @@ export const InstallationInfoSchema = schema.object({
       error: schema.maybe(schema.string()),
     })
   ),
+  previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+  rolled_back: schema.maybe(schema.boolean()),
+  is_rollback_ttl_expired: schema.maybe(schema.boolean()),
 });
 
 const PackageIconSchema = schema.object({
@@ -200,6 +206,7 @@ export const PackageInfoSchema = schema
     discovery: schema.maybe(
       schema.object({
         fields: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
+        datasets: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
       })
     ),
   })
@@ -255,6 +262,7 @@ export const GetLimitedPackagesResponseSchema = schema.object({
 export const GetStatsResponseSchema = schema.object({
   response: schema.object({
     agent_policy_count: schema.number(),
+    package_policy_count: schema.number(),
   }),
 });
 
@@ -323,6 +331,20 @@ export const GetInfoResponseSchema = schema.object({
   item: GetPackageInfoSchema,
   metadata: schema.maybe(PackageMetadataSchema),
 });
+export const GetKnowledgeBaseResponseSchema = schema.object({
+  package: schema.object({
+    name: schema.string(),
+  }),
+  items: schema.arrayOf(
+    schema.object({
+      fileName: schema.string(),
+      content: schema.string(),
+      path: schema.string(),
+      installed_at: schema.string(),
+      version: schema.string(),
+    })
+  ),
+});
 
 export const UpdatePackageResponseSchema = schema.object({
   item: GetPackageInfoSchema,
@@ -337,10 +359,15 @@ export const InstallPackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),
   _meta: schema.object({
     install_source: schema.string(),
+    name: schema.string(),
   }),
 });
 
 export const InstallKibanaAssetsResponseSchema = schema.object({
+  success: schema.boolean(),
+});
+
+export const DeletePackageDatastreamAssetsResponseSchema = schema.object({
   success: schema.boolean(),
 });
 
@@ -367,6 +394,24 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
 
 export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
   items: schema.arrayOf(BulkInstallPackagesResponseItemSchema),
+});
+
+export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
+
+export const BulkRollbackPackagesResponseSchema = schema.object({ taskId: schema.string() });
+
+export const GetOneBulkOperationPackagesResponseSchema = schema.object({
+  status: schema.string(),
+  error: schema.maybe(schema.object({ message: schema.string() })),
+  results: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        success: schema.boolean(),
+        error: schema.maybe(schema.object({ message: schema.string() })),
+      })
+    )
+  ),
 });
 
 export const DeletePackageResponseSchema = schema.object({
@@ -408,6 +453,11 @@ export const ReauthorizeTransformResponseSchema = schema.arrayOf(
     error: schema.oneOf([schema.literal(null), schema.any()]),
   })
 );
+
+export const RollbackPackageResponseSchema = schema.object({
+  version: schema.string(),
+  success: schema.boolean(),
+});
 
 export const GetInstalledPackagesRequestSchema = {
   query: schema.object({
@@ -473,6 +523,11 @@ export const GetInfoRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
     withMetadata: schema.boolean({ defaultValue: false }),
+  }),
+};
+export const GetKnowledgeBaseRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
   }),
 };
 
@@ -549,6 +604,59 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
   }),
 };
 
+export const GetOneBulkOperationPackagesRequestSchema = {
+  params: schema.object({
+    taskId: schema.string({
+      meta: {
+        description: 'Task ID of the bulk operation',
+      },
+    }),
+  }),
+};
+
+export const BulkUpgradePackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.maybe(schema.string()),
+      }),
+      { minSize: 1 }
+    ),
+    prerelease: schema.maybe(schema.boolean()),
+    force: schema.boolean({ defaultValue: false }),
+    upgrade_package_policies: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const BulkUninstallPackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { minSize: 1 }
+    ),
+    force: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const BulkRollbackPackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string({
+          meta: {
+            description: 'Package name to rollback',
+          },
+        }),
+      }),
+      { minSize: 1 }
+    ),
+  }),
+};
+
 export const InstallPackageByUploadRequestSchema = {
   query: schema.object({
     ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
@@ -591,7 +699,27 @@ export const InstallKibanaAssetsRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
-  // body is deprecated on delete request
+  body: schema.nullable(
+    schema.object({
+      force: schema.maybe(schema.boolean()),
+      space_ids: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          minSize: 1,
+          meta: {
+            description:
+              'When provided install assets in the specified spaces instead of the current space.',
+          },
+        })
+      ),
+    })
+  ),
+};
+
+export const InstallRuleAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
   body: schema.nullable(
     schema.object({
       force: schema.maybe(schema.boolean()),
@@ -606,6 +734,16 @@ export const DeleteKibanaAssetsRequestSchema = {
   }),
 };
 
+export const DeletePackageDatastreamAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  query: schema.object({
+    packagePolicyId: schema.string(),
+  }),
+};
+
 export const GetInputsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
@@ -617,5 +755,13 @@ export const GetInputsRequestSchema = {
     }),
     prerelease: schema.maybe(schema.boolean()),
     ignoreUnverified: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const RollbackPackageRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({
+      meta: { description: 'Package name to roll back' },
+    }),
   }),
 };

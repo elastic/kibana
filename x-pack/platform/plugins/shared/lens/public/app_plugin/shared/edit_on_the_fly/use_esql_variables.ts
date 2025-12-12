@@ -6,12 +6,10 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import {
-  isApiESQLVariablesCompatible,
-  TypedLensSerializedState,
-} from '../../../react_embeddable/types';
+import { BehaviorSubject } from 'rxjs';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 
 export const useESQLVariables = ({
   parentApi,
@@ -25,10 +23,12 @@ export const useESQLVariables = ({
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : undefined
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject(undefined)
   );
   const controlGroupApi = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : undefined
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.controlGroupApi$
+      : new BehaviorSubject(undefined)
   );
 
   const panel = useMemo(() => {
@@ -48,11 +48,12 @@ export const useESQLVariables = ({
       }
 
       // add a new control
-      controlGroupApi?.addNewPanel({
+      controlGroupApi?.addNewPanel?.({
         panelType: 'esqlControl',
-        initialState: {
-          ...controlState,
-          id: uuidv4(),
+        serializedState: {
+          rawState: {
+            ...controlState,
+          },
         },
       });
       if (panel && updatedQuery && attributes) {

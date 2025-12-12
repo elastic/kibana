@@ -8,7 +8,7 @@
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createOrUpdateIndexTemplate } from '@kbn/observability-plugin/server';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
+import { APM_SOURCE_MAP_INDEX } from '@kbn/apm-sources-access-plugin/server';
 
 const indexTemplate: IndicesPutIndexTemplateRequest = {
   name: 'apm-source-map',

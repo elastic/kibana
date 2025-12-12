@@ -6,14 +6,13 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../../types';
-import {
-  State,
-  XYState,
-  visualizationSubtypes,
-  XYAnnotationLayerConfig,
-  XYDataLayerConfig,
-} from './types';
+import type {
+  TableSuggestionColumn,
+  VisualizationSuggestion,
+  TableSuggestion,
+} from '@kbn/lens-common';
+import type { XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from './types';
+import { visualizationSubtypes } from './types';
 import { generateId } from '../../id_generator';
 import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -84,7 +83,7 @@ describe('xy_suggestions', () => {
 
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
-  function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
+  function suggestionSubset(suggestion: VisualizationSuggestion<XYState>) {
     return (suggestion.state.layers as XYDataLayerConfig[]).map(
       ({ seriesType, splitAccessor, xAccessor, accessors }) => ({
         seriesType,
@@ -1310,5 +1309,94 @@ describe('xy_suggestions', () => {
         },
       ]
     `);
+  });
+
+  test('suggests an area stacked chart when current xy chart is bar stacked', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'right' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar_stacked',
+          xAccessor: 'date',
+          accessors: ['bytes'],
+          splitAccessor: undefined,
+        },
+      ],
+    };
+
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first'],
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
+    expect(suggestion.title).toEqual('Area stacked');
+    expect(suggestion.state).toEqual(
+      expect.objectContaining({
+        ...currentState,
+        preferredSeriesType: 'area_stacked',
+        layers: [
+          expect.objectContaining({
+            ...currentState.layers[0],
+            seriesType: 'area_stacked',
+          }),
+        ],
+      })
+    );
+  });
+
+  test('suggests an area chart when current xy chart is line', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'right' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'line',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'line',
+          xAccessor: 'date',
+          accessors: ['bytes'],
+          splitAccessor: undefined,
+        },
+      ],
+    };
+
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first'],
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
+
+    expect(suggestion.title).toEqual('Area chart');
+    expect(suggestion.state).toEqual(
+      expect.objectContaining({
+        ...currentState,
+        preferredSeriesType: 'area',
+        layers: [
+          expect.objectContaining({
+            ...currentState.layers[0],
+            seriesType: 'area',
+          }),
+        ],
+      })
+    );
   });
 });

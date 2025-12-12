@@ -13,7 +13,7 @@
     "patterns": [
       "_sql/translate"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/sql-translate-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-translate",
     "availability": {
       "stack": true,
       "serverless": true

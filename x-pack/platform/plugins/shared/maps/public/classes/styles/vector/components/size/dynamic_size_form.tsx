@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch,
-  EuiSwitchEvent,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
-import { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
-import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
-import { StyleField } from '../../style_fields_helper';
+import type { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
+import type { DynamicSizeProperty } from '../../properties/dynamic_size_property';
+import type { StyleField } from '../../style_fields_helper';
 
 interface Props {
   fields: StyleField[];

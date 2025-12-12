@@ -15,16 +15,13 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
+  ControlColumnProps,
   SetEventsDeleted,
   SetEventsLoading,
-  ControlColumnProps,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { useTourContext } from '../../guided_onboarding_tour';
-import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
-import { NotesEventTypes, DocumentEventTypes } from '../../../lib/telemetry';
+import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 
@@ -38,15 +35,15 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   loadingEventIds: Readonly<string[]>;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
+  pageRowIndex: number;
+  refetch?: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  setEventsDeleted: SetEventsDeleted;
+  setEventsLoading: SetEventsLoading;
   showCheckboxes: boolean;
   tabType?: string;
   tableId: string;
   width: number;
-  setEventsLoading: SetEventsLoading;
-  setEventsDeleted: SetEventsDeleted;
-  pageRowIndex: number;
-  refetch?: () => void;
 };
 
 const RowActionComponent = ({
@@ -60,25 +57,19 @@ const RowActionComponent = ({
   onRowSelected,
   onRuleChange,
   pageRowIndex,
+  refetch,
   rowIndex,
   selectedEventIds,
+  setEventsLoading,
+  setEventsDeleted,
   showCheckboxes,
   tabType,
   tableId,
-  setEventsLoading,
-  setEventsDeleted,
   width,
-  refetch,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
-
-  const { activeStep, isTourShown } = useTourContext();
-  const shouldFocusOnOverviewTab =
-    (activeStep === AlertsCasesTourSteps.expandEvent ||
-      activeStep === AlertsCasesTourSteps.reviewAlertDetailsFlyout) &&
-    isTourShown(SecurityStepId.alertsCases);
 
   const columnValues = useMemo(
     () =>
@@ -95,20 +86,16 @@ const RowActionComponent = ({
     [columnHeaders, timelineNonEcsData]
   );
 
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
   const {
     notesPrivileges: { read: canReadNotes },
     timelinePrivileges: { read: canReadTimelines },
   } = useUserPrivileges();
-  const showNotes = canReadNotes && !securitySolutionNotesDisabled;
+  const showNotes = canReadNotes;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     openFlyout({
       right: {
         id: DocumentDetailsRightPanelKey,
-        path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
         params: {
           id: eventId,
           indexName,
@@ -120,7 +107,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'right',
     });
-  }, [eventId, indexName, tableId, openFlyout, shouldFocusOnOverviewTab, telemetry]);
+  }, [eventId, indexName, tableId, openFlyout, telemetry]);
 
   const toggleShowNotes = useCallback(() => {
     openFlyout({
@@ -167,9 +154,9 @@ const RowActionComponent = ({
           checked={Object.keys(selectedEventIds).includes(eventId)}
           columnId={controlColumn.id || ''}
           columnValues={columnValues || ''}
-          data={timelineNonEcsData}
           data-test-subj="actions"
           disabled={disabled}
+          disableTimelineAction={!canReadTimelines}
           ecsData={ecsData}
           eventId={eventId}
           index={index}
@@ -178,17 +165,16 @@ const RowActionComponent = ({
           onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
           onRowSelected={onRowSelected}
           onRuleChange={onRuleChange}
+          refetch={refetch}
           rowIndex={rowIndex}
-          showCheckboxes={showCheckboxes}
-          tabType={tabType}
-          timelineId={tableId}
-          toggleShowNotes={securitySolutionNotesDisabled ? undefined : toggleShowNotes}
-          width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
-          refetch={refetch}
+          showCheckboxes={showCheckboxes}
           showNotes={showNotes}
-          disableTimelineAction={!canReadTimelines}
+          tabType={tabType}
+          timelineId={tableId}
+          toggleShowNotes={toggleShowNotes}
+          width={width}
         />
       )}
     </>
