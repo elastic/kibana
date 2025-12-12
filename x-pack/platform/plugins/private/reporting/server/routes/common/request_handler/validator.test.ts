@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseParams } from '@kbn/reporting-common/types';
+import type { BaseParams } from '@kbn/reporting-common/types';
 import { idSchema, validateJobParams } from './validator';
 
 describe('validateJobParams', () => {

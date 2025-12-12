@@ -44,7 +44,7 @@ export const idSchema = z.enum(['preserve_layout', 'print', 'canvas', 'png']); /
 const layoutSchema = z
   .object({
     id: idSchema.optional(),
-    dimensions: dimensionsSchema.strict().optional(),
+    dimensions: dimensionsSchema.optional(),
     zoom: z.number().positive().max(1000).optional(),
     selectors: z
       .object({
