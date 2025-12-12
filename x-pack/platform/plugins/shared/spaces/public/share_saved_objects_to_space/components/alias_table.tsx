@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiTableComputedColumnType, Pagination } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -15,8 +17,6 @@ import {
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InternalLegacyUrlAliasTarget } from './types';
 import { getSpaceAvatarComponent } from '../../space_avatar';
@@ -99,6 +99,9 @@ export const AliasTable: FunctionComponent<Props> = ({ spaces, aliasesToDisable 
               setPageSize(size);
             }}
             tableLayout="auto"
+            tableCaption={i18n.translate('xpack.spaces.shareToSpace.aliasTableCaption', {
+              defaultMessage: 'Legacy URL aliases to disable',
+            })}
           />
         </Suspense>
       </EuiFlexItem>

@@ -265,6 +265,12 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     return (
       <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.security.management.editRole.spacePrivilegeTable.caption',
+          {
+            defaultMessage: 'Space privilege assignments',
+          }
+        )}
         columns={columns}
         items={rows}
         rowProps={(item: TableRow) => {
