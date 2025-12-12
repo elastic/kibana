@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { isNotFoundError } from '@kbn/es-errors';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -38,7 +37,7 @@ export const validateClassicStreamRoute = createServerRoute({
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const { name, selectedTemplateName } = params.body;
 
-    // Check 1: Does a classic stream with this name already exist?
+    // Check 1: Does a stream with this name already exist?
     const streamExists = await streamsClient.existsStream(name);
     if (streamExists) {
       return {
@@ -47,26 +46,7 @@ export const validateClassicStreamRoute = createServerRoute({
       };
     }
 
-    // Check 2: Does a data stream with this name already exist?
-    try {
-      const dataStreamResult = await scopedClusterClient.asCurrentUser.indices.getDataStream({
-        name,
-      });
-
-      if (dataStreamResult.data_streams.length > 0) {
-        return {
-          isValid: false,
-          errorType: 'duplicate' as const,
-        };
-      }
-    } catch (error) {
-      if (!isNotFoundError(error)) {
-        logger.error(`Unexpected error checking for existing data stream: ${error.message}`);
-        throw error;
-      }
-    }
-
-    // Check 3: Would this stream name match a higher priority index template than the selected one?
+    // Check 2: Would this stream name match a higher priority index template than the selected one?
     try {
       // Get the priority of the selected template
       const selectedTemplateDetails =
