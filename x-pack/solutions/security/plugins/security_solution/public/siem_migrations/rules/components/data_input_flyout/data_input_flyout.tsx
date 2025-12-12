@@ -19,6 +19,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PanelText } from '../../../../common/components/panel_text';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
@@ -33,6 +34,7 @@ import type { MigrationStepProps, MissingResourcesIndexed, Step } from '../../..
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
 import { QradarDataInputStep } from './types';
+import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -158,30 +160,39 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexGroup direction="column" gutterSize="m" justifyContent="spaceBetween">
               <EuiFlexItem>
-                <MigrationSourceDropdown
-                  migrationSource={migrationSource}
-                  setMigrationSource={setMigrationSource}
-                  disabled={migrationSourceDisabled}
-                  migrationSourceOptions={migrationSourceOptions}
-                />
-              </EuiFlexItem>
-              <>
-                {STEP_COMPONENTS[migrationSource].map((step: Step<MigrationStepProps>) => (
-                  <EuiFlexItem key={step.id}>
-                    <step.Component
-                      dataInputStep={dataInputStep}
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  <EuiFlexItem>
+                    <MigrationSourceDropdown
                       migrationSource={migrationSource}
-                      migrationStats={migrationStats}
-                      missingResourcesIndexed={missingResourcesIndexed}
-                      onMigrationCreated={onMigrationCreated}
-                      onMissingResourcesFetched={onMissingResourcesFetched}
-                      setDataInputStep={setDataInputStep}
+                      setMigrationSource={setMigrationSource}
+                      disabled={migrationSourceDisabled}
+                      migrationSourceOptions={migrationSourceOptions}
                     />
                   </EuiFlexItem>
-                ))}
-              </>
+                  <>
+                    {STEP_COMPONENTS[migrationSource].map((step: Step<MigrationStepProps>) => (
+                      <EuiFlexItem key={step.id}>
+                        <step.Component
+                          dataInputStep={dataInputStep}
+                          migrationSource={migrationSource}
+                          migrationStats={migrationStats}
+                          missingResourcesIndexed={missingResourcesIndexed}
+                          onMigrationCreated={onMigrationCreated}
+                          onMissingResourcesFetched={onMissingResourcesFetched}
+                          setDataInputStep={setDataInputStep}
+                        />
+                      </EuiFlexItem>
+                    ))}
+                  </>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <PanelText size="xs" subdued cursive>
+                  <p>{getCopyrightNoticeByVendor(migrationSource)}</p>
+                </PanelText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

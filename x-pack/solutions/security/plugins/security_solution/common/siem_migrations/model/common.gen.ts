@@ -262,6 +262,10 @@ export const MigrationTaskStats = z.object({
    * The last execution of the migration task.
    */
   last_execution: MigrationLastExecution.optional(),
+  /**
+   * The migration vendor.
+   */
+  vendor: NonEmptyString.optional(),
 });
 
 export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
