@@ -134,6 +134,10 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
                 <EuiHorizontalRule margin="none" css={{ height: 2 }} />
                 <EuiBasicTable
                   id={PRIVILEGED_USERS_TABLE_QUERY_ID}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.tableCaption',
+                    { defaultMessage: 'Privileged users list' }
+                  )}
                   loading={isLoading}
                   items={visibleRecords || []}
                   columns={columns}

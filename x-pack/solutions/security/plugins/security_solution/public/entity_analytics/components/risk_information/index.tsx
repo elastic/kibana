@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import styled from '@emotion/styled';
 import {
@@ -236,6 +237,12 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 columns={getCriticalityLevelTableColumns()}
                 items={criticalityLevelTableItems}
                 data-test-subj="criticality-level-information-table"
+                tableCaption={i18n.translate(
+                  'xpack.securitySolution.riskInformation.criticalityLevelTableCaption',
+                  {
+                    defaultMessage: 'Asset criticality level modifiers',
+                  }
+                )}
               />
               <EuiSpacer size="s" />
             </li>
@@ -255,6 +262,12 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 columns={getRiskLevelTableColumns()}
                 items={riskLevelTableItems}
                 data-test-subj="risk-level-information-table"
+                tableCaption={i18n.translate(
+                  'xpack.securitySolution.riskInformation.riskLevelTableCaption',
+                  {
+                    defaultMessage: 'Entity risk levels',
+                  }
+                )}
               />
               <EuiSpacer size="s" />
             </li>
