@@ -34,6 +34,7 @@ export type ESQLSingleAstItem =
   | ESQLAstQueryExpression
   | ESQLFunction
   | ESQLCommandOption
+  | ESQLCommand
   | ESQLSource
   | ESQLParens
   | ESQLColumn
