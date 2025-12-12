@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
+import type { Subscription } from 'rxjs';
 import { combineLatest, distinctUntilChanged, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -28,6 +29,8 @@ export class ServerlessObservabilityPlugin
       ServerlessObservabilityPublicStartDependencies
     >
 {
+  private managementCardsSubscription?: Subscription;
+
   public setup(
     _core: CoreSetup<
       ServerlessObservabilityPublicStartDependencies,
@@ -68,7 +71,7 @@ export class ServerlessObservabilityPlugin
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
     const roleManagementEnabled = security.authz.isRoleManagementEnabled();
 
-    chatExperience$
+    this.managementCardsSubscription = chatExperience$
       .pipe(
         map(
           (chatExperience) =>
@@ -113,5 +116,7 @@ export class ServerlessObservabilityPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.managementCardsSubscription?.unsubscribe();
+  }
 }
