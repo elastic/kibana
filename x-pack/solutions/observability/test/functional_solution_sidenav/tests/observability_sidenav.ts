@@ -42,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
-        await solutionNavigation.sidenav.expectSectionExists('observability_project_nav');
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'observabilityOnboarding',
         });
@@ -58,6 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         // open Infrastructure popover and navigate to some link inside the panel
+        await solutionNavigation.sidenav.expandMore();
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
         // open first link in popover to open a panel
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
@@ -93,6 +93,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await expectNoPageReload();
+      });
+
+      it('shows cases in sidebar navigation', async () => {
+        await solutionNavigation.expectExists();
+
+        await solutionNavigation.sidenav.expectLinkExists({
+          deepLinkId: 'observability-overview:cases',
+        });
+      });
+
+      it('navigates to cases app', async () => {
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+        expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
+
+        await testSubjects.click('createNewCaseBtn');
+        expect(await browser.getCurrentUrl()).contain('app/observability/cases/create');
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+        await testSubjects.click('configure-case-button');
+        expect(await browser.getCurrentUrl()).contain('app/observability/cases/configure');
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
       });
 
       it('renders a feedback callout', async () => {

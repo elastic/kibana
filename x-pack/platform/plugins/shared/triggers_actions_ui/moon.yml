@@ -97,6 +97,9 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/discover-utils'
   - '@kbn/react-query'
+  - '@kbn/router-utils'
+  - '@kbn/maintenance-windows-plugin'
+  - '@kbn/actions-types'
 tags:
   - plugin
   - prod

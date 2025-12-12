@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ReviewDissectFieldsPrompt } from '@kbn/dissect-heuristics';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
@@ -44,6 +44,7 @@ export interface ProcessingDissectSuggestionsHandlerDeps {
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
+  logger: Logger;
 }
 
 export const processingDissectSuggestionsSchema = z.object({
@@ -71,6 +72,7 @@ export const handleProcessingDissectSuggestions = async ({
   streamsClient,
   fieldsMetadataClient,
   signal,
+  logger,
 }: ProcessingDissectSuggestionsHandlerDeps) => {
   // Determine if we should use OTEL field names
   const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);

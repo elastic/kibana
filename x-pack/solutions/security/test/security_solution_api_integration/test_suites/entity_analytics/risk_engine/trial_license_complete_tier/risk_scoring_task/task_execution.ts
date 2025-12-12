@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  const doTests = () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -277,19 +277,17 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(assetCriticalityModifiers).to.contain(2);
 
             const scoreWithCriticality = riskScores.find((score) => score.host?.name === 'host-1');
-            expect(normalizeScores([scoreWithCriticality!])).to.eql([
-              {
-                id_field: 'host.name',
-                id_value: 'host-1',
-                criticality_level: 'extreme_impact',
-                criticality_modifier: 2,
-                calculated_level: 'Moderate',
-                calculated_score: 79.8134597338,
-                calculated_score_norm: 47.0801624006,
-                category_1_count: 10,
-                category_1_score: 30.7874786815,
-              },
-            ]);
+            const normalized = normalizeScores([scoreWithCriticality!])[0];
+
+            expect(normalized.id_field).to.eql('host.name');
+            expect(normalized.id_value).to.eql('host-1');
+            expect(normalized.criticality_level).to.eql('extreme_impact');
+            expect(normalized.criticality_modifier).to.eql(2);
+            expect(normalized.calculated_level).to.eql('Moderate');
+            expect(normalized.category_1_count).to.eql(10);
+            expect(normalized.calculated_score).to.be.within(79.813459733, 79.813459734);
+            expect(normalized.calculated_score_norm).to.be.within(47.0801624, 47.080162401);
+            expect(normalized.category_1_score).to.be.within(30.787478681, 30.787478682);
           });
 
           it('filters out deleted asset criticality data when calculating score', async () => {
@@ -320,27 +318,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       });
-    });
-  };
-
-  describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
-    describe('ESQL', () => {
-      doTests();
-    });
-
-    describe('Scripted metric', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
     });
   });
 };

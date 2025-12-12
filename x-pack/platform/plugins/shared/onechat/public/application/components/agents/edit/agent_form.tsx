@@ -38,6 +38,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pushFlyoutPaddingStyles } from '../../../../common.styles';
 import { docLinks } from '../../../../../common/doc_links';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -47,7 +48,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { isValidAgentAvatarColor } from '../../../utils/color';
 import { labels } from '../../../utils/i18n';
 import { zodResolver } from '../../../utils/zod_resolver';
-import { AgentAvatar } from '../agent_avatar';
+import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
@@ -411,11 +412,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               <EuiFlexItem grow={false}>
                 <AgentAvatar
                   size="l"
-                  agent={{
-                    name: agentName,
-                    avatar_symbol: agentAvatarSymbol,
-                    avatar_color: agentAvatarColor,
-                  }}
+                  name={agentName}
+                  symbol={agentAvatarSymbol}
+                  color={agentAvatarColor}
                 />
               </EuiFlexItem>
             )}
@@ -594,7 +593,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         position="fixed"
         usePortal
       >
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" css={pushFlyoutPaddingStyles}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={labels.agents.settings.cancelButtonLabel}

@@ -28,7 +28,7 @@ import {
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
-import { FeatureEventsSparkline } from './feature_events_sparkline';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
 
@@ -87,7 +87,7 @@ export function StreamExistingFeaturesTable({
       width: '15%',
       render: (feature: Feature) => {
         if (isFeatureWithFilter(feature)) {
-          return <FeatureEventsSparkline feature={feature} definition={definition} />;
+          return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
         }
       },
     },
@@ -104,12 +104,14 @@ export function StreamExistingFeaturesTable({
           onClick: (feature) => {
             goToGenerateSignificantEvents([feature]);
           },
+          'data-test-subj': 'feature_identification_single_goto_significant_events_button',
         },
         {
           name: EDIT_ACTION_NAME_LABEL,
           description: EDIT_ACTION_DESCRIPTION_LABEL,
           type: 'icon',
           icon: 'pencil',
+          'data-test-subj': 'feature_identification_existing_start_edit_button',
           onClick: (feature) => {
             setSelectedFeature(feature);
           },
@@ -187,6 +189,7 @@ export function StreamExistingFeaturesTable({
               iconType="crosshairs"
               size="xs"
               aria-label={GENERATE_SIGNIFICANT_EVENTS}
+              data-test-subj="feature_identification_selection_goto_significant_events_button"
             >
               {GENERATE_SIGNIFICANT_EVENTS}
             </EuiButtonEmpty>

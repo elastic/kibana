@@ -112,7 +112,9 @@ export const useConversationScrollActions = ({
   // Scrolls the most recent round to the top of it's parent scroll container
   const scrollToMostRecentRoundTop = useCallback(() => {
     if (!scrollContainer) return;
-    scrollToMostRecentRound({ scrollContainer, position: 'start' });
+    requestAnimationFrame(() => {
+      scrollToMostRecentRound({ scrollContainer, position: 'start' });
+    });
   }, [scrollContainer]);
 
   // Scrolls the most recent round to the bottom of it's parent scroll container

@@ -34,8 +34,15 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/storage-adapter'
   - '@kbn/core-saved-objects-server-mocks'
-  - '@kbn/task-manager-plugin'
   - '@kbn/inference-langchain'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/core-application-common'
+  - '@kbn/i18n'
+  - '@kbn/features-plugin'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/logging'
 tags:
   - plugin
   - prod
@@ -45,6 +52,7 @@ tags:
 fileGroups:
   src:
     - index.ts
+    - public/**/*
     - server/**/*.ts
     - common/**/*.ts
     - '!target/**/*'

@@ -1,0 +1,188 @@
+{
+  "lastModified": "2025-12-03T19:03:24.591Z",
+  "sha1": "6441468ffb4077883ee6a6fbb942e69e8ffd91a6",
+  "tests": [
+    {
+      "id": "e7ca8c886a58426-d57f60fe1d6db3b",
+      "title": "Home page Loads the app and renders the indices tab by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7ca8c886a58426-27b5341489d2049",
+      "title": "Home page Indices - renders the indices tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7ca8c886a58426-8af903399832657",
+      "title": "Home page Indices - can create an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7ca8c886a58426-6254649b2eeb89f",
+      "title": "Home page Data streams - renders the data streams tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7ca8c886a58426-c4e1c8ec6b68b76",
+      "title": "Home page Index templates - renders the index templates tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7ca8c886a58426-9c13e3ee7e1f9fe",
+      "title": "Home page Component templates - renders the component templates tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7ca8c886a58426-9b94d3afcaf88b6",
+      "title": "Home page Enrich policies - renders the enrich policies tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 103,
+        "column": 7
+      }
+    },
+    {
+      "id": "8b2302c844751d9-97a3b7268ab4789",
+      "title": "Index details page Navigates to the index details page from the home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "b881be62b258ebc-9a7d3356056083c",
+      "title": "Index template wizard - Mappings step clearing up the Numeric subtype dropdown doesn't break the page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "b881be62b258ebc-a615b69eb6e5911",
+      "title": "Index template wizard - Mappings step clearing up the Range subtype dropdown doesn't break the page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "b881be62b258ebc-55c3d2b0ef98d52",
+      "title": "Index template wizard - Mappings step advanced options tab doesn't add default values to request by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "b881be62b258ebc-aaa3d55cabfade3",
+      "title": "Index template wizard - Mappings step advanced options tab adds the set values to the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
+        "line": 99,
+        "column": 7
+      }
+    },
+    {
+      "id": "7d82deafb17121c-339a53750c46ef4",
+      "title": "Index template wizard - Preview template can create and preview an index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_preview.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "ed0c62c57a89768-1a697404152ef55",
+      "title": "Index template wizard - Create can walk through all wizard steps and create a template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    }
+  ]
+}

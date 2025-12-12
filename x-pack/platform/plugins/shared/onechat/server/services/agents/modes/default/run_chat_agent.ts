@@ -54,8 +54,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, attachments, events }
+  context
 ) => {
+  const { logger, modelProvider, toolProvider, attachments, request, events } = context;
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
@@ -66,9 +67,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     manualEvents$.next(event);
   };
 
+  const processedConversation = await prepareConversation({
+    nextInput,
+    previousRounds: conversation?.rounds ?? [],
+    context,
+  });
+
   const selectedTools = await selectTools({
-    input: nextInput,
-    conversation,
+    conversation: processedConversation,
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
@@ -98,11 +104,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
-  const processedConversation = await prepareConversation({
-    nextInput,
-    previousRounds: conversation?.rounds ?? [],
-    attachmentsService: attachments,
-  });
   const initialMessages = conversationToLangchainMessages({
     conversation: processedConversation,
   });

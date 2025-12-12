@@ -52,6 +52,7 @@ export function useYamlValidation(
   const connectors = useSelector(selectConnectors);
   const { application } = useKibana().services;
 
+  // eslint-disable-next-line complexity
   useEffect(() => {
     if (!editor) {
       return;
