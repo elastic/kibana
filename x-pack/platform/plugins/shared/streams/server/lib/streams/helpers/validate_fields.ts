@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { IngestSimulateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { transpileIngestPipeline } from '@kbn/streamlang';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { isRoot, keepFields, namespacePrefixes } from '@kbn/streams-schema';
-import { simulateProcessing } from '../../../routes/internal/streams/processing/simulation_handler';
-import type { StreamsClient } from '../client';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 
@@ -92,28 +92,25 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
 
 export async function validateSimulation(
   definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
-  scopedClusterClient: IScopedClusterClient,
-  streamsClient: StreamsClient,
-  fieldsMetadataClient: IFieldsMetadataClient
+  scopedClusterClient: IScopedClusterClient
 ) {
   if (definition.ingest.processing.steps.length === 0) {
     return;
   }
 
-  const result = await simulateProcessing({
-    params: {
-      path: { name: definition.name },
-      body: {
-        processing: definition.ingest.processing,
-        documents: [],
+  const simulationBody: IngestSimulateRequest = {
+    docs: [
+      {
+        _source: {},
       },
+    ],
+    pipeline: {
+      processors: transpileIngestPipeline(definition.ingest.processing).processors,
     },
-    scopedClusterClient,
-    streamsClient,
-    fieldsMetadataClient,
-  });
-  if (result.definition_error) {
-    throw new MalformedFieldsError(result.definition_error.message);
+  };
+  const simulationResult = await executePipelineSimulation(scopedClusterClient, simulationBody);
+  if (simulationResult.status === 'failure') {
+    throw new MalformedFieldsError(simulationResult.error.message);
   }
 }
 

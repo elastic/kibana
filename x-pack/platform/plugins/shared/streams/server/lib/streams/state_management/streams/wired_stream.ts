@@ -532,12 +532,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     validateSettings(this._definition, this.dependencies.isServerless);
 
-    await validateSimulation(
-      this._definition,
-      this.dependencies.scopedClusterClient,
-      this.dependencies.streamsClient,
-      this.dependencies.fieldsMetadataClient
-    );
+    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
 
     return { isValid: true, errors: [] };
   }

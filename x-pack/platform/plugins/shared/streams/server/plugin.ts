@@ -207,7 +207,6 @@ export class StreamsPlugin
             attachmentClient,
             queryClient,
             featureClient,
-            fieldsMetadataClient,
           });
 
           return {
