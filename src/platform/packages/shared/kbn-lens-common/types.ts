@@ -8,7 +8,7 @@
  */
 
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { Query, AggregateQuery, ProjectRouting } from '@kbn/es-query';
 import { type DataView } from '@kbn/data-plugin/common';
 import type {
   DataPublicPluginStart,
@@ -77,6 +77,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
 import type { LensSavedObjectAttributes, StructuredDatasourceStates } from './embeddable/types';
@@ -175,6 +176,7 @@ export interface LensAppServices extends StartServices {
   locator?: LensAppLocator;
   lensDocumentService: ILensDocumentService;
   serverless?: ServerlessPluginStart;
+  cps?: CPSPluginStart;
 }
 
 export type StartServices = Pick<
@@ -771,7 +773,8 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     dateRange: DateRange,
     nowInstant: Date,
     searchSessionId?: string,
-    forceDSL?: boolean
+    forceDSL?: boolean,
+    projectRouting?: ProjectRouting
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -1386,6 +1389,7 @@ export interface LensAppState extends EditorFrameState {
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsState;
   annotationGroups: AnnotationGroups;
+  projectRouting?: ProjectRouting;
 
   // Whether the current visualization is managed by the system
   managed: boolean;
