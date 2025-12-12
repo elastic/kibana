@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class CustomLinksPage {
   public saveButton: Locator;
@@ -16,7 +17,7 @@ export class CustomLinksPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/custom-links`);
-    return this.page.waitForLoadingIndicatorHidden();
+    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   async getCreateCustomLinkButton() {

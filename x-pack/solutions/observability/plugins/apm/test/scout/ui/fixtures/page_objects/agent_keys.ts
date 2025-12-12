@@ -6,13 +6,14 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class AgentKeysPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-keys`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
     this.page.getByRole('heading', { name: 'Settings', level: 1 });
 
     return this.page;

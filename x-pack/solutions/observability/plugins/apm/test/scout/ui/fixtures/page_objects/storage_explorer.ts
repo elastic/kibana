@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class StorageExplorerPage {
   public storageChart: Locator;
@@ -25,7 +26,7 @@ export class StorageExplorerPage {
         'apm'
       )}/storage-explorer?rangeFrom=now-24h&rangeTo=now&environment=ENVIRONMENT_ALL&indexLifecyclePhase=all`
     );
-    return this.page.waitForLoadingIndicatorHidden();
+    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
@@ -34,7 +35,7 @@ export class StorageExplorerPage {
         'apm'
       )}/storage-explorer?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&environment=ENVIRONMENT_ALL&indexLifecyclePhase=all`
     );
-    return this.page.waitForLoadingIndicatorHidden();
+    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   // Summary stats methods

@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
@@ -27,7 +28,7 @@ export class ServiceMapPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
+    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   async gotoDetailedServiceMapWithDateSelected(start: string, end: string) {
@@ -36,7 +37,7 @@ export class ServiceMapPage {
         'apm'
       )}/services/opbeans-java/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
+    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   async getSearchBar() {

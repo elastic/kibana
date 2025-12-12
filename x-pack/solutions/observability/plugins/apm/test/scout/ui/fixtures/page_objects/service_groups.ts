@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class ServiceGroupsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -15,7 +16,7 @@ export class ServiceGroupsPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/service-groups?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
+    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   async typeInTheSearchBar(text: string) {

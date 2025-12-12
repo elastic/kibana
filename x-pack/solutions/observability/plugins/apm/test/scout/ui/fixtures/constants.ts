@@ -9,6 +9,7 @@ import type { KibanaRole } from '@kbn/scout-oblt';
 
 export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
 export const OPBEANS_END_DATE = '2021-10-10T00:15:00.000Z';
+export const BIGGER_TIMEOUT = 45000;
 
 // APM-specific role definitions matching authentication.ts
 export const APM_ROLES = {
