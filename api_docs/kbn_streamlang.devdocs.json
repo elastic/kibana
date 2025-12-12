@@ -68,6 +68,60 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.conditionToESQLAst",
+        "type": "Function",
+        "tags": [],
+        "label": "conditionToESQLAst",
+        "description": [],
+        "signature": [
+          "(condition: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLSingleAstItem",
+            "text": "ESQLSingleAstItem"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/condition_to_esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.conditionToESQLAst.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/condition_to_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.conditionToPainless",
         "type": "Function",
         "tags": [],
@@ -1759,6 +1813,97 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.validateStreamlang",
+        "type": "Function",
+        "tags": [],
+        "label": "validateStreamlang",
+        "description": [
+          "\nValidates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.\n\nThis validates that:\n- All generated fields are properly namespaced (contain at least one dot)\n- Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes\n- Processors don't modify reserved/system fields\n- Fields are used with compatible types\n"
+        ],
+        "signature": [
+          "(streamlangDSL: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          ", options: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangValidationOptions",
+            "text": "StreamlangValidationOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangValidationResult",
+            "text": "StreamlangValidationResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validateStreamlang.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "streamlangDSL",
+            "description": [
+              "- The Streamlang DSL to validate"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validateStreamlang.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Validation options (reservedFields)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangValidationOptions",
+                "text": "StreamlangValidationOptions"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Validation result with any errors found"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -3628,6 +3773,241 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangValidationError",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamlangValidationError",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationError.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"non_namespaced_field\" | \"reserved_field\" | \"type_mismatch\" | \"mixed_type\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationError.processorId",
+            "type": "string",
+            "tags": [],
+            "label": "processorId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationError.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationError.expectedType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expectedType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.FieldType",
+                "text": "FieldType"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.FieldType",
+                "text": "FieldType"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationError.actualType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "actualType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.FieldType",
+                "text": "FieldType"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationError.conflictingTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "conflictingTypes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.FieldType",
+                "text": "FieldType"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangValidationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamlangValidationOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationOptions.reservedFields",
+            "type": "Array",
+            "tags": [],
+            "label": "reservedFields",
+            "description": [
+              "\nList of reserved/forbidden field names that cannot be modified by processors"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamlangValidationResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationResult.isValid",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValid",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationResult.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangValidationError",
+                "text": "StreamlangValidationError"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationResult.fieldTypesByProcessor",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldTypesByProcessor",
+            "description": [
+              "\nField types available at each processor (indexed by processorId).\nThis represents the field types that exist BEFORE the processor runs,\nwhich is useful for field selection in the UI."
+            ],
+            "signature": [
+              "Map<string, ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.FieldTypeMap",
+                "text": "FieldTypeMap"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.UIAttributes",
         "type": "Interface",
         "tags": [],
@@ -3845,6 +4225,48 @@
           "{ enrich?: unknown; inference?: unknown; sort?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; script?: unknown; circle?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; remove?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; bytes?: unknown; uppercase?: unknown; geo_grid?: unknown; fail?: unknown; grok?: unknown; reroute?: unknown; fingerprint?: unknown; dissect?: unknown; convert?: unknown; community_id?: unknown; date_index_name?: unknown; dot_expander?: unknown; foreach?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; network_direction?: unknown; redact?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.FieldType",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldType",
+        "description": [
+          "\nSupported field types for type tracking"
+        ],
+        "signature": [
+          "\"string\" | \"number\" | \"boolean\" | \"unknown\" | \"date\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.FieldTypeMap",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldTypeMap",
+        "description": [
+          "\nMap of field names to their inferred types"
+        ],
+        "signature": [
+          "Map<string, ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.FieldType",
+            "text": "FieldType"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4662,6 +5084,40 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.KEEP_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "KEEP_FIELDS",
+        "description": [
+          "\nList of special fields that are allowed without namespacing (from kbn-streams-schema)\nThese are OTel standard fields that don't require custom namespace prefixes"
+        ],
+        "signature": [
+          "readonly [\"@timestamp\", \"observed_timestamp\", \"trace_id\", \"span_id\", \"severity_text\", \"body\", \"severity_number\", \"event_name\", \"dropped_attributes_count\", \"scope\", \"body.text\", \"body.structured\", \"resource.schema_url\", \"resource.dropped_attributes_count\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.NAMESPACE_PREFIXES",
+        "type": "Object",
+        "tags": [],
+        "label": "NAMESPACE_PREFIXES",
+        "description": [
+          "\nValid namespace prefixes for custom fields in wired streams"
+        ],
+        "signature": [
+          "readonly [\"body.structured.\", \"attributes.\", \"scope.attributes.\", \"resource.attributes.\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.NEVER_CONDITION",
         "type": "Object",
         "tags": [],
@@ -5255,6 +5711,66 @@
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.validationErrorTypeLabels",
+        "type": "Object",
+        "tags": [],
+        "label": "validationErrorTypeLabels",
+        "description": [
+          "\nHuman-readable labels for validation error types"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validationErrorTypeLabels.non_namespaced_field",
+            "type": "string",
+            "tags": [],
+            "label": "non_namespaced_field",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validationErrorTypeLabels.reserved_field",
+            "type": "string",
+            "tags": [],
+            "label": "reserved_field",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validationErrorTypeLabels.type_mismatch",
+            "type": "string",
+            "tags": [],
+            "label": "type_mismatch",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validationErrorTypeLabels.mixed_type",
+            "type": "string",
+            "tags": [],
+            "label": "mixed_type",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]

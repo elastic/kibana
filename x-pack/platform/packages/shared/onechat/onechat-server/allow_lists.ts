@@ -19,6 +19,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_data_sources',
   'observability.get_anomaly_detection_jobs',
   'observability.run_log_rate_analysis',
+  'observability.get_log_categories',
   'observability.get_alerts',
   'observability.get_services',
   'observability.get_downstream_dependencies',
@@ -39,8 +40,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
 export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   'observability.agent',
   'platform.dashboard.dashboard_agent',
-  `${internalNamespaces.security}.alerts`,
-  `${internalNamespaces.security}.entity`,
+  `${internalNamespaces.security}.agent`,
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {

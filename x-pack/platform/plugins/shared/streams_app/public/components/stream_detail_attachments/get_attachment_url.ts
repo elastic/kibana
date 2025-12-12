@@ -27,7 +27,7 @@ const URL_GETTERS: Record<
     const dashboardLocator = locatorsService.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
     return dashboardLocator?.getRedirectUrl({
       dashboardId: redirectId,
-      timeRange,
+      time_range: timeRange,
     });
   },
   rule: (redirectId, locatorsService) => {

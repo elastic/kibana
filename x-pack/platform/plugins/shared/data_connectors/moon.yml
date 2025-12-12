@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/management-settings-ids'
   - '@kbn/config-schema'
+  - '@kbn/data-sources-registry-plugin'
 tags:
   - plugin
   - prod

@@ -660,7 +660,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
+              "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; preferCached?: boolean | undefined; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
               {
                 "pluginId": "@kbn/test",
                 "scope": "common",
@@ -2790,6 +2790,23 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.fipsIsEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "fipsIsEnabled",
+        "description": [],
+        "signature": [
+          "() => RegExpMatchArray | null | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/fips.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.getArgValue",
         "type": "Function",
         "tags": [],
@@ -4423,6 +4440,20 @@
             "tags": [],
             "label": "image",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DockerServerSpec.preferCached",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preferCached",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
             "deprecated": false,
             "trackAdoption": false

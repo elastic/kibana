@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiButtonColor, IconType } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { memo } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
@@ -19,10 +19,6 @@ export interface NewAgentBuilderAttachmentProps {
    */
   color?: EuiButtonColor;
   /**
-   * icon type
-   */
-  iconType?: IconType;
-  /**
    * Callback when button is clicked
    */
   onClick: () => void;
@@ -30,10 +26,6 @@ export interface NewAgentBuilderAttachmentProps {
    * Size of the button
    */
   size?: EuiButtonEmptySizes;
-  /**
-   * Optional button text
-   */
-  text?: string;
 }
 
 /**
@@ -42,14 +34,12 @@ export interface NewAgentBuilderAttachmentProps {
  */
 export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment({
   color = 'primary',
-  iconType = onechatIconType,
   onClick,
   size = 'm',
-  text = i18n.VIEW_IN_AGENT_BUILDER,
 }: NewAgentBuilderAttachmentProps) {
   return (
     <EuiButtonEmpty
-      aria-label={text}
+      aria-label={i18n.ADD_TO_CHAT}
       color={color}
       data-test-subj={'newAgentBuilderAttachment'}
       onClick={onClick}
@@ -57,9 +47,9 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} color={color === 'primary' ? 'default' : color} />
+          <EuiIcon type={onechatIconType} color={color === 'primary' ? 'default' : color} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{text}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18n.ADD_TO_CHAT}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiButtonEmpty>
   );

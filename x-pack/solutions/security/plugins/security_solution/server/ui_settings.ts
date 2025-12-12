@@ -35,7 +35,6 @@ import {
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
-  ENABLE_ESQL_RISK_SCORING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
@@ -493,29 +492,6 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
     },
     ...getDefaultValueReportSettings(),
-    ...(experimentalFeatures.disableESQLRiskScoring
-      ? {}
-      : {
-          [ENABLE_ESQL_RISK_SCORING]: {
-            name: i18n.translate('xpack.securitySolution.uiSettings.enableEsqlRiskScoringLabel', {
-              defaultMessage: 'Enable ESQL-based risk scoring',
-            }),
-            value: true,
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.enableEsqlRiskScoringDescription',
-              {
-                defaultMessage:
-                  '<p>Enables risk scoring based on ESQL queries. Disabling this will revert to using scripted metrics</p>',
-                values: { p: (chunks) => `<p>${chunks}</p>` },
-              }
-            ),
-            type: 'boolean',
-            category: [APP_ID],
-            requiresPageReload: true,
-            schema: schema.boolean(),
-            solutionViews: ['classic', 'security'],
-          },
-        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {

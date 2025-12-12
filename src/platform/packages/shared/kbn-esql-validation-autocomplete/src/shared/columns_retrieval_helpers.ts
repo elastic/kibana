@@ -6,13 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast';
-import type { ESQLColumnData, GetColumnsByTypeFn } from '@kbn/esql-ast/src/commands_registry/types';
-import { buildFieldsDefinitionsWithMetadata } from '@kbn/esql-ast/src/definitions/utils';
+import { ESQL_VARIABLES_PREFIX } from '@kbn/esql-ast/src/commands/registry/constants';
+import type { ESQLColumnData, GetColumnsByTypeFn } from '@kbn/esql-ast/src/commands/registry/types';
+import { buildFieldsDefinitionsWithMetadata } from '@kbn/esql-ast/src/commands/definitions/utils';
 import { QueryColumns } from '../query_columns_service';
-import type { ESQLCallbacks } from './types';
 
 export type ColumnsMap = Map<string, ESQLColumnData>;
 export type GetColumnMapFn = () => Promise<ColumnsMap>;

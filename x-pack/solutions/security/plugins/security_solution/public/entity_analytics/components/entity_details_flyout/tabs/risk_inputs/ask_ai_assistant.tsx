@@ -65,12 +65,19 @@ export const AskAiAssistant = <T extends EntityType>({
     getPromptContext,
     replacements,
   });
-
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.entity,
-    attachmentData: { identifierType: entityType, identifier: entityName },
-    attachmentPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
-  });
+  const entityAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.entity,
+      attachmentData: {
+        identifierType: entityType,
+        identifier: entityName,
+        attachmentLabel: entityName,
+      },
+      attachmentPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
+    }),
+    [entityName, entityType]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
 
   if (aiAssistantDisable || isAssistantToolDisabled) {
     return null;

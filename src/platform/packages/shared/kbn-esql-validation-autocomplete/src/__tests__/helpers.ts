@@ -6,13 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { METADATA_FIELDS, fieldTypes } from '@kbn/esql-ast';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { METADATA_FIELDS } from '@kbn/esql-ast';
+import { esqlFieldTypes } from '@kbn/esql-types';
 import { camelCase } from 'lodash';
-import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import type {
+  IndexAutocompleteItem,
+  ESQLCallbacks,
+  ESQLFieldWithMetadata,
+  InferenceEndpointAutocompleteItem,
+} from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLCallbacks } from '../shared/types';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
   name: field,
@@ -21,7 +24,7 @@ export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((fiel
 }));
 
 export const fields: ESQLFieldWithMetadata[] = [
-  ...fieldTypes.map((type) => ({
+  ...esqlFieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
     userDefined: false as false,

@@ -10,6 +10,7 @@
 export * from './specs/abuseipdb';
 export * from './specs/alienvault_otx';
 export * from './specs/greynoise';
+export * from './specs/notion';
 export * from './specs/shodan';
 export * from './specs/urlvoid';
 export * from './specs/virustotal';

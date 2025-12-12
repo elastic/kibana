@@ -15,7 +15,7 @@ import {
 import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../data_management/shared';
-import { FeatureEventsSparkline } from './feature_events_sparkline';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 import { FeatureDetailExpanded } from './feature_detail_expanded';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
@@ -101,7 +101,7 @@ export function StreamFeaturesTable({
       width: '20%',
       render: (feature: Feature) => {
         if (isFeatureWithFilter(feature)) {
-          return <FeatureEventsSparkline feature={feature} definition={definition} />;
+          return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
         }
       },
     },
