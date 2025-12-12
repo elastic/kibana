@@ -119,8 +119,7 @@
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/react-query",
-    "@kbn/app-menu"
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

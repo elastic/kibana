@@ -31,11 +31,12 @@ import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awarenes
 import type { SingleTabViewProps } from './components/single_tab_view';
 import {
   BrandedLoadingIndicator,
+  SingleTabView,
   NoDataPage,
   InitializationError,
 } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
-import { TabsView, TabsBarWithAppMenu } from './components/tabs_view';
+import { TabsView } from './components/tabs_view';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { useUrl } from './hooks/use_url';
@@ -103,6 +104,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -242,48 +244,31 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     );
   }
 
-  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
-  const shouldShowTabs = tabsEnabled && customizationContext.displayMode !== 'embedded';
-
   return (
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
-        <DiscoverMainContent
-          {...props}
-          shouldShowTabs={shouldShowTabs}
-          persistedDiscoverSession={persistedDiscoverSession}
-        />
+        <DiscoverTopNavMenuProvider>
+          <>
+            <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
+              {persistedDiscoverSession?.title
+                ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                    defaultMessage: 'Discover - {savedSearchTitle}',
+                    values: {
+                      savedSearchTitle: persistedDiscoverSession.title,
+                    },
+                  })
+                : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                    defaultMessage: 'Discover - Session not yet saved',
+                  })}
+            </h1>
+            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+              <TabsView {...props} />
+            ) : (
+              <SingleTabView {...props} />
+            )}
+          </>
+        </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
-  );
-};
-
-interface DiscoverMainContentProps extends SingleTabViewProps {
-  shouldShowTabs: boolean;
-  persistedDiscoverSession: DiscoverInternalState['persistedDiscoverSession'];
-}
-
-const DiscoverMainContent = ({
-  shouldShowTabs,
-  persistedDiscoverSession,
-  ...props
-}: DiscoverMainContentProps) => {
-  return (
-    <DiscoverTopNavMenuProvider>
-      {shouldShowTabs && <TabsBarWithAppMenu {...props} />}
-      <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
-        {persistedDiscoverSession?.title
-          ? i18n.translate('discover.pageTitleWithSavedSearch', {
-              defaultMessage: 'Discover - {savedSearchTitle}',
-              values: {
-                savedSearchTitle: persistedDiscoverSession.title,
-              },
-            })
-          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-              defaultMessage: 'Discover - Session not yet saved',
-            })}
-      </h1>
-      <TabsView {...props} />
-    </DiscoverTopNavMenuProvider>
   );
 };
