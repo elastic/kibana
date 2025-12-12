@@ -28,10 +28,7 @@ describe('closePitRoute', () => {
       mockOsqueryContext as unknown as OsqueryAppContext
     );
 
-    const route = mockRouter.versioned.getRoute(
-      'post',
-      '/internal/osquery/live_queries/pit/close'
-    );
+    const route = mockRouter.versioned.getRoute('post', '/internal/osquery/live_queries/pit/close');
     const routeVersion = route.versions['1'];
     if (!routeVersion) {
       throw new Error('Handler for version [1] not found!');
