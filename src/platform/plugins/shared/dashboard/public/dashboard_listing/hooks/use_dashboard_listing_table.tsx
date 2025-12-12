@@ -334,7 +334,7 @@ export const useDashboardListingTable = ({
       listingLimit,
       title,
       urlStateEnabled,
-      createdByEnabled: true,
+      createdByEnabled: contentTypeFilter === TAB_IDS.DASHBOARDS,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
       customTableColumn:
         contentTypeFilter === TAB_IDS.VISUALIZATIONS
