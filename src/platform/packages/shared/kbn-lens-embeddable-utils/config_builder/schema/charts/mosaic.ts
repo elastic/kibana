@@ -9,32 +9,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  countMetricOperationSchema,
-  counterRateOperationSchema,
-  cumulativeSumOperationSchema,
-  differencesOperationSchema,
-  formulaOperationDefinitionSchema,
-  lastValueOperationSchema,
-  metricOperationSchema,
-  movingAverageOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-  staticOperationDefinitionSchema,
-  uniqueCountMetricOperationSchema,
-  sumMetricOperationSchema,
-  esqlColumnSchema,
-  genericOperationOptionsSchema,
-} from '../metric_ops';
+import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import {
-  bucketDateHistogramOperationSchema,
-  bucketTermsOperationSchema,
-  bucketHistogramOperationSchema,
-  bucketRangesOperationSchema,
-  bucketFiltersOperationSchema,
-} from '../bucket_ops';
+
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
   legendNestedSchema,
@@ -43,6 +21,10 @@ import {
   legendSizeSchema,
   valueDisplaySchema,
 } from './partition_shared';
+import {
+  mergeAllBucketsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+} from './shared';
 
 const mosaicStateSharedSchema = {
   legend: schema.maybe(
@@ -111,6 +93,18 @@ const partitionStateBreakdownByOptionsSchema = schema.object(
   }
 );
 
+function validateMosaicGroupings(obj: {
+  outer_grouping: Array<{ collapse_by?: string }>;
+  inner_grouping?: Array<{ collapse_by?: string }>;
+}) {
+  if (obj.outer_grouping.filter((def) => def.collapse_by == null).length > 1) {
+    return 'In outer grouping, only a single non-collapsed dimension is allowed when using multiple dimensions.';
+  }
+  if ((obj.inner_grouping?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
+    return 'In inner grouping, only a single non-collapsed dimension is allowed when using multiple dimensions.';
+  }
+}
+
 export const mosaicStateSchemaNoESQL = schema.object(
   {
     type: schema.literal('mosaic'),
@@ -121,180 +115,30 @@ export const mosaicStateSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
-    metrics: schema.arrayOf(
-      schema.oneOf(
-        [
-          // oneOf allows only 12 items
-          // so break down metrics based on the type: field-based, reference-based, formula-like
-          schema.oneOf(
-            [
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, countMetricOperationSchema], {
-                meta: {
-                  description: 'Count metric operation with primary metric options',
-                },
-              }),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema],
-                {
-                  meta: {
-                    description: 'Unique count metric operation with primary metric options',
-                  },
-                }
-              ),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, metricOperationSchema], {
-                meta: {
-                  description:
-                    'Generic metric operation (min, max, avg) with primary metric options',
-                },
-              }),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, sumMetricOperationSchema], {
-                meta: {
-                  description: 'Sum metric operation with primary metric options',
-                },
-              }),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, lastValueOperationSchema], {
-                meta: {
-                  description: 'Last value metric operation with primary metric options',
-                },
-              }),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileOperationSchema], {
-                meta: {
-                  description: 'Percentile metric operation with primary metric options',
-                },
-              }),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema],
-                {
-                  meta: {
-                    description: 'Percentile ranks metric operation with primary metric options',
-                  },
-                }
-              ),
-            ],
-            {
-              meta: {
-                description: 'Field-based metric operations',
-              },
-            }
-          ),
-          schema.oneOf(
-            [
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, differencesOperationSchema], {
-                meta: {
-                  description: 'Differences operation with primary metric options',
-                },
-              }),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, movingAverageOperationSchema],
-                {
-                  meta: {
-                    description: 'Moving average operation with primary metric options',
-                  },
-                }
-              ),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema],
-                {
-                  meta: {
-                    description: 'Cumulative sum operation with primary metric options',
-                  },
-                }
-              ),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, counterRateOperationSchema], {
-                meta: {
-                  description: 'Counter rate operation with primary metric options',
-                },
-              }),
-            ],
-            {
-              meta: {
-                description: 'Reference-based metric operations',
-              },
-            }
-          ),
-          schema.oneOf(
-            [
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema],
-                {
-                  meta: {
-                    description: 'Static value operation with primary metric options',
-                  },
-                }
-              ),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema],
-                {
-                  meta: {
-                    description: 'Formula operation with primary metric options',
-                  },
-                }
-              ),
-            ],
-            {
-              meta: {
-                description: 'Formula-like metric operations',
-              },
-            }
-          ),
-        ],
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      partitionStatePrimaryMetricOptionsSchema
+    ),
+    outer_grouping: schema.arrayOf(
+      mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+      {
+        minSize: 1,
+        meta: {
+          description:
+            'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
+        },
+      }
+    ),
+    inner_grouping: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
         {
+          minSize: 1,
           meta: {
             description:
-              'Metric operation configuration supporting field-based, reference-based, and formula-like operations',
+              'Array of horizontal breakdown dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
           },
         }
-      ),
-      { minSize: 1 }
-    ),
-    /**
-     * Configure how to break down the metric (e.g. show one metric per term). Supports date histogram, terms, histogram, ranges, and filters operations.
-     */
-    group_by: schema.arrayOf(
-      schema.maybe(
-        schema.oneOf(
-          [
-            schema.allOf(
-              [partitionStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema],
-              {
-                meta: {
-                  description:
-                    'Date histogram bucket operation for breaking down metrics over time',
-                },
-              }
-            ),
-            schema.allOf([partitionStateBreakdownByOptionsSchema, bucketTermsOperationSchema], {
-              meta: {
-                description: 'Terms bucket operation for breaking down metrics by field values',
-              },
-            }),
-            schema.allOf([partitionStateBreakdownByOptionsSchema, bucketHistogramOperationSchema], {
-              meta: {
-                description:
-                  'Histogram bucket operation for breaking down metrics by numeric intervals',
-              },
-            }),
-            schema.allOf([partitionStateBreakdownByOptionsSchema, bucketRangesOperationSchema], {
-              meta: {
-                description:
-                  'Ranges bucket operation for breaking down metrics by custom numeric ranges',
-              },
-            }),
-            schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema], {
-              meta: {
-                description:
-                  'Filters bucket operation for breaking down metrics by custom query filters',
-              },
-            }),
-          ],
-          {
-            meta: {
-              description: 'Bucket operation configuration for breaking down metrics by dimensions',
-            },
-          }
-        )
-      ),
-      { minSize: 1 }
+      )
     ),
   },
   {
@@ -302,6 +146,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
+    validate: validateMosaicGroupings,
   }
 );
 
@@ -315,7 +160,7 @@ const mosaicStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
-    metrics: schema.allOf(
+    metric: schema.allOf(
       [
         schema.object(genericOperationOptionsSchema),
         partitionStatePrimaryMetricOptionsSchema,
@@ -328,14 +173,22 @@ const mosaicStateSchemaESQL = schema.object(
         },
       }
     ),
-    /**
-     * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
-     */
-    group_by: schema.maybe(
-      schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
+    outer_grouping: schema.arrayOf(
+      schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema]),
+      {
+        minSize: 1,
         meta: {
           description:
-            'Breakdown dimension configuration for ES|QL mode, combining breakdown options with column selection',
+            'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
+        },
+      }
+    ),
+    inner_grouping: schema.maybe(
+      schema.arrayOf(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema]), {
+        minSize: 1,
+        meta: {
+          description:
+            'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
         },
       })
     ),
@@ -345,6 +198,7 @@ const mosaicStateSchemaESQL = schema.object(
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
+    validate: validateMosaicGroupings,
   }
 );
 
