@@ -2573,6 +2573,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.mitigations.policies.redirection_guard',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.mitigations.policies.redirection_guard',
+      {
+        defaultMessage:
+          'Set to false to opt out of Windows Redirection Guard on Win10/Win11 21H2 and later. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.agent.orphaned_remediation',
     first_supported_version: '9.2',
     documentation: i18n.translate(
@@ -2734,6 +2745,26 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Number of parallel streams per upload for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.script_capture',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_capture',
+      {
+        defaultMessage: 'Capture script content for process create events. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.script_max_size',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_max_size',
+      {
+        defaultMessage: 'Maximum size of script being captured in bytes. Default 1024.',
       }
     ),
   },
