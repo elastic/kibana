@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LegendValue } from '@elastic/charts';
 import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import {
@@ -41,7 +42,15 @@ const dockerContainerDiskIOReadWrite: LensConfigWithId = {
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_LEGEND,
+  legend: {
+    ...DEFAULT_XY_LEGEND.legend,
+    legendStats: [
+      LegendValue.Average,
+      LegendValue.Min,
+      LegendValue.Max,
+      LegendValue.LastNonNullValue,
+    ],
+  },
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 

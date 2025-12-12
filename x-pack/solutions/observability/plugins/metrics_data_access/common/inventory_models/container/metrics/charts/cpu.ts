@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { LegendValue } from '@elastic/charts';
 import {
   CPU_USAGE_LABEL,
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
-  DEFAULT_XY_HIDDEN_LEGEND,
+  DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
 } from '../../../shared/charts/constants';
 import type { LensConfigWithId } from '../../../types';
@@ -26,9 +27,25 @@ const dockerContainerCpuUsageXY: LensConfigWithId = {
       xAxis: '@timestamp',
       yAxis: [formulas.dockerContainerCpuUsage],
     },
+    {
+      type: 'reference',
+      yAxis: [
+        {
+          value: '1',
+        },
+      ],
+    },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
+  legend: {
+    ...DEFAULT_XY_LEGEND.legend,
+    legendStats: [
+      LegendValue.Average,
+      LegendValue.Min,
+      LegendValue.Max,
+      LegendValue.LastNonNullValue,
+    ],
+  },
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   ...DEFAULT_XY_YBOUNDS,
 };
@@ -44,9 +61,25 @@ const k8sContainerCpuUsageXY: LensConfigWithId = {
       xAxis: '@timestamp',
       yAxis: [formulas.k8sContainerCpuUsage],
     },
+    {
+      type: 'reference',
+      yAxis: [
+        {
+          value: '1',
+        },
+      ],
+    },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
+  legend: {
+    ...DEFAULT_XY_LEGEND.legend,
+    legendStats: [
+      LegendValue.Average,
+      LegendValue.Min,
+      LegendValue.Max,
+      LegendValue.LastNonNullValue,
+    ],
+  },
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   ...DEFAULT_XY_YBOUNDS,
 };

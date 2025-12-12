@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { LegendValue } from '@elastic/charts';
 import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
-  DEFAULT_XY_HIDDEN_LEGEND,
+  DEFAULT_XY_LEGEND,
 } from '../../../shared/charts/constants';
 
 const logRate: LensConfigWithId = {
@@ -24,9 +25,25 @@ const logRate: LensConfigWithId = {
       xAxis: '@timestamp',
       yAxis: [formulas.logRate],
     },
+    {
+      type: 'reference',
+      yAxis: [
+        {
+          value: '1',
+        },
+      ],
+    },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
+  legend: {
+    ...DEFAULT_XY_LEGEND.legend,
+    legendStats: [
+      LegendValue.Average,
+      LegendValue.Min,
+      LegendValue.Max,
+      LegendValue.LastNonNullValue,
+    ],
+  },
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
