@@ -13,6 +13,12 @@ import { Callout, type CalloutProps } from './callout';
 import { getCalloutConfig } from './callout.config';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
+const mockLinks = {
+  integrationUrl: '/app/integrations/browse/security/asset_inventory',
+  entityStoreUrl: '/app/security/entity_analytics_entity_store',
+  discoverUrl: '/app/discover',
+};
+
 export default {
   title: 'Components/Graph Components/Callout',
   component: Callout,
@@ -30,35 +36,35 @@ const onDismiss = action('onDismiss');
 
 export const MissingAllRequirements: StoryObj<CalloutProps> = {
   args: {
-    ...getCalloutConfig('missingAllRequirements'),
+    ...getCalloutConfig('missingAllRequirements', mockLinks),
     onDismiss,
   },
 };
 
 export const UninstalledIntegration: StoryObj<CalloutProps> = {
   args: {
-    ...getCalloutConfig('uninstalledIntegration'),
+    ...getCalloutConfig('uninstalledIntegration', mockLinks),
     onDismiss,
   },
 };
 
 export const DisabledEntityStore: StoryObj<CalloutProps> = {
   args: {
-    ...getCalloutConfig('disabledEntityStore'),
+    ...getCalloutConfig('disabledEntityStore', mockLinks),
     onDismiss,
   },
 };
 
 export const UnavailableEntityInfo: StoryObj<CalloutProps> = {
   args: {
-    ...getCalloutConfig('unavailableEntityInfo'),
+    ...getCalloutConfig('unavailableEntityInfo', mockLinks),
     onDismiss,
   },
 };
 
 export const UnknownEntityType: StoryObj<CalloutProps> = {
   args: {
-    ...getCalloutConfig('unknownEntityType'),
+    ...getCalloutConfig('unknownEntityType', mockLinks),
     onDismiss,
   },
 };
