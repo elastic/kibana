@@ -8,5 +8,5 @@
 export { roleDescriptorsFixture } from './roles_descriptors';
 export type { RoleDescriptorsFixture } from './roles_descriptors';
 
-export { getDetectionRuleApiService } from './apis';
-export type { DetectionRuleApiService } from './apis';
+export { getDetectionRuleApiService, getEntityAnalyticsApiService } from './apis';
+export type { DetectionRuleApiService, EntityAnalyticsApiService } from './apis';

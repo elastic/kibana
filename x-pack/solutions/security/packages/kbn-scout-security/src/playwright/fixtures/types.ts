@@ -13,10 +13,11 @@ import type {
   ScoutWorkerFixtures,
 } from '@kbn/scout';
 import type { SecurityPageObjects, SecurityBrowserAuthFixture } from './test';
-import type { DetectionRuleApiService } from './worker';
+import type { DetectionRuleApiService, EntityAnalyticsApiService } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;
+  entityAnalytics: EntityAnalyticsApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {
