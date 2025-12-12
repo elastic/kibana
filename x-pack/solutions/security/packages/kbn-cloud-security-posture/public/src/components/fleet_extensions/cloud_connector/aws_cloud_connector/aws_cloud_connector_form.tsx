@@ -22,6 +22,7 @@ import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,
@@ -66,6 +67,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             });
           }
         }}
+        data-test-subj={CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ}
       />
       <EuiSpacer size="m" />
       <EuiAccordion
