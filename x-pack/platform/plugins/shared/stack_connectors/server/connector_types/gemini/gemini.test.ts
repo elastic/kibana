@@ -97,7 +97,7 @@ describe('GeminiConnector', () => {
         configurationUtilities: actionsConfigMock.create(),
         config: {
           apiUrl: 'https://api.gemini.com',
-          defaultModel: DEFAULT_MODEL,
+          defaultModel: DEFAULT_GEMINI_MODEL,
           gcpRegion: 'us-central1',
           gcpProjectID: 'my-project-12345',
         },
@@ -128,7 +128,7 @@ describe('GeminiConnector', () => {
         configurationUtilities: actionsConfigMock.create(),
         config: {
           apiUrl: 'https://api.gemini.com',
-          defaultModel: DEFAULT_MODEL,
+          defaultModel: DEFAULT_GEMINI_MODEL,
           gcpRegion: 'us-central1',
           gcpProjectID: 'my-project-12345',
         },
