@@ -398,7 +398,7 @@ const result = await savedObjectsClient.search({
       },
     },
   },
-  // ❌ The encrypted value is returned in the response, bypassing redaction
+  // ❌ The encrypted value is returned in the response, bypassing decryption
   fields: ['exposed_api_key'],
 });
 ```
