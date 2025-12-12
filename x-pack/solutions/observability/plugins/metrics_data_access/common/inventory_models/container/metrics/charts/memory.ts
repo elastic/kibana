@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LegendValue } from '@elastic/charts';
 import type { LensConfigWithId } from '../../../types';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
+  DEFAULT_LEGEND_STATS,
   MEMORY_USAGE_LABEL,
 } from '../../../shared/charts/constants';
 import { formulas } from '../formulas';
@@ -39,12 +39,7 @@ const dockerContainerMemoryUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_FITTING_FUNCTION,
   legend: {
     ...DEFAULT_XY_LEGEND.legend,
-    legendStats: [
-      LegendValue.Average,
-      LegendValue.Min,
-      LegendValue.Max,
-      LegendValue.LastNonNullValue,
-    ],
+    legendStats: DEFAULT_LEGEND_STATS,
   },
   ...DEFAULT_XY_YBOUNDS,
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
@@ -73,12 +68,7 @@ const k8sContainerMemoryUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_FITTING_FUNCTION,
   legend: {
     ...DEFAULT_XY_LEGEND.legend,
-    legendStats: [
-      LegendValue.Average,
-      LegendValue.Min,
-      LegendValue.Max,
-      LegendValue.LastNonNullValue,
-    ],
+    legendStats: DEFAULT_LEGEND_STATS,
   },
   ...DEFAULT_XY_YBOUNDS,
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,

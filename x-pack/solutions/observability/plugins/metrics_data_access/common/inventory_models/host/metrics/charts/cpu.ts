@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LegendValue } from '@elastic/charts';
 import {
   CPU_USAGE_LABEL,
   LOAD_LABEL,
@@ -13,6 +12,7 @@ import {
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
+  DEFAULT_LEGEND_STATS,
 } from '../../../shared/charts/constants';
 import type { FormulasCatalog } from '../../../shared/metrics/types';
 import type { LensConfigWithId } from '../../../types';
@@ -42,12 +42,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     ...DEFAULT_XY_FITTING_FUNCTION,
     legend: {
       ...DEFAULT_XY_LEGEND.legend,
-      legendStats: [
-        LegendValue.Average,
-        LegendValue.Min,
-        LegendValue.Max,
-        LegendValue.LastNonNullValue,
-      ],
+      legendStats: DEFAULT_LEGEND_STATS,
     },
     ...DEFAULT_XY_YBOUNDS,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
@@ -68,12 +63,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     ...DEFAULT_XY_FITTING_FUNCTION,
     legend: {
       ...DEFAULT_XY_LEGEND.legend,
-      legendStats: [
-        LegendValue.Average,
-        LegendValue.Min,
-        LegendValue.Max,
-        LegendValue.LastNonNullValue,
-      ],
+      legendStats: DEFAULT_LEGEND_STATS,
     },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
@@ -101,12 +91,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     ...DEFAULT_XY_FITTING_FUNCTION,
     legend: {
       ...DEFAULT_XY_LEGEND.legend,
-      legendStats: [
-        LegendValue.Average,
-        LegendValue.Min,
-        LegendValue.Max,
-        LegendValue.LastNonNullValue,
-      ],
+      legendStats: DEFAULT_LEGEND_STATS,
     },
     ...DEFAULT_XY_YBOUNDS,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
@@ -135,12 +120,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     ...DEFAULT_XY_FITTING_FUNCTION,
     legend: {
       ...DEFAULT_XY_LEGEND.legend,
-      legendStats: [
-        LegendValue.Average,
-        LegendValue.Min,
-        LegendValue.Max,
-        LegendValue.LastNonNullValue,
-      ],
+      legendStats: DEFAULT_LEGEND_STATS,
     },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
