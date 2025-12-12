@@ -440,7 +440,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
-    const maintenanceWindows = await this.getMaintenanceWindows([ALL_SPACES_ID]);
+    const maintenanceWindows = await this.getMaintenanceWindows(ALL_SPACES_ID);
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
@@ -669,7 +669,7 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows(spaceIds: string[]) {
+  async getMaintenanceWindows(spaceId: string) {
     const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
       {} as KibanaRequest
     );
@@ -681,7 +681,7 @@ export class SyntheticsService {
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
-      namespaces: spaceIds,
+      namespaces: [spaceId],
     });
     return mws.data;
   }
