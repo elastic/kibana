@@ -14,10 +14,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  AGENT_BUILDER_ENABLED_SETTING_ID,
-  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
@@ -74,11 +70,6 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
-    );
-
     const navigationService = new NavigationService({
       management: deps.management.locator,
       licenseManagement: deps.licenseManagement?.locator,
@@ -86,20 +77,18 @@ export class OnechatPlugin
 
     this.setupServices = { navigationService };
 
-    if (isAgentBuilderEnabled) {
-      registerApp({
-        core,
-        getServices: () => {
-          if (!this.internalServices) {
-            throw new Error('getServices called before plugin start');
-          }
-          return this.internalServices;
-        },
-      });
+    registerApp({
+      core,
+      getServices: () => {
+        if (!this.internalServices) {
+          throw new Error('getServices called before plugin start');
+        }
+        return this.internalServices;
+      },
+    });
 
-      registerAnalytics({ analytics: core.analytics });
-      registerLocators(deps.share);
-    }
+    registerAnalytics({ analytics: core.analytics });
+    registerLocators(deps.share);
 
     if (deps.workflowsExtensions) {
       registerStepDefinitions(deps.workflowsExtensions);
@@ -150,14 +139,7 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
-    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
-    );
-    const isAgentBuilderNavEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-      false
-    );
+    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
 
     const onechatService: OnechatPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
@@ -203,7 +185,7 @@ export class OnechatPlugin
       },
     };
 
-    if (isAgentBuilderEnabled && isAgentBuilderNavEnabled) {
+    if (hasAgentBuilder) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(

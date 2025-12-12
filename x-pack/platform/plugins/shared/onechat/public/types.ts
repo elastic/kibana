@@ -25,6 +25,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
@@ -51,6 +52,7 @@ export interface OnechatSetupDependencies {
 }
 
 export interface OnechatStartDependencies {
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
