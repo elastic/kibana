@@ -20,9 +20,9 @@ import { parseDatemath } from '../../utils/time';
 import {
   DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
   DEFAULT_TIME_RANGE,
-  DEFAULT_FIELDS,
+  DEFAULT_LOG_FIELDS,
 } from './constants';
-import { fetchAnchorLogs } from './fetch_error_anchors';
+import { fetchAnchorLogs } from './fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
 
 export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_correlated_logs';
@@ -86,7 +86,7 @@ export function createGetCorrelatedLogsTool({
         index,
         correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
         logId,
-        fields = DEFAULT_FIELDS,
+        fields = DEFAULT_LOG_FIELDS,
       },
       { esClient }
     ) => {

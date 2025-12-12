@@ -9,7 +9,7 @@ import moment from 'moment';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter } from '../../utils/dsl_filters';
-import type { ErrorLogDoc, ErrorAnchor } from './types';
+import type { ErrorLogDoc, AnchorLog } from './types';
 
 export async function getCorrelatedLogsForAnchor({
   esClient,
@@ -19,10 +19,10 @@ export async function getCorrelatedLogsForAnchor({
   fields,
 }: {
   esClient: IScopedClusterClient;
-  errorAnchor: ErrorAnchor;
+  errorAnchor: AnchorLog;
   logsIndices: string[];
   logger: Logger;
-  fields?: string[];
+  fields: string[];
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
   const { correlation, '@timestamp': timestamp } = errorAnchor;
@@ -34,7 +34,8 @@ export async function getCorrelatedLogsForAnchor({
   );
 
   const res = await search<ErrorLogDoc, any>({
-    _source: fields ?? true,
+    _source: false,
+    fields,
     track_total_hits: false,
     index: logsIndices,
     size: 100,

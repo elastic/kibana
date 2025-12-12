@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
-import { OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetCorrelatedErrorLogsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_correlated_error_logs/types';
+import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
+import type { GetCorrelatedLogsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_correlated_logs/types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createSyntheticLogsWithErrorsAndCorrelationIds } from '../utils/synthtrace_scenarios/create_synthetic_logs_with_errors_and_correlation_ids';
@@ -16,7 +16,7 @@ import { createSyntheticLogsWithErrorsAndCorrelationIds } from '../utils/synthtr
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
 
-  describe(`tool: ${OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID}`, function () {
+  describe(`tool: ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let logsSynthtraceEsClient: LogsSynthtraceEsClient;
 
@@ -72,8 +72,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns one log group with all logs', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -87,8 +87,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('includes the error log and surrounding logs', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -109,8 +109,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('does not return logs that do not match the specified terms', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -143,8 +143,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('creates only one group for multiple errors with same correlation ID', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -157,8 +157,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('includes both error logs in the same group', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -167,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         const group = results[0].data.correlatedLogs[0];
-        const errorLogs = group.filter((log: any) => log.log?.level === 'ERROR');
+        const errorLogs = group.filter((log) => log.log?.level === 'ERROR');
         expect(errorLogs.length).to.be(2);
 
         const messages = errorLogs.map((log: any) => log.message);
@@ -212,8 +212,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('creates separate groups for errors with different correlation IDs', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -226,8 +226,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('groups logs correctly by their correlation ID', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -274,8 +274,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns empty results when errors have no correlation IDs', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -312,8 +312,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('filters logs by service name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -387,16 +387,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         { service: 'http-service', format: 'HTTP status codes (≥500)' },
       ].forEach(({ service, format }) => {
         it(`detects errors using ${format}`, async () => {
-          const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>(
-            {
-              id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
-              params: {
-                start: 'now-10m',
-                end: 'now',
-                terms: { 'service.name': service },
-              },
-            }
-          );
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              terms: { 'service.name': service },
+            },
+          });
 
           const { correlatedLogs } = results[0].data;
           expect(correlatedLogs.length).to.be(1);
@@ -425,8 +423,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('uses trace.id when multiple correlation IDs are present (priority order)', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>({
-          id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-10m',
             end: 'now',
@@ -484,16 +482,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         { service: 'app-service', level: 'WARN', message: 'Application warn' },
       ].forEach(({ service, level, message }) => {
         it(`detects errors using ${level} level`, async () => {
-          const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>(
-            {
-              id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
-              params: {
-                start: 'now-10m',
-                end: 'now',
-                terms: { 'service.name': service },
-              },
-            }
-          );
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              terms: { 'service.name': service },
+            },
+          });
 
           const { correlatedLogs } = results[0].data;
           expect(correlatedLogs.length).to.be(1);
@@ -617,16 +613,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       ].forEach(({ correlationField, service, expectedMessages }) => {
         it(`Correlate by ${correlationField ?? 'N/A'}`, async () => {
-          const results = await agentBuilderApiClient.executeTool<GetCorrelatedErrorLogsToolResult>(
-            {
-              id: OBSERVABILITY_GET_CORRELATED_ERROR_LOGS_TOOL_ID,
-              params: {
-                start: 'now-10m',
-                end: 'now',
-                terms: { 'service.name': service },
-              },
-            }
-          );
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              terms: { 'service.name': service },
+            },
+          });
 
           const { correlatedLogs } = results[0].data;
           expect(correlatedLogs.flatMap((log) => log.map(({ message }) => message))).to.eql(

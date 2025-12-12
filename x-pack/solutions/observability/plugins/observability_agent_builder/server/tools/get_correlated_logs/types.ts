@@ -7,14 +7,14 @@
 
 import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
-export interface GetCorrelatedErrorLogsToolResult {
+export interface GetCorrelatedLogsToolResult {
   type: ToolResultType.other;
   data: {
     correlatedLogs: ErrorLogDoc[][];
   };
 }
 
-export interface ErrorAnchor {
+export interface AnchorLog {
   '@timestamp': string;
   correlation: {
     field: string;

@@ -70,7 +70,7 @@ export const DEFAULT_ERROR_SEVERITY_FILTER = {
   },
 };
 
-export const DEFAULT_FIELDS = [
+export const DEFAULT_LOG_FIELDS = [
   '@timestamp',
   'message',
   // Correlation fields

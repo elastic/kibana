@@ -11,7 +11,7 @@ import type { SearchHit } from '@kbn/es-types';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
-import type { ErrorLogDoc, ErrorAnchor } from './types';
+import type { ErrorLogDoc, AnchorLog } from './types';
 import { DEFAULT_ERROR_SEVERITY_FILTER } from './constants';
 
 export async function fetchAnchorLogs({
@@ -32,7 +32,7 @@ export async function fetchAnchorLogs({
   correlationFields: string[];
   logger: Logger;
   logId?: string;
-}): Promise<ErrorAnchor[]> {
+}): Promise<AnchorLog[]> {
   if (logId) {
     const anchor = await fetchAnchorLog({
       esClient,
@@ -47,7 +47,7 @@ export async function fetchAnchorLogs({
   const search = getTypedSearch(esClient.asCurrentUser);
   const correlationIdentifierFields = correlationFields;
 
-  const errorLogsResponse = await search<ErrorLogDoc, any>({
+  const anchorLogsResponse = await search<ErrorLogDoc, any>({
     size: 50,
     track_total_hits: false,
     _source: false,
@@ -75,9 +75,9 @@ export async function fetchAnchorLogs({
     },
   });
 
-  const errorAnchors: ErrorAnchor[] = uniqBy(
+  const errorAnchors: AnchorLog[] = uniqBy(
     compact(
-      errorLogsResponse.hits.hits.map((hit) =>
+      anchorLogsResponse.hits.hits.map((hit) =>
         findCorrelationIdentifier(hit, correlationIdentifierFields)
       )
     ),
@@ -85,7 +85,7 @@ export async function fetchAnchorLogs({
   );
 
   logger.debug(
-    `Found ${errorLogsResponse.hits.hits.length} error logs in ${errorAnchors.length} unique sequences`
+    `Found ${anchorLogsResponse.hits.hits.length} anchor logs in ${errorAnchors.length} unique sequences`
   );
 
   return errorAnchors.slice(0, 10); // limit to 10 anchors
@@ -103,7 +103,7 @@ async function fetchAnchorLog({
   logId: string;
   correlationFields: string[];
   logger: Logger;
-}): Promise<ErrorAnchor | undefined> {
+}): Promise<AnchorLog | undefined> {
   const search = getTypedSearch(esClient.asCurrentUser);
   const response = await search<ErrorLogDoc, any>({
     size: 1,
@@ -127,7 +127,7 @@ async function fetchAnchorLog({
 export function findCorrelationIdentifier(
   hit: SearchHit<ErrorLogDoc | undefined, any, any>,
   correlationFields: string[]
-): ErrorAnchor | undefined {
+): AnchorLog | undefined {
   if (!hit) return undefined;
 
   const correlationIdentifier = correlationFields
