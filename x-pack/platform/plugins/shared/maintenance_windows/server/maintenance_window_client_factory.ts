@@ -12,6 +12,7 @@ import type {
   SecurityServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { MaintenanceWindowClient } from './client';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
@@ -45,7 +46,7 @@ export class MaintenanceWindowClientFactory {
     const { securityService } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
       includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
-      ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
+      ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID] }),
     });
 
     const uiSettingClient = this.uiSettings.asScopedToClient(savedObjectsClient);
