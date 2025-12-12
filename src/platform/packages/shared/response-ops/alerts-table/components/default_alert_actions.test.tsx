@@ -131,13 +131,13 @@ describe('DefaultAlertActions', () => {
         }
       );
 
-      it('should hide the Mute alert action when mutedAlertsEnabled is false', async () => {
+      it('should hide the Mute alert action when isMutedAlertsEnabled is false', async () => {
         const mutedAlertsDisabledProps = createPartialObjectMock<AlertActionsProps>({
           alert: {
             [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
           },
           refresh: jest.fn(),
-          mutedAlertsEnabled: false,
+          isMutedAlertsEnabled: false,
         });
 
         render(<TestComponent {...mutedAlertsDisabledProps} />);

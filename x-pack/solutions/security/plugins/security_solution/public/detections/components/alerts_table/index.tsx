@@ -149,7 +149,7 @@ const casesConfiguration = {
 };
 const emptyInputFilters: Filter[] = [];
 
-const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'mutedAlertsEnabled'>> = ({
+const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlertsEnabled'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
   pageScope = PageScope.alerts,
@@ -479,7 +479,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'mutedAlertsEn
               onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
-              mutedAlertsEnabled={false}
+              isMutedAlertsEnabled={false}
               pageSize={50}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}

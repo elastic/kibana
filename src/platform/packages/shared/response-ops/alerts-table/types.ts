@@ -282,7 +282,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * Whether to fetch muted alerts for the table. Security Solution, for
    * example, does not use muted alerts. Defaults to true.
    */
-  mutedAlertsEnabled?: boolean;
+  isMutedAlertsEnabled?: boolean;
   /**
    * Customizations to the data grid toolbar
    */
@@ -504,7 +504,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'services'
     | 'casesConfiguration'
     | 'openLinksInNewTab'
-    | 'mutedAlertsEnabled'
+    | 'isMutedAlertsEnabled'
   >,
   | 'columns'
   | 'pageIndex'
@@ -514,7 +514,7 @@ export type RenderContext<AC extends AdditionalContext> = {
   | 'openLinksInNewTab'
   | 'expandedAlertIndex'
   | 'onExpandedAlertIndexChange'
-  | 'mutedAlertsEnabled'
+  | 'isMutedAlertsEnabled'
 > &
   AC;
 
