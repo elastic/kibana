@@ -27,5 +27,5 @@ export const NEW_TOUR_FEATURES_TOUR_STORAGE_KEYS: Record<NEW_FEATURES_TOUR_STORA
     'elasticAssistant.elasticLLM.conversation.costAwarenessTour.v8.19',
   ELASTIC_LLM_USAGE_AUTOMATIC_TROUBLESHOOTING:
     'elasticAssistant.elasticLLM.costAwarenessTour.automaticTroubleshooting.v9.0',
-  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.2',
+  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3',
 };
