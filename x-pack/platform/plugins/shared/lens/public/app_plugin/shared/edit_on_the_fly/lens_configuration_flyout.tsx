@@ -310,14 +310,14 @@ export function LensEditConfigurationFlyout({
 
   // The button is disabled when the visualization cannot be converted to ES|QL
   const { isConvertToEsqlButtonDisbaled, esqlPreview } = useMemo(() => {
-    if (!isSingleLayerVisualization || textBasedMode) {
+    const layers = datasourceStates[datasourceId].state?.layers;
+
+    if (!isSingleLayerVisualization || textBasedMode || !layers) {
       return { isConvertToEsqlButtonDisbaled: true, esqlPreview: '' };
     }
 
     // Take the first (and only) layer
-    const layerId = layerIds[0];
-    const state = datasourceStates[datasourceId].state;
-    const singleLayer = state && state.layers[layerId];
+    const singleLayer = layers[layerIds[0]];
 
     // Get the esAggEntries
     const { columnOrder } = singleLayer;
