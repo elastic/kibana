@@ -122,4 +122,12 @@ describe('Reporting Config Schema', () => {
       ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { dev: true })
     ).not.toThrow();
   });
+
+  it(`fails to validate "csv.maxRows" when maxRows is less than 1`, () => {
+    expect(() =>
+      ConfigSchema.validate({
+        csv: { maxRows: 0 },
+      })
+    ).toThrowError('[csv.maxRows]: Value must be equal to or greater than [1].');
+  });
 });

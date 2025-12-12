@@ -71,6 +71,7 @@ export abstract class ExportType<
   public setupDeps!: SetupDepsType;
   public startDeps!: StartDepsType;
   public http!: HttpServiceSetup;
+  public isServerless: boolean;
 
   constructor(
     core: CoreSetup,
@@ -79,6 +80,7 @@ export abstract class ExportType<
     public context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.http = core.http;
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(setupDeps: SetupDepsType) {

@@ -61,6 +61,7 @@ describe('GetCsvReportPanelAction', () => {
   beforeEach(() => {
     csvConfig = {
       scroll: {} as ClientConfigType['csv']['scroll'],
+      maxRows: 10000,
     };
 
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
