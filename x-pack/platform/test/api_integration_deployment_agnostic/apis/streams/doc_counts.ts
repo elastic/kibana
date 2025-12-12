@@ -405,7 +405,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Scalability with many streams', () => {
+    describe('Scalability with many streams', function () {
+      // Skip in serverless due to timeout issues with large number of streams
+      this.tags(['skipServerless']);
       const NUM_STREAMS = 300;
       const createdStreams: string[] = [];
       before(async () => {
