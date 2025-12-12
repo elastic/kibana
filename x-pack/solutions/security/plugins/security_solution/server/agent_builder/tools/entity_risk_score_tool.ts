@@ -219,7 +219,7 @@ export const entityRiskScoreTool = (
                       ...(score.criticality_level !== undefined && {
                         criticality_level: score.criticality_level,
                       }),
-                      ...(score.modifiers && { modifiers: score.modifiers || [] }),
+                      ...(score.modifiers && { modifiers: score.modifiers ?? [] }),
                     };
                   }),
                 },
