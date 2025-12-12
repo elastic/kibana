@@ -17,11 +17,11 @@ import { APMEventClient, type APMEventESSearchRequest, type APMEventFieldCapsReq
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 import * as cancelEsRequestOnAbortModule from '../cancel_es_request_on_abort';
-import * as observabilityPluginModule from '@kbn/observability-plugin/server';
+import * as observabilitySharedModule from '@kbn/observability-shared-plugin/common';
 
-jest.mock('@kbn/observability-plugin/server', () => ({
+jest.mock('@kbn/observability-shared-plugin/common', () => ({
   __esModule: true,
-  ...jest.requireActual('@kbn/observability-plugin/server'),
+  ...jest.requireActual('@kbn/observability-shared-plugin/common'),
 }));
 
 describe('APMEventClient', () => {
@@ -135,7 +135,7 @@ describe('APMEventClient', () => {
         .mockImplementation(jest.fn());
 
       unwrapEsResponseSpy = jest
-        .spyOn(observabilityPluginModule, 'unwrapEsResponse')
+        .spyOn(observabilitySharedModule, 'unwrapEsResponse')
         .mockImplementation(jest.fn());
 
       esClientMock = {

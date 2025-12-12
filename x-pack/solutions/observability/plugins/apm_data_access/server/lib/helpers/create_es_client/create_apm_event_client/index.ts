@@ -18,12 +18,14 @@ import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/li
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
 import type { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
-import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import {
+  unwrapEsResponse,
+  type InspectResponse,
+  type DataTier,
+} from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { withApmSpan } from '../../../../utils';

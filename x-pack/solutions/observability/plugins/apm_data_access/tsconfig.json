@@ -11,7 +11,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/data-plugin",
     "@kbn/inspector-plugin",
-    "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/es-types",
     "@kbn/apm-types",
