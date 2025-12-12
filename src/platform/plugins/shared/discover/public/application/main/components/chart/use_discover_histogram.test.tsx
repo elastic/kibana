@@ -390,22 +390,66 @@ describe('useDiscoverHistogram', () => {
       expect(mockCheckHitCount).not.toHaveBeenCalled();
     });
 
-    it('should set isChartLoading to true for fetch start', async () => {
-      const stateContainer = getStateContainer();
-      stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
-          appState: { query: { esql: 'from *' } },
-        })
-      );
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      act(() => {
-        stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.LOADING });
+    describe('given a non-ES|QL query', () => {
+      it('should NOT set isChartLoading to true for fetch start', async () => {
+        const stateContainer = getStateContainer();
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { query: { language: 'kuery', query: 'test' } },
+          })
+        );
+        const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+        act(() => {
+          stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.LOADING });
+        });
+        expect(hook.result.current.isChartLoading).toBe(false);
+        act(() => {
+          stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.COMPLETE });
+        });
+        expect(hook.result.current.isChartLoading).toBe(false);
       });
-      expect(hook.result.current.isChartLoading).toBe(true);
-      act(() => {
-        stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.COMPLETE });
+    });
+
+    describe('given an ES|QL query', () => {
+      describe('when it has a transformational command', () => {
+        it('should set isChartLoading to true for fetch start', async () => {
+          const stateContainer = getStateContainer();
+          stateContainer.internalState.dispatch(
+            stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+              appState: { query: { esql: 'from * | stats by *' } },
+            })
+          );
+          const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+          act(() => {
+            stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.LOADING });
+          });
+          expect(hook.result.current.isChartLoading).toBe(true);
+          act(() => {
+            stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.COMPLETE });
+          });
+          expect(hook.result.current.isChartLoading).toBe(false);
+        });
       });
-      expect(hook.result.current.isChartLoading).toBe(false);
+
+      describe('when it does NOT have a transformational command', () => {
+        it('should set isChartLoading to true for fetch start', async () => {
+          const stateContainer = getStateContainer();
+          stateContainer.internalState.dispatch(
+            stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+              appState: { query: { esql: 'from *' } },
+            })
+          );
+          const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+          act(() => {
+            stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.LOADING });
+          });
+          expect(hook.result.current.isChartLoading).toBe(false);
+          act(() => {
+            stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.COMPLETE });
+          });
+          expect(hook.result.current.isChartLoading).toBe(false);
+        });
+      });
     });
 
     it('should use timerange + timeRangeRelative + query given by the internalState', async () => {

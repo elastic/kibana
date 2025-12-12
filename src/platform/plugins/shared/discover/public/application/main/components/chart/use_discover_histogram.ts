@@ -81,7 +81,7 @@ export const useDiscoverHistogram = (
   const documentsState = useDataState(documents$);
   const isChartLoading = useMemo(() => {
     const query = stateContainer.getCurrentTab().appState.query;
-    if (!isOfAggregateQueryType(query)) return undefined;
+    if (!isOfAggregateQueryType(query)) return false;
     if (!hasTransformationalCommand(query.esql)) return false;
     return documentsState?.fetchStatus === FetchStatus.LOADING;
   }, [documentsState?.fetchStatus, stateContainer]);
