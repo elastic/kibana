@@ -61,9 +61,10 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
     const deleteResponse = body as DeleteTransformsResponseSchema;
 
     expect(statusCode).toBe(200);
-    expect(deleteResponse[transformId].transformDeleted.success).toBe(true);
-    expect(deleteResponse[transformId].destIndexDeleted.success).toBe(false);
-    expect(deleteResponse[transformId].destDataViewDeleted.success).toBe(false);
+    expect(deleteResponse[transformId]).toBeDefined();
+    expect(deleteResponse[transformId]!.transformDeleted.success).toBe(true);
+    expect(deleteResponse[transformId]!.destIndexDeleted!.success).toBe(false);
+    expect(deleteResponse[transformId]!.destDataViewDeleted!.success).toBe(false);
   });
 
   apiTest('should return 403 for unauthorized user', async ({ apiClient }) => {
@@ -125,9 +126,10 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
       const deleteResponse = body as DeleteTransformsResponseSchema;
 
       expect(statusCode).toBe(200);
-      expect(deleteResponse[transformId2].transformDeleted.success).toBe(true);
-      expect(deleteResponse[transformId2].destIndexDeleted.success).toBe(true);
-      expect(deleteResponse[transformId2].destDataViewDeleted.success).toBe(false);
+      expect(deleteResponse[transformId2]).toBeDefined();
+      expect(deleteResponse[transformId2]!.transformDeleted.success).toBe(true);
+      expect(deleteResponse[transformId2]!.destIndexDeleted!.success).toBe(true);
+      expect(deleteResponse[transformId2]!.destDataViewDeleted!.success).toBe(false);
 
       // Ensure destination index is deleted
       const destinationIndexExists = await esClient.indices.exists({ index: destinationIndex2 });

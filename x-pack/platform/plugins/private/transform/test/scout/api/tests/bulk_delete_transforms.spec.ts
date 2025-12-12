@@ -60,9 +60,10 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
 
     expect(statusCode).toBe(200);
     for (const id of transformIds) {
-      expect(deleteResponse[id].transformDeleted.success).toBe(true);
-      expect(deleteResponse[id].destIndexDeleted.success).toBe(false);
-      expect(deleteResponse[id].destDataViewDeleted.success).toBe(false);
+      expect(deleteResponse[id]).toBeDefined();
+      expect(deleteResponse[id]!.transformDeleted.success).toBe(true);
+      expect(deleteResponse[id]!.destIndexDeleted!.success).toBe(false);
+      expect(deleteResponse[id]!.destDataViewDeleted!.success).toBe(false);
     }
   });
 
