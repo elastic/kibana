@@ -35,465 +35,168 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
           {
             input: {
               question:
+                'Can I start accepting payments on my site while my Wix Payments account is still under verification?',
+            },
+            output: {
+              expected:
+                'You can start accepting payments on your site using [Wix Payments](https://support.wix.com/en/article/about-wix-payments) almost immediately. However, we need to verify your identity before your account can be fully activated.',
+              groundTruth: {
+                wix_knowledge_base: {
+                  '49d9e88fadbf11fa4e685c847590078ff9394c2fe7566094f504f53ca4aca465': 1,
+                },
+              },
+            },
+            metadata: {
+              query_intent: 'Factual',
+            },
+          },
+          {
+            input: {
+              question:
+                'I am inquiring about purchasing the yearly premium plan for $17.00, which includes a free domain for 1 year. However, the voucher does not show up at checkout. Do I need to purchase the plan first and then will the voucher be available to activate?',
+            },
+            output: {
+              expected:
+                'When you purchase a yearly Premium plan, the free domain voucher is not immediately visible at checkout. Instead, the voucher becomes available after you complete the purchase of the plan. You can then claim the voucher by visiting the [Premium Vouchers page](https://manage.wix.com/account/vouchers?referralAdditionalInfo=%7Btheir) in your Wix account. The voucher is valid for two months from the date of purchase, and you can use it to register a domain for free for one year. If you have already purchased the plan and still do not see the voucher, ensure that you meet all eligibility criteria, such as not having purchased a monthly plan or a domain prior to the plan. If issues persist, you can [contact Wix Customer Care](https://support.wix.com/en/article/contacting-wix-customer-care-for-support) for further assistance.',
+              groundTruth: {
+                wix_knowledge_base: {
+                  '06535db983ea0ffe0214af14497a1d158f279d92c92f211e87b8820aa95dbe43': 1,
+                },
+              },
+            },
+            metadata: {
+              query_intent: 'Procedural',
+            },
+          },
+          {
+            input: {
+              question: "I'm want to know how much it would cost to upgrade my email plan.",
+            },
+            output: {
+              expected:
+                "To upgrade your email marketing plan:\n[Go to Email Marketing](https://www.wix.com/my-account/site-selector/?buttonText=Email%20Marketing%20Dashboard&title=Select%20a%20Site&autoSelectOnSingleSite=true&actionUrl=https://www.wix.com/dashboard/%7B%7BmetaSiteId%7D%7D/shoutout/) in your site's dashboard.  Under Monthly Balance click Upgrade.\n  Choose a plan that works best for you and checkout.",
+              groundTruth: {
+                wix_knowledge_base: {
+                  de6e96935f0b3321cf29416ec164482247b5035f1d2e12b36e203be8126ca8b8: 1,
+                },
+              },
+            },
+            metadata: {
+              query_intent: 'Procedural',
+            },
+          },
+          {
+            input: {
+              question:
+                'I want to know if the Wix store function work for selling services instead of just physical goods',
+            },
+            output: {
+              expected:
+                'Wix Stores gives you all the tools you need to create a sleek, professional online store and grow your eCommerce business.\n  \nWix Bookings, however, is an easy-to-use scheduling system that lets your members book and [pay for] (https://support.wix.com/en/article/wix-bookings-about-getting-paid-online) services online, so you can focus on managing your business. Whether you offer services like workshops, courses, or private sessions, online or in-person, Wix Bookings has you covered.',
+              groundTruth: {
+                wix_knowledge_base: {
+                  a513a215c1798f329293330cb5f5e975a18978954b5ee27d84441e029f900d51: 1,
+                  b9ba8c318ee75f49eaa89c1d5b8d461fa2b4c27167381b869aeb31027d7187f9: 1,
+                },
+              },
+            },
+            metadata: {
+              query_intent: 'Factual',
+            },
+          },
+          {
+            input: {
+              question:
+                'How can I add discounts to my service prices when customers pay for a plan?',
+            },
+            output: {
+              expected:
+                "To add discounts to your service prices when customers pay for a plan, you can create discount coupons for your pricing plans. You can choose to offer a price discount or a percentage discount coupon. You can also choose whether your discount coupons apply to a specific plan or to all your pricing plans. Your clients redeem the coupon at checkout to take advantage of the discounted plans. Note: Discount coupons for Pricing Plans cover the plans themselves, but not any setup fees you may have enabled. To create discount coupons for your pricing plans:\n\n1. Go to Pricing Plans in your site's dashboard.\n2. Click the More Actions icon at the top.\n3. Click Create a coupon.\n4. Select the type of coupon you want to offer:\n   - $ Discount: Offer a fixed monetary discount amount.\n   - % Discount: Offer a percentage discount.\n5. Enter the Coupon code clients use to redeem the coupon.\n6. Enter the Coupon name for your own records.\n7. Click the Apply to drop-down and choose the relevant pricing plan(s):\n   - All plans: This is applied to all your available pricing plans.\n   - Specific plan: Click the Pricing plan drop-down and select the relevant plan.\n8. Choose how the coupon works with your pricing plans:\n   - First billing cycle: The coupon offers a one-time discount at the start of the pricing plan.\n   - All billing cycles: The coupon offers a recurring discount, every time your client is charged.\n   - Custom: You choose how your coupons work with recurring payments (e.g. give a discount for the first 4 billing cycles).\n9. Select the dates the coupon is valid between.\n10. (Optional) Select the Limit the total number of uses for this coupon checkbox and enter the number of times the coupon can be used.\n11. (Optional) Select the Limit to one use per customer checkbox if you want clients to be able to use the coupon only one time.\n12. Click Create Coupon.",
+              groundTruth: {
+                wix_knowledge_base: {
+                  '8cc75fbcc571336d1ef1768e7727bd9d1e6c1333f22eeb5366232b9a1a066418': 1,
+                },
+              },
+            },
+            metadata: {
+              query_intent: 'Procedural',
+            },
+          },
+          {
+            input: {
+              question:
+                'I am trying to change the order of the items within a CMS collection on my Wix site, but the provided steps did not work for me.',
+            },
+            output: {
+              expected:
+                "To change the order of items within a CMS collection on your Wix site, you should follow these steps:\n\n1. Go to the CMS in your site's dashboard or editor.\n2. Click on the relevant collection.\n3. If you have multiple collection views, select the view you want to sort items in.\n4. Click 'Sort' at the top of your collection.\n5. Click '+ Add a Sort'.\n6. Choose the field you want to sort by from the 'Sort by' drop-down menu.\n7. Select the sorting order (e.g., A-Z, Low-High, Oldest-Newest).\n8. Click 'Add Sort'.\n9. To apply this order to your live site, enable the 'Mirror on Site' toggle at the top of the collection.\n\nIf these steps did not work, ensure that the 'Mirror on Site' feature is enabled, as this is necessary for the order in your collection view to be reflected on your live site. Additionally, check if there are any sort conditions added to datasets, as these can override the order set in your mirrored collection view. For more detailed guidance, you can refer to the [Wix support article on mirroring item order](https://support.wix.com/en/article/cms-mirroring-the-order-of-items-in-your-collection-to-your-sites-connected-elements).",
+              groundTruth: {
+                wix_knowledge_base: {
+                  f346781bc6cf23c95342ce003927de9d985a99eeb7561c69f03e65da7c10f2fb: 1,
+                  '163d579af227160c8072dc465c81d8edea4b507d7e8789078b680f88633aefab': 1,
+                  '2df694686b70b35ed389ff590354cfaf19aafc07659b12b02078f2ebcf015ac8': 1,
+                },
+              },
+            },
+            metadata: {
+              query_intent: 'Issue Resolution',
+            },
+          },
+          {
+            input: {
+              question:
+                'How do I sync the hotel app with my calendars ical link to allow visitors to book available dates on my site?',
+            },
+            output: {
+              expected:
+                'To sync your hotel app with your calendars using an iCal link, you can import reservations from external services like Airbnb, HomeAway, and VRBO to your Wix Hotels reservation calendar. This is a one-way sync from iCal to the Wix Calendar.\nTo import your external calendar - \n  1. [Locate your iCal URL.] (https://support.wix.com/en/article/finding-your-ical-url)\n  2. [Go to your dashboard.] (https://support.wix.com/en/article/accessing-your-sites-dashboard)\n  3. Click the Hotels tab.\n  4. Click to expand the Reservations tab.\n  5. Select iCal.\n  6. Click the Choose Type drop-down menu and select a room type.\n  7. Paste your iCal URL into the URL field. \n  8. (Optional) Click Add Calendar to add another room type and paste the iCal URL in the URL field.\n  9. Click Save.\nPlease note that - \n  * You can only import from services that allow you to export your calendar in iCal format.\n  * The sync is one way only, from iCal to the Wix Calendar.\n  * If you have multiple room types, you must add a different iCal URL for each room type.\n  * Imported rates do not appear in the calendar. Rates can be viewed by clicking on the reservation in the calendar and scrolling down to the Payment Details section.\n  * This feature is not compatible with the Wix Hotels Channel Manager. If you want to connect the Channel Manager please delete all the URLs in this tab before doing so.',
+              groundTruth: {
+                wix_knowledge_base: {
+                  '5f02fc2f8937d16a4d8cdca47da36ae34429e0b279fb0cc56af72e2d91991a28': 1,
+                },
+              },
+            },
+            metadata: {
+              query_intent: 'Procedural',
+            },
+          },
+          {
+            input: {
+              question:
                 'I am trying to verify my domain with Google Workspace. I need to add a TXT record to my domains DNS settings. I have confirmed that my domain is connected to Wix via pointing. What to do now?',
             },
             output: {
-              expected: `To verify your domain with Google Workspace by adding a TXT record, you need to manage your DNS settings with your domain host, not Wix, since your domain is connected via pointing. 
-Follow these steps:
-1. Log in to your domain host account where your DNS records are managed.
-2. Add the TXT record provided by Google Workspace to your domain's DNS settings.
-3. After adding the TXT record, return to the Google Admin Console and click 'Verify'.`,
+              expected:
+                "To verify your domain with Google Workspace by adding a TXT record, you need to manage your DNS settings with your domain host, not Wix, since your domain is connected via pointing. Follow these steps:\n\n1. Log in to your domain host account where your DNS records are managed.\n2. Add the TXT record provided by Google Workspace to your domain's DNS settings.\n3. After adding the TXT record, return to the Google Admin Console and click 'Verify'.",
+              groundTruth: {
+                wix_knowledge_base: {
+                  '65806b123ff355cef16c8abe4301f1df982e2c3bddcd33b81ed446b92a79e336': 1,
+                  db6a6c4be5c11fae531b4fdd546601bab6d4a26b669a8a7ea6063c62a045e9d4: 1,
+                },
+              },
             },
-            metadata: { query_intent: 'Procedural' },
+            metadata: {
+              query_intent: 'Procedural',
+            },
           },
           {
             input: {
               question:
-                'I need to reset my password but the reset email is going to an old address I cant access anymore. I have my phone number linked to my account, how can I use it to regain access and update my email address to one I can access?',
+                'I cant access my old email address to change my password. I have a recovery phone number added to my Wix account.',
             },
             output: {
-              expected: `If you've previously added a Recovery Phone Number to your Wix account, you can get a one-time SMS code sent to your mobile phone to recover your Wix account. 
-To recover your account: 
-1. Go to the Wix Log In page. 
-2. Click Forgot Email?. 
-3. Select Can't access my login email. 
-4. Click Next. 
-5. Enter the email address associated with your Wix account. 
-6. Click Next. 
-7. Select Send me a code to my phone number ending with XXXX and click Next. 
-8. Enter the one-time verification code sent to your phone under Enter code here. 
-9. Click Verify. 
-10. Enter a new password and retype it. 
-11. Click Save New Password. 
-After you recover your account, you should change the email address of your account to one that you are able to access. 
-To change your email address: 
-1. Go to Account Settings in your Wix account. 
-2. Click the Account email field. 
-3. Enter your Wix account password in the pop-up. 
-4. Enter your new account email address. 
-5. Retype your new email account email address to confirm it. 
-6. Click Next. 
-7. Check your email account for an email from Wix. 
-8. Copy the 6-digit confirmation code. 
-9. Go back to Account Settings in your Wix account. 
-10. Paste the code into the pop-up. 
-11. Click Submit.`,
+              expected:
+                "If you've previously added a Recovery Phone Number to your Wix account, you can get a one-time SMS code sent to your mobile phone to recover your Wix account.\n  To recover your account:\n  1. Go to the Wix Log In page. (https://users.wix.com/signin)\n  2. Click Forgot Email?.\n  3. Select Can't access my login email.\n  4. Click Next.\n  5. Enter the email address associated with your Wix account. \n  6. Click Next.\n  7. Select Send me a code to my phone number ending with XXXX and click Next.\n  8. Enter the one-time verification code sent to your phone under Enter code here.\n  9. Click Verify.\n  10. Enter a new password and retype it.\n  11. Click Save New Password. \n  \n  After you recover your account, you should change the email address of your account (https://support.wix.com/en/article/changing-the-email-address-of-your-wix-account) to one that you are able to access.\n  To change your email address:\n  1. Go to Account Settings in your Wix account.\n  2. Click the Account email field.\n  3. Enter your Wix account password in the pop-up.\n  4. Enter your new account email address.\n  5. Retype your new email account email address to confirm it.\n  6. Click Next.\n  7. Check your email account for an email from Wix.\n  8. Copy the 6-digit confirmation code.\n  9. Go back to Account Settings in your Wix account.\n  10. Paste the code into the pop-up.\n  11. Click Submit.",
+              groundTruth: {
+                wix_knowledge_base: {
+                  '39158650c97235d1f9b98a71be41c5222ddb3ee3e497cfb1d10ef3bd0bc166cf': 1,
+                  e9366441d1e037a1470c9bad57455dbadc24db0ca931791edd0f3b026ea6a58f: 1,
+                },
+              },
             },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'I need help managing the categories my booking services are in on my Wix website. How can I create, assign, reorder, rename, or delete categories?',
+            metadata: {
+              query_intent: 'Procedural',
             },
-            output: {
-              expected: `To manage the categories for your booking services on your Wix website, you can follow these steps: 
-Creating categories 
-1. Go to Booking Services in your site's dashboard. 
-2. Click Manage Categories. 
-3. Click + Add New Category. 
-4. Enter the Category Name. 
-5. Click Add to save. 
-Assigning a service to a category 
-1. Go to Booking Services in your site's dashboard. 
-2. Select the service you want to assign to a category. 
-3. Click the Service category drop-down and choose the relevant category. 
-4. Click Save. 
-Reordering your services and categories 
-- To reorder services within a category: 
-1. Select a category from the drop-down at the top. 
-2. Click and hold the drag handle next to your services to drag and drop them into your preferred order. 
-- To reorder categories: 
-1. Click Manage Categories at the top of the list. 
-2. Click and hold the drag handle next to your categories to drag and drop them into your preferred order. 
-Renaming categories 
-1. Go to Booking Services in your site's dashboard. 
-2. Click Manage Categories. 
-3. Hover over the category you want to rename. 
-4. Click Edit Name. 
-5. Enter the new category name. 
-6. Click Save. 
-Deleting a category 
-1. Go to Booking Services in your site's dashboard. 
-2. Click Manage Categories. 
-3. Hover over the relevant category. 
-4. Click Delete. 
-5. Choose to move services to another category or delete the category and its services.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'How long does it take for my products to appear in a Wix Google Ads campaign, and are there any prerequisites or approval steps I should complete first?',
-            },
-            output: {
-              expected: `You should connect your Google Mechant account first and have your products approved there. In Google Merchant Solutions tab you can see an overview of the status of your products at the top of the page. All your products with the 'Live' status that are also set to 'Visible' in Google Merchant Solutions appear across Google's channels as part of your campaign. After you list your products on Google Merchant Solutions, it can take up to 72 hours for Google to approve them. Once you have the approved products, you can create your campaign, purchase a subscription and launch it. After that, you will be able to track your campaign's progress and metrics from the Google Ads with Wix dashboard.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: { question: 'how to cancel both site plan and domain after already paying' },
-            output: {
-              expected: `To cancel both your site plan and domain, you need to do it separately by going to the Premium Subscriptions page, clicking the More Actions icon next to the relevant plan or domain, and selecting 'Cancel Plan' or 'Cancel domain.' Your plan and domain will remain active until the end of the subscription period.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'can i temporarily unpublish my website and stop billing, then access it later',
-            },
-            output: {
-              expected: `You can temporarily unpublish your website to make it inaccessible to the public, but unpublishing does not stop billing for your domain or Premium plan. Canceling your Premium plan will not delete your website, and you can restore the plan later by turning auto-renew back on or purchasing a new plan if the subscription has ended.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question: 'can I extend my current plan and domain contract to be a month longer',
-            },
-            output: {
-              expected: `you can't extend a Premium plan by just one month, but you can change your subscription period to a longer term. You can extend your domain registration by up to several additional years through your Wix account.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                'How can I set up an automation on Wix for a clients birthday to send an email offering a free class?',
-            },
-            output: {
-              expected: `To do this, you first need to create a contacts segment that groups contacts by birthday.
-To create a segment:
-Go to contacts in your site's dashboard.
-Click the Segments tab.
-Click the + Create New drop-down and select Segment.
-Add a name for your segment to help you identify it later
-Select all the relevant filters that apply to this segment, or click + Add a Filter to create your first filter.
-Note: Add the filters one at a time. The more filters you add, the more specific the segment becomes.
-Create your filter by choosing an attribute, condition and value:
-Note: The options change depending on what you select.
-Choose an option from the Contact attribute or Contact activity list. Following the 'returning customer' example, we want to find all contacts who have previously spent money on the site. To find this we select 'total amount spent.'
-Click the Choose a condition drop-down to choose logic for your filter. The logic sets the rules for your segment.
-Click Create Segment. The new segment appears under Your segments.
-Then, create an automation using the Segments trigger set to trigger when a contact enters your birthday segment.
-To add a new automation:
-Go to Automations in your site's dashboard.
-Click + New Automation in the top right corner.
-Click + Start from Scratch.
-Click the app you'd like to base your trigger on in the Trigger section.
-Select your chosen trigger from the available options.
-Note: These options will differ depending on the app you selected in step 1.
-Click the Limit frequency to drop-down to set trigger frequency:
-Don't limit (trigger every time): Your action will take place every time it is triggered by a visitor.
-Once per contact: Your action will take place only once per contact.
-Once per contact every 24hrs: Your action will take place only once per contact in any 24hr period.
-Click your chosen action in the Action section.
-Note: The actions available will differ based on your trigger choice.
-Set up the action using the available options.
-Click Edit in the Sender details section to edit your sender details:
-From name: This is the name that appears in the recipient's inbox.
-Reply-to email: This is the address that replies are sent to.
-Scroll down to the Create an email section and choose what you want to do:
-Click Edit to update the default template generated by this automation.
-Click the More Actions drop-down and select Switch template to use an email template from a different automation or email marketing campaign.
-Click Activate to save and activate the automation. It now appears on your Automations page where you can edit, deactivate or delete according to your needs.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'I want to transfer my domain domain purchased from Wix to another host? Is there a seperate procedure for .co.uk domains?',
-            },
-            output: {
-              expected: `You can transfer a domain purchased from Wix to another domain host. When you transfer your domain away from Wix, your domain's contact information, DNS settings, and renewal payments are all managed in your new provider's account.
-To transfer your domain:
-1. Go to Domains in your Wix account.
-2. Click the Domain Actions icon next to the relevant domain.
-3. Select Transfer away from Wix.
-4. After reviewing the info about transferring your domain, click Transfer Domain.
-5. Click I Still Want to Transfer. We'll send a transfer authorization code (EPP code) to your domain's registrant contact email address.
-6. Once you get the code, follow the instructions from your new domain host to transfer your domain.
-For .co.uk domains, you need an IPS tag from your new provider. Enter the IPS tag in your Wix account to initiate the transfer. The process will be finalized within 7 days.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'Im having trouble finding the arrows and the Change Slide Background option in a full-width slideshow on Wix.',
-            },
-            output: {
-              expected: `To change the background of your slideshow: 
-1. Click the slideshow in the editor. 
-2. Click the arrows next to the slide number to navigate to the relevant slide. 
-3. Click Change Slide Background. 
-To display buttons or arrows on your slideshow: 
-1. Click your slideshow in the Editor. 
-2. Click the Layout icon and choose what you want to display: 
-3. Show navigation arrows: Enable the toggle to display the arrows.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'I would like to know how to set up all available mobile POS solutions in the UK',
-            },
-            output: {
-              expected: `For businesses in the UK looking for third-party POS solutions, Square and SumUp are both suitable options. 
-Please follow these steps to set up a POS with SumUp: 
-Step 1 | Download the Wix app 
-1. Go to the Apple App Store (on iPhone) or Google Play (on Android). 
-2. Type 'Wix' in the Search field. 
-3. Click Get or Install to download the app. You are now ready to accept cash payments on your mobile device
-Step 2 | Set up SumUp as your payment provider Go to Accept Payments in your site's dashboard and connect SumUp as your payment provider. Note: You can set up SumUp without an upgrade, but to start collecting payments, you'll need a Premium plan or Studio plan that supports payments. 
-Step 3 | Order a SumUp card reader To accept credit card payments, you need one of SumUp's credit card readers. SumUp card readers connect to your smartphone or tablet via Bluetooth. They can be used to swipe, tap or insert debit/credit cards. The SumUp card reader Contact SumUp to order one of their card readers.
-Please follow these steps to set up a POS with Square: 
-Step 1 | Download the Wix app Go to the Apple App Store (on an iOS device) or Google Play (on Android). Type 'Wix' in the Search field. Click Get or Install to download the app. You are now ready to accept cash payments on your mobile device.
-Step 2 | Download the Square app To use Square for POS sales, you need to download the Square app to your mobile device. 
-To download to an iOS device: 
-1. Open the App Store on your iOS device. 
-2. Search for Square Point of Sale (POS). 
-3. Tap Get next to Square Point of Sale (POS). 
-4. Tap Install. 
-To download to an Android device: 
-1. Open the Play Store on your Android device. 
-2. Search for Square Point of Sale (POS). 
-3. Tap Square Point of Sale (POS). 
-4. Tap Install. 
-Step 3 | Set up Square as your payment provider Go to Accept Payments in your site's dashboard and set up Square as your payment provider. Note: You can set up Square without an upgrade, but to start collecting payments, you'll need aPremium plan or Studio plan that supports payments. 
-Step 4 | Order a magstripe card reader To swipe credit cards, you need a magstripe card reader which plugs into your smartphone or tablet's headphone jack. Magstripe card reader Contact Square to order your free magstripe reader.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'How can I set up a flat rate shipping fee and charge the same rate for all purchases delivered to a certain region in Wix Stores.',
-            },
-            output: {
-              expected: `To set up flat rate shipping and charge the same rate for all purchases delivered to a certain region, please follow these steps:
-Step 1 | Create or Select a Shipping Region
-A region can be made of one or more countries. Alternatively, it can be made of one or more regions within a country. You can set up different shipping regions for your store. For example, a merchant might set up 4 shipping rules: a local shipping region for California, a region for the rest of the US, another for Mexico and Canada, and finally one for the rest of the world.
-Important:
-If there is no rule for a region, customers from that region cannot make store purchases.
-If you previously set up shipping (and tax) in a merchant account (e.g. in PayPal), remove these settings before starting.
-1. Go to the Shipping & fulfillment settings in your site's dashboard.
-2. Select an option:
-- Edit a default rule: Click the region you want to set up.
-- Create a new rule:
-a. Click Add Region.
-b. Click +Add destination, start typing a country name and select it.
-3. Click Done or move directly on to the next step.
-Step 2 | Set Up a Flat Rate Shipping Rule
-1. Select Flat Rate from the Select how shipping is calculated drop-down.
-2. Enter a name in the Shipping Option Name field (e.g. Standard Shipping).
-3. Enter the shipping rate.
-4. Click the Offer Free Shipping when customer buys over a certain amount checkbox and enter the amount.
-Note: If you create additional shipping services (e.g. priority shipping), this checkbox must be selected and the amount specified to apply to each rule.
-5. Click Add another Delivery Option to add an additional options (e.g. Express Shipping).
-6. Click Save.
-Step 3 | Offer Local Delivery or Pickup options
-After saving your shipping rule, you can select the region again and add local delivery or pickup options.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'Im having trouble applying a 50% off coupon in Wix Stores. Its not applying the discount, and I need assistance with this issue.',
-            },
-            output: {
-              expected: `Check If the Coupon is Out-of-Date:
-When creating a coupon, you can limit when it can be used. For example, a "June Sale" coupon might be active from June 1 to June 30. Customers trying to use it outside these dates will be unable to apply the coupon.
-Edit the dates to extend the validity if necessary.
-Check the Visibility of the Promo Code Link:
-Ensure the "Enter a promo code" link is enabled.
-Verify that the font color of the link contrasts with your site's background color so it is visible.
-Ensure the Coupon is Activated:
-If a coupon is deactivated, customers will not be able to use it.
-Reactivate the coupon in your settings if needed.
-Check If the Coupon Reached Its Usage Limit:
-Coupons can be limited by total usage or to one use per person. For example, the first 50 people to use a discount.
-If the coupon has exceeded its usage limits, it won't be applicable for more customers.
-Verify the Coupon Code Format:
-Customers may mistakenly add spaces to the coupon code (e.g., "March Madness" instead of "MarchMadness"), rendering it invalid.
-Advise customers to copy and paste the coupon code carefully without any additional spaces.`,
-            },
-            metadata: { query_intent: 'Issue Resolution' },
-          },
-          {
-            input: {
-              question:
-                'I would like to know how many sites I can have with Wix and what happens if I reach the limit for free sites on my account?',
-            },
-            output: {
-              expected: `With Wix, you're not just limited to creating a single site. You can create as many as you need to manage multiple businesses, separate your personal site or blog, or experiment with different designs.
-If you reach the limit of free sites you can have within your account, you can move old sites to trash or upgrade your sites to Premium.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: { question: 'I would like to know how many options Wix offers per product.' },
-            output: {
-              expected: `You can have up to 6 product options, 100 option choices, and a total of 1000 variants.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                'I want to update the picture that appears when I share my website link with someone using my editor.',
-            },
-            output: {
-              expected: `Go to your editor and publish your site.To update the picture that appears when you share your website link, you need to change the og:image settings in your Wix Editor. Here are the steps you can follow:
-1. For an individual page:
-- Go to your Wix Editor and click on 'Pages & Menu' on the left side.
-- Hover over the relevant page and click the More Actions icon.
-- Choose 'Social Share' and click 'Upload Image' to select a new image.
-- Click 'Add to Page'.
-- Publish your site.
-2. For the whole site:
-- Open your site's settings and click on 'Website settings'.
-- Scroll down to 'General social image' and click 'Upload Image'.
-- Select a new image or upload a new one, then click 'Choose File' and 'Save'.
-- Go to your editor and publish your site.`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'I want to know more about the "Right Click Protect App" to prevent visitors from copying my website content.',
-            },
-            output: {
-              expected: `The Right Click Protect app is a tool available from the Wix App Market designed to help prevent visitors from downloading images or copying text from your website by displaying a custom copyright message when they attempt to right-click. However, it does not prevent copying via Ctrl+C or using the print screen function.
-To add the app, you can go to your Wix Editor, click on 'Add Apps', search for the Right Click Protect app, and add it to your site.
-You can customize the message that appears when someone right-clicks on your content.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                'I want to delete other payment methods and keep Square as my only payment processor.',
-            },
-            output: {
-              expected: `To disconnect a payment provider
-Go to Accept Payments on your site's dashboard.
-Click Manage beside the relevant payment provider.
-Click Disconnect`,
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question:
-                'If I cancel Premium in the first two weeks, how long does it take for the full refund to process?',
-            },
-            output: {
-              expected: `If you cancel during the first 14 days, your plan ends immediately and you are fully refunded within the next 20 business days`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                "I'm trying to understand more about Wix Shipping. Who is the partner company that Wix worked with on this?",
-            },
-            output: {
-              expected: `Wix has partnered with Shippo to create Wix Shipping - an integrated print label solution`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                'When I create a new Wix store, what are the standard shipping rules that are already in place? Can you list them for me?',
-            },
-            output: {
-              expected: `New stores come with 2 shipping rules already set up - a free shipping rule for your region and a free international shipping rule for the rest of the world`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                "Hi, I just set up my store and I see two default shipping regions, Domestic and International. I haven't changed any settings yet, what is the default shipping price for those?",
-            },
-            output: {
-              expected: `By default, both the "Domestic" and "International" shipping regions are set to Free Shipping`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question: "Wix's website builder is available in how many different languages?",
-            },
-            output: { expected: `The Wix website builder is available in 17 languages` },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                "I'm setting up my shop here in Canada. Which 'buy now, pay later' companies can I use?",
-            },
-            output: {
-              expected: `The BNPL providers available for Canada are Afterpay, Klarna, Sezzle, and Splitit`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                'I have a free Wix website right now. Can I still add one of these installment payment options to my checkout?',
-            },
-            output: {
-              expected: `No. To accept any form of payment on your Wix site, including BNPL solutions, you must first upgrade to a Premium plan that allows you to accept payments.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question: 'What are the standard processing fees for using Stripe on my Wix site?',
-            },
-            output: {
-              expected: `The standard processing fee is 2.9% + $0.30 per transaction. However, fees can vary by country, so you should visit Stripe for the most accurate information.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                "I'm setting up my store and my Wix account currency is in Canadian Dollars, but my Stripe account is in US Dollars. Will that cause a problem?",
-            },
-            output: {
-              expected: `Yes; the currency used in your Wix account must match the currency in your Stripe account, otherwise transactions may be declined.`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                'How many countries are supported for Stripe payments on Wix? List each of them?',
-            },
-            output: {
-              expected: `Wix supports Stripe in 41 countries. Austria, Australia, Belgium, Bulgaria, Canada, Croatia, Cyprus, Czech Republic, Denmark, Finland, France, Germany, Gibraltar, Hong Kong, Hungary, Ireland, Italy, Japan, Latvia, Liechtenstein, Lithuania, Luxembourg, Malaysia, Malta, Mexico, Netherlands, Norway, New Zealand, Poland, Portugal, Romania, Singapore, Slovenia, Slovakia, Spain, Sweden, Switzerland, Thailand, United Arab Emirates, United Kingdom and United States`,
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-          {
-            input: {
-              question:
-                'I just issued a refund but entered the wrong amount. Can I cancel or reverse it?',
-            },
-            output: {
-              expected: `No. Once a refund has been initiated, it cannot be canceled or reversed`,
-            },
-            metadata: { query_intent: 'Factual' },
           },
         ],
       },

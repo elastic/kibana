@@ -116,11 +116,27 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             latency.name,
             { unitSuffix: 's', statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
           ],
+          [
+            'Precision@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'F1@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'Recall@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
         ]),
         evaluatorDisplayGroups: [
           {
             evaluatorNames: [inputTokens.name, outputTokens.name, cachedTokens.name],
             combinedColumnName: 'Tokens',
+          },
+          {
+            evaluatorNames: ['Precision@K', 'F1@K', 'Recall@K'],
+            combinedColumnName: 'RAG',
           },
         ],
       });

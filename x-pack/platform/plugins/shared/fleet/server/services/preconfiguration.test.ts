@@ -22,7 +22,10 @@ import type {
 } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output, DownloadSource } from '../types';
 
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+} from '../constants';
 
 import { appContextService } from './app_context';
 
@@ -88,6 +91,17 @@ function getPutPreconfiguredPackagesMock() {
           per_page: 1,
         };
       }
+    }
+    if (
+      type === PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE &&
+      search?.includes('deleted')
+    ) {
+      return {
+        saved_objects: [],
+        page: 1,
+        per_page: 1,
+        total: 1,
+      };
     }
     return {
       saved_objects: [],
@@ -487,6 +501,77 @@ describe('policy preconfiguration', () => {
           output_id: undefined,
           package: { name: 'test_package', title: 'test_package', version: '3.0.0' },
           policy_id: 'test-id',
+          supports_agentless: undefined,
+          vars: undefined,
+        }),
+        expect.objectContaining({ id: 'test-1' })
+      );
+    });
+
+    it('should install packages and configure agent policies successfully for deleted managed policies', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+
+      const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-deleted-id',
+            is_managed: true,
+            package_policies: [
+              {
+                id: 'test-1',
+                name: 'Test package',
+                namespace: 'default',
+                description: 'test',
+                package: { name: 'test_package' },
+                policy_ids: ['test-id'],
+                inputs: {
+                  'test_template-foo': {
+                    vars: {
+                      bar: 'test',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(policies.length).toEqual(1);
+      expect(policies[0].id).toBe('test-deleted-id');
+      expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
+      expect(nonFatalErrors.length).toBe(0);
+
+      expect(mockedPackagePolicyService.create).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          description: 'test',
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              policy_template: 'test_template',
+              streams: [],
+              type: 'foo',
+              vars: { bar: { type: 'text', value: 'test' } },
+            },
+          ],
+          name: 'Test package',
+          namespace: 'default',
+          output_id: undefined,
+          package: { name: 'test_package', title: 'test_package', version: '3.0.0' },
+          policy_id: 'test-deleted-id',
           supports_agentless: undefined,
           vars: undefined,
         }),

@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/access-control-test-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "accessControlTestPlugin",
+    "server": true,
+    "browser": false
+  }
+}
