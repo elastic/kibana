@@ -30,7 +30,6 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram/types';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
-import type { MultiMatchAnalysis } from '@kbn/data-plugin/common/search/search_source/query_analysis_utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -202,26 +201,6 @@ export function getDataStateContainer({
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
 
-  const getTelemetryQueryAnalysis = (): MultiMatchAnalysis | undefined => {
-    const searchSource = savedSearchContainer.getState().searchSource;
-
-    if (!searchSource) {
-      return undefined;
-    }
-
-    try {
-      // Build the search request body and analyze the resulting ES DSL.
-      // We catch errors here so telemetry doesn't prevent the fetch from proceeding.
-      // The fetch will also build the query and catch/display errors properly via its error handling.
-      searchSource.getSearchRequestBody();
-      return searchSource.getQueryAnalysis();
-    } catch {
-      // If building the query fails (e.g. invalid user input), skip telemetry.
-      // The fetch will proceed and its error handling will catch and display the error properly.
-      return undefined;
-    }
-  };
-
   // This is debugging code, helping you to understand which messages are sent to the data observables
   // Adding a debugger in the functions can be helpful to understand what triggers a message
   // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
@@ -311,14 +290,10 @@ export function getDataStateContainer({
           abortController?.abort();
           abortControllerFetchMore?.abort();
 
-          // Build search request body and analyze the BUILT ES DSL - reused across both branches
-          const queryAnalysis = getTelemetryQueryAnalysis();
-          const phraseQueryCount = queryAnalysis?.typeCounts.get('match_phrase') ?? 0;
-          const multiMatchTypes: string[] = queryAnalysis?.rawTypes ?? [];
-
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
+            const fetchMoreTracker =
+              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
 
             // Calculate query range in seconds
             const timeRange = timefilter.getAbsoluteTime();
@@ -330,13 +305,8 @@ export function getDataStateContainer({
             });
 
             fetchMoreTracker.reportEvent({
-              key1: 'query_range_secs',
-              value1: queryRangeSeconds,
-              key2: 'phrase_query_count',
-              value2: phraseQueryCount,
-              meta: {
-                multi_match_types: multiMatchTypes,
-              },
+              queryRangeSeconds,
+              requests: inspectorAdapters.requests?.getRequestsSince(fetchMoreTracker.startTime),
             });
 
             return;
@@ -393,7 +363,7 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
 
           // Calculate query range in seconds
           const timeRange = timefilter.getAbsoluteTime();
@@ -446,13 +416,8 @@ export function getDataStateContainer({
           });
 
           fetchAllTracker.reportEvent({
-            key1: 'query_range_secs',
-            value1: queryRangeSeconds,
-            key2: 'phrase_query_count',
-            value2: phraseQueryCount,
-            meta: {
-              multi_match_types: multiMatchTypes,
-            },
+            queryRangeSeconds,
+            requests: inspectorAdapters.requests?.getRequestsSince(fetchAllTracker.startTime),
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

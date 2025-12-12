@@ -13,7 +13,6 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
-import type { MultiMatchAnalysis } from '@kbn/data-plugin/common/search';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -125,19 +124,7 @@ export function fetchAll(
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
 
-    // Build the search request body first (this triggers buildEsQuery)
-    // Then analyze the BUILT ES DSL query
-    // Wrap in try-catch to handle bad query syntax gracefully.
-    let queryAnalysis: MultiMatchAnalysis = { typeCounts: new Map(), rawTypes: [] };
-    try {
-      searchSource.getSearchRequestBody();
-      queryAnalysis = searchSource.getQueryAnalysis();
-    } catch {
-      // If building the query fails (e.g. invalid user input), skip telemetry.
-      // The fetch will proceed and its error handling will catch and display the error properly.
-    }
-
-    const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
+    const fetchAllRequestOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent(
       'discoverFetchAllRequestsOnly'
     );
 
@@ -149,16 +136,19 @@ export function fetchAll(
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestOnlyTracker.reportEvent({
-          key1: 'query_range_secs',
-          value1: queryRangeSeconds,
-          key2: 'phrase_query_count',
-          value2: queryAnalysis.typeCounts.get('match_phrase') || 0,
-          meta: {
-            fetchType,
-            multi_match_types: queryAnalysis.rawTypes,
+        fetchAllRequestOnlyTracker.reportEvent(
+          {
+            queryRangeSeconds,
+            requests: params.inspectorAdapters.requests?.getRequestsSince(
+              fetchAllRequestOnlyTracker.startTime
+            ),
           },
-        });
+          {
+            meta: {
+              fetchType,
+            },
+          }
+        );
 
         if (isEsqlQuery) {
           const fetchStatus =

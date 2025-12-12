@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Analysis result for multi_match query types found in ES query DSL.
@@ -59,9 +60,7 @@ export interface MultiMatchAnalysis {
  *
  * @internal
  */
-export function analyzeMultiMatchTypes(
-  query: estypes.QueryDslQueryContainer | undefined
-): MultiMatchAnalysis {
+export function analyzeMultiMatchTypesQuery(query: object | undefined): MultiMatchAnalysis {
   const result: MultiMatchAnalysis = {
     typeCounts: new Map(),
     rawTypes: [],
@@ -141,3 +140,48 @@ export function analyzeMultiMatchTypes(
   visit(query);
   return result;
 }
+
+/**
+ * Analyzes an inspected request to determine the types of multi-match queries present within its body.
+ *
+ * @param request - The inspected request object containing the JSON body to be analyzed.
+ * @returns The result of analyzing the query for multi-match types, or the result of analyzing `undefined` if the request body is invalid.
+ */
+export function analyzeMultiMatchTypesRequest(request: InspectedRequest) {
+  const maybeRequestBody = RequestWithQuery.safeParse(request.json);
+
+  return analyzeMultiMatchTypesQuery(
+    maybeRequestBody.success ? maybeRequestBody.data.query : undefined
+  );
+}
+
+/**
+ * Merges multiple MultiMatchAnalysis results into a single consolidated analysis by adding up
+ * the counts for each multi_match type and concatenating the raw types arrays.
+ * @param analyses - Array of MultiMatchAnalysis results to merge
+ * @returns A single MultiMatchAnalysis representing the merged results
+ */
+export function mergeMultiMatchAnalyses(analyses: MultiMatchAnalysis[]): MultiMatchAnalysis {
+  return analyses.reduce(
+    (merged, analysis) => {
+      // Merge type counts
+      analysis.typeCounts.forEach((count, type) => {
+        const currentCount = merged.typeCounts.get(type) ?? 0;
+        merged.typeCounts.set(type, currentCount + count);
+      });
+
+      // Concatenate raw types
+      merged.rawTypes.push(...analysis.rawTypes);
+
+      return merged;
+    },
+    {
+      typeCounts: new Map(),
+      rawTypes: [],
+    } as MultiMatchAnalysis
+  );
+}
+
+const RequestWithQuery = z.object({
+  query: z.record(z.string(), z.unknown()),
+});

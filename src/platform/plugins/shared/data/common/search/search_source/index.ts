@@ -17,4 +17,3 @@ export * from './search_source';
 export * from './search_source_service';
 export * from './types';
 export * from './query_to_fields';
-export type { MultiMatchAnalysis } from './query_analysis_utils';
