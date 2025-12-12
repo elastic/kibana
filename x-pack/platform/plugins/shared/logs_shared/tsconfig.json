@@ -59,7 +59,7 @@
     "@kbn/ml-plugin",
     "@kbn/saved-search-component",
     "@kbn/onechat-plugin",
-    "@kbn/observability-agent-builder",
+    "@kbn/ai-insights",
     "@kbn/observability-agent-builder-plugin"
   ]
 }
