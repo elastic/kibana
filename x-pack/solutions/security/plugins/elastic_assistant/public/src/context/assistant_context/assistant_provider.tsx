@@ -13,7 +13,7 @@ import type { IToasts } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
 import type { Observable } from 'rxjs';
-import type { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import type { AIExperienceSelection } from '@kbn/ai-assistant-management-plugin/public';
 import { getComments } from '../../components/get_comments';
 import { useKibana } from '../typed_kibana_context/typed_kibana_context';
 import { useInferenceEnabled } from '../../hooks/inference_enabled/use_inference_enabled';
@@ -39,7 +39,7 @@ export function AssistantProvider({
 }: {
   children: React.ReactElement;
   isServerless?: boolean;
-  openChatTrigger$: Observable<{ assistant: AIAssistantType }>;
+  openChatTrigger$: Observable<AIExperienceSelection>;
   completeOpenChat: () => void;
 }) {
   const {
