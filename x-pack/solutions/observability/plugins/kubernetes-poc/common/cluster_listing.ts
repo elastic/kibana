@@ -18,6 +18,7 @@ export interface ClusterData {
   runningPods: number;
   cpuUtilization: number | null;
   memoryUtilization: number | null;
+  volumeUtilization: number | null;
 }
 
 export interface ClusterListingResponse {

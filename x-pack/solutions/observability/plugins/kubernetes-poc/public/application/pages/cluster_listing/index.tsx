@@ -27,6 +27,7 @@ import {
   UnhealthyClustersCard,
   CpuUsageTrendCard,
   MemoryUsageTrendCard,
+  VolumeUsageTrendCard,
 } from '../../components/cluster_overview_cards';
 import { useFetchClusterListing } from '../../../hooks/use_fetch_cluster_listing';
 
@@ -158,6 +159,11 @@ export const ClusterListingPage: React.FC = () => {
         </EuiFlexItem>
 
         {/* Right column: Trend charts */}
+        <EuiFlexItem grow={true}>
+          <EuiPanel hasBorder paddingSize="none">
+            <VolumeUsageTrendCard timeRange={appliedTimeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiPanel hasBorder paddingSize="none">
             <CpuUsageTrendCard timeRange={appliedTimeRange} />

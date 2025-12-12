@@ -31,6 +31,8 @@ FROM remote_cluster:metrics-*
     OR k8s.node.allocatable_cpu IS NOT NULL
     OR k8s.node.allocatable_memory IS NOT NULL
     OR k8s.node.condition_ready IS NOT NULL
+    OR k8s.node.filesystem.usage IS NOT NULL
+    OR k8s.node.filesystem.capacity IS NOT NULL
   )
 | STATS 
     total_nodes = COUNT_DISTINCT(k8s.node.name),
@@ -43,14 +45,17 @@ FROM remote_cluster:metrics-*
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_memory_usage = SUM(k8s.node.memory.usage),
     sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu),
-    sum_allocatable_memory = SUM(k8s.node.allocatable_memory)
+    sum_allocatable_memory = SUM(k8s.node.allocatable_memory),
+    sum_filesystem_usage = SUM(k8s.node.filesystem.usage),
+    sum_filesystem_capacity = SUM(k8s.node.filesystem.capacity)
   BY k8s.cluster.name, cloud.provider
 | EVAL health_status = CASE(ready_nodes < total_nodes, "unhealthy", "healthy")
 | EVAL cpu_utilization = ROUND(sum_cpu_usage / sum_allocatable_cpu * 100, 2)
 | EVAL memory_utilization = ROUND(sum_memory_usage / TO_DOUBLE(sum_allocatable_memory) * 100, 2)
+| EVAL volume_utilization = ROUND(sum_filesystem_usage / TO_DOUBLE(sum_filesystem_capacity) * 100, 2)
 | KEEP k8s.cluster.name, health_status, cloud.provider, total_nodes, total_namespaces,
        failed_pods, pending_pods, running_pods, 
-       cpu_utilization, memory_utilization
+       cpu_utilization, memory_utilization, volume_utilization
 `;
 
 interface EsqlColumn {
@@ -134,6 +139,7 @@ const getClusterListingRoute = createKubernetesPocServerRoute({
         runningPods: row[columnIndex.running_pods] as number,
         cpuUtilization: row[columnIndex.cpu_utilization] as number | null,
         memoryUtilization: row[columnIndex.memory_utilization] as number | null,
+        volumeUtilization: row[columnIndex.volume_utilization] as number | null,
       }));
 
       logger.debug(`Returning ${clusters.length} clusters`);

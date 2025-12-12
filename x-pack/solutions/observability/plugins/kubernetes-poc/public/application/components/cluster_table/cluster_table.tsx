@@ -97,6 +97,14 @@ const COLUMNS: EuiDataGridColumn[] = [
     initialWidth: 150,
     isSortable: true,
   },
+  {
+    id: 'volumeUtilization',
+    displayAsText: i18n.translate('xpack.kubernetesPoc.clusterTable.volumeColumn', {
+      defaultMessage: 'Volume Util.',
+    }),
+    initialWidth: 150,
+    isSortable: true,
+  },
 ];
 
 interface HealthBadgeProps {
@@ -333,6 +341,9 @@ export const ClusterTable: React.FC<ClusterTableProps> = ({ clusters, onExpandCl
 
         case 'memoryUtilization':
           return <UtilizationCell value={cluster.memoryUtilization} />;
+
+        case 'volumeUtilization':
+          return <UtilizationCell value={cluster.volumeUtilization} />;
 
         default:
           return null;

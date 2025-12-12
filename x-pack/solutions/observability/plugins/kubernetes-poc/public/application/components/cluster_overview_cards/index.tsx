@@ -10,3 +10,4 @@ export { HealthyClustersCard } from './healthy_clusters_card';
 export { UnhealthyClustersCard } from './unhealthy_clusters_card';
 export { CpuUsageTrendCard } from './cpu_usage_trend_card';
 export { MemoryUsageTrendCard } from './memory_usage_trend_card';
+export { VolumeUsageTrendCard } from './volume_usage_trend_card';
