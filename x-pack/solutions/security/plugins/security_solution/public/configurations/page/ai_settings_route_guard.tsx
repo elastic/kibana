@@ -7,10 +7,10 @@
 
 import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AISettings } from '../tabs/ai_settings';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { useNavigation } from '../../common/lib/kibana';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { ConfigurationTabs } from '../constants';
 
@@ -34,4 +34,3 @@ export const AISettingsRouteGuard: React.FC = React.memo(() => {
 });
 
 AISettingsRouteGuard.displayName = 'AISettingsRouteGuard';
-
