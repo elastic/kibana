@@ -3148,25 +3148,31 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // Failing: See https://github.com/elastic/kibana/issues/202940
-      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
-        const dateNow = Date.now();
-        const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
-        const timestampSequenceEvent2 = new Date(dateNow - 5500).toISOString();
-        const timestampSequenceEvent3 = new Date(dateNow - 5800).toISOString();
 
-        const firstSequenceEvent = {
+        const SECOND = 1000;
+        const dateNow = Date.now();
+        const timestamp1 = new Date(dateNow - 50 * SECOND);
+        const timestamp2 = new Date(dateNow - 49 * SECOND);
+        const timestamp3 = new Date(dateNow - 48 * SECOND);
+        const timestamp4 = new Date(dateNow - 5 * SECOND);
+        const timestamp5 = new Date(dateNow - 4 * SECOND);
+        const timestamp6 = new Date(dateNow - 3 * SECOND);
+
+        const buildSequenceDoc = (ts: Date) => ({
           id,
-          '@timestamp': timestampSequenceEvent1,
-          host: {
-            name: 'host-a',
-          },
-        };
+          '@timestamp': ts.toISOString(),
+          host: { name: 'host-a' },
+        });
+
         await indexListOfSourceDocuments([
-          firstSequenceEvent,
-          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent2 },
-          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent3 },
+          buildSequenceDoc(timestamp1),
+          buildSequenceDoc(timestamp2),
+          buildSequenceDoc(timestamp3),
+          buildSequenceDoc(timestamp4),
+          buildSequenceDoc(timestamp5),
+          buildSequenceDoc(timestamp6),
         ]);
 
         const rule: EqlRuleCreateProps = {
@@ -3175,84 +3181,34 @@ export default ({ getService }: FtrProviderContext) => {
           alert_suppression: {
             group_by: ['host.name'],
             duration: {
-              value: 7,
+              value: 30,
               unit: 's',
             },
             missing_fields_strategy: 'suppress',
           },
-          from: 'now-10s',
-          interval: '5s',
+          from: 'now-40s',
+          interval: '40s',
         };
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
-        // we expect one shell alert
-        // and three building block alerts
-        expect(alerts.hits.hits).toHaveLength(4);
-        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
-          alerts.hits.hits
-        );
-        expect(buildingBlockAlerts).toHaveLength(3);
-        expect(sequenceAlert).toHaveLength(1);
-
-        expect(sequenceAlert[0]._source).toEqual({
-          ...sequenceAlert[0]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: 'host-a',
-            },
-          ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        // it will execute 2 times
+        // first execution from dateNow - 80s to dateNow - 40s, should fetch timestamp 1, 2, 3
+        // the exucution should generate 1 alert
+        // second execution from dateNow - 40s to dateNow, should fetch timestamp 4, 5, 6
+        // the execution should generate 1 more alert, and not supress it as timestamp 1, 2, 3 outside of suppression duration
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date(dateNow),
+          invocationCount: 2,
         });
 
-        const dateNow2 = Date.now();
-        const secondTimestampEventSequence = new Date(dateNow2 - 2000).toISOString();
-        const secondTimestampEventSequence2 = new Date(dateNow2 - 1000).toISOString();
-        const secondTimestampEventSequence3 = new Date(dateNow2).toISOString();
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const [sequenceAlert2, buildingBlockAlerts2] =
+          partitionSequenceBuildingBlocks(previewAlerts);
 
-        const secondSequenceEvent = {
-          id,
-          '@timestamp': secondTimestampEventSequence,
-          host: {
-            name: 'host-a',
-          },
-        };
-
-        // Add a new document, then disable and re-enable to trigger another rule run.
-        // the second rule run should generate a new alert
-        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
-
-        await indexListOfSourceDocuments([
-          secondSequenceEvent,
-          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence2 },
-          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence3 },
-        ]);
-        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp2 = new Date(dateNow2 + 55000);
-        const secondAlerts = await getOpenAlerts(
-          supertest,
-          log,
-          es,
-          createdRule,
-          RuleExecutionStatusEnum.succeeded,
-          undefined,
-          afterTimestamp2
-        );
-
-        const [sequenceAlert2, buildingBlockAlerts2] = partitionSequenceBuildingBlocks(
-          secondAlerts.hits.hits
-        );
-
-        // two sequence alerts because the second one happened
-        // outside of the rule's suppression duration
+        // two sequence alerts because the second one happened outside of the suppression duration
         expect(sequenceAlert2).toHaveLength(2);
         expect(buildingBlockAlerts2).toHaveLength(6);
-        // timestamps should be different for two alerts, showing they were
-        // created in different rule executions
-        expect(sequenceAlert2[0]?._source?.[TIMESTAMP]).not.toEqual(
-          sequenceAlert2[1]?._source?.[TIMESTAMP]
-        );
 
         expect(sequenceAlert2[0]._source).toEqual({
           ...sequenceAlert2[0]?._source,
@@ -3262,7 +3218,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
         expect(sequenceAlert2[1]._source).toEqual({
           ...sequenceAlert2[1]?._source,
@@ -3272,7 +3228,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
       });
     });
