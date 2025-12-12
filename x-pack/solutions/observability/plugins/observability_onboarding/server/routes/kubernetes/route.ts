@@ -116,6 +116,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
       const result = await elasticsearch.client.asCurrentUser.search({
         index: ['logs-*', 'metrics-*'],
         ignore_unavailable: true,
+        allow_partial_search_results: true,
         size: 0,
         terminate_after: 1,
         query: {
