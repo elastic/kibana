@@ -16,7 +16,6 @@ import type {
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   legacyMonitorAttributes,
   syntheticsMonitorAttributes,
@@ -282,20 +281,8 @@ export class SyncPrivateLocationMonitorsTask {
     monitorMwsIds: string[];
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
-    const maintenanceWindowClient = this.serverSetup.getMaintenanceWindowClientInternal(
-      {} as KibanaRequest
-    );
 
-    if (!maintenanceWindowClient) {
-      return {
-        hasMWsChanged: false,
-        updatedMWs: [],
-        missingMWIds: [],
-        maintenanceWindows: [],
-      };
-    }
-
-    const maintenanceWindows = await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID);
+    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
     // check if any of the MWs were updated since the last run
     const updatedMWs = maintenanceWindows.filter((mw) => {
       const updatedAt = mw.updatedAt;
