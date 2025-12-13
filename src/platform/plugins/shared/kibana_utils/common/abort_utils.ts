@@ -7,6 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export enum AbortReason {
+  /**
+   * The request was aborted due to reaching the `search:timeout` advanced setting.
+   */
+  TIMEOUT = 'timeout',
+
+  /**
+   * The request was aborted because the data was replaced by a new request (refreshed/re-fetched).
+   */
+  REPLACED = 'replaced',
+
+  /**
+   * The request was aborted because the component unmounted or the execution context was destroyed.
+   */
+  CLEANUP = 'cleanup',
+
+  /**
+   * The request was aborted because the user explicitly canceled it.
+   */
+  CANCELED = 'canceled',
+}
+
 /**
  * Class used to signify that something was aborted. Useful for applications to conditionally handle
  * this type of error differently than other errors.
