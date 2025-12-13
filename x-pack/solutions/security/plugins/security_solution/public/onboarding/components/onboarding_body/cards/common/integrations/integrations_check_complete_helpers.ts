@@ -25,10 +25,12 @@ interface GetInstalledPackagesParams {
   showOnlyActiveDataStreams?: boolean;
   perPage?: number;
   searchAfter?: GetInstalledPackagesResponse['searchAfter'];
+  nameQuery?: string;
+  packageNames?: string[];
 }
 
 export const getInstalledPackages = async (
-  { showOnlyActiveDataStreams, perPage, searchAfter }: GetInstalledPackagesParams,
+  { showOnlyActiveDataStreams, perPage, searchAfter, nameQuery }: GetInstalledPackagesParams,
   services: StartServices
 ) => {
   return services.http
@@ -38,6 +40,7 @@ export const getInstalledPackages = async (
         showOnlyActiveDataStreams,
         perPage,
         searchAfter: searchAfter ? JSON.stringify(searchAfter) : undefined,
+        ...(nameQuery && { nameQuery }),
       },
     })
     .catch((err: Error) => {
