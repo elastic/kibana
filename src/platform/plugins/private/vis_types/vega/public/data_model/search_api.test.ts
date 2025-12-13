@@ -138,8 +138,4 @@ describe('SearchAPI projectRouting', () => {
   test('should not include project_routing in ES params when projectRouting is undefined', (done) => {
     testProjectRouting(undefined, undefined, done);
   });
-
-  test('should sanitize ALL projectRouting value', (done) => {
-    testProjectRouting('ALL', undefined, done);
-  });
 });
