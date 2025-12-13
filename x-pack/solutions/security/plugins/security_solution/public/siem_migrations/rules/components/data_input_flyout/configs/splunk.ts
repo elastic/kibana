@@ -10,7 +10,7 @@ import { LookupsDataInput } from '../steps/lookups/lookups_data_input';
 import { MacrosDataInput } from '../steps/macros/macros_data_input';
 import { RulesDataInput } from '../steps/rules/rules_data_input';
 
-enum SplunkDataInputStepId {
+export enum SplunkDataInputStepId {
   Rules = 'splunk_rules',
   Macros = 'splunk_macros',
   Lookups = 'splunk_lookups',
