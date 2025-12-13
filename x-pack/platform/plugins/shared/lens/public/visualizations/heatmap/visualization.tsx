@@ -346,11 +346,13 @@ export const getHeatmapVisualization = ({
         isYAxisLabelVisible: state.gridConfig.isYAxisLabelVisible,
         isYAxisTitleVisible: state.gridConfig.isYAxisTitleVisible ?? false,
         yTitle: state.gridConfig.yTitle,
+        ySortPredicate: state.gridConfig.ySortPredicate,
         // X-axis
         isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible,
         xAxisLabelRotation: state.gridConfig.xAxisLabelRotation,
         isXAxisTitleVisible: state.gridConfig.isXAxisTitleVisible ?? false,
         xTitle: state.gridConfig.xTitle,
+        xSortPredicate: state.gridConfig.xSortPredicate,
       }
     );
 
@@ -406,10 +408,12 @@ export const getHeatmapVisualization = ({
         isYAxisLabelVisible: false,
         isYAxisTitleVisible: false,
         yTitle: state.gridConfig.yTitle,
+        ySortPredicate: state.gridConfig.ySortPredicate,
         // X-axis
         isXAxisLabelVisible: false,
         isXAxisTitleVisible: false,
         xTitle: state.gridConfig.xTitle,
+        xSortPredicate: state.gridConfig.xSortPredicate,
       }
     );
 

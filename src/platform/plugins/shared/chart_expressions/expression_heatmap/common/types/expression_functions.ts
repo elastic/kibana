@@ -69,11 +69,13 @@ export interface HeatmapGridConfig {
   isYAxisLabelVisible: boolean;
   isYAxisTitleVisible: boolean;
   yTitle?: string;
+  ySortPredicate?: 'numAsc' | 'numDesc' | 'alphaAsc' | 'alphaDesc' | 'dataIndex';
   // X-axis
   isXAxisLabelVisible: boolean;
   xAxisLabelRotation?: number;
   isXAxisTitleVisible: boolean;
   xTitle?: string;
+  xSortPredicate?: 'numAsc' | 'numDesc' | 'alphaAsc' | 'alphaDesc' | 'dataIndex';
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {
