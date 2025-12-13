@@ -103,7 +103,15 @@ export async function createSAMLResponse(options: {
   full_name?: string;
   email?: string;
   roles: string[];
-  serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean };
+  serverless?:
+    | { organizationId: string; projectType: string; uiamEnabled: false }
+    | {
+        organizationId: string;
+        projectType: string;
+        uiamEnabled: true;
+        accessTokenLifetimeSec?: number;
+        refreshTokenLifetimeSec?: number;
+      };
 }) {
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
@@ -116,6 +124,8 @@ export async function createSAMLResponse(options: {
         roles: options.roles,
         fullName: options.full_name,
         email: options.email,
+        accessTokenLifetimeSec: options.serverless.accessTokenLifetimeSec,
+        refreshTokenLifetimeSec: options.serverless.refreshTokenLifetimeSec,
       })
     : undefined;
 
@@ -256,6 +266,10 @@ async function createUiamSessionTokens({
   roles,
   fullName,
   email,
+  // 1H
+  accessTokenLifetimeSec = 3600,
+  // 3D
+  refreshTokenLifetimeSec = 3 * 24 * 3600,
 }: {
   username: string;
   organizationId: string;
@@ -263,6 +277,8 @@ async function createUiamSessionTokens({
   roles: string[];
   fullName?: string;
   email?: string;
+  accessTokenLifetimeSec?: number;
+  refreshTokenLifetimeSec?: number;
 }) {
   const iat = Math.floor(Date.now() / 1000);
 
@@ -308,8 +324,7 @@ async function createUiamSessionTokens({
       },
 
       nbf: iat,
-      // 1H
-      exp: iat + 3600,
+      exp: iat + accessTokenLifetimeSec,
       iat,
       jti: randomBytes(16).toString('hex'),
     })
@@ -324,8 +339,7 @@ async function createUiamSessionTokens({
       sub: username,
 
       nbf: iat,
-      // 3D
-      exp: iat + 3600 * 24 * 3,
+      exp: iat + refreshTokenLifetimeSec,
       iat,
       session_created: iat,
       jti: randomBytes(16).toString('hex'),
@@ -342,9 +356,9 @@ async function createUiamSessionTokens({
 
   return {
     accessToken: prepareJwtForUiam(accessToken),
-    accessTokenExpiresAt: (iat + 3600) * 1000,
+    accessTokenExpiresAt: (iat + accessTokenLifetimeSec) * 1000,
     refreshToken: prepareJwtForUiam(refreshToken),
-    refreshTokenExpiresAt: (iat + 3600) * 1000,
+    refreshTokenExpiresAt: (iat + refreshTokenLifetimeSec) * 1000,
   };
 }
 
