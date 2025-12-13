@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { slo, SO_SLO_TYPE } from './slo';
-export { sloTemplate, SO_SLO_TEMPLATE_TYPE } from './slo_template';
-export { sloSettings, SO_SLO_SETTINGS_TYPE } from './slo_settings';
+import type { storedSloDefinitionTemplateSchema } from '@kbn/slo-schema';
+import type * as t from 'io-ts';
+
+type StoredSLODefinitionTemplate = t.OutputOf<typeof storedSloDefinitionTemplateSchema>;
+
+export type { StoredSLODefinitionTemplate };

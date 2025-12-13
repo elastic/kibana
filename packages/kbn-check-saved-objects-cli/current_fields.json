@@ -1190,6 +1190,10 @@
     "version"
   ],
   "slo-settings": [],
+  "slo_template": [
+    "name",
+    "tags"
+  ],
   "space": [
     "disabledFeatures",
     "name",
