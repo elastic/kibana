@@ -89,13 +89,13 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   /**
    * Map of all the fields currently in the form
    */
-  const fieldsRefs = useRef<FieldsMap>({});
+  const fieldsRefs = useRef<Record<string, FieldHook>>({});
   /**
    * Keep a track of the fields that have been removed from the form.
    * This will allow us to know if the form has been modified
    * (this ref is then accessed in the "useFormIsModified()" hook)
    */
-  const fieldsRemovedRefs = useRef<FieldsMap>({});
+  const fieldsRemovedRefs = useRef<Record<string, FieldHook>>({});
   /**
    * A list of all subscribers to form data and validity changes that
    * called "form.subscribe()"
@@ -190,9 +190,9 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const getFieldsForOutput = useCallback(
     (
-      fields: FieldsMap,
+      fields: Record<string, FieldHook>,
       opts: { stripEmptyFields: boolean; stripUnsetFields: boolean }
-    ): FieldsMap => {
+    ): Record<string, FieldHook> => {
       return Object.entries(fields).reduce((acc, [key, field]) => {
         if (!field.__isIncludedInOutput) {
           return acc;
@@ -213,7 +213,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
         acc[key] = field;
         return acc;
-      }, {} as FieldsMap);
+      }, {} as Record<string, FieldHook>);
     },
     [getFieldDefaultValue]
   );
@@ -350,8 +350,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     [schema]
   );
 
-  const getFieldsRemoved: FormHook<T, I>['getFields'] = useCallback(
-    () => fieldsRemovedRefs.current,
+  const getFieldsRemoved: FormHook<T, I>['__getFieldsRemoved'] = useCallback(
+    () => fieldsRemovedRefs.current as unknown as FieldsMap<T>,
     []
   );
 
@@ -474,7 +474,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     }
   }, []);
 
-  const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
+  const getFields: FormHook<T, I>['getFields'] = useCallback(
+    () => fieldsRefs.current as unknown as FieldsMap<T>,
+    []
+  );
 
   const updateFieldValues: FormHook<T, I>['updateFieldValues'] = useCallback(
     (updatedFormData, { runDeserializer = true } = {}) => {
