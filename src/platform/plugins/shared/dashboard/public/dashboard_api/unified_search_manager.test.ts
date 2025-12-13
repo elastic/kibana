@@ -134,4 +134,56 @@ describe('initializeUnifiedSearchManager', () => {
       });
     });
   });
+  describe('getState', () => {
+    test('Should return as code filters', () => {
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(
+        getSampleDashboardState({
+          filters: [
+            {
+              condition: {
+                field: 'status',
+                operator: 'is',
+                value: 'active',
+              },
+            },
+          ],
+        })
+      );
+      const unifiedSearchManager = initializeUnifiedSearchManager(
+        lastSavedState$.value,
+        new BehaviorSubject<ControlGroupApi | undefined>(undefined),
+        new BehaviorSubject<boolean>(false),
+        new Subject<void>(),
+        () => lastSavedState$.value,
+        {
+          useUnifiedSearchIntegration: false,
+        }
+      );
+      // change the unified search filter
+      unifiedSearchManager.api.setFilters([
+        {
+          meta: {
+            key: 'status',
+            type: 'phrase',
+          },
+          query: {
+            match_phrase: {
+              status: 'inactive',
+            },
+          },
+        },
+      ]);
+      expect(unifiedSearchManager.internalApi.getState().filters).toEqual([
+        {
+          condition: {
+            field: 'status',
+            operator: 'is',
+            value: 'inactive',
+          },
+          filter_type: 'phrase',
+          key: 'status',
+        },
+      ]);
+    });
+  });
 });

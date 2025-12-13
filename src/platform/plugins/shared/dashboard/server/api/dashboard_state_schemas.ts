@@ -12,7 +12,8 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
-import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
@@ -168,7 +169,7 @@ export function getDashboardStateSchema() {
 
     // supported "as code" keys
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+    filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
     options: schema.maybe(optionsSchema),
     panels: schema.maybe(
       schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
