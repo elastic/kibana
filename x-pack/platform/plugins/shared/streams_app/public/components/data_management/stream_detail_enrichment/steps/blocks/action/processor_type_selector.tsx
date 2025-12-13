@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiLink, EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiComboBox, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
@@ -312,6 +312,30 @@ const getAvailableProcessors: (
       );
     },
   },
+  math: {
+    type: 'math' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.mathInputDisplay',
+      {
+        defaultMessage: 'Math',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
+          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (for example, {example}). The result is written to the target field."
+          values={{
+            example: (
+              <>
+                <EuiCode>bytes / duration </EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -350,6 +374,7 @@ const PROCESSOR_GROUP_MAP: Record<
   append: 'set',
   set: 'set',
   rename: 'set',
+  math: 'set',
   manual_ingest_pipeline: 'other',
 };
 

@@ -11,6 +11,7 @@ import type {
   IngestPipelineDissectProcessor,
   IngestPipelineGrokProcessor,
   IngestPipelineManualIngestPipelineProcessor,
+  IngestPipelineMathProcessor,
   IngestPipelineRenameProcessor,
   IngestPipelineSetProcessor,
   IngestPipelineConvertProcessor,
@@ -26,6 +27,7 @@ export interface ActionToIngestType {
   grok: WithOptionalTracingTag<IngestPipelineGrokProcessor>;
   dissect: WithOptionalTracingTag<IngestPipelineDissectProcessor>;
   date: WithOptionalTracingTag<IngestPipelineDateProcessor>;
+  math: WithOptionalTracingTag<IngestPipelineMathProcessor>;
   rename: WithOptionalTracingTag<IngestPipelineRenameProcessor>;
   set: WithOptionalTracingTag<IngestPipelineSetProcessor>;
   append: WithOptionalTracingTag<IngestPipelineAppendProcessor>;
