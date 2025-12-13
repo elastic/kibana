@@ -11,8 +11,8 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiInMemoryTable,
+  EuiLink,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -24,8 +24,8 @@ import type { CtiEnrichment } from '../../../../../common/search_strategy';
 import { QUERY_ID } from '../../shared/hooks/use_investigation_enrichment';
 import { InspectButton } from '../../../../common/components/inspect';
 import {
-  getEnrichmentIdentifiers,
   buildThreatDetailsItems,
+  getEnrichmentIdentifiers,
   isInvestigationTimeEnrichment,
 } from '../../shared/utils/threat_intelligence';
 import { EnrichmentButtonContent } from './threat_details_view_enrichment_button_content';
@@ -82,12 +82,19 @@ const columns: Array<EuiBasicTableColumn<ThreatDetailsRow>> = [
     truncateText: false,
     render: (description: ThreatDetailsRow['description']) => {
       const { fieldName, value } = description;
-      const tooltipChild = fieldName.match(REFERENCE) ? (
+      console.log('value', value);
+      const renderedValue = fieldName.match(REFERENCE) ? (
         <EuiLink href={value} target="_blank">
           {value}
         </EuiLink>
       ) : (
-        <span>{value}</span>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {value.map((val) => (
+            <EuiFlexItem>
+              <span>{val}</span>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       );
       return (
         <EuiToolTip
@@ -100,7 +107,7 @@ const columns: Array<EuiBasicTableColumn<ThreatDetailsRow>> = [
             </EuiFlexGroup>
           }
         >
-          {tooltipChild}
+          {renderedValue}
         </EuiToolTip>
       );
     },
