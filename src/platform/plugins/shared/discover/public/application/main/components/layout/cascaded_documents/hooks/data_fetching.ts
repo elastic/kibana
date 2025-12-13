@@ -110,7 +110,6 @@ interface UseScopedESQLQueryFetchClientProps
     | 'dataView'
     | 'data'
     | 'expressions'
-    | 'filters'
     | 'timeRange'
     | 'scopedProfilesManager'
     | 'esqlVariables'
@@ -128,7 +127,6 @@ export function useScopedESQLQueryFetchClient({
   data,
   expressions,
   esqlVariables,
-  filters,
   timeRange,
   scopedProfilesManager,
   inspectorAdapters,
@@ -148,7 +146,6 @@ export function useScopedESQLQueryFetchClient({
         data,
         expressions,
         abortSignal,
-        filters,
         timeRange,
         scopedProfilesManager,
         inspectorAdapters,
@@ -167,7 +164,6 @@ export function useScopedESQLQueryFetchClient({
       dataView,
       esqlVariables,
       expressions,
-      filters,
       inspectorAdapters,
       scopedProfilesManager,
       timeRange,
