@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import { getSecurityLabsIndexName } from '@kbn/product-doc-common';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
 
 const securityLabsSearchSchema = z.object({
@@ -28,7 +28,7 @@ export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search')
 const SECURITY_LABS_INDEX = getSecurityLabsIndexName();
 
 export const securityLabsSearchTool = (
-  core: CoreSetup
+  core: SecuritySolutionPluginCoreSetupDependencies,
 ): BuiltinToolDefinition<typeof securityLabsSearchSchema> => {
   return {
     id: SECURITY_LABS_SEARCH_TOOL_ID,
