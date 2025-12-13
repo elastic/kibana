@@ -128,8 +128,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getStartServices,
       this.searchSessionEBTManager,
       this.sessionsClient,
-      nowProvider,
-      this.usageCollector
+      nowProvider
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
