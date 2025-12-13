@@ -36,7 +36,7 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-import { truncateAndPreserveHighlightTags } from './utils';
+import { truncateAndPreserveHighlightTags, extractTextAndMarkTags } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -175,6 +175,7 @@ export interface FieldBadgeWithActionsProps
   > {
   icon?: EuiBadgeProps['iconType'];
   color?: string;
+  truncateTitle?: boolean;
 }
 
 interface FieldBadgeWithActionsDependencies {
@@ -193,8 +194,12 @@ export function FieldBadgeWithActions({
   value,
   rawValue,
   color = 'hollow',
+  truncateTitle = false,
 }: FieldBadgeWithActionsPropsAndDependencies) {
   const MAX_LENGTH = 20;
+
+  const displayValue = truncateTitle ? truncateAndPreserveHighlightTags(value, MAX_LENGTH) : value;
+  const titleText = extractTextAndMarkTags(value).cleanText;
 
   return (
     <CellActionsPopover
@@ -204,11 +209,17 @@ export function FieldBadgeWithActions({
       rawValue={rawValue}
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
-        <EuiBadge {...popoverTriggerProps} color={color} iconType={icon} iconSide="left">
+        <EuiBadge
+          {...popoverTriggerProps}
+          color={color}
+          iconType={icon}
+          iconSide="left"
+          title={titleText}
+        >
           <span
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
-              __html: truncateAndPreserveHighlightTags(value, MAX_LENGTH),
+              __html: displayValue,
             }}
           />
         </EuiBadge>
