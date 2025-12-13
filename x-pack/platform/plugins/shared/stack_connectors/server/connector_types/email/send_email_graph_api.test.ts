@@ -53,6 +53,7 @@ describe('sendEmailGraphApi', () => {
       Array [
         "https://graph.microsoft.com/v1.0/users/fred@example.com/sendMail",
         Object {
+          "beforeRedirect": [Function],
           "data": Object {
             "message": Object {
               "bccRecipients": Array [],
@@ -95,6 +96,7 @@ describe('sendEmailGraphApi', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -104,8 +106,10 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",
@@ -149,6 +153,7 @@ describe('sendEmailGraphApi', () => {
       Array [
         "https://graph.microsoft.com/v1.0/users/fred@example.com/sendMail",
         Object {
+          "beforeRedirect": [Function],
           "data": Object {
             "message": Object {
               "bccRecipients": Array [],
@@ -193,6 +198,7 @@ describe('sendEmailGraphApi', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -202,8 +208,10 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",
@@ -248,6 +256,7 @@ describe('sendEmailGraphApi', () => {
       Array [
         "https://test/users/fred@example.com/sendMail",
         Object {
+          "beforeRedirect": [Function],
           "data": Object {
             "message": Object {
               "bccRecipients": Array [],
@@ -290,6 +299,7 @@ describe('sendEmailGraphApi', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -299,8 +309,10 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",

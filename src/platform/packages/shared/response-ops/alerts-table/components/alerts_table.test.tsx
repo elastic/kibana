@@ -337,6 +337,7 @@ describe('AlertsTable', () => {
   let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
   let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
+  let refreshSpy: jest.SpyInstance<void, []>;
 
   mockAlertsDataGrid.mockImplementation((props) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
@@ -344,6 +345,7 @@ describe('AlertsTable', () => {
     onToggleColumn = props.onToggleColumn;
     onResetColumns = props.onResetColumns;
     refresh = props.renderContext.refresh;
+    refreshSpy = jest.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
   });
 
@@ -1209,6 +1211,18 @@ describe('AlertsTable', () => {
         refresh();
       });
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(expect.objectContaining({ pageIndex: 0 }));
+    });
+
+    it("doesn't call `refresh` when paginating and using `lastReloadRequestTime`", async () => {
+      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} />);
+
+      await waitFor(() => expect(onChangePageIndex).not.toBeUndefined());
+
+      act(() => {
+        onChangePageIndex(1);
+      });
+
+      expect(refreshSpy).not.toHaveBeenCalled();
     });
   });
 });

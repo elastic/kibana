@@ -81,6 +81,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiPopover
+              closePopover={() => setIsPopoverOpen(false)}
               button={
                 <EuiButtonIcon
                   aria-label={i18n.translate(

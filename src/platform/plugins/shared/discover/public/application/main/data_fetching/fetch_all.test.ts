@@ -137,6 +137,7 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
+    // @ts-expect-error upgrade typescript v5.9.3
     searchSource.getField('index')!.isTimeBased = () => false;
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
@@ -161,6 +162,7 @@ describe('test fetchAll', () => {
 
   test('should use charts query to fetch total hit count when chart is visible', async () => {
     const collect = subjectCollector(subjects.totalHits$);
+    // @ts-expect-error upgrade typescript v5.9.3
     searchSource.getField('index')!.isTimeBased = () => true;
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
@@ -183,6 +185,7 @@ describe('test fetchAll', () => {
   test('should only fail totalHits$ query not main$ for error from that query', async () => {
     const collectTotalHits = subjectCollector(subjects.totalHits$);
     const collectMain = subjectCollector(subjects.main$);
+    // @ts-expect-error upgrade typescript v5.9.3
     searchSource.getField('index')!.isTimeBased = () => false;
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
@@ -217,6 +220,7 @@ describe('test fetchAll', () => {
 
   test('should not set COMPLETE if an ERROR has been set on main$', async () => {
     const collectMain = subjectCollector(subjects.main$);
+    // @ts-expect-error upgrade typescript v5.9.3
     searchSource.getField('index')!.isTimeBased = () => false;
     mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
     subjects.totalHits$.next({

@@ -434,7 +434,9 @@ const AlertsTableContent = typedForwardRef(
       if (lastReloadRequestTime) {
         refresh();
       }
-    }, [lastReloadRequestTime, refresh]);
+      // Purposefully not including `refresh` to avoid refreshing when it changes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lastReloadRequestTime]);
 
     useImperativeHandle(ref, () => ({
       refresh,

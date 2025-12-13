@@ -41,9 +41,20 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 $$$kibana-213916$$$
 ::::{dropdown} Change to variable syntax in {{esql}} queries
 
-% **Details**<br> Fields and functions variables are now described with `??` in {{esql}} queries. For value variables, you can continue to use `?`. 
+**Details**<br> Fields and functions variables are now described with `??` in {{esql}} queries. For value variables, you can continue to use `?`. 
 
 View [#213916]({{kib-pull}}213916).
+::::
+
+$$$kibana-216558$$$
+::::{dropdown} API keys are used for authenticating report generation requests
+
+**Details**<br> In 9.1.0, report generation requests are authenticated by API keys instead of session cookies. There are several key differences between the authentication methods. API keys capture your role privileges, whereas session cookie are based on your user credentials. API keys are also longer-lived, compared to session cookies, which have a shorter lifespan.
+
+
+If you have a cross-cluster search environment and want to generate reports from remote clusters, you must have the appropriate cluster and index privileges on the remote cluster and local cluster. For example, if requests are authenticated with an API key, the API key requires certain privileges on the local cluster that contains the local index, in addition to the remote. For more information and examples, refer to [Configure roles and users for remote clusters](docs-content://deploy-manage/remote-clusters/remote-clusters-cert.md#remote-clusters-privileges-cert).
+
+View [#216558]({{kib-pull}}216558).
 ::::
 
 ## 9.0.0 [kibana-900-breaking-changes]

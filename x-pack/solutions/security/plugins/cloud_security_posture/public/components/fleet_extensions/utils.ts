@@ -13,7 +13,6 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { merge } from 'lodash';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
@@ -21,6 +20,7 @@ import semverLt from 'semver/functions/lt';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -298,12 +298,10 @@ export const getCloudDefaultAwsCredentialConfig = ({
       value: credentialsType,
       type: 'text',
     },
-    ...(showCloudConnectors && {
-      'aws.supports_cloud_connectors': {
-        value: showCloudConnectors,
-        type: 'bool',
-      },
-    }),
+    'aws.supports_cloud_connectors': {
+      value: showCloudConnectors,
+      type: 'bool',
+    },
   };
 
   return config;
@@ -573,14 +571,9 @@ export const getCloudCredentialVarsConfig = ({
   const credentialType = `${getCloudProvider(inputType)}.credentials.type`;
   const supportCloudConnectors = `${getCloudProvider(inputType)}.supports_cloud_connectors`;
 
-  if (showCloudConnectors) {
-    return {
-      [credentialType]: { value: optionId },
-      [supportCloudConnectors]: { value: supportsCloudConnector },
-    };
-  }
-
+  // Always return the supports_cloud_connectors field to ensure it's properly updated
   return {
     [credentialType]: { value: optionId },
+    [supportCloudConnectors]: { value: supportsCloudConnector },
   };
 };
