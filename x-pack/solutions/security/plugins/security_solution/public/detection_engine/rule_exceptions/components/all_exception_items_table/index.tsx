@@ -99,7 +99,7 @@ const ExceptionsViewerComponent = ({
   const { services } = useKibana();
   const toasts = useToasts();
   const [{ hasIndexWrite }] = useUserData();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canCrudExceptions = useUserPrivileges().rulesPrivileges.exceptions.crud;
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -461,8 +461,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(isViewReadOnly || !canEditRules || !hasIndexWrite);
-  }, [setReadOnly, isViewReadOnly, hasIndexWrite, canEditRules]);
+    setReadOnly(isViewReadOnly || !canCrudExceptions || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, hasIndexWrite, canCrudExceptions]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {

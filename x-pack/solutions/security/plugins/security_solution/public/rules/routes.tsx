@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
@@ -37,6 +37,27 @@ import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_d
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { hasCapabilities } from '../common/lib/capabilities';
 import { useKibana } from '../common/lib/kibana/kibana_react';
+import { useRuleDetailsUrlPathWithLandingTab } from '../detection_engine/rule_management_ui/components/rules_table/use_rule_details_url_with_landing_tab';
+
+/**
+ * Component to redirect to rule details with the appropriate landing tab.
+ * This is a separate component because hooks can only be called at the top level of a React component.
+ */
+const RuleDetailsRedirect: React.FC = () => {
+  const { detailName } = useParams<{ detailName: string }>();
+  const location = useLocation();
+  const { ruleDetailsUrlPathWithLandingTab } = useRuleDetailsUrlPathWithLandingTab(detailName);
+
+  return (
+    <Redirect
+      to={{
+        ...location,
+        pathname: `rules${ruleDetailsUrlPathWithLandingTab}`,
+        search: location.search,
+      }}
+    />
+  );
+};
 
 const getRulesSubRoutes = (capabilities: Capabilities) => [
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
@@ -93,24 +114,9 @@ const RulesContainerComponent: React.FC = () => {
   return (
     <PluginTemplateWrapper>
       <Routes>
-        <Route // Redirect to first tab if none specified
-          path="/rules/id/:detailName"
-          exact
-          render={({
-            match: {
-              params: { detailName },
-            },
-            location,
-          }) => (
-            <Redirect
-              to={{
-                ...location,
-                pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
-                search: location.search,
-              }}
-            />
-          )}
-        />
+        <Route path="/rules/id/:detailName" exact>
+          <RuleDetailsRedirect />
+        </Route>
         <Route path="/rules" exact>
           <Redirect to={`/rules/${AllRulesTabs.management}`} />
         </Route>

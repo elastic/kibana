@@ -34,7 +34,6 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import {
@@ -46,7 +45,6 @@ import { RuleStatusBadge } from '../../../common/components/rule_execution_statu
 import { RuleSwitch } from '../../../common/components/rule_switch';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../common/translations';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
 import { useRulesTableContext } from './rules_table/rules_table_context';
@@ -66,6 +64,7 @@ import {
   gapStatusTooltipUnfilled,
   gapStatusTooltipFilled,
 } from './translations';
+import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -148,12 +147,14 @@ const useRuleSnoozeColumn = (): TableColumn => {
 };
 
 export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
+  const ruleDetailsUrl = getRuleDetailsUrl(id);
+
   return (
     <EuiToolTip content={name} anchorClassName="eui-textTruncate">
       <SecuritySolutionLinkAnchor
         data-test-subj="ruleName"
         deepLinkId={SecurityPageName.rules}
-        path={getRuleDetailsTabUrl(id, RuleDetailTabs.alerts)}
+        path={ruleDetailsUrl}
       >
         {name}
       </SecuritySolutionLinkAnchor>

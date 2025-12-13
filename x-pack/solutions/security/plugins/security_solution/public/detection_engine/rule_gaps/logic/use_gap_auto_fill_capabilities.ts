@@ -19,7 +19,7 @@ export const useGapAutoFillCapabilities = () => {
     'gapAutoFillSchedulerEnabled'
   );
   const hasEnterpriseLicense = license.isEnterprise();
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
 
   return useMemo(
     () => ({

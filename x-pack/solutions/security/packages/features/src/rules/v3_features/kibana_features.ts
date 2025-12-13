@@ -18,12 +18,10 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+
 import {
-  ALERTS_API_ALL,
-  ALERTS_API_READ,
   APP_ID,
-  EXCEPTIONS_API_ALL,
-  EXCEPTIONS_API_READ,
   INITIALIZE_SECURITY_SOLUTION,
   LEGACY_NOTIFICATIONS_ID,
   LISTS_API_ALL,
@@ -31,14 +29,14 @@ import {
   LISTS_API_SUMMARY,
   RULES_API_ALL,
   RULES_API_READ,
-  RULES_FEATURE_ID,
+  RULES_FEATURE_ID_V3,
   RULES_UI_EDIT,
   RULES_UI_READ,
   SERVER_APP_ID,
   USERS_API_READ,
-} from '../constants';
-import { type BaseKibanaFeatureConfig } from '../types';
-import type { SecurityFeatureParams } from '../security/types';
+} from '../../constants';
+import { type BaseKibanaFeatureConfig } from '../../types';
+import type { SecurityFeatureParams } from '../../security/types';
 
 const SECURITY_RULE_TYPES = [
   LEGACY_NOTIFICATIONS_ID,
@@ -57,10 +55,10 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   consumers: [SERVER_APP_ID],
 }));
 
-export const getRulesBaseKibanaFeature = (
+export const getRulesV3BaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
-  id: RULES_FEATURE_ID,
+  id: RULES_FEATURE_ID_V3,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesTitle',
     {
@@ -69,7 +67,7 @@ export const getRulesBaseKibanaFeature = (
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [RULES_FEATURE_ID, 'kibana'],
+  app: [RULES_FEATURE_ID_V3, 'kibana'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
   management: {
@@ -77,15 +75,16 @@ export const getRulesBaseKibanaFeature = (
   },
   privileges: {
     all: {
-      app: [RULES_FEATURE_ID, 'kibana'],
+      app: [RULES_FEATURE_ID_V3, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
-        all: params.savedObjects,
-        read: params.savedObjects,
+        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
       },
       alerting: {
         rule: { all: alertingFeatures },
-        alert: { all: alertingFeatures },
+        // TODO: confirm if this is needed for rules to create alerts
+        // alert: { all: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
@@ -94,10 +93,6 @@ export const getRulesBaseKibanaFeature = (
       api: [
         RULES_API_ALL,
         RULES_API_READ,
-        ALERTS_API_ALL,
-        ALERTS_API_READ,
-        EXCEPTIONS_API_ALL,
-        EXCEPTIONS_API_READ,
         LISTS_API_ALL,
         LISTS_API_READ,
         LISTS_API_SUMMARY,
@@ -107,15 +102,14 @@ export const getRulesBaseKibanaFeature = (
       ],
     },
     read: {
-      app: [RULES_FEATURE_ID, 'kibana'],
+      app: [RULES_FEATURE_ID_V3, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: params.savedObjects,
+        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
       },
       alerting: {
         rule: { read: alertingFeatures },
-        alert: { all: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
@@ -123,8 +117,6 @@ export const getRulesBaseKibanaFeature = (
       ui: [RULES_UI_READ],
       api: [
         RULES_API_READ,
-        ALERTS_API_READ,
-        EXCEPTIONS_API_READ,
         LISTS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,

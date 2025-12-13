@@ -26,6 +26,7 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -63,6 +64,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const ruleId = linkValue;
   const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
 
   const isInTimelineContext =
     ruleName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
@@ -165,7 +167,9 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     openInNewTab,
   ]);
 
-  if (isString(value) && ruleName.length > 0 && ruleId != null) {
+  const shouldShowLink = canReadRules && isString(value) && ruleName.length > 0 && ruleId != null;
+
+  if (shouldShowLink) {
     return link;
   } else if (value != null) {
     return <>{value}</>;

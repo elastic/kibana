@@ -113,7 +113,10 @@ describe('useMissingPrivileges', () => {
   it('reports missing rulesPrivileges if user cannot edit rules', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
-        rulesPrivileges: { edit: false, read: true },
+        rulesPrivileges: {
+          rules: { edit: false, read: true },
+          exceptions: { crud: false, read: true },
+        },
       })
     );
 
@@ -154,7 +157,10 @@ describe('useMissingPrivileges', () => {
   it('reports no missing rule privileges if user can edit rules', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
-        rulesPrivileges: { edit: true, read: true },
+        rulesPrivileges: {
+          rules: { edit: true, read: true },
+          exceptions: { crud: true, read: true },
+        },
       })
     );
 

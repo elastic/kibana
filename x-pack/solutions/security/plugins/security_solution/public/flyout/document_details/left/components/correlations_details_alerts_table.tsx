@@ -164,19 +164,20 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         render: (row: Record<string, unknown>) => {
           const ruleName = row[ALERT_RULE_NAME] as string;
           const ruleId = row['kibana.alert.rule.uuid'] as string;
-          return (
-            <CellTooltipWrapper tooltip={ruleName}>
-              <PreviewLink
-                field={ALERT_RULE_NAME}
-                value={ruleName}
-                scopeId={scopeId}
-                ruleId={ruleId}
-                data-test-subj={`${dataTestSubj}RulePreview`}
-              >
-                <span>{ruleName}</span>
-              </PreviewLink>
-            </CellTooltipWrapper>
+
+          const cellContent = (
+            <PreviewLink
+              field={ALERT_RULE_NAME}
+              value={ruleName}
+              scopeId={scopeId}
+              ruleId={ruleId}
+              data-test-subj={`${dataTestSubj}RulePreview`}
+            >
+              <span>{ruleName}</span>
+            </PreviewLink>
           );
+
+          return <CellTooltipWrapper tooltip={ruleName}>{cellContent}</CellTooltipWrapper>;
         },
       },
       {
