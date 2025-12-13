@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions } from './type';
+export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions, SomeType } from './type';
 export { Type } from './type';
 export { AnyType } from './any_type';
 export type { ArrayOptions } from './array_type';
@@ -43,6 +43,8 @@ export type { StringOptions } from './string_type';
 export { StringType } from './string_type';
 export type { UnionTypeOptions } from './union_type';
 export { UnionType } from './union_type';
+export type { PropsWithDiscriminator, ObjectResultUnionType } from './discriminated_union_type';
+export { DiscriminatedUnionType } from './discriminated_union_type';
 export type { URIOptions } from './uri_type';
 export { URIType } from './uri_type';
 export { NeverType } from './never_type';

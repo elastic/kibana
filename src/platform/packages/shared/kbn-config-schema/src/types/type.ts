@@ -20,11 +20,17 @@ import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../o
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
+export type SomeType = Type<any>;
+
 /**
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.
  */
 export interface TypeMeta {
+  /**
+   * A unique identifier for this type, reduces duplication.
+   */
+  id?: string;
   /**
    * A human-friendly description of this type to be used in documentation.
    */
