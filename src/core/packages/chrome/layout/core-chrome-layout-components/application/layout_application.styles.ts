@@ -9,21 +9,33 @@
 
 import { css } from '@emotion/react';
 import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
+import { euiOverflowScroll } from '@elastic/eui';
 import type { EmotionFn } from '../types';
 
-const root: EmotionFn = ({ euiTheme }) =>
+const root: EmotionFn = (useEuiTheme) =>
   css`
     grid-area: application;
-    height: 100%;
-    position: relative;
-    width: 100%;
+
+    height: calc(100% - ${layoutVar('application.marginBottom')});
+    width: calc(100% - ${layoutVar('application.marginRight')});
+    margin-bottom: ${layoutVar('application.marginBottom')};
+    margin-right: ${layoutVar('application.marginRight')};
+
     z-index: ${layoutLevels.content};
 
+    position: relative;
     display: flex;
     flex-direction: column;
 
     &:focus-visible {
-      border: 2px solid ${euiTheme.colors.textParagraph};
+      border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};
+    }
+
+    // only restrict overflow scroll on screen (not print) to allow for full page printing
+    @media screen {
+      ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
+      // reset the height back to respect the margin bottom
+      height: calc(100% - ${layoutVar('application.marginBottom')});
     }
   `;
 

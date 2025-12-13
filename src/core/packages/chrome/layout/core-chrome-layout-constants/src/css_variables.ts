@@ -15,7 +15,15 @@ export type LayoutComponent =
   | 'sidebar'
   | 'application';
 export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
-export type LayoutProperty = 'top' | 'bottom' | 'left' | 'right' | 'height' | 'width';
+export type LayoutProperty =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'height'
+  | 'width'
+  | 'marginBottom'
+  | 'marginRight';
 
 export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;
 export type ApplicationVarName = `application.${ApplicationComponent}.${LayoutProperty}`;

@@ -33,7 +33,8 @@ export const Logo = ({
   label,
   ...props
 }: LogoProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme, highContrastMode } = euiThemeContext;
   const { tooltipRef, handleMouseOut } = useTooltip();
 
   /**
@@ -48,9 +49,25 @@ export const Logo = ({
    * We cannot use `euiTheme.size.s` because it's 8px.
    */
   const wrapperStyles = css`
-    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    position: relative;
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
     padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
+
+    ${highContrastMode
+      ? `border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};`
+      : `
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: ${euiTheme.size.xl};
+      margin: 0 auto;
+      height: ${euiTheme.border.width.thin};
+      background-color: ${euiTheme.colors.borderBaseSubdued};
+    }
+    `}
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};

@@ -28,6 +28,7 @@ export const TestComponent = ({
   logo,
 }: TestComponentProps) => {
   const [activeItemId, setActiveItemId] = useState(initialActiveItemId);
+  const [collapsed, setCollapsed] = useState(isCollapsed);
 
   const handleItemClick = (item: SideNavLogo | MenuItem | SecondaryMenuItem) => {
     setActiveItemId(item.id);
@@ -39,10 +40,11 @@ export const TestComponent = ({
     <I18nProvider>
       <Navigation
         activeItemId={activeItemId}
-        isCollapsed={isCollapsed}
+        isCollapsed={collapsed}
         items={items}
         logo={logo}
         onItemClick={handleItemClick}
+        onToggleCollapsed={setCollapsed}
         setWidth={() => {}}
       />
     </I18nProvider>

@@ -8,41 +8,25 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  logicalCSS,
-  logicalSizeCSS,
-  useEuiTheme,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import type { Observable } from 'rxjs';
-import { isObservable, of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { PRIMARY_NAVIGATION_ID } from '@kbn/core-chrome-navigation/src/constants';
+import { PRIMARY_NAVIGATION_ID } from '../constants';
 
 interface Props {
-  isCollapsed: boolean | Observable<boolean>;
+  isCollapsed: boolean;
   toggle: (isCollapsed: boolean) => void;
 }
 
 const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
-  // packages/eui/src/components/header/header.styles.ts
-  const height = euiTheme.size.xxxl; // TODO: hardcoded height of the euiHeader header
-  const padding = euiTheme.size.s; // TODO: hardcoded padding of the euiHeader header
-
   return {
     sideNavCollapseButtonWrapper: css`
       display: flex;
       align-items: center;
       justify-content: center;
-      ${logicalSizeCSS(height)}
-      ${logicalCSS('border-right', euiTheme.border.thin)}
-      ${logicalCSS('margin-left', `-${padding}`)}
-      ${logicalCSS('margin-right', padding)}
+      min-width: ${euiTheme.size.xxl};
     `,
     sideNavCollapseButton: css`
       &.euiButtonIcon:hover {
@@ -53,25 +37,12 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
 };
 
 /**
- * Reimplementation of EuiCollapsibleNavBeta Collapse Button to survey new sidenav and new layout use-cases
+ * Collapse button for the side navigation
  */
-export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest }) => {
-  const collapsedObservable = useMemo(
-    () => (isObservable(isCollapsed) ? isCollapsed : of(isCollapsed)),
-    [isCollapsed]
-  );
-
-  const collapsed = useObservable(
-    collapsedObservable,
-    typeof isCollapsed === 'boolean' ? isCollapsed : false
-  );
-
-  const iconType = collapsed ? 'transitionLeftIn' : 'transitionLeftOut';
+export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
+  const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
   const { euiTheme } = useEuiTheme();
-  const styles = sideNavCollapseButtonStyles(euiTheme);
-
-  const isSmall = useIsWithinBreakpoints(['xs', 's']);
-  if (isSmall) return null;
+  const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
 
   return (
     <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
@@ -82,7 +53,7 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest 
         color="text"
         iconType={iconType}
         aria-label={
-          collapsed
+          isCollapsed
             ? i18n.translate('core.ui.chrome.sideNavigation.expandButtonLabel', {
                 defaultMessage: 'Expand navigation menu',
               })
@@ -90,10 +61,10 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest 
                 defaultMessage: 'Collapse navigation menu',
               })
         }
-        aria-pressed={!collapsed}
-        aria-expanded={!collapsed}
+        aria-pressed={!isCollapsed}
+        aria-expanded={!isCollapsed}
         aria-controls={PRIMARY_NAVIGATION_ID}
-        onClick={() => toggle(!collapsed)}
+        onClick={() => toggle(!isCollapsed)}
       />
     </div>
   );
