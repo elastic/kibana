@@ -1,0 +1,83 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects changes to the registry that indicates the install of a new Windows Subsystem for Linux distribution by name. Adversaries may enable and use WSL for Linux to avoid detection.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Windows Subsystem for Linux Distribution Installed",
+        "query": "registry where host.os.type == \"windows\" and\n registry.path : \n       (\"HK*\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Lxss\\\\*\\\\PackageFamilyName\",\n        \"\\\\REGISTRY\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Lxss\\\\*\\\\PackageFamilyName\")\n",
+        "references": [
+            "https://learn.microsoft.com/en-us/windows/wsl/wsl-config"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "a1699af0-8e1e-4ed0-8ec1-89783538a061",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1112",
+                        "name": "Modify Registry",
+                        "reference": "https://attack.mitre.org/techniques/T1112/"
+                    },
+                    {
+                        "id": "T1202",
+                        "name": "Indirect Command Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1202/"
+                    }
+                ]
+            }
+        ],
+        "timeline_id": "3e47ef71-ebfc-4520-975c-cb27fc090799",
+        "timeline_title": "Comprehensive Registry Timeline",
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "a1699af0-8e1e-4ed0-8ec1-89783538a061_3",
+    "type": "security-rule"
+}

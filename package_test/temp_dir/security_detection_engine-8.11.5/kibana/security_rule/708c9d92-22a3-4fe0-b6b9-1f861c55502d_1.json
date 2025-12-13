@@ -1,0 +1,130 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies suspicious execution of the built-in Windows Installer, msiexec.exe, to install a package from usual paths or parent process. Adversaries may abuse msiexec.exe to launch malicious local MSI files.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Execution via MSIEXEC",
+        "query": "process where host.os.type == \"windows\" and event.action == \"start\" and\n  process.name : \"msiexec.exe\" and user.id : (\"S-1-5-21*\", \"S-1-12-*\") and process.parent.executable != null and\n  (\n    (process.args : \"/i\" and process.args : (\"/q\", \"/quiet\") and process.args_count == 4 and\n     process.args : (\"?:\\\\Users\\\\*\", \"?:\\\\ProgramData\\\\*\") and\n     not process.parent.executable : (\"?:\\\\Program Files (x86)\\\\*.exe\",\n                                      \"?:\\\\Program Files\\\\*.exe\",\n                                      \"?:\\\\Windows\\\\explorer.exe\",\n                                      \"?:\\\\Users\\\\*\\\\Desktop\\\\*\",\n                                      \"?:\\\\Users\\\\*\\\\Downloads\\\\*\",\n                                      \"?:\\\\programdata\\\\*\")) or\n\n    (process.args_count == 1 and not process.parent.executable : (\"?:\\\\Windows\\\\explorer.exe\", \"?:\\\\Windows\\\\SysWOW64\\\\explorer.exe\")) or\n\n    (process.args : \"/i\" and process.args : (\"/q\", \"/quiet\") and process.args_count == 4 and\n     (process.parent.args : \"Schedule\" or process.parent.name : \"wmiprvse.exe\" or\n     process.parent.executable : \"?:\\\\Users\\\\*\\\\AppData\\\\*\" or\n     (process.parent.name : (\"powershell.exe\", \"cmd.exe\") and length(process.parent.command_line) \u003e= 200))) or\n\n    (process.args : \"/i\" and process.args : (\"/q\", \"/quiet\") and process.args_count == 4 and\n     process.working_directory : \"?:\\\\\" and process.parent.name : (\"cmd.exe\", \"powershell.exe\"))\n  ) and\n\n  /* noisy pattern */\n  not (process.parent.executable : \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\*\" and process.parent.args_count \u003e= 2 and\n       process.args : \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\*\\\\*.msi\") and\n\n  not process.args : (\"?:\\\\Program Files (x86)\\\\*\", \"?:\\\\Program Files\\\\*\")\n",
+        "references": [
+            "https://lolbas-project.github.io/lolbas/Binaries/Msiexec/",
+            "https://www.guardicore.com/labs/purple-fox-rootkit-now-propagates-as-a-worm/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args_count",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.args_count",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.command_line",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.working_directory",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "708c9d92-22a3-4fe0-b6b9-1f861c55502d",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1218",
+                        "name": "System Binary Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1218/",
+                        "subtechnique": [
+                            {
+                                "id": "T1218.007",
+                                "name": "Msiexec",
+                                "reference": "https://attack.mitre.org/techniques/T1218/007/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "708c9d92-22a3-4fe0-b6b9-1f861c55502d_1",
+    "type": "security-rule"
+}

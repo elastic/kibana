@@ -1,0 +1,75 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "A new user was added to a GitHub organization.",
+    "from": "now-9m",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "New User Added To GitHub Organization",
+    "query": "configuration where event.dataset == \"github.audit\" and event.action == \"org.add_member\"\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "61336fe6-c043-4743-ab6e-41292f439603",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Persistence",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/",
+            "subtechnique": [
+              {
+                "id": "T1098.001",
+                "name": "Additional Cloud Credentials",
+                "reference": "https://attack.mitre.org/techniques/T1098/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "61336fe6-c043-4743-ab6e-41292f439603_1",
+  "type": "security-rule"
+}

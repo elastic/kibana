@@ -1,0 +1,78 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Malicious remote file creation, which can be an indicator of lateral movement activity.",
+        "from": "now-10m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Malicious Remote File Creation",
+        "query": "sequence by host.name\n[file where event.action == \"creation\" and process.name : (\"System\", \"scp\", \"sshd\", \"smbd\", \"vsftpd\", \"sftp-server\")]\n[file where event.category == \"malware\" or event.category == \"intrusion_detection\"\nand process.name:(\"System\", \"scp\", \"sshd\", \"smbd\", \"vsftpd\", \"sftp-server\")]\n",
+        "references": [
+            "https://www.elastic.co/es/blog/remote-desktop-protocol-connections-elastic-security"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 99,
+        "rule_id": "301571f3-b316-4969-8dd0-7917410030d3",
+        "severity": "critical",
+        "tags": [
+            "Domain: Endpoint",
+            "Use Case: Lateral Movement Detection",
+            "Tactic: Lateral Movement",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1210",
+                        "name": "Exploitation of Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1210/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "301571f3-b316-4969-8dd0-7917410030d3_1",
+    "type": "security-rule"
+}

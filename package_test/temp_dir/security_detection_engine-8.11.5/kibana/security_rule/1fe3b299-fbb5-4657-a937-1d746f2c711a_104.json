@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies network activity from unexpected system applications. This may indicate adversarial activity as these applications are often leveraged by adversaries to execute code and evade detection.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unusual Network Activity from a Windows System Binary",
+        "note": "## Triage and analysis\n\n### Investigating Unusual Network Activity from a Windows System Binary\n\nAttackers can abuse certain trusted developer utilities to proxy the execution of malicious payloads. Since these utilities are usually signed, they can bypass the security controls that were put in place to prevent or detect direct execution.\n\nThis rule identifies network connections established by trusted developer utilities, which can indicate abuse to execute payloads or process masquerading.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate abnormal behaviors observed by the subject process, such as registry or file modifications, and any spawned child processes.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the process executable using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - $osquery_0\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - $osquery_1\n      - $osquery_2\n      - $osquery_3\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n\n### False positive analysis\n\n- As trusted developer utilities have dual-use purposes, alerts derived from this rule are not essentially malicious. If these utilities are contacting internal or known trusted domains, review their security and consider creating exceptions if the domain is safe.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n  - If the malicious file was delivered via phishing:\n    - Block the email sender from sending future emails.\n    - Block the malicious web pages.\n    - Remove emails from the sender from mailboxes.\n    - Consider improvements to the security awareness program.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "sequence by process.entity_id with maxspan=5m\n  [process where host.os.type == \"windows\" and event.type == \"start\" and\n\n     /* known applocker bypasses */\n     (process.name : \"bginfo.exe\" or\n      process.name : \"cdb.exe\" or\n      process.name : \"control.exe\" or\n      process.name : \"cmstp.exe\" or\n      process.name : \"csi.exe\" or\n      process.name : \"dnx.exe\" or\n      process.name : \"fsi.exe\" or\n      process.name : \"ieexec.exe\" or\n      process.name : \"iexpress.exe\" or\n      process.name : \"installutil.exe\" or\n      process.name : \"Microsoft.Workflow.Compiler.exe\" or\n      process.name : \"MSBuild.exe\" or\n      process.name : \"msdt.exe\" or\n      process.name : \"mshta.exe\" or\n      process.name : \"msiexec.exe\" or\n      process.name : \"msxsl.exe\" or\n      process.name : \"odbcconf.exe\" or\n      process.name : \"rcsi.exe\" or\n      process.name : \"regsvr32.exe\" or\n      process.name : \"xwizard.exe\")]\n  [network where\n     (process.name : \"bginfo.exe\" or\n      process.name : \"cdb.exe\" or\n      process.name : \"control.exe\" or\n      process.name : \"cmstp.exe\" or\n      process.name : \"csi.exe\" or\n      process.name : \"dnx.exe\" or\n      process.name : \"fsi.exe\" or\n      process.name : \"ieexec.exe\" or\n      process.name : \"iexpress.exe\" or\n      process.name : \"installutil.exe\" or\n      process.name : \"Microsoft.Workflow.Compiler.exe\" or\n      process.name : \"MSBuild.exe\" or\n      process.name : \"msdt.exe\" or\n      process.name : \"mshta.exe\" or\n      (\n         process.name : \"msiexec.exe\" and not\n         dns.question.name : (\n            \"ocsp.digicert.com\", \"ocsp.verisign.com\", \"ocsp.comodoca.com\", \"ocsp.entrust.net\", \"ocsp.usertrust.com\",\n            \"ocsp.godaddy.com\", \"ocsp.camerfirma.com\", \"ocsp.globalsign.com\", \"ocsp.sectigo.com\", \"*.local\"\n         )\n      ) or\n      process.name : \"msxsl.exe\" or\n      process.name : \"odbcconf.exe\" or\n      process.name : \"rcsi.exe\" or\n      process.name : \"regsvr32.exe\" or\n      process.name : \"xwizard.exe\")]\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "dns.question.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "1fe3b299-fbb5-4657-a937-1d746f2c711a",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Defense Evasion",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1127",
+                        "name": "Trusted Developer Utilities Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1127/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 104
+    },
+    "id": "1fe3b299-fbb5-4657-a937-1d746f2c711a_104",
+    "type": "security-rule"
+}

@@ -1,0 +1,68 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects events where Okta behavior detection has identified a new authentication behavior.",
+        "from": "now-30m",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "interval": "15m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "New Okta Authentication Behavior Detected",
+        "note": "## Triage and analysis\n\n### Investigating New Okta Authentication Behavior Detected\n\nThis rule detects events where Okta behavior detection has identified a new authentication behavior such as a new device or location.\n\n#### Possible investigation steps:\n- Identify the user involved in this action by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, and `okta.actor.display_name` fields.\n- Determine the authentication anomaly by examining the `okta.debug_context.debug_data.risk_behaviors` and `okta.debug_context.debug_data.flattened` fields.\n- Determine the client used by the actor. Review the `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.zone`, `okta.client.device`, and `okta.client.id` fields.\n- If the client is a device, check the `okta.device.id`, `okta.device.name`, `okta.device.os_platform`, `okta.device.os_version`, and `okta.device.managed` fields.\n- Review the past activities of the actor involved in this action by checking their previous actions.\n- Examine the `okta.request.ip_chain` field to potentially determine if the actor used a proxy or VPN to perform this action.\n- Evaluate the actions that happened just before and after this event in the `okta.event_type` field to help understand the full context of the activity.\n\n### False positive analysis:\n- A user may be using a new device or location to sign in.\n- The Okta behavior detection may be incorrectly identifying a new authentication behavior and need adjusted.\n\n### Response and remediation:\n- If the user is legitimate and the authentication behavior is not suspicious, no action is required.\n- If the user is legitimate but the authentication behavior is suspicious, consider resetting the user's password and enabling multi-factor authentication (MFA).\n    - If MFA is already enabled, consider resetting MFA for the user.\n- If the user is not legitimate, consider deactivating the user's account.\n- If this is a false positive, consider adjusting the Okta behavior detection settings.\n- Block the IP address or device used in the attempts if they appear suspicious, using the data from the `okta.client.ip` and `okta.device.id` fields.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.",
+        "query": "event.dataset:okta.system and okta.debug_context.debug_data.risk_behaviors:*",
+        "references": [
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+            "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection",
+            "https://unit42.paloaltonetworks.com/muddled-libra/",
+            "https://help.okta.com/oie/en-us/content/topics/security/behavior-detection/about-behavior-detection.htm"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.debug_context.debug_data.risk_behaviors",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "260486ee-7d98-11ee-9599-f661ea17fbcd",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Tactic: Initial Access",
+            "Data Source: Okta"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": []
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 1
+    },
+    "id": "260486ee-7d98-11ee-9599-f661ea17fbcd_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,101 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the creation of the Antimalware Scan Interface (AMSI) DLL in an unusual location. This may indicate an attempt to bypass AMSI by loading a rogue AMSI module instead of the legit one.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.*",
+      "logs-windows.*",
+      "endgame-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious Antimalware Scan Interface DLL",
+    "query": "file where event.action != \"deletion\" and file.path != null and \n file.name : (\"amsi.dll\", \"amsi\") and not file.path : (\"?:\\\\Windows\\\\system32\\\\amsi.dll\", \"?:\\\\Windows\\\\Syswow64\\\\amsi.dll\")\n",
+    "references": [
+      "https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "fa488440-04cc-41d7-9279-539387bf2a17",
+    "severity": "high",
+    "tags": [
+      "Elastic",
+      "Host",
+      "Windows",
+      "Threat Detection",
+      "Defense Evasion",
+      "Elastic Endgame"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.001",
+                "name": "Disable or Modify Tools",
+                "reference": "https://attack.mitre.org/techniques/T1562/001/"
+              }
+            ]
+          },
+          {
+            "id": "T1574",
+            "name": "Hijack Execution Flow",
+            "reference": "https://attack.mitre.org/techniques/T1574/",
+            "subtechnique": [
+              {
+                "id": "T1574.001",
+                "name": "DLL Search Order Hijacking",
+                "reference": "https://attack.mitre.org/techniques/T1574/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "fa488440-04cc-41d7-9279-539387bf2a17",
+  "type": "security-rule"
+}

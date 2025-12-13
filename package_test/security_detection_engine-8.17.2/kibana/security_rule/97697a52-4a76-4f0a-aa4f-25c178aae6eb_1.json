@@ -1,0 +1,86 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule detects the use of the built-in Linux DebugFS utility from inside a privileged container. DebugFS is a special file system debugging utility which supports reading and writing directly from a hard drive device. When launched inside a privileged container, a container deployed with all the capabilities of the host machine, an attacker can access sensitive host level files which could be used for further privilege escalation and container escapes to the host machine.",
+    "from": "now-6m",
+    "index": [
+      "logs-cloud_defend*"
+    ],
+    "interval": "5m",
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "File System Debugger Launched Inside a Privileged Container",
+    "query": "process where event.module == \"cloud_defend\" and     \n  event.type == \"start\" and process.name == \"debugfs\" and \n  process.args : \"/dev/sd*\" and not process.args == \"-R\" and\n  container.security_context.privileged == true\n",
+    "references": [
+      "https://cyberark.wistia.com/medias/ygbzkzx93q?wvideo=ygbzkzx93q",
+      "https://book.hacktricks.xyz/linux-hardening/privilege-escalation/docker-security/docker-breakout-privilege-escalation#privileged"
+    ],
+    "related_integrations": [
+      {
+        "package": "cloud_defend",
+        "version": "^1.0.5"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "container.security_context.privileged",
+        "type": "boolean"
+      },
+      {
+        "ecs": true,
+        "name": "event.module",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "97697a52-4a76-4f0a-aa4f-25c178aae6eb",
+    "severity": "medium",
+    "tags": [
+      "Data Source: Elastic Defend for Containers",
+      "Domain: Container",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1611",
+            "name": "Escape to Host",
+            "reference": "https://attack.mitre.org/techniques/T1611/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "97697a52-4a76-4f0a-aa4f-25c178aae6eb_1",
+  "type": "security-rule"
+}
