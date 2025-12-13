@@ -7,14 +7,21 @@
 
 import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { API_VERSIONS } from '@kbn/security-solution-plugin/common/entity_analytics/constants';
+import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine/constants';
+import type { RiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 
 const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
+const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 
 export interface EntityAnalyticsApiService {
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
+  getRiskEngineStatus: () => Promise<RiskEngineStatusResponse>;
+  getEntityStoreStatus: () => Promise<GetEntityStoreStatusResponse>;
 }
 
 export const getEntityAnalyticsApiService = ({
@@ -70,6 +77,40 @@ export const getEntityAnalyticsApiService = ({
               ignoreErrors: [404, 500],
             });
           }
+        }
+      );
+    },
+
+    getRiskEngineStatus: async () => {
+      return await measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.getRiskEngineStatus',
+        async () => {
+          const response = await kbnClient.request<RiskEngineStatusResponse>({
+            method: 'GET',
+            path: `${basePath}${RISK_ENGINE_STATUS_URL}`,
+            headers: {
+              'elastic-api-version': API_VERSIONS.internal.v1,
+            },
+          });
+          return response.data;
+        }
+      );
+    },
+
+    getEntityStoreStatus: async () => {
+      return await measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.getEntityStoreStatus',
+        async () => {
+          const response = await kbnClient.request<GetEntityStoreStatusResponse>({
+            method: 'GET',
+            path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
+            headers: {
+              'elastic-api-version': API_VERSIONS.public.v1,
+            },
+          });
+          return response.data;
         }
       );
     },

@@ -19,7 +19,7 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
     await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
   });
 
-  spaceTest('enables risk score followed by the store', async ({ pageObjects }) => {
+  spaceTest('enables risk score followed by the store', async ({ pageObjects, apiServices }) => {
     const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
 
     await spaceTest.step('Navigate to dashboard and verify initial state', async () => {
@@ -45,6 +45,16 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
       await dashboardPage.confirmEntityStoreEnablement();
 
       await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
+    });
+
+    await spaceTest.step('Verify risk engine and entity store are actually enabled via API', async () => {
+      const riskEngineStatus = await apiServices.entityAnalytics.getRiskEngineStatus();
+
+      expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
+  
+      const entityStoreStatus = await apiServices.entityAnalytics.getEntityStoreStatus();
+
+      expect(entityStoreStatus.status).toBe('running');
     });
   });
 });
