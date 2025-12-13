@@ -16,12 +16,13 @@ import type {
   FieldFormatConvert,
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
+  HtmlLinkContextTypeOptions,
   TextContextTypeOptions,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from './types';
-import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
+import { htmlContentTypeSetup, htmlLinkContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
+import type { HtmlContextTypeConvert, HtmlLinkContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
@@ -74,6 +75,14 @@ export abstract class FieldFormat {
   htmlConvert: HtmlContextTypeConvert | undefined;
 
   /**
+   * @property {htmlLinkConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  htmlLinkConvert: HtmlLinkContextTypeConvert | undefined;
+
+  /**
    * @property {textConvert}
    * @protected
    * have to remove the protected because of
@@ -115,7 +124,7 @@ export abstract class FieldFormat {
   convert(
     value: unknown,
     contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE,
-    options?: HtmlContextTypeOptions | TextContextTypeOptions
+    options?: HtmlContextTypeOptions | TextContextTypeOptions | HtmlLinkContextTypeOptions
   ): string {
     return this.getConverterFor(contentType).call(this, value, options);
   }
@@ -209,6 +218,7 @@ export abstract class FieldFormat {
     return {
       text: textContentTypeSetup(this, this.textConvert),
       html: htmlContentTypeSetup(this, this.htmlConvert),
+      link: htmlLinkContentTypeSetup(this, this.htmlLinkConvert),
     };
   }
 

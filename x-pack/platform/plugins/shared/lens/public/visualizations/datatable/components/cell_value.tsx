@@ -17,6 +17,7 @@ import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import {resolveLink} from './helpers'
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -40,9 +41,17 @@ export const createGridCell = (
       colorMode = 'none',
       palette,
       colorMapping,
+      useLink,
+      linkPattern,
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
-    const content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
+    const isLink = table && useLink && linkPattern;
+    const convertOptions = isLink ? {
+      link: resolveLink(table, linkPattern, rowIndex)
+    } : undefined;
+    const formatsContentType = isLink ? 'link' : (filterOnClick ? 'text' : 'html');
+    const content =  formatter?.convert(rawValue, formatsContentType, convertOptions);
+    //const content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
     const currentAlignment = alignments?.get(columnId);
 
     useEffect(() => {

@@ -52,6 +52,8 @@ export interface ColumnState {
   summaryLabel?: string;
   collapseFn?: CollapseFunction;
   isMetric?: boolean;
+  useLink?: boolean;
+  linkPattern?: string;
 }
 
 export type DatatableColumnResult = DatatableColumnArgs & {
@@ -76,6 +78,8 @@ export const datatableColumn: DatatableColumnFn = {
     alignment: { types: ['string'], help: '' },
     sortingHint: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
+    useLink: { types: ['boolean'], help: '' },
+    linkPattern: { types: ['string'], help: '' },
     oneClickFilter: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },

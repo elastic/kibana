@@ -628,6 +628,8 @@ export const getDatatableVisualization = ({
               oneClickFilter: column.oneClickFilter,
               width: column.width,
               isTransposed: column.isTransposed,
+              useLink: column.useLink,
+              linkPattern: column.linkPattern,
               transposable: isTransposable,
               alignment: column.alignment,
               colorMode: canColor ? column.colorMode ?? 'none' : 'none',

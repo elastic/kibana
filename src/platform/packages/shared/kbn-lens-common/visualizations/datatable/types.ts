@@ -93,6 +93,8 @@ export interface ColumnState {
   summaryLabel?: string;
   collapseFn?: CollapseFunction;
   isMetric?: boolean;
+  useLink?: boolean;
+  linkPattern?: string;
 }
 
 export interface LensSortActionData {
