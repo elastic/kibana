@@ -211,7 +211,9 @@ export const rulesAll: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV1: ['all'],
+          // siemV5: ['all'], // TODO: Remove before merge
+          // securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all', 'securitySolutionExceptionsAll'],
           actions: ['all'],
           indexPatterns: ['all'],
           savedObjectManagement: ['all'],
@@ -236,7 +238,9 @@ export const rulesAllWithCases: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV1: ['all'],
+          // siemV5: ['all'], // TODO: Remove before merge
+          // securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all', 'securitySolutionExceptionsAll'],
           actions: ['all'],
           indexPatterns: ['all'],
           savedObjectManagement: ['all'],
@@ -262,7 +266,9 @@ export const rulesRead: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV1: ['read'],
+          // siemV5: ['all'], // TODO: Remove before merge
+          // securitySolutionRulesV1: ['read'],
+          securitySolutionRulesV2: ['read', 'securitySolutionExceptionsRead'],
           savedObjectManagement: ['all'],
           indexPatterns: ['all'],
         },

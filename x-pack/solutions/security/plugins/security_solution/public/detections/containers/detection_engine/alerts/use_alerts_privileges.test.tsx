@@ -78,7 +78,7 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
   siemPrivileges: { crud: true, read: true },
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
-  rulesPrivileges: { edit: true, read: true },
+  rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, crud: false } },
 };
 
 describe('useAlertsPrivileges', () => {

@@ -14,12 +14,10 @@ import type {
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { getIdError } from '../../../utils/utils';
 import { validateNonCustomizablePatchFields } from '../../../utils/validate';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
-import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
-import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
+import { ClientError, validateMlAuth, patchApplicator } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 
 interface PatchRuleOptions {
@@ -54,18 +52,12 @@ export const patchRule = async ({
 
   validateNonCustomizablePatchFields(rulePatch, existingRule);
 
-  const patchedRule = await applyRulePatch({
-    prebuiltRuleAssetClient,
-    existingRule,
+  const appliedInternalPatches = await patchApplicator(
+    rulesClient,
+    actionsClient,
     rulePatch,
-  });
-
-  const patchedInternalRule = await rulesClient.update({
-    id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
-  });
-
-  const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);
-
-  return convertAlertingRuleToRuleResponse({ ...patchedInternalRule, enabled });
+    existingRule,
+    prebuiltRuleAssetClient
+  );
+  return convertAlertingRuleToRuleResponse(appliedInternalPatches);
 };

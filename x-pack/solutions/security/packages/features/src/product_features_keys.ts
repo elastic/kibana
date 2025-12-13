@@ -168,6 +168,11 @@ export enum ProductFeatureRulesKey {
    * Enables customization of prebuilt Elastic rules
    */
   prebuiltRuleCustomization = 'prebuilt_rule_customization',
+
+  /**
+   * Enables Exceptions
+   */
+  exceptions = 'exceptions',
 }
 
 // Merges the two enums.
@@ -233,4 +238,9 @@ export enum AssistantSubFeatureId {
 /** Sub-features IDs for Security Attack Discovery */
 export enum AttackDiscoverySubFeatureId {
   updateSchedule = 'updateScheduleSubFeature',
+}
+
+/** Sub-features IDs for Security Rules */
+export enum RulesSubFeatureId {
+  exceptions = 'exceptionsSubFeature',
 }

@@ -31,14 +31,18 @@ import {
   LISTS_API_SUMMARY,
   RULES_API_ALL,
   RULES_API_READ,
-  RULES_FEATURE_ID,
+  RULES_FEATURE_ID_V1,
+  RULES_FEATURE_ID_V2,
   RULES_UI_EDIT,
   RULES_UI_READ,
   SERVER_APP_ID,
   USERS_API_READ,
-} from '../constants';
-import { type BaseKibanaFeatureConfig } from '../types';
-import type { SecurityFeatureParams } from '../security/types';
+  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ID_READ,
+  SECURITY_SOLUTION_RULES_APP_ID,
+} from '../../constants';
+import { type BaseKibanaFeatureConfig } from '../../types';
+import type { SecurityFeatureParams } from '../../security/types';
 
 const SECURITY_RULE_TYPES = [
   LEGACY_NOTIFICATIONS_ID,
@@ -60,7 +64,19 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 export const getRulesBaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
-  id: RULES_FEATURE_ID,
+  deprecated: {
+    notice: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
+      {
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
+        values: {
+          currentId: RULES_FEATURE_ID_V1,
+          latestId: RULES_FEATURE_ID_V2,
+        },
+      }
+    ),
+  },
+  id: RULES_FEATURE_ID_V1,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesTitle',
     {
@@ -69,7 +85,7 @@ export const getRulesBaseKibanaFeature = (
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [RULES_FEATURE_ID, 'kibana'],
+  app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
   management: {
@@ -77,7 +93,16 @@ export const getRulesBaseKibanaFeature = (
   },
   privileges: {
     all: {
-      app: [RULES_FEATURE_ID, 'kibana'],
+      replacedBy: {
+        default: [{ feature: RULES_FEATURE_ID_V2, privileges: ['all'] }],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID_V2,
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
+          },
+        ],
+      },
+      app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: params.savedObjects,
@@ -107,7 +132,16 @@ export const getRulesBaseKibanaFeature = (
       ],
     },
     read: {
-      app: [RULES_FEATURE_ID, 'kibana'],
+      replacedBy: {
+        default: [{ feature: RULES_FEATURE_ID_V2, privileges: ['read'] }],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID_V2,
+            privileges: ['minimal_read', EXCEPTIONS_SUBFEATURE_ID_READ],
+          },
+        ],
+      },
+      app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
@@ -115,7 +149,7 @@ export const getRulesBaseKibanaFeature = (
       },
       alerting: {
         rule: { read: alertingFeatures },
-        alert: { all: alertingFeatures },
+        alert: { read: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
