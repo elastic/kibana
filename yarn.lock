@@ -4970,6 +4970,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-elasticsearch-server-utils@link:src/core/packages/elasticsearch/server-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-elasticsearch-server@link:src/core/packages/elasticsearch/server":
   version "0.0.0"
   uid ""
