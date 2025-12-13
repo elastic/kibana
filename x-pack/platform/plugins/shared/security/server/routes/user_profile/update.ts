@@ -16,11 +16,7 @@ import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /** User profile data keys that are allowed to be updated by Cloud users */
-const ALLOWED_KEYS_UPDATE_CLOUD = [
-  'userSettings.darkMode',
-  'userSettings.contrastMode',
-  'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
-];
+const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode', 'userSettings.contrastMode'];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
 
@@ -47,7 +43,6 @@ const userProfileUpdateSchema = schema.object({
       contrastMode: schema.maybe(
         schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
       ),
-      'solutionNavigationTour:completed': schema.maybe(schema.boolean()),
     })
   ),
 });
