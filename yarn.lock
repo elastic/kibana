@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@0no-co/graphql.web/-/graphql.web-1.1.2.tgz#9af8deaf3f236c1c6ee99cc5349051475e5dcc83"
   integrity sha512-N2NGsU5FLBhT8NZ+3l2YrzZSHITjNXNuDhC4iDiikv0IujaJ0Xc6xIxQZ/Ek3Cb+rgPjnLHYyJm11tInuJn+cw==
 
-"@a2a-js/sdk@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@a2a-js/sdk/-/sdk-0.3.4.tgz#4b46a1b966d67e35d300cf28e2925a7283ad0bfd"
-  integrity sha512-WXMk/UspvQFxesvb8hXyfPE8d3ibpiRie24Yw/5ruMqNJcdwxjfZ1G0gj6vYE/I9RAZD145CNzedpZA2cLV2JQ==
+"@a2a-js/sdk@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@a2a-js/sdk/-/sdk-0.3.5.tgz#56eb7fb64e5da69ee3e5301a0857b6b92bc92e1f"
+  integrity sha512-6xAApkiss2aCbJXmXLC845tifcbYJ/R4Dj22kQsOaanMbf9bvkYhebDEuYPAIu3aaR5MWaBqG7OCK3IF8dqZZQ==
   dependencies:
     uuid "^11.1.0"
 
@@ -10042,10 +10042,10 @@
     outvariant "^1.4.3"
     strict-event-emitter "^0.5.1"
 
-"@n8n/json-schema-to-zod@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@n8n/json-schema-to-zod/-/json-schema-to-zod-1.1.0.tgz#d59ecf5f0c90c560b8b09374ea3efafc2dd5b84e"
-  integrity sha512-HfL3jq5NSb0Mng56QCfUnzD09F4wxWR543jYJZ+XBQpb0f9B102r6K3qEtdXVTs1mwHVnxz5KBaesqipFYPjww==
+"@n8n/json-schema-to-zod@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@n8n/json-schema-to-zod/-/json-schema-to-zod-1.6.0.tgz#6bc933056e8d273e897cebe52012ca0f92d96627"
+  integrity sha512-5AryA/GdX0U0+Qx2u3S14vME9ZK4ubS+rOC2MYlRDtRPCalBMGd5heVzU+W5o95JWAm4XQL/s0PZGM9a1xEhHg==
 
 "@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3":
   version "2.1.8-no-fsevents.3"
