@@ -87,11 +87,11 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import {
-  useGetDocumentViewRenderer,
-  type DiscoverGridFlyoutProps,
-} from './helpers/render_document_view';
 import { useReadCascadeConfig } from './cascaded_documents/hooks/config';
+import {
+  DiscoverGridFlyout,
+  type DiscoverGridFlyoutProps,
+} from '../../../../components/discover_grid_flyout';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -232,9 +232,6 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
-
-  const documentViewRenderer = useGetDocumentViewRenderer(docViewerRef);
-
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       dispatch(
@@ -340,26 +337,27 @@ function DiscoverDocumentsComponent({
       displayedColumns: string[],
       expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
       customColumnsMeta?: DataTableColumnsMeta
-    ) =>
-      documentViewRenderer({
-        dataView,
-        hit,
-        hits: displayedRows,
+    ) => (
+      <DiscoverGridFlyout
+        dataView={dataView}
+        hit={hit}
+        hits={displayedRows}
         // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-        columns: displayedColumns,
-        columnsMeta: customColumnsMeta,
-        savedSearchId: persistedDiscoverSession?.id!,
-        query,
-        initialTabId: initialDocViewerTabId,
-        onFilter: onAddFilter,
-        onRemoveColumn: onRemoveColumnWithTracking,
-        onAddColumn: onAddColumnWithTracking,
-        setExpandedDoc: expandedDocSetter,
-        onClose: expandedDocSetter.bind(null, undefined),
-        docViewerExtensionActions,
-      }),
+        columns={displayedColumns}
+        columnsMeta={customColumnsMeta}
+        savedSearchId={persistedDiscoverSession?.id!}
+        query={query}
+        initialTabId={initialDocViewerTabId}
+        onFilter={onAddFilter}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddColumn={onAddColumnWithTracking}
+        setExpandedDoc={expandedDocSetter}
+        onClose={expandedDocSetter.bind(null, undefined)}
+        docViewerRef={docViewerRef}
+        docViewerExtensionActions={docViewerExtensionActions}
+      />
+    ),
     [
-      documentViewRenderer,
       dataView,
       persistedDiscoverSession?.id,
       query,
