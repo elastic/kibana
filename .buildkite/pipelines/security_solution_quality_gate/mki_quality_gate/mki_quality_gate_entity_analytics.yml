@@ -12,6 +12,10 @@ steps:
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
     parallelism: 1
+    retry:
+      automatic:
+        - exit_status: "1"
+          limit: 1
 
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
@@ -28,7 +32,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - entity_analytics:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless:release
@@ -42,7 +46,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - explore:hosts:runner:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless:release
@@ -56,7 +60,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - explore:network:runner:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless:release
@@ -70,7 +74,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - explore:users:runner:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless:release
@@ -84,4 +88,4 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1

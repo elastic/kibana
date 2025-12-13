@@ -15,6 +15,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 3
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:detection_alerts
         label: 'Cypress MKI - Detection Alerts'
@@ -29,6 +33,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 2
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:exceptions
         label: 'Cypress MKI - Exceptions'
@@ -43,6 +51,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 4
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:overview
         label: 'Cypress MKI - Overview'
@@ -57,6 +69,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_actions
         label: 'Cypress MKI - Rule Actions'
@@ -71,6 +87,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_creation
         label: 'Cypress MKI - Rule Creation'
@@ -85,6 +105,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 3
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_edit
         label: 'Cypress MKI - Rule Edit'
@@ -99,6 +123,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:rule_gaps
         label: 'Cypress MKI - Rule Gaps'
@@ -113,6 +141,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:value_lists
         label: 'Cypress MKI - Value Lists'
@@ -127,6 +159,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
   - group: 'API MKI - Detection Engine'
     key: api_test_detections_engine
@@ -142,8 +178,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_lists:auth:lists:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:lists:qa:serverless
@@ -156,8 +192,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_lists:auth:common:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:common:qa:serverless
@@ -170,8 +206,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_lists:auth:items:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:items:qa:serverless
@@ -184,8 +220,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - lists_items:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh lists_items:qa:serverless
@@ -198,8 +234,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - user_roles:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh user_roles:qa:serverless
@@ -212,8 +248,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - telemetry:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh telemetry:qa:serverless
@@ -226,8 +262,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_workflows:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:essentials:qa:serverless
@@ -240,8 +276,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_date_types:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_types:essentials:qa:serverless
@@ -254,8 +290,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_double:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_double:essentials:qa:serverless
@@ -268,8 +304,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_float:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_float:essentials:qa:serverless
@@ -282,8 +318,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_integer:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_integer:essentials:qa:serverless
@@ -296,8 +332,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_keyword:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_keyword:essentials:qa:serverless
@@ -310,8 +346,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_ips:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_ips:essentials:qa:serverless
@@ -324,8 +360,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_long:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:essentials:qa:serverless
@@ -338,8 +374,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - exception_operators_text:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_text:essentials:qa:serverless
@@ -352,8 +388,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - actions:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh actions:qa:serverless
@@ -366,8 +402,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - alerts:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:qa:serverless
@@ -380,8 +416,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - alerts:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:essentials:qa:serverless
@@ -394,8 +430,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:eql:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:eql:qa:serverless
@@ -408,8 +444,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:esql:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:esql:qa:serverless
@@ -422,8 +458,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:general_logic:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:qa:serverless
@@ -436,8 +472,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:general_logic:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:essentials:qa:serverless
@@ -450,8 +486,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:indicator_match:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:indicator_match:qa:serverless
@@ -464,8 +500,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:machine_learning:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:machine_learning:qa:serverless
@@ -478,8 +514,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:new_terms:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:new_terms:qa:serverless
@@ -492,8 +528,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:query:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:query:qa:serverless
@@ -506,8 +542,8 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
 
       - label: 'API MKI - rule_execution_logic:threshold:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:threshold:qa:serverless
@@ -520,5 +556,5 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: '1'
-              limit: 2
+            - exit_status: "1"
+              limit: 1
