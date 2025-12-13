@@ -23,4 +23,11 @@ tags:
   - dev
   - group-platform
   - private
+fileGroups:
+  src:
+    - '*.js'
+    - .eslintrc.js
+    - react.js
+    - restricted_globals.js
+    - typescript.js
 tasks: {}

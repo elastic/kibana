@@ -52,6 +52,7 @@
     "lint:es": "node --no-experimental-require-module scripts/eslint_all_files",
     "lint:style": "node --no-experimental-require-module scripts/stylelint",
     "makelogs": "node --no-experimental-require-module scripts/makelogs",
+    "moon:regenerate": "node scripts/regenerate_moon_projects.js --update",
     "quick-checks": "node --no-experimental-require-module scripts/quick_checks",
     "serverless": "node --no-experimental-require-module scripts/kibana --dev --serverless",
     "serverless-es": "node --no-experimental-require-module scripts/kibana --dev --serverless=es",
