@@ -54,7 +54,7 @@ export const simpleMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },

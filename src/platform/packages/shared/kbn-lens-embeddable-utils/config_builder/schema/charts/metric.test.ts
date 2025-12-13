@@ -8,6 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
+import type { MetricState } from './metric';
 import { metricStateSchema } from './metric';
 
 describe('Metric Schema', () => {
@@ -17,12 +18,14 @@ describe('Metric Schema', () => {
       type: 'dataView',
       id: 'test-data-view',
     },
-  };
+  } satisfies Partial<MetricState>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  };
+  } satisfies Partial<MetricState>;
+
+  type MetricInput = Omit<MetricState, keyof typeof defaultValues>;
 
   describe('primary metric configuration', () => {
     it('validates count metric operation', () => {
@@ -39,7 +42,7 @@ describe('Metric Schema', () => {
             value: 'right',
           },
         },
-      };
+      } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
@@ -59,7 +62,7 @@ describe('Metric Schema', () => {
           },
           alignments: { labels: 'left', value: 'left' },
         },
-      };
+      } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({
@@ -80,12 +83,12 @@ describe('Metric Schema', () => {
             type: 'dynamic',
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 100, color: 'red' },
             ],
           },
         },
-      };
+      } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
@@ -108,7 +111,7 @@ describe('Metric Schema', () => {
             },
           },
         },
-      };
+      } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
@@ -122,16 +125,17 @@ describe('Metric Schema', () => {
           field: 'temperature',
           color: {
             type: 'dynamic',
+            // @ts-expect-error - percentage not supported
             range: 'percentage',
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 100, color: 'red' },
             ],
           },
           fit: false,
           alignments: { labels: 'left', value: 'left' },
         },
-      };
+      } satisfies MetricInput;
 
       expect(() => metricStateSchema.validate(input)).toThrow();
     });
@@ -157,7 +161,7 @@ describe('Metric Schema', () => {
           },
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-      };
+      } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
@@ -247,10 +251,11 @@ describe('Metric Schema', () => {
     it('throws on missing metric operation', () => {
       const input = {
         ...baseMetricConfig,
+        // @ts-expect-error
         metric: {
           field: 'test_field',
         },
-      };
+      } satisfies MetricInput;
 
       expect(() => metricStateSchema.validate(input)).toThrow();
     });
@@ -273,6 +278,7 @@ describe('Metric Schema', () => {
     it('throws on invalid breakdown collapse_by value', () => {
       const input = {
         ...baseMetricConfig,
+        // @ts-expect-error
         metric: {
           operation: 'sum',
           field: 'sales',
@@ -280,9 +286,10 @@ describe('Metric Schema', () => {
         breakdown_by: {
           operation: 'terms',
           fields: ['category'],
+          // @ts-expect-error
           collapse_by: 'invalid',
         },
-      };
+      } satisfies MetricInput;
 
       expect(() => metricStateSchema.validate(input)).toThrow();
     });
@@ -312,8 +319,8 @@ describe('Metric Schema', () => {
             type: 'dynamic',
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#red' },
-              { type: 'to', to: 1000, color: '#green' },
+              { lt: 0, color: 'red' },
+              { gte: 1000, color: 'green' },
             ],
           },
           background_chart: {
@@ -334,8 +341,9 @@ describe('Metric Schema', () => {
           fields: ['category'],
           columns: 4,
           collapse_by: 'sum',
+          size: 5,
         },
-      };
+      } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({
@@ -358,7 +366,7 @@ describe('Metric Schema', () => {
           fit: false,
           alignments: { labels: 'left', value: 'left' },
         },
-      };
+      } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
