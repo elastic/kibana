@@ -26,10 +26,10 @@ import {
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
 import { type ESQLDataGroupNode } from '../blocks';
-import type { CascadedDocumentsRestorableState } from '../cascaded_documents_restorable_state';
+import type { CascadedDocumentsState } from '../../../../state_management/redux';
 
 interface UseGroupedCascadeDataProps extends Pick<UnifiedDataTableProps, 'rows'> {
-  cascadeConfig: CascadedDocumentsRestorableState;
+  cascadeConfig: CascadedDocumentsState;
   queryMeta: ESQLStatsQueryMeta;
   esqlVariables: ESQLControlVariable[] | undefined;
 }

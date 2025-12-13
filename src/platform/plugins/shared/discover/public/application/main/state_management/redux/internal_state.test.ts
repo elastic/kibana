@@ -236,7 +236,13 @@ describe('InternalStateStore', () => {
 
       expect(cascadeLayoutFeatureFlagSpy).toHaveBeenCalled();
 
-      expect(getCurrentTab(store).uiState.cascadedDocuments).toBeUndefined();
+      const currentTab = getCurrentTab(store);
+
+      expect(currentTab.cascadedDocumentsState).toBeDefined();
+
+      expect(currentTab.cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+
+      expect(currentTab.cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
     });
 
     it('should compute and set cascade groupings when state updates happen and the feature flag evaluation is true', async () => {
@@ -259,11 +265,11 @@ describe('InternalStateStore', () => {
 
       const currentTab = getCurrentTab(store);
 
-      expect(currentTab.uiState.cascadedDocuments).toBeDefined();
+      expect(currentTab.cascadedDocumentsState).toBeDefined();
 
-      expect(currentTab.uiState.cascadedDocuments?.availableCascadeGroups).toEqual(['my_field']);
+      expect(currentTab.cascadedDocumentsState.availableCascadeGroups).toEqual(['my_field']);
 
-      expect(currentTab.uiState.cascadedDocuments?.selectedCascadeGroups).toEqual(['my_field']);
+      expect(currentTab.cascadedDocumentsState.selectedCascadeGroups).toEqual(['my_field']);
     });
 
     it('should respect previous cascade group selection when a state update happens as long as the query has not changed', async () => {
@@ -290,13 +296,13 @@ describe('InternalStateStore', () => {
       const currentTabState = getCurrentTab(store);
 
       // The initial available groups are ['field1', 'field2'].
-      expect(currentTabState.uiState.cascadedDocuments?.availableCascadeGroups).toEqual([
+      expect(currentTabState.cascadedDocumentsState.availableCascadeGroups).toEqual([
         'field1',
         'field2',
       ]);
 
       // By default, the first group is selected.
-      expect(currentTabState.uiState.cascadedDocuments?.selectedCascadeGroups).toEqual(['field1']);
+      expect(currentTabState.cascadedDocumentsState.selectedCascadeGroups).toEqual(['field1']);
 
       // 2. Simulate user selects a valid group that is not the first (e.g., 'field2')
       // We mimic this by directly setting the group selection in UI state.
@@ -304,22 +310,20 @@ describe('InternalStateStore', () => {
       // Here we simulate how state update with same query uses previous selection if valid.
       const injectCurrentTab = createTabActionInjector(currentTabState.id);
       store.dispatch(
-        injectCurrentTab(internalStateActions.setCascadeUiState)({
-          cascadeUiState: {
-            ...currentTabState.uiState.cascadedDocuments!,
+        injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+          cascadedDocumentsState: {
+            ...currentTabState.cascadedDocumentsState!,
             selectedCascadeGroups: ['field2'],
           },
         })
       );
 
-      expect(getCurrentTab(store).uiState.cascadedDocuments!.availableCascadeGroups).toEqual([
+      expect(getCurrentTab(store).cascadedDocumentsState!.availableCascadeGroups).toEqual([
         'field1',
         'field2',
       ]);
       // select cascade group should be value "field2" now
-      expect(getCurrentTab(store).uiState.cascadedDocuments?.selectedCascadeGroups).toEqual([
-        'field2',
-      ]);
+      expect(getCurrentTab(store).cascadedDocumentsState.selectedCascadeGroups).toEqual(['field2']);
 
       // 3. Another state update with the same query, e.g., something else changed, but not the query.
       store.dispatch(
@@ -332,12 +336,12 @@ describe('InternalStateStore', () => {
         })
       );
 
-      expect(getCurrentTab(store).uiState.cascadedDocuments!.availableCascadeGroups).toEqual([
+      expect(getCurrentTab(store).cascadedDocumentsState!.availableCascadeGroups).toEqual([
         'field1',
         'field2',
       ]);
       // Still uses ['field2'] as selected group.
-      expect(getCurrentTab(store).uiState.cascadedDocuments!.selectedCascadeGroups).toEqual([
+      expect(getCurrentTab(store).cascadedDocumentsState!.selectedCascadeGroups).toEqual([
         'field2',
       ]);
 
@@ -353,13 +357,13 @@ describe('InternalStateStore', () => {
       );
 
       // With a new query, we should have new available groups.
-      expect(getCurrentTab(store).uiState.cascadedDocuments!.availableCascadeGroups).toEqual([
+      expect(getCurrentTab(store).cascadedDocumentsState!.availableCascadeGroups).toEqual([
         'new_field1',
         'new_field2',
       ]);
 
       // With a new query, the selected group should be the first group since it's the default.
-      expect(getCurrentTab(store).uiState.cascadedDocuments!.selectedCascadeGroups).toEqual([
+      expect(getCurrentTab(store).cascadedDocumentsState!.selectedCascadeGroups).toEqual([
         'new_field1',
       ]);
     });

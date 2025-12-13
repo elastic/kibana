@@ -238,6 +238,14 @@ export const internalStateSlice = createSlice({
         tab.controlGroupState = action.payload.controlGroupState;
       }),
 
+    setCascadedDocumentsState: (
+      state,
+      action: TabAction<Pick<TabState, 'cascadedDocumentsState'>>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.cascadedDocumentsState = action.payload.cascadedDocumentsState;
+      }),
+
     setEsqlVariables: (
       state,
       action: TabAction<{ esqlVariables: ESQLControlVariable[] | undefined }>
@@ -346,14 +354,6 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.metricsGrid = action.payload.metricsGridState;
-      }),
-
-    setCascadeUiState: (
-      state,
-      action: TabAction<{ cascadeUiState: TabState['uiState']['cascadedDocuments'] }>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.uiState.cascadedDocuments = action.payload.cascadeUiState;
       }),
   },
   extraReducers: (builder) => {
@@ -474,45 +474,47 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: (action, listenerApi) => {
       const { services } = listenerApi.extra;
 
-      withTab(listenerApi.getState(), action.payload, ({ appState, uiState, id: tabId }) => {
-        if (
-          isOfAggregateQueryType(appState.query) &&
-          services.discoverFeatureFlags.getCascadeLayoutEnabled()
-        ) {
-          const availableCascadeGroups = getESQLStatsQueryMeta(
-            (appState.query as AggregateQuery).esql
-          ).groupByFields.map((group) => group.field);
+      withTab(
+        listenerApi.getState(),
+        action.payload,
+        ({ appState, cascadedDocumentsState, id: tabId }) => {
+          if (
+            isOfAggregateQueryType(appState.query) &&
+            services.discoverFeatureFlags.getCascadeLayoutEnabled()
+          ) {
+            const availableCascadeGroups = getESQLStatsQueryMeta(
+              (appState.query as AggregateQuery).esql
+            ).groupByFields.map((group) => group.field);
 
-          const computeSelectedCascadeGroups = (cascadeGroups: string[]) => {
-            if (
-              !uiState.cascadedDocuments ||
-              (uiState.cascadedDocuments &&
-                // if the proposed available groups is different in length or contains a value the existing one doesn't have, we want to reset by defaulting to the first group
-                (cascadeGroups.length !== uiState.cascadedDocuments.availableCascadeGroups.length ||
-                  cascadeGroups.some(
-                    (group) =>
-                      (uiState.cascadedDocuments?.availableCascadeGroups ?? []).indexOf(group) < 0
-                  )))
-            ) {
-              return [cascadeGroups[0]].filter(Boolean);
-            }
+            const computeSelectedCascadeGroups = (cascadeGroups: string[]) => {
+              // if the proposed available groups is different in length or contains a value the existing one doesn't have,
+              // we want to reset by defaulting to the first group
+              if (
+                cascadeGroups.length !== cascadedDocumentsState.availableCascadeGroups.length ||
+                cascadeGroups.some(
+                  (group) => cascadedDocumentsState.availableCascadeGroups.indexOf(group) < 0
+                )
+              ) {
+                return [cascadeGroups[0]].filter(Boolean);
+              }
 
-            // return existing selection since we've asserted that there's been no change to the available groups default
-            return uiState.cascadedDocuments!.selectedCascadeGroups;
-          };
+              // return existing selection since we've asserted that there's been no change to the available groups default
+              return cascadedDocumentsState.selectedCascadeGroups;
+            };
 
-          const injectCurrentTab = createTabActionInjector(tabId);
+            const injectCurrentTab = createTabActionInjector(tabId);
 
-          listenerApi.dispatch(
-            injectCurrentTab(internalStateSlice.actions.setCascadeUiState)({
-              cascadeUiState: {
-                availableCascadeGroups,
-                selectedCascadeGroups: computeSelectedCascadeGroups(availableCascadeGroups),
-              },
-            })
-          );
+            listenerApi.dispatch(
+              injectCurrentTab(internalStateSlice.actions.setCascadedDocumentsState)({
+                cascadedDocumentsState: {
+                  availableCascadeGroups,
+                  selectedCascadeGroups: computeSelectedCascadeGroups(availableCascadeGroups),
+                },
+              })
+            );
+          }
         }
-      });
+      );
     },
   });
 

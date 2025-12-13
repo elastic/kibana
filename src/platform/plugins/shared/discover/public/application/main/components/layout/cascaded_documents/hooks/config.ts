@@ -12,11 +12,11 @@ import { useCurrentTabSelector } from '../../../../state_management/redux';
 const SUPPORTED_CASCADE_GROUPING_COUNT = 1;
 
 export const useReadCascadeConfig = () => {
-  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascadedDocuments);
+  const cascadeConfig = useCurrentTabSelector((state) => state.cascadedDocumentsState);
 
   if (
-    cascadeConfig?.availableCascadeGroups?.length &&
-    cascadeConfig?.availableCascadeGroups?.length <= SUPPORTED_CASCADE_GROUPING_COUNT
+    cascadeConfig.availableCascadeGroups.length &&
+    cascadeConfig.availableCascadeGroups.length <= SUPPORTED_CASCADE_GROUPING_COUNT
   ) {
     return cascadeConfig;
   }

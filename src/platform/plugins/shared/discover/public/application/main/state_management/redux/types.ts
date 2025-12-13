@@ -30,7 +30,6 @@ import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
-import type { CascadedDocumentsRestorableState } from '../../components/layout/cascaded_documents/cascaded_documents_restorable_state';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 
 export interface InternalStateDataRequestParams {
@@ -117,6 +116,11 @@ export interface DiscoverAppState {
   density?: DataGridDensity;
 }
 
+export interface CascadedDocumentsState {
+  availableCascadeGroups: string[];
+  selectedCascadeGroups: string[];
+}
+
 export enum TabInitializationStatus {
   NotStarted = 'NotStarted',
   InProgress = 'InProgress',
@@ -143,9 +147,7 @@ export interface TabState extends TabItem {
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
   controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
-  /**
-   * ESQL query variables
-   */
+  cascadedDocumentsState: CascadedDocumentsState;
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
@@ -166,7 +168,6 @@ export interface TabState extends TabItem {
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
-    cascadedDocuments?: CascadedDocumentsRestorableState;
   };
 }
 

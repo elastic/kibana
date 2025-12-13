@@ -562,8 +562,8 @@ export function getDiscoverStateContainer({
       ).groupByFields.map((group) => group.field);
 
       internalState.dispatch(
-        injectCurrentTab(internalStateActions.setCascadeUiState)({
-          cascadeUiState: {
+        injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+          cascadedDocumentsState: {
             availableCascadeGroups,
             selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
           },
@@ -800,10 +800,10 @@ export function getDiscoverStateContainer({
     const currentTabState = getCurrentTab();
 
     internalState.dispatch(
-      injectCurrentTab(internalStateActions.setCascadeUiState)({
-        cascadeUiState: {
+      injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+        cascadedDocumentsState: {
           availableCascadeGroups:
-            currentTabState.uiState.cascadedDocuments!.availableCascadeGroups.slice(0),
+            currentTabState.cascadedDocumentsState.availableCascadeGroups.slice(0),
           selectedCascadeGroups: cascadeGrouping,
         },
       })
