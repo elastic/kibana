@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
 import type { OnPreResponseHandler } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
 
 export function createOnPreResponseHandler(
   refresh: () => Promise<ILicense>,
-  license$: Observable<ILicense>
+  getLicense: () => Readonly<ILicense> | undefined
 ): OnPreResponseHandler {
   return async (req, res, t) => {
     // If we're returning an error response, refresh license info from
@@ -22,9 +20,18 @@ export function createOnPreResponseHandler(
     // that back-pressure should be applied, and we don't need to refresh the license in these
     // situations.
     if (res.statusCode >= 400 && res.statusCode !== 429) {
-      await refresh();
+      void refresh();
     }
-    const license = await firstValueFrom(license$);
+    const license = getLicense();
+
+    if (!license) {
+      return t.next({
+        headers: {
+          'kbn-license-sig': 'unknown',
+        },
+      });
+    }
+
     return t.next({
       headers: {
         'kbn-license-sig': license.signature,
