@@ -33,6 +33,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./global_search'));
     loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./doc_counts'));
     loadTestFile(require.resolve('./snapshot_restore'));
   });
 }
