@@ -163,6 +163,16 @@ export {
   IndexLifecyclePhaseSelectOption,
 } from './ilm_types';
 
+export {
+  SEARCH_EXCLUDED_DATA_TIERS_SETTING,
+  getExcludedDataTiers,
+  getDataTierFilterCombined,
+  applyDataTierFilterToQuery,
+  mergeDataTierFilter,
+  applyDataTierFilterToSearchRequest,
+  applyDataTierFilterToKibanaSearchRequest,
+} from './data_tier_filter';
+
 export const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 export const LOGS_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';
 

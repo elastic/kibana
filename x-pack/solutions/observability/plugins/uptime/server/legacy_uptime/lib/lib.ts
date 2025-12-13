@@ -20,7 +20,12 @@ import type { ESSearchResponse } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
-import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+import {
+  getInspectResponse,
+  getExcludedDataTiers,
+  mergeDataTierFilter,
+  applyDataTierFilterToSearchRequest,
+} from '@kbn/observability-shared-plugin/common';
 import semver from 'semver/preload';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../constants/settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
@@ -101,7 +106,11 @@ export class UptimeEsClient {
 
     await this.initSettings();
 
-    const esParams = { index: index ?? this.heartbeatIndices, ...params };
+    // Get excluded data tiers and apply filter
+    const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
+    const filteredParams = applyDataTierFilterToSearchRequest(params, excludedDataTiers);
+
+    const esParams = { index: index ?? this.heartbeatIndices, ...filteredParams };
 
     const startTimeNow = Date.now();
 
@@ -139,13 +148,31 @@ export class UptimeEsClient {
 
     return res;
   }
-  async count<TParams>(params: TParams): Promise<CountResponse> {
+  async count<TParams extends estypes.CountRequest>(params: TParams): Promise<CountResponse> {
     let res: any;
     let esError: any;
 
     await this.initSettings();
 
-    const esParams = { index: this.heartbeatIndices, ...params };
+    // Get excluded data tiers and apply filter only when there are tiers to exclude
+    const excludedDataTiers = await getExcludedDataTiers(this.uiSettings?.client);
+    let filteredParams: TParams = params;
+
+    if (excludedDataTiers.length > 0) {
+      const mustNot = mergeDataTierFilter(params.query?.bool?.must_not, excludedDataTiers);
+      filteredParams = {
+        ...params,
+        query: {
+          ...params.query,
+          bool: {
+            ...params.query?.bool,
+            must_not: mustNot,
+          },
+        },
+      };
+    }
+
+    const esParams = { index: this.heartbeatIndices, ...filteredParams };
 
     try {
       res = await this.baseESClient.count(esParams, {

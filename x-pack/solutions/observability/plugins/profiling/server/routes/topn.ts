@@ -196,7 +196,11 @@ export function queryTopNCommon({
       try {
         return response.ok({
           body: await topNElasticSearchQuery({
-            client: createProfilingEsClient({ request, esClient: client }),
+            client: createProfilingEsClient({
+              request,
+              esClient: client,
+              uiSettings: core.uiSettings.client,
+            }),
             logger,
             timeFrom,
             timeTo,
