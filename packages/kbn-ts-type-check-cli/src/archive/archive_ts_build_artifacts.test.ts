@@ -102,6 +102,7 @@ describe('archiveTSBuildArtifacts', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       files,
+      cacheInvalidationFiles: ['yarn.lock', '.nvmrc', '.node-version'],
       prNumber: '789',
       sha: 'abc123',
     });
