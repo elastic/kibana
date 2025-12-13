@@ -18,6 +18,7 @@ import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { AttachmentType } from '../../../common/types/domain';
 
 const FilesBadge = ({
   activeTab,
@@ -192,23 +193,43 @@ export interface UseCaseAttachmentTabsReturnValue {
 export const useCaseAttachmentTabs = ({
   caseData,
   activeTab,
+  searchTerm,
 }: {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
+  searchTerm?: string;
 }): UseCaseAttachmentTabsReturnValue => {
   const { features } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
     caseId: caseData.id,
+    searchTerm,
   });
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
-
+  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
+  const totalAlerts = useMemo(() => {
+    return features.alerts.enabled
+      ? caseData.comments
+          .filter((comment) => comment.type === AttachmentType.alert)
+          .map((comment) => comment.alertId)
+          .flat().length
+      : 0;
+  }, [features.alerts.enabled, caseData.comments]);
+
+  const totalEvents = useMemo(() => {
+    return features.events.enabled
+      ? caseData.comments
+          .filter((comment) => comment.type === AttachmentType.event)
+          .map((comment) => comment.eventId)
+          .flat().length
+      : 0;
+  }, [features.events.enabled, caseData.comments]);
+
   const totalAttachments =
-    Number(features.alerts.enabled ? caseData.totalAlerts : 0) +
-    Number(features.events.enabled ? caseData.totalEvents : 0) +
+    totalAlerts +
+    totalEvents +
     Number(fileStatsData?.total) +
     (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
 
@@ -222,7 +243,7 @@ export const useCaseAttachmentTabs = ({
               badge: (
                 <AlertsBadge
                   isExperimental={features.alerts.isExperimental}
-                  totalAlerts={caseData.totalAlerts}
+                  totalAlerts={totalAlerts}
                   activeTab={activeTab}
                   euiTheme={euiTheme}
                 />
@@ -236,11 +257,7 @@ export const useCaseAttachmentTabs = ({
               id: CASE_VIEW_PAGE_TABS.EVENTS,
               name: EVENTS_TAB,
               badge: (
-                <EventsBadge
-                  totalEvents={caseData.totalEvents}
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                />
+                <EventsBadge totalEvents={totalEvents} activeTab={activeTab} euiTheme={euiTheme} />
               ),
             },
           ]
@@ -277,8 +294,8 @@ export const useCaseAttachmentTabs = ({
     [
       activeTab,
       canShowObservableTabs,
-      caseData.totalAlerts,
-      caseData.totalEvents,
+      totalAlerts,
+      totalEvents,
       euiTheme,
       features.alerts.enabled,
       features.alerts.isExperimental,
