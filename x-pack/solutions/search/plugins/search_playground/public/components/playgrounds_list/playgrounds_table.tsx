@@ -155,6 +155,9 @@ export const PlaygroundsTable = ({
         data-test-subj="playgroundsTable"
         items={playgroundsData.items}
         columns={columns}
+        tableCaption={i18n.translate('xpack.searchPlayground.playgroundsList.table.caption', {
+          defaultMessage: 'Saved playgrounds list',
+        })}
         pagination={{
           pageIndex: playgroundsData._meta.page - 1,
           pageSize: playgroundsData._meta.size,
