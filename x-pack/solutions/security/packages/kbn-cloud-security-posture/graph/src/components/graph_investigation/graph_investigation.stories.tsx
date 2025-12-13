@@ -21,7 +21,11 @@ import {
   USE_FETCH_GRAPH_DATA_ACTION,
   USE_FETCH_GRAPH_DATA_REFRESH_ACTION,
 } from '../mock/constants';
-import type { MockScenario } from '../mock/use_fetch_graph_data.mock';
+import {
+  singleActorMockData,
+  groupedActorMockData,
+  groupedTargetMockData,
+} from '../mock/use_fetch_graph_data.mock';
 
 const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
 const defaultProps: GraphInvestigationProps = {
@@ -53,7 +57,7 @@ type GraphInvestigationPropsAndCustomArgs = React.ComponentProps<typeof GraphInv
   supportNodePreviewPopover: boolean;
 };
 
-const createDecorator = (scenario: MockScenario): Decorator[] => {
+const createDecorator = (mockData: unknown): Decorator[] => {
   const scenarioDecorator: Decorator = (StoryComponent, context) => {
     const { shouldShowSearchBarTour, isLoading } =
       context.args as Partial<GraphInvestigationPropsAndCustomArgs>;
@@ -61,17 +65,17 @@ const createDecorator = (scenario: MockScenario): Decorator[] => {
       SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
       shouldShowSearchBarTour?.toString() || 'true'
     );
-    const mockData = {
+    const mock = {
       useFetchGraphDataMock: {
         isFetching: isLoading ?? false,
         refresh: action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION),
         log: action(USE_FETCH_GRAPH_DATA_ACTION),
-        scenario,
+        data: mockData,
       },
     };
 
     return (
-      <MockDataProvider data={mockData}>
+      <MockDataProvider data={mock}>
         <StoryComponent />
       </MockDataProvider>
     );
@@ -133,13 +137,13 @@ const meta = {
 export default meta;
 
 export const SingleActor: StoryObj<Partial<GraphInvestigationProps>> = {
-  decorators: createDecorator('single-actor'),
+  decorators: createDecorator(singleActorMockData),
 };
 
 export const GroupedActor: StoryObj<Partial<GraphInvestigationProps>> = {
-  decorators: createDecorator('grouped-actor'),
+  decorators: createDecorator(groupedActorMockData),
 };
 
 export const GroupedTarget: StoryObj<Partial<GraphInvestigationProps>> = {
-  decorators: createDecorator('grouped-target'),
+  decorators: createDecorator(groupedTargetMockData),
 };
