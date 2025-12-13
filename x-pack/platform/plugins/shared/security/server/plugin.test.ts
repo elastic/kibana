@@ -192,6 +192,11 @@ describe('Security Plugin', () => {
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
               "invalidateAsInternalUser": [Function],
+              "uiam": Object {
+                "getScopedClusterClientWithApiKey": [Function],
+                "grantApiKey": [Function],
+                "invalidateApiKey": [Function],
+              },
               "update": [Function],
               "validate": [Function],
             },

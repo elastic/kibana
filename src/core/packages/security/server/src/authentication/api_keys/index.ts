@@ -26,3 +26,10 @@ export type {
 } from './api_keys';
 export type { APIKeysServiceWithContext } from './api_keys_context';
 export { isCreateRestAPIKeyParams } from './api_keys';
+
+export type {
+  UiamAPIKeysService,
+  UiamAPIKeysServiceWithContext,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+} from './uiam';

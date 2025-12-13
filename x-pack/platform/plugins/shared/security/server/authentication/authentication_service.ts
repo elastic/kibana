@@ -24,6 +24,7 @@ import type {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { APIKeys } from './api_keys';
+import { UiamAPIKeys } from './api_keys/uiam';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
@@ -80,7 +81,12 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
-  >;
+  > & {
+    uiam: Pick<
+      UiamAPIKeys,
+      'grantApiKey' | 'invalidateApiKey' | 'getScopedClusterClientWithApiKey'
+    >;
+  };
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
@@ -353,6 +359,14 @@ export class AuthenticationService {
       kibanaFeatures,
       buildFlavor,
     });
+
+    const uiamAPIKeys = new UiamAPIKeys({
+      logger: this.logger.get('api-key-uiam'),
+      clusterClient,
+      license: this.license,
+      uiam,
+    });
+
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).
@@ -398,6 +412,12 @@ export class AuthenticationService {
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
+        uiam: {
+          grantApiKey: uiamAPIKeys.grantApiKey.bind(uiamAPIKeys),
+          invalidateApiKey: uiamAPIKeys.invalidateApiKey.bind(uiamAPIKeys),
+          getScopedClusterClientWithApiKey:
+            uiamAPIKeys.getScopedClusterClientWithApiKey.bind(uiamAPIKeys),
+        },
       },
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {

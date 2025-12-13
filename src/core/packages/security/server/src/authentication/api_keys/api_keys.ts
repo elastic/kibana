@@ -8,10 +8,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
+import type { UiamAPIKeysService } from './uiam';
 
 /**
  * Interface for managing API keys in Elasticsearch, including creation,
@@ -90,6 +90,12 @@ export interface APIKeys {
    * @param params The params to invalidate the API keys.
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * UIAM-specific API key operations.
+   * Provides methods for managing API keys through the UIAM service.
+   */
+  uiam: UiamAPIKeysService;
 }
 
 export type CreateAPIKeyParams =
