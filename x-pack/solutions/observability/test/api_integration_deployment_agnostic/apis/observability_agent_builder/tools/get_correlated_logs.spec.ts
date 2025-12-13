@@ -26,11 +26,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
     });
 
-    after(async () => {
-      if (logsSynthtraceEsClient) {
-        await logsSynthtraceEsClient.clean();
-      }
-    });
+    // after(async () => {
+    //   if (logsSynthtraceEsClient) {
+    //     await logsSynthtraceEsClient.clean();
+    //   }
+    // });
 
     describe('with single error and `trace.id` as correlation ID', () => {
       before(async () => {
@@ -829,7 +829,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('with a noisy trace causing starvation', () => {
+    describe('when the number of anchors in a single sequence is more than `maxSequences`', () => {
       before(async () => {
         const logs = [
           // Trace A: 60 errors (recent)
@@ -856,21 +856,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }));
       });
 
-      it('returns only the noisy trace due to fetch limit', async () => {
+      it('returns two sequences (a single long sequence should not cause starvation)', async () => {
         const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
           id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
           params: {
             start: 'now-5m',
             end: 'now',
-            maxSequences: 10, // Default, implies fetch limit of 50
+            logsKqlFilter: 'service.name: "starvation-service"',
+            maxSequences: 10,
           },
         });
 
         const { sequences } = results[0].data;
 
-        // We expect only 1 sequence because the top 50 logs are all from trace-A
-        expect(sequences.length).to.be(1);
-        expect(sequences[0].correlation.value).to.be('trace-A');
+        expect(sequences.length).to.be(2);
+
+        const traceIds = sequences.map((s) => s.correlation.value).sort();
+        expect(traceIds).to.eql(['trace-A', 'trace-B']);
       });
     });
   });

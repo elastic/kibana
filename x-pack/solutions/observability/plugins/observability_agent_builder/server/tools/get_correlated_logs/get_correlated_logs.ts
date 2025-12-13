@@ -22,7 +22,7 @@ import {
   DEFAULT_TIME_RANGE,
   DEFAULT_LOG_SOURCE_FIELDS,
 } from './constants';
-import { fetchAnchorLogs } from './fetch_anchor_logs';
+import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
 
 export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_correlated_logs';
@@ -115,7 +115,7 @@ Each sequence contains chronologically sorted logs sharing the same correlation 
         const startTime = parseDatemath(start);
         const endTime = parseDatemath(end, { roundUp: true });
 
-        const anchorLogs = await fetchAnchorLogs({
+        const anchorLogs = await getAnchorLogs({
           esClient,
           logsIndices,
           startTime,
@@ -154,6 +154,7 @@ Each sequence contains chronologically sorted logs sharing the same correlation 
       } catch (error) {
         logger.error(`Error fetching errors and surrounding logs: ${error.message}`);
         logger.debug(error);
+        console.log(error);
 
         return {
           results: [
