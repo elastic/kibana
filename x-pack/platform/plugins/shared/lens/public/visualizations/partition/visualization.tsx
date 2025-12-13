@@ -193,6 +193,10 @@ export const getPieVisualization = ({
 
   getSuggestions: suggestions,
 
+  isSubtypeSupported(subtype) {
+    return subtype in PartitionChartsMeta;
+  },
+
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
