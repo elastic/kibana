@@ -7,10 +7,12 @@
 
 import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-repository';
 import { clusterListingRouteRepository } from './cluster_listing/route';
+import { esqlRouteRepository } from './esql/route';
 
 function getTypedKubernetesPocServerRouteRepository() {
   const repository = {
     ...clusterListingRouteRepository,
+    ...esqlRouteRepository,
   };
   return repository;
 }

@@ -180,7 +180,11 @@ export const ClusterListingPage: React.FC = () => {
       {renderContent()}
 
       {selectedCluster && (
-        <ClusterDetailFlyout cluster={selectedCluster} onClose={handleCloseFlyout} />
+        <ClusterDetailFlyout
+          cluster={selectedCluster}
+          timeRange={appliedTimeRange}
+          onClose={handleCloseFlyout}
+        />
       )}
     </KubernetesPageTemplate>
   );

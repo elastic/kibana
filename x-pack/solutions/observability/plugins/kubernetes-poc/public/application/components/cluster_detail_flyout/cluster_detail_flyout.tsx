@@ -5,133 +5,151 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-  EuiIcon,
-  EuiProgress,
   EuiSpacer,
   EuiPanel,
-  EuiText,
+  EuiFlexGroup,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import type { ClusterData } from '../../../../common/cluster_listing';
+import { FlyoutHeader } from './flyout_header';
+import { FlyoutTabs, type ClusterDetailTab } from './flyout_tabs';
+import {
+  DiskSizeCard,
+  MemoryTotalCard,
+  NamespacesCard,
+  PodsCard,
+  MemoryUtilChart,
+  PodsUtilChart,
+  CpuUtilChart,
+  NetworkTrafficChart,
+  NodesCard,
+  SlosCard,
+} from './overview_tab';
 
 interface ClusterDetailFlyoutProps {
   cluster: ClusterData;
+  timeRange: TimeRange;
   onClose: () => void;
 }
 
-export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({ cluster, onClose }) => {
+export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
+  cluster,
+  timeRange,
+  onClose,
+}) => {
+  const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'clusterDetailFlyout',
   });
 
-  const getHealthBadge = () => {
-    const color = cluster.healthStatus === 'healthy' ? 'success' : 'danger';
-    const label =
-      cluster.healthStatus === 'healthy'
-        ? i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.healthyLabel', {
-            defaultMessage: 'Healthy',
-          })
-        : i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.unhealthyLabel', {
-            defaultMessage: 'Unhealthy',
-          });
-    return <EuiBadge color={color}>{label}</EuiBadge>;
-  };
+  const [activeTab, setActiveTab] = useState<ClusterDetailTab>('overview');
 
-  const getCloudProviderIcon = () => {
-    if (!cluster.cloudProvider) return null;
-    const providerIcons: Record<string, string> = {
-      aws: 'logoAWS',
-      gcp: 'logoGCP',
-      azure: 'logoAzure',
-    };
-    const icon = providerIcons[cluster.cloudProvider.toLowerCase()];
-    return icon ? <EuiIcon type={icon} size="l" /> : null;
-  };
+  const renderTabContent = () => {
+    if (activeTab === 'overview') {
+      return (
+        <>
+          <EuiSpacer size="s" />
+          {/* Metric Cards Row */}
+          <EuiFlexGroup gutterSize="s">
+            <EuiPanel hasBorder paddingSize="none">
+              <DiskSizeCard clusterName={cluster.clusterName} timeRange={timeRange} height={120} />
+            </EuiPanel>
+            <EuiPanel hasBorder paddingSize="none">
+              <MemoryTotalCard
+                clusterName={cluster.clusterName}
+                timeRange={timeRange}
+                height={120}
+              />
+            </EuiPanel>
+            <EuiPanel hasBorder paddingSize="none">
+              <NamespacesCard
+                clusterName={cluster.clusterName}
+                timeRange={timeRange}
+                height={120}
+              />
+            </EuiPanel>
+            <EuiPanel hasBorder paddingSize="none">
+              <PodsCard clusterName={cluster.clusterName} timeRange={timeRange} height={120} />
+            </EuiPanel>
+          </EuiFlexGroup>
 
-  const formatUtilization = (value: number | null) => {
-    if (value === null || value === undefined || isNaN(value)) {
-      return '—';
+          <EuiSpacer size="s" />
+
+          {/* Row 2: Memory util & Pods util (50/50) */}
+          <EuiFlexGroup gutterSize="s">
+            <EuiPanel hasBorder paddingSize="none">
+              <MemoryUtilChart
+                clusterName={cluster.clusterName}
+                timeRange={timeRange}
+                height={250}
+              />
+            </EuiPanel>
+            <EuiPanel hasBorder paddingSize="none">
+              <PodsUtilChart clusterName={cluster.clusterName} timeRange={timeRange} height={250} />
+            </EuiPanel>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+
+          {/* Row 3: CPU util (full height left) | Nodes, SLOs, Network Traffic, Cluster Health (stacked right) */}
+          <EuiFlexGroup gutterSize="s" alignItems="stretch">
+            {/* Left column: CPU util - height = 120 + 8 + 250 = 378px */}
+            <EuiPanel hasBorder paddingSize="none" style={{ flex: 1 }}>
+              <CpuUtilChart clusterName={cluster.clusterName} timeRange={timeRange} height={378} />
+            </EuiPanel>
+
+            {/* Right column: Nodes, SLOs, Network Traffic, Cluster Health */}
+            <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiPanel hasBorder paddingSize="none">
+                  <NodesCard clusterName={cluster.clusterName} timeRange={timeRange} height={120} />
+                </EuiPanel>
+                <EuiPanel hasBorder paddingSize="none">
+                  <SlosCard height={120} />
+                </EuiPanel>
+              </EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s">
+                <EuiPanel hasBorder paddingSize="none">
+                  <NetworkTrafficChart
+                    clusterName={cluster.clusterName}
+                    timeRange={timeRange}
+                    height={250}
+                  />
+                </EuiPanel>
+                {/* TODO: Cluster health card */}
+                <EuiPanel hasBorder paddingSize="none">
+                  <div
+                    style={{
+                      height: '250px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: euiTheme.colors.subduedText,
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.kubernetesPoc.renderTabContent.div.clusterHealthComingSoonLabel',
+                      { defaultMessage: 'Cluster Health (Coming Soon)' }
+                    )}
+                  </div>
+                </EuiPanel>
+              </EuiFlexGroup>
+            </div>
+          </EuiFlexGroup>
+        </>
+      );
     }
-    return `${value.toFixed(2)}%`;
+
+    // Placeholder for other tabs
+    return null;
   };
-
-  const getUtilizationColor = (value: number | null): 'success' | 'warning' | 'danger' => {
-    if (value === null || value === undefined || isNaN(value)) return 'success';
-    if (value < 70) return 'success';
-    if (value < 90) return 'warning';
-    return 'danger';
-  };
-
-  const clusterInfoItems = [
-    {
-      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.healthLabel', {
-        defaultMessage: 'Health Status',
-      }),
-      description: getHealthBadge(),
-    },
-    {
-      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.providerLabel', {
-        defaultMessage: 'Cloud Provider',
-      }),
-      description: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {getCloudProviderIcon() && (
-            <EuiFlexItem grow={false}>{getCloudProviderIcon()}</EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{cluster.cloudProvider || '—'}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-  ];
-
-  const resourceInfoItems = [
-    {
-      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.nodesLabel', {
-        defaultMessage: 'Total Nodes',
-      }),
-      description: cluster.totalNodes,
-    },
-    {
-      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.namespacesLabel', {
-        defaultMessage: 'Namespaces',
-      }),
-      description: cluster.totalNamespaces,
-    },
-  ];
-
-  const podItems = [
-    {
-      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.runningPodsLabel', {
-        defaultMessage: 'Running Pods',
-      }),
-      description: <EuiBadge color="success">{cluster.runningPods}</EuiBadge>,
-    },
-    {
-      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.pendingPodsLabel', {
-        defaultMessage: 'Pending Pods',
-      }),
-      description: <EuiBadge color="warning">{cluster.pendingPods}</EuiBadge>,
-    },
-    {
-      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.failedPodsLabel', {
-        defaultMessage: 'Failed Pods',
-      }),
-      description: <EuiBadge color="danger">{cluster.failedPods}</EuiBadge>,
-    },
-  ];
 
   return (
     <EuiFlyout
@@ -141,118 +159,11 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({ cluste
       size="l"
       data-test-subj="kubernetesPocClusterDetailFlyout"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          {getCloudProviderIcon() && (
-            <EuiFlexItem grow={false}>{getCloudProviderIcon()}</EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2 id={flyoutTitleId}>{cluster.clusterName}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{getHealthBadge()}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {/* Cluster Information */}
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.clusterInfoTitle', {
-                defaultMessage: 'Cluster Information',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList type="column" listItems={clusterInfoItems} compressed />
-        </EuiPanel>
-
-        <EuiSpacer size="m" />
-
-        {/* Resources */}
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.resourcesTitle', {
-                defaultMessage: 'Resources',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList type="column" listItems={resourceInfoItems} compressed />
-        </EuiPanel>
-
-        <EuiSpacer size="m" />
-
-        {/* Pod Status */}
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.podStatusTitle', {
-                defaultMessage: 'Pod Status',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList type="column" listItems={podItems} compressed />
-        </EuiPanel>
-
-        <EuiSpacer size="m" />
-
-        {/* Resource Utilization */}
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.utilizationTitle', {
-                defaultMessage: 'Resource Utilization',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
-                  <EuiText size="s">
-                    {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.cpuLabel', {
-                      defaultMessage: 'CPU',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiProgress
-                    value={cluster.cpuUtilization ?? 0}
-                    max={100}
-                    size="l"
-                    color={getUtilizationColor(cluster.cpuUtilization)}
-                    valueText={formatUtilization(cluster.cpuUtilization)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
-                  <EuiText size="s">
-                    {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryLabel', {
-                      defaultMessage: 'Memory',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiProgress
-                    value={cluster.memoryUtilization ?? 0}
-                    max={100}
-                    size="l"
-                    color={getUtilizationColor(cluster.memoryUtilization)}
-                    valueText={formatUtilization(cluster.memoryUtilization)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <FlyoutHeader cluster={cluster} />
+        <EuiSpacer size="s" />
+        <FlyoutTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        {renderTabContent()}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

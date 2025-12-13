@@ -1,4 +1,4 @@
-# Introduction 
+# Introduction
 
 You are an AI coding agent with expertise in monitoring Kubernetes clusters. The project you are working on is a POC for a curated Kubernetes UI for an Observability product. The goal of this project is to create the following flow (in development order):
 
@@ -18,18 +18,18 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 
 3. **Kubernetes Overview** - A comprehensive dashboard page providing a high-level view of Kubernetes infrastructure health and resource utilization. The page prioritizes operational effectiveness with actionable insights. Key sections include:
   - **Cluster Health Status**: At-a-glance indicators for cluster availability, node readiness, control plane components (API server, etcd, scheduler, controller manager), and overall cluster state
-  - **Resource Capacity & Utilization**: 
+  - **Resource Capacity & Utilization**:
     - CPU and Memory usage across clusters/nodes with capacity thresholds and trending
     - Resource quota utilization by namespace (requests vs limits, over/under-provisioned workloads)
     - Storage usage (PV/PVC status, available capacity, storage class distribution)
     - Network metrics (ingress/egress traffic, service connectivity)
-  - **Workload Health Summary**: 
+  - **Workload Health Summary**:
     - Pod status breakdown (Running, Pending, Failed, CrashLoopBackOff, etc.) with trend indicators
     - Deployment/StatefulSet/DaemonSet readiness ratios (ready vs desired vs unavailable)
     - Recent pod restarts and failure rates
     - ReplicaSet status and scaling events
   - **Node Status**: Node readiness, conditions (MemoryPressure, DiskPressure, PIDPressure), taints, cordon status, and resource allocation per node
-  - **Active Issues & Alerts**: 
+  - **Active Issues & Alerts**:
     - Critical alerts prioritized by severity with actionable context
     - Recent events (last 1-24 hours) filtered by type (Warning, Error) and resource
     - Failed deployments, image pull errors, and scheduling failures
@@ -68,7 +68,8 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 
 ### 📋 Next Steps / TODO
 - [ ] Add Kubernetes Cluster Detail Flyout (builds on listing page patterns)
-- [ ] Implement Kubernetes Overview Page features (most complex, builds on established patterns) 
+- [ ] Add Workload Resources Table to Cluster Detail Flyout (requires backend API endpoint for per-node data with status, kubelet version, and resource utilization)
+- [ ] Implement Kubernetes Overview Page features (most complex, builds on established patterns)
 
 ## Architecture
 
@@ -192,8 +193,8 @@ The Local Kibana MCP (Model Context Protocol) server provides tools for explorin
 To explore what fields are available in the metrics data, run a simple query and examine the columns:
 
 ```esql
-FROM remote_cluster:metrics-* 
-| WHERE k8s.node.name IS NOT NULL 
+FROM remote_cluster:metrics-*
+| WHERE k8s.node.name IS NOT NULL
 | LIMIT 1
 ```
 
@@ -204,7 +205,7 @@ This returns all available columns/fields for documents matching the filter.
 To check if a specific metric exists (e.g., allocatable CPU):
 
 ```esql
-FROM remote_cluster:metrics-* 
+FROM remote_cluster:metrics-*
 | WHERE k8s.node.name IS NOT NULL AND k8s.node.allocatable_cpu IS NOT NULL
 | STATS avg_value = AVG(k8s.node.allocatable_cpu) BY k8s.cluster.name
 | LIMIT 10
@@ -239,7 +240,7 @@ FROM remote_cluster:metrics-*
 - **Endpoint**: `GET /internal/kubernetes_poc/cluster_listing`
 - **Security**: Requires `kibana_read` privilege
 - **Description**: Returns a list of all monitored Kubernetes clusters with health status, node counts, pod statuses, and resource utilization.
-- **Response**: 
+- **Response**:
   ```json
   {
     "clusters": [
@@ -278,8 +279,8 @@ FROM remote_cluster:metrics-*
 | WHERE <by_field_1> IS NOT NULL
   AND <by_field_2> IS NOT NULL
   AND (
-    <metric_field_1> IS NOT NULL 
-    OR <metric_field_2> IS NOT NULL 
+    <metric_field_1> IS NOT NULL
+    OR <metric_field_2> IS NOT NULL
     OR <metric_field_3> IS NOT NULL
   )
 | STATS ... BY <by_field_1>, <by_field_2>
@@ -317,12 +318,12 @@ FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
   AND k8s.node.name IS NOT NULL
   AND k8s.node.condition_ready IS NOT NULL
-| STATS 
+| STATS
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0
   BY k8s.cluster.name
 | EVAL health_status = CASE(ready_nodes < total_nodes, "unhealthy", "healthy")
-| STATS 
+| STATS
     healthy_count = COUNT(*) WHERE health_status == "healthy",
     total_count = COUNT(*)
 ```
@@ -342,7 +343,7 @@ TS remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
   AND k8s.node.name IS NOT NULL
   AND (k8s.node.cpu.usage IS NOT NULL OR k8s.node.allocatable_cpu IS NOT NULL)
-| STATS 
+| STATS
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
   BY timestamp = TBUCKET(1 minute), k8s.cluster.name
@@ -386,16 +387,16 @@ FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
   AND cloud.provider IS NOT NULL
   AND (
-    k8s.node.name IS NOT NULL 
-    OR k8s.pod.uid IS NOT NULL 
-    OR k8s.pod.phase IS NOT NULL 
+    k8s.node.name IS NOT NULL
+    OR k8s.pod.uid IS NOT NULL
+    OR k8s.pod.phase IS NOT NULL
     OR k8s.node.cpu.usage IS NOT NULL
-    OR k8s.node.memory.usage IS NOT NULL 
+    OR k8s.node.memory.usage IS NOT NULL
     OR k8s.node.allocatable_cpu IS NOT NULL
     OR k8s.node.allocatable_memory IS NOT NULL
     OR k8s.node.condition_ready IS NOT NULL
   )
-| STATS 
+| STATS
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,
     total_pods = COUNT_DISTINCT(k8s.pod.uid),
@@ -410,12 +411,12 @@ FROM remote_cluster:metrics-*
 | EVAL health_status = CASE(ready_nodes < total_nodes, "unhealthy", "healthy")
 | EVAL cpu_utilization = ROUND(sum_cpu_usage / sum_allocatable_cpu * 100, 2)
 | EVAL memory_utilization = ROUND(sum_memory_usage / TO_DOUBLE(sum_allocatable_memory) * 100, 2)
-| KEEP k8s.cluster.name, health_status, cloud.provider, total_nodes, 
-       failed_pods, pending_pods, running_pods, 
+| KEEP k8s.cluster.name, health_status, cloud.provider, total_nodes,
+       failed_pods, pending_pods, running_pods,
        cpu_utilization, memory_utilization
 ```
 
-**Metrics Used**: 
+**Metrics Used**:
 - `k8s.node.condition_ready` (from k8sclusterreceiver)
 - `k8s.pod.phase` (from k8sclusterreceiver) - values: 1=Running, 2=Pending, 3=Failed
 - `k8s.node.cpu.usage`, `k8s.node.memory.usage` (from kubeletstatsreceiver)
@@ -451,10 +452,10 @@ Total disk capacity across all nodes in the cluster.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.node.name IS NOT NULL
   AND k8s.node.filesystem.capacity IS NOT NULL
-| STATS 
+| STATS
     disk_capacity = MAX(k8s.node.filesystem.capacity)
   BY k8s.node.name
 | STATS total_disk_bytes = SUM(disk_capacity)
@@ -472,10 +473,10 @@ Total allocatable memory across all nodes in the cluster.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.node.name IS NOT NULL
   AND k8s.node.allocatable_memory IS NOT NULL
-| STATS 
+| STATS
     node_memory = MAX(k8s.node.allocatable_memory)
   BY k8s.node.name
 | STATS total_memory_bytes = SUM(node_memory)
@@ -493,7 +494,7 @@ Total number of namespaces in the cluster.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.namespace.name IS NOT NULL
 | STATS namespace_count = COUNT_DISTINCT(k8s.namespace.name)
 ```
@@ -510,10 +511,10 @@ Pod counts by health status for the cluster.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.pod.uid IS NOT NULL
   AND k8s.pod.phase IS NOT NULL
-| STATS 
+| STATS
     total_pods = COUNT_DISTINCT(k8s.pod.uid),
     healthy_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 2,
     unhealthy_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 4
@@ -522,7 +523,7 @@ FROM remote_cluster:metrics-*
 **Visualization**: `lnsMetric`
 **Metrics Used**: `k8s.pod.phase` (from k8sclusterreceiver)
 **Dimensions**: `k8s.pod.uid`
-**Output**: 
+**Output**:
 - `total_pods` - Total pod count
 - `healthy_pods` - Running pods (phase = 2)
 - `unhealthy_pods` - Failed pods (phase = 4)
@@ -542,7 +543,7 @@ Memory usage over time for the cluster.
 
 ```esql
 TS remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.node.name IS NOT NULL
   AND k8s.node.memory.usage IS NOT NULL
 | STATS memory_usage_bytes = SUM(k8s.node.memory.usage)
@@ -561,10 +562,10 @@ Pod utilization percentage over time for the cluster.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.pod.uid IS NOT NULL
   AND k8s.pod.phase IS NOT NULL
-| STATS 
+| STATS
     pod_count = COUNT_DISTINCT(k8s.pod.uid),
     node_count = COUNT_DISTINCT(k8s.node.name)
   BY timestamp = BUCKET(@timestamp, 1 minute)
@@ -587,10 +588,10 @@ CPU utilization percentage over time for the cluster.
 
 ```esql
 TS remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.node.name IS NOT NULL
   AND (k8s.node.cpu.usage IS NOT NULL OR k8s.node.allocatable_cpu IS NOT NULL)
-| STATS 
+| STATS
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
   BY timestamp = TBUCKET(1 minute)
@@ -610,10 +611,10 @@ Network inbound/outbound traffic rate over time for the cluster.
 
 ```esql
 TS remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.node.name IS NOT NULL
   AND k8s.node.network.io IS NOT NULL
-| STATS 
+| STATS
     inbound = SUM(RATE(k8s.node.network.io)) WHERE direction == "receive",
     outbound = SUM(RATE(k8s.node.network.io)) WHERE direction == "transmit"
   BY timestamp = TBUCKET(1 minute)
@@ -633,10 +634,10 @@ Node counts by health status for the cluster.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.node.name IS NOT NULL
   AND k8s.node.condition_ready IS NOT NULL
-| STATS 
+| STATS
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     healthy_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,
     unhealthy_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready <= 0
@@ -645,7 +646,7 @@ FROM remote_cluster:metrics-*
 **Visualization**: `lnsMetric`
 **Metrics Used**: `k8s.node.condition_ready` (from k8sclusterreceiver)
 **Dimensions**: `k8s.node.name`
-**Output**: 
+**Output**:
 - `total_nodes` - Total node count
 - `healthy_nodes` - Nodes with condition_ready > 0
 - `unhealthy_nodes` - Nodes with condition_ready <= 0
@@ -657,7 +658,7 @@ Table showing per-node status, kubelet version, and resource utilization.
 
 ```esql
 FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "<cluster_name>" 
+| WHERE k8s.cluster.name == "<cluster_name>"
   AND k8s.node.name IS NOT NULL
   AND (
     k8s.node.condition_ready IS NOT NULL
@@ -668,7 +669,7 @@ FROM remote_cluster:metrics-*
     OR k8s.node.allocatable_memory IS NOT NULL
     OR k8s.pod.uid IS NOT NULL
   )
-| STATS 
+| STATS
     condition_ready = MAX(k8s.node.condition_ready),
     kubelet_version = MAX(k8s.kubelet.version),
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
@@ -690,7 +691,7 @@ FROM remote_cluster:metrics-*
 ```
 
 **Visualization**: Table (EuiDataGrid or similar)
-**Metrics Used**: 
+**Metrics Used**:
 - `k8s.node.condition_ready` (from k8sclusterreceiver)
 - `k8s.kubelet.version` (from k8sclusterreceiver)
 - `k8s.node.cpu.usage`, `k8s.node.memory.usage` (from kubeletstatsreceiver)
@@ -800,7 +801,7 @@ Verify **only the files you changed in this commit**:
   - Resource attributes: `k8s.cluster.name`, `k8s.namespace.name`, `k8s.node.name`, `k8s.pod.name`, `k8s.pod.uid`, `k8s.container.name`, `k8s.volume.name`, `k8s.volume.type`, `k8s.persistentvolumeclaim.name`
 
 ### Data Source & Setup
-- **OpenTelemetry Collector on Kubernetes**: 
+- **OpenTelemetry Collector on Kubernetes**:
   - This plugin consumes data collected via OpenTelemetry Collector deployed on Kubernetes clusters
   - The collector should be configured with both `k8sclusterreceiver` and `kubeletstatsreceiver`
   - Data is exported to Elasticsearch in OTel format
@@ -852,4 +853,3 @@ Returns documentation showing 20 time series functions: `RATE`, `AVG_OVER_TIME`,
 - Client-side API calls use the type-safe repository client pattern
 - Data is sourced from Elasticsearch indices populated by OpenTelemetry Collector's Kubernetes receivers
 - All data follows OpenTelemetry format - use OTel metric and attribute names when querying Elasticsearch
-
