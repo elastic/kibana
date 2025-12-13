@@ -19,15 +19,21 @@ import type {
   AutomaticImportPluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
+import { Telemetry } from './services/telemetry/service';
 
 export class AutomaticImportPlugin
   implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
 {
+  private telemetry = new Telemetry();
+
   constructor(_: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
   ): AutomaticImportPluginSetup {
+    this.telemetry.setup(core.analytics);
+
+    const telemetry = this.telemetry;
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -35,7 +41,12 @@ export class AutomaticImportPlugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, plugins] = await core.getStartServices();
-        return renderApp({ coreStart, plugins, params });
+        return renderApp({
+          coreStart,
+          plugins,
+          params,
+          telemetry: telemetry.start(),
+        });
       },
     });
 
