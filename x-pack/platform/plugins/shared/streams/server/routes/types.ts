@@ -13,6 +13,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { LLMSuggestionClient } from '../lib/streams/llm_suggestions';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AssetClient } from '../lib/streams/assets/asset_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
@@ -37,6 +38,7 @@ export interface RouteHandlerScopedClients {
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   featureClient: FeatureClient;
+  llmSuggestionsClient: LLMSuggestionClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   queryClient: QueryClient;
