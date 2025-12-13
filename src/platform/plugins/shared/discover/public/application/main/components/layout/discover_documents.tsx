@@ -92,8 +92,6 @@ import {
   type DiscoverGridFlyoutProps,
 } from '../../../../components/discover_grid_flyout';
 
-const DiscoverGridMemoized = React.memo(DiscoverGrid);
-
 // export needs for testing
 export const onResize = (
   colSettings: { columnId: string; width: number | undefined },
@@ -522,7 +520,7 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          <DiscoverGridMemoized
+          <DiscoverGrid
             ariaLabelledBy="documentsAriaLabel"
             columns={currentColumns}
             columnsMeta={columnsMeta}
