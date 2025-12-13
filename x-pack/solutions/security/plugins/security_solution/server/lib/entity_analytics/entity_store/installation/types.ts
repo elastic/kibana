@@ -16,12 +16,34 @@ import type { EntityType } from '../../../../../common/api/entity_analytics';
 
 export type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
 
+export interface CalculatedEntityIdentifierDescription {
+  /**
+   * Without and calculated entity identifier description,
+   * the transform query filters by the identity field.
+   *
+   * With the calculated entity manager it will filter
+   * documents containing at least one of the fields
+   * present in `filterOnAtLeastOneOf`.
+   */
+  filterOnAtLeastOneOf: string[];
+
+  /**
+   * Painless script used to calculate the identity field.
+   */
+  script: string;
+}
+
 export interface EntityEngineInstallationDescriptor {
   id: string;
   version: string;
   entityType: EntityType;
   identityField: string;
   identityFieldMapping: MappingProperty;
+
+  /**
+   * Specifies Calculated Entity attributes.
+   */
+  calculatedIdentity?: CalculatedEntityIdentifierDescription;
 
   /**
    * Default static index patterns to use as the source of entity data.
