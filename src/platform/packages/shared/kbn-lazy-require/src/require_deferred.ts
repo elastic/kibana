@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env/lazy');
-require('@kbn/inference-cli/scripts/phoenix');
+import { LAZY_REQUIRE_IMMEDIATE } from './constants';
+import { factories } from './helper';
+
+export function requireDeferred() {
+  (globalThis as any)[LAZY_REQUIRE_IMMEDIATE] = true;
+  factories.forEach((factory) => {
+    factory();
+  });
+}

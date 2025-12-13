@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node_lazy',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-streams-schema'],
 };

@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+const { isEnvVarExplicitlyEnabled } = require('./src/is_env_var');
 
-require('@kbn/setup-node-env/lazy');
-require('@kbn/inference-cli/scripts/phoenix');
+exports.isLazyRequireEnabled = () => {
+  return isEnvVarExplicitlyEnabled(process.env.KBN_ENABLE_LAZY_REQUIRE);
+};

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const preset = require('../jest-preset');
+const preset = require('../jest_node/jest-preset');
 
 const presetClone = { ...preset };
 
@@ -16,15 +16,11 @@ delete presetClone.testEnvironment; // simply redefining as `testEnvironment: 'n
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
   ...presetClone,
-  snapshotSerializers: [],
-  setupFiles: ['<rootDir>/src/setup_node_env/polyfill.ts'],
   transform: {
     ...preset.transform,
-    '^.+\\.(js|tsx?)$':
+    '^.+\\.(js|tsx?)$': [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
-  },
-  haste: {
-    ...preset.haste,
-    throwOnModuleCollision: true,
+      { '@kbn/lazy-require': { enabled: true } },
+    ],
   },
 };

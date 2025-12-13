@@ -43,5 +43,6 @@
     "@kbn/babel-preset",
     "@kbn/dot-text",
     "@kbn/apm-utils",
+    "@kbn/lazy-require",
   ]
 }
