@@ -21,10 +21,6 @@ export interface DashboardMountContextProps {
   scopedHistory: () => ScopedHistory;
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  /**
-   * Whether access control is enabled for saved objects.
-   * Available synchronously from plugin config (exposed via `exposeToBrowser`).
-   */
   isAccessControlEnabled: boolean;
 }
 
