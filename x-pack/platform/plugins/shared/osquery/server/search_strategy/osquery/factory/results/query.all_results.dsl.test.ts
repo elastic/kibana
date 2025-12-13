@@ -7,7 +7,8 @@
 
 import moment from 'moment/moment';
 import { buildResultsQuery } from './query.all_results.dsl';
-import { Direction, type ResultsRequestOptions } from '../../../../../common/search_strategy';
+import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
+import { Direction } from '../../../../../common/search_strategy';
 
 // Mock the utility functions
 
@@ -78,6 +79,11 @@ describe('buildResultsQuery', () => {
               order: 'desc',
             },
           },
+          {
+            _shard_doc: {
+              order: 'desc',
+            },
+          },
         ],
       });
     });
@@ -142,7 +148,13 @@ describe('buildResultsQuery', () => {
           ],
         },
       });
-      expect(result.sort).toEqual([]);
+      expect(result.sort).toEqual([
+        {
+          _shard_doc: {
+            order: 'desc',
+          },
+        },
+      ]);
     });
 
     it('should build query with time range filter', () => {
@@ -295,8 +307,249 @@ describe('buildResultsQuery', () => {
               order: 'asc',
             },
           },
+          {
+            _shard_doc: {
+              order: 'desc',
+            },
+          },
         ],
       });
+    });
+  });
+
+  describe('PIT pagination mode', () => {
+    it('should generate query with PIT when pitId is provided', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pitId: 'pit-abc',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [
+          {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+        ],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.pit).toEqual({ id: 'pit-abc', keep_alive: '10m' });
+      expect(result.index).toBeUndefined();
+      expect(result.from).toBeUndefined();
+    });
+
+    it('should include search_after when provided with PIT', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pitId: 'pit-abc',
+        searchAfter: [1733900000000, 12345],
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [
+          {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+        ],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.search_after).toEqual([1733900000000, 12345]);
+    });
+
+    it('should add _shard_doc tiebreaker to sort for consistent pagination', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pitId: 'pit-abc',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [
+          {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+        ],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.sort).toContainEqual({ _shard_doc: { order: 'desc' } });
+    });
+
+    it('should NOT include from field when using PIT', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pitId: 'pit-abc',
+        pagination: {
+          activePage: 5,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.from).toBeUndefined();
+      expect(result.pit).toBeDefined();
+    });
+
+    it('should use offset pagination when pitId is not provided', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pagination: {
+          activePage: 2,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [
+          {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+        ],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.from).toBe(200);
+      expect(result.index).toBeDefined();
+      expect(result.pit).toBeUndefined();
+    });
+
+    it('should set ccs_minimize_roundtrips to false for PIT queries', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pitId: 'pit-abc',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.ccs_minimize_roundtrips).toBe(false);
+    });
+
+    it('should add _shard_doc tiebreaker even with empty sort array', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pitId: 'pit-abc',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      // Even with empty sort, _shard_doc tiebreaker should be present for consistent pagination
+      expect(result.sort).toEqual([{ _shard_doc: { order: 'desc' } }]);
+    });
+
+    it('should NOT include search_after when not provided in PIT mode', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pitId: 'pit-abc',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [
+          {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+        ],
+        kuery: '',
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.search_after).toBeUndefined();
+    });
+
+    it('should combine PIT with filters and aggregations correctly', () => {
+      const startDate = '2024-01-01T00:00:00.000Z';
+
+      const options: ResultsRequestOptions = {
+        actionId: 'action-pit-full',
+        agentId: 'agent-pit',
+        pitId: 'pit-xyz',
+        searchAfter: [1733900000000, 999],
+        startDate,
+        pagination: {
+          activePage: 0,
+          querySize: 50,
+          cursorStart: 0,
+        },
+        sort: [
+          {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+        ],
+        kuery: 'osquery.action: "executed"',
+        integrationNamespaces: ['prod'],
+      };
+
+      const result = buildResultsQuery(options);
+
+      // PIT-specific fields
+      expect(result.pit).toEqual({ id: 'pit-xyz', keep_alive: '10m' });
+      expect(result.search_after).toEqual([1733900000000, 999]);
+      expect(result.ccs_minimize_roundtrips).toBe(false);
+
+      // Should NOT have offset-based fields
+      expect(result.index).toBeUndefined();
+      expect(result.from).toBeUndefined();
+      expect(result.allow_no_indices).toBeUndefined();
+      expect(result.ignore_unavailable).toBeUndefined();
+
+      // Aggregations should still be present
+      expect(result.aggs).toEqual({
+        count_by_agent_id: {
+          terms: {
+            field: 'elastic_agent.id',
+            size: 10000,
+          },
+        },
+        unique_agents: {
+          cardinality: {
+            field: 'elastic_agent.id',
+          },
+        },
+      });
+
+      // Track total hits should be enabled
+      expect(result.track_total_hits).toBe(true);
+
+      // Size should be set correctly
+      expect(result.size).toBe(50);
     });
   });
 });

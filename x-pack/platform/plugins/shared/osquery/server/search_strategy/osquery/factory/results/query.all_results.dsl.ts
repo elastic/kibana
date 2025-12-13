@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
 import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
-import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
+import { OSQUERY_INTEGRATION_NAME, PIT_KEEP_ALIVE } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
 
 export const buildResultsQuery = ({
@@ -21,6 +21,8 @@ export const buildResultsQuery = ({
   startDate,
   pagination: { activePage, querySize },
   integrationNamespaces,
+  pitId,
+  searchAfter,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
   const actionIdQuery = `action_id: ${actionId}`;
@@ -55,6 +57,43 @@ export const buildResultsQuery = ({
     index = baseIndex;
   }
 
+  const baseSort =
+    sort?.map((sortConfig) => ({
+      [sortConfig.field]: {
+        order: sortConfig.direction,
+      },
+    })) ?? [];
+
+  const sortWithTiebreaker = [...baseSort, { _shard_doc: { order: 'desc' as const } }];
+
+  if (pitId) {
+    return {
+      aggs: {
+        count_by_agent_id: {
+          terms: {
+            field: 'elastic_agent.id',
+            size: 10000,
+          },
+        },
+        unique_agents: {
+          cardinality: {
+            field: 'elastic_agent.id',
+          },
+        },
+      },
+      query: { bool: { filter: filterQuery } },
+      pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+      size: querySize,
+      track_total_hits: true,
+      fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
+      sort: sortWithTiebreaker,
+      ccs_minimize_roundtrips: false,
+    };
+  }
+
+  const sortWithDocTiebreaker = [...baseSort, { _shard_doc: { order: 'desc' as const } }];
+
   return {
     allow_no_indices: true,
     index,
@@ -77,11 +116,6 @@ export const buildResultsQuery = ({
     size: querySize,
     track_total_hits: true,
     fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
-    sort:
-      sort?.map((sortConfig) => ({
-        [sortConfig.field]: {
-          order: sortConfig.direction,
-        },
-      })) ?? [],
+    sort: sortWithDocTiebreaker,
   };
 };

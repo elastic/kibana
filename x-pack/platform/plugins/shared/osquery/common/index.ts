@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { OSQUERY_INTEGRATION_NAME, BASE_PATH } from './constants';
+export {
+  OSQUERY_INTEGRATION_NAME,
+  BASE_PATH,
+  MAX_OFFSET_RESULTS,
+  PIT_KEEP_ALIVE,
+} from './constants';
 export {
   allowedExperimentalValues,
   parseExperimentalConfigValue,

@@ -100,8 +100,8 @@ export const useActionResults = ({
         // Server already filtered by agentIds - build set of responded agents
         const respondedAgentIds = new Set(
           response.edges
-            .map((edge) => getAgentIdFromFields(edge.fields))
-            .filter((id): id is string => id !== undefined)
+            .map((edge: ResultEdges[number]) => getAgentIdFromFields(edge.fields))
+            .filter((id: string | undefined): id is string => id !== undefined)
         );
 
         const placeholderEdges = currentPageAgentIds
