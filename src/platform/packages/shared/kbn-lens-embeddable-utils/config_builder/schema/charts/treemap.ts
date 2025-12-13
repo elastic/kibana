@@ -120,7 +120,7 @@ export const treemapStateSchemaNoESQL = schema.object({
         schema.allOf([partitionStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
       ]),
     ]),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 100 }
   ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
@@ -135,7 +135,7 @@ export const treemapStateSchemaNoESQL = schema.object({
         schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
       ])
     ),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 100 }
   ),
 });
 

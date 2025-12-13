@@ -95,14 +95,14 @@ export const pieStateSchemaNoESQL = schema.object({
     mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
       partitionStatePrimaryMetricOptionsSchema
     ),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 100 }
   ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
    */
   group_by: schema.arrayOf(
     schema.maybe(mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema)),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 100 }
   ),
 });
 
