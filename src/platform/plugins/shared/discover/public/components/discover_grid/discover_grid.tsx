@@ -50,122 +50,126 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
  * Customized version of the UnifiedDataTable
  * @constructor
  */
-export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
-  onUpdateESQLQuery,
-  onCascadeGroupingChange,
-  query,
-  viewModeToggle,
-  externalAdditionalControls: customExternalAdditionalControls,
-  rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
-  onFullScreenChange,
-  registerCascadeRequestsInspectorAdapter,
-  cascadeConfig,
-  ...props
-}) => {
-  const { dataView, setExpandedDoc, renderDocumentView } = props;
-  const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
-  const getRowIndicator = useMemo(() => {
-    return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-  }, [getRowIndicatorProvider, props.dataView]);
-
-  const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
-    'getRowAdditionalLeadingControls'
-  );
-  const rowAdditionalLeadingControls = useMemo(() => {
-    return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-      actions: {
-        updateESQLQuery: onUpdateESQLQuery,
-        setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
-      },
-      dataView,
-      query,
-    });
-  }, [
-    customRowAdditionalLeadingControls,
-    dataView,
-    getRowAdditionalLeadingControlsAccessor,
+export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
+  ({
     onUpdateESQLQuery,
+    onCascadeGroupingChange,
     query,
-    setExpandedDoc,
-    renderDocumentView,
-  ]);
-
-  const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
-  const paginationModeConfig = useMemo(() => {
-    return getPaginationConfigAccessor(() => ({
-      paginationMode: DEFAULT_PAGINATION_MODE,
-    }))();
-  }, [getPaginationConfigAccessor]);
-
-  const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
-
-  const customGridColumnsConfiguration = useMemo(() => {
-    return getColumnsConfigurationAccessor(() => ({}))();
-  }, [getColumnsConfigurationAccessor]);
-
-  /**
-   * For the discover use case we use this function to hook into the app state container,
-   * so that we can respond to changes in the cascade grouping.
-   * We don't have to, but doing it this way means we get all the error handling and loading utils already existing there.
-   */
-  const cascadeGroupingChangeHandler = useCallback(
-    (cascadeGrouping: string[]) => {
-      return onCascadeGroupingChange?.({ query: query as AggregateQuery, cascadeGrouping });
-    },
-    [onCascadeGroupingChange, query]
-  );
-
-  const groupBySelectorRenderer = useGroupBySelectorRenderer({
-    cascadeGroupingChangeHandler,
-  });
-
-  const externalAdditionalControls = useMemo(() => {
-    const additionalControls = [
-      customExternalAdditionalControls,
-      Boolean(cascadeConfig?.availableCascadeGroups?.length) && props.isPlainRecord
-        ? groupBySelectorRenderer(
-            cascadeConfig!.availableCascadeGroups,
-            cascadeConfig!.selectedCascadeGroups
-          )
-        : null,
-    ].filter(Boolean);
-
-    return additionalControls.length ? <React.Fragment>{additionalControls}</React.Fragment> : null;
-  }, [
+    viewModeToggle,
+    externalAdditionalControls: customExternalAdditionalControls,
+    rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+    onFullScreenChange,
+    registerCascadeRequestsInspectorAdapter,
     cascadeConfig,
-    customExternalAdditionalControls,
-    groupBySelectorRenderer,
-    props.isPlainRecord,
-  ]);
+    ...props
+  }) => {
+    const { dataView, setExpandedDoc, renderDocumentView } = props;
+    const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
+    const getRowIndicator = useMemo(() => {
+      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
+    }, [getRowIndicatorProvider, props.dataView]);
 
-  return props.isPlainRecord && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <LazyCascadedDocumentsLayout
+    const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
+      'getRowAdditionalLeadingControls'
+    );
+    const rowAdditionalLeadingControls = useMemo(() => {
+      return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
+        actions: {
+          updateESQLQuery: onUpdateESQLQuery,
+          setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
+        },
+        dataView,
+        query,
+      });
+    }, [
+      customRowAdditionalLeadingControls,
+      dataView,
+      getRowAdditionalLeadingControlsAccessor,
+      onUpdateESQLQuery,
+      query,
+      setExpandedDoc,
+      renderDocumentView,
+    ]);
+
+    const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
+    const paginationModeConfig = useMemo(() => {
+      return getPaginationConfigAccessor(() => ({
+        paginationMode: DEFAULT_PAGINATION_MODE,
+      }))();
+    }, [getPaginationConfigAccessor]);
+
+    const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
+
+    const customGridColumnsConfiguration = useMemo(() => {
+      return getColumnsConfigurationAccessor(() => ({}))();
+    }, [getColumnsConfigurationAccessor]);
+
+    /**
+     * For the discover use case we use this function to hook into the app state container,
+     * so that we can respond to changes in the cascade grouping.
+     * We don't have to, but doing it this way means we get all the error handling and loading utils already existing there.
+     */
+    const cascadeGroupingChangeHandler = useCallback(
+      (cascadeGrouping: string[]) => {
+        return onCascadeGroupingChange?.({ query: query as AggregateQuery, cascadeGrouping });
+      },
+      [onCascadeGroupingChange, query]
+    );
+
+    const groupBySelectorRenderer = useGroupBySelectorRenderer({
+      cascadeGroupingChangeHandler,
+    });
+
+    const externalAdditionalControls = useMemo(() => {
+      const additionalControls = [
+        customExternalAdditionalControls,
+        cascadeConfig?.availableCascadeGroups.length && props.isPlainRecord
+          ? groupBySelectorRenderer(
+              cascadeConfig.availableCascadeGroups,
+              cascadeConfig.selectedCascadeGroups
+            )
+          : null,
+      ].filter(Boolean);
+
+      return additionalControls.length ? (
+        <React.Fragment>{additionalControls}</React.Fragment>
+      ) : null;
+    }, [
+      cascadeConfig,
+      customExternalAdditionalControls,
+      groupBySelectorRenderer,
+      props.isPlainRecord,
+    ]);
+
+    return props.isPlainRecord && !!cascadeConfig?.selectedCascadeGroups.length ? (
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazyCascadedDocumentsLayout
+          {...props}
+          dataView={dataView}
+          viewModeToggle={viewModeToggle}
+          cascadeConfig={cascadeConfig!}
+          onUpdateESQLQuery={onUpdateESQLQuery!}
+          cascadeGroupingChangeHandler={cascadeGroupingChangeHandler}
+          registerCascadeRequestsInspectorAdapter={registerCascadeRequestsInspectorAdapter!}
+        />
+      </Suspense>
+    ) : (
+      <UnifiedDataTable
+        showColumnTokens
+        canDragAndDropColumns
+        enableComparisonMode
+        enableInTableSearch
+        renderCustomToolbar={renderCustomToolbar}
+        getRowIndicator={getRowIndicator}
+        rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+        visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+        paginationMode={paginationModeConfig.paginationMode}
+        customGridColumnsConfiguration={customGridColumnsConfiguration}
+        shouldKeepAdHocDataViewImmutable
+        externalAdditionalControls={externalAdditionalControls}
+        onFullScreenChange={onFullScreenChange}
         {...props}
-        dataView={dataView}
-        viewModeToggle={viewModeToggle}
-        cascadeConfig={cascadeConfig!}
-        onUpdateESQLQuery={onUpdateESQLQuery!}
-        cascadeGroupingChangeHandler={cascadeGroupingChangeHandler}
-        registerCascadeRequestsInspectorAdapter={registerCascadeRequestsInspectorAdapter!}
       />
-    </Suspense>
-  ) : (
-    <UnifiedDataTable
-      showColumnTokens
-      canDragAndDropColumns
-      enableComparisonMode
-      enableInTableSearch
-      renderCustomToolbar={renderCustomToolbar}
-      getRowIndicator={getRowIndicator}
-      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-      visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
-      paginationMode={paginationModeConfig.paginationMode}
-      customGridColumnsConfiguration={customGridColumnsConfiguration}
-      shouldKeepAdHocDataViewImmutable
-      externalAdditionalControls={externalAdditionalControls}
-      onFullScreenChange={onFullScreenChange}
-      {...props}
-    />
-  );
-};
+    );
+  }
+);

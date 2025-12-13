@@ -39,8 +39,6 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   enableDocumentViewer: boolean;
 }
 
-export const DiscoverGridMemoized = React.memo(DiscoverGrid);
-
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
@@ -141,7 +139,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
     >
-      <DiscoverGridMemoized
+      <DiscoverGrid
         {...gridProps}
         isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
