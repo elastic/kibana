@@ -176,11 +176,8 @@ export const CascadedDocumentsLayout = React.memo(
     onUpdateESQLQuery,
     ...props
   }: CascadedDocumentsLayoutProps) => {
-    const [query] = useAppStateSelector((state) => [state.query, state.filters]);
-    const [globalState, esqlVariables] = useCurrentTabSelector((state) => [
-      state.globalState,
-      state.esqlVariables,
-    ]);
+    const query = useAppStateSelector((state) => state.query);
+    const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
     const { euiTheme } = useEuiTheme();
     const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -200,7 +197,6 @@ export const CascadedDocumentsLayout = React.memo(
       esqlVariables,
       editorQuery: query as AggregateQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
-      globalState,
       services: props.services,
       updateESQLQuery: onUpdateESQLQuery,
     });

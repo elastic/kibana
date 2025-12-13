@@ -42,11 +42,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
 import type { ESQLDataGroupNode } from './types';
-import {
-  type TabStateGlobalState,
-  internalStateActions,
-  useInternalStateDispatch,
-} from '../../../../state_management/redux';
+import { internalStateActions, useInternalStateDispatch } from '../../../../state_management/redux';
 import type { DiscoverStateContainer } from '../../../../state_management/discover_state';
 
 interface RowContext {
@@ -62,7 +58,6 @@ interface RowClickActionContext {
   rowContext: RowContext;
   services: UnifiedDataTableProps['services'];
   closeActionMenu: () => void;
-  globalState: TabStateGlobalState;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
   updateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
 }
@@ -173,7 +168,6 @@ interface ContextMenuProps
   extends Pick<
     RowClickActionContext,
     | 'editorQuery'
-    | 'globalState'
     | 'openInNewTab'
     | 'dataView'
     | 'esqlVariables'
@@ -194,7 +188,6 @@ const ContextMenu = React.memo(
     esqlVariables,
     dataView,
     close,
-    globalState,
     openInNewTab,
     updateESQLQuery,
   }: ContextMenuProps) => {
@@ -244,7 +237,6 @@ const ContextMenu = React.memo(
                   esqlVariables,
                   dataView,
                   closeActionMenu: close,
-                  globalState,
                   openInNewTab,
                   updateESQLQuery,
                 }),
@@ -263,7 +255,6 @@ const ContextMenu = React.memo(
       esqlVariables,
       dataView,
       close,
-      globalState,
       openInNewTab,
       updateESQLQuery,
     ]);
@@ -283,7 +274,6 @@ export const useEsqlDataCascadeRowActionHelpers = ({
   esqlVariables,
   editorQuery,
   statsFieldSummary,
-  globalState,
   services,
   updateESQLQuery,
 }: Pick<
@@ -292,7 +282,6 @@ export const useEsqlDataCascadeRowActionHelpers = ({
   | 'esqlVariables'
   | 'editorQuery'
   | 'statsFieldSummary'
-  | 'globalState'
   | 'services'
   | 'updateESQLQuery'
 >) => {
@@ -350,7 +339,6 @@ export const useEsqlDataCascadeRowActionHelpers = ({
             close={closePopover}
             editorQuery={editorQuery}
             esqlVariables={esqlVariables}
-            globalState={globalState}
             row={popoverRowData}
             services={services}
             dataView={dataView}
@@ -366,7 +354,6 @@ export const useEsqlDataCascadeRowActionHelpers = ({
       closePopover,
       editorQuery,
       esqlVariables,
-      globalState,
       services,
       dataView,
       statsFieldSummary,
