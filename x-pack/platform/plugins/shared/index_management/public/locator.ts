@@ -7,7 +7,10 @@
 
 import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import {
+  INDEX_MANAGEMENT_LOCATOR_ID,
+  type IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import {
   getComponentTemplateCloneLink,
   getComponentTemplateCreateLink,
@@ -22,8 +25,7 @@ import {
   getTemplateEditLink,
 } from './application/services/routing';
 import { PLUGIN } from '../common/constants';
-
-export const INDEX_MANAGEMENT_LOCATOR_ID = 'INDEX_MANAGEMENT_LOCATOR_ID';
+export { INDEX_MANAGEMENT_LOCATOR_ID };
 
 export interface IndexManagementLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;

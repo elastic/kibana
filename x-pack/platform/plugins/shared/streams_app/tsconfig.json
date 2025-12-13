@@ -98,7 +98,6 @@
     "@kbn/tooling-log",
     "@kbn/inference-common",
     "@kbn/core-chrome-navigation",
-    "@kbn/index-management-plugin",
-    "@kbn/classic-stream-flyout",
+    "@kbn/classic-stream-flyout"
   ]
 }

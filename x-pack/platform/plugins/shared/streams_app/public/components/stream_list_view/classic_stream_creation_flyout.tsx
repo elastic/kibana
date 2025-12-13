@@ -6,9 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
-import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
-import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-plugin/public';
+import type {
+  IndexManagementLocatorParams,
+  IndexManagementIndexTemplate,
+} from '@kbn/index-management-shared-types';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { createIlmApiClient } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
 import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
@@ -102,7 +104,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   const handleValidate = useCallback(
     async (
       streamName: string,
-      selectedTemplate: TemplateDeserialized,
+      selectedTemplate: IndexManagementIndexTemplate,
       validationSignal?: AbortSignal
     ) => {
       try {
