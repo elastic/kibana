@@ -10,31 +10,38 @@
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { EisPromotionalCallout, type EisPromotionalCalloutProps } from './eis_promotional_callout';
+import { EisUpdateCallout, type EisUpdateCalloutProps } from './eis_update_callout';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
+
 import {
-  EIS_PROMO_CALLOUT_DESCRIPTION,
-  EIS_CALLOUT_ICON_ALT,
   EIS_CALLOUT_TITLE,
+  EIS_CALLOUT_ICON_ALT,
+  EIS_UPDATE_CALLOUT_DESCRIPTION,
+  EIS_UPDATE_CALLOUT_CTA,
+  EIS_CALLOUT_DOCUMENTATION_BTN,
 } from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
-describe('EisPromotionalCallout', () => {
+describe('EisUpdateCallout', () => {
   const promoId = 'testPromo';
-  const dataId = `${promoId}-eis-promo-callout`;
+  const dataId = `${promoId}-eis-update-callout`;
   const ctaLink = 'https://example.com';
-  const direction: EisPromotionalCalloutProps['direction'] = 'row';
-  const mockOnDismissTour = jest.fn();
+  const direction: EisUpdateCalloutProps['direction'] = 'row';
 
-  const renderEisPromotionalCallout = (props?: Partial<EisPromotionalCalloutProps>) => {
+  const mockOnDismissTour = jest.fn();
+  const mockHandleOnClick = jest.fn();
+
+  const renderEisUpdateCallout = (props?: Partial<EisUpdateCalloutProps>) => {
     return render(
       <EuiThemeProvider>
-        <EisPromotionalCallout
+        <EisUpdateCallout
           promoId={promoId}
           ctaLink={ctaLink}
           isCloudEnabled={true}
           direction={direction}
+          hasUpdatePrivileges={true}
+          handleOnClick={mockHandleOnClick}
           {...props}
         />
       </EuiThemeProvider>
@@ -54,26 +61,36 @@ describe('EisPromotionalCallout', () => {
   });
 
   it('renders callout when promo is visible', () => {
-    renderEisPromotionalCallout();
+    renderEisUpdateCallout();
 
-    // Panel exists
     const panel = screen.getByTestId(dataId);
     expect(panel).toBeInTheDocument();
 
-    // Title, description, CTA, and image
     expect(screen.getByText(EIS_CALLOUT_TITLE)).toBeInTheDocument();
-    expect(screen.getByText(EIS_PROMO_CALLOUT_DESCRIPTION)).toBeInTheDocument();
-    expect(screen.getByTestId('eisPromoCalloutCtaBtn')).toBeInTheDocument();
+    expect(screen.getByText(EIS_UPDATE_CALLOUT_DESCRIPTION)).toBeInTheDocument();
+
+    expect(screen.getByText(EIS_UPDATE_CALLOUT_CTA)).toBeInTheDocument();
+    expect(screen.getByText(EIS_CALLOUT_DOCUMENTATION_BTN)).toBeInTheDocument();
+
     expect(screen.getByAltText(EIS_CALLOUT_ICON_ALT)).toBeInTheDocument();
   });
 
   it('calls onDismissTour when dismiss button is clicked', () => {
-    renderEisPromotionalCallout();
+    renderEisUpdateCallout();
 
-    const dismissButton = screen.getByTestId('eisPromoCalloutDismissBtn');
+    const dismissButton = screen.getByTestId('eisUpdateCalloutDismissBtn');
     fireEvent.click(dismissButton);
 
     expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls handleOnClick when CTA button is clicked', () => {
+    renderEisUpdateCallout();
+
+    const ctaButton = screen.getByTestId('eisUpdateCalloutCtaBtn');
+    fireEvent.click(ctaButton);
+
+    expect(mockHandleOnClick).toHaveBeenCalledTimes(1);
   });
 
   it('does not render callout when promo is not visible', () => {
@@ -82,8 +99,23 @@ describe('EisPromotionalCallout', () => {
       onDismissTour: mockOnDismissTour,
     });
 
-    renderEisPromotionalCallout();
+    renderEisUpdateCallout();
+
     const panel = screen.queryByTestId(dataId);
     expect(panel).not.toBeInTheDocument();
+  });
+
+  it('does not render callout when user does not have update privileges', () => {
+    renderEisUpdateCallout({ hasUpdatePrivileges: false });
+
+    const panel = screen.queryByTestId(dataId);
+    expect(panel).not.toBeInTheDocument();
+  });
+
+  it('renders documentation link with correct href', () => {
+    renderEisUpdateCallout();
+
+    const docLink = screen.getByText(EIS_CALLOUT_DOCUMENTATION_BTN);
+    expect(docLink).toHaveAttribute('href', ctaLink);
   });
 });
