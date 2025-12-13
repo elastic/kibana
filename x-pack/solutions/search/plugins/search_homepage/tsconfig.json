@@ -47,6 +47,7 @@
     "@kbn/index-management-shared-types",
     "@kbn/data-views-plugin",
     "@kbn/cloud",
+    "@kbn/onechat-plugin",
   ],
   "exclude": [
     "target/**/*",
