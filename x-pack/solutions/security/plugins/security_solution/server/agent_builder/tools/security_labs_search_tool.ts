@@ -28,7 +28,7 @@ export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search')
 const SECURITY_LABS_INDEX = getSecurityLabsIndexName();
 
 export const securityLabsSearchTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
+  core: SecuritySolutionPluginCoreSetupDependencies
 ): BuiltinToolDefinition<typeof securityLabsSearchSchema> => {
   return {
     id: SECURITY_LABS_SEARCH_TOOL_ID,
