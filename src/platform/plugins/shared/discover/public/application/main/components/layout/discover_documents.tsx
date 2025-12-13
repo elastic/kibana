@@ -47,7 +47,6 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
@@ -87,11 +86,11 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import {
-  useGetDocumentViewRenderer,
-  type DiscoverGridFlyoutProps,
-} from './helpers/render_document_view';
 import { useReadCascadeConfig } from './cascaded_documents/hooks/config';
+import {
+  DiscoverGridFlyout,
+  type DiscoverGridFlyoutProps,
+} from '../../../../components/discover_grid_flyout';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -123,7 +122,6 @@ function DiscoverDocumentsComponent({
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const documents$ = stateContainer.dataState.data$.documents$;
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -157,7 +155,7 @@ function DiscoverDocumentsComponent({
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
-  const documentState = useDataState(documents$);
+  const documentState = useDataState(stateContainer.dataState.data$.documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -232,10 +230,7 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
-
-  const documentViewRenderer = useGetDocumentViewRenderer(docViewerRef);
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
-
   const setExpandedDoc = useCallback(
     (
       doc: DataTableRecord | undefined,
@@ -384,29 +379,30 @@ function DiscoverDocumentsComponent({
       displayedColumns: string[],
       expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
       customColumnsMeta?: DataTableColumnsMeta
-    ) =>
-      documentViewRenderer({
-        dataView,
-        hit,
-        hits: displayedRows,
+    ) => (
+      <DiscoverGridFlyout
+        dataView={dataView}
+        hit={hit}
+        hits={displayedRows}
         // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-        columns: displayedColumns,
-        columnsMeta: customColumnsMeta,
-        savedSearchId: persistedDiscoverSession?.id!,
-        query,
-        initialTabId: initialDocViewerTabId,
-        onFilter: onAddFilter,
-        onRemoveColumn: onRemoveColumnWithTracking,
-        onAddColumn: onAddColumnWithTracking,
-        setExpandedDoc: expandedDocSetter,
-        onClose: expandedDocSetter.bind(null, undefined),
-        docViewerExtensionActions,
-        onUpdateSelectedTabId,
-        initialDocViewerState: docViewerUiState,
-        onInitialDocViewerStateChange,
-      }),
+        columns={displayedColumns}
+        columnsMeta={customColumnsMeta}
+        savedSearchId={persistedDiscoverSession?.id!}
+        query={query}
+        initialTabId={initialDocViewerTabId}
+        onFilter={onAddFilter}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddColumn={onAddColumnWithTracking}
+        setExpandedDoc={expandedDocSetter}
+        onClose={expandedDocSetter.bind(null, undefined)}
+        docViewerRef={docViewerRef}
+        docViewerExtensionActions={docViewerExtensionActions}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
+        initialDocViewerState={docViewerUiState}
+        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      />
+    ),
     [
-      documentViewRenderer,
       dataView,
       persistedDiscoverSession?.id,
       query,
@@ -461,20 +457,18 @@ function DiscoverDocumentsComponent({
     return getCellRenderers(cellRendererParams);
   }, [cellRendererParams, getCellRenderersAccessor]);
 
-  const documents = useObservable(stateContainer.dataState.data$.documents$);
-
   const callouts = useMemo(
     () => (
       <>
         <SelectedVSAvailableCallout
-          esqlQueryColumns={documents?.esqlQueryColumns}
+          esqlQueryColumns={documentState.esqlQueryColumns}
           // If `_source` is in the columns, we should exclude it from the callout
           selectedColumns={currentColumns.filter((col) => col !== '_source')}
         />
         <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
       </>
     ),
-    [currentColumns, documents?.esqlQueryColumns, documentState.interceptedWarnings]
+    [currentColumns, documentState.esqlQueryColumns, documentState.interceptedWarnings]
   );
 
   const loadingIndicator = useMemo(
