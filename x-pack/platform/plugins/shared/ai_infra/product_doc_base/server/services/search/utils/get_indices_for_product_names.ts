@@ -7,6 +7,7 @@
 
 import {
   getProductDocIndexName,
+  getSecurityLabsIndexName,
   DocumentationProduct,
   type ProductName,
 } from '@kbn/product-doc-common';
@@ -23,4 +24,22 @@ export const getIndicesForProductNames = (
   return productNames.map((productName: ProductName) =>
     getProductDocIndexName(productName, inferenceId)
   );
+};
+
+/**
+ * Returns the indices to search including Security Labs if requested.
+ */
+export const getIndicesWithSecurityLabs = (
+  productNames: ProductName[] | undefined,
+  inferenceId?: string,
+  includeSecurityLabs?: boolean
+): string | string[] => {
+  const productIndices = getIndicesForProductNames(productNames, inferenceId);
+  const indices = Array.isArray(productIndices) ? productIndices : [productIndices];
+
+  if (includeSecurityLabs) {
+    indices.push(getSecurityLabsIndexName(inferenceId));
+  }
+
+  return indices.length === 1 ? indices[0] : indices;
 };

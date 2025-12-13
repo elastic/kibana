@@ -29,9 +29,13 @@ import type {
   DocUninstallOptions,
   DocUpdateOptions,
   DocUpdateAllOptions,
+  SecurityLabsInstallOptions,
+  SecurityLabsUninstallOptions,
+  SecurityLabsStatusResponse,
 } from './types';
 import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 import type { PerformUpdateResponse } from '../../../common/http_api/installation';
+import type { PackageInstaller } from '../package_installer';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
 
@@ -46,6 +50,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   private licensing: LicensingPluginStart;
   private docInstallClient: ProductDocInstallClient;
   private auditService: CoreAuditService;
+  private packageInstaller?: PackageInstaller;
 
   constructor({
     logger,
@@ -53,18 +58,21 @@ export class DocumentationManager implements DocumentationManagerAPI {
     licensing,
     docInstallClient,
     auditService,
+    packageInstaller,
   }: {
     logger: Logger;
     taskManager: TaskManagerStartContract;
     licensing: LicensingPluginStart;
     docInstallClient: ProductDocInstallClient;
     auditService: CoreAuditService;
+    packageInstaller?: PackageInstaller;
   }) {
     this.logger = logger;
     this.taskManager = taskManager;
     this.licensing = licensing;
     this.docInstallClient = docInstallClient;
     this.auditService = auditService;
+    this.packageInstaller = packageInstaller;
   }
 
   async install(options: DocInstallOptions): Promise<void> {
@@ -265,6 +273,93 @@ export class DocumentationManager implements DocumentationManagerAPI {
       {}
     );
     return body;
+  }
+
+  // Security Labs methods
+
+  async installSecurityLabs(options: SecurityLabsInstallOptions): Promise<void> {
+    const { request, inferenceId, version } = options;
+
+    const license = await this.licensing.getLicense();
+    if (!checkLicense(license)) {
+      throw new Error('Security Labs content requires an enterprise license');
+    }
+
+    if (!this.packageInstaller) {
+      throw new Error('PackageInstaller not available');
+    }
+
+    if (request) {
+      this.auditService.asScoped(request).log({
+        message:
+          `User is requesting installation of Security Labs content for AI Assistants.` +
+          (inferenceId ? ` Inference ID=[${inferenceId}]` : '') +
+          (version ? ` Version=[${version}]` : ''),
+        event: {
+          action: 'security_labs_create',
+          category: ['database'],
+          type: ['creation'],
+          outcome: 'unknown',
+        },
+      });
+    }
+
+    try {
+      await this.packageInstaller.installSecurityLabs({
+        version,
+        inferenceId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to install Security Labs content: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async uninstallSecurityLabs(options: SecurityLabsUninstallOptions): Promise<void> {
+    const { request, inferenceId } = options;
+
+    if (!this.packageInstaller) {
+      throw new Error('PackageInstaller not available');
+    }
+
+    if (request) {
+      this.auditService.asScoped(request).log({
+        message: `User is requesting deletion of Security Labs content for AI Assistants.`,
+        event: {
+          action: 'security_labs_delete',
+          category: ['database'],
+          type: ['deletion'],
+          outcome: 'unknown',
+        },
+      });
+    }
+
+    try {
+      await this.packageInstaller.uninstallSecurityLabs({ inferenceId });
+    } catch (error) {
+      this.logger.error(`Failed to uninstall Security Labs content: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async getSecurityLabsStatus({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    if (!this.packageInstaller) {
+      return { status: 'uninstalled' };
+    }
+
+    try {
+      return await this.packageInstaller.getSecurityLabsStatus({ inferenceId });
+    } catch (error) {
+      this.logger.error(`Failed to get Security Labs status: ${error.message}`);
+      return {
+        status: 'error',
+        failureReason: error.message,
+      };
+    }
   }
 }
 
