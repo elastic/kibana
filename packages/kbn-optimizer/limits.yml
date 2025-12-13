@@ -25,7 +25,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 566392
+  core: 565105
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -75,7 +75,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 187942
-  genAiSettings: 5507
+  genAiSettings: 5663
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -115,7 +115,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 18999
+  navigation: 15639
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
@@ -125,12 +125,12 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 28638
+  onechat: 88464
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
   presentationUtil: 9000
-  productDocBase: 3083
+  productDocBase: 5025
   productIntercept: 9860
   profiling: 20716
   reindexService: 3469
@@ -174,7 +174,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 23974
+  streamsApp: 27784
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
