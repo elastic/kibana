@@ -255,6 +255,7 @@
     "@kbn/core-metrics-server",
     "@kbn/ai-assistant-default-llm-setting",
     "@kbn/core-ui-settings-browser",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-elasticsearch-server-utils",
   ]
 }
