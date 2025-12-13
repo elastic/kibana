@@ -2768,4 +2768,37 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'mac.advanced.trusted_ancestors',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.trusted_ancestors',
+      {
+        defaultMessage:
+          'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.trusted_ancestors',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.trusted_ancestors',
+      {
+        defaultMessage:
+          'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.trusted_ancestors',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.trusted_ancestors',
+      {
+        defaultMessage:
+          'Enable support for trusted ancestors, allowing children of trusted processes to become trusted by default',
+      }
+    ),
+  },
 ];
