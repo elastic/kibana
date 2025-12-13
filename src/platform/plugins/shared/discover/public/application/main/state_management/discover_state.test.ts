@@ -42,9 +42,16 @@ import type { HistoryLocationState } from '../../../build_services';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { getConnectedCustomizationService } from '../../../customizations';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 
 let mockServices = createDiscoverServicesMock();
 let savedSearchMock = copySavedSearch(originalSavedSearchMock);
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLQueryColumns: jest.fn(),
+}));
+const getESQLQueryColumnsMock = jest.mocked(getESQLQueryColumns);
 
 async function getState(url: string = '/', { savedSearch }: { savedSearch?: SavedSearch } = {}) {
   const nextHistory = createBrowserHistory<HistoryLocationState>();
@@ -94,6 +101,7 @@ describe('Discover state', () => {
   beforeEach(() => {
     mockServices = createDiscoverServicesMock();
     savedSearchMock = copySavedSearch(originalSavedSearchMock);
+    getESQLQueryColumnsMock.mockResolvedValue([]);
   });
 
   describe('Test discover state', () => {

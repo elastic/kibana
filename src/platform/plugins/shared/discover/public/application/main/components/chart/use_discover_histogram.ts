@@ -26,8 +26,9 @@ import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -79,8 +80,11 @@ export const useDiscoverHistogram = (
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
   const isChartLoading = useMemo(() => {
-    return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
-  }, [isEsqlMode, documentsState?.fetchStatus]);
+    const query = stateContainer.getCurrentTab().appState.query;
+    if (!isOfAggregateQueryType(query)) return false;
+    if (!hasTransformationalCommand(query.esql)) return false;
+    return documentsState?.fetchStatus === FetchStatus.LOADING;
+  }, [documentsState?.fetchStatus, stateContainer]);
 
   /**
    * API initialization
@@ -505,11 +509,7 @@ function getUnifiedHistogramTableForEsql({
   documentsValue: DataDocumentsMsg | undefined;
   isEsqlMode: boolean;
 }) {
-  if (
-    !isEsqlMode ||
-    !documentsValue?.result ||
-    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
-  ) {
+  if (!isEsqlMode) {
     return {
       table: undefined,
       esqlQueryColumns: EMPTY_ESQL_COLUMNS,
@@ -520,7 +520,7 @@ function getUnifiedHistogramTableForEsql({
   return {
     table: {
       type: 'datatable' as const,
-      rows: documentsValue.result.map((r) => r.raw),
+      rows: documentsValue?.result?.map((r) => r.raw) || [],
       columns: esqlQueryColumns,
       meta: { type: ESQL_TABLE_TYPE },
     },
