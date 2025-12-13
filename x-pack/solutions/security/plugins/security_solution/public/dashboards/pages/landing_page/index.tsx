@@ -15,7 +15,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
+import type { DashboardListingViewRegistry } from '@kbn/dashboard-plugin/public';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
+import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import { LandingLinksImageCards } from '@kbn/security-solution-navigation/landing_links';
 import { useContractComponents } from '../../../common/hooks/use_contract_component';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -35,7 +37,7 @@ import { trackLandingLinkClick } from '../../../common/lib/telemetry/trackers';
 import type { TagReference } from '../../context/dashboard_context';
 import { useSecurityTags } from '../../context/dashboard_context';
 
-const EMPTY_LISTING_VIEW_REGISTRY = new Set();
+const EMPTY_LISTING_VIEW_REGISTRY: DashboardListingViewRegistry = new Set<TableListTab>();
 
 const getInitialFilterString = (securityTags: TagReference[] | null | undefined) => {
   if (!securityTags) {
