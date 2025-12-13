@@ -188,8 +188,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const { hasSiemRead: hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
 
   const entityFilter = useMemo(
     () => ({
