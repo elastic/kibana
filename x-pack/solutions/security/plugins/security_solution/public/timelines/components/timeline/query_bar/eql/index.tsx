@@ -10,9 +10,7 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
-
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -24,7 +22,6 @@ import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { timelineActions } from '../../../../store';
 import { getEqlOptions } from './selectors';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 interface TimelineEqlQueryBar {
   index: string[];
@@ -62,25 +59,9 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);
   const eqlOptions = useDeepEqualSelector((state) => getOptionsSelected(state, timelineId));
 
-  const {
-    loading: oldIndexPatternsLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(PageScope.timeline);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-
-  const indexPatternsLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIndexPatternsLoading),
-    [newDataViewPickerEnabled, oldIndexPatternsLoading, status]
-  );
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
+  const { dataView, status } = useDataView(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const indexPatternsLoading = useMemo(() => status !== 'ready', [status]);
 
   const initialState = useMemo(
     () => ({
@@ -171,14 +152,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     }
   }, [getFields, selectedPatterns]);
 
-  const dataView = useMemo(() => {
-    return newDataViewPickerEnabled
-      ? experimentalDataView || { title: '', fields: [] }
-      : {
-          title: oldSourcererDataViewSpec.title ?? '',
-          fields: Object.values(oldSourcererDataViewSpec.fields || {}),
-        };
-  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataViewSpec]);
+  const dv = useMemo(() => dataView || { title: '', fields: [] }, [dataView]);
 
   /* Force casting `dataViewSpec` to `DataViewBase` is required since EqlQueryEdit
      accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`. Since
@@ -196,7 +170,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           path="eqlQueryBar"
           eqlOptionsPath="eqlOptions"
           showEqlSizeOption
-          dataView={dataView}
+          dataView={dv}
           loading={indexPatternsLoading}
           disabled={indexPatternsLoading}
         />

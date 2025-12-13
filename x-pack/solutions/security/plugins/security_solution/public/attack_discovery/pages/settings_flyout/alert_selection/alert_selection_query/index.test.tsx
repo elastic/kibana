@@ -12,15 +12,10 @@ import React from 'react';
 import { AlertSelectionQuery } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 
 describe('AlertSelectionQuery', () => {
   const defaultProps = {
@@ -47,11 +42,6 @@ describe('AlertSelectionQuery', () => {
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
   });
 
   it('renders the SearchBar', () => {

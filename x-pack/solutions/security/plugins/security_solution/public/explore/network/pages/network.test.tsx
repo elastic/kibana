@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { screen, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import type { Filter } from '@kbn/es-query';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { TestProviders, createMockStore } from '../../../common/mock';
+import { createMockStore, TestProviders } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 
 import { Network } from './network';
@@ -23,7 +22,6 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withMatchedIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../common/components/empty_prompt');
-jest.mock('../../../sourcerer/containers');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -120,7 +118,6 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Network page - rendering', () => {
   beforeAll(() => {
     mockMapVisibility.mockReturnValue({ show: true });
@@ -129,11 +126,6 @@ describe('Network page - rendering', () => {
     jest.clearAllMocks();
   });
   test('it renders getting started page when no index is available', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      selectedPatterns: [],
-      indicesExist: false,
-    });
-
     render(
       <TestProviders>
         <Router history={mockHistory}>
@@ -146,11 +138,6 @@ describe('Network page - rendering', () => {
   });
 
   test('it DOES NOT render getting started page when an index is available', async () => {
-    mockUseSourcererDataView.mockReturnValue({
-      selectedPatterns: [],
-      indicesExist: true,
-      indexPattern: {},
-    });
     render(
       <TestProviders>
         <Router history={mockHistory}>
@@ -164,12 +151,6 @@ describe('Network page - rendering', () => {
   });
 
   test('it renders the network map if user has permissions', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      selectedPatterns: [],
-      indicesExist: true,
-      indexPattern: {},
-    });
-
     // When there are matched indices
     jest.mocked(useDataView).mockImplementation(withMatchedIndices);
 
@@ -185,12 +166,6 @@ describe('Network page - rendering', () => {
 
   test('it does not render the network map if user does not have permissions', () => {
     mockMapVisibility.mockReturnValue({ show: false });
-    mockUseSourcererDataView.mockReturnValue({
-      selectedPatterns: [],
-      indicesExist: true,
-      indexPattern: {},
-    });
-
     render(
       <TestProviders>
         <Router history={mockHistory}>
@@ -233,13 +208,6 @@ describe('Network page - rendering', () => {
         },
       },
     ];
-    mockUseSourcererDataView.mockReturnValue({
-      selectedPatterns: [],
-      indicesExist: true,
-      indexPattern: { fields: [], title: 'title' },
-      sourcererDataView: {},
-    });
-
     jest.mocked(useDataView).mockImplementation(withMatchedIndices);
 
     const myStore = createMockStore();

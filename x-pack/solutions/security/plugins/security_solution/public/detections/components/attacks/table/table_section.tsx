@@ -147,17 +147,12 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
     []
   );
 
-  const dataViewSpec = useMemo(() => {
-    return dataView.toSpec(true);
-  }, [dataView]);
-
   return (
     <div data-test-subj={TABLE_SECTION_TEST_ID}>
       <GroupedAlertsTable
         accordionButtonContent={defaultGroupTitleRenderers}
         accordionExtraActionGroupStats={accordionExtraActionGroupStats}
         dataView={dataView}
-        dataViewSpec={dataViewSpec}
         defaultFilters={defaultFilters}
         defaultGroupingOptions={groupingOptions}
         from={from}
