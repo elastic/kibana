@@ -8,10 +8,9 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/onechat-server';
-import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '@kbn/observability-agent-builder-plugin/common';
+import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../../types';
-import { getIsObservabilityAgentEnabled } from './get_is_obs_agent_enabled';
 import { buildApmToolResources } from './build_apm_tool_resources';
 
 export async function getApmToolAvailability({
@@ -26,14 +25,44 @@ export async function getApmToolAvailability({
   logger: Logger;
 }): Promise<ToolAvailabilityResult> {
   try {
-    const isEnabled = await getIsObservabilityAgentEnabled(core);
-    if (!isEnabled) {
+    const [coreStart, pluginsStart] = await core.getStartServices();
+
+    const isAiAgentsEnabled = await coreStart.featureFlags.getBooleanValue(
+      AI_AGENTS_FEATURE_FLAG,
+      AI_AGENTS_FEATURE_FLAG_DEFAULT
+    );
+
+    if (!isAiAgentsEnabled) {
+      logger.debug(`AI agents are disabled (${AI_AGENTS_FEATURE_FLAG}), skipping registration.`);
       return {
         status: 'unavailable',
-        reason: `Feature flag "${OBSERVABILITY_AGENT_FEATURE_FLAG}" is disabled`,
+        reason: `AI agents are disabled (${AI_AGENTS_FEATURE_FLAG})`,
       };
     }
 
+    // Only register APM Agent Builder tools in Observability or Classic solution spaces
+    try {
+      const activeSpace = await pluginsStart.spaces?.spacesService.getActiveSpace(request);
+      const solution = activeSpace?.solution;
+      const isAllowedSolution = !solution || solution === 'classic' || solution === 'oblt';
+
+      if (!isAllowedSolution) {
+        logger.debug(
+          'Observability agent builder tools are not available in this space, skipping registration.'
+        );
+
+        return {
+          status: 'unavailable',
+          reason: 'Observability tools are not available in this space',
+        };
+      }
+    } catch {
+      logger.debug(
+        'Spaces are unavailable, proceeding with Observability agent builder tool registration.'
+      );
+    }
+
+    // Only register APM Agent Builder tools if APM data is available
     const { apmEventClient } = await buildApmToolResources({
       core,
       plugins,

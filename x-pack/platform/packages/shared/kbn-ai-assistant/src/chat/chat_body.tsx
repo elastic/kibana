@@ -412,13 +412,12 @@ export function ChatBody({
   };
 
   const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+  const { conversationCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
     !!elasticManagedLlm &&
     connectors.selectedConnector === elasticManagedLlm.id &&
-    !conversationCalloutDismissed &&
-    tourCalloutDismissed;
+    !conversationCalloutDismissed;
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
