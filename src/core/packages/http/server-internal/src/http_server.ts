@@ -382,11 +382,12 @@ export class HttpServer {
   }
 
   private getAuthOption(
-    authRequired: RouteConfigOptions<any>['authRequired'] = true
+    authRequired: RouteConfigOptions<any>['authRequired'] | 'minimal' = true
   ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
-    if (authRequired === true) {
+    // Minimal authentication still should go through the authentication handler.
+    if (authRequired === true || authRequired === 'minimal') {
       return { mode: 'required' };
     }
     if (authRequired === 'optional') {
