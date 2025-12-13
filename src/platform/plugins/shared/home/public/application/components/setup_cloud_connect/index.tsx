@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
-import { AutoOpsPromotionCallout as Component } from './callout';
-
-export default {
-  title: 'AutoOps Promotion Callout',
-  description: '',
-};
-
-export const AutoOpsPromotionCallout = () => {
-  return <Component learnMoreLink="https://www.elastic.co/blog/elasticsearch-autoops-on-prem" />;
-};
+export * from './setup_cloud_connect';
