@@ -16,6 +16,7 @@ import type {
   TextBasedLayer,
   DatasourceDimensionEditorProps,
   DataType,
+  TextBasedLayerColumn,
 } from '@kbn/lens-common';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
@@ -133,12 +134,12 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           selectedField={selectedField}
           onChoose={(choice) => {
             const column = allColumns?.find((f) => f.name === choice.field);
-            const newColumn = {
+            const newColumn: TextBasedLayerColumn = {
               columnId: props.columnId,
               fieldName: choice.field,
               meta: column?.meta,
               variable: column?.variable,
-              label: choice.field,
+              customLabel: false,
             };
             return props.setState(
               !selectedField
@@ -201,8 +202,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           </EuiText>
 
           <NameInput
-            value={selectedField.label || ''}
-            defaultValue={''}
+            value={selectedField.customLabel ? selectedField.label ?? '' : ''}
+            defaultValue={!selectedField.customLabel ? selectedField.fieldName ?? '' : ''}
             onChange={(value) => {
               updateLayer(
                 updateColumnLabel({

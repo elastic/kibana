@@ -74,5 +74,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
     loadTestFile(require.resolve('./logsdb')); // 43m
     loadTestFile(require.resolve('./esql'));
+    loadTestFile(require.resolve('./dashboard_esql_chart'));
   });
 };
