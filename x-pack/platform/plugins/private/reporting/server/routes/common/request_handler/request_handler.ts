@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import moment from 'moment';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -26,6 +25,7 @@ import { checkParamsVersion } from '../../../lib';
 import { type Counters } from '..';
 import type { ReportingCore } from '../../..';
 import type { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
+import { validateJobParams } from './validator';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -121,6 +121,17 @@ export abstract class RequestHandler<
         body: `invalid rison: ${jobParamsRison}`,
       });
     }
+    try {
+      jobParams = validateJobParams(jobParams) as BaseParams;
+    } catch (err) {
+      this.opts.logger.error(`Job param validation failed: ${err.message}`, {
+        error: { stack_trace: err.stack },
+      });
+      throw res.customError({
+        statusCode: 400,
+        body: `invalid params: ${err.message}`,
+      });
+    }
 
     return jobParams;
   }
@@ -145,10 +156,7 @@ export abstract class RequestHandler<
     return { job, version, jobType: exportType.jobType, name: exportType.name };
   }
 
-  protected async checkLicenseAndTimezone(
-    exportTypeId: string,
-    browserTimezone: string
-  ): Promise<IKibanaResponse | null> {
+  protected async checkLicense(exportTypeId: string): Promise<IKibanaResponse | null> {
     const { reporting, context, res } = this.opts;
 
     // ensure the async dependencies are loaded
@@ -165,12 +173,6 @@ export abstract class RequestHandler<
 
     if (!licenseResults.enableLinks) {
       return res.forbidden({ body: licenseResults.message });
-    }
-
-    if (browserTimezone && !moment.tz.zone(browserTimezone)) {
-      return res.badRequest({
-        body: `Invalid timezone "${browserTimezone ?? ''}".`,
-      });
     }
 
     return null;
