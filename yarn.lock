@@ -6514,6 +6514,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-snapshot-loader@link:x-pack/platform/packages/shared/kbn-es-snapshot-loader":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-types@link:src/platform/packages/shared/kbn-es-types":
   version "0.0.0"
   uid ""
