@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
+import {
+  SavedObjectsClient,
+  type CoreSetup,
+  type Logger,
+  type LoggerFactory,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { SLOConfig, SLOPluginStartDependencies } from '../../types';
-import { CleanUpTempSummary } from '../management/clean_up_temp_summary';
+import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
+import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
 
-export const TYPE = 'slo:temp-summary-cleanup-task';
-export const VERSION = '1.0.0';
+export const TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
 interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;
@@ -25,7 +28,7 @@ interface TaskSetupContract {
   config: SLOConfig;
 }
 
-export class TempSummaryCleanupTask {
+export class OrphanSummaryCleanupTask {
   private logger: Logger;
   private config: SLOConfig;
   private wasStarted: boolean = false;
@@ -35,12 +38,10 @@ export class TempSummaryCleanupTask {
     this.logger = logFactory.get(this.taskId);
     this.config = config;
 
-    this.logger.debug('Registering task with [2m] timeout');
-
     taskManager.registerTaskDefinitions({
       [TYPE]: {
-        title: 'SLO temp summary cleanup task',
-        timeout: '2m',
+        title: 'SLO orphan summary cleanup task',
+        timeout: '3m',
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
@@ -60,6 +61,10 @@ export class TempSummaryCleanupTask {
     });
   }
 
+  private get taskId() {
+    return `${TYPE}:1.0.0`;
+  }
+
   public async start(plugins: SLOPluginStartDependencies) {
     const hasCorrectLicense = (await plugins.licensing.getLicense()).hasAtLeast('platinum');
     if (!hasCorrectLicense) {
@@ -72,7 +77,7 @@ export class TempSummaryCleanupTask {
       return;
     }
 
-    if (!this.config.tempSummaryCleanupTaskEnabled) {
+    if (!this.config.sloOrphanSummaryCleanUpTaskEnabled) {
       this.logger.debug('Unscheduling task');
       return await plugins.taskManager.removeIfExists(this.taskId);
     }
@@ -96,10 +101,6 @@ export class TempSummaryCleanupTask {
     }
   }
 
-  private get taskId(): string {
-    return `${TYPE}:${VERSION}`;
-  }
-
   public async runTask(
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
@@ -117,21 +118,42 @@ export class TempSummaryCleanupTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.debug(`runTask started`);
-
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const internalSoClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
+
+    this.logger.debug(`Task started with previous state: ${JSON.stringify(taskInstance.state)}`);
+
+    const params = this.parseTaskInstanceState(taskInstance);
 
     try {
-      const cleanUpTempSummary = new CleanUpTempSummary(esClient, this.logger, abortController);
-      await cleanUpTempSummary.execute();
-    } catch (err) {
-      if (err instanceof errors.RequestAbortedError) {
-        this.logger.warn(`Request aborted due to timeout: ${err}`);
+      const result = await cleanupOrphanSummaries(params, {
+        esClient,
+        soClient: internalSoClient,
+        logger: this.logger,
+        abortController,
+      });
 
-        return;
+      if (result.aborted) {
+        this.logger.debug(`Task aborted, will start from last state next run`);
+        return {
+          state: result.nextState,
+        };
       }
+
+      this.logger.debug(`Task completed successfully`);
+    } catch (err) {
       this.logger.debug(`Error: ${err}`);
     }
+  }
+
+  private parseTaskInstanceState(taskInstance: ConcreteTaskInstance) {
+    const state = taskInstance.state || {};
+
+    return {
+      searchAfter: state.searchAfter,
+    };
   }
 }

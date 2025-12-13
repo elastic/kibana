@@ -10,7 +10,7 @@ import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/l
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   SUMMARY_TEMP_INDEX_NAME,
-} from '../../../common/constants';
+} from '../../../../common/constants';
 
 interface AggBucketKey extends AggregationsCompositeAggregateKey {
   spaceId: string;
