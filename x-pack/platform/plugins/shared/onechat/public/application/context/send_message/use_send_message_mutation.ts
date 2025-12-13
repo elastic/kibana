@@ -67,7 +67,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setPendingMessage,
     removePendingMessage,
   } = usePendingMessageState({ conversationId });
-  const subscribeToChatEvents = useSubscribeToChatEvents({
+  const { subscribeToChatEvents, unsubscribeFromChatEvents } = useSubscribeToChatEvents({
     setAgentReasoning,
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
@@ -118,6 +118,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationActions.invalidateConversation();
       messageControllerRef.current = null;
       setAgentReasoning(null);
+      setIsResponseLoading(false);
     },
     onSuccess: () => {
       removePendingMessage();
@@ -127,7 +128,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       }
     },
     onError: (err) => {
-      setIsResponseLoading(false);
       reportConverseError(err, { connectorId });
       setError(err);
       const steps = conversation?.rounds?.at(-1)?.steps;
@@ -176,12 +176,14 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     },
     canCancel,
     cancel,
-    // Cleaning only makes sense in the context of an error state on a new conversation round
-    // The user can click "New" to clear the pending round and error
     cleanConversation: () => {
-      conversationActions.removeOptimisticRound();
-      removeError();
-      removePendingMessage();
+      if (isLoading) {
+        unsubscribeFromChatEvents();
+      } else if (Boolean(error)) {
+        conversationActions.removeOptimisticRound();
+        removeError();
+        removePendingMessage();
+      }
     },
   };
 };
