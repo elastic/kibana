@@ -1,0 +1,165 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { validateSettingsWithDryRun } from './validate_settings';
+
+describe('validateSettingsWithDryRun', () => {
+  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
+
+  beforeEach(() => {
+    mockScopedClusterClient = {
+      asCurrentUser: {
+        indices: {
+          putDataStreamSettings: jest.fn(),
+        },
+      },
+    } as unknown as IScopedClusterClient;
+  });
+
+  it('returns valid when settings pass dry_run validation', async () => {
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+      .fn()
+      .mockResolvedValue({
+        data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
+      });
+
+    const result = await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-test-default',
+      settings: { 'index.refresh_interval': { value: '5s' } },
+      isServerless: true,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(
+      mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
+    ).toHaveBeenCalledWith({
+      name: 'logs-test-default',
+      settings: { 'index.refresh_interval': '5s' },
+      dry_run: true,
+    });
+  });
+
+  it('returns invalid when settings fail dry_run validation', async () => {
+    const errorMessage =
+      'index setting [index.refresh_interval=1s] should be either -1 or equal to or greater than 5s';
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+      .fn()
+      .mockResolvedValue({
+        data_streams: [
+          {
+            name: 'logs-test-default',
+            applied_to_data_stream: false,
+            error: errorMessage,
+          },
+        ],
+      });
+
+    const result = await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-test-default',
+      settings: { 'index.refresh_interval': { value: '1s' } },
+      isServerless: true,
+    });
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].message).toContain('Invalid stream settings');
+    expect(result.errors[0].message).toContain(errorMessage);
+  });
+
+  it('skips validation when there are no settings to validate', async () => {
+    const result = await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-test-default',
+      settings: {},
+      isServerless: true,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(
+      mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
+    ).not.toHaveBeenCalled();
+  });
+
+  it('skips validation when all settings are null', async () => {
+    const result = await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-test-default',
+      settings: { 'index.refresh_interval': { value: null as unknown as string } },
+      isServerless: true,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(
+      mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
+    ).not.toHaveBeenCalled();
+  });
+
+  it('only sends allowed settings in serverless mode', async () => {
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+      .fn()
+      .mockResolvedValue({
+        data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
+      });
+
+    await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-test-default',
+      settings: {
+        'index.refresh_interval': { value: '5s' },
+        'index.number_of_replicas': { value: 2 },
+        'index.number_of_shards': { value: 3 },
+      },
+      isServerless: true,
+    });
+
+    // In serverless mode, only refresh_interval is allowed
+    expect(
+      mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
+    ).toHaveBeenCalledWith({
+      name: 'logs-test-default',
+      settings: { 'index.refresh_interval': '5s' },
+      dry_run: true,
+    });
+  });
+
+  it('sends all settings in non-serverless mode', async () => {
+    mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
+      .fn()
+      .mockResolvedValue({
+        data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
+      });
+
+    await validateSettingsWithDryRun({
+      scopedClusterClient: mockScopedClusterClient,
+      streamName: 'logs-test-default',
+      settings: {
+        'index.refresh_interval': { value: '5s' },
+        'index.number_of_replicas': { value: 2 },
+        'index.number_of_shards': { value: 3 },
+      },
+      isServerless: false,
+    });
+
+    expect(
+      mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
+    ).toHaveBeenCalledWith({
+      name: 'logs-test-default',
+      settings: {
+        'index.refresh_interval': '5s',
+        'index.number_of_replicas': 2,
+        'index.number_of_shards': 3,
+      },
+      dry_run: true,
+    });
+  });
+});

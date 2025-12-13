@@ -64,6 +64,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { validateSettingsWithDryRun } from './validate_settings';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -524,6 +525,34 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     validateSettings(this._definition, this.dependencies.isServerless);
+
+    const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!
+    ) as WiredStream[];
+
+    // Settings can be applied due to an upstream stream change, so validate when any stream in the chain changed.
+    if (
+      existsInStartingState &&
+      ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings())
+    ) {
+      const { existsAsDataStream } = await this.getMatchingDataStream();
+      if (existsAsDataStream) {
+        const inheritedSettings = getInheritedSettings(
+          ancestorsAndSelf.map(
+            (ancestor) => ancestor.definition
+          ) as Streams.WiredStream.Definition[]
+        );
+        const settingsValidation = await validateSettingsWithDryRun({
+          scopedClusterClient: this.dependencies.scopedClusterClient,
+          streamName: this._definition.name,
+          settings: inheritedSettings,
+          isServerless: this.dependencies.isServerless,
+        });
+        if (!settingsValidation.isValid) {
+          return settingsValidation;
+        }
+      }
+    }
 
     return { isValid: true, errors: [] };
   }
