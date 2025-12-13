@@ -15,9 +15,12 @@ import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import { groupBy } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { ExceptionItemImportError } from '@kbn/lists-plugin/server/exception_item_import_error';
 import { stringify } from '../../../endpoint/utils/stringify';
 import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
+  buildPerPolicyTag,
   getArtifactOwnerSpaceIds,
   isArtifactGlobal,
 } from '../../../../common/endpoint/service/artifacts/utils';
@@ -31,7 +34,6 @@ import {
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from './errors';
-import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 
 const OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.noGlobalArtifactAuthzApiMessage',
@@ -111,14 +113,6 @@ export class BaseValidator {
       (!this.isItemByPolicy(item) && !featureKey.endsWith('_BY_POLICY'))
     ) {
       this.endpointAppContext.getFeatureUsageService().notifyUsage(featureKey);
-    }
-  }
-
-  protected async validateHasEndpointExceptionsPrivileges(
-    privilege: keyof EndpointAuthz
-  ): Promise<void> {
-    if (!(await this.endpointAuthzPromise)[privilege]) {
-      throw new EndpointExceptionsValidationError('Endpoint exceptions authorization failure', 403);
     }
   }
 
@@ -438,5 +432,89 @@ export class BaseValidator {
       `Item not found in space [${activeSpaceId}]`,
       404
     );
+  }
+
+  protected async validatePreImportItems(
+    items: PromiseFromStreams,
+    validator: (item: ExceptionItemLikeOptions) => Promise<void>
+  ): Promise<void> {
+    const validatedItems: PromiseFromStreams['items'] = [];
+
+    for (const _item of items.items) {
+      if (_item instanceof Error) {
+        validatedItems.push(_item);
+      } else {
+        const item: ExceptionItemLikeOptions = {
+          name: _item.name,
+          description: _item.description,
+          entries: _item.entries,
+          osTypes: _item.os_types,
+          tags: _item.tags,
+          namespaceType: _item.namespace_type,
+          comments: _item.comments,
+          listId: _item.list_id,
+        };
+
+        try {
+          await validator(item);
+
+          validatedItems.push({
+            ..._item,
+
+            name: item.name,
+            description: item.description,
+            entries: item.entries,
+            os_types: item.osTypes,
+            tags: item.tags,
+            namespace_type: item.namespaceType,
+            list_id: item.listId ?? _item.list_id,
+          });
+        } catch (error) {
+          validatedItems.push(new ExceptionItemImportError(error, _item.list_id, _item.item_id));
+        }
+      }
+    }
+
+    items.items = validatedItems;
+  }
+
+  protected async removeInvalidPolicyIds(item: ExceptionItemLikeOptions): Promise<void> {
+    if (this.isItemByPolicy(item)) {
+      const { packagePolicy, savedObjects } = this.endpointAppContext.getInternalFleetServices();
+      const policyIdsInArtifact = getPolicyIdsFromArtifact(item);
+      const soClient = savedObjects.createInternalUnscopedSoClient();
+
+      if (policyIdsInArtifact.length === 0) {
+        return;
+      }
+
+      const matchingPoliciesFromAllSpaces: PackagePolicy[] =
+        (await packagePolicy.getByIDs(soClient, policyIdsInArtifact, {
+          ignoreMissing: true,
+          spaceIds: ['*'],
+        })) ?? [];
+
+      const matchingPolicyIdsFromAllSpaces = new Set<string>();
+      matchingPoliciesFromAllSpaces.forEach(({ id }) => matchingPolicyIdsFromAllSpaces.add(id));
+
+      const invalidPolicyIds: string[] = policyIdsInArtifact.filter(
+        (policyId) => !matchingPolicyIdsFromAllSpaces.has(policyId)
+      );
+
+      const invalidPolicyIdTags = new Set<string>();
+      invalidPolicyIds.forEach((invalidPolicyId) =>
+        invalidPolicyIdTags.add(buildPerPolicyTag(invalidPolicyId))
+      );
+
+      if (invalidPolicyIdTags.size > 0) {
+        item.tags = item.tags.filter((tag) => !invalidPolicyIdTags.has(tag));
+
+        item.comments.push({
+          comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n${invalidPolicyIds
+            .map((id) => `- "${id}"`)
+            .join('\n')}`,
+        });
+      }
+    }
   }
 }

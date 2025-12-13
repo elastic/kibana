@@ -17,6 +17,7 @@ import {
   OperatingSystem,
   isTrustedDeviceFieldAvailableForOs,
 } from '@kbn/securitysolution-utils';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { EndpointArtifactExceptionValidationError } from './errors';
@@ -117,6 +118,17 @@ export class TrustedDeviceValidator extends BaseValidator {
     if (!this.endpointAppContext.experimentalFeatures.trustedDevices) {
       throw new EndpointArtifactExceptionValidationError('Trusted devices feature is not enabled');
     }
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      await this.validateCreateOwnerSpaceIds(item);
+      await this.validateCanCreateGlobalArtifacts(item);
+      await this.removeInvalidPolicyIds(item);
+    });
   }
 
   async validatePreCreateItem(
