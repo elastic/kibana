@@ -101,7 +101,8 @@ const jobParamsSchema = z
     locatorParams: locatorParamsSchema.nullable().optional(), // this is for CSV v2 compatibility
     searchSource: z.record(z.string(), z.any()).optional(), // this is for CSV v1 compatibility
     columns: z.array(z.string()).optional(), // this is for CSV v1 compatibility
-    relativeUrls: z.array(z.string().max(124)).optional(), // legacy
+    relativeUrls: z.array(z.string().max(124)).optional(), // used in tests could be legacy
+    relativeUrl: z.array(z.string().max(124)).optional(), // used in tests could be legacy
   })
   .strict();
 
