@@ -175,6 +175,7 @@ export const packageToPackagePolicyInputs = (
       policy_template: packageInput.policy_template,
       enabled: enableInput,
       streams: streamsForInput,
+      ...(packageInput?.migrate_from ? { migrate_from: packageInput.migrate_from } : {}),
     };
 
     if (Object.keys(varsForInput).length) {
