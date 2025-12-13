@@ -271,6 +271,38 @@ export async function pickTestGroupRunOrder() {
   const unit = getRunGroup(bk, types, UNIT_TYPE);
   const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
 
+  // NEW: Get test-suite-level breakdowns for configs that are too long
+  const configsNeedingSplit = types
+    .filter((t) => t.type === FUNCTIONAL_TYPE)
+    .flatMap((t) => t.tooLong ?? [])
+    .filter(({ durationMin }) => durationMin > FUNCTIONAL_MAX_MINUTES)
+    .map(({ config }) => config);
+
+  let testSuiteBreakdowns: Record<string, any> = {};
+
+  if (configsNeedingSplit.length > 0) {
+    console.log(
+      `Fetching test-suite breakdowns for ${configsNeedingSplit.length} configs that exceed ${FUNCTIONAL_MAX_MINUTES} minutes`
+    );
+
+    try {
+      const breakdownResp = await ciStats.getTestSuiteDurations({
+        sources: sources as Array<
+          | { branch: string; jobName: string }
+          | { prId: string; jobName: string }
+          | { commit: string; jobName: string }
+        >,
+        configs: configsNeedingSplit,
+        thresholdMin: 5, // Only consider suites taking >5 min for splitting
+      });
+
+      testSuiteBreakdowns = breakdownResp.configs;
+      console.log(`Received breakdowns for ${Object.keys(testSuiteBreakdowns).length} configs`);
+    } catch (error) {
+      console.warn('Failed to get test suite durations, will use config-level grouping', error);
+    }
+  }
+
   let configCounter = 0;
   let groupCounter = 0;
 
@@ -284,7 +316,12 @@ export async function pickTestGroupRunOrder() {
   // the map that we will write to the artifacts for informing ftr config jobs of what they should do
   const ftrRunOrder: Record<
     string,
-    { title: string; expectedDurationMin: number; names: string[] }
+    {
+      title: string;
+      expectedDurationMin: number;
+      names: string[];
+      testFileFilter?: string[];
+    }
   > = {};
 
   if (ftrConfigsByQueue.size) {
@@ -294,28 +331,97 @@ export async function pickTestGroupRunOrder() {
           continue;
         }
 
-        const key = `ftr_configs_${configCounter++}`;
-        let sortBy;
-        let title;
-        if (group.names.length === 1) {
-          title = group.names[0];
-          sortBy = title;
-        } else {
-          sortBy = ++groupCounter;
-          title = `FTR Configs #${sortBy}`;
-        }
+        // Process each config in the group
+        for (const configName of group.names) {
+          const breakdown = testSuiteBreakdowns[configName];
 
-        functionalGroups.push({
-          title,
-          key,
-          sortBy,
-          queue: queue ?? defaultQueue,
-        });
-        ftrRunOrder[key] = {
-          title,
-          expectedDurationMin: group.durationMin,
-          names: group.names,
-        };
+          // If we have suite-level breakdown and config is too long, split it
+          if (breakdown && breakdown.totalDurationMin > FUNCTIONAL_MAX_MINUTES) {
+            console.log(
+              `Splitting ${configName} (${breakdown.totalDurationMin} min) based on test-suite durations`
+            );
+
+            // Group test files to fit within FUNCTIONAL_MAX_MINUTES
+            const testFilesWithDurations = breakdown.testFiles.map(
+              (tf: { file: string; totalAvgDurationMin: number }) => ({
+                file: tf.file,
+                duration: tf.totalAvgDurationMin,
+              })
+            );
+
+            // Sort by duration descending for better bin-packing
+            testFilesWithDurations.sort(
+              (a: { file: string; duration: number }, b: { file: string; duration: number }) =>
+                b.duration - a.duration
+            );
+
+            // Simple bin-packing: group files that fit together
+            const splits: Array<{ files: string[]; duration: number }> = [];
+            let currentSplit = { files: [] as string[], duration: 0 };
+
+            for (const testFile of testFilesWithDurations) {
+              if (
+                currentSplit.duration + testFile.duration > FUNCTIONAL_MAX_MINUTES &&
+                currentSplit.files.length > 0
+              ) {
+                splits.push(currentSplit);
+                currentSplit = { files: [], duration: 0 };
+              }
+              currentSplit.files.push(testFile.file);
+              currentSplit.duration += testFile.duration;
+            }
+
+            if (currentSplit.files.length > 0) {
+              splits.push(currentSplit);
+            }
+
+            console.log(
+              `  Split into ${splits.length} parts: ${splits
+                .map((s) => `${s.duration.toFixed(1)}min`)
+                .join(', ')}`
+            );
+
+            // Create a group for each split
+            for (let i = 0; i < splits.length; i++) {
+              const split = splits[i];
+              const key = `ftr_configs_${configCounter++}`;
+              const title =
+                splits.length === 1 ? configName : `${configName} [part ${i + 1}/${splits.length}]`;
+
+              functionalGroups.push({
+                title,
+                key,
+                sortBy: groupCounter++,
+                queue: queue ?? defaultQueue,
+              });
+
+              ftrRunOrder[key] = {
+                title,
+                expectedDurationMin: split.duration,
+                names: [configName],
+                testFileFilter: split.files,
+              };
+            }
+          } else {
+            // No split needed, use original logic
+            const key = `ftr_configs_${configCounter++}`;
+            const title = group.names.length === 1 ? configName : `FTR Configs #${++groupCounter}`;
+            const sortBy = group.names.length === 1 ? configName : groupCounter;
+
+            functionalGroups.push({
+              title,
+              key,
+              sortBy,
+              queue: queue ?? defaultQueue,
+            });
+
+            ftrRunOrder[key] = {
+              title,
+              expectedDurationMin: group.durationMin / group.names.length,
+              names: [configName],
+            };
+          }
+        }
       }
     }
   }

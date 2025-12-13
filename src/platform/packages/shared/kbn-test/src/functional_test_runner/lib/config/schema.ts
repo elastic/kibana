@@ -91,6 +91,7 @@ export const schema = Joi.object()
   .keys({
     rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
+    testFileFilter: Joi.array().items(Joi.string()).optional(),
     testRunner: Joi.func(),
     serverless: Joi.boolean().default(false),
     testConfigCategory: Joi.string()
