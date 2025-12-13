@@ -182,5 +182,6 @@ export function createPluginStartContext<
     },
     rendering: deps.rendering,
     pricing: deps.pricing,
+    savedObjects: deps.injectedMetadata.getSavedObjects(),
   };
 }

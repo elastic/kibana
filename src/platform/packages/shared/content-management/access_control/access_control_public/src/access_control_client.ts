@@ -15,7 +15,6 @@ import type {
   ChangeAccessModeResponse,
   CheckGlobalPrivilegeResponse,
   CheckUserAccessControlParameters,
-  IsAccessControlEnabledResponse,
 } from './types';
 
 export interface AccessControlClientPublic {
@@ -27,7 +26,6 @@ export interface AccessControlClientPublic {
   canManageAccessControl(params: CanManageContentControlParameters): Promise<boolean>;
   checkUserAccessControl(params: CheckUserAccessControlParameters): boolean;
   isInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean;
-  isAccessControlEnabled(): Promise<boolean>;
 }
 
 export class AccessControlClient implements AccessControlClientPublic {
@@ -104,13 +102,5 @@ export class AccessControlClient implements AccessControlClientPublic {
       accessControl.accessMode === undefined ||
       accessControl.accessMode === 'default'
     );
-  }
-
-  async isAccessControlEnabled(): Promise<boolean> {
-    const response = await this.deps.http.get<IsAccessControlEnabledResponse>(
-      '/internal/access_control/is_enabled'
-    );
-
-    return response?.isAccessControlEnabled ?? false;
   }
 }

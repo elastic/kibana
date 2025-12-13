@@ -152,37 +152,4 @@ export const registerAccessControl = async ({
       }
     }
   );
-
-  router.get(
-    {
-      path: '/internal/access_control/is_enabled',
-      validate: {
-        request: {},
-        response: {
-          200: {
-            body: () =>
-              schema.object({
-                isAccessControlEnabled: schema.boolean(),
-              }),
-          },
-        },
-      },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route returns the access control enabled status',
-        },
-      },
-    },
-    async (_ctx, request, response) => {
-      const { security: securityStart } = await getStartServices();
-      const useRbacForRequest = securityStart?.authz.mode.useRbacForRequest(request);
-      const enabled = isAccessControlEnabled && useRbacForRequest;
-      return response.ok({
-        body: {
-          isAccessControlEnabled: enabled,
-        },
-      });
-    }
-  );
 };

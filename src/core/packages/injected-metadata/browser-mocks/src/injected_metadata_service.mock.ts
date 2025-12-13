@@ -54,6 +54,7 @@ const createSetupContractMock = () => {
     getKibanaBuildNumber: jest.fn(),
     getCustomBranding: jest.fn(),
     getFeatureFlags: jest.fn(),
+    getSavedObjects: jest.fn().mockReturnValue({ isAccessControlEnabled: false }),
   });
 
   return setupContract;

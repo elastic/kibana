@@ -58,6 +58,7 @@ type RenderOptions =
       featureFlags?: never;
       customBranding?: never;
       userSettings?: never;
+      savedObjects?: never;
     });
 
 const themeVersion: ThemeVersion = 'v8';
@@ -104,6 +105,7 @@ export class RenderingService {
     customBranding,
     userSettings,
     i18n,
+    savedObjects,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -127,6 +129,7 @@ export class RenderingService {
         customBranding,
         userSettings,
         i18n,
+        savedObjects,
       }),
     };
   }
@@ -166,6 +169,7 @@ export class RenderingService {
       customBranding,
       userSettings,
       i18n,
+      savedObjects,
     } = renderOptions;
 
     const env = {
@@ -320,6 +324,9 @@ export class RenderingService {
           logo: branding?.logo,
           customizedLogo: branding?.customizedLogo,
           pageTitle: branding?.pageTitle,
+        },
+        savedObjects: {
+          isAccessControlEnabled: savedObjects?.isAccessControlEnabled() ?? false,
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,

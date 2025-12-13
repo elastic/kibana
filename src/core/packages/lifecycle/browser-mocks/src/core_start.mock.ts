@@ -55,6 +55,7 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     plugins: lazyObject({
       onStart: jest.fn(),
     }),
+    savedObjects: { isAccessControlEnabled: false },
   });
 
   return mock;

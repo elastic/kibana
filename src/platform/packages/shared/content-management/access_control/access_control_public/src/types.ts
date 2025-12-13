@@ -14,10 +14,6 @@ export interface CheckGlobalPrivilegeResponse {
   isGloballyAuthorized: boolean;
 }
 
-export interface IsAccessControlEnabledResponse {
-  isAccessControlEnabled: boolean;
-}
-
 export interface ChangeAccesModeParameters {
   objects: Array<{ type: string; id: string }>;
   accessMode: SavedObjectAccessControl['accessMode'];
