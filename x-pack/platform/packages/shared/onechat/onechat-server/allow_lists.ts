@@ -43,8 +43,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
 export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   'observability.agent',
   'platform.dashboard.dashboard_agent',
-  `${internalNamespaces.security}.alerts`,
-  `${internalNamespaces.security}.entity`,
+  `${internalNamespaces.security}.agent`,
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
