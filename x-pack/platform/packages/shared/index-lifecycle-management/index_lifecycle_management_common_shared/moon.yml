@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared
 dependsOn:
   - '@kbn/utility-types'
+  - '@kbn/core'
 tags:
   - shared-common
   - package

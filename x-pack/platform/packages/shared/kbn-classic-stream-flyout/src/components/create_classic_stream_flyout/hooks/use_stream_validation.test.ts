@@ -7,7 +7,7 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useReducer } from 'react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { IndexTemplate } from '../../../types';
 import { useStreamValidation } from './use_stream_validation';
 import type { StreamNameValidator } from '../../../utils';
 import { formReducer, initialFormState } from '../reducers/form_reducer';
@@ -18,10 +18,12 @@ describe('useStreamValidation', () => {
     errorType: null,
   });
 
-  const mockTemplate: TemplateDeserialized = {
+  const mockTemplate: IndexTemplate = {
     name: 'test-template',
     indexPatterns: ['logs-*'],
-  } as TemplateDeserialized;
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'default', hasDatastream: true },
+  };
 
   // Helper to set up hook with form reducer
   const setupHook = (onValidate?: StreamNameValidator) => {

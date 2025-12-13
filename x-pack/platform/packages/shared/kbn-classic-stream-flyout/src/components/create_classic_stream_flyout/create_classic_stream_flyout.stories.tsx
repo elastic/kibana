@@ -7,13 +7,13 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 
+import type { IndexTemplate } from '../../types';
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 import type { StreamNameValidator, IlmPolicyFetcher } from '../../utils';
 
-const MOCK_TEMPLATES: TemplateDeserialized[] = [
+const MOCK_TEMPLATES: IndexTemplate[] = [
   {
     name: 'behavioral_analytics-events-default',
     ilmPolicy: { name: 'profiling-60-days' },
@@ -410,11 +410,7 @@ const createMockValidator = (
 ): StreamNameValidator => {
   const onValidateAction = action('onValidate');
 
-  return async (
-    streamName: string,
-    selectedTemplate: TemplateDeserialized,
-    signal?: AbortSignal
-  ) => {
+  return async (streamName: string, selectedTemplate: IndexTemplate, signal?: AbortSignal) => {
     // Log the validation call to Storybook actions panel
     onValidateAction({ streamName, template: selectedTemplate.name });
     action('onValidate:start')({

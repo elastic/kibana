@@ -6,7 +6,7 @@
  */
 
 import { useCallback, type Dispatch } from 'react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { IndexTemplate } from '../../../types';
 
 import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';
@@ -19,7 +19,7 @@ interface UseStreamValidationParams {
   formState: FormState;
   dispatch: Dispatch<FormAction>;
   onCreate: (streamName: string) => void;
-  selectedTemplate: TemplateDeserialized | undefined;
+  selectedTemplate: IndexTemplate | undefined;
   onValidate?: StreamNameValidator;
   debounceMs?: number;
 }
