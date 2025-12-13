@@ -29,7 +29,7 @@ import { type ESQLDataGroupNode } from '../blocks';
 import type { CascadedDocumentsState } from '../../../../state_management/redux';
 
 interface UseGroupedCascadeDataProps extends Pick<UnifiedDataTableProps, 'rows'> {
-  cascadeConfig: CascadedDocumentsState;
+  cascadedDocumentsState: CascadedDocumentsState;
   queryMeta: ESQLStatsQueryMeta;
   esqlVariables: ESQLControlVariable[] | undefined;
 }
@@ -38,14 +38,14 @@ interface UseGroupedCascadeDataProps extends Pick<UnifiedDataTableProps, 'rows'>
  * Function returns the data for the cascade group.
  */
 export const useGroupedCascadeData = ({
-  cascadeConfig,
+  cascadedDocumentsState,
   rows,
   queryMeta,
   esqlVariables,
 }: UseGroupedCascadeDataProps) => {
   return useMemo(
     () =>
-      cascadeConfig.selectedCascadeGroups.reduce((acc, cur, levelIdx) => {
+      cascadedDocumentsState.selectedCascadeGroups.reduce((acc, cur, levelIdx) => {
         let dataAccessorKey: string = cur;
 
         const selectedGroupVariable = esqlVariables?.find(
@@ -88,8 +88,8 @@ export const useGroupedCascadeData = ({
             // we need to find the record in acc that has the same value for the previous level of cascade grouping
             const previousLevelRecord = acc.find(
               (r: ESQLDataGroupNode) =>
-                r[cascadeConfig.selectedCascadeGroups[levelIdx - 1]] ===
-                record[cascadeConfig.selectedCascadeGroups[levelIdx - 1]]
+                r[cascadedDocumentsState.selectedCascadeGroups[levelIdx - 1]] ===
+                record[cascadedDocumentsState.selectedCascadeGroups[levelIdx - 1]]
             );
 
             if (previousLevelRecord) {
@@ -100,7 +100,7 @@ export const useGroupedCascadeData = ({
 
         return acc;
       }, [] as ESQLDataGroupNode[]),
-    [cascadeConfig.selectedCascadeGroups, esqlVariables, queryMeta, rows]
+    [cascadedDocumentsState.selectedCascadeGroups, esqlVariables, queryMeta, rows]
   );
 };
 

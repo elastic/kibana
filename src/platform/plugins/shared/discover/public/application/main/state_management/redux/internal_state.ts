@@ -242,7 +242,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<Pick<TabState, 'cascadedDocumentsState'>>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.cascadedDocumentsState = action.payload.cascadedDocumentsState;
       }),
 

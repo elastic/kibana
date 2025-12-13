@@ -72,7 +72,7 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { useReadCascadeConfig } from './cascaded_documents/hooks/config';
+import { isCascadedDocumentsVisible } from './cascaded_documents';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -131,12 +131,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
-
-  const cascadeConfig = useReadCascadeConfig();
-
-  const isCascadeLayoutSelected = useMemo(() => {
-    return Boolean(cascadeConfig?.selectedCascadeGroups?.length);
-  }, [cascadeConfig]);
+  const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
+    isCascadedDocumentsVisible(tab.cascadedDocumentsState, tab.appState.query)
+  );
 
   const fetchCounter = useRef<number>(0);
 

@@ -7,46 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, Suspense } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { AggregateQuery } from '@kbn/es-query';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useProfileAccessor } from '../../context_awareness';
-import type {
-  CascadedDocumentsState,
-  DiscoverAppState,
-} from '../../application/main/state_management/redux';
+import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import {
-  useGroupBySelectorRenderer,
+  useMaybeCascadedDocumentsContext,
+  useGetGroupBySelectorRenderer,
   LazyCascadedDocumentsLayout,
 } from '../../application/main/components/layout/cascaded_documents';
 
-export type DiscoverGridProps = UnifiedDataTableProps & {
+export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
-} & (
-    | {
-        cascadeConfig?: never;
-        onCascadeGroupingChange?: undefined;
-        onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-        viewModeToggle?: never;
-        registerCascadeRequestsInspectorAdapter?: never;
-      }
-    | {
-        cascadeConfig: CascadedDocumentsState | undefined;
-        // when cascade on grouping change handler config is passed to the discover grid component, we expect that all it's supporting props are passed along
-        onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
-        onUpdateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
-        viewModeToggle: React.ReactElement | undefined;
-        registerCascadeRequestsInspectorAdapter: (requestAdapter: RequestAdapter) => void;
-      }
-  );
+  onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+}
 
 /**
  * Customized version of the UnifiedDataTable
@@ -55,14 +35,10 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
 export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     onUpdateESQLQuery,
-    onCascadeGroupingChange,
     query,
-    viewModeToggle,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
-    registerCascadeRequestsInspectorAdapter,
-    cascadeConfig,
     ...props
   }) => {
     const { dataView, setExpandedDoc, renderDocumentView } = props;
@@ -106,29 +82,27 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       return getColumnsConfigurationAccessor(() => ({}))();
     }, [getColumnsConfigurationAccessor]);
 
-    /**
-     * For the discover use case we use this function to hook into the app state container,
-     * so that we can respond to changes in the cascade grouping.
-     * We don't have to, but doing it this way means we get all the error handling and loading utils already existing there.
-     */
+    const cascadedDocumentsContext = useMaybeCascadedDocumentsContext();
+    const cascadedDocumentsState = cascadedDocumentsContext?.cascadedDocumentsState;
+
     const cascadeGroupingChangeHandler = useCallback(
       (cascadeGrouping: string[]) => {
-        return onCascadeGroupingChange?.({ query: query as AggregateQuery, cascadeGrouping });
+        return cascadedDocumentsContext?.cascadeGroupingChangeHandler(cascadeGrouping);
       },
-      [onCascadeGroupingChange, query]
+      [cascadedDocumentsContext]
     );
 
-    const groupBySelectorRenderer = useGroupBySelectorRenderer({
+    const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
       cascadeGroupingChangeHandler,
     });
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls = [
         customExternalAdditionalControls,
-        cascadeConfig?.availableCascadeGroups.length && props.isPlainRecord
+        cascadedDocumentsState?.availableCascadeGroups.length && props.isPlainRecord
           ? groupBySelectorRenderer(
-              cascadeConfig.availableCascadeGroups,
-              cascadeConfig.selectedCascadeGroups
+              cascadedDocumentsState.availableCascadeGroups,
+              cascadedDocumentsState.selectedCascadeGroups
             )
           : null,
       ].filter(Boolean);
@@ -137,24 +111,14 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         <React.Fragment>{additionalControls}</React.Fragment>
       ) : null;
     }, [
-      cascadeConfig,
+      cascadedDocumentsState,
       customExternalAdditionalControls,
       groupBySelectorRenderer,
       props.isPlainRecord,
     ]);
 
-    return props.isPlainRecord && !!cascadeConfig?.selectedCascadeGroups.length ? (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyCascadedDocumentsLayout
-          {...props}
-          dataView={dataView}
-          viewModeToggle={viewModeToggle}
-          cascadeConfig={cascadeConfig!}
-          onUpdateESQLQuery={onUpdateESQLQuery!}
-          cascadeGroupingChangeHandler={cascadeGroupingChangeHandler}
-          registerCascadeRequestsInspectorAdapter={registerCascadeRequestsInspectorAdapter!}
-        />
-      </Suspense>
+    return props.isPlainRecord && !!cascadedDocumentsState?.selectedCascadeGroups.length ? (
+      <LazyCascadedDocumentsLayout {...props} dataView={dataView} />
     ) : (
       <UnifiedDataTable
         showColumnTokens
@@ -169,7 +133,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         shouldKeepAdHocDataViewImmutable
         externalAdditionalControls={externalAdditionalControls}
-        onFullScreenChange={onFullScreenChange}
         {...props}
       />
     );

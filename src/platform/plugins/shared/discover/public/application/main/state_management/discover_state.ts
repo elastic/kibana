@@ -232,10 +232,7 @@ export interface DiscoverStateContainer {
     /**
      * Triggered when the user changes the grouping of the cascade layout
      */
-    onCascadeGroupingChange: (payload: {
-      query: AggregateQuery;
-      cascadeGrouping: string[];
-    }) => void;
+    onCascadeGroupingChange: (payload: { cascadeGrouping: string[] }) => void;
   };
 }
 
@@ -794,16 +791,13 @@ export function getDiscoverStateContainer({
   /**
    * Triggered when user changes grouping in the cascade experience
    */
-  const onCascadeGroupingChange = (({ query, cascadeGrouping }) => {
-    trackQueryFields(query);
-
+  const onCascadeGroupingChange = (({ cascadeGrouping }) => {
     const currentTabState = getCurrentTab();
 
     internalState.dispatch(
       injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
         cascadedDocumentsState: {
-          availableCascadeGroups:
-            currentTabState.cascadedDocumentsState.availableCascadeGroups.slice(0),
+          ...currentTabState.cascadedDocumentsState,
           selectedCascadeGroups: cascadeGrouping,
         },
       })
