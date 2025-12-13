@@ -11,9 +11,12 @@ import type { FC } from 'react';
 import React, { useRef, useLayoutEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
+import type { AppMenuConfig } from '@kbn/app-menu';
+import { AppMenu } from '@kbn/app-menu';
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };
+  config?: Observable<AppMenuConfig | undefined> | null;
 }
 
 export const useHeaderActionMenuMounter = (
@@ -36,9 +39,10 @@ export const useHeaderActionMenuMounter = (
   return mounter;
 };
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
+export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter, config }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
+  const [menuConfig, setMenuConfig] = useState<AppMenuConfig | undefined>(undefined);
 
   useLayoutEffect(() => {
     if (mounter.mount && elementRef.current) {
@@ -57,6 +61,19 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
       }
     };
   }, [mounter]);
+
+  useLayoutEffect(() => {
+    if (config) {
+      const subscription = config.subscribe((value) => {
+        setMenuConfig(value);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [config]);
+
+  if (menuConfig) {
+    return <AppMenu config={menuConfig} />;
+  }
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;
 };

@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { AppLeaveHandler } from './app_leave';
 import type { ScopedHistory } from './scoped_history';
 
@@ -204,6 +205,8 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+
+  setAppMenu?: (config: AppMenuConfig) => void;
 
   /**
    * An observable emitting {@link CoreTheme | Core's theme}.

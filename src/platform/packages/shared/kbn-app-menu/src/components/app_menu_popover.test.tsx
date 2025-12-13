@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TopNavMenuPopover } from './top_nav_menu_popover';
+import { AppMenuPopover } from './app_menu_popover';
 
-describe('TopNavMenuPopover', () => {
+describe('AppMenuPopover', () => {
   const defaultItems = [
     { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
     { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
@@ -31,40 +31,40 @@ describe('TopNavMenuPopover', () => {
   });
 
   it('should render the popover with anchor element', () => {
-    render(<TopNavMenuPopover {...defaultProps} />);
+    render(<AppMenuPopover {...defaultProps} />);
 
     expect(screen.getByTestId('anchor-button')).toBeInTheDocument();
   });
 
   it('should render anchor element even with empty items', () => {
-    render(<TopNavMenuPopover {...defaultProps} items={[]} />);
+    render(<AppMenuPopover {...defaultProps} items={[]} />);
 
     expect(screen.getByTestId('anchor-button')).toBeInTheDocument();
   });
 
   it('should render menu items when popover is open', () => {
-    render(<TopNavMenuPopover {...defaultProps} isOpen={true} />);
+    render(<AppMenuPopover {...defaultProps} isOpen={true} />);
 
     expect(screen.getByText('Item 1')).toBeInTheDocument();
     expect(screen.getByText('Item 2')).toBeInTheDocument();
   });
 
   it('should not render menu items when popover is closed', () => {
-    render(<TopNavMenuPopover {...defaultProps} isOpen={false} />);
+    render(<AppMenuPopover {...defaultProps} isOpen={false} />);
 
     expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
     expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
   });
 
   it('should wrap anchor in tooltip when tooltipContent is provided', () => {
-    render(<TopNavMenuPopover {...defaultProps} tooltipContent="Tooltip content" />);
+    render(<AppMenuPopover {...defaultProps} tooltipContent="Tooltip content" />);
 
     const anchorButton = screen.getByTestId('anchor-button');
     expect(anchorButton.closest('.euiToolTipAnchor')).toBeInTheDocument();
   });
 
   it('should wrap anchor in tooltip when tooltipTitle is provided', () => {
-    render(<TopNavMenuPopover {...defaultProps} tooltipTitle="Tooltip title" />);
+    render(<AppMenuPopover {...defaultProps} tooltipTitle="Tooltip title" />);
 
     const anchorButton = screen.getByTestId('anchor-button');
     expect(anchorButton.closest('.euiToolTipAnchor')).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('TopNavMenuPopover', () => {
 
   it('should wrap anchor in tooltip when both tooltipContent and tooltipTitle are provided', () => {
     render(
-      <TopNavMenuPopover
+      <AppMenuPopover
         {...defaultProps}
         tooltipContent="Tooltip content"
         tooltipTitle="Tooltip title"
@@ -84,7 +84,7 @@ describe('TopNavMenuPopover', () => {
   });
 
   it('should not wrap anchor in tooltip when neither tooltipContent nor tooltipTitle is provided', () => {
-    render(<TopNavMenuPopover {...defaultProps} />);
+    render(<AppMenuPopover {...defaultProps} />);
 
     const anchorButton = screen.getByTestId('anchor-button');
     expect(anchorButton.closest('.euiToolTipAnchor')).not.toBeInTheDocument();
@@ -92,7 +92,7 @@ describe('TopNavMenuPopover', () => {
 
   it('should apply popoverWidth to the panel style', () => {
     const { baseElement } = render(
-      <TopNavMenuPopover {...defaultProps} isOpen={true} popoverWidth={300} />
+      <AppMenuPopover {...defaultProps} isOpen={true} popoverWidth={300} />
     );
 
     const popoverPanel = baseElement.querySelector('.euiPanel');

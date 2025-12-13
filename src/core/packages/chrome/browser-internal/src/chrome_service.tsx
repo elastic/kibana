@@ -455,6 +455,7 @@ export class ChromeService {
         application={application}
         globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
         actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
+        appMenu$={includeAppMenu ? application.currentAppMenu$ : null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
         breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
         customBranding$={customBranding$}
@@ -569,7 +570,13 @@ export class ChromeService {
         );
       },
       getProjectAppMenuComponent: () => {
-        return <AppMenuBar appMenuActions$={application.currentActionMenu$} isFixed={false} />;
+        return (
+          <AppMenuBar
+            appMenuActions$={application.currentActionMenu$}
+            appMenu$={application.currentAppMenu$}
+            isFixed={false}
+          />
+        );
       },
 
       // chrome APIs

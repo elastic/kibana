@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
 import {
   ChromeLayout,
@@ -82,7 +82,11 @@ export class GridLayout implements LayoutService {
 
     // in project style, the project app menu is displayed at the top of application area
     const projectAppMenu = chrome.getProjectAppMenuComponent();
-    const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
+    const hasAppMenu$ = combineLatest([
+      application.currentActionMenu$,
+      application.currentAppMenu$,
+      // @ts-expect-error
+    ]).pipe(map(([menu, appMenu]) => !!menu || !!appMenu));
 
     const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
 

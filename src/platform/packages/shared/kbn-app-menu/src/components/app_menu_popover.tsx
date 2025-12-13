@@ -10,28 +10,28 @@
 import React, { useMemo, type ReactElement } from 'react';
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import { getPopoverPanels, getTooltip } from './utils';
+import { getPopoverPanels, getTooltip } from '../utils';
 import type {
-  TopNavMenuPopoverItem,
-  TopNavMenuPrimaryActionItem,
-  TopNavMenuSecondaryActionItem,
-} from './types';
+  AppMenuPopoverItem,
+  AppMenuPrimaryActionItem,
+  AppMenuSecondaryActionItem,
+} from '../types';
 
-interface TopNavContextMenuProps {
+interface AppMenuContextMenuProps {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   anchorElement: ReactElement;
-  items: TopNavMenuPopoverItem[];
+  items: AppMenuPopoverItem[];
   isOpen: boolean;
   popoverWidth?: number;
-  primaryActionItem?: TopNavMenuPrimaryActionItem;
-  secondaryActionItem?: TopNavMenuSecondaryActionItem;
+  primaryActionItem?: AppMenuPrimaryActionItem;
+  secondaryActionItem?: AppMenuSecondaryActionItem;
   anchorPosition?: PopoverAnchorPosition;
   testId?: string;
   onClose: () => void;
 }
 
-export const TopNavMenuPopover = ({
+export const AppMenuPopover = ({
   items,
   anchorElement,
   tooltipContent,
@@ -43,7 +43,7 @@ export const TopNavMenuPopover = ({
   anchorPosition,
   testId,
   onClose,
-}: TopNavContextMenuProps) => {
+}: AppMenuContextMenuProps) => {
   const panels = useMemo(
     () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem }),
     [items, primaryActionItem, secondaryActionItem]

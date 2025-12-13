@@ -10,9 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TopNavMenuActionButton } from './top_nav_menu_action_button';
+import { AppMenuActionButton } from './app_menu_action_button';
 
-describe('TopNavMenuActionButton', () => {
+describe('AppMenuActionButton', () => {
   const defaultProps = {
     label: 'save',
     run: jest.fn(),
@@ -34,14 +34,14 @@ describe('TopNavMenuActionButton', () => {
   });
 
   it('should render basic action button', () => {
-    render(<TopNavMenuActionButton {...defaultProps} testId="test-action-button" />);
+    render(<AppMenuActionButton {...defaultProps} testId="test-action-button" />);
     expect(screen.getByTestId('test-action-button')).toBeInTheDocument();
     expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
   it('should call run function when clicked', async () => {
     const user = userEvent.setup();
-    render(<TopNavMenuActionButton {...defaultProps} testId="test-action-button" />);
+    render(<AppMenuActionButton {...defaultProps} testId="test-action-button" />);
 
     await user.click(screen.getByTestId('test-action-button'));
 
@@ -50,7 +50,7 @@ describe('TopNavMenuActionButton', () => {
   });
 
   it('should render as split button', () => {
-    render(<TopNavMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
+    render(<AppMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
     expect(screen.getByText('Save')).toBeInTheDocument();
     expect(screen.getByLabelText('More options')).toBeInTheDocument();
   });
@@ -58,7 +58,7 @@ describe('TopNavMenuActionButton', () => {
   it('should call main run function when primary button is clicked', async () => {
     const user = userEvent.setup();
     render(
-      <TopNavMenuActionButton
+      <AppMenuActionButton
         {...defaultProps}
         splitButtonProps={splitButtonProps}
         testId="test-split-button"
@@ -73,7 +73,7 @@ describe('TopNavMenuActionButton', () => {
 
   it('should call split button run function when secondary button is clicked', async () => {
     const user = userEvent.setup();
-    render(<TopNavMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
+    render(<AppMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
 
     await user.click(screen.getByLabelText('More options'));
 
@@ -83,11 +83,7 @@ describe('TopNavMenuActionButton', () => {
 
   it('should not attach onClick handler when href is present', () => {
     render(
-      <TopNavMenuActionButton
-        {...defaultProps}
-        href="http://elastic.co"
-        testId="test-action-button"
-      />
+      <AppMenuActionButton {...defaultProps} href="http://elastic.co" testId="test-action-button" />
     );
 
     const button = screen.getByTestId('test-action-button');
@@ -98,7 +94,7 @@ describe('TopNavMenuActionButton', () => {
 
   it('should render disabled button when disableButton is true', () => {
     render(
-      <TopNavMenuActionButton {...defaultProps} disableButton={true} testId="test-action-button" />
+      <AppMenuActionButton {...defaultProps} disableButton={true} testId="test-action-button" />
     );
 
     expect(screen.getByTestId('test-action-button')).toBeDisabled();
@@ -107,7 +103,7 @@ describe('TopNavMenuActionButton', () => {
   it('should not call run when button is disabled', async () => {
     const user = userEvent.setup();
     render(
-      <TopNavMenuActionButton {...defaultProps} disableButton={true} testId="test-action-button" />
+      <AppMenuActionButton {...defaultProps} disableButton={true} testId="test-action-button" />
     );
 
     await user.click(screen.getByTestId('test-action-button'));
@@ -130,7 +126,7 @@ describe('TopNavMenuActionButton', () => {
       ],
     };
 
-    render(<TopNavMenuActionButton {...secondaryActionProps} testId="test-action-button" />);
+    render(<AppMenuActionButton {...secondaryActionProps} testId="test-action-button" />);
 
     await user.click(screen.getByTestId('test-action-button'));
 
@@ -149,7 +145,7 @@ describe('TopNavMenuActionButton', () => {
     };
 
     render(
-      <TopNavMenuActionButton
+      <AppMenuActionButton
         {...defaultProps}
         splitButtonProps={splitButtonPropsWithItems}
         testId="test-split-button"
@@ -169,7 +165,7 @@ describe('TopNavMenuActionButton', () => {
     };
 
     render(
-      <TopNavMenuActionButton
+      <AppMenuActionButton
         {...defaultProps}
         splitButtonProps={splitButtonPropsDisabled}
         testId="test-split-button"

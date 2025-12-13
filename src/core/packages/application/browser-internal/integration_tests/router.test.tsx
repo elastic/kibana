@@ -57,6 +57,7 @@ describe('AppRouter', () => {
         appStatuses$={mountersToAppStatus$()}
         setAppLeaveHandler={noop}
         setAppActionMenu={noop}
+        setAppMenu={noop}
         setIsMounting={noop}
         theme$={theme$}
       />
