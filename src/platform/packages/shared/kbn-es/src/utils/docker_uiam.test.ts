@@ -80,7 +80,7 @@ describe(`#runUiamContainer()`, () => {
             "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
             "--name",
             "uiam-cosmosdb",
-            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251124",
+            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251205",
             "--protocol",
             "https",
             "--port",
@@ -183,7 +183,7 @@ describe(`#runUiamContainer()`, () => {
             "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
             "--name",
             "uiam",
-            "docker.elastic.co/cloud-ci/uiam:git-fd2a53b8cf9f",
+            "docker.elastic.co/cloud-ci/uiam:git-f56eb1a3b9a8",
           ],
         ],
         Array [
