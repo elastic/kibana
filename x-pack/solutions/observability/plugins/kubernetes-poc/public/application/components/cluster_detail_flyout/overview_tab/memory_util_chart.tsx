@@ -158,4 +158,3 @@ export const MemoryUtilChart: React.FC<MemoryUtilChartProps> = ({
     </div>
   );
 };
-

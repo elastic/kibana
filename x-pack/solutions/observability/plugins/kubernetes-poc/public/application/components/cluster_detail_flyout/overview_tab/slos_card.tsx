@@ -64,12 +64,7 @@ export const SlosCard: React.FC<SlosCardProps> = ({ height = 120 }) => {
           defaultMessage: 'SLOs',
         })}
       </EuiText>
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        alignItems="flexEnd"
-        style={{ flex: 1 }}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexEnd" style={{ flex: 1 }}>
         <EuiFlexItem>
           <MetricItem
             value={violated}
@@ -117,4 +112,3 @@ export const SlosCard: React.FC<SlosCardProps> = ({ height = 120 }) => {
     </div>
   );
 };
-

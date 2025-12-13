@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiText,
   EuiButton,
-  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -95,7 +94,7 @@ export const FlyoutHeader: React.FC<FlyoutHeaderProps> = ({ cluster }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-    <EuiFlexGroup alignItems="flexStart" gutterSize="m" wrap>
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m" wrap>
         <EuiFlexItem>
           <EuiTitle size="m">
             <h2>{cluster.clusterName}</h2>
@@ -124,4 +123,3 @@ export const FlyoutHeader: React.FC<FlyoutHeaderProps> = ({ cluster }) => {
     </>
   );
 };
-

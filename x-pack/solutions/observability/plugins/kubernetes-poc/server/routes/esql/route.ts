@@ -117,4 +117,3 @@ const executeEsqlRoute = createKubernetesPocServerRoute({
 export const esqlRouteRepository = {
   ...executeEsqlRoute,
 };
-

@@ -165,4 +165,3 @@ export const PodsUtilChart: React.FC<PodsUtilChartProps> = ({
     </div>
   );
 };
-

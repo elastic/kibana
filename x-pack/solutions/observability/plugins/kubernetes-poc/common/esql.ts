@@ -30,4 +30,3 @@ export interface EsqlQueryResponse {
   columns: EsqlColumn[];
   rows: Array<Record<string, unknown>>;
 }
-

@@ -106,4 +106,3 @@ export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({
     />
   );
 };
-

@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export type ClusterDetailTab = 'overview' | 'logs' | 'events' | 'services' | 'alerts' | 'slos' | 'significantEvents';
+export type ClusterDetailTab =
+  | 'overview'
+  | 'logs'
+  | 'events'
+  | 'services'
+  | 'alerts'
+  | 'slos'
+  | 'significantEvents';
 
 interface FlyoutTabsProps {
   activeTab: ClusterDetailTab;
@@ -84,4 +91,3 @@ export const FlyoutTabs: React.FC<FlyoutTabsProps> = ({ activeTab, onTabChange }
     </EuiTabs>
   );
 };
-

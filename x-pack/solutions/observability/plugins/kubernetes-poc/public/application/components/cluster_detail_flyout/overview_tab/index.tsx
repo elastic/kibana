@@ -15,4 +15,4 @@ export { CpuUtilChart } from './cpu_util_chart';
 export { NetworkTrafficChart } from './network_traffic_chart';
 export { NodesCard } from './nodes_card';
 export { SlosCard } from './slos_card';
-
+export { WorkloadResourcesTable } from './workload_resources_table';

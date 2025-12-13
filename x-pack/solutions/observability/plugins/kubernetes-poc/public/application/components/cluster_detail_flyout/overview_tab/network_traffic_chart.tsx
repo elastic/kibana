@@ -176,4 +176,3 @@ export const NetworkTrafficChart: React.FC<NetworkTrafficChartProps> = ({
     </div>
   );
 };
-

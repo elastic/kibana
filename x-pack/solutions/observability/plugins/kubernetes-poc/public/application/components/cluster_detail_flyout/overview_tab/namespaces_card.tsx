@@ -96,4 +96,3 @@ export const NamespacesCard: React.FC<NamespacesCardProps> = ({
     />
   );
 };
-

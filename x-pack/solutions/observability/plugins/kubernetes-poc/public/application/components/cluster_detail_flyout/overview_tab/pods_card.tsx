@@ -93,12 +93,7 @@ export const PodsCard: React.FC<PodsCardProps> = ({ clusterName, timeRange, heig
           defaultMessage: 'Pods',
         })}
       </EuiText>
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        alignItems="flexEnd"
-        style={{ flex: 1 }}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexEnd" style={{ flex: 1 }}>
         <EuiFlexItem>
           <MetricItem
             value={totalPods}

@@ -162,4 +162,3 @@ export const CpuUtilChart: React.FC<CpuUtilChartProps> = ({
     </div>
   );
 };
-

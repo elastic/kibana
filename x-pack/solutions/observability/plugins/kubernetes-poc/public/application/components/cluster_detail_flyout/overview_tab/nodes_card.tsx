@@ -93,12 +93,7 @@ export const NodesCard: React.FC<NodesCardProps> = ({ clusterName, timeRange, he
           defaultMessage: 'Nodes',
         })}
       </EuiText>
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        alignItems="flexEnd"
-        style={{ flex: 1 }}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexEnd" style={{ flex: 1 }}>
         <EuiFlexItem>
           <MetricItem
             value={totalNodes}
@@ -132,4 +127,3 @@ export const NodesCard: React.FC<NodesCardProps> = ({ clusterName, timeRange, he
     </div>
   );
 };
-

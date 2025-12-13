@@ -31,6 +31,7 @@ import {
   NetworkTrafficChart,
   NodesCard,
   SlosCard,
+  WorkloadResourcesTable,
 } from './overview_tab';
 
 interface ClusterDetailFlyoutProps {
@@ -143,6 +144,11 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
               </EuiFlexGroup>
             </div>
           </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+
+          {/* Row 4: Workload Resources Table */}
+          <WorkloadResourcesTable clusterName={cluster.clusterName} timeRange={timeRange} />
         </>
       );
     }
