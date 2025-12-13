@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 
 import { Spaces } from '../../../scenarios';
@@ -16,12 +16,12 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
   const supertest = getService('supertest');
   const retry = getService('retry');
   const es = getService('es');
+  const log = getService('log');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  // FLAKY: https://github.com/elastic/kibana/issues/229751
-  describe.skip('getActionErrorLog', () => {
+  describe('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -166,14 +166,27 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 1 }]]));
-      await waitForEvents(createdRule.id, 'actions', new Map([['execute', { gte: 2 }]]));
+      const alertingEvents = await waitForEvents(
+        createdRule.id,
+        'alerting',
+        new Map([['execute', { gte: 1 }]])
+      );
+      const actionEvents = await waitForEvents(
+        createdRule.id,
+        'actions',
+        new Map([['execute', { gte: 2 }]])
+      );
+
+      log.info(`alerting events: ${JSON.stringify(alertingEvents)}`);
+      log.info(`action events: ${JSON.stringify(actionEvents)}`);
 
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
           createdRule.id
         }/_action_error_log?date_start=${dateStart}`
       );
+
+      log.info(`response body: ${JSON.stringify(response.body)}`);
 
       expect(response.body.totalErrors).to.eql(2);
 
@@ -182,6 +195,8 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           createdRule.id
         }/_action_error_log?filter=message:"throws_1"&date_start=${dateStart}`
       );
+
+      log.info(`filtered response body: ${JSON.stringify(filteredResponse.body)}`);
 
       expect(filteredResponse.body.totalErrors).to.eql(1);
 
@@ -192,6 +207,8 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         }/_execution_log?date_start=${dateStart}`
       );
 
+      log.info(`execResponse body: ${JSON.stringify(execResponse.body)}`);
+
       const runId = execResponse.body.data[0].id;
 
       const filteredByIdResponse = await supertest.get(
@@ -199,6 +216,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           createdRule.id
         }/_action_error_log?filter=kibana.alert.rule.execution.uuid:${runId}&date_start=${dateStart}`
       );
+      log.info(`filteredByIdResponse body: ${JSON.stringify(filteredByIdResponse.body)}`);
       expect(filteredByIdResponse.body.totalErrors).to.eql(2);
 
       const filteredByInvalidResponse = await supertest.get(
@@ -206,6 +224,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           createdRule.id
         }/_action_error_log?filter=kibana.alert.rule.execution.uuid:doesnt_exist&date_start=${dateStart}`
       );
+      log.info(`filteredByInvalidResponse body: ${JSON.stringify(filteredByInvalidResponse.body)}`);
       expect(filteredByInvalidResponse.body.totalErrors).to.eql(0);
     });
   });
