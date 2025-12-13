@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj, Decorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { GraphInvestigation, type GraphInvestigationProps } from './graph_investigation';
 import {
@@ -51,7 +51,38 @@ type GraphInvestigationPropsAndCustomArgs = React.ComponentProps<typeof GraphInv
   shouldShowSearchBarTour: boolean;
   isLoading: boolean;
   supportNodePreviewPopover: boolean;
-  scenario: MockScenario;
+};
+
+const createDecorator = (scenario: MockScenario): Decorator[] => {
+  const scenarioDecorator: Decorator = (StoryComponent, context) => {
+    const { shouldShowSearchBarTour, isLoading } =
+      context.args as Partial<GraphInvestigationPropsAndCustomArgs>;
+    localStorage.setItem(
+      SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
+      shouldShowSearchBarTour?.toString() || 'true'
+    );
+    const mockData = {
+      useFetchGraphDataMock: {
+        isFetching: isLoading ?? false,
+        refresh: action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION),
+        log: action(USE_FETCH_GRAPH_DATA_ACTION),
+        scenario,
+      },
+    };
+
+    return (
+      <MockDataProvider data={mockData}>
+        <StoryComponent />
+      </MockDataProvider>
+    );
+  };
+
+  return [
+    ReactQueryStorybookDecorator,
+    KibanaReactStorybookDecorator,
+    GlobalStylesStorybookDecorator,
+    scenarioDecorator,
+  ];
 };
 
 const meta = {
@@ -89,12 +120,6 @@ const meta = {
       description:
         'Enable or disable the support for node preview popover (When disabled `Show event details` list item is not shown)',
     },
-    scenario: {
-      control: { type: 'select' },
-      options: ['single-actor', 'grouped-actor', 'grouped-target'],
-      description:
-        'Select graph scenario: single-actor (default), grouped-actor (mixed namespaces as actor), or grouped-target (mixed namespaces as target)',
-    },
   },
   args: {
     showToggleSearch: false,
@@ -102,35 +127,19 @@ const meta = {
     shouldShowSearchBarTour: true,
     isLoading: false,
     supportNodePreviewPopover: true,
-    scenario: 'single-actor',
   },
-  decorators: [
-    ReactQueryStorybookDecorator,
-    KibanaReactStorybookDecorator,
-    GlobalStylesStorybookDecorator,
-    (StoryComponent, context) => {
-      const { shouldShowSearchBarTour, isLoading, scenario } = context.args;
-      localStorage.setItem(
-        SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
-        shouldShowSearchBarTour?.toString() || 'true'
-      );
-      const mockData = {
-        useFetchGraphDataMock: {
-          isFetching: isLoading,
-          refresh: action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION),
-          log: action(USE_FETCH_GRAPH_DATA_ACTION),
-          scenario,
-        },
-      };
-
-      return (
-        <MockDataProvider data={mockData}>
-          <StoryComponent />
-        </MockDataProvider>
-      );
-    },
-  ],
 } satisfies Meta<Partial<GraphInvestigationPropsAndCustomArgs>>;
 
 export default meta;
-export const Investigation: StoryObj<Partial<GraphInvestigationProps>> = {};
+
+export const SingleActor: StoryObj<Partial<GraphInvestigationProps>> = {
+  decorators: createDecorator('single-actor'),
+};
+
+export const GroupedActor: StoryObj<Partial<GraphInvestigationProps>> = {
+  decorators: createDecorator('grouped-actor'),
+};
+
+export const GroupedTarget: StoryObj<Partial<GraphInvestigationProps>> = {
+  decorators: createDecorator('grouped-target'),
+};

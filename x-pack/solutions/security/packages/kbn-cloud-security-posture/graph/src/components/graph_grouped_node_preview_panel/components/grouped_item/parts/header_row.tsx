@@ -6,8 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
@@ -16,10 +25,18 @@ import {
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
+  GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
 import type { EntityOrEventItem } from '../types';
 import { emitGroupedItemClick } from '../../../events';
 import { displayEntityName, displayEventName } from '../utils';
+
+const entityUnavailableTooltip = i18n.translate(
+  'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
+  {
+    defaultMessage: 'Entity unavailable in entity store',
+  }
+);
 
 export interface HeaderRowProps {
   item: EntityOrEventItem;
@@ -88,16 +105,23 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
             {title}
           </EuiLink>
         ) : (
-          <EuiText
-            size="s"
-            color="default"
-            data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_TEXT}
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
+          <EuiToolTip
+            content={entityUnavailableTooltip}
+            position="left"
+            data-test-subj={GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID}
           >
-            {title}
-          </EuiText>
+            <EuiText
+              size="s"
+              color="text"
+              tabIndex={0}
+              data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_TEXT}
+              css={css`
+                font-weight: ${euiTheme.font.weight.medium};
+              `}
+            >
+              {title}
+            </EuiText>
+          </EuiToolTip>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

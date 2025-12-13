@@ -31,7 +31,7 @@ import { mockDataView } from '../mock/data_view.mock';
 
 setProjectAnnotations(previewAnnotations);
 
-const { Investigation } = composeStories(stories);
+const { SingleActor, GroupedActor, GroupedTarget } = composeStories(stories);
 
 // Mock the useFetchGraphData hook, which is used by the GraphInvestigation component
 // Callbacks replaced with storybook actions, therefore we mock storybook's action function as well for testing
@@ -53,10 +53,32 @@ jest.mock('@storybook/addon-actions', () => ({
 const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
     <IntlProvider locale="en">
-      <Investigation {...args} />
+      <SingleActor {...args} />
     </IntlProvider>,
     {
       // TODO: Fails in concurrent mode
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedActorStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedActor {...args} />
+    </IntlProvider>,
+    {
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedTarget {...args} />
+    </IntlProvider>,
+    {
       legacyRoot: true,
     }
   );
@@ -784,17 +806,6 @@ describe('GraphInvestigation Component', () => {
   });
 
   describe('grouped-actor scenario - mixed namespaces as actor', () => {
-    const renderGroupedActorStory = (args: Partial<GraphInvestigationProps> = {}) => {
-      return render(
-        <IntlProvider locale="en">
-          <Investigation scenario="grouped-actor" {...args} />
-        </IntlProvider>,
-        {
-          legacyRoot: true,
-        }
-      );
-    };
-
     it('renders graph with grouped actor node', async () => {
       const { container } = renderGroupedActorStory();
 
@@ -843,17 +854,6 @@ describe('GraphInvestigation Component', () => {
   });
 
   describe('grouped-target scenario - mixed namespaces as target', () => {
-    const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) => {
-      return render(
-        <IntlProvider locale="en">
-          <Investigation scenario="grouped-target" {...args} />
-        </IntlProvider>,
-        {
-          legacyRoot: true,
-        }
-      );
-    };
-
     it('renders graph with grouped target node', async () => {
       const { container } = renderGroupedTargetStory();
 
