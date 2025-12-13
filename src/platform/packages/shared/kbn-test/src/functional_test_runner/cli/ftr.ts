@@ -89,12 +89,12 @@ export function runFtrCli() {
           process.exitCode = 1;
         } else {
           await reportTime(runStartTime, 'total', {
-            success: true,
+            success: process.exitCode === 0,
             ...Object.fromEntries(flagsReader.getUsed().entries()),
           });
         }
 
-        process.exit();
+        process.exit(process.exitCode);
       };
 
       process.on('unhandledRejection', (err) =>
