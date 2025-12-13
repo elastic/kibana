@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { timeRangeSchema } from './src/time_range';
-export { querySchema } from './src/query';
-export { storedFilterSchema } from './src/stored_filter';
+export {
+  asCodeFilterSchema,
+  asCodeConditionFilterSchema,
+  asCodeGroupFilterSchema,
+  asCodeDSLFilterSchema,
+} from './src/schemas/filter';
 
 export type {
-  TimeRange,
-  AbsoluteTimeRange,
-  RelativeTimeRange,
-  AggregateQuery,
-  Query,
+  AsCodeFilter,
+  AsCodeConditionFilter,
+  AsCodeGroupFilter,
+  AsCodeDSLFilter,
 } from './src/types';
