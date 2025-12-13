@@ -3,6 +3,7 @@
 set -euo pipefail
 
 # Function to generate and publish performance test reports
+# TODO: remove
 # Requires environment variables:
 #   TEST_EXIT_CODE - exit code from test execution
 #   TEST_DURATION - test duration in seconds
