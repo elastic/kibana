@@ -20,3 +20,14 @@ export type GetResponseFound<TDocument = unknown> = estypes.GetResponse<TDocumen
 export const isFoundGetResponse = <TDocument = unknown>(
   doc: estypes.GetResponse<TDocument>
 ): doc is GetResponseFound<TDocument> => doc.found;
+
+/**
+ * Type and type guard function for converting a possibly error item from mget response to a successful item.
+ */
+export type GetGetResult<TDocument = unknown> = estypes.MgetResponseItem<TDocument> &
+  Required<Pick<estypes.MgetResponseItem<TDocument>, '_source'>>;
+
+export const isGetGetResult = <TDocument = unknown>(
+  item: estypes.MgetResponseItem<TDocument>
+): item is GetGetResult<TDocument> =>
+  (item as { error?: unknown }).error === undefined;
