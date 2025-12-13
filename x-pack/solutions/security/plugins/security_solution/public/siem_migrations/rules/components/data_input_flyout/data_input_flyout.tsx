@@ -24,14 +24,15 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
-import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
+import { type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
 import { useMissingResources } from './steps/hooks/use_missing_resources';
-import type { MigrationStepProps, Step } from '../../../common/types';
+import type { MigrationStepProps, MissingResourcesIndexed, Step } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
+import { QradarDataInputStep } from './types';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -65,10 +66,39 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const [dataInputStep, setDataInputStep] = useState(SplunkDataInputStep.Upload);
+    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
+
+    const setMissingResourcesStep = useCallback(
+      (newMissingResourcesIndexed: MissingResourcesIndexed) => {
+        if (migrationSource === MigrationSource.QRADAR) {
+          if (newMissingResourcesIndexed.lookups.length) {
+            setDataInputStep(QradarDataInputStep.ReferenceSet);
+            return;
+          }
+
+          setDataInputStep(QradarDataInputStep.End);
+          return;
+        }
+
+        if (newMissingResourcesIndexed.macros.length) {
+          setDataInputStep(SplunkDataInputStep.Macros);
+          return;
+        }
+
+        if (newMissingResourcesIndexed.lookups.length) {
+          setDataInputStep(SplunkDataInputStep.Lookups);
+          return;
+        }
+
+        setDataInputStep(SplunkDataInputStep.End);
+      },
+      [migrationSource]
+    );
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
       setDataInputStep,
+      migrationSource,
+      handleMissingResourcesIndexed: setMissingResourcesStep,
     });
 
     const onMigrationCreated = useCallback(
