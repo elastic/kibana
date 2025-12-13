@@ -9591,6 +9591,17 @@
     },
     "dashboard": {
       "properties": {
+        "access_mode": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
         "panels": {
           "properties": {
             "total": {
