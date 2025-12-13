@@ -86,6 +86,7 @@ describe('useUnsavedChanges', () => {
           }),
           dataViewSpec: undefined,
           defaultUrlState: undefined,
+          esqlControls: undefined,
         },
       })
     );
