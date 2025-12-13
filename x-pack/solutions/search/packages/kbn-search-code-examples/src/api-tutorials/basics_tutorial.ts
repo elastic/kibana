@@ -182,4 +182,7 @@ DELETE /kibana_sample_data_basics_explicit_mapping
 # You covered creating an index, indexing documents, searching, and managing mappings.
 # 📖 See more search query options in the Elasticsearch documentation: https://www.elastic.co/docs/reference/query-languages/query-dsl/full-text-queries
 # 📖 Empower your search with AI! Learn more about semantic search here: https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-semantic-text
+# 🔗 Manage your inference endpoints: {inference_endpoints_url}
+# 🔗 Try the Search Playground: {search_playground_url}
+# 🔗 Build Search Applications: {search_applications_url}
 `;
