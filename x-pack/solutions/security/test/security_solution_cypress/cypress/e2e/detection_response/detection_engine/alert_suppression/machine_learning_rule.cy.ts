@@ -21,6 +21,7 @@ import {
   forceStartDatafeeds,
   forceStopAndCloseJob,
   setupMlModulesWithRetry,
+  waitForJobsToBeStarted,
 } from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
@@ -42,7 +43,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Machine Learning Detection Rules - Alert suppression',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
@@ -85,6 +86,7 @@ describe(
           cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
           setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
           forceStartDatafeeds({ jobIds: [jobId] });
+          waitForJobsToBeStarted({ jobIds: [jobId] });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
         });
 
