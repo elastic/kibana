@@ -22,7 +22,7 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getRelevantAlertFields } from './get_relevant_alert_fields';
-import { getHitsTotal } from '../../utils/get_hits_total';
+import { getTotalHits } from '../../utils/get_total_hits';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
@@ -169,7 +169,7 @@ export function createGetAlertsTool({
           size: 10,
         });
 
-        const total = getHitsTotal(response);
+        const total = getTotalHits(response);
 
         const alerts = response.hits.hits.map((hit) =>
           omit(hit._source ?? {}, ...OMITTED_ALERT_FIELDS)

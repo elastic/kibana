@@ -23,6 +23,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_alerts',
   'observability.get_services',
   'observability.get_downstream_dependencies',
+  'observability.get_log_change_points',
+  'observability.get_metric_change_points',
   // Dashboards
   'platform.dashboard.create_dashboard',
   'platform.dashboard.update_dashboard',
