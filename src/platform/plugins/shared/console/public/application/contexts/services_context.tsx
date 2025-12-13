@@ -14,7 +14,13 @@ import type { RouteComponentProps } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
+import type {
+  AutocompleteInfo,
+  History,
+  Settings,
+  Storage,
+  SavedSnippetsService,
+} from '../../services';
 import type { ObjectStorageClient } from '../../../common/types';
 import type { ConsoleStartServices, MetricsTracker } from '../../types';
 import type { EsHostService } from '../lib';
@@ -33,6 +39,7 @@ interface ContextServices {
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   application: ApplicationStart;
+  savedSnippetsService: SavedSnippetsService;
 }
 
 export interface ContextValue extends ConsoleStartServices {

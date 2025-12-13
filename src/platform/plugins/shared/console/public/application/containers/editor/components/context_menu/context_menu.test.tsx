@@ -58,6 +58,13 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
       data: {} as any,
       licensing: {} as any,
       application: {} as any,
+      savedSnippetsService: {
+        create: jest.fn(),
+        find: jest.fn(),
+        get: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      } as any,
     },
     docLinkVersion: '8.0',
     docLinks: {} as any,

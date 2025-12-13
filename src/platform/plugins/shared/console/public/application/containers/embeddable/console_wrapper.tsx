@@ -20,13 +20,26 @@ import type {
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiWindowEvent } from '@elastic/eui';
 import type { ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
 import { loadActiveApi } from '../../../lib/kb';
-import type { AutocompleteInfo, History, Settings, Storage } from '../../../services';
-import { getAutocompleteInfo, createHistory, createSettings, getStorage } from '../../../services';
+import type {
+  AutocompleteInfo,
+  History,
+  Settings,
+  Storage,
+  SavedSnippetsService,
+} from '../../../services';
+import {
+  getAutocompleteInfo,
+  createHistory,
+  createSettings,
+  getStorage,
+  createSavedSnippetsService,
+} from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
 import type {
   MetricsTracker,
@@ -60,6 +73,7 @@ interface ConsoleDependencies extends ConsoleStartServices {
   theme$: Observable<CoreTheme>;
   trackUiMetric: MetricsTracker;
   application: ApplicationStart;
+  savedSnippetsService: SavedSnippetsService;
 }
 
 const loadDependencies = async (
@@ -83,6 +97,7 @@ const loadDependencies = async (
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
   const esHostService = createEsHostService({ api });
+  const savedSnippetsService = createSavedSnippetsService(http);
 
   autocompleteInfo.mapping.setup(http, settings);
   return {
@@ -99,6 +114,7 @@ const loadDependencies = async (
     storage,
     theme$: startServices.theme.theme$,
     trackUiMetric,
+    savedSnippetsService,
   };
 };
 
@@ -116,6 +132,16 @@ const useStyles = () => {
     embeddableConsoleContent: useEmbeddableConsoleContentStyles(),
   };
 };
+
+// Create a QueryClient for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
@@ -150,47 +176,51 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     settings,
     storage,
     trackUiMetric,
+    savedSnippetsService,
     ...startServices
   } = dependencies;
   return (
     <KibanaRenderContextProvider {...core}>
-      <ServicesContextProvider
-        value={{
-          ...startServices,
-          docLinkVersion,
-          docLinks,
-          services: {
-            esHostService,
-            storage,
-            history,
-            settings,
-            notifications,
-            trackUiMetric,
-            objectStorageClient,
-            http,
-            autocompleteInfo,
-            application: startServices.application,
-            data,
-            licensing,
-          },
-          config: {
-            isDevMode,
-          },
-        }}
-      >
-        <RequestContextProvider>
-          <EditorContextProvider settings={settings.toJSON()}>
-            {isOpen ? (
-              <div css={styles.embeddableConsoleContent} data-test-subj="consoleEmbeddedBody">
-                <EuiWindowEvent event="keydown" handler={onKeyDown} />
-                <Main isEmbeddable={true} />
-              </div>
-            ) : (
-              <span />
-            )}
-          </EditorContextProvider>
-        </RequestContextProvider>
-      </ServicesContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <ServicesContextProvider
+          value={{
+            ...startServices,
+            docLinkVersion,
+            docLinks,
+            services: {
+              esHostService,
+              storage,
+              history,
+              settings,
+              notifications,
+              trackUiMetric,
+              objectStorageClient,
+              http,
+              autocompleteInfo,
+              application: startServices.application,
+              data,
+              licensing,
+              savedSnippetsService,
+            },
+            config: {
+              isDevMode,
+            },
+          }}
+        >
+          <RequestContextProvider>
+            <EditorContextProvider settings={settings.toJSON()}>
+              {isOpen ? (
+                <div css={styles.embeddableConsoleContent} data-test-subj="consoleEmbeddedBody">
+                  <EuiWindowEvent event="keydown" handler={onKeyDown} />
+                  <Main isEmbeddable={true} />
+                </div>
+              ) : (
+                <span />
+              )}
+            </EditorContextProvider>
+          </RequestContextProvider>
+        </ServicesContextProvider>
+      </QueryClientProvider>
     </KibanaRenderContextProvider>
   );
 };

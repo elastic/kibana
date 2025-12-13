@@ -23,9 +23,16 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import type { AutocompleteInfo } from '../services';
-import { createStorage, createHistory, createSettings, setStorage } from '../services';
+import {
+  createStorage,
+  createHistory,
+  createSettings,
+  setStorage,
+  createSavedSnippetsService,
+} from '../services';
 import { createUsageTracker } from '../services/tracker';
 import { loadActiveApi } from '../lib/kb';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
@@ -83,12 +90,24 @@ export async function renderApp({
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
   const esHostService = createEsHostService({ api });
+  const savedSnippetsService = createSavedSnippetsService(http);
 
   autocompleteInfo.mapping.setup(http, settings);
 
+  // Create a QueryClient for React Query
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        refetchOnWindowFocus: false,
+      },
+    },
+  });
+
   render(
     <KibanaRenderContextProvider {...startServices}>
-      <ServicesContextProvider
+      <QueryClientProvider client={queryClient}>
+        <ServicesContextProvider
         value={{
           ...startServices,
           docLinkVersion,
@@ -107,6 +126,7 @@ export async function renderApp({
             application,
             data,
             licensing,
+            savedSnippetsService,
           },
           config: {
             isDevMode,
@@ -134,6 +154,7 @@ export async function renderApp({
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>
+      </QueryClientProvider>
     </KibanaRenderContextProvider>,
     element
   );

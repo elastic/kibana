@@ -52,6 +52,13 @@ export const serviceContextMock = {
         application: applicationServiceMock.createStartContract(),
         data: dataPluginMock.createStartContract(),
         licensing: licensingMock.createStart(),
+        savedSnippetsService: {
+          create: jest.fn(),
+          find: jest.fn(),
+          get: jest.fn(),
+          update: jest.fn(),
+          delete: jest.fn(),
+        } as any,
       },
       docLinkVersion: 'NA',
       docLinks: docLinksServiceMock.createStartContract().links,

@@ -29,6 +29,7 @@ import {
   createStorage,
   setStorage,
   httpService,
+  createSavedSnippetsService,
 } from './services';
 
 export class ConsoleUIPlugin
@@ -150,6 +151,11 @@ export class ConsoleUIPlugin
       isEmbeddedConsoleEnabled &&
       core.application.capabilities?.dev_tools?.show === true &&
       embeddedConsoleUiSetting;
+
+    // Initialize saved snippets service
+    if (isConsoleUiEnabled) {
+      consoleStart.savedSnippetsService = createSavedSnippetsService(core.http);
+    }
 
     if (embeddedConsoleAvailable) {
       consoleStart.EmbeddableConsole = (_props: {}) => {

@@ -24,7 +24,7 @@ export const useDataInit = () => {
   }, []);
 
   const {
-    services: { objectStorageClient, history },
+    services: { objectStorageClient, history, savedSnippetsService },
   } = useServicesContext();
 
   const dispatch = useEditorActionContext();
@@ -62,6 +62,44 @@ export const useDataInit = () => {
             });
           }
         }
+
+        // Handle URL deep linking for loading snippets
+        const urlParams = new URLSearchParams(window.location.search);
+        const snippetId = urlParams.get('loadSnippet');
+
+        if (snippetId && savedSnippetsService) {
+          try {
+            const snippet = await savedSnippetsService.get(snippetId);
+            if (snippet) {
+              // Get the current text object that was just set
+              const currentTextObject = results.length
+                ? results.sort((a, b) => a.createdAt - b.createdAt)[0]
+                : await objectStorageClient.text.findAll().then((objs) => objs[0]);
+
+              // Update it with the snippet content
+              const textObjectWithSnippet = {
+                ...currentTextObject,
+                text: snippet.query,
+                updatedAt: Date.now(),
+              } as TextObject;
+
+              objectStorageClient.text.update(textObjectWithSnippet);
+              dispatch({
+                type: 'setCurrentTextObject',
+                payload: textObjectWithSnippet,
+              });
+
+              // Clear the URL parameter to avoid reloading on refresh
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.delete('loadSnippet');
+              window.history.replaceState({}, '', newUrl.toString());
+            }
+          } catch (snippetError) {
+            // If snippet loading fails, just continue with normal initialization
+            // The error is not critical to the app functioning
+            console.error('Failed to load snippet from URL:', snippetError);
+          }
+        }
       } catch (e) {
         setError(e);
       } finally {
@@ -70,7 +108,7 @@ export const useDataInit = () => {
     };
 
     load();
-  }, [dispatch, objectStorageClient, history, retryToken]);
+  }, [dispatch, objectStorageClient, history, retryToken, savedSnippetsService]);
 
   return {
     error,
