@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ViewType = 'cardView' | 'listView' | 'compactView';
+export type ViewType = 'cardView' | 'listView' | 'compactView' | 'hierarchyView';
 export type GroupByField =
   | 'ungrouped'
   | 'slo.tags'
