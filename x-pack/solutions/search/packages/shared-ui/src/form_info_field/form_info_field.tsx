@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 
 import {
   EuiButtonIcon,
@@ -16,6 +16,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+const COPIED_ICON_DISPLAY_DURATION_MS = 1000;
 
 interface FormInfoFieldProps {
   actions?: React.ReactNode[];
@@ -39,6 +41,27 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
   minWidth,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleCopy = useCallback((copyFn: () => void) => {
+    copyFn();
+    setIsCopied(true);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsCopied(false);
+    }, COPIED_ICON_DISPLAY_DURATION_MS);
+  }, []);
 
   return (
     <EuiFlexGroup
@@ -93,13 +116,23 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
                 <EuiButtonIcon
                   size="s"
                   display="empty"
-                  onClick={copy}
-                  iconType="copy"
-                  color="text"
-                  data-test-subj={copyValueDataTestSubj}
-                  aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
-                    defaultMessage: 'Copy to clipboard',
-                  })}
+                  onClick={() => handleCopy(copy)}
+                  iconType={isCopied ? 'check' : 'copy'}
+                  color={isCopied ? 'success' : 'text'}
+                  data-test-subj={
+                    isCopied && copyValueDataTestSubj
+                      ? `${copyValueDataTestSubj}-copied`
+                      : copyValueDataTestSubj
+                  }
+                  aria-label={
+                    isCopied
+                      ? i18n.translate('xpack.searchSharedUI.formInfoField.copiedAriaLabel', {
+                          defaultMessage: 'Copied',
+                        })
+                      : i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
+                          defaultMessage: 'Copy to clipboard',
+                        })
+                  }
                 />
               )}
             </EuiCopy>

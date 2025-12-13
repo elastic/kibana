@@ -89,6 +89,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.existOrFail('endpointValueField');
           });
 
+          it('shows checkmark icon feedback when copy button is clicked', async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.click('copyEndpointButton');
+            // After clicking, the button should show copied state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton-copied');
+            });
+            // After 1 second, it should revert back to normal state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton');
+              await testSubjects.missingOrFail('copyEndpointButton-copied');
+            });
+          });
+
           it('renders API keys buttons and active badge correctly', async () => {
             await testSubjects.existOrFail('createApiKeyButton');
             await testSubjects.existOrFail('manageApiKeysButton');
