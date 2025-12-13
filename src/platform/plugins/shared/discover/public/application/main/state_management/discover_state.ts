@@ -308,8 +308,8 @@ export function getDiscoverStateContainer({
       ).groupByFields.map((group) => group.field);
 
       internalState.dispatch(
-        injectCurrentTab(internalStateActions.setCascadeUiState)({
-          cascadeUiState: {
+        injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+          cascadedDocumentsState: {
             availableCascadeGroups,
             selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
           },
