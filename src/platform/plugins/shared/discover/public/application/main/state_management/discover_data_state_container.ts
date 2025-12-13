@@ -177,7 +177,7 @@ export function getDataStateContainer({
   const getInitialFetchStatus = () => {
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearchContainer.getState().id !== undefined ||
+      internalState.getState().persistedDiscoverSession !== undefined ||
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
@@ -235,7 +235,6 @@ export function getDataStateContainer({
     data,
     main$: dataSubjects.main$,
     refetch$,
-    searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
@@ -323,7 +322,7 @@ export function getDataStateContainer({
           await scopedProfilesManager.resolveDataSourceProfile(
             {
               dataSource: getCurrentTab().appState.dataSource,
-              dataView: savedSearchContainer.getState().searchSource.getField('index'),
+              dataView: currentDataView$.getValue(),
               query: getCurrentTab().appState.query,
             },
             resetFetchChart$
@@ -436,7 +435,8 @@ export function getDataStateContainer({
 
   const fetchQuery = async () => {
     const query = getCurrentTab().appState.query;
-    const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+    const currentDataView = currentDataView$.getValue();
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
