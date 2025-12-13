@@ -243,7 +243,9 @@ export class ExecutionPlan {
     }
 
     return Promise.all(
-      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.name))
+      actions.map((action) =>
+        this.dependencies.significantEventsClient.deleteAll(action.request.name)
+      )
     );
   }
 

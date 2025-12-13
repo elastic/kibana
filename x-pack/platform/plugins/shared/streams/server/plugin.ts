@@ -30,9 +30,8 @@ import {
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
-import { AssetService } from './lib/streams/assets/asset_service';
+import { SignificantEventsService } from './lib/streams/significant_events/significant_events_service';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -106,12 +105,11 @@ export class StreamsPlugin
     registerRules({ plugins, logger: this.logger.get('rules') });
     registerStreamsSavedObjects(core.savedObjects);
 
-    const assetService = new AssetService(core, this.logger);
+    const significantEventsService = new SignificantEventsService(core, this.logger);
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger, getDefaultFeatureRegistry());
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -165,7 +163,7 @@ export class StreamsPlugin
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
-        assets: assetService,
+        significantEvents: significantEventsService,
         features: featureService,
         server: this.server,
         telemetry: this.ebtTelemetryService.getClient(),
@@ -177,31 +175,26 @@ export class StreamsPlugin
         }): Promise<RouteHandlerScopedClients> => {
           const [
             [coreStart, pluginsStart],
-            assetClient,
+            significantEventsClient,
             attachmentClient,
             featureClient,
             contentClient,
           ] = await Promise.all([
             core.getStartServices(),
-            assetService.getClientWithRequest({ request }),
+            significantEventsService.getClientWithRequest({ request }),
             attachmentService.getClientWithRequest({ request }),
             featureService.getClientWithRequest({ request }),
             contentService.getClient(),
           ]);
 
-          const [queryClient, uiSettingsClient] = await Promise.all([
-            queryService.getClientWithRequest({
-              request,
-              assetClient,
-            }),
-            coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
-          ]);
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+            coreStart.savedObjects.getScopedClient(request)
+          );
 
           const streamsClient = await streamsService.getClientWithRequest({
             request,
-            assetClient,
+            significantEventsClient,
             attachmentClient,
-            queryClient,
             featureClient,
           });
 
@@ -214,13 +207,12 @@ export class StreamsPlugin
           return {
             scopedClusterClient,
             soClient,
-            assetClient,
+            significantEventsClient,
             attachmentClient,
             streamsClient,
             featureClient,
             inferenceClient,
             contentClient,
-            queryClient,
             fieldsMetadataClient,
             licensing,
             uiSettingsClient,

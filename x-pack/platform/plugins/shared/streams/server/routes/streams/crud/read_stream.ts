@@ -19,7 +19,7 @@ import type {
   WiredIngestStreamEffectiveFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
-import type { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { SignificantEventsClient } from '../../../lib/streams/significant_events/significant_events_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
@@ -28,25 +28,23 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import type { QueryLink } from '../../../../common/assets';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
   name,
-  assetClient,
+  significantEventsClient,
   attachmentClient,
   streamsClient,
   scopedClusterClient,
 }: {
   name: string;
-  assetClient: AssetClient;
+  significantEventsClient: SignificantEventsClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<Streams.all.GetResponse> {
-  const [streamDefinition, { [name]: assets }, attachments] = await Promise.all([
+  const [streamDefinition, { [name]: significantEvents }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetLinks([name], ['query']),
+    significantEventsClient.getSignificantEventLinks([name]),
     attachmentClient.getAttachments(name),
   ]);
 
@@ -62,22 +60,7 @@ export async function readStream({
     { dashboards: [] as string[], rules: [] as string[] }
   );
 
-  const assetsByType = assets.reduce(
-    (acc, asset) => {
-      const assetType = asset[ASSET_TYPE];
-      if (assetType === 'query') {
-        acc.queries.push(asset);
-      }
-      return acc;
-    },
-    {
-      queries: [] as QueryLink[],
-    }
-  );
-
-  const queries = assetsByType.queries.map((query) => {
-    return query.query;
-  });
+  const queries = significantEvents.map((significantEvent) => significantEvent.query);
 
   if (Streams.GroupStream.Definition.is(streamDefinition)) {
     return {
