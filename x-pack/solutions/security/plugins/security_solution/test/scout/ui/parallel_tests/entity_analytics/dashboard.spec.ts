@@ -22,23 +22,29 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
   spaceTest('enables risk score followed by the store', async ({ pageObjects }) => {
     const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
 
-    await dashboardPage.navigate();
+    await spaceTest.step('Navigate to dashboard and verify initial state', async () => {
+      await dashboardPage.navigate();
 
-    await expect(dashboardPage.entityStoreEnablementPanel).toContainText(
-      'Enable entity store and risk score',
-      { timeout: 30000 }
-    );
+      await expect(dashboardPage.entityStoreEnablementPanel).toContainText(
+        'Enable entity store and risk score',
+        { timeout: 30000 }
+      );
+    });
 
-    await dashboardPage.openEntityStoreEnablementModal();
+    await spaceTest.step('Open enablement modal and verify options', async () => {
+      await dashboardPage.openEntityStoreEnablementModal();
 
-    await expect(dashboardPage.entityStoreEnablementModal).toContainText(
-      'Entity Analytics Enablement'
-    );
-    await expect(dashboardPage.enablementRiskScoreSwitch).toBeVisible();
-    await expect(dashboardPage.enablementEntityStoreSwitch).toBeVisible();
+      await expect(dashboardPage.entityStoreEnablementModal).toContainText(
+        'Entity Analytics Enablement'
+      );
+      await expect(dashboardPage.enablementRiskScoreSwitch).toBeVisible();
+      await expect(dashboardPage.enablementEntityStoreSwitch).toBeVisible();
+    });
 
-    await dashboardPage.confirmEntityStoreEnablement();
+    await spaceTest.step('Confirm enablement and verify success', async () => {
+      await dashboardPage.confirmEntityStoreEnablement();
 
-    await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
+      await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
+    });
   });
 });
