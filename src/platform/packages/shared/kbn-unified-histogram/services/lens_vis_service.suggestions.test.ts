@@ -280,7 +280,7 @@ describe('LensVisService suggestions', () => {
           xAccessor: '@timestamp every 30 second',
           accessors: ['results'],
           layerType: 'data',
-          splitAccessor: 'var0',
+          splitAccessors: ['var0'],
         },
       ]
     );

@@ -12,6 +12,7 @@ import { attributesCleanup } from './attributes';
 import { metricMigrations } from './metric';
 import { addVersion } from './add_version';
 import type { LensSavedObjectV0, LensAttributesV0 } from './types';
+import { convertToSplitAccessors } from './split_accessors';
 
 /**
  * Transforms existing unversioned Lens SO attributes to v1 Lens Item attributes
@@ -30,6 +31,7 @@ export function transformToV1LensItemAttributes(
   return [
     convertToLegendStats,
     convertToRawColorMappingsFn,
+    convertToSplitAccessors,
     attributesCleanup,
     metricMigrations,
     addVersion,

@@ -18,6 +18,7 @@ import type { ValuesType } from 'utility-types';
 import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import type { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
@@ -136,10 +137,25 @@ export function DataDimensionEditor(
 
   if (props.groupId === 'breakdown') {
     const currentData = props.frame.activeData?.[layer.layerId];
-    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessor);
-    const columnMeta = currentData?.columns?.find(({ id }) => id === layer.splitAccessor)?.meta;
+    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessors);
+
+    const columnMeta = currentData?.columns?.find(({ id }) =>
+      layer.splitAccessors?.includes(id)
+    )?.meta;
     const allowCustomMatch = canCreateCustomMatch(columnMeta);
-    const formatter = props.formatFactory(columnMeta?.params);
+    let formatter = props.formatFactory(columnMeta?.params);
+    // TODO we need to understand how to get the formatter for a composed splitAccessor.....
+    if (layer.splitAccessors && layer.splitAccessors.length > 1) {
+      formatter = props.formatFactory({
+        id: 'multi_terms',
+        params: {
+          paramsPerField: layer.splitAccessors.map(() => ({
+            id: 'string',
+          })),
+          separator: MULTI_FIELD_KEY_SEPARATOR,
+        },
+      });
+    }
 
     return !layer.collapseFn ? (
       <div className="lnsIndexPatternDimensionEditor--padded">
@@ -162,7 +178,7 @@ export function DataDimensionEditor(
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
-  const disabledMessage = Boolean(!layer.collapseFn && layer.splitAccessor)
+  const disabledMessage = Boolean(!layer.collapseFn && layer.splitAccessors)
     ? i18n.translate('xpack.lens.xyChart.colorPicker.tooltip.disabled', {
         defaultMessage:
           'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
