@@ -18,6 +18,7 @@ import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
@@ -85,9 +86,17 @@ export const SecondaryMenuItemComponent = ({
     gap: ${euiTheme.size.xs};
   `;
 
+  const labelTextStyles = css`
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    /* Account for section padding (16px) + item padding (8px) + ellipsis space (~6px) */
+    max-width: ${SIDE_PANEL_WIDTH - 30}px;
+  `;
+
   const content = (
     <div css={labelAndBadgeStyles}>
-      {children}
+      <span css={labelTextStyles}>{children}</span>
       {badgeType && <BetaBadge type={badgeType} />}
     </div>
   );
