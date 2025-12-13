@@ -20,6 +20,7 @@ export const TOOLS_FORM_REGISTRY = {
   [ToolType.index_search]: indexSearchToolRegistryEntry,
   [ToolType.workflow]: workflowToolRegistryEntry,
   [ToolType.builtin]: builtinToolRegistryEntry,
+  [ToolType.mcp]: {} as any, // TODO: Add MCP tool form registry entry
 };
 
 export function getToolTypeConfig<T extends ToolType>(
