@@ -29,7 +29,8 @@
       "spaces",
       "stackConnectors",
       "licensing",
-      "triggersActionsUi"
+      "triggersActionsUi",
+      "esUiShared"
     ],
     "requiredBundles": [
       "kibanaReact"
