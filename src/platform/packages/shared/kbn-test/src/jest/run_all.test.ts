@@ -22,6 +22,7 @@ jest.mock('fs', () => ({
   promises: {
     mkdir: jest.fn().mockResolvedValue(undefined),
     writeFile: jest.fn().mockResolvedValue(undefined),
+    readFile: jest.fn().mockRejectedValue({ code: 'ENOENT' }),
   },
 }));
 
@@ -64,6 +65,9 @@ describe('run_all.ts', () => {
   let mockFs: {
     mkdir: jest.Mock;
     writeFile: jest.Mock;
+    readFile: jest.Mock;
+    copyFile: jest.Mock;
+    unlink: jest.Mock;
   };
 
   beforeEach(() => {
@@ -76,6 +80,8 @@ describe('run_all.ts', () => {
     // Reset process.env
     delete process.env.JEST_MAX_PARALLEL;
     delete process.env.JEST_ALL_FAILED_CONFIGS_PATH;
+    delete process.env.JEST_ALL_CHECKPOINT_PATH;
+    delete process.env.BUILDKITE;
 
     // Set up mocks
     mockGetopts = jest.mocked(jest.requireMock('getopts'));
@@ -85,6 +91,9 @@ describe('run_all.ts', () => {
     mockReporter = jest.fn();
     mockGetTimeReporter.mockReturnValue(mockReporter);
     mockFs = jest.mocked(jest.requireMock('fs').promises);
+    mockFs.readFile.mockRejectedValue({ code: 'ENOENT' }); // Default: checkpoint doesn't exist
+    mockFs.copyFile = jest.fn().mockResolvedValue(undefined);
+    mockFs.unlink = jest.fn().mockResolvedValue(undefined);
 
     // Default mock implementations
     mockGetopts.mockReturnValue({
@@ -673,6 +682,352 @@ describe('run_all.ts', () => {
 
         expect(mockLog.info).toHaveBeenCalledWith('Configs still failing after retry:');
         expect(mockLog.info).toHaveBeenCalledWith('  - /path/to/config1.js');
+      });
+    });
+
+    describe('checkpoint functionality', () => {
+      it('should write checkpoint file when a config succeeds', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set
+        delete process.env.BUILDKITE;
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0); // Success
+        });
+
+        await runPromise;
+
+        // Should write checkpoint after successful config (with relative path)
+        expect(mockFs.writeFile).toHaveBeenCalledWith(
+          '/tmp/checkpoint.json',
+          expect.stringContaining('config1.js'),
+          'utf8'
+        );
+      });
+
+      it('should upload checkpoint to Buildkite after each successful config', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        process.env.BUILDKITE = 'true';
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockJestProcess = new EventEmitter() as any;
+        mockJestProcess.stdout = new EventEmitter();
+        mockJestProcess.stderr = new EventEmitter();
+
+        // Mock spawn to handle both jest and buildkite-agent calls
+        let spawnCallCount = 0;
+        mockSpawn.mockImplementation((cmd: string, args: string[]) => {
+          if (cmd === 'buildkite-agent') {
+            // Mock buildkite-agent upload process
+            const mockUploadProcess = new EventEmitter() as any;
+            mockUploadProcess.stdout = new EventEmitter();
+            mockUploadProcess.stderr = new EventEmitter();
+            process.nextTick(() => {
+              mockUploadProcess.emit('exit', 0); // Successful upload
+            });
+            return mockUploadProcess;
+          } else {
+            // Mock jest process
+            spawnCallCount++;
+            if (spawnCallCount === 1) {
+              process.nextTick(() => {
+                mockJestProcess.emit('exit', 0); // Success
+              });
+            }
+            return mockJestProcess;
+          }
+        });
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        await runPromise;
+
+        // Should have called buildkite-agent to upload checkpoint with progress suffix
+        expect(mockSpawn).toHaveBeenCalledWith(
+          'buildkite-agent',
+          expect.arrayContaining([
+            'artifact',
+            'upload',
+            expect.stringMatching(/\/tmp\/checkpoint\.progress_\d+\.json/),
+          ]),
+          expect.objectContaining({ stdio: 'pipe' })
+        );
+
+        // Should log successful upload
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('Checkpoint: Uploaded to Buildkite')
+        );
+
+        // Clean up env vars
+        delete process.env.BUILDKITE;
+      });
+
+      it('should not write checkpoint when config fails', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        // Always fail
+        mockSpawn.mockImplementation(() => {
+          const mockProcess = new EventEmitter() as any;
+          mockProcess.stdout = new EventEmitter();
+          mockProcess.stderr = new EventEmitter();
+
+          process.nextTick(() => {
+            mockProcess.emit('exit', 1); // Failure
+          });
+
+          return mockProcess;
+        });
+
+        try {
+          await runJestAll();
+        } catch (err) {
+          // Expected due to process.exit mock
+        }
+
+        // Checkpoint should not be written for failed configs
+        const checkpointWrites = mockFs.writeFile.mock.calls.filter(
+          (call) => call[0] === '/tmp/checkpoint.json'
+        );
+        expect(checkpointWrites.length).toBe(0);
+      });
+
+      it('should load checkpoint and skip completed configs', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set so no upload spawn happens
+        delete process.env.BUILDKITE;
+
+        // Mock existing checkpoint with config1 already completed (relative path)
+        mockFs.readFile.mockResolvedValue(
+          JSON.stringify({
+            completedConfigs: ['config1.js'],
+          })
+        );
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+            { config: '/path/to/config2.js', testFiles: ['test2.js'] },
+          ],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // Should only spawn process for config2 (config1 was in checkpoint)
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
+        expect(mockSpawn).toHaveBeenCalledWith(
+          process.execPath,
+          expect.arrayContaining(['--config', 'config2.js']),
+          expect.any(Object)
+        );
+
+        // Should log that it filtered completed configs
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('Checkpoint: Loaded 1 already-completed configs')
+        );
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('Checkpoint: Filtered 1 configs (1 remaining)')
+        );
+      });
+
+      it('should handle missing checkpoint file gracefully', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+
+        // readFile rejects with ENOENT
+        mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // Should not log a warning for missing checkpoint
+        expect(mockLog.warning).not.toHaveBeenCalledWith(
+          expect.stringContaining('Unable to read checkpoint file')
+        );
+
+        // Should run the config normally
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
+      });
+
+      it('should handle corrupted checkpoint file with warning', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+
+        // Return invalid JSON
+        mockFs.readFile.mockResolvedValue('invalid json{');
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // Should log warning about unable to read checkpoint
+        expect(mockLog.warning).toHaveBeenCalledWith(
+          expect.stringContaining('Unable to read checkpoint file')
+        );
+
+        // Should still run the config
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
+      });
+
+      it('should display resumed configs in discovery summary', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set
+        delete process.env.BUILDKITE;
+
+        // Mock existing checkpoint with config1 already completed (relative path)
+        mockFs.readFile.mockResolvedValue(
+          JSON.stringify({
+            completedConfigs: ['config1.js'],
+          })
+        );
+
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js,config2.js',
+          maxParallel: undefined,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+            { config: '/path/to/config2.js', testFiles: ['test2.js'] },
+          ],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // Should log Config Discovery Summary with resumed configs row
+        // The table is logged as a string, so check if any log.info call contains the text
+        const allLogCalls = mockLog.info.mock.calls.map((call) => call[0]).join('\n');
+        expect(allLogCalls).toContain('Config Discovery Summary:');
+        expect(allLogCalls).toContain('Configs resumed from previous run');
+      });
+
+      it('should accumulate completed configs in checkpoint across multiple successes', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set
+        delete process.env.BUILDKITE;
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+            { config: '/path/to/config2.js', testFiles: ['test2.js'] },
+          ],
+          emptyConfigs: [],
+        });
+
+        mockSpawn.mockImplementation(() => {
+          const mockProcess = new EventEmitter() as any;
+          mockProcess.stdout = new EventEmitter();
+          mockProcess.stderr = new EventEmitter();
+
+          process.nextTick(() => {
+            mockProcess.emit('exit', 0); // All succeed
+          });
+
+          return mockProcess;
+        });
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        await runPromise;
+
+        // Should write checkpoint twice (once for each successful config)
+        const checkpointWrites = mockFs.writeFile.mock.calls.filter(
+          (call) => call[0] === '/tmp/checkpoint.json'
+        );
+
+        expect(checkpointWrites.length).toBeGreaterThanOrEqual(2);
+
+        // Final checkpoint should contain both configs (as relative paths)
+        const finalCheckpoint = checkpointWrites[checkpointWrites.length - 1][1];
+        const parsed = JSON.parse(finalCheckpoint);
+        expect(parsed.completedConfigs).toContain('config1.js');
+        expect(parsed.completedConfigs).toContain('config2.js');
       });
     });
   });

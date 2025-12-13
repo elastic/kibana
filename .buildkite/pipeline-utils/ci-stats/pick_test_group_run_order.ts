@@ -365,7 +365,7 @@ export async function pickTestGroupRunOrder() {
             agents: expandAgentQueue('n2-4-spot', 105),
             env: {
               SCOUT_TARGET_TYPE: 'local',
-            },
+            } as Record<string, string | number>,
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
