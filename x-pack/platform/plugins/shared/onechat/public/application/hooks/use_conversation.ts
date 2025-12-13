@@ -126,7 +126,12 @@ export const useStepsFromPrevRounds = () => {
 };
 
 export const useHasActiveConversation = () => {
-  const conversationId = useConversationId();
+  const hasPersistedConversation = useHasPersistedConversation();
   const conversationRounds = useConversationRounds();
-  return Boolean(conversationId || conversationRounds.length > 0);
+  return hasPersistedConversation || conversationRounds.length > 0;
+};
+
+export const useHasPersistedConversation = () => {
+  const conversationId = useConversationId();
+  return Boolean(conversationId);
 };
