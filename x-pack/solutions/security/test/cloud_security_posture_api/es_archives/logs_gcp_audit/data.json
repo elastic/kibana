@@ -11,6 +11,11 @@
           "id": "admin@example.com"
         }
       },
+      "user": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
       "client": {
         "user": {
           "email": "admin@example.com"
@@ -112,6 +117,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -132,6 +142,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin2@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin2@example.com"
         }
@@ -237,6 +252,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -257,6 +277,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin3@example.com"
         }
@@ -362,6 +387,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -382,6 +412,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin3@example.com"
         }
@@ -487,6 +522,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -507,6 +547,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin5@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin5@example.com"
         }
@@ -631,6 +676,11 @@
           "id": "admin@example.com"
         }
       },
+      "user": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
       "client": {
         "user": {
           "email": "admin@example.com"
@@ -732,12 +782,116 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "7",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "service-account-123@project.iam.gserviceaccount.com"
+        }
+      },
+      "service": {
+        "entity": {
+          "id": "service-account-123@project.iam.gserviceaccount.com"
+        },
+        "name": "compute.googleapis.com"
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "agent_id_status": "missing",
+        "category": [
+          "process"
+        ],
+        "id": "service-host-event-id",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "start"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "compute.instances.start",
+              "resource": "projects/your-project-id/zones/us-central1-a/instances/instance-1"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-9876543210"
+          },
+          "resource_name": "projects/your-project-id/zones/us-central1-a/instances/instance-1",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": [
+            "host-instance-1",
+            "host-instance-2"
+          ]
+        }
+      },
+      "host": {
+        "target": {
+          "entity": {
+            "id": [
+              "host-instance-1",
+              "host-instance-2"
+            ]
+          }
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/400.0.0"
       }
     }
   }
@@ -754,6 +908,12 @@
       "actor": {
         "entity": {
           "id": "non-enriched-actor-123"
+        }
+      },
+      "entity": {
+        "id": "non-enriched-actor-123",
+        "target": {
+          "id": "non-enriched-target-456"
         }
       },
       "event": {
@@ -784,6 +944,12 @@
           "id": "non-enriched-actor-multi-1"
         }
       },
+      "entity": {
+        "id": "non-enriched-actor-multi-1",
+        "target": {
+          "id": "non-enriched-target-multi-1"
+        }
+      },
       "event": {
         "action": "test.action.non.enriched.multiple",
         "id": "non-enriched-event-multi-1",
@@ -810,6 +976,12 @@
       "actor": {
         "entity": {
           "id": "non-enriched-actor-multi-2"
+        }
+      },
+      "entity": {
+        "id": "non-enriched-actor-multi-2",
+        "target": {
+          "id": "non-enriched-target-multi-2"
         }
       },
       "event": {
@@ -840,6 +1012,12 @@
           "id": "non-enriched-actor-multi-3"
         }
       },
+      "entity": {
+        "id": "non-enriched-actor-multi-3",
+        "target": {
+          "id": "non-enriched-target-multi-3"
+        }
+      },
       "event": {
         "action": "test.action.non.enriched.multiple",
         "id": "non-enriched-event-multi-3",
@@ -868,6 +1046,19 @@
           "id": [
             "actor-mv-1",
             "actor-mv-2"
+          ]
+        }
+      },
+      "entity": {
+        "id": [
+          "actor-mv-1",
+          "actor-mv-2"
+        ],
+        "target": {
+          "id": [
+            "target-mv-1",
+            "target-mv-2",
+            "target-mv-3"
           ]
         }
       },
