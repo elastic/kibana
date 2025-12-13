@@ -64,6 +64,7 @@ export interface InternalInjectedMetadataSetup {
         initialFeatureFlags: Record<string, unknown>;
       }
     | undefined;
+  getSavedObjects: () => { isAccessControlEnabled: boolean };
 }
 
 /** @internal */

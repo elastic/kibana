@@ -84,3 +84,12 @@ export type StartServicesAccessor<
   TPluginsStart extends object = object,
   TStart = unknown
 > = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+/**
+ * Saved objects configuration exposed to browser plugins.
+ * @internal
+ * */
+export interface CoreSetupSavedObjects {
+  /** Whether access control is enabled for saved objects. */
+  isAccessControlEnabled: boolean;
+}

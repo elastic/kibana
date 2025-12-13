@@ -54,6 +54,7 @@ export interface ShowShareModalProps {
   accessControlClient: AccessControlClient;
   saveDashboard: () => Promise<void>;
   changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+  isAccessControlEnabled: boolean;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -65,6 +66,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 };
 
 export function ShowShareModal({
+  isAccessControlEnabled,
   isDirty,
   asExport,
   anchorElement,
@@ -264,6 +266,7 @@ export function ShowShareModal({
           onChangeAccessMode={handleChangeAccessMode}
           accessControlClient={accessControlClient}
           contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
+          isAccessControlEnabled={isAccessControlEnabled}
         />
       ) : undefined,
     },

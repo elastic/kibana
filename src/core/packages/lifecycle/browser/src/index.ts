@@ -8,4 +8,4 @@
  */
 
 export type { CoreSetup, StartServicesAccessor } from './core_setup';
-export type { CoreStart } from './core_start';
+export type { CoreStart, SavedObjectsStart } from './core_start';

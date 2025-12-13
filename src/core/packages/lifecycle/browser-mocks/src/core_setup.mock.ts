@@ -58,6 +58,7 @@ export function createCoreSetupMock({
       onSetup: jest.fn(),
       onStart: jest.fn(),
     }),
+    savedObjects: { isAccessControlEnabled: false },
   });
 
   return mock;

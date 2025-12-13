@@ -76,6 +76,7 @@ interface Props {
   contentTypeId: string;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
+  isAccessControlEnabled: boolean;
 }
 
 export const AccessModeContainer = ({
@@ -86,22 +87,14 @@ export const AccessModeContainer = ({
   contentTypeId,
   accessControl,
   createdBy,
+  isAccessControlEnabled,
 }: Props) => {
   const [space, setSpace] = useState<Space>({} as Space);
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
-  const [isAccessControlEnabled, setIsAccessControlEnabled] = useState(false);
+
   const [tooltipContent, setTooltipContent] = useState('');
   const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
-
-  useEffect(() => {
-    const checkAccessControlEnabled = async () => {
-      const enabled = await accessControlClient.isAccessControlEnabled();
-      setIsAccessControlEnabled(enabled);
-    };
-
-    checkAccessControlEnabled();
-  }, [accessControlClient]);
 
   useEffect(() => {
     getActiveSpace?.().then((activeSpace) => {

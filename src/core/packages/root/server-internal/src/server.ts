@@ -376,6 +376,7 @@ export class Server {
       customBranding: customBrandingSetup,
       userSettings: userSettingsServiceSetup,
       i18n: i18nServiceSetup,
+      savedObjects: savedObjectsSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({

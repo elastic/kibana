@@ -15,6 +15,7 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mock
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 const context = mockCoreContext.create();
 const httpPreboot = httpServiceMock.createInternalPrebootContract();
@@ -47,6 +48,7 @@ export const mockRenderingSetupDeps = {
   status,
   userSettings,
   i18n: i18nServiceMock.createSetupContract(),
+  savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
 };
 export const mockRenderingStartDeps = {
   featureFlags: coreFeatureFlagsMock.createStart(),

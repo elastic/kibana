@@ -30,6 +30,15 @@ import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
 /**
+ * Saved objects configuration exposed to browser plugins.
+ * @public
+ */
+export interface SavedObjectsStart {
+  /** Whether access control is enabled for saved objects. */
+  isAccessControlEnabled: boolean;
+}
+
+/**
  * Core services exposed to the `Plugin` start lifecycle
  *
  * @public
@@ -84,4 +93,6 @@ export interface CoreStart {
   userProfile: UserProfileServiceStart;
   /** {@link RenderingService} */
   rendering: RenderingService;
+  /** {@link SavedObjectsStart} */
+  savedObjects: SavedObjectsStart;
 }

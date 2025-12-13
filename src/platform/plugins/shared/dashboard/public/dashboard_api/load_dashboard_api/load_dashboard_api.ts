@@ -8,7 +8,6 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { getAccessControlClient } from '../../services/access_control_service';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
@@ -30,13 +29,9 @@ export async function loadDashboardApi({
 }) {
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  const [readResult, user, isAccessControlEnabled] = savedObjectId
-    ? await Promise.all([
-        dashboardClient.get(savedObjectId),
-        getUserAccessControlData(),
-        getAccessControlClient().isAccessControlEnabled(),
-      ])
-    : [undefined, undefined, undefined];
+  const [readResult, user] = savedObjectId
+    ? await Promise.all([dashboardClient.get(savedObjectId), getUserAccessControlData()])
+    : [undefined, undefined];
 
   const validationResult = readResult && creationOptions?.validateLoadedSavedObject?.(readResult);
   if (validationResult === 'invalid') {
@@ -59,7 +54,7 @@ export async function loadDashboardApi({
   if (viewMode) {
     getDashboardBackupService().storeViewMode(viewMode);
   }
-
+  const isAccessControlEnabled = coreServices.savedObjects.isAccessControlEnabled;
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddables,

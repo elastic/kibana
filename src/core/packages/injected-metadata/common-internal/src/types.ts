@@ -90,4 +90,7 @@ export interface InjectedMetadata {
     };
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
+  savedObjects: {
+    isAccessControlEnabled: boolean;
+  };
 }

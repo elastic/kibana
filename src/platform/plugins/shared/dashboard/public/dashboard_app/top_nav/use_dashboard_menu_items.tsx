@@ -28,6 +28,7 @@ import { topNavStrings } from '../_dashboard_app_strings';
 import { showAddMenu } from './add_menu/show_add_menu';
 import { ShowShareModal } from './share/show_share_modal';
 import { showSaveMenu } from './save_menu/show_save_menu';
+import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -47,6 +48,7 @@ export const useDashboardMenuItems = ({
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();
+  const { isAccessControlEnabled } = useDashboardMountContext();
 
   const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
@@ -172,6 +174,7 @@ export const useDashboardMenuItems = ({
         accessControlClient,
         saveDashboard: saveFromShareModal,
         changeAccessMode: dashboardApi.changeAccessMode,
+        isAccessControlEnabled,
       });
     },
     [
@@ -186,6 +189,7 @@ export const useDashboardMenuItems = ({
       dashboardApi.createdBy,
       accessControlClient,
       dashboardApi.isManaged,
+      isAccessControlEnabled,
     ]
   );
 

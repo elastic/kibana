@@ -424,6 +424,7 @@ export class CoreSystem {
         userProfile,
         rendering,
         pricing,
+        savedObjects: { isAccessControlEnabled: false },
       };
 
       await this.plugins.start(core);
