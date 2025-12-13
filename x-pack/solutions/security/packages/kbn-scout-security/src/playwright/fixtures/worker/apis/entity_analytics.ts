@@ -82,7 +82,7 @@ export const getEntityAnalyticsApiService = ({
     },
 
     getRiskEngineStatus: async () => {
-      return await measurePerformanceAsync(
+      return measurePerformanceAsync(
         log,
         'security.entityAnalytics.getRiskEngineStatus',
         async () => {
@@ -99,7 +99,7 @@ export const getEntityAnalyticsApiService = ({
     },
 
     getEntityStoreStatus: async () => {
-      return await measurePerformanceAsync(
+      return measurePerformanceAsync(
         log,
         'security.entityAnalytics.getEntityStoreStatus',
         async () => {

@@ -47,14 +47,17 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
       await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
     });
 
-    await spaceTest.step('Verify risk engine and entity store are actually enabled via API', async () => {
-      const riskEngineStatus = await apiServices.entityAnalytics.getRiskEngineStatus();
+    await spaceTest.step(
+      'Verify risk engine and entity store are actually enabled via API',
+      async () => {
+        const riskEngineStatus = await apiServices.entityAnalytics.getRiskEngineStatus();
 
-      expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
-  
-      const entityStoreStatus = await apiServices.entityAnalytics.getEntityStoreStatus();
+        expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
 
-      expect(entityStoreStatus.status).toBe('running');
-    });
+        const entityStoreStatus = await apiServices.entityAnalytics.getEntityStoreStatus();
+
+        expect(entityStoreStatus.status).toBe('running');
+      }
+    );
   });
 });
