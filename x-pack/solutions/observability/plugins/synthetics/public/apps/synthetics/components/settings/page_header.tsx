@@ -16,7 +16,8 @@ export type SettingsTabId =
   | 'params'
   | 'alerting'
   | 'private-locations'
-  | 'api-keys';
+  | 'api-keys'
+  | 'snippets';
 
 export const getSettingsPageHeader = (
   history: ReturnType<typeof useHistory>,
@@ -75,6 +76,13 @@ export const getSettingsPageHeader = (
         }),
         isSelected: tabId === 'api-keys',
         href: replaceTab('api-keys'),
+      },
+      {
+        label: i18n.translate('xpack.synthetics.settingsTabs.snippets', {
+          defaultMessage: 'Snippets',
+        }),
+        isSelected: tabId === 'snippets',
+        href: replaceTab('snippets'),
       },
     ],
   };

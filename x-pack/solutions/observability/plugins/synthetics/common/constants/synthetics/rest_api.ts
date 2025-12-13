@@ -22,6 +22,8 @@ export enum SYNTHETICS_API_URLS {
   RUN_ONCE_MONITOR = '/internal/synthetics/service/monitors/run_once',
   SERVICE_ALLOWED = '/internal/synthetics/service/allowed',
   SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
+  SYNTHETICS_PROJECT_SNIPPETS = '/internal/synthetics/service/snippets',
+  DELETE_SYNTHETICS_PROJECT_SNIPPET = '/internal/synthetics/service/snippets/{snippetId}',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
   PRIVATE_LOCATIONS_CLEANUP = `/internal/synthetics/private_locations/_cleanup`,
   SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,

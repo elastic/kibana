@@ -35,6 +35,8 @@ import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journ
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
+import { getSyntheticsSnippetsRoute } from './settings/snippets/get_snippets';
+import { postSyntheticsSnippetsRoute } from './settings/snippets/add_snippet';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
 import {
@@ -67,6 +69,7 @@ import { getLocationMonitors } from './settings/private_locations/get_location_m
 import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
+import { deleteSyntheticsSnippetsRoute } from './settings/snippets/delete_snippet';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -79,6 +82,9 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   runOnceSyntheticsMonitorRoute,
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
+  getSyntheticsSnippetsRoute,
+  postSyntheticsSnippetsRoute,
+  deleteSyntheticsSnippetsRoute,
   syntheticsGetPingsRoute,
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
