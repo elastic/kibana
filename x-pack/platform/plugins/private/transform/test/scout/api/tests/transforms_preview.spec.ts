@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
+import type {
+  PostTransformsPreviewRequestSchema,
+  PostTransformsPreviewResponseSchema,
+} from '../../../../server/routes/api_schemas/transforms';
+import { generateTransformConfig } from '../helpers/transform_config';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from '../constants';
+
+function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
+  // passing in an empty string for transform id since we will not use
+  // it as part of the config request schema. Destructuring will
+  // remove the `dest` part of the config.
+  const { dest, ...config } = generateTransformConfig('');
+  return config as PostTransformsPreviewRequestSchema;
+}
+
+apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY }, () => {
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformViewerUserApiCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
+  });
+
+  apiTest('should return a transform preview', async ({ apiClient }) => {
+    const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformPowerUserApiCredentials.apiKeyHeader,
+      },
+      body: getTransformPreviewConfig(),
+      responseType: 'json',
+    });
+    const previewResponse = body as PostTransformsPreviewResponseSchema;
+
+    expect(statusCode).toBe(200);
+
+    expect(previewResponse.preview).toHaveLength(19);
+    expect(typeof previewResponse.generated_dest_index).toBe('object');
+  });
+
+  apiTest('should return a correct error for transform preview', async ({ apiClient }) => {
+    const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformPowerUserApiCredentials.apiKeyHeader,
+      },
+      body: {
+        ...getTransformPreviewConfig(),
+        pivot: {
+          group_by: { airline: { terms: { field: 'airline' } } },
+          aggregations: {
+            '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
+          },
+        },
+      },
+      responseType: 'json',
+    });
+
+    expect(statusCode).toBe(400);
+
+    expect(body.message).toContain('Unknown aggregation type [value_countt]');
+  });
+
+  apiTest('should return 403 for transform view-only user', async ({ apiClient }) => {
+    const { statusCode } = await apiClient.post('internal/transform/transforms/_preview', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...transformViewerUserApiCredentials.apiKeyHeader,
+      },
+      body: getTransformPreviewConfig(),
+      responseType: 'json',
+    });
+
+    expect(statusCode).toBe(403);
+  });
+});
