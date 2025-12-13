@@ -103,6 +103,7 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
         consumers={ALERT_TABLE_CONSUMERS}
         gridStyle={GRID_STYLE}
         id={id}
+        isMutedAlertsEnabled={false}
         onLoaded={onLoaded}
         query={query}
         ref={refetchRef}
