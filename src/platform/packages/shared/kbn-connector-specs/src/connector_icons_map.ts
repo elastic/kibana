@@ -34,4 +34,14 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
+
+  [
+    '.sharepointOnline',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
+        )
+    ),
+  ],
 ]);
