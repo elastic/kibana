@@ -24,7 +24,7 @@ import {
   filterByServiceName,
   filterByTransactionNameOrSpanName,
   filterByTransactionType,
-} from './filters';
+} from '../../../../../common/utils/esql/filters';
 
 const getESQLQuery = ({
   params,

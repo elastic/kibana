@@ -20,6 +20,7 @@ export const errorCountMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );
@@ -36,6 +37,7 @@ export const errorCountRecoveryMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );
@@ -55,6 +57,7 @@ export const transactionDurationMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'ms
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );
@@ -73,6 +76,7 @@ export const transactionDurationRecoveryMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'ms
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );
@@ -91,6 +95,7 @@ export const transactionErrorRateMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'%
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );
@@ -108,6 +113,7 @@ export const transactionErrorRateRecoveryMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'%
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );
@@ -126,6 +132,7 @@ export const anomalyMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );
@@ -143,6 +150,7 @@ export const anomalyRecoveryMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );

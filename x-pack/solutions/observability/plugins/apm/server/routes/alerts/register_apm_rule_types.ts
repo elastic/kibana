@@ -13,6 +13,7 @@ import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server'
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import {
@@ -107,6 +108,7 @@ export interface RegisterRuleDependencies {
   observability: ObservabilityPluginSetup;
   ruleDataClient: IRuleDataClient;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  discoverLocator?: LocatorPublic<DiscoverAppLocatorParams>;
 }
 
 export function registerApmRuleTypes(dependencies: RegisterRuleDependencies) {

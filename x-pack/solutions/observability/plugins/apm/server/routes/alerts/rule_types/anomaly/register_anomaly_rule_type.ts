@@ -71,6 +71,7 @@ import {
   getAnomalyDetectorIndex,
   getAnomalyDetectorType,
 } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { getAlertDiscoverUrl } from '../utils/get_alert_discover_url';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -89,6 +90,7 @@ export function registerAnomalyRuleType({
   logger,
   ml,
   ruleDataClient,
+  discoverLocator,
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error('Cannot register anomaly rule type. The alerting plugin needs to be enabled.');
@@ -117,6 +119,7 @@ export function registerAnomalyRuleType({
         apmActionVariables.transactionType,
         apmActionVariables.triggerValue,
         apmActionVariables.viewInAppUrl,
+        apmActionVariables.discoverUrl,
       ],
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
@@ -179,7 +182,7 @@ export function registerAnomalyRuleType({
           ? minimumWindow
           : requestedWindow;
 
-      const { dateStart } = getTimeRange(window);
+      const { dateStart, dateEnd } = getTimeRange(window);
 
       const jobIds = mlJobs.map((job) => job.jobId);
       const anomalySearchParams = {
@@ -327,6 +330,22 @@ export function registerAnomalyRuleType({
         );
         const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
 
+        const index = apmIndices.transaction;
+        const groupByFields: Record<string, string> = {
+          [SERVICE_NAME]: serviceName,
+          [TRANSACTION_TYPE]: transactionType,
+          [SERVICE_ENVIRONMENT]: environment,
+        };
+
+        const discoverUrl = getAlertDiscoverUrl({
+          discoverLocator,
+          index,
+          groupByFields,
+          dateStart,
+          dateEnd,
+          spaceId,
+        });
+
         const payload = {
           [SERVICE_NAME]: serviceName,
           ...getEnvironmentEsField(environment),
@@ -341,6 +360,7 @@ export function registerAnomalyRuleType({
 
         const context = {
           alertDetailsUrl,
+          discoverUrl,
           environment: getEnvironmentLabel(environment),
           reason: reasonMessage,
           serviceName,
@@ -380,8 +400,25 @@ export function registerAnomalyRuleType({
           spaceId,
           relativeViewInAppUrl
         );
+
+        const recoveredGroupByFields: Record<string, string> = {
+          [SERVICE_NAME]: serviceName,
+          [TRANSACTION_TYPE]: transactionType,
+          [SERVICE_ENVIRONMENT]: environment,
+        };
+
+        const recoveredDiscoverUrl = getAlertDiscoverUrl({
+          discoverLocator,
+          index: apmIndices.transaction,
+          groupByFields: recoveredGroupByFields,
+          dateStart,
+          dateEnd,
+          spaceId,
+        });
+
         const recoveredContext = {
           alertDetailsUrl,
+          discoverUrl: recoveredDiscoverUrl,
           environment: getEnvironmentLabel(environment),
           reason: reasonMessage,
           serviceName,
