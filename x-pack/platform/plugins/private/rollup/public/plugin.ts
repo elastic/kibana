@@ -17,6 +17,7 @@ import { UIM_APP_NAME } from '../common';
 import { setHttp, init as initDocumentation } from './crud_app/services';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
 import type { ClientConfigType } from './types';
+import { rollupDataEnricher } from './rollup_data_enricher';
 
 export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -46,6 +47,7 @@ export class RollupPlugin implements Plugin {
       if (indexManagement) {
         indexManagement.extensionsService.addBadge(rollupBadgeExtension);
         indexManagement.extensionsService.addToggle(rollupToggleExtension);
+        indexManagement.indexDataEnricher.add(rollupDataEnricher);
       }
 
       if (home) {

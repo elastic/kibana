@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesStatsResponse,
+  IndicesGetResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
@@ -51,6 +55,10 @@ import type { Fields } from '../components/mappings_editor/types';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
+}
+
+interface MeteringStatsResponse {
+  indices: MeteringStats[];
 }
 
 // Temporary hack to provide the uiMetricService and reindexService instance to this file.
@@ -139,9 +147,155 @@ export async function updateDSFailureStore(
   });
 }
 
+interface IndexMetadata {
+  name: string;
+  primary?: Number;
+  replica?: Number;
+  isFrozen: boolean;
+  aliases: string[] | 'none';
+  hidden: boolean;
+  data_stream: string;
+  mode: string;
+  health?: string;
+  status?: string;
+  uuid?: string;
+  documents?: number;
+  documents_deleted?: number;
+  size?: string;
+  primary_size?: string;
+}
+
+const getBaseResponse = ({
+  indexName,
+  indexData,
+  aliases,
+}: {
+  indexName: string;
+  indexData: any;
+  aliases: string[];
+}): IndexMetadata => ({
+  name: indexName,
+  primary: indexData.settings?.index?.number_of_shards as Number,
+  replica: indexData.settings?.index?.number_of_replicas as Number,
+  isFrozen: indexData.settings?.index?.frozen === 'true',
+  aliases: aliases.length ? aliases : 'none',
+  hidden: indexData.settings?.index?.hidden === 'true',
+  data_stream: indexData.data_stream as string,
+  mode: indexData.settings?.index?.mode as string,
+});
+
 export async function loadIndices() {
-  const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
-  return response.data ? response.data : response;
+  const config = {
+    isIndexStatsEnabled: true,
+    isSizeAndDocCountEnabled: true,
+    // until endpoit is implemented
+    // isSizeAndDocCountEnabled: false,
+  };
+
+  const promises: [
+    Promise<IndicesGetResponse>,
+    Promise<IndicesStatsResponse>,
+    Promise<MeteringStatsResponse>
+  ][] = [];
+
+  const getIndicesPromise = httpService.httpClient.get<IndicesGetResponse>(
+    `${API_BASE_PATH}/indices_get`
+  );
+  // @ts-expect-error
+  promises.push([getIndicesPromise]);
+  if (config.isIndexStatsEnabled) {
+    const getIndicesStatsPromise = httpService.httpClient.get<IndicesStatsResponse>(
+      `${API_BASE_PATH}/indices_stats`
+    );
+    promises[0].push(getIndicesStatsPromise);
+  } else {
+    promises[0].push(Promise.resolve({}));
+  }
+
+  // uses the _metering/stats API to get the number of documents and size of the index
+  // this API is only available in ES3
+  if (config.isSizeAndDocCountEnabled) {
+    // todo
+    const meteringStatsPromise = httpService.httpClient
+      .get<MeteringStatsResponse>(`${API_BASE_PATH}/metering_stats`)
+      .catch(() => ({} as MeteringStatsResponse));
+
+    // todo why does this depend upon elevated privs?
+    /*
+    const getMeteringStatsPromise =
+      client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
+        method: 'GET',
+        path: `/_metering/stats/` + indexNamesString,
+      });
+      */
+    promises[0].push(meteringStatsPromise);
+  } else {
+    promises[0].push(Promise.resolve({}));
+  }
+
+  // todo - this will run at speed of slowest promise
+  // would be better to run independently and combine later
+  const [indices, indicesStats, meteringStats] = await Promise.all(promises[0]);
+
+  const indicesNames = Object.keys(indices);
+
+  if (!indicesNames.length) {
+    return [];
+  }
+
+  // todo better type
+  const mainBaseResponse = indicesNames.reduce<Record<string, IndexMetadata>>(
+    (collector, indexName: string) => {
+      const indexData = indices[indexName];
+      const aliases = Object.keys(indexData.aliases!);
+      collector[indexName] = getBaseResponse({
+        indexName,
+        indexData,
+        aliases,
+      });
+
+      return collector;
+    },
+    {}
+  );
+
+  if (indicesStats?.indices) {
+    Object.values(mainBaseResponse).forEach((baseResponse) => {
+      const indexStats = indicesStats.indices![baseResponse.name] || {};
+
+      baseResponse.health = indexStats?.health;
+      baseResponse.status = indexStats?.status;
+      baseResponse.uuid = indexStats?.uuid;
+      baseResponse.documents = indexStats?.primaries?.docs?.count ?? 0;
+      baseResponse.documents_deleted = indexStats?.primaries?.docs?.deleted ?? 0;
+      baseResponse.size = new ByteSizeValue(
+        indexStats?.total?.store?.size_in_bytes ?? 0
+      ).toString();
+      baseResponse.primary_size = new ByteSizeValue(
+        indexStats?.primaries?.store?.size_in_bytes ?? 0
+      ).toString();
+    });
+  }
+
+  const meteringStatsWithTypes = meteringStats as MeteringStatsResponse | undefined;
+
+  if (meteringStatsWithTypes?.indices?.length === 0) {
+    meteringStatsWithTypes?.indices?.forEach((indexStat) => {
+      const baseResponse = mainBaseResponse[indexStat.name];
+      if (baseResponse) {
+        baseResponse.documents = indexStat.num_docs;
+        baseResponse.size = new ByteSizeValue(indexStat.size_in_bytes).toString();
+      }
+    });
+  }
+
+  // todo change api
+  const enriched = await indexDataEnricher.enrichIndices(indices, httpService.httpClient);
+
+  // if neither index stats (Stateful only API)
+  // nor size and doc count are enabled (ES3 only API)
+  // return the base response
+  return Object.values(mainBaseResponse);
 }
 
 export async function reloadIndices(

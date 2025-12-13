@@ -10,28 +10,19 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/serv
 import { PLUGIN } from '../common/constants/plugin';
 import type { Dependencies } from './types';
 import { ApiRoutes } from './routes';
-import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
 import type { IndexManagementConfig } from './config';
 
-export interface IndexManagementPluginSetup {
-  indexDataEnricher: {
-    add: IndexDataEnricher['add'];
-  };
-}
-
-export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup, void, any, any> {
+export class IndexMgmtServerPlugin implements Plugin<void, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
-  private readonly indexDataEnricher: IndexDataEnricher;
   private readonly config: IndexManagementConfig;
 
   constructor(initContext: PluginInitializerContext) {
     this.apiRoutes = new ApiRoutes();
-    this.indexDataEnricher = new IndexDataEnricher();
     this.config = initContext.config.get();
   }
 
-  setup({ http }: CoreSetup, { features, security }: Dependencies): IndexManagementPluginSetup {
+  setup({ http }: CoreSetup, { features, security }: Dependencies) {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
       privileges: [
@@ -70,17 +61,10 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         enableFailureStoreRetentionDisabling:
           this.config.enableFailureStoreRetentionDisabling ?? true,
       },
-      indexDataEnricher: this.indexDataEnricher,
       lib: {
         handleEsError,
       },
     });
-
-    return {
-      indexDataEnricher: {
-        add: this.indexDataEnricher.add.bind(this.indexDataEnricher),
-      },
-    };
   }
 
   start() {}

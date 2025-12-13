@@ -18,6 +18,7 @@ export const loadIndices = () => async (dispatch) => {
   try {
     indices = await request();
   } catch (error) {
+    console.log('loadIndices error', error);
     return dispatch(loadIndicesError(error));
   }
   dispatch(loadIndicesSuccess({ indices }));
