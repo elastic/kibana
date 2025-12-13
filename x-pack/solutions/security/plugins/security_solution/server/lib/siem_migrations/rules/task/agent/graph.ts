@@ -7,6 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { AIMessage } from '@langchain/core/messages';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
@@ -14,7 +15,6 @@ import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
 import { getResolveDepsNode } from './nodes/resolve_dependencies_node/resolve_dependencies';
 import { getVendorRouter } from './edges/vendor_edge';
-import { AIMessage } from '@langchain/core/messages';
 
 export function getRuleMigrationAgent({
   model,
@@ -95,5 +95,7 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
 export function toolRouter(state: MigrateRuleState): string {
   const messages = state.messages;
   const lastMessage = messages.at(-1);
-  return AIMessage.isInstance(lastMessage) && lastMessage?.tool_calls?.length ? 'hasToolCalls' : 'noToolCalls';
+  return AIMessage.isInstance(lastMessage) && lastMessage?.tool_calls?.length
+    ? 'hasToolCalls'
+    : 'noToolCalls';
 }
