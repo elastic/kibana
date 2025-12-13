@@ -236,7 +236,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
-  - x-pack/platform/test/functional/apps/product_intercept/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
@@ -266,6 +265,7 @@ enabled:
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/platform/test/plugin_functional/config.ts
+  - x-pack/platform/test/product_intercepts_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_and_deprecated_security.config.ts
