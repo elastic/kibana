@@ -35,6 +35,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             !arg.includes('xpack.fleet.experimentalFeatures') &&
             !arg.includes('xpack.securitySolution.enableExperimental')
         ),
+
+        '--logging.root.level=debug',
+
         // FLEET: set any experimental feature flags for testing
         `--xpack.fleet.experimentalFeatures=${JSON.stringify(fleetEnableExperimental)}`,
 
