@@ -130,7 +130,7 @@ export function checkScaleOperation(
 }
 
 export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>
-  layer.layerType === layerTypes.DATA || !layer.layerType;
+  layer.layerType === layerTypes.DATA || layer.layerType === layerTypes.ESQL || !layer.layerType;
 
 export const getDataLayers = (layers: XYLayerConfig[]) =>
   (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
@@ -179,6 +179,7 @@ export interface LayerTypeToLayer {
   [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => XYAnnotationLayerConfig;
+  [layerTypes.ESQL]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
 }
 
 export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLayer) => {
@@ -334,6 +335,18 @@ const newLayerFn = {
     accessors: [],
     seriesType,
   }),
+  [layerTypes.ESQL]: ({
+    layerId,
+    seriesType,
+  }: {
+    layerId: string;
+    seriesType: SeriesType;
+  }): XYDataLayerConfig => ({
+    layerId,
+    layerType: layerTypes.ESQL,
+    accessors: [],
+    seriesType,
+  }),
   [layerTypes.REFERENCELINE]: ({ layerId }: { layerId: string }): XYReferenceLineLayerConfig => ({
     layerId,
     layerType: layerTypes.REFERENCELINE,
@@ -461,8 +474,8 @@ export const isBucketed = (op: OperationMetadata) => op.isBucketed;
 export const isTimeChart = (
   dataLayers: XYDataLayerConfig[],
   frame?: Pick<FramePublicAPI, 'datasourceLayers'> | undefined
-) =>
-  Boolean(
+) => {
+  return Boolean(
     dataLayers.length &&
       dataLayers.every(
         (dataLayer) =>
@@ -470,3 +483,4 @@ export const isTimeChart = (
           checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
       )
   );
+};

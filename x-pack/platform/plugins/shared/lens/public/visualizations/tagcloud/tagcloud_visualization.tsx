@@ -192,6 +192,12 @@ export const getTagcloudVisualization = ({
           defaultMessage: 'Add visualization layer',
         }),
       },
+      {
+        type: LayerTypes.ESQL,
+        label: i18n.translate('xpack.lens.tagcloud.addESQLLayer', {
+          defaultMessage: 'Add esql layer',
+        }),
+      },
     ];
   },
 

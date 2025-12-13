@@ -314,6 +314,13 @@ export function getTopSuggestionForField(
     (datasourceLayer) => datasourceLayer && datasourceLayer.getTableSpec().length > 0
   );
 
+  if (
+    Object.values(datasourceLayers).some((datasourceLayer) =>
+      datasourceLayer?.isTextBasedLanguage()
+    )
+  ) {
+    return;
+  }
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : undefined;

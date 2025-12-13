@@ -62,7 +62,7 @@ export interface YConfig {
 export interface XYDataLayerConfig {
   layerId: string;
   accessors: string[];
-  layerType: 'data';
+  layerType: 'data' | 'esql';
   seriesType: SeriesType;
   xAccessor?: string;
   simpleView?: boolean;
