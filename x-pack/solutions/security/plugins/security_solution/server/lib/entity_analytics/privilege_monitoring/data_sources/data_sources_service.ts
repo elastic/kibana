@@ -10,16 +10,24 @@ import { POST_EXCLUDE_INDICES, PRE_EXCLUDE_INDICES } from '../constants';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elasticsearch/mappings';
 import { createIndexSyncService } from './sync/index_sync';
-import { createIntegrationsSyncService } from './sync/integrations/integrations_sync';
+import { createIndexSyncServiceWiP } from './sync/index_sync_WIP';
+import { createIntegrationsSyncService } from './sync/integrations_sync';
 
 export const createDataSourcesService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract,
-  maxUsersAllowed: number
+  maxUsersAllowed: number // TODO: remove this and use a const instead
 ) => {
+  const newIndexSync =
+    dataClient.deps.experimentalFeatures?.privilegedMonitoringNewIndexSyncUpdateDetectionEnabled;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
-  const indexSyncService = createIndexSyncService(dataClient, maxUsersAllowed);
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
+  let indexSyncService;
+  if (newIndexSync) {
+    indexSyncService = createIndexSyncServiceWiP(dataClient, soClient);
+  } else {
+    indexSyncService = createIndexSyncService(dataClient, maxUsersAllowed);
+  }
 
   /**
    * This creates an index for the user to populate privileged users.
@@ -74,7 +82,5 @@ export const createDataSourcesService = (
     createImportIndex,
     searchPrivilegesIndices,
     syncAllSources,
-    ...createIndexSyncService(dataClient, maxUsersAllowed),
-    ...createIntegrationsSyncService(dataClient, soClient),
   };
 };

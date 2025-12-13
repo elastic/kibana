@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics';
-import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
-import type { PrivMonBulkUser } from '../../types';
+import type { MonitoredUserDoc } from '../../../../../../../common/api/entity_analytics';
+import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
+import type { PrivMonBulkUser } from '../../../types';
 
 export const findStaleUsersFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>

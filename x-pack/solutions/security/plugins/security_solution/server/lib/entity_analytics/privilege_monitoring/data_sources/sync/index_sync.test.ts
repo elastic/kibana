@@ -22,6 +22,7 @@ import type { SearchService } from '../../users/search';
 import type { BulkResponse } from 'elasticsearch-8.x/lib/api/types';
 
 const mockFindSourcesByType = jest.fn();
+const STALE_USERS_PATH = '../../deletion_detection/stale_users';
 jest.mock('../../saved_objects', () => {
   return {
     MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
@@ -36,7 +37,7 @@ jest.mock('../../saved_objects', () => {
 });
 
 const mockFindStaleUsersForIndex = jest.fn();
-jest.mock('./stale_users', () => {
+jest.mock(STALE_USERS_PATH, () => {
   return {
     findStaleUsersForIndexFactory: () => mockFindStaleUsersForIndex,
   };
@@ -56,7 +57,7 @@ jest.mock('../../users/search', () => {
   };
 });
 
-jest.mock('./stale_users', () => {
+jest.mock(STALE_USERS_PATH, () => {
   return {
     findStaleUsersFactory: () => mockFindStaleUsersFactory,
   };
