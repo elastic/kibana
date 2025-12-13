@@ -40,6 +40,7 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
@@ -72,12 +73,27 @@ export const defaultExpression: MetricExpression = {
     },
   ],
   threshold: [100],
-  timeSize: 1,
+  timeSize: 5,
   timeUnit: 'm',
 };
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
+
+const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
+  switch (timeWindowUnit) {
+    case 's':
+      return timeWindowSize / 60;
+    case 'm':
+      return timeWindowSize;
+    case 'h':
+      return timeWindowSize * 60;
+    case 'd':
+      return timeWindowSize * 60 * 24;
+    default:
+      return timeWindowSize;
+  }
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
@@ -97,7 +113,7 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  const [timeSize, setTimeSize] = useState<number | undefined>(1);
+  const [timeSize, setTimeSize] = useState<number | undefined>(5);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
@@ -117,6 +133,41 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+
+  const isTimeSizeBelowRecommended =
+    timeSize && timeUnit ? convertToMinutes(timeSize, timeUnit) < 5 : false;
+
+  const emptyError = useMemo(() => {
+    return {
+      aggField: [],
+      timeSizeUnit: [],
+      timeWindowSize: [],
+    };
+  }, []);
+
+  // Compose errors for the ForLastExpression control. If the selected time window
+  // is below the recommended minimum, include the RECOMMENDED_TIMESIZE_WARNING in
+  // the errors.timeWindowSize array in addition to any other errors. We memoize
+  // this to avoid recreating the object on every render.
+  const lastExpressionErrors = useMemo(() => {
+    // Ensure we don't mutate the shared emptyError object
+    const base = {
+      aggField: Array.isArray(emptyError.aggField) ? [...emptyError.aggField] : [],
+      timeSizeUnit: Array.isArray(emptyError.timeSizeUnit) ? [...emptyError.timeSizeUnit] : [],
+      timeWindowSize: Array.isArray(emptyError.timeWindowSize)
+        ? [...emptyError.timeWindowSize]
+        : [],
+    } as Record<string, any>;
+
+    if (isTimeSizeBelowRecommended) {
+      base.timeWindowSize = [
+        ...(Array.isArray(base.timeWindowSize) ? base.timeWindowSize : []),
+        RECOMMENDED_TIMESIZE_WARNING,
+      ];
+    }
+
+    return base as IErrorObject;
+  }, [emptyError, isTimeSizeBelowRecommended]);
 
   const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
     let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
@@ -376,14 +427,6 @@ export default function Expressions(props: Props) {
     [setRuleParams, isNoDataChecked]
   );
 
-  const emptyError = useMemo(() => {
-    return {
-      aggField: [],
-      timeSizeUnit: [],
-      timeWindowSize: [],
-    };
-  }, []);
-
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const ruleCriteria =
@@ -631,10 +674,12 @@ export default function Expressions(props: Props) {
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={emptyError}
+        errors={lastExpressionErrors}
+        warnings={RecommendedTimeSizeWarning}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
+        isTimeSizeBelowRecommended={isTimeSizeBelowRecommended}
       />
 
       <EuiSpacer size="m" />
@@ -733,6 +778,43 @@ export default function Expressions(props: Props) {
         }}
       />
       <EuiSpacer size="m" />
+    </>
+  );
+}
+
+export const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.observability.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
+
+function RecommendedTimeSizeWarning() {
+  const description = i18n.translate(
+    'xpack.observability.observability.rules.customThreshold.recommendedTimeSizeWarning.description',
+    {
+      defaultMessage:
+        'Recommended minimum value is 5 minutes. This is to ensure, that the alert has enough data to evaluate. If you choose a lower values, the alert may not work as expected.',
+    }
+  );
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.observability.observability.rules.customThreshold.recommendedTimeSizeWarning.title',
+          { defaultMessage: `Value is too low, possible alerting noise` }
+        )}
+        color="warning"
+        iconType="warning"
+        size="s"
+        css={css`
+          max-width: 400px;
+        `}
+      >
+        <p>{description}</p>
+      </EuiCallOut>
     </>
   );
 }

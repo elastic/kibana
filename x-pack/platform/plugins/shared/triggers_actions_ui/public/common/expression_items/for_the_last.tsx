@@ -28,6 +28,7 @@ export interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
+  isTimeSizeBelowRecommended?: boolean;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -52,6 +53,13 @@ const FOR_LAST_LABEL = i18n.translate(
     defaultMessage: 'for the last',
   }
 );
+
+const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.triggersActionsUI.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
@@ -60,6 +68,7 @@ export const ForLastExpression = ({
   onChangeWindowSize,
   onChangeWindowUnit,
   popupPosition,
+  isTimeSizeBelowRecommended = false,
   description = FOR_LAST_LABEL,
 }: ForLastExpressionProps) => {
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
@@ -101,12 +110,16 @@ export const ForLastExpression = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow
-              isInvalid={Number(errors.timeWindowSize?.length) > 0}
-              error={errors.timeWindowSize as string[]}
+              isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
+              error={
+                isTimeSizeBelowRecommended
+                  ? [RECOMMENDED_TIMESIZE_WARNING]
+                  : (errors.timeWindowSize as string[])
+              }
             >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
-                isInvalid={Number(errors.timeWindowSize?.length) > 0}
+                isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
                 min={0}
                 value={timeWindowSize || ''}
                 onChange={(e) => {
@@ -134,6 +147,7 @@ export const ForLastExpression = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isTimeSizeBelowRecommended && <RecommendedTimeSizeWarning />}
       </div>
     </EuiPopover>
   );
