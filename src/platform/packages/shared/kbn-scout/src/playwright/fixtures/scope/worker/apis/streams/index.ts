@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
-import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
 import type { RoutingStatus } from '@kbn/streams-schema';
+import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
+import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
 import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type { ScoutSpaceParallelFixture } from '../../scout_space';
 
-export interface StreamsApiService {
+export interface StreamsApiService<TCondition = unknown, TStreamlangDSL = unknown> {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
   forkStream: (
     streamName: string,
     destination: string,
-    condition: Condition,
+    condition: TCondition,
     status?: RoutingStatus
   ) => Promise<void>;
   getStreamDefinition: (streamName: string) => Promise<IngestStream.all.GetResponse>;
@@ -34,11 +33,11 @@ export interface StreamsApiService {
   clearStreamProcessors: (streamName: string) => Promise<void>;
   updateStreamProcessors: (
     streamName: string,
-    getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
+    getProcessors: TStreamlangDSL | ((prevProcessors: TStreamlangDSL) => TStreamlangDSL)
   ) => Promise<void>;
 }
 
-export const getStreamsApiService = ({
+export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unknown>({
   kbnClient,
   log,
   scoutSpace,
@@ -46,7 +45,7 @@ export const getStreamsApiService = ({
   kbnClient: KbnClient;
   log: ScoutLogger;
   scoutSpace?: ScoutSpaceParallelFixture;
-}): StreamsApiService => {
+}): StreamsApiService<TCondition, TStreamlangDSL> => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
   const service = {
@@ -69,7 +68,7 @@ export const getStreamsApiService = ({
     forkStream: async (
       streamName: string,
       newStreamName: string,
-      condition: Condition,
+      condition: TCondition,
       status: RoutingStatus = 'enabled'
     ) => {
       await measurePerformanceAsync(log, 'streamsApi.createRoutingRule', async () => {
@@ -171,19 +170,20 @@ export const getStreamsApiService = ({
     },
     updateStreamProcessors: async (
       streamName: string,
-      getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
+      getProcessors: TStreamlangDSL | ((prevProcessors: TStreamlangDSL) => TStreamlangDSL)
     ) => {
       await measurePerformanceAsync(log, 'streamsApi.updateStreamProcessors', async () => {
         const definition = await service.getStreamDefinition(streamName);
-        const processing = !(typeof getProcessors === 'function')
-          ? getProcessors
-          : getProcessors(definition.stream.ingest.processing);
+        const isFunction = typeof getProcessors === 'function';
+        const processing = isFunction
+          ? (getProcessors as (prevProcessors: TStreamlangDSL) => TStreamlangDSL)(
+              definition.stream.ingest.processing as unknown as TStreamlangDSL
+            )
+          : (getProcessors as TStreamlangDSL);
         await service.updateStream(streamName, {
           ingest: {
             ...definition.stream.ingest,
-            processing: {
-              ...processing,
-            },
+            processing: processing as unknown as IngestUpsertRequest['processing'],
           },
         });
       });
