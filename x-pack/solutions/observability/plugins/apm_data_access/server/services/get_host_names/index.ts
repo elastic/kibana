@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import { HOST_NAME } from '@kbn/apm-types/es_fields';
 import { castArray } from 'lodash';
 import { type DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';

@@ -142,6 +142,8 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/onechat-plugin",
     "@kbn/ai-insights",
+    "@kbn/observability-agent-builder-plugin",
+    "@kbn/server-route-repository-client",
   ],
   "exclude": ["target/**/*"]
 }
