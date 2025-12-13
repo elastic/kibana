@@ -46,6 +46,7 @@ import { IndexManagementLocatorDefinition } from './locator';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
+import { IndexDataEnricher } from './services';
 
 export class IndexMgmtUIPlugin
   implements
@@ -78,6 +79,8 @@ export class IndexMgmtUIPlugin
   private licensingSubscription?: Subscription;
 
   private capabilities$ = new Subject<Capabilities>();
+
+  private readonly indexDataEnricher: IndexDataEnricher;
 
   constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -113,6 +116,8 @@ export class IndexMgmtUIPlugin
       enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
+
+    this.indexDataEnricher = new IndexDataEnricher();
   }
 
   public setup(
@@ -178,6 +183,9 @@ export class IndexMgmtUIPlugin
         });
       },
       locator: this.locator,
+      indexDataEnricher: {
+        add: this.indexDataEnricher.add.bind(this.indexDataEnricher),
+      },
     };
   }
 

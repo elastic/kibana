@@ -15,8 +15,11 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { ExtensionsSetup } from './services/extensions_service';
 import type { PublicApiServiceSetup } from './services/public_api_service';
+
+export type Enricher = (indices: Index[], client: HttpSetup) => Promise<Index[]>;
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (
@@ -79,6 +82,9 @@ export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
   renderIndexManagementApp: (params: IndexManagementAppMountParams) => Promise<() => void>;
   locator?: IndexManagementLocator;
+  indexDataEnricher: {
+    add: (enricher: Enricher) => void;
+  };
 }
 
 export interface IndexManagementPluginStart {

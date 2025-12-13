@@ -10,7 +10,6 @@ import type { IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type { IndexDataEnricher } from './services';
 import type { handleEsError } from './shared_imports';
 
 export interface Dependencies {
@@ -32,7 +31,6 @@ export interface RouteDependencies {
     enableProjectLevelRetentionChecks: boolean;
     enableFailureStoreRetentionDisabling: boolean;
   };
-  indexDataEnricher: IndexDataEnricher;
   lib: {
     handleEsError: typeof handleEsError;
   };

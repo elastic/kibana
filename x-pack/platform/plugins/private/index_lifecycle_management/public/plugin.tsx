@@ -16,6 +16,7 @@ import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
 import type { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 import { IlmLocatorDefinition } from './locator';
+import { indexLifecycleDataEnricher } from './index_lifecycle_data_enricher';
 
 export class IndexLifecycleManagementPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
@@ -104,6 +105,7 @@ export class IndexLifecycleManagementPlugin
 
       if (indexManagement) {
         addAllExtensions(indexManagement.extensionsService);
+        indexManagement.indexDataEnricher.add(indexLifecycleDataEnricher);
       }
 
       plugins.share.url.locators.create(

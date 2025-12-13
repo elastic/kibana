@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Enricher } from '@kbn/index-management-shared-types';
 import type { Index } from '..';
-
-export type Enricher = (indices: Index[], client: IScopedClusterClient) => Promise<Index[]>;
 
 export class IndexDataEnricher {
   private readonly _enrichers: Enricher[] = [];
@@ -17,15 +16,13 @@ export class IndexDataEnricher {
     this._enrichers.push(enricher);
   }
 
-  public enrichIndices = async (
-    indices: Index[],
-    client: IScopedClusterClient
-  ): Promise<Index[]> => {
+  public enrichIndices = async (indices: Index[], client: HttpSetup): Promise<Index[]> => {
     let enrichedIndices = indices;
 
     for (let i = 0; i < this.enrichers.length; i++) {
       const dataEnricher = this.enrichers[i];
       try {
+        // todo do this in parallel
         const dataEnricherResponse = await dataEnricher(enrichedIndices, client);
         enrichedIndices = dataEnricherResponse;
       } catch (e) {

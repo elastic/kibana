@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { Index } from '@kbn/index-management-plugin/server';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Index } from '@kbn/index-management-shared-types';
 import { isArray } from 'lodash';
 
-export const rollupDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
+export const rollupDataEnricher = async (indicesList: Index[], client: HttpSetup) => {
   if (!indicesList || !indicesList.length) {
     return Promise.resolve(indicesList);
   }

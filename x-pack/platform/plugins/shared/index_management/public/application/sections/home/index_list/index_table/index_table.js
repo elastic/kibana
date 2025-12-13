@@ -535,6 +535,8 @@ export class IndexTable extends Component {
         );
       }
 
+      console.log('indicesError', indicesError);
+
       if (indicesError) {
         if (indicesError.status === 403) {
           return (
