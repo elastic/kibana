@@ -816,6 +816,10 @@ export function hasElserOnMlNodeSemanticTextField(fields: NormalizedFields): boo
   return Object.values(fields.byId).some(isElserOnMlNodeSemanticField);
 }
 
+export function hasSemanticTextField(fields: NormalizedFields): boolean {
+  return Object.values(fields.byId).some((field) => field.source.type === 'semantic_text');
+}
+
 export const prepareFieldsForEisUpdate = (
   selectedMappings: EuiSelectableOption<MappingsOptionData>[],
   fullNormalized: NormalizedFields

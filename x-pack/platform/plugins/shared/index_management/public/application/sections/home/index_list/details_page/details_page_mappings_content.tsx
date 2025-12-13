@@ -28,10 +28,9 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ILicense } from '@kbn/licensing-types';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { EisPromotionalCallout, EisUpdateCallout } from '@kbn/search-api-panels';
 import {
   getStateWithCopyToFields,
-  hasElserOnMlNodeSemanticTextField,
+  hasSemanticTextField,
   isSemanticTextField,
 } from '../../../../components/mappings_editor/lib/utils';
 import type { Index } from '../../../../../../common';
@@ -56,7 +55,6 @@ import type { NormalizedFields, State } from '../../../../components/mappings_ed
 import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
-import { documentationService } from '../../../../services';
 import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
@@ -65,7 +63,6 @@ import { parseMappings } from '../../../../shared/parse_mappings';
 import { EmptyMappingsContent } from './details_page_empty_mappings';
 import { AddFieldButton } from './details_page_mappings_content/add_field_button';
 import { MappingsInformationPanels } from './details_page_mappings_content/mappings_information_panels';
-import { UpdateElserMappingsModal } from './update_elser_mappings/update_elser_mappings_modal';
 const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
 
 export const DetailsPageMappingsContent: FunctionComponent<{
@@ -81,7 +78,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       application: { capabilities, navigateToUrl },
       http,
     },
-    plugins: { ml, licensing, cloud },
+    plugins: { ml, licensing },
     config,
     overlays,
     history,
@@ -101,7 +98,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
-  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const { enableSemanticText: isSemanticTextEnabled } = config;
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
@@ -117,14 +113,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     prefix: 'pendingFieldListId',
   });
   const hasSemanticText = hasSemanticTextField(state.fields);
-  const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
-
-  const showAboutMappingsStyles = css`
-    ${useEuiBreakpoint(['xl'])} {
-      max-width: 480px;
-    }
-  `;
 
   const newFieldsLength = useMemo(() => {
     return Object.keys(state.fields.byId).length;
@@ -422,39 +411,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       {/* using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen */}
       <EuiFlexGroup wrap direction="rowReverse" css={mappingsWrapperStyles}>
         {showAboutMappings && hasMappings && (
-          <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
-            {hasSemanticText && (
-              <>
-                {hasElserOnMlNodeSemanticText ? (
-                  <EisUpdateCallout
-                    ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
-                    promoId="indexDetailsMappings"
-                    isCloudEnabled={cloud?.isCloudEnabled ?? false}
-                    handleOnClick={() => setIsUpdatingElserMappings(true)}
-                    direction="column"
-                    hasUpdatePrivileges={hasUpdateMappingsPrivilege}
-                  />
-                ) : (
-                  <EisPromotionalCallout
-                    promoId="indexDetailsMappings"
-                    isCloudEnabled={cloud?.isCloudEnabled ?? false}
-                    ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
-                    direction="column"
-                  />
-                )}
-                <EuiSpacer size="l" />
-                {isUpdatingElserMappings && (
-                  <UpdateElserMappingsModal
-                    indexName={indexName}
-                    refetchMapping={refetchMapping}
-                    setIsModalOpen={setIsUpdatingElserMappings}
-                    hasUpdatePrivileges={hasUpdateMappingsPrivilege}
-                  />
-                )}
-              </>
-            )}
-            <MappingsInformationPanels />
-          </EuiFlexItem>
+          <MappingsInformationPanels
+            indexName={indexName}
+            refetchMapping={refetchMapping}
+            hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+          />
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
           {hasMLPermissions && !hasSemanticText && (
@@ -625,7 +586,3 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </>
   );
 };
-
-function hasSemanticTextField(fields: NormalizedFields): boolean {
-  return Object.values(fields.byId).some((field) => field.source.type === 'semantic_text');
-}

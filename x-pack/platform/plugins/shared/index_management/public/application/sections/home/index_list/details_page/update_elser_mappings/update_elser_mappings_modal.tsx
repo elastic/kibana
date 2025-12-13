@@ -55,7 +55,7 @@ export function UpdateElserMappingsModal({
   const state = useMappingsState();
   const [options, setOptions] = useState<EuiSelectableOption<MappingsOptionData>[]>([]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const isApplyDisabled = options.every((o) => o.checked !== 'on') || !hasUpdatePrivileges;
+  const isApplyDisabled = options.every((o) => o.checked !== 'on') || hasUpdatePrivileges === false;
 
   const buildElserOptions = (
     mappings: NormalizedFields

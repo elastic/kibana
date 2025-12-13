@@ -18,12 +18,10 @@ import React from 'react';
 import { documentationService } from '../../../../services/documentation';
 
 interface EmptyMappingsProps {
-  addFieldButton: React.ReactNode;
+  addFieldButton: React.ReactElement;
 }
 
-export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({
-  addFieldButton: AddFieldButtonComponent,
-}) => {
+export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({ addFieldButton }) => {
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
       <EuiFlexItem grow={false}>
@@ -48,7 +46,7 @@ export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({
             </EuiText>
           }
           actions={[
-            AddFieldButtonComponent,
+            addFieldButton,
             <>
               <EuiHorizontalRule />
               <EuiLink

@@ -47,7 +47,7 @@ export const EisUpdateCallout = ({
 
   const dataId = `${promoId}-eis-update-callout`;
 
-  if (!isPromoVisible || !hasUpdatePrivileges) {
+  if (!isPromoVisible || hasUpdatePrivileges === false) {
     return null;
   }
 
