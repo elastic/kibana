@@ -89,6 +89,9 @@ const locatorObjectSchema = z.object({
 
 const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObjectSchema);
 
+const relativeUrlSchema = z.string().max(1024);
+const relativeUrlsSchema = z.array(relativeUrlSchema).max(100);
+
 const jobParamsSchema = z
   .object({
     browserTimezone: timezoneSchema.optional(),
@@ -101,8 +104,8 @@ const jobParamsSchema = z
     locatorParams: locatorParamsSchema.nullable().optional(), // this is for CSV v2 compatibility
     searchSource: z.record(z.string(), z.any()).optional(), // this is for CSV v1 compatibility
     columns: z.array(z.string()).optional(), // this is for CSV v1 compatibility
-    relativeUrls: z.array(z.string().max(124)).optional(), // used in tests could be legacy
-    relativeUrl: z.array(z.string().max(124)).optional(), // used in tests could be legacy
+    relativeUrls: relativeUrlsSchema.optional(), // used in tests could be legacy
+    relativeUrl: relativeUrlSchema.optional(), // used in tests could be legacy
   })
   .strict();
 
