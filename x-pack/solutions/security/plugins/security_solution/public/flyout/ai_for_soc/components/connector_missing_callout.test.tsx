@@ -14,19 +14,10 @@ import {
 } from './connector_missing_callout';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 
-const mockedUseKibana = {
-  services: {
-    featureFlags: {
-      getBooleanValue: jest.fn().mockReturnValue(false),
-    },
-  },
-};
-
 jest.mock('@kbn/security-solution-navigation');
 jest.mock('../../../common/lib/kibana', () => {
   return {
     ...jest.requireActual('../../../common/lib/kibana'),
-    useKibana: () => mockedUseKibana,
   };
 });
 
@@ -52,23 +43,6 @@ describe('ConnectorMissingCallout', () => {
     (useNavigateTo as jest.Mock).mockReturnValue({
       navigateTo,
     });
-
-    const { getByTestId } = render(<ConnectorMissingCallout canSeeAdvancedSettings={true} />);
-
-    getByTestId(MISSING_CONNECTOR_CALLOUT_LINK_TEST_ID).click();
-
-    expect(navigateTo).toHaveBeenCalledWith({
-      appId: 'management',
-      path: '/kibana/settings?query=defaultAIConnector',
-    });
-  });
-
-  it('should call navigateTo genAiSettings when clicking on link and useNewDefaultConnector is true', () => {
-    const navigateTo = jest.fn();
-    (useNavigateTo as jest.Mock).mockReturnValue({
-      navigateTo,
-    });
-    mockedUseKibana.services.featureFlags.getBooleanValue.mockReturnValue(true);
 
     const { getByTestId } = render(<ConnectorMissingCallout canSeeAdvancedSettings={true} />);
 
