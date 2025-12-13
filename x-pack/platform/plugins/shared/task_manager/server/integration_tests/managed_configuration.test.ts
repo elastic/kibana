@@ -68,6 +68,10 @@ describe('managed configuration', () => {
     kibanas_per_partition: 2,
     capacity: 10,
     max_attempts: 9,
+    invalidate_api_key_task: {
+      interval: '5m',
+      removalDelay: '1h',
+    },
     poll_interval: 3000,
     allow_reading_invalid_state: false,
     version_conflict_threshold: 80,

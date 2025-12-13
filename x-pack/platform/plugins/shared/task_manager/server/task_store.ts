@@ -65,6 +65,7 @@ import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
+import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -700,7 +701,11 @@ export class TaskStore {
 
     if (apiKey && userScope) {
       if (!userScope.apiKeyCreatedByUser) {
-        await this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [userScope.apiKeyId] });
+        await bulkMarkApiKeysForInvalidation({
+          apiKeyIds: [userScope.apiKeyId],
+          logger: this.logger,
+          savedObjectsClient: this.savedObjectsRepository,
+        });
       }
     }
 
@@ -733,8 +738,10 @@ export class TaskStore {
     });
 
     if (apiKeyIdsToRemove.length) {
-      await this.security.authc.apiKeys.invalidateAsInternalUser({
-        ids: [...new Set(apiKeyIdsToRemove)],
+      await bulkMarkApiKeysForInvalidation({
+        apiKeyIds: apiKeyIdsToRemove,
+        logger: this.logger,
+        savedObjectsClient: this.savedObjectsRepository,
       });
     }
 
