@@ -2493,7 +2493,8 @@
       "zod": ["typings/zod/v3"],
       "zod/v4": ["typings/zod/v4"],
       "vega-lite": ["typings/vega/vega_lite"],
-      "vega-tooltip": ["typings/vega/vega_tooltip"]
+      "vega-tooltip": ["typings/vega/vega_tooltip"],
+      "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
