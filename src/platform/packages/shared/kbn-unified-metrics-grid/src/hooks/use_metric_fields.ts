@@ -1,0 +1,147 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useEffect, useMemo, useRef } from 'react';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import type { Dimension, MetricField, MetricUnit } from '../types';
+import { useMetricsExperienceFieldsContext } from '../context/metrics_experience_fields_provider';
+import { normalizeUnit } from '../common/utils/metric_unit/normalize_unit';
+import { hasValue } from '../common/utils/fields';
+import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
+import { useMetricFieldsFilter } from './use_metric_fields_filter';
+
+interface UseMetricFieldsReturn {
+  allMetricFields: MetricField[];
+  visibleMetricFields: MetricField[];
+  dimensions: Dimension[];
+}
+
+/**
+ * Builds MetricField[] from the context's metric fieldSpecs and sampleRowByMetric.
+ * Returns:
+ * - allMetricFields: Complete set of metric fields (for dimension selector, filtering source)
+ * - visibleMetricFields: Currently visible fields based on filters (for grid, value selector)
+ * - dimensions: Unique dimensions extracted from sampled metric fields
+ */
+export const useMetricFields = (): UseMetricFieldsReturn => {
+  const { searchTerm, selectedDimensions, selectedValuesMetricFields, onDimensionsChange } =
+    useMetricsExperienceState();
+  const { metricFields, dimensions, sampleRowByMetric } = useMetricsExperienceFieldsContext();
+
+  // Ref to access current values in effects without adding them to dependencies
+  const stateRef = useRef({
+    selectedDimensions: [] as Dimension[],
+    returnValue: null as UseMetricFieldsReturn | null,
+  });
+
+  stateRef.current.selectedDimensions = selectedDimensions;
+
+  // Computed values
+  const sampledMetricFields = useMemo(() => {
+    if (metricFields.length === 0 || sampleRowByMetric.size === 0) {
+      return [];
+    }
+
+    const result: MetricField[] = [];
+    for (const metricField of metricFields) {
+      const row = sampleRowByMetric.get(metricField.name);
+      if (row) {
+        result.push(enrichMetricField(metricField, dimensions, row));
+      }
+    }
+    return result.sort((a, b) => a.name.localeCompare(b.name));
+  }, [metricFields, dimensions, sampleRowByMetric]);
+
+  const sampledDimensions = useMemo(
+    () => getUniqueDimensions(sampledMetricFields),
+    [sampledMetricFields]
+  );
+
+  const { filteredFields: visibleMetricFields } = useMetricFieldsFilter({
+    fields: sampledMetricFields,
+    searchTerm,
+    dimensions: selectedDimensions,
+    dimensionValuesMetricFields: selectedValuesMetricFields,
+  });
+
+  // Update return value
+  stateRef.current.returnValue = {
+    allMetricFields: sampledMetricFields,
+    visibleMetricFields,
+    dimensions: sampledDimensions,
+  };
+
+  // Sync selected dimensions when context data changes - removes invalid selections
+  useEffect(() => {
+    const currentSelection = stateRef.current.selectedDimensions;
+    if (sampledDimensions.length === 0 || currentSelection.length === 0) {
+      return;
+    }
+
+    const availableDimNames = new Set(sampledDimensions.map((d) => d.name));
+    const validSelection = currentSelection.filter((d) => availableDimNames.has(d.name));
+
+    if (validSelection.length !== currentSelection.length) {
+      onDimensionsChange(validSelection);
+    }
+  }, [onDimensionsChange, sampledDimensions]);
+
+  return stateRef.current.returnValue;
+};
+
+// utility functions
+const getDimensionsFromRow = (row: DatatableRow, dimensions: Dimension[]): Dimension[] => {
+  if (dimensions.length === 0) {
+    return dimensions;
+  }
+
+  const result: Dimension[] = [];
+  for (const dim of dimensions) {
+    if (dim.name !== 'unit' && hasValue(row[dim.name])) {
+      result.push(dim);
+    }
+  }
+  return result;
+};
+
+const getUnit = (row: DatatableRow, fieldName: string): MetricUnit | undefined => {
+  if (row.unit && typeof row.unit === 'string') {
+    return normalizeUnit({ fieldName, unit: row.unit });
+  }
+
+  return undefined;
+};
+
+const enrichMetricField = (
+  metricField: MetricField,
+  dimensions: Dimension[],
+  row: DatatableRow
+): MetricField => {
+  return {
+    ...metricField,
+    dimensions: getDimensionsFromRow(row, dimensions),
+    unit: getUnit(row, metricField.name),
+  };
+};
+
+const getUniqueDimensions = (fields: Array<{ dimensions: Dimension[] }>): Dimension[] => {
+  const dimensionMap = new Map<string, Dimension>();
+
+  for (const field of fields) {
+    for (const dimension of field.dimensions) {
+      if (!dimensionMap.has(dimension.name)) {
+        dimensionMap.set(dimension.name, dimension);
+      }
+    }
+  }
+
+  return [...dimensionMap.values()].sort((a, b) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
+};

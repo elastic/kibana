@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
@@ -18,7 +19,7 @@ import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { EmptyState } from './empty_state/empty_state';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
-import { useMetricFieldsQuery } from '../hooks';
+import { useMetricFields } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { UnifiedMetricsGridProps } from '../types';
 
@@ -35,21 +36,44 @@ export const MetricsExperienceGrid = ({
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
 }: UnifiedMetricsGridProps) => {
-  const { dataView, timeRange } = fetchParams;
-  const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
-    useMetricsExperienceState();
+  const {
+    searchTerm,
+    isFullscreen,
+    selectedDimensionValues,
+    dimensionFilters,
+    onSearchTermChange,
+    onToggleFullscreen,
+  } = useMetricsExperienceState();
 
-  const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
-    index: indexPattern,
-    timeRange,
-  });
+  const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
+
+  const { onPageReady } = usePerformanceContext();
+  useEffect(() => {
+    if (!isDiscoverLoading && allMetricFields.length > 0) {
+      onPageReady({
+        meta: {
+          rangeFrom: fetchParams.timeRange?.from,
+          rangeTo: fetchParams.timeRange?.to,
+        },
+        customMetrics: {
+          key1: 'metric_experience_fields_count',
+          value1: allMetricFields.length,
+        },
+      });
+    }
+  }, [
+    allMetricFields.length,
+    onPageReady,
+    fetchParams.timeRange?.from,
+    fetchParams.timeRange?.to,
+    isDiscoverLoading,
+  ]);
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    fields,
+    allMetricFields,
+    dimensions,
     renderToggleActions,
-    fetchParams,
-    isLoading: isFetchingAllFields,
+    isLoading: isDiscoverLoading,
   });
 
   const onKeyDown = useCallback(
@@ -62,8 +86,8 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (fields.length === 0 && valueFilters.length === 0) {
-    return <EmptyState isLoading={isFetchingAllFields} />;
+  if (allMetricFields.length === 0 && selectedDimensionValues.length === 0) {
+    return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
   return (
@@ -92,15 +116,15 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        fields={fields}
+        fields={visibleMetricFields}
         services={services}
+        filters={dimensionFilters}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
         actions={actions}
         histogramCss={histogramCss}
-        isFieldsLoading={isFetchingAllFields}
         isDiscoverLoading={isDiscoverLoading}
       />
     </MetricsGridWrapper>

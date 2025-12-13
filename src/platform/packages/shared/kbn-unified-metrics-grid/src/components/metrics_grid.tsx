@@ -11,12 +11,8 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  MetricField,
-  Dimension,
-  DimensionFilters,
-} from '@kbn/metrics-experience-plugin/common/types';
 import { css } from '@emotion/react';
+import type { MetricField, Dimension, DimensionValueFilters } from '../types';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
@@ -31,7 +27,7 @@ export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
   'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
-  filters?: DimensionFilters;
+  filters?: DimensionValueFilters;
   dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
@@ -202,7 +198,7 @@ interface ChartItemProps
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
-  filters: DimensionFilters;
+  filters: DimensionValueFilters;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;

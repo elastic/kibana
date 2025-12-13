@@ -8,16 +8,8 @@
  */
 
 import { useContext } from 'react';
-import { MetricsExperienceClientContext } from './metrics_experience_client_provider';
+import { MetricsExperienceFieldsContext } from './metrics_experience_fields_provider';
 
-export function useMetricsExperienceClient() {
-  const services = useContext(MetricsExperienceClientContext);
-
-  if (!services) {
-    throw new Error(
-      'MetricsExperienceClientContext not set. Did you wrap your component in `<MetricsExperienceClientProvider/>`?'
-    );
-  }
-
-  return services;
-}
+export const useMetricsExperienceFieldsContext = () => {
+  return useContext(MetricsExperienceFieldsContext);
+};

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { createContext } from 'react';
-import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, DimensionValueFilters } from '../../types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
+import { parseDimensionFilters } from '../../common/utils/parse_dimension_filters';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
+  dimensionFilters: DimensionValueFilters | undefined;
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
-  onValuesChange: (value: string[]) => void;
+  onDimensionValuesChange: (items: { value: string; metricFields: Set<string> }[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
 }
@@ -26,16 +28,24 @@ export const MetricsExperienceStateContext =
 
 export function MetricsExperienceStateProvider({ children }: { children: React.ReactNode }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
-  const [dimensions, setDimensions] = useRestorableState('dimensions', []);
-  const [valueFilters, setValueFilters] = useRestorableState('valueFilters', []);
+  const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
+  const [selectedDimensionValues, setSelectedDimensionValues] = useRestorableState(
+    'selectedDimensionValues',
+    []
+  );
+  const [selectedValuesMetricFields, setSelectedValuesMetricFields] = useRestorableState(
+    'selectedValuesMetricFields',
+    []
+  );
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
       setCurrentPage(0);
-      setDimensions(nextDimensions);
-      setValueFilters((prevValueFilters) => {
+      setSelectedValuesMetricFields([]);
+      setSelectedDimensions(nextDimensions);
+      setSelectedDimensionValues((prevValueFilters) => {
         if (nextDimensions.length === 0) {
           return [];
         }
@@ -45,14 +55,20 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         );
       });
     },
-    [setValueFilters, setCurrentPage, setDimensions]
+    [
+      setCurrentPage,
+      setSelectedDimensionValues,
+      setSelectedDimensions,
+      setSelectedValuesMetricFields,
+    ]
   );
 
-  const onValuesChange = useCallback(
-    (values: string[]) => {
-      setValueFilters(values);
+  const onDimensionValuesChange = useCallback(
+    (items: { value: string; metricFields: Set<string> }[]) => {
+      setSelectedDimensionValues(items.map((item) => item.value));
+      setSelectedValuesMetricFields(items.flatMap((item) => Array.from(item.metricFields)));
     },
-    [setValueFilters]
+    [setSelectedDimensionValues, setSelectedValuesMetricFields]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
@@ -69,17 +85,24 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     setIsFullscreen((prev) => !prev);
   }, [setIsFullscreen]);
 
+  const dimensionFilters = useMemo(
+    () => parseDimensionFilters(selectedDimensionValues),
+    [selectedDimensionValues]
+  );
+
   return (
     <MetricsExperienceStateContext.Provider
       value={{
         currentPage,
-        dimensions,
+        dimensionFilters,
         isFullscreen,
         searchTerm,
-        valueFilters,
+        selectedDimensions,
+        selectedDimensionValues,
+        selectedValuesMetricFields,
         onPageChange,
         onDimensionsChange,
-        onValuesChange,
+        onDimensionValuesChange,
         onSearchTermChange,
         onToggleFullscreen,
       }}

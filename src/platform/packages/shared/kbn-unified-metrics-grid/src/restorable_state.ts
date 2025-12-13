@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
+import type { Dimension } from './types';
 
 export interface MetricsExperienceRestorableState {
   // Pagination page index
@@ -20,11 +20,14 @@ export interface MetricsExperienceRestorableState {
   // Fullscreen mode state
   isFullscreen: boolean;
 
-  // Metric grouping dimensions
-  dimensions: Dimension[];
+  // Selected dimensions
+  selectedDimensions: Dimension[];
 
-  // Metric value filters
-  valueFilters: string[];
+  // Selected dimension values
+  selectedDimensionValues: string[];
+
+  // selected metric field keys matching the selected dimension values
+  selectedValuesMetricFields: string[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

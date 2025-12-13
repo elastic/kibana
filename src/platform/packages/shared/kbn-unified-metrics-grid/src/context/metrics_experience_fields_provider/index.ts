@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useEsqlQueryInfo } from './use_esql_query_info';
-export { usePagination } from './use_pagination';
-export { useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
-export { useGridNavigation } from './use_grid_navigation';
-export { useMetricFields } from './use_metric_fields';
-export { useMetricFieldsFilter } from './use_metric_fields_filter';
-export { useExtractDimensionsValues } from './use_extract_dimensions_values';
+export {
+  MetricsExperienceFieldsProvider as MetricsExperienceFieldsCapsProvider,
+  type MetricsExperienceFieldsProviderProps as MetricsExperienceFieldsCapsProviderProps,
+} from './metrics_experience_fields_provider';
+export { useMetricsExperienceFieldsContext } from './use_metrics_experience_fields_context';

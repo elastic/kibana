@@ -7,51 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef } from 'react';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiNotificationBadge,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { Dimension } from '../../types';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
-import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
 import {
   MAX_VALUES_SELECTIONS,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
+import { useExtractDimensionsValues } from '../../hooks/use_extract_dimensions_values';
 
 export interface ValuesFilterProps {
   selectedDimensions: Dimension[];
   selectedValues: string[];
-  indices?: string[];
   disabled?: boolean;
   fullWidth?: boolean;
-  timeRange?: TimeRange;
-
   isLoading?: boolean;
-  onChange: (values: string[]) => void;
+  onChange: (items: { value: string; metricFields: Set<string> }[]) => void;
   onClear: () => void;
 }
 export const ValuesSelector = ({
   selectedDimensions,
   selectedValues,
   onChange,
-  timeRange,
   fullWidth = false,
   disabled = false,
   isLoading: isFieldsLoading = false,
-  indices = [],
   onClear,
 }: ValuesFilterProps) => {
   const selectedDimensionNames = useMemo(
@@ -59,65 +46,83 @@ export const ValuesSelector = ({
     [selectedDimensions]
   );
 
-  const {
-    data: values = [],
-    isLoading: isValuesLoading,
-    error,
-  } = useDimensionsQuery({
-    dimensions: selectedDimensionNames,
-    indices,
-    from: timeRange?.from,
-    to: timeRange?.to,
+  const valuesByDimensionName = useExtractDimensionsValues({
+    dimensionNames: selectedDimensionNames,
   });
 
-  const groupedValues = useMemo(() => {
-    const result = new Map<string, Array<string>>();
-    values.forEach(({ value, field }) => {
-      const arr = result.get(field) ?? [];
-      arr.push(value);
-      result.set(field, arr);
-    });
-
+  const metricsByFieldValue = useMemo(() => {
+    const result = new Map<string, Set<string>>();
+    for (const [field, values] of valuesByDimensionName.entries()) {
+      for (const [value, metricFieldKey] of values.entries()) {
+        result.set(`${field}${FIELD_VALUE_SEPARATOR}${value}`, metricFieldKey);
+      }
+    }
     return result;
-  }, [values]);
+  }, [valuesByDimensionName]);
 
-  // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
     const selectedSet = new Set(selectedValues);
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
 
-    return Array.from(groupedValues.entries()).flatMap<SelectableEntry>(([field, fieldValues]) => [
-      { label: field, isGroupLabel: true, value: field },
-      ...fieldValues.map<SelectableEntry>((value) => {
-        const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
-        const isSelected = selectedSet.has(key);
-        const isDisabledByLimit = !isSelected && isAtMaxLimit;
+    return Array.from(valuesByDimensionName.entries()).flatMap<SelectableEntry>(
+      ([field, values]) => [
+        { label: field, isGroupLabel: true, value: field },
+        ...Array.from(values.keys())
+          .map<SelectableEntry>((value) => {
+            const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
+            const isSelected = selectedSet.has(key);
+            const isDisabledByLimit = !isSelected && isAtMaxLimit;
 
-        return {
-          value,
-          label: value,
-          checked: isSelected ? 'on' : undefined,
-          disabled: isDisabledByLimit,
-          key,
-        };
-      }),
-    ]);
-  }, [groupedValues, selectedValues]);
+            return {
+              value,
+              label: value,
+              checked: isSelected ? 'on' : undefined,
+              disabled: isDisabledByLimit,
+              key,
+            };
+          })
+          .sort((a, b) => a.label.localeCompare(b.label)),
+      ]
+    );
+  }, [valuesByDimensionName, selectedValues]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry[]) => {
       const newSelectedValues = chosenOption
         ?.filter((option) => !option.isGroupLabel && option.key)
-        .map((option: SelectableEntry) => option.key!);
+        .map((option: SelectableEntry) => {
+          return {
+            value: option.key!,
+            metricFields: metricsByFieldValue.get(option.key!) ?? new Set(),
+          };
+        });
 
       // Enforce the maximum limit
       const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
       onChange(limitedSelection);
     },
-    [onChange]
+    [onChange, metricsByFieldValue]
   );
 
-  const isLoading = isValuesLoading || isFieldsLoading;
+  const selectedValuesRef = useRef(selectedValues);
+  selectedValuesRef.current = selectedValues;
+
+  // Sync selected values when available options change
+  useEffect(() => {
+    if (isFieldsLoading || options.length === 0) return;
+
+    const availableKeys = new Set(options.map((o) => o.key));
+    const currentSelectedValues = selectedValuesRef.current;
+
+    if (
+      currentSelectedValues.length > 0 &&
+      !currentSelectedValues.every((v) => availableKeys.has(v))
+    ) {
+      onChange([]);
+    }
+  }, [options, isFieldsLoading, onChange]);
+
+  const isLoading = isFieldsLoading;
 
   const buttonLabel = useMemo(() => {
     const count = selectedValues.length;
@@ -186,28 +191,10 @@ export const ValuesSelector = ({
     );
   }, [selectedValues.length, onClear]);
 
-  if (error) {
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" color="danger" size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="danger">
-            <FormattedMessage
-              id="metricsExperience.valuesSelector.errorLoadingValues"
-              defaultMessage="Error loading values"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <ToolbarSelector
       data-test-subj={METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}
-      data-selected-value={selectedDimensionNames}
+      data-selected-value={selectedValues}
       searchable
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}

@@ -20,7 +20,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
 interface OverviewTabProps {
