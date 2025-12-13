@@ -12,6 +12,17 @@ import {
   RawIndicatorFieldId,
 } from '../../../../../common/threat_intelligence/types/indicator';
 
+export type NormalizedValue = string | string[] | null;
+
+export const normalizeAll = (v: string | string[] | null): NormalizedValue => {
+  if (v == null) return null;
+  if (Array.isArray(v)) return v.filter(Boolean);
+  return v;
+};
+
+export const asArray = (v: NormalizedValue): string[] =>
+  v == null ? [] : Array.isArray(v) ? v : [v];
+
 /**
  * Retrieves a field/value pair from an Indicator
  * @param data the {@link Indicator} to extract the value for the field
@@ -21,17 +32,19 @@ import {
 export const getIndicatorFieldAndValue = (
   data: Indicator,
   field: string
-): { key: string; value: string | null } => {
-  const value = unwrapValue(data, field as RawIndicatorFieldId);
-  const key =
-    field === RawIndicatorFieldId.Name
-      ? (unwrapValue(data, RawIndicatorFieldId.NameOrigin) as string)
-      : field;
+): { key: string; value: NormalizedValue } => {
+  const rawValue = unwrapValue(data, field as RawIndicatorFieldId);
+  const value = normalizeAll(rawValue);
 
-  return {
-    key,
-    value,
-  };
+  let key = field;
+  if (field === RawIndicatorFieldId.Name) {
+    const nameOrigin = normalizeAll(unwrapValue(data, RawIndicatorFieldId.NameOrigin));
+    if (typeof nameOrigin === 'string' && nameOrigin) {
+      key = nameOrigin;
+    }
+  }
+
+  return { key, value };
 };
 
 /**
@@ -40,5 +53,13 @@ export const getIndicatorFieldAndValue = (
  * @param value Indicator string|null value for the field
  * @returns true if correct, false if not
  */
-export const fieldAndValueValid = (field: string | null, value: string | null): boolean =>
-  !!value && value !== EMPTY_VALUE && !!field;
+export const fieldAndValueValid = (field: string | null, value: NormalizedValue): boolean => {
+  if (!field) return false;
+  if (value == null) return false;
+
+  if (Array.isArray(value)) {
+    return value.some((v) => v && v !== EMPTY_VALUE);
+  }
+
+  return value !== EMPTY_VALUE;
+};
