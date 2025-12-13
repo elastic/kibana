@@ -200,7 +200,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.getByTestId('queryInput').fill(recoveredFilter);
     await page.click(byTestId('querySubmitButton'));
     await page.getByTestId('optionsList-control-0').hover();
-    await page.getByTestId('control-action-0-erase').click();
+    await page.getByTestId('control-action-0-clearControl').click();
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
 

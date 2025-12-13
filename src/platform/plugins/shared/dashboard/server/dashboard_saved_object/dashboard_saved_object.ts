@@ -106,6 +106,7 @@ export const createDashboardSavedObjectType = ({
           value: { type: 'integer', index: false, doc_values: false },
         },
       },
+      // Deprecated, kept in mappings for backwards compatibility only
       controlGroupInput: {
         properties: {
           controlStyle: { type: 'keyword', index: false, doc_values: false },

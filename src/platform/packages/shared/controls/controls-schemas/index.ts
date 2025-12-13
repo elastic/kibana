@@ -10,10 +10,23 @@
 export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
-  ControlState,
   ControlWidth,
+  ControlState,
   ControlsGroupState,
-  ControlsLabelPosition,
-  ControlsChainingSystem,
-  ControlsIgnoreParentSettings,
+  DataControlState,
+  OptionsListControlState,
+  OptionsListDSLControlState,
+  OptionsListESQLControlState,
+  OptionsListDisplaySettings,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSortingType,
+  RangeSliderControlState,
+  RangeSliderValue,
+  StickyControlState,
+  TimeSlice,
+  TimeSliderControlState,
+  HasCustomPrepend,
+  LegacyIgnoreParentSettings,
+  StickyControlLayoutState,
 } from './src/types';

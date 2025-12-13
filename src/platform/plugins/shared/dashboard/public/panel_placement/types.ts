@@ -29,6 +29,7 @@ export interface PanelPlacementProps {
   height: number;
   currentPanels: DashboardLayout['panels'];
   sectionId?: string; // section where panel is being placed
+  beside?: string; // the ID of the panel to place the new panel relative to
 }
 
 export interface PanelResizeSettings {

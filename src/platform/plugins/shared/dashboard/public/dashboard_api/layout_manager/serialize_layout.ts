@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+
+import { omit } from 'lodash';
 import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
@@ -14,7 +17,7 @@ import type { DashboardSection } from '../../../server';
 export function serializeLayout(
   layout: DashboardLayout,
   childState: DashboardChildState
-): Pick<DashboardState, 'panels' | 'references'> {
+): Pick<DashboardState, 'panels' | 'references' | 'controlGroupInput'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
     sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
@@ -43,6 +46,17 @@ export function serializeLayout(
 
   return {
     panels: [...panels, ...Object.values(sections)],
+    controlGroupInput: {
+      controls: Object.entries(layout.controls)
+        .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
+        .map(([id, control]) => {
+          return {
+            uid: id,
+            ...omit(control, 'order'),
+            config: childState[id].rawState,
+          } as ControlsGroupState['controls'][number];
+        }),
+    },
     references,
   };
 }

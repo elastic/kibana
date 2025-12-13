@@ -91,7 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
-          width: 'medium',
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];

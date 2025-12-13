@@ -58,7 +58,9 @@ export const getAddAlertsTableAction = (
                     panelType: EMBEDDABLE_ALERTS_TABLE_ID,
                     serializedState: { rawState: { tableConfig } },
                   },
-                  true
+                  {
+                    displaySuccessMessage: true,
+                  }
                 );
               }}
             />

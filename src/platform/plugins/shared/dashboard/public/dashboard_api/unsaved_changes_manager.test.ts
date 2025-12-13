@@ -9,7 +9,6 @@
 
 import { BehaviorSubject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { initializeControlGroupManager } from './control_group_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
@@ -22,23 +21,10 @@ import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
+import type { initializeFiltersManager } from './filters_manager';
 
 jest.mock('../services/dashboard_backup_service', () => ({}));
 
-const controlGroupApi = {
-  hasUnsavedChanges$: new BehaviorSubject(false),
-};
-const controlGroupManagerMock = {
-  api: {
-    controlGroupApi$: new BehaviorSubject(controlGroupApi),
-  },
-  internalApi: {
-    serializeControlGroup: () => ({
-      controlGroupInput: {},
-      controlGroupReferences: [],
-    }),
-  },
-} as unknown as ReturnType<typeof initializeControlGroupManager>;
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
   api: {
@@ -62,6 +48,13 @@ const layoutManagerMock = {
     },
   },
 } as unknown as ReturnType<typeof initializeLayoutManager>;
+
+const filtersManagerMock = {
+  api: {
+    publishFilters: jest.fn(),
+  },
+} as unknown as ReturnType<typeof initializeFiltersManager>;
+
 const settingsManagerMock = {
   internalApi: {
     startComparing$: () => new BehaviorSubject<Partial<DashboardSettings>>({}),
@@ -81,7 +74,6 @@ const projectRoutingManagerMock = {
       new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
   },
 } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
-const getReferences = () => [];
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
 const viewMode$ = new BehaviorSubject<ViewMode>('edit');
 
@@ -107,14 +99,13 @@ describe('unsavedChangesManager', () => {
         const unsavedChangesManager = initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: false,
-          controlGroupManager: controlGroupManagerMock,
           lastSavedState: DEFAULT_DASHBOARD_STATE,
           layoutManager: layoutManagerMock,
           savedObjectId$,
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
+          filtersManager: filtersManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          getReferences,
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -133,14 +124,13 @@ describe('unsavedChangesManager', () => {
         initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: true,
-          controlGroupManager: controlGroupManagerMock,
           lastSavedState: DEFAULT_DASHBOARD_STATE,
           layoutManager: layoutManagerMock,
           savedObjectId$,
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
+          filtersManager: filtersManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          getReferences,
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -195,14 +185,13 @@ describe('unsavedChangesManager', () => {
 
       const unsavedChangesManager = initializeUnsavedChangesManager({
         viewMode$,
-        controlGroupManager: controlGroupManagerMock,
         lastSavedState: getSampleDashboardState(),
         layoutManager: layoutManagerMock,
         savedObjectId$,
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
+        filtersManager: filtersManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        getReferences,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -230,14 +219,13 @@ describe('unsavedChangesManager', () => {
 
       const unsavedChangesManager = initializeUnsavedChangesManager({
         viewMode$,
-        controlGroupManager: controlGroupManagerMock,
         lastSavedState,
         layoutManager: layoutManagerMock,
         savedObjectId$,
         settingsManager: settingsManagerMock,
+        filtersManager: filtersManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        getReferences,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {

@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
 import img from './portable_dashboard_image.png';
 
@@ -25,6 +26,7 @@ export interface StartDeps {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 export class PortableDashboardsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {

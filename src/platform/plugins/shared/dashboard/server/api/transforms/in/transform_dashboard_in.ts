@@ -83,11 +83,16 @@ export const transformDashboardIn = (
       query
     );
 
+    const { controlsJSON, references: controlGroupReferences } =
+      transformControlGroupIn(controlGroupInput);
+
     const attributes = {
       description: '',
       ...rest,
-      ...(controlGroupInput && {
-        controlGroupInput: transformControlGroupIn(controlGroupInput),
+      ...(controlsJSON && {
+        controlGroupInput: {
+          panelsJSON: controlsJSON,
+        },
       }),
       optionsJSON: transformOptionsIn(options),
       panelsJSON,
@@ -105,6 +110,7 @@ export const transformDashboardIn = (
         ...tagReferences,
         ...(incomingReferences ?? []),
         ...panelReferences,
+        ...controlGroupReferences,
         ...searchSourceReferences,
       ],
       error: null,

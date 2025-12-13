@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
+
+import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
+
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
@@ -70,7 +72,15 @@ export const EmbeddableRenderer = <
             apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
           ) => {
             const hasLockedHoverActions$ = new BehaviorSubject(false);
+            const panelCapabilitiesDefaults: HasPanelCapabilities = {
+              isExpandable: true,
+              isDuplicable: true,
+              isCustomizable: true,
+              isPinnable: false,
+            };
             return {
+              // Spread default panel capabilities first, allow apiRegistration to override them
+              ...panelCapabilitiesDefaults,
               ...apiRegistration,
               uuid,
               phase$: phaseTracker.current.getPhase$(),

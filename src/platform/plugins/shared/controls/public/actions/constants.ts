@@ -7,6 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ACTION_EDIT_CONTROL = 'editDataControl';
+import { i18n } from '@kbn/i18n';
+
 export const ACTION_CLEAR_CONTROL = 'clearControl';
-export const ACTION_DELETE_CONTROL = 'deleteControl';
+export const ACTION_CREATE_CONTROL = 'createControl';
+export const ACTION_CREATE_ESQL_CONTROL = 'createESQLControl';
+export const ACTION_CREATE_TIME_SLIDER = 'createTimeSlider';
+export const ACTION_PIN_CONTROL = 'pinControl';
+export const ACTION_EDIT_CONTROL_DISPLAY_SETTINGS = 'editControlDisplaySettings';
+
+export const OPTIONS_LIST_ACTION = 'addOptionsList';
+export const RANGE_SLIDER_ACTION = 'addRangeSlider';
+
+export const ADD_PANEL_CONTROL_GROUP = {
+  id: 'controls',
+  order: 950,
+  getDisplayName: () =>
+    i18n.translate('controls.panelGroup.displayName', {
+      defaultMessage: 'Controls',
+    }),
+};

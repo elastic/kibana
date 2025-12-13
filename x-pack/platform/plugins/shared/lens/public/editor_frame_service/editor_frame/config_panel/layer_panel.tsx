@@ -25,6 +25,7 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
@@ -44,7 +45,6 @@ import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
@@ -88,7 +88,7 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { parentApi } = editorProps;
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
+    apiPublishesESQLVariables(parentApi)
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
   );

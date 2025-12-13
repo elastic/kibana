@@ -31,9 +31,6 @@ export const stateSchemaByVersion = {
         },
         controls: {
           total: state.telemetry?.controls?.total || 0,
-          chaining_system: state.telemetry?.controls?.chaining_system || {},
-          label_position: state.telemetry?.controls?.label_position || {},
-          ignore_settings: state.telemetry?.controls?.ignore_settings || {},
           by_type: state.telemetry?.controls?.by_type || {},
         },
       },
@@ -57,14 +54,10 @@ export const stateSchemaByVersion = {
         }),
         controls: schema.object({
           total: schema.number(),
-          chaining_system: schema.recordOf(schema.string(), schema.number()),
-          label_position: schema.recordOf(schema.string(), schema.number()),
-          ignore_settings: schema.recordOf(schema.string(), schema.number()),
           by_type: schema.recordOf(
             schema.string(),
             schema.object({
               total: schema.number(),
-              details: schema.recordOf(schema.string(), schema.number()),
             })
           ),
         }),
@@ -88,9 +81,6 @@ export const emptyState: LatestTaskStateSchema = {
     },
     controls: {
       total: 0,
-      chaining_system: {},
-      ignore_settings: {},
-      label_position: {},
       by_type: {},
     },
     sections: {

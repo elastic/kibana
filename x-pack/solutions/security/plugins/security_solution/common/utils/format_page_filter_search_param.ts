@@ -15,14 +15,14 @@ export const formatPageFilterSearchParam = (filters: FilterControlConfig[]) => {
       selectedOptions = [],
       existsSelected = false,
       exclude = false,
-      hideActionBar = false,
+      displaySettings = { hideActionBar: false },
     }) => ({
       title: title ?? fieldName,
       selectedOptions,
       fieldName,
       existsSelected,
       exclude,
-      hideActionBar,
+      displaySettings: { hideActionBar: displaySettings.hideActionBar },
     })
   );
 };

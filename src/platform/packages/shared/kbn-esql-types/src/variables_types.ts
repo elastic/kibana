@@ -38,6 +38,12 @@ export interface ESQLControlVariable {
   key: string;
   value: string | number | (string | number)[];
   type: ESQLVariableType;
+  meta?: {
+    // controlledBy is there to identify who owns the variable
+    controlledBy?: string;
+    // allows grouping of variables
+    group?: string;
+  };
 }
 
 export interface PublishesESQLVariable {
@@ -47,8 +53,6 @@ export interface PublishesESQLVariable {
 export type ControlWidthOptions = 'small' | 'medium' | 'large';
 
 export interface ESQLControlState {
-  grow?: boolean;
-  width?: ControlWidthOptions;
   singleSelect?: boolean;
   title: string;
   selectedOptions: string[];
