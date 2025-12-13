@@ -12,9 +12,11 @@ import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import type { ExtendsDeepOptions } from './type';
 import { Type } from './type';
-import type { Props } from './object_type';
+import type { ObjectResultType, Props } from './object_type';
 import type { ObjectType } from './object_type';
 import type { UnionTypeOptions } from './union_type';
+
+export type ObjectResultUnionType<T> = T extends Props ? ObjectResultType<T> : never;
 
 export type PropsWithDiscriminator<Discriminator extends string, T extends Props> = Omit<
   T,

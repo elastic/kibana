@@ -34,6 +34,20 @@ describe('DiscriminatedUnionType', () => {
     expect(exampleType.validate(input)).toEqual(input);
   });
 
+  it('should validate with default', () => {
+    const type = schema.oneOfKind(
+      'type',
+      [
+        schema.object({ type: schema.literal('str'), string: schema.string() }),
+        schema.object({ type: schema.literal('num'), number: schema.number() }),
+        schema.object({ type: schema.literal('bool'), boolean: schema.boolean() }),
+      ],
+      { defaultValue: { type: 'str', string: 'test' } }
+    );
+
+    expect(type.validate(undefined)).toEqual({ type: 'str', string: 'test' });
+  });
+
   describe('error validation', () => {
     it('should handle missing discriminator', () => {
       expect(() => exampleType.validate({})).toThrowErrorMatchingInlineSnapshot(
