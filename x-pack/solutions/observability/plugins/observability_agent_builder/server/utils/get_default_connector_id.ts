@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
@@ -20,10 +20,12 @@ export async function getDefaultConnectorId({
   coreStart,
   inference,
   request,
+  logger,
 }: {
   coreStart: CoreStart;
   inference: InferenceServerStart;
   request: KibanaRequest;
+  logger?: Logger;
 }): Promise<string> {
   const soClient = coreStart.savedObjects.getScopedClient(request);
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
@@ -36,6 +38,7 @@ export async function getDefaultConnectorId({
     defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR;
 
   if (hasValidDefaultConnector) {
+    logger?.debug(`Using default AI connector from UI setting: ${defaultConnectorSetting}`);
     return defaultConnectorSetting;
   }
 
@@ -45,5 +48,6 @@ export async function getDefaultConnectorId({
     throw new Error('No AI connector configured.');
   }
 
+  logger?.debug(`Using default connector from inference plugin: ${connectorId}`);
   return connectorId;
 }

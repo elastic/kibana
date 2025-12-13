@@ -4530,6 +4530,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/access-control-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""
@@ -5003,6 +5007,14 @@
   uid ""
 
 "@kbn/content-connectors-plugin@link:x-pack/platform/plugins/shared/content_connectors":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-access-control-server@link:src/platform/packages/shared/content-management/access_control/access_control_server":
   version "0.0.0"
   uid ""
 

@@ -8,7 +8,7 @@
  */
 
 import { Parser } from '..';
-import { printAst } from '../../debug';
+import { printAst } from '../../shared/debug';
 
 describe('Column Bracketed Syntax: [qualifier].[name]', () => {
   describe('STATS', () => {

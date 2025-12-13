@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GapAutoFillSchedulerResponse } from '../../../../../../application/gap_auto_fill_scheduler/result/types';
+import type { GapAutoFillSchedulerResponse } from '../../../../../../application/gaps/auto_fill_scheduler/result/types';
 import { transformToGapAutoFillSchedulerResponseBody } from './v1';
 
 describe('transformToGapAutoFillSchedulerResponseBody', () => {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
 
@@ -28,7 +30,8 @@ const getKnowledgeBaseIndex = (spaceId: string): string =>
   `.kibana-elastic-ai-assistant-knowledge-base-${spaceId}`;
 
 export const securityLabsSearchTool = (
-  core: CoreSetup
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
 ): BuiltinToolDefinition<typeof securityLabsSearchSchema> => {
   return {
     id: SECURITY_LABS_SEARCH_TOOL_ID,
@@ -37,37 +40,41 @@ export const securityLabsSearchTool = (
     schema: securityLabsSearchSchema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ spaceId }: ToolAvailabilityContext) => {
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
         try {
-          const [coreStart] = await core.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
-          const knowledgeBaseIndex = getKnowledgeBaseIndex(spaceId);
+          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
+          if (availability.status === 'available') {
+            const [coreStart] = await core.getStartServices();
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const knowledgeBaseIndex = getKnowledgeBaseIndex(spaceId);
 
-          const response = await esClient.search({
-            index: knowledgeBaseIndex,
-            size: 1,
-            terminate_after: 1,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      kb_resource: SECURITY_LABS_RESOURCE,
+            const response = await esClient.search({
+              index: knowledgeBaseIndex,
+              size: 1,
+              terminate_after: 1,
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        kb_resource: SECURITY_LABS_RESOURCE,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          });
+            });
 
-          if (response.hits.hits.length > 0) {
-            return { status: 'available' };
+            if (response.hits.hits.length > 0) {
+              return { status: 'available' };
+            }
+
+            return {
+              status: 'unavailable',
+              reason: 'Security Labs content not found in knowledge base',
+            };
           }
-
-          return {
-            status: 'unavailable',
-            reason: 'Security Labs content not found in knowledge base',
-          };
+          return availability;
         } catch (error) {
           return {
             status: 'unavailable',
@@ -78,7 +85,7 @@ export const securityLabsSearchTool = (
         }
       },
     },
-    handler: async ({ query: nlQuery }, { request, esClient, modelProvider, logger, events }) => {
+    handler: async ({ query: nlQuery }, { request, esClient, modelProvider, events }) => {
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {

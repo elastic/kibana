@@ -9,7 +9,7 @@
 
 import { withAutoSuggest } from '../../../..';
 import type { ISuggestionItem } from '../../registry/types';
-import { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../shared/sorting/types';
 import { settings } from '../generated/settings';
 
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {

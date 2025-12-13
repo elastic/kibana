@@ -11,7 +11,7 @@ import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
 import { METADATA_FIELDS } from '../metadata';
 import { prettifyQueryTemplate, prettifyQuery } from './utils';
-import { SuggestionCategory } from '../../../../sorting/types';
+import { SuggestionCategory } from '../../../../shared/sorting/types';
 
 export interface EditorExtensions {
   recommendedQueries: RecommendedQuery[];

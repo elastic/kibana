@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboards-selector'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-management-team'
+  defaultOwner: '@elastic/actionable-obs-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/dashboards-selector'
   description: Moon project for @kbn/dashboards-selector
   channel: ''
-  owner: '@elastic/obs-ux-management-team'
+  owner: '@elastic/actionable-obs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/dashboards/dashboards-selector
 dependsOn:

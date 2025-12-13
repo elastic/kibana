@@ -21,7 +21,7 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../definitions/all_operators';
-import { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../shared/sorting/types';
 
 type ExpectedSuggestions = string[] | { contains?: string[]; notContains?: string[] };
 

@@ -127,6 +127,26 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    modifiers: {
+                      properties: {
+                        contribution: {
+                          type: 'float',
+                        },
+                        metadata: {
+                          type: 'flattened',
+                        },
+                        modifier_value: {
+                          type: 'float',
+                        },
+                        subtype: {
+                          type: 'keyword',
+                        },
+                        type: {
+                          type: 'keyword',
+                        },
+                      },
+                      type: 'object',
+                    },
                     notes: {
                       type: 'keyword',
                     },
@@ -209,6 +229,26 @@ export default ({ getService }: FtrProviderContext) => {
                       },
                       type: 'object',
                     },
+                    modifiers: {
+                      properties: {
+                        contribution: {
+                          type: 'float',
+                        },
+                        metadata: {
+                          type: 'flattened',
+                        },
+                        modifier_value: {
+                          type: 'float',
+                        },
+                        subtype: {
+                          type: 'keyword',
+                        },
+                        type: {
+                          type: 'keyword',
+                        },
+                      },
+                      type: 'object',
+                    },
                     notes: {
                       type: 'keyword',
                     },
@@ -244,6 +284,26 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     id_value: {
                       type: 'keyword',
+                    },
+                    modifiers: {
+                      properties: {
+                        contribution: {
+                          type: 'float',
+                        },
+                        metadata: {
+                          type: 'flattened',
+                        },
+                        modifier_value: {
+                          type: 'float',
+                        },
+                        subtype: {
+                          type: 'keyword',
+                        },
+                        type: {
+                          type: 'keyword',
+                        },
+                      },
+                      type: 'object',
                     },
                     notes: {
                       type: 'keyword',
@@ -406,6 +466,26 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    modifiers: {
+                      properties: {
+                        contribution: {
+                          type: 'float',
+                        },
+                        metadata: {
+                          type: 'flattened',
+                        },
+                        modifier_value: {
+                          type: 'float',
+                        },
+                        subtype: {
+                          type: 'keyword',
+                        },
+                        type: {
+                          type: 'keyword',
+                        },
+                      },
+                      type: 'object',
+                    },
                     notes: {
                       type: 'keyword',
                     },
@@ -488,6 +568,26 @@ export default ({ getService }: FtrProviderContext) => {
                       },
                       type: 'object',
                     },
+                    modifiers: {
+                      properties: {
+                        contribution: {
+                          type: 'float',
+                        },
+                        metadata: {
+                          type: 'flattened',
+                        },
+                        modifier_value: {
+                          type: 'float',
+                        },
+                        subtype: {
+                          type: 'keyword',
+                        },
+                        type: {
+                          type: 'keyword',
+                        },
+                      },
+                      type: 'object',
+                    },
                     notes: {
                       type: 'keyword',
                     },
@@ -523,6 +623,26 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     id_value: {
                       type: 'keyword',
+                    },
+                    modifiers: {
+                      properties: {
+                        contribution: {
+                          type: 'float',
+                        },
+                        metadata: {
+                          type: 'flattened',
+                        },
+                        modifier_value: {
+                          type: 'float',
+                        },
+                        subtype: {
+                          type: 'keyword',
+                        },
+                        type: {
+                          type: 'keyword',
+                        },
+                      },
+                      type: 'object',
                     },
                     notes: {
                       type: 'keyword',
@@ -647,7 +767,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 5,
+            mappingsVersion: 6,
           },
           enableResetToZero: true,
         });

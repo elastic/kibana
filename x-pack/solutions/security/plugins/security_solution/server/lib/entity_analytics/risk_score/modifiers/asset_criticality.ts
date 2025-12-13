@@ -11,8 +11,8 @@ import type { AssetCriticalityRecord } from '../../../../../common/api/entity_an
 import type { RiskScoreBucket } from '../../types';
 
 import type { AssetCriticalityService } from '../../asset_criticality';
-import { max10DecimalPlaces } from '../helpers';
-import { bayesianUpdate, getCriticalityModifier } from '../../asset_criticality/helpers';
+import { getCriticalityModifier } from '../../asset_criticality/helpers';
+import type { Modifier } from './types';
 
 export interface AssetCriticalityRiskFields {
   category_2_score: number;
@@ -60,41 +60,44 @@ export const applyCriticalityModifier = async ({
       (c) => c.id_field === page.identifierField && c.id_value === bucket.key[page.identifierField]
     );
 
-    return calculateScoreAndContributions(
-      bucket.top_inputs.risk_details.value.normalized_score,
-      criticality,
-      globalWeight
-    );
+    return buildModifier(criticality, globalWeight);
   });
 };
 
-const calculateScoreAndContributions = (
-  normalizedBaseScore: number,
+const buildModifier = (
   criticality?: AssetCriticalityRecord,
   globalWeight?: number
-): AssetCriticalityRiskFields => {
+): Modifier<'asset_criticality'> | undefined => {
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
-  if (!criticalityModifier) {
+  if (!criticality || !criticalityModifier) {
+    return;
+  }
+
+  const weightedModifier =
+    globalWeight !== undefined ? criticalityModifier * globalWeight : criticalityModifier;
+
+  return {
+    type: 'asset_criticality',
+    modifier_value: weightedModifier,
+    metadata: {
+      criticality_level: criticality?.criticality_level,
+    },
+  };
+};
+
+export const buildLegacyCriticalityFields = (
+  modifier?: Modifier<'asset_criticality'> & { contribution: number }
+): AssetCriticalityRiskFields => {
+  if (!modifier?.metadata?.criticality_level) {
     return {
       category_2_score: 0,
       category_2_count: 0,
     };
   }
-
-  const weightedNormalizedScore =
-    globalWeight !== undefined ? normalizedBaseScore * globalWeight : normalizedBaseScore;
-
-  const updatedNormalizedScore = bayesianUpdate({
-    modifier: criticalityModifier,
-    score: weightedNormalizedScore,
-  });
-
-  const contribution = updatedNormalizedScore - weightedNormalizedScore;
-
   return {
-    category_2_score: max10DecimalPlaces(contribution),
-    category_2_count: 1, // modifier exists, so count as 1
-    criticality_level: criticality?.criticality_level,
-    criticality_modifier: criticalityModifier,
+    criticality_level: modifier.metadata?.criticality_level,
+    criticality_modifier: modifier.modifier_value,
+    category_2_score: modifier?.contribution ?? 0,
+    category_2_count: 1,
   };
 };
