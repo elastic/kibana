@@ -27,7 +27,6 @@
     "@kbn/cloud-plugin",
     "@kbn/actions-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/langchain",
     "@kbn/logging",
     "@kbn/doc-links",
     "@kbn/core-logging-server-mocks",

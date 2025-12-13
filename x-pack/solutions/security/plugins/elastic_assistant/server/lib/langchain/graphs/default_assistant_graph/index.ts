@@ -6,7 +6,6 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import { getDefaultArguments } from '@kbn/langchain/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { MessageMetadata } from '@kbn/elastic-assistant-common';
@@ -86,7 +85,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           chatModelOptions: {
             model: request.body.model,
             signal: abortSignal,
-            temperature: getDefaultArguments(llmType).temperature,
             // prevents the agent from retrying on failure
             // failure could be due to bad connector, we should deliver that result to the client asap
             maxRetries: 0,
@@ -105,9 +103,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           // possible client model override,
           // let this be undefined otherwise so the connector handles the model
           model: request.body.model ?? defaultModel,
-          // ensure this is defined because we default to it in the language_models
-          // This is where the LangSmith logs (Metadata > Invocation Params) are set
-          temperature: getDefaultArguments(llmType).temperature,
+          // Temperature is not set here to allow connector config temperature to be used
           signal: abortSignal,
           streaming: isStream,
           // prevents the agent from retrying on failure

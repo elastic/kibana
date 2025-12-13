@@ -164,4 +164,25 @@ describe('getEvaluatorLlm', () => {
       })
     );
   });
+
+  it('creates ActionsClientLlm with temperature: 0 (explicit temperature still propagates)', async () => {
+    const actionsClient = {
+      get: jest.fn().mockResolvedValue(evaluatorConnector),
+    } as unknown as ActionsClient;
+
+    await getEvaluatorLlm({
+      actionsClient,
+      connectorTimeout,
+      evaluatorConnectorId,
+      experimentConnector,
+      langSmithApiKey: undefined,
+      logger,
+    });
+
+    expect(ActionsClientLlm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        temperature: 0,
+      })
+    );
+  });
 });
