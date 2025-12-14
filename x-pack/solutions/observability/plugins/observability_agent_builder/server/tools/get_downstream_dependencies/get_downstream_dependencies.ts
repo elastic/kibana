@@ -10,15 +10,18 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/common';
-import { timeRangeSchema } from '../../utils/tool_schemas';
-import { buildApmToolResources } from '../../utils/build_apm_tool_resources';
-import { getApmToolAvailability } from '../../utils/get_apm_tool_availability';
-import { getApmDownstreamDependencies } from '../../../routes/assistant_functions/get_apm_downstream_dependencies';
-import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../../types';
+import type {
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../types';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+
+export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
+  'observability.get_downstream_dependencies';
 
 const getDownstreamDependenciesToolSchema = z.object({
-  ...timeRangeSchema.shape,
+  ...timeRangeSchemaRequired,
   serviceName: z.string().min(1).describe('The name of the service'),
   serviceEnvironment: z
     .string()
@@ -30,11 +33,14 @@ const getDownstreamDependenciesToolSchema = z.object({
 
 export function createDownstreamDependenciesTool({
   core,
-  plugins,
+  dataRegistry,
   logger,
 }: {
-  core: CoreSetup<APMPluginStartDependencies>;
-  plugins: APMPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }): StaticToolRegistration<typeof getDownstreamDependenciesToolSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getDownstreamDependenciesToolSchema> = {
@@ -44,35 +50,23 @@ export function createDownstreamDependenciesTool({
       'Identifies downstream dependencies (other services, databases, external APIs) for a specific service within a time range. Critical for mapping service architecture and troubleshooting dependency-related issues.',
     schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        return getApmToolAvailability({ core, plugins, request, logger });
-      },
-    },
     handler: async (args, context) => {
-      const { request, esClient, logger: scopedLogger } = context;
+      const { request } = context;
 
       try {
-        const { apmEventClient, randomSampler } = await buildApmToolResources({
-          core,
-          plugins,
+        const dependencies = await dataRegistry.getData('apmDownstreamDependencies', {
           request,
-          esClient,
-          logger: scopedLogger,
-        });
-
-        const result = await getApmDownstreamDependencies({
-          arguments: args,
-          apmEventClient,
-          randomSampler,
+          serviceName: args.serviceName,
+          serviceEnvironment: args.serviceEnvironment ?? '',
+          start: args.start,
+          end: args.end,
         });
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { dependencies: result },
+              data: { dependencies },
             },
           ],
         };

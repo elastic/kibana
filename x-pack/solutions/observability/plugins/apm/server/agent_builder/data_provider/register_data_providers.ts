@@ -10,7 +10,11 @@ import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_
 import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
 import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
+import { getServicesItems } from '../../routes/services/get_services/get_services_items';
 import { getApmErrors } from '../../routes/assistant_functions/get_observability_alert_details_context/get_apm_errors';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import {
   getExitSpanChangePoints,
   getServiceChangePoints,
@@ -143,6 +147,36 @@ export function registerDataProviders({
         end: parseDatemath(end),
         environment: serviceEnvironment ?? '',
         kuery,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'servicesItems',
+    async ({ request, environment, kuery, start, end, searchQuery }) => {
+      const { apmEventClient, randomSampler, mlClient, apmAlertsClient } =
+        await buildApmToolResources({
+          core,
+          plugins,
+          request,
+          logger,
+        });
+
+      return getServicesItems({
+        apmEventClient,
+        apmAlertsClient,
+        randomSampler,
+        mlClient,
+        logger,
+        environment: environment ?? ENVIRONMENT_ALL.value,
+        kuery: kuery ?? '',
+        start,
+        end,
+        serviceGroup: null,
+        documentType: ApmDocumentType.TransactionMetric,
+        rollupInterval: RollupInterval.OneMinute,
+        useDurationSummary: false,
+        searchQuery,
       });
     }
   );
