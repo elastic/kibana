@@ -561,6 +561,7 @@
     "@kbn/error-boundary-example-plugin": "link:examples/error_boundary",
     "@kbn/es-errors": "link:src/platform/packages/shared/kbn-es-errors",
     "@kbn/es-mappings": "link:src/platform/packages/shared/kbn-es-mappings",
+    "@kbn/es-proxy-plugin": "link:src/platform/plugins/shared/es_proxy",
     "@kbn/es-query": "link:src/platform/packages/shared/kbn-es-query",
     "@kbn/es-query-constants": "link:src/platform/packages/shared/kbn-es-query-constants",
     "@kbn/es-query-server": "link:src/platform/packages/shared/kbn-es-query-server",
