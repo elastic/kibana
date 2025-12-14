@@ -162,8 +162,8 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     request: KibanaRequest;
     environment?: string;
     kuery?: string;
-    start: number;
-    end: number;
+    start: string;
+    end: string;
     searchQuery?: string;
   }) => Promise<ServicesItemsResponse>;
 }
