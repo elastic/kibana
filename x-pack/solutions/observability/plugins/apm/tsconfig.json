@@ -150,7 +150,6 @@
     "@kbn/core-chrome-layout-constants",
     "@kbn/zod",
     "@kbn/onechat-server",
-    "@kbn/onechat-common",
     "@kbn/onechat-plugin",
     "@kbn/ai-insights",
     "@kbn/observability-agent-builder-plugin",
