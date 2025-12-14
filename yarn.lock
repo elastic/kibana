@@ -25025,7 +25025,7 @@ langchain@^1.2.0:
     uuid "^10.0.0"
     zod "^3.25.76 || ^4"
 
-langsmith@^0.3.64, langsmith@^0.3.82, langsmith@~0.3.74, langsmith@^0.3.87:
+langsmith@^0.3.64, langsmith@^0.3.82, langsmith@^0.3.87, langsmith@~0.3.74:
   version "0.3.87"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.87.tgz#f1c991c93a5d4d226a31671be7e4443b4b8673b1"
   integrity sha512-XXR1+9INH8YX96FKWc5tie0QixWz6tOqAsAKfcJyPkE0xPep+NDz0IQLR32q4bn10QK3LqD2HN6T3n6z1YLW7Q==
