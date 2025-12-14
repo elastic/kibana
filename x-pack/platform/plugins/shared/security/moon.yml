@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/es-errors'
   - '@kbn/logging'
-  - '@kbn/core-saved-objects-api-server-internal'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-saved-objects-utils-server'
@@ -101,6 +100,7 @@ dependsOn:
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/css-utils'
+  - '@kbn/core-saved-objects-base-server-mocks'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
 tags:
