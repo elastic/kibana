@@ -432,7 +432,7 @@ describe('cascaded documents helpers utils', () => {
 
             expect(cascadeQuery).toBeDefined();
             expect(cascadeQuery!.esql).toBe(
-              'FROM kibana_sample_data_logs | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | SAMPLE 0.001 | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+              'FROM kibana_sample_data_logs | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
             );
           });
 
