@@ -144,4 +144,213 @@ describe('searchArgsToSOFindOptionsDefault', () => {
       ]);
     });
   });
+
+  describe('createdBy filtering', () => {
+    it('should build KQL filter for single included user', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          createdBy: {
+            included: ['user1'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe('(created_by:"user1")');
+    });
+
+    it('should build KQL filter for multiple included users with OR logic', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          createdBy: {
+            included: ['user1', 'user2', 'user3'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe('(created_by:"user1" OR created_by:"user2" OR created_by:"user3")');
+    });
+
+    it('should build KQL filter for excluded users', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          createdBy: {
+            excluded: ['user4'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe('NOT created_by:"user4"');
+    });
+
+    it('should build KQL filter for multiple excluded users with AND logic', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          createdBy: {
+            excluded: ['user4', 'user5'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe('NOT created_by:"user4" AND NOT created_by:"user5"');
+    });
+
+    it('should handle includeNoCreator flag', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          createdBy: {
+            includeNoCreator: true,
+          },
+        },
+      });
+
+      expect(result.filter).toBe('NOT created_by:*');
+    });
+
+    it('should combine included users with includeNoCreator', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          createdBy: {
+            included: ['user1', 'user2'],
+            includeNoCreator: true,
+          },
+        },
+      });
+
+      expect(result.filter).toBe('(created_by:"user1" OR created_by:"user2") AND NOT created_by:*');
+    });
+
+    it('should combine included and excluded users', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          createdBy: {
+            included: ['user1'],
+            excluded: ['user2'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe('(created_by:"user1") AND NOT created_by:"user2"');
+    });
+
+    it('should not add filter when createdBy is not provided', () => {
+      const result = searchArgsToSOFindOptionsDefault(baseParams);
+
+      expect(result.filter).toBeUndefined();
+    });
+  });
+
+  describe('favorites filtering', () => {
+    it('should handle favorites with IDs', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          favorites: {
+            only: true,
+            ids: ['fav1', 'fav2', 'fav3'],
+          },
+        },
+      });
+
+      expect(result.hasReference).toEqual([
+        { type: 'favorite', id: 'fav1' },
+        { type: 'favorite', id: 'fav2' },
+        { type: 'favorite', id: 'fav3' },
+      ]);
+    });
+
+    it('should handle empty favorites list by returning no-match filter', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          favorites: {
+            only: true,
+            ids: [],
+          },
+        },
+      });
+
+      expect(result.hasReference).toEqual([{ type: '__invalid__', id: '__no_match__' }]);
+    });
+
+    it('should not add favorites filter when only is false', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          favorites: {
+            only: false,
+            ids: ['fav1', 'fav2'],
+          },
+        },
+      });
+
+      expect(result.hasReference).toBeUndefined();
+    });
+
+    it('should not add favorites filter when favorites is not provided', () => {
+      const result = searchArgsToSOFindOptionsDefault(baseParams);
+
+      expect(result.hasReference).toBeUndefined();
+    });
+  });
+
+  describe('combined filters', () => {
+    it('should handle tags and createdBy together', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          tags: {
+            included: ['tag1'],
+          },
+          createdBy: {
+            included: ['user1'],
+          },
+        },
+      });
+
+      expect(result.hasReference).toEqual([{ id: 'tag1', type: 'tag' }]);
+      expect(result.filter).toBe('(created_by:"user1")');
+    });
+
+    it('should handle sort, createdBy, and tags together', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          sort: {
+            field: 'title',
+            direction: 'asc',
+          },
+          tags: {
+            included: ['tag1'],
+          },
+          createdBy: {
+            included: ['user1'],
+          },
+        },
+      });
+
+      expect(result.sortField).toBe('title');
+      expect(result.sortOrder).toBe('asc');
+      expect(result.hasReference).toEqual([{ id: 'tag1', type: 'tag' }]);
+      expect(result.filter).toBe('(created_by:"user1")');
+    });
+  });
 });

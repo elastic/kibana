@@ -41,10 +41,63 @@ export interface SearchArgsToSOFindOptionsOptionsDefault {
   searchFields?: string[];
 }
 
+/**
+ * Builds a KQL filter string for createdBy filtering.
+ * Note: createdBy is stored in saved object root level, not in attributes.
+ */
+const buildCreatedByFilter = (createdBy: SearchQuery['createdBy']): string | undefined => {
+  if (!createdBy) return undefined;
+
+  const conditions: string[] = [];
+
+  // Include specific users
+  if (createdBy.included?.length) {
+    const userConditions = createdBy.included.map((uid) => `created_by:"${uid}"`);
+    conditions.push(`(${userConditions.join(' OR ')})`);
+  }
+
+  // Exclude specific users
+  if (createdBy.excluded?.length) {
+    const excludeConditions = createdBy.excluded.map((uid) => `NOT created_by:"${uid}"`);
+    conditions.push(excludeConditions.join(' AND '));
+  }
+
+  // Include items with no creator
+  if (createdBy.includeNoCreator) {
+    conditions.push('NOT created_by:*');
+  }
+
+  if (conditions.length === 0) return undefined;
+  return conditions.join(' AND ');
+};
+
+/**
+ * Builds options for favorites filtering using IDs.
+ * Uses SavedObjects native ID filtering when available.
+ */
+const buildFavoritesFilter = (
+  favorites: SearchQuery['favorites']
+): { hasReference?: Array<{ type: string; id: string }> } | undefined => {
+  if (!favorites?.only) return undefined;
+  if (!favorites.ids?.length) {
+    // If favorites.only is true but no IDs provided, return filter that matches nothing
+    // We use hasReference with an impossible ID to match nothing
+    return { hasReference: [{ type: '__invalid__', id: '__no_match__' }] };
+  }
+  // Map favorite IDs to hasReference format
+  return {
+    hasReference: favorites.ids.map((id) => ({ type: 'favorite', id })),
+  };
+};
+
 export const searchArgsToSOFindOptionsDefault = <T extends string>(
   params: SearchIn<T, SearchArgsToSOFindOptionsOptionsDefault>
 ): SavedObjectsFindOptions => {
   const { query, contentTypeId, options } = params;
+
+  const createdByFilter = buildCreatedByFilter(query.createdBy);
+  const favoritesFilter = buildFavoritesFilter(query.favorites);
+  const tagsFilter = tagsToFindOptions(query.tags);
 
   return {
     type: contentTypeId,
@@ -54,11 +107,13 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     defaultSearchOperator: 'AND',
     searchFields: options?.searchFields ?? ['description', 'title'],
     fields: options?.fields ?? ['description', 'title'],
-    ...tagsToFindOptions(query.tags),
+    ...tagsFilter,
     ...(query.sort && {
       sortField: query.sort.field,
       sortOrder: query.sort.direction,
     }),
+    ...(createdByFilter && { filter: createdByFilter }),
+    ...favoritesFilter,
   };
 };
 
