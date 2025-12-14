@@ -23,20 +23,20 @@ FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
   AND cloud.provider IS NOT NULL
   AND (
-    k8s.node.name IS NOT NULL 
-    OR k8s.pod.uid IS NOT NULL 
-    OR k8s.pod.phase IS NOT NULL 
+    k8s.node.name IS NOT NULL
+    OR k8s.pod.uid IS NOT NULL
+    OR k8s.pod.phase IS NOT NULL
     OR k8s.node.cpu.usage IS NOT NULL
-    OR k8s.node.memory.usage IS NOT NULL 
+    OR k8s.node.memory.usage IS NOT NULL
     OR k8s.node.allocatable_cpu IS NOT NULL
     OR k8s.node.allocatable_memory IS NOT NULL
     OR k8s.node.condition_ready IS NOT NULL
     OR k8s.node.filesystem.usage IS NOT NULL
     OR k8s.node.filesystem.capacity IS NOT NULL
   )
-| STATS 
-    total_nodes = COUNT_DISTINCT(k8s.node.name),
-    ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,
+| STATS
+    total_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready IS NOT NULL,
+    ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0 AND k8s.node.condition_ready IS NOT NULL,
     total_namespaces = COUNT_DISTINCT(k8s.namespace.name),
     total_pods = COUNT_DISTINCT(k8s.pod.uid),
     running_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 1,
@@ -54,7 +54,7 @@ FROM remote_cluster:metrics-*
 | EVAL memory_utilization = ROUND(sum_memory_usage / TO_DOUBLE(sum_allocatable_memory) * 100, 2)
 | EVAL volume_utilization = ROUND(sum_filesystem_usage / TO_DOUBLE(sum_filesystem_capacity) * 100, 2)
 | KEEP k8s.cluster.name, health_status, cloud.provider, total_nodes, total_namespaces,
-       failed_pods, pending_pods, running_pods, 
+       failed_pods, pending_pods, running_pods,
        cpu_utilization, memory_utilization, volume_utilization
 `;
 
