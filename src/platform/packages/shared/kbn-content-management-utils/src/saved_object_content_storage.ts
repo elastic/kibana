@@ -90,6 +90,126 @@ const buildFavoritesFilter = (
   };
 };
 
+/**
+ * Builds Elasticsearch aggregations for requested facets.
+ * Returns both the aggregations config and a flag indicating if any facets were requested.
+ */
+const buildFacetAggregations = (
+  facets: SearchQuery['facets'],
+  contentTypeId: string
+): { aggs?: Record<string, any>; hasFacets: boolean } => {
+  if (!facets) return { hasFacets: false };
+
+  const aggs: Record<string, any> = {};
+  let hasFacets = false;
+
+  // Tag facets - tags are stored as references
+  if (facets.tags) {
+    hasFacets = true;
+    aggs.tags = {
+      nested: {
+        path: `${contentTypeId}.references`,
+      },
+      aggs: {
+        filtered_tags: {
+          filter: {
+            term: {
+              [`${contentTypeId}.references.type`]: 'tag',
+            },
+          },
+          aggs: {
+            tag_ids: {
+              terms: {
+                field: `${contentTypeId}.references.id`,
+                size: facets.tags.size ?? 10,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    // Handle missing tags if requested
+    if (facets.tags.includeMissing) {
+      aggs.missing_tags = {
+        missing: {
+          field: `${contentTypeId}.references`,
+        },
+      };
+    }
+  }
+
+  // CreatedBy facets - created_by is a root level field
+  if (facets.createdBy) {
+    hasFacets = true;
+    aggs.created_by = {
+      terms: {
+        field: 'created_by',
+        size: facets.createdBy.size ?? 10,
+      },
+    };
+
+    // Handle missing createdBy if requested
+    if (facets.createdBy.includeMissing) {
+      aggs.missing_created_by = {
+        missing: {
+          field: 'created_by',
+        },
+      };
+    }
+  }
+
+  return { aggs: Object.keys(aggs).length > 0 ? aggs : undefined, hasFacets };
+};
+
+/**
+ * Parses Elasticsearch aggregation results into facet format.
+ */
+export const parseFacetsFromAggregations = (
+  aggregations: any,
+  facetsRequested: SearchQuery['facets']
+): { tags?: Array<{ key: string; doc_count: number }>; createdBy?: Array<{ key: string; doc_count: number }> } | undefined => {
+  if (!aggregations || !facetsRequested) return undefined;
+
+  const facets: { tags?: Array<{ key: string; doc_count: number }>; createdBy?: Array<{ key: string; doc_count: number }> } = {};
+
+  // Parse tag facets
+  if (facetsRequested.tags && aggregations.tags?.filtered_tags?.tag_ids?.buckets) {
+    const tagBuckets = aggregations.tags.filtered_tags.tag_ids.buckets;
+    facets.tags = tagBuckets.map((bucket: any) => ({
+      key: bucket.key,
+      doc_count: bucket.doc_count,
+    }));
+
+    // Add missing count if requested and available
+    if (facetsRequested.tags?.includeMissing && aggregations.missing_tags?.doc_count !== undefined) {
+      facets.tags?.push({
+        key: '__missing__',
+        doc_count: aggregations.missing_tags.doc_count,
+      });
+    }
+  }
+
+  // Parse createdBy facets
+  if (facetsRequested.createdBy && aggregations.created_by?.buckets) {
+    const createdByBuckets = aggregations.created_by.buckets;
+    facets.createdBy = createdByBuckets.map((bucket: any) => ({
+      key: bucket.key,
+      doc_count: bucket.doc_count,
+    }));
+
+    // Add missing count if requested and available
+    if (facetsRequested.createdBy?.includeMissing && aggregations.missing_created_by?.doc_count !== undefined) {
+      facets.createdBy?.push({
+        key: '__missing__',
+        doc_count: aggregations.missing_created_by.doc_count,
+      });
+    }
+  }
+
+  return Object.keys(facets).length > 0 ? facets : undefined;
+};
+
 export const searchArgsToSOFindOptionsDefault = <T extends string>(
   params: SearchIn<T, SearchArgsToSOFindOptionsOptionsDefault>
 ): SavedObjectsFindOptions => {
@@ -98,6 +218,7 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
   const createdByFilter = buildCreatedByFilter(query.createdBy);
   const favoritesFilter = buildFavoritesFilter(query.favorites);
   const tagsFilter = tagsToFindOptions(query.tags);
+  const { aggs } = buildFacetAggregations(query.facets, contentTypeId);
 
   return {
     type: contentTypeId,
@@ -114,6 +235,7 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     }),
     ...(createdByFilter && { filter: createdByFilter }),
     ...favoritesFilter,
+    ...(aggs && { aggs }),
   };
 };
 
@@ -509,11 +631,13 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     });
     // Execute the query in the DB
     const soResponse = await soClient.find<Types['Attributes']>(soQuery);
+    const facets = parseFacetsFromAggregations(soResponse.aggregations, query.facets);
     const response = {
       hits: soResponse.saved_objects.map((so) => this.savedObjectToItem(so)),
       pagination: {
         total: soResponse.total,
       },
+      ...(facets && { facets }),
     };
 
     const validationError = transforms.search.out.result.validate(response);

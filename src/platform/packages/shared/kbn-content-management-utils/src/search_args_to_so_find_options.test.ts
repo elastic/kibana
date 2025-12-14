@@ -353,4 +353,125 @@ describe('searchArgsToSOFindOptionsDefault', () => {
       expect(result.filter).toBe('(created_by:"user1")');
     });
   });
+
+  describe('facets', () => {
+    it('should add aggregations for tag facets', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          facets: {
+            tags: {
+              size: 15,
+            },
+          },
+        },
+      });
+
+      expect(result.aggs).toBeDefined();
+      expect(result.aggs?.tags).toBeDefined();
+      expect(result.aggs?.tags?.nested?.path).toBe('test-type.references');
+    });
+
+    it('should add aggregations for createdBy facets', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          facets: {
+            createdBy: {
+              size: 20,
+            },
+          },
+        },
+      });
+
+      expect(result.aggs).toBeDefined();
+      expect(result.aggs?.created_by).toBeDefined();
+      expect(result.aggs?.created_by?.terms?.field).toBe('created_by');
+      expect(result.aggs?.created_by?.terms?.size).toBe(20);
+    });
+
+    it('should add aggregations for both tag and createdBy facets', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          facets: {
+            tags: {
+              size: 10,
+            },
+            createdBy: {
+              size: 10,
+            },
+          },
+        },
+      });
+
+      expect(result.aggs).toBeDefined();
+      expect(result.aggs?.tags).toBeDefined();
+      expect(result.aggs?.created_by).toBeDefined();
+    });
+
+    it('should handle includeMissing for tag facets', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          facets: {
+            tags: {
+              size: 10,
+              includeMissing: true,
+            },
+          },
+        },
+      });
+
+      expect(result.aggs).toBeDefined();
+      expect(result.aggs?.tags).toBeDefined();
+      expect(result.aggs?.missing_tags).toBeDefined();
+      expect(result.aggs?.missing_tags?.missing?.field).toBe('test-type.references');
+    });
+
+    it('should handle includeMissing for createdBy facets', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          facets: {
+            createdBy: {
+              size: 10,
+              includeMissing: true,
+            },
+          },
+        },
+      });
+
+      expect(result.aggs).toBeDefined();
+      expect(result.aggs?.created_by).toBeDefined();
+      expect(result.aggs?.missing_created_by).toBeDefined();
+      expect(result.aggs?.missing_created_by?.missing?.field).toBe('created_by');
+    });
+
+    it('should not add aggregations when facets are not requested', () => {
+      const result = searchArgsToSOFindOptionsDefault(baseParams);
+
+      expect(result.aggs).toBeUndefined();
+    });
+
+    it('should use default size of 10 when not specified', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          facets: {
+            tags: {},
+          },
+        },
+      });
+
+      expect(result.aggs).toBeDefined();
+      expect(result.aggs?.tags?.aggs?.filtered_tags?.aggs?.tag_ids?.terms?.size).toBe(10);
+    });
+  });
 });
