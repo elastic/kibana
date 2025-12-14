@@ -62,13 +62,11 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 - [x] Cluster Listing table with EuiDataGrid and custom cell renderers
 - [x] Custom cell renderers for health status, cloud provider, pod statuses, and utilization metrics
 - [x] Cluster overview cards with Lens visualizations (Total Clusters, Healthy/Unhealthy Clusters, CPU Usage by Cluster)
+- [x] Add Kubernetes Cluster Detail Flyout (builds on listing page patterns)
+- [x] Add Workload Resources Table to Cluster Detail Flyout (requires backend API endpoint for per-node data with status, kubelet version, and resource utilization)
 
-### 🚧 In Progress
-- None currently
 
 ### 📋 Next Steps / TODO
-- [ ] Add Kubernetes Cluster Detail Flyout (builds on listing page patterns)
-- [ ] Add Workload Resources Table to Cluster Detail Flyout (requires backend API endpoint for per-node data with status, kubelet version, and resource utilization)
 - [ ] Implement Kubernetes Overview Page features (most complex, builds on established patterns)
 
 ## Architecture
@@ -164,15 +162,6 @@ const attributes: TypedLensByValueInput['attributes'] = {
 - **Required Bundles**: None (removed unused `kibanaReact`)
 
 ## Development Workflow
-
-### Access Plugin
-- **URL**: http://localhost:5601/app/kubernetesPoc
-
-### Run Tests
-```bash
-# Unit tests
-yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc --no-watchman
-```
 
 ### Exploring Metrics with Local Kibana MCP Server
 
@@ -712,20 +701,6 @@ FROM remote_cluster:metrics-*
 
 ---
 
----
-
-### Overview Page
-
-<!-- TODO: Add queries for overview dashboard elements -->
-
----
-
-## Known Issues / Gotchas
-
-1. **Security Configuration**: All routes must have `security.authz` configuration to avoid `Cannot read properties of undefined (reading 'authz')` errors
-2. **Bundle Warnings**: Removed `kibanaReact` from `requiredBundles` since we're using `@kbn/react-kibana-context-render` directly
-3. **Plugin Discovery**: Plugin must be bootstrapped (`yarn kbn bootstrap`) and Kibana restarted for changes to take effect
-
 ## Architecture Decisions
 
 1. **Route Repository Pattern**: Chose `@kbn/server-route-repository` over traditional router for type safety and consistency with other Observability plugins
@@ -750,17 +725,6 @@ Verify **only the files you changed in this commit**:
    ```bash
    # Pass closest tsconfig.json file to your changed tests/helpers
    node scripts/type_check --project x-pack/solutions/observability/plugins/kubernetes-poc/tsconfig.json
-   ```
-
-5. **Unit tests (scoped):** Run tests only for affected code - MUST pass with 0 failures
-
-   ```bash
-   # Run tests for specific files/directories you changed
-   yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc/path/to/changed/file.test.ts --no-watchman
-   yarn test:jest x-pack/solutions/observability/plugins/kubernetes-poc --no-watchman
-
-   # Run tests matching a pattern
-   yarn test:jest --testPathPattern=kubernetes-poc --no-watchman
    ```
 
 ## References
