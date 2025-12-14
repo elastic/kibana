@@ -30,8 +30,8 @@ export const EditSignificantEventFlyout = ({
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
-  selectedFeatures: Feature[];
-  setSelectedFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
+  selectedFeatures: Feature[] | undefined;
+  setSelectedFeatures: React.Dispatch<React.SetStateAction<Feature[] | undefined>>;
   features: Feature[];
   queryToEdit?: StreamQueryKql;
   definition: Streams.all.GetResponse;
@@ -147,7 +147,7 @@ export const EditSignificantEventFlyout = ({
       onClose={() => {
         setIsEditFlyoutOpen(false);
         setQueryToEdit(undefined);
-        setSelectedFeatures([]);
+        setSelectedFeatures(undefined);
       }}
       initialFlow={initialFlow}
       initialSelectedFeatures={selectedFeatures}

@@ -55,7 +55,6 @@ export function NoSignificantEventsEmptyState({
           <ConnectorListButton
             buttonProps={{
               iconType: 'sparkles',
-              isDisabled: selectedFeatures.length === 0,
               onClick: () => onGenerateSuggestionsClick(),
               'data-test-subj': 'significant_events_generate_suggestions_button',
               children: i18n.translate(

@@ -24,7 +24,6 @@ import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
 import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
-import { NO_FEATURE } from './add_significant_event_flyout/utils/default_query';
 import { NoFeaturesEmptyState } from './empty_state/no_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
@@ -67,7 +66,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[] | undefined>(undefined);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   const [dateRange, setDateRange] = useState<TimeRange | undefined>(undefined);
@@ -260,10 +259,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             items={significantEvents}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
-              setQueryToEdit({
-                ...item.query,
-                feature: item.query.feature ?? NO_FEATURE,
-              });
+              setQueryToEdit({ ...item.query });
             }}
             onDeleteClick={async (item) => {
               await removeQuery?.(item.query.id).then(() => {

@@ -21,7 +21,13 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
+import {
+  isFeature,
+  type StreamQueryKql,
+  type Streams,
+  type Feature,
+  type FeatureType,
+} from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -35,9 +41,9 @@ import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
-import { defaultQuery, NO_FEATURE } from './utils/default_query';
+import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { FeaturesSelector } from '../feature_selector';
+import { ALL_DATA_OPTION, FeaturesSelector } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -59,7 +65,7 @@ export function AddSignificantEventFlyout({
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedFeatures = [],
+  initialSelectedFeatures,
   features,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -92,7 +98,9 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>(initialSelectedFeatures);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[] | undefined>(
+    initialSelectedFeatures
+  );
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -123,7 +131,7 @@ export function AddSignificantEventFlyout({
     let inputTokensUsed = 0;
     let outputTokensUsed = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
-    if (!connector || selectedFeatures.length === 0) {
+    if (!connector) {
       return;
     }
 
@@ -131,13 +139,15 @@ export function AddSignificantEventFlyout({
     setIsGenerating(true);
     setGeneratedQueries([]);
 
-    from(selectedFeatures)
+    from(selectedFeatures ?? [ALL_DATA_OPTION.value])
       .pipe(
         concatMap((feature) =>
-          generate(connector, feature).pipe(
+          generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
             concatMap(({ queries: nextQueries, tokensUsed }) => {
               numberOfGeneratedQueries += nextQueries.length;
-              numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
+              if (isFeature(feature)) {
+                numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
+              }
               inputTokensUsed += tokensUsed.prompt;
               outputTokensUsed += tokensUsed.completion;
 
@@ -196,7 +206,7 @@ export function AddSignificantEventFlyout({
             output_tokens_used: outputTokensUsed,
             count: numberOfGeneratedQueries,
             count_by_feature_type: numberOfGeneratedQueriesByFeature,
-            features_selected: selectedFeatures.length,
+            features_selected: selectedFeatures?.length ?? 0,
             features_total: features.length,
             stream_name: definition.name,
             stream_type: getStreamTypeFromDefinition(definition),
@@ -215,7 +225,7 @@ export function AddSignificantEventFlyout({
   ]);
 
   useEffect(() => {
-    if (initialFlow === 'ai' && initialSelectedFeatures.length > 0) {
+    if (initialFlow === 'ai' && (initialSelectedFeatures ?? []).length > 0) {
       generateQueries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -278,7 +288,7 @@ export function AddSignificantEventFlyout({
                   selected={selectedFlow}
                   updateSelected={(flow) => {
                     setSelectedFlow(flow);
-                    setSelectedFeatures([]);
+                    setSelectedFeatures(undefined);
                   }}
                 />
                 <EuiSpacer size="m" />
@@ -294,7 +304,7 @@ export function AddSignificantEventFlyout({
                       buttonProps={{
                         iconType: 'sparkles',
                         isLoading: isGenerating,
-                        isDisabled: isSubmitting || selectedFeatures.length === 0,
+                        isDisabled: isSubmitting,
                         onClick: generateQueries,
                         'data-test-subj': 'significant_events_flyout_generate_suggestions_button',
                         children: i18n.translate(
@@ -414,9 +424,7 @@ export function AddSignificantEventFlyout({
                             query: {
                               ...queries[0],
                               feature: queries[0].feature
-                                ? queries[0].feature.name === NO_FEATURE.name
-                                  ? undefined
-                                  : omit(queries[0].feature, 'description')
+                                ? omit(queries[0].feature, 'description')
                                 : undefined,
                             },
                             isUpdating: isEditMode,
@@ -428,9 +436,7 @@ export function AddSignificantEventFlyout({
                             queries: queries.map((nextQuery) => ({
                               ...nextQuery,
                               feature: nextQuery.feature
-                                ? nextQuery.feature.name === NO_FEATURE.name
-                                  ? undefined
-                                  : omit(nextQuery.feature, 'description')
+                                ? omit(nextQuery.feature, 'description')
                                 : undefined,
                             })),
                           }).finally(() => setIsSubmitting(false));

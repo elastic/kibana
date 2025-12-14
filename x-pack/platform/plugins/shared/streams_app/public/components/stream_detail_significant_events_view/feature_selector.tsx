@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiText, EuiSpacer, EuiComboBox, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Feature } from '@kbn/streams-schema';
+import { isFeature, type Feature } from '@kbn/streams-schema';
 import React from 'react';
 
 export interface FeatureSelectorProps {
   features: Feature[];
-  selectedFeatures: Feature[];
-  onFeaturesChange: (features: Feature[]) => void;
+  selectedFeatures: Feature[] | undefined;
+  onFeaturesChange: (features: Feature[] | undefined) => void;
 }
+
+export const ALL_DATA_OPTION = {
+  label: 'All data',
+  value: { name: 'All data', type: 'all_data' as const },
+};
+
+type FeatureSelectorOptionValue = Feature | typeof ALL_DATA_OPTION.value;
 
 export function FeaturesSelector({
   features,
@@ -22,6 +30,13 @@ export function FeaturesSelector({
   onFeaturesChange,
 }: FeatureSelectorProps) {
   const { euiTheme } = useEuiTheme();
+  const options: Array<EuiComboBoxOptionOption<FeatureSelectorOptionValue>> = [
+    ALL_DATA_OPTION,
+    {
+      label: 'Features',
+      options: features.map((feature) => ({ label: feature.name, value: feature })),
+    },
+  ];
 
   return (
     <EuiFormRow
@@ -36,20 +51,31 @@ export function FeaturesSelector({
     >
       <>
         <EuiSpacer size="s" />
-        <EuiComboBox
+        <EuiComboBox<FeatureSelectorOptionValue>
           placeholder={i18n.translate(
             'xpack.streams.significantEvents.featuresSelector.featuresPlaceholder',
             {
               defaultMessage: 'Select features',
             }
           )}
-          options={features.map((feature) => ({ label: feature.name, value: feature }))}
-          selectedOptions={selectedFeatures.map((feature) => ({
-            label: feature.name,
-            value: feature,
-          }))}
+          options={options}
+          selectedOptions={
+            !selectedFeatures
+              ? [{ label: ALL_DATA_OPTION.label, value: ALL_DATA_OPTION.value }]
+              : selectedFeatures.map((feature) => ({
+                  label: feature.name,
+                  value: feature,
+                }))
+          }
           onChange={(selected) => {
-            onFeaturesChange(selected.map((option) => option.value) as Feature[]);
+            const hasAllData = selected.some(
+              (option) => option.value?.type === ALL_DATA_OPTION.value.type
+            );
+            if (hasAllData) {
+              onFeaturesChange(undefined);
+            } else {
+              onFeaturesChange(selected.map((option) => option.value).filter(isFeature));
+            }
           }}
         />
       </>
