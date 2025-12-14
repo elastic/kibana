@@ -6,6 +6,7 @@
  */
 
 import { isProviderTechPreview } from './reranker_helper';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 describe('Reranker Tech preview badge', () => {
   const mockProvider = {
@@ -22,8 +23,36 @@ describe('Reranker Tech preview badge', () => {
     },
   } as any;
 
+  const mockJinaEmbeddingsV3Provider = {
+    inference_id: '.jina-embeddings-v3',
+    task_type: 'text_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'jina-embeddings-v3',
+    },
+    chunking_settings: {},
+  } as InferenceInferenceEndpointInfo;
+
+  const mockJinaRerankerV2Provider = {
+    inference_id: '.jina-reranker-v2',
+    task_type: 'rerank',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'jina-reranker-v2',
+    },
+    chunking_settings: {},
+  } as InferenceInferenceEndpointInfo;
+
   it('return true for reranker', () => {
     expect(isProviderTechPreview(mockProvider)).toEqual(true);
+  });
+
+  it('should return true for jina-embeddings-v3 model', () => {
+    expect(isProviderTechPreview(mockJinaEmbeddingsV3Provider)).toEqual(true);
+  });
+
+  it('should return true for jina-reranker-v2 model', () => {
+    expect(isProviderTechPreview(mockJinaRerankerV2Provider)).toEqual(true);
   });
 
   it('return false for rainbow-sprinkles', () => {
