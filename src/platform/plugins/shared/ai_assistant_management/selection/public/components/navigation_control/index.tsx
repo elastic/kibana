@@ -58,6 +58,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
+  const { links: docLinks } = coreStart.docLinks;
 
   const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.show === true;
   const isAiAgentsEnabled = getIsAiAgentsEnabled(coreStart.featureFlags);
@@ -160,9 +161,8 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       </EuiLink>
                     ),
                     learnMoreLink: (
-                      // TODO: Update link when documentation is ready
                       <EuiLink
-                        href="#"
+                        href={docLinks.agentBuilder.learnMore}
                         target="_blank"
                         data-test-subj="aiAgentBuilderLearnMoreLink"
                       >
@@ -299,6 +299,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
         <AIAgentConfirmationModal
           onConfirm={handleConfirmAgent}
           onCancel={() => setConfirmModalOpen(false)}
+          docLinks={docLinks}
         />
       )}
     </>

@@ -73,12 +73,19 @@ describe('plugin', () => {
       });
 
       // Second call: Chat Experience setting
-      expect(coreSetup.uiSettings.register).toHaveBeenNthCalledWith(2, {
-        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
-          ...chatExperienceSetting,
-          value: AIChatExperience.Classic,
-        },
-      });
+      expect(coreSetup.uiSettings.register).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: expect.objectContaining({
+            name: chatExperienceSetting.name,
+            description: chatExperienceSetting.description,
+            type: chatExperienceSetting.type,
+            options: chatExperienceSetting.options,
+            optionLabels: chatExperienceSetting.optionLabels,
+            value: AIChatExperience.Classic,
+          }),
+        })
+      );
     });
   });
 });

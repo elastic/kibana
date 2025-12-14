@@ -111,10 +111,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features.
-              By default, Elastic uses its Elastic Managed LLM connector ({additionalCostsIncur}) when no custom connectors are available.
-              When available, Elastic uses the last used custom connector. Set up your own connectors or disable the AI Assistant from the AI feature visibility setting below.
-              Select a default AI connector to enforce the choice for your space. {manageConnectors}`}
+            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can configure a third-party connector or use the Elastic Managed LLM ({atAdditionalCost}). 
+              When using these features, this space's Default AI connector is pre-selected. To prevent the use of other connectors, enable Disallow all other connectors. 
+              If no default is set, the last-used connector will be selected automatically. {manageConnectors}`}
             values={{
               manageConnectors: (
                 <EuiLink
@@ -131,12 +130,14 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   />
                 </EuiLink>
               ),
-              additionalCostsIncur: (
-                // TODO: Update link when documentation is ready
-                <EuiLink href="#" target="_blank">
+              atAdditionalCost: (
+                <EuiLink
+                  href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                  target="_blank"
+                >
                   <FormattedMessage
-                    id="genAiSettings.additionalCostsLink"
-                    defaultMessage="additional costs incur"
+                    id="genAiSettings.additionalCostLink"
+                    defaultMessage="at additional cost"
                   />
                 </EuiLink>
               ),
