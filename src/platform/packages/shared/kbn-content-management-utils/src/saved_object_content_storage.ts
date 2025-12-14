@@ -64,9 +64,7 @@ const buildCreatedByFilter = (createdBy: SearchQuery['createdBy']): string | und
 
   // Exclude specific users (AND logic - must not match any)
   if (createdBy.excluded?.length) {
-    excludeConditions.push(
-      ...createdBy.excluded.map((uid) => `NOT created_by:"${uid}"`)
-    );
+    excludeConditions.push(...createdBy.excluded.map((uid) => `NOT created_by:"${uid}"`));
   }
 
   // Combine include (OR) and exclude (AND) conditions
