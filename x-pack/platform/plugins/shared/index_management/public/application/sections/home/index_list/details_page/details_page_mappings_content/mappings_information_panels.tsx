@@ -19,7 +19,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EisPromotionalCallout, EisUpdateCallout } from '@kbn/search-api-panels';
+import {
+  EisCloudConnectPromoCallout,
+  EisPromotionalCallout,
+  EisUpdateCallout,
+} from '@kbn/search-api-panels';
 
 import { documentationService } from '../../../../../services';
 import { useAppContext } from '../../../../../app_context';
@@ -43,6 +47,7 @@ export const MappingsInformationPanels = ({
 }: MappingsInformationPanelsProps) => {
   const {
     plugins: { cloud },
+    core: { application },
   } = useAppContext();
   const state = useMappingsState();
 
@@ -87,6 +92,13 @@ export const MappingsInformationPanels = ({
             )}
           </>
         )}
+        <EisCloudConnectPromoCallout
+          promoId="indexDetailsMappings"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="column"
+          // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
+          navigateToApp={() => application.navigateToApp('cloud_connect')}
+        />
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>

@@ -51,7 +51,7 @@ export const EIS_PROMO_TOUR_DESCRIPTION = i18n.translate(
   }
 );
 
-export const EIS_CLOUD_CONNECT_PROMO_TOUR_DESCRIPTION = i18n.translate(
+export const EIS_CLOUD_CONNECT_PROMO_DESCRIPTION = i18n.translate(
   'searchApiPanels.eisPromotion.cloudConnect.tour.description',
   {
     defaultMessage:

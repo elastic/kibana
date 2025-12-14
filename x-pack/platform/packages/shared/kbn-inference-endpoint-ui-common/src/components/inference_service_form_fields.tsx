@@ -550,7 +550,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           return (
             <EisCloudConnectPromoTour
               promoId="eisInferenceEndpointFlyout"
-              // TODO: Replace with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
+              // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
               navigateToApp={() => application.navigateToApp('cloud_connect')}
               isSelfManaged={!cloud?.isCloudEnabled}
               isReady={isFlyoutOpen}

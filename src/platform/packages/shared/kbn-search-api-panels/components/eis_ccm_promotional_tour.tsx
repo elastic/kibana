@@ -19,7 +19,7 @@ import {
 import {
   EIS_TOUR_DISMISS,
   EIS_CLOUD_CONNECT_PROMO_TOUR_CTA,
-  EIS_CLOUD_CONNECT_PROMO_TOUR_DESCRIPTION,
+  EIS_CLOUD_CONNECT_PROMO_DESCRIPTION,
   EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
@@ -70,7 +70,7 @@ export const EisCloudConnectPromoTour = ({
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}CloudConnectTour`,
   });
-  const dataId = `${promoId}-eis-cloud-connect-promo-tour`;
+  const dataId = `${promoId}-cloud-connect-promo-tour`;
 
   if (!isPromoVisible || !isReady || !isSelfManaged) {
     return children;
@@ -84,7 +84,7 @@ export const EisCloudConnectPromoTour = ({
       maxWidth={`${euiTheme.base * 25}px`}
       content={
         <EuiText>
-          <p>{EIS_CLOUD_CONNECT_PROMO_TOUR_DESCRIPTION}</p>
+          <p>{EIS_CLOUD_CONNECT_PROMO_DESCRIPTION}</p>
         </EuiText>
       }
       display="block"
@@ -100,7 +100,6 @@ export const EisCloudConnectPromoTour = ({
         <EuiButton
           onClick={navigateToApp}
           data-test-subj="eisCloudConnectPromoTourCtaBtn"
-          target="_blank"
           iconSide="right"
           iconType="popout"
         >

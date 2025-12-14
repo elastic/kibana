@@ -27,6 +27,7 @@ import {
   CodeBox,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
+  EisCloudConnectPromoCallout,
 } from '@kbn/search-api-panels';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
@@ -82,6 +83,14 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   return (
     <>
+      <EisCloudConnectPromoCallout
+        promoId="indexDetailsOverview"
+        isSelfManaged={!plugins.cloud?.isCloudEnabled}
+        direction="row"
+        // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
+        navigateToApp={() => core.application.navigateToApp('cloud_connect')}
+        addSpacer="bottom"
+      />
       <EuiFlexGrid columns={isLarge ? 3 : 1}>
         <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
 

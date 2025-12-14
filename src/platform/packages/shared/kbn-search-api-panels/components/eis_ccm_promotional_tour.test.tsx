@@ -19,7 +19,7 @@ jest.mock('../hooks/use_show_eis_promotional_content');
 
 describe('EisCloudConnectPromoTour', () => {
   const promoId = 'cloudConnectPromo';
-  const dataId = `${promoId}-eis-cloud-connect-promo-tour`;
+  const dataId = `${promoId}-cloud-connect-promo-tour`;
   const childTestId = 'tourChild';
   const mockNavigateToApp = jest.fn();
 

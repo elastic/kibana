@@ -15,8 +15,10 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { EisCloudConnectPromoCallout } from '@kbn/search-api-panels';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
+import { useKibana } from '../../hooks/use_kibana';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import type { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
 import { IndexDocuments } from '../index_documents/index_documents';
@@ -37,6 +39,7 @@ export const IndexDetailsData = ({
   navigateToPlayground,
   userPrivileges,
 }: IndexDetailsDataProps) => {
+  const { application, cloud } = useKibana().services;
   const { data: mappingData } = useIndexMapping(indexName);
   const documents = indexDocuments?.results?.data ?? [];
 
@@ -50,31 +53,41 @@ export const IndexDetailsData = ({
   }
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <EuiSpacer />
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {documents.length > 0 && (
-          <>
-            <EuiFlexItem>
-              <IndexSearchExample
-                indexName={indexName}
-                documents={documents}
-                mappings={mappingData}
-                navigateToPlayground={navigateToPlayground}
-              />
-            </EuiFlexItem>
-            <EuiHorizontalRule />
-          </>
-        )}
-        <EuiFlexItem>
-          <IndexDocuments
-            indexName={indexName}
-            documents={documents}
-            mappings={mappingData}
-            userPrivileges={userPrivileges}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <>
+      <EisCloudConnectPromoCallout
+        promoId="indexDetailsData"
+        isSelfManaged={!cloud?.isCloudEnabled}
+        direction="row"
+        // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
+        navigateToApp={() => application.navigateToApp('cloud_connect')}
+        addSpacer="top"
+      />
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+        <EuiSpacer />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {documents.length > 0 && (
+            <>
+              <EuiFlexItem>
+                <IndexSearchExample
+                  indexName={indexName}
+                  documents={documents}
+                  mappings={mappingData}
+                  navigateToPlayground={navigateToPlayground}
+                />
+              </EuiFlexItem>
+              <EuiHorizontalRule />
+            </>
+          )}
+          <EuiFlexItem>
+            <IndexDocuments
+              indexName={indexName}
+              documents={documents}
+              mappings={mappingData}
+              userPrivileges={userPrivileges}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 };
