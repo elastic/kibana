@@ -874,7 +874,60 @@ export class StreamsApp {
   }
 
   /**
-   * Significant events utilities
+   * Pipeline Suggestions utility methods
+   */
+  getSuggestPipelineButton() {
+    return this.page.getByTestId('streamsAppGenerateSuggestionButton');
+  }
+
+  async clickSuggestPipelineButton() {
+    const button = this.getSuggestPipelineButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getSuggestPipelinePanel() {
+    return this.page.getByTestId('streamsAppSuggestPipelinePanel');
+  }
+
+  getPipelineSuggestionCallout() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionCallout');
+  }
+
+  getPipelineSuggestionAcceptButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionAcceptButton');
+  }
+
+  async acceptPipelineSuggestion() {
+    const button = this.getPipelineSuggestionAcceptButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getPipelineSuggestionRejectButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionRejectButton');
+  }
+
+  async rejectPipelineSuggestion() {
+    const button = this.getPipelineSuggestionRejectButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getRegeneratePipelineSuggestionButton() {
+    return this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+  }
+
+  async regeneratePipelineSuggestion() {
+    const regenerateButton = this.getRegeneratePipelineSuggestionButton();
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
+  }
+
+  /**
+   * Significant events utility methods
    */
   async createManualSignificantEventEntry(hasFeatures: boolean = true) {
     const id = hasFeatures
