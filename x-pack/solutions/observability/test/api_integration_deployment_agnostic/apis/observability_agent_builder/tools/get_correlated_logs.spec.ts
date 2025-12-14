@@ -26,11 +26,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
     });
 
-    // after(async () => {
-    //   if (logsSynthtraceEsClient) {
-    //     await logsSynthtraceEsClient.clean();
-    //   }
-    // });
+    after(async () => {
+      if (logsSynthtraceEsClient) {
+        await logsSynthtraceEsClient.clean();
+      }
+    });
 
     describe('with single error and `trace.id` as correlation ID', () => {
       before(async () => {
