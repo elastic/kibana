@@ -31,13 +31,19 @@ export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_corr
 function getNoResultsMessage({
   sequences,
   logId,
+  logsFilter,
   interestingEventFilter,
   correlationFields,
+  start,
+  end,
 }: {
   sequences: LogSequence[];
-  logId?: string;
-  interestingEventFilter?: string;
+  logId: string | undefined;
+  logsFilter: string | undefined;
+  interestingEventFilter: string | undefined;
   correlationFields: string[];
+  start: string;
+  end: string;
 }): string | undefined {
   if (sequences.length > 0) {
     return undefined;
@@ -47,23 +53,23 @@ function getNoResultsMessage({
     correlationFields === DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
 
   const correlationFieldsDescription = isUsingDefaultCorrelationFields
-    ? 'the default `correlationFields` option (trace.id, request.id, transaction.id, etc.)'
-    : `the \`correlationFields\` option: ${correlationFields.join(', ')}`;
+    ? 'Matching logs exist but lack the default correlation fields (trace.id, request.id, transaction.id, etc.). Try using `correlationFields` for specifying custom correlation fields.'
+    : `Matching logs exist but lack the custom correlation fields: ${correlationFields.join(', ')}`;
 
   const isUsingDefaultEventFilter = !interestingEventFilter;
   const eventFilterDescription = isUsingDefaultEventFilter
-    ? 'the default `interestingEventFilter` option (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.).'
-    : `the \`interestingEventFilter\` option "${interestingEventFilter}"`;
+    ? 'The default `interestingEventFilter` (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.) did not match any documents.'
+    : `The \`interestingEventFilter\` option "${interestingEventFilter}" did not match any documents.`;
 
   if (logId) {
     return `The log ID "${logId}" was not found, or the log does not have any of the ${correlationFieldsDescription}.`;
   }
 
   const suggestions = [
-    'No matching logs exist in this time range',
-    `Logs exist but don't match ${eventFilterDescription}`,
-    `Matching logs exist but lack ${correlationFieldsDescription}`,
-    'The logsFilter is too restrictive',
+    `No matching logs exist in this time range (${start} to ${end})`,
+    ...(logsFilter ? ['`logsFilter` is too restrictive'] : []),
+    eventFilterDescription,
+    correlationFieldsDescription,
   ];
 
   return `No log sequences found. Possible reasons: ${suggestions
@@ -205,8 +211,11 @@ Do NOT use for:
         const message = getNoResultsMessage({
           sequences,
           logId,
+          logsFilter,
           interestingEventFilter,
           correlationFields,
+          start,
+          end,
         });
         return {
           results: [{ type: ToolResultType.other, data: { sequences, message } }],
