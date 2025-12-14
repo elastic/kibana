@@ -19,6 +19,20 @@ export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provid
 const INSERT_AS_SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
 
 /**
+ * Get the deduplication key for a suggestion.
+ * Uses filterText if available (contains the actual connector type),
+ * otherwise falls back to the label.
+ */
+function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): string {
+  // Prefer filterText as it contains the actual technical name (e.g., 'kibana.createCaseDefaultSpace')
+  // even when the label shows a cleaner display name (e.g., 'kibana.createCase')
+  if (suggestion.filterText) {
+    return suggestion.filterText;
+  }
+  return typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
+}
+
+/**
  * Add suggestions to a deduplicated map, preferring suggestions with snippets over plain text.
  */
 function mapSuggestions(
@@ -26,7 +40,7 @@ function mapSuggestions(
   suggestions: monaco.languages.CompletionItem[]
 ): void {
   for (const suggestion of suggestions) {
-    const key = typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
+    const key = getDeduplicationKey(suggestion);
     const existing = map.get(key);
 
     if (existing) {
