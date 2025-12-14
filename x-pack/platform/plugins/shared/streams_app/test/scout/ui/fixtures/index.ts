@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ApiServicesFixture,
-  ScoutPage,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-} from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest } from '@kbn/scout';
-import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { StreamsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
@@ -20,30 +14,18 @@ export interface StreamsTestFixtures extends ScoutTestFixtures {
   pageObjects: StreamsPageObjects;
 }
 
-export const test = baseTest
-  .extend({
-    // Extend apiServices to provide typed StreamsApiService
-    apiServices: async ({ apiServices }, use) => {
-      // The runtime object is the same, we just provide explicit types
-      const typedApiServices = apiServices as unknown as ApiServicesFixture<
-        Condition,
-        StreamlangDSL
-      >;
-      await (use as any)(typedApiServices);
+export const test = baseTest.extend<StreamsTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: StreamsPageObjects;
+      page: ScoutPage;
     },
-  })
-  .extend<StreamsTestFixtures, ScoutWorkerFixtures>({
-    pageObjects: async (
-      {
-        pageObjects,
-        page,
-      }: {
-        pageObjects: StreamsPageObjects;
-        page: ScoutPage;
-      },
-      use: (pageObjects: StreamsPageObjects) => Promise<void>
-    ) => {
-      const extendedPageObjects = extendPageObjects(pageObjects, page);
-      await use(extendedPageObjects);
-    },
-  });
+    use: (pageObjects: StreamsPageObjects) => Promise<void>
+  ) => {
+    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    await use(extendedPageObjects);
+  },
+});
