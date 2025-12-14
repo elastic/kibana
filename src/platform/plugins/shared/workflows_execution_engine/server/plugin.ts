@@ -438,6 +438,8 @@ export class WorkflowsExecutionEnginePlugin
       const workflowExecution = {
         ...initialExecution,
         context: enrichedContext,
+        // Store concurrencyGroupKey as top-level field for efficient querying
+        concurrencyGroupKey: concurrencyGroupKey ?? undefined,
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);

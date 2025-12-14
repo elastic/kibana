@@ -46,6 +46,14 @@ export async function runWorkflow({
 
   // Check concurrency before starting execution (for queued executions)
   const workflowExecution = workflowExecutionState.getWorkflowExecution();
+
+  // If execution is already cancelled, abort immediately
+  if (workflowExecution.status === ExecutionStatus.CANCELLED) {
+    logger.debug(`Workflow execution ${workflowRunId} is already cancelled, aborting before start`);
+    taskAbortController.abort();
+    return;
+  }
+
   const concurrencyGroupKey = workflowExecution.context?.concurrencyGroupKey as string | undefined;
 
   if (concurrencyGroupKey) {
@@ -65,6 +73,27 @@ export async function runWorkflow({
 
     if (!concurrencyCheck.shouldProceed && workflowExecution.status === ExecutionStatus.PENDING) {
       logger.debug(`Workflow execution ${workflowRunId} still queued due to concurrency limit`);
+      return;
+    }
+
+    // Re-check status after concurrency check - it might have been cancelled by another execution
+    const updatedExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowExecution.id,
+      workflowExecution.spaceId
+    );
+    if (updatedExecution?.status === ExecutionStatus.CANCELLED) {
+      logger.debug(
+        `Workflow execution ${workflowRunId} was cancelled during concurrency check, aborting`
+      );
+      taskAbortController.abort();
+      // Update in-memory state to reflect cancellation
+      workflowExecutionState.updateWorkflowExecution({
+        status: ExecutionStatus.CANCELLED,
+        cancelRequested: true,
+        cancellationReason: updatedExecution.cancellationReason,
+        cancelledAt: updatedExecution.cancelledAt,
+        cancelledBy: updatedExecution.cancelledBy,
+      });
       return;
     }
   }

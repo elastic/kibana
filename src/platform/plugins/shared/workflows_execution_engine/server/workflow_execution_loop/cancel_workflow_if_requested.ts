@@ -25,13 +25,45 @@ export async function cancelWorkflowIfRequested(
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   monitorAbortController?: AbortController
 ): Promise<void> {
-  if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
+  const inMemoryExecution = workflowExecutionState.getWorkflowExecution();
+
+  // Check if already cancelled in memory - if so, abort controllers and return
+  if (inMemoryExecution.status === ExecutionStatus.CANCELLED) {
+    monitorAbortController?.abort();
+    monitoredStepExecutionRuntime.abortController.abort();
+    return;
+  }
+
+  // Check cancelRequested flag in memory first
+  let shouldCancel = inMemoryExecution.cancelRequested;
+
+  if (!shouldCancel) {
+    // Fetch from ES to check if cancellation was requested or status is CANCELLED
     const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-      workflowExecutionState.getWorkflowExecution().id,
-      workflowExecutionState.getWorkflowExecution().spaceId
+      inMemoryExecution.id,
+      inMemoryExecution.spaceId
     );
 
-    if (!currentExecution?.cancelRequested) {
+    // If status is CANCELLED in ES, we need to cancel (even if cancelRequested is false)
+    // This handles the case where concurrency manager sets status to CANCELLED directly
+    shouldCancel =
+      currentExecution?.cancelRequested === true ||
+      currentExecution?.status === ExecutionStatus.CANCELLED;
+
+    if (shouldCancel) {
+      // Update in-memory state with cancellation info from ES
+      workflowExecutionState.updateWorkflowExecution({
+        cancelRequested: true,
+        status:
+          currentExecution?.status === ExecutionStatus.CANCELLED
+            ? ExecutionStatus.CANCELLED
+            : inMemoryExecution.status,
+        cancellationReason: currentExecution?.cancellationReason,
+        cancelledAt: currentExecution?.cancelledAt,
+        cancelledBy: currentExecution?.cancelledBy,
+      });
+    } else {
+      // No cancellation requested, exit early
       return;
     }
   }

@@ -358,6 +358,13 @@ export class WorkflowExecutionRuntimeManager {
       );
     }
 
+    // Check if execution was cancelled before starting
+    const currentExecution = this.workflowExecutionState.getWorkflowExecution();
+    if (currentExecution.status === ExecutionStatus.CANCELLED) {
+      // Execution was cancelled (e.g., by concurrency manager), don't start
+      return;
+    }
+
     this.nextNodeId = this.topologicalOrder[0];
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       currentNodeId: this.nextNodeId,

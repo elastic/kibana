@@ -96,6 +96,14 @@ export class ConcurrencyManager {
     );
 
     const activeCount = runningExecutions.length;
+    this.logger.debug(
+      `Concurrency check for group "${concurrencyGroupKey}": Found ${activeCount} active execution(s) (limit: ${maxConcurrency})`
+    );
+    if (activeCount > 0) {
+      this.logger.debug(
+        `Active execution IDs: ${runningExecutions.map((e) => `${e.id}(${e.status})`).join(', ')}`
+      );
+    }
 
     // If under the limit, proceed
     if (activeCount < maxConcurrency) {
@@ -115,9 +123,21 @@ export class ConcurrencyManager {
         };
 
       case 'cancel-in-progress':
-        // Cancel all running executions in this group
+        // Cancel enough running executions to make room for the new one
+        // We need to cancel (activeCount - maxConcurrency + 1) executions
+        // Example: if maxConcurrency=2, activeCount=2, we cancel 1 to make room (2-2+1=1)
+        const executionsToCancel = activeCount - maxConcurrency + 1;
         const cancelledIds: string[] = [];
-        for (const execution of runningExecutions) {
+
+        // Sort by startedAt to cancel oldest first (most fair)
+        const sortedExecutions = [...runningExecutions].sort((a, b) => {
+          const aTime = new Date(a.startedAt || a.createdAt).getTime();
+          const bTime = new Date(b.startedAt || b.createdAt).getTime();
+          return aTime - bTime;
+        });
+
+        for (let i = 0; i < executionsToCancel && i < sortedExecutions.length; i++) {
+          const execution = sortedExecutions[i];
           try {
             // Mark as cancelled immediately - this will be picked up by the monitoring loop
             await this.workflowExecutionRepository.updateWorkflowExecution({
@@ -164,7 +184,7 @@ export class ConcurrencyManager {
     const mustClauses: Array<Record<string, unknown>> = [
       { term: { workflowId } },
       { term: { spaceId } },
-      { term: { 'context.concurrencyGroupKey': concurrencyGroupKey } },
+      { term: { concurrencyGroupKey } },
     ];
 
     const mustNotClauses: Array<Record<string, unknown>> = [
