@@ -39,7 +39,7 @@ POST kbn://api/agent_builder/tools/_execute
     "start": "now-15m",
     "end": "now",
     "logSourceFields": ["@timestamp", "message", "log.level", "service.name"],
-    "maxResults": 20
+    "maxSequences": 20
   }
 }
 ```

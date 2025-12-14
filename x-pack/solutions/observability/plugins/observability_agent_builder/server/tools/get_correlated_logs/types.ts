@@ -17,6 +17,7 @@ export interface GetCorrelatedLogsToolResult<T = Record<string, unknown>> {
   type: ToolResultType.other;
   data: {
     sequences: LogSequence<T>[];
+    message?: string;
   };
 }
 

@@ -55,7 +55,7 @@ export async function getCorrelatedLogsForAnchor({
   const totalHits = getHitsTotal(res);
 
   return {
-    logs: res.hits.hits.map((hit) => hit._source!),
+    logs: res.hits.hits.map((hit) => hit._source as Record<string, unknown>),
     isTruncated: totalHits > maxLogsPerSequence,
   };
 }

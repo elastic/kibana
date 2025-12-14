@@ -24,8 +24,52 @@ import {
 } from './constants';
 import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
+import type { LogSequence } from './types';
 
 export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_correlated_logs';
+
+function getNoResultsMessage({
+  sequences,
+  logId,
+  anchorKqlFilter,
+  correlationFields,
+}: {
+  sequences: LogSequence[];
+  logId?: string;
+  anchorKqlFilter?: string;
+  correlationFields: string[];
+}): string | undefined {
+  if (sequences.length > 0) {
+    return undefined;
+  }
+
+  const isUsingDefaultCorrelationFields =
+    correlationFields === DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
+
+  const correlationFieldsDescription = isUsingDefaultCorrelationFields
+    ? 'default correlation fields (trace.id, request.id, transaction.id, etc.)'
+    : `the specified correlation fields: ${correlationFields.join(', ')}`;
+
+  const isUsingDefaultAnchorFilter = !anchorKqlFilter;
+  const anchorDescription = isUsingDefaultAnchorFilter
+    ? 'the default `anchorKqlFilter` options (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.).'
+    : `the \`anchorKqlFilter\` option "${anchorKqlFilter}"`;
+
+  if (logId) {
+    return `The log ID "${logId}" was not found, or the log does not have any of the ${correlationFieldsDescription}.`;
+  }
+
+  const suggestions = [
+    'No matching logs exist in this time range',
+    `Logs exist but don't match ${anchorDescription}`,
+    `Matching logs exist but lack the ${correlationFieldsDescription}`,
+    'The logsKqlFilter is too restrictive',
+  ];
+
+  return `No log sequences found. Possible reasons: ${suggestions
+    .map((s, i) => `(${i + 1}) ${s}`)
+    .join(', ')}.`;
+}
 
 const getCorrelatedLogsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
@@ -158,8 +202,14 @@ Do NOT use for:
           })
         );
 
+        const message = getNoResultsMessage({
+          sequences,
+          logId,
+          anchorKqlFilter,
+          correlationFields,
+        });
         return {
-          results: [{ type: ToolResultType.other, data: { sequences } }],
+          results: [{ type: ToolResultType.other, data: { sequences, message } }],
         };
       } catch (error) {
         logger.error(`Error fetching errors and surrounding logs: ${error.message}`);

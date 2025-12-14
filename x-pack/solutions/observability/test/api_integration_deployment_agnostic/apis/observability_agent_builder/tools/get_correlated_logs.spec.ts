@@ -82,12 +82,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { sequences } = results[0].data;
+        const { sequences, message } = results[0].data;
 
         expect(sequences.length).to.be(1);
         expect(sequences[0].logs.length).to.be(5);
         expect(sequences[0].correlation.field).to.be('trace.id');
         expect(sequences[0].correlation.value).to.be('trace-123');
+        expect(message).to.be(undefined);
       });
 
       it('includes the error log and surrounding logs', async () => {
@@ -295,8 +296,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { sequences } = results[0].data;
+        const { sequences, message } = results[0].data;
         expect(sequences.length).to.be(0);
+        expect(message).to.contain('No log sequences found');
+        expect(message).to.contain('default correlation fields');
       });
     });
 
