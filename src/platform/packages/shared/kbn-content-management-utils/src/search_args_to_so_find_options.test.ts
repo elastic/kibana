@@ -354,6 +354,29 @@ describe('searchArgsToSOFindOptionsDefault', () => {
       expect(result.hasReference).toEqual([{ id: 'tag1', type: 'tag' }]);
       expect(result.filter).toBe('(created_by:"user1")');
     });
+
+    it('should combine tags and favorites hasReference arrays', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        ...baseParams,
+        query: {
+          ...baseQuery,
+          tags: {
+            included: ['tag1', 'tag2'],
+          },
+          favorites: {
+            only: true,
+            ids: ['fav1', 'fav2'],
+          },
+        },
+      });
+
+      expect(result.hasReference).toEqual([
+        { id: 'tag1', type: 'tag' },
+        { id: 'tag2', type: 'tag' },
+        { type: 'favorite', id: 'fav1' },
+        { type: 'favorite', id: 'fav2' },
+      ]);
+    });
   });
 
   describe('facets', () => {

@@ -182,10 +182,32 @@ interface AggregationBucket {
 }
 
 /**
+ * Expected structure of Elasticsearch aggregations response
+ */
+interface ElasticsearchAggregations {
+  tags?: {
+    filtered_tags?: {
+      tag_ids?: {
+        buckets?: AggregationBucket[];
+      };
+    };
+  };
+  missing_tags?: {
+    doc_count?: number;
+  };
+  created_by?: {
+    buckets?: AggregationBucket[];
+  };
+  missing_created_by?: {
+    doc_count?: number;
+  };
+}
+
+/**
  * Parses Elasticsearch aggregation results into facet format.
  */
 export const parseFacetsFromAggregations = (
-  aggregations: any,
+  aggregations: ElasticsearchAggregations | undefined,
   facetsRequested: SearchQuery['facets']
 ):
   | {
@@ -253,6 +275,12 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
   const tagsFilter = tagsToFindOptions(query.tags);
   const { aggs } = buildFacetAggregations(query.facets, contentTypeId);
 
+  // Combine hasReference from tags and favorites
+  const hasReference = [
+    ...(tagsFilter.hasReference || []),
+    ...(favoritesFilter?.hasReference || []),
+  ];
+
   return {
     type: contentTypeId,
     search: query.text,
@@ -261,13 +289,13 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     defaultSearchOperator: 'AND',
     searchFields: options?.searchFields ?? ['description', 'title'],
     fields: options?.fields ?? ['description', 'title'],
-    ...tagsFilter,
+    ...(tagsFilter.hasNoReference && { hasNoReference: tagsFilter.hasNoReference }),
+    ...(hasReference.length > 0 && { hasReference }),
     ...(query.sort && {
       sortField: query.sort.field,
       sortOrder: query.sort.direction,
     }),
     ...(createdByFilter && { filter: createdByFilter }),
-    ...favoritesFilter,
     ...(aggs && { aggs }),
   };
 };
