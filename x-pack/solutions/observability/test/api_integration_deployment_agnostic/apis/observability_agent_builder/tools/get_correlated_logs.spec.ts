@@ -78,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "payment-service"',
+            logsFilter: 'service.name: "payment-service"',
           },
         });
 
@@ -97,7 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "payment-service"',
+            logsFilter: 'service.name: "payment-service"',
           },
         });
 
@@ -119,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "non-existing-service"',
+            logsFilter: 'service.name: "non-existing-service"',
           },
         });
 
@@ -153,7 +153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "checkout-service"',
+            logsFilter: 'service.name: "checkout-service"',
           },
         });
 
@@ -167,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "checkout-service"',
+            logsFilter: 'service.name: "checkout-service"',
           },
         });
 
@@ -222,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "multi-service"',
+            logsFilter: 'service.name: "multi-service"',
           },
         });
 
@@ -236,7 +236,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "multi-service"',
+            logsFilter: 'service.name: "multi-service"',
           },
         });
 
@@ -292,7 +292,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "no-correlation-service"',
+            logsFilter: 'service.name: "no-correlation-service"',
           },
         });
 
@@ -332,7 +332,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "service-a"',
+            logsFilter: 'service.name: "service-a"',
           },
         });
 
@@ -407,7 +407,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsKqlFilter: `service.name: "${service}"`,
+              logsFilter: `service.name: "${service}"`,
             },
           });
 
@@ -443,7 +443,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "priority-service"',
+            logsFilter: 'service.name: "priority-service"',
           },
         });
 
@@ -504,7 +504,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsKqlFilter: `service.name: "${service}"`,
+              logsFilter: `service.name: "${service}"`,
             },
           });
 
@@ -635,7 +635,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsKqlFilter: `service.name: "${service}"`,
+              logsFilter: `service.name: "${service}"`,
             },
           });
 
@@ -731,7 +731,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-10m',
             end: 'now',
-            logsKqlFilter: 'service.name: "fields-service"',
+            logsFilter: 'service.name: "fields-service"',
             logSourceFields: ['message', 'service.name'],
           },
         });
@@ -775,7 +775,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsKqlFilter: 'service.name: "limit-service"',
+              logsFilter: 'service.name: "limit-service"',
               maxSequences: 3,
             },
           });
@@ -819,7 +819,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: {
               start: 'now-10m',
               end: 'now',
-              logsKqlFilter: 'service.name: "limit-logs-service"',
+              logsFilter: 'service.name: "limit-logs-service"',
               maxLogsPerSequence: 5,
             },
           });
@@ -865,7 +865,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-5m',
             end: 'now',
-            logsKqlFilter: 'service.name: "starvation-service"',
+            logsFilter: 'service.name: "starvation-service"',
             maxSequences: 10,
           },
         });

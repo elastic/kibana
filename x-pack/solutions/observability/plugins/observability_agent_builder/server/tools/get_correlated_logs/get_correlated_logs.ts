@@ -31,12 +31,12 @@ export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_corr
 function getNoResultsMessage({
   sequences,
   logId,
-  anchorKqlFilter,
+  interestingEventFilter,
   correlationFields,
 }: {
   sequences: LogSequence[];
   logId?: string;
-  anchorKqlFilter?: string;
+  interestingEventFilter?: string;
   correlationFields: string[];
 }): string | undefined {
   if (sequences.length > 0) {
@@ -47,13 +47,13 @@ function getNoResultsMessage({
     correlationFields === DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
 
   const correlationFieldsDescription = isUsingDefaultCorrelationFields
-    ? 'default correlation fields (trace.id, request.id, transaction.id, etc.)'
-    : `the specified correlation fields: ${correlationFields.join(', ')}`;
+    ? 'the default `correlationFields` option (trace.id, request.id, transaction.id, etc.)'
+    : `the \`correlationFields\` option: ${correlationFields.join(', ')}`;
 
-  const isUsingDefaultAnchorFilter = !anchorKqlFilter;
-  const anchorDescription = isUsingDefaultAnchorFilter
-    ? 'the default `anchorKqlFilter` options (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.).'
-    : `the \`anchorKqlFilter\` option "${anchorKqlFilter}"`;
+  const isUsingDefaultEventFilter = !interestingEventFilter;
+  const eventFilterDescription = isUsingDefaultEventFilter
+    ? 'the default `interestingEventFilter` option (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.).'
+    : `the \`interestingEventFilter\` option "${interestingEventFilter}"`;
 
   if (logId) {
     return `The log ID "${logId}" was not found, or the log does not have any of the ${correlationFieldsDescription}.`;
@@ -61,9 +61,9 @@ function getNoResultsMessage({
 
   const suggestions = [
     'No matching logs exist in this time range',
-    `Logs exist but don't match ${anchorDescription}`,
-    `Matching logs exist but lack the ${correlationFieldsDescription}`,
-    'The logsKqlFilter is too restrictive',
+    `Logs exist but don't match ${eventFilterDescription}`,
+    `Matching logs exist but lack ${correlationFieldsDescription}`,
+    'The logsFilter is too restrictive',
   ];
 
   return `No log sequences found. Possible reasons: ${suggestions
@@ -78,19 +78,19 @@ const getCorrelatedLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, "start", "end", "logsKqlFilter", and "anchorFilter" are ignored.'
+      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, "start", "end", "logsFilter", and "interestingEventFilter" are ignored.'
     ),
-  logsKqlFilter: z
+  logsFilter: z
     .string()
     .optional()
     .describe(
-      'Optional KQL query to filter logs. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
+      'Optional KQL query to filter the scope of logs to search. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
     ),
-  anchorKqlFilter: z
+  interestingEventFilter: z
     .string()
     .optional()
     .describe(
-      'Optional KQL query to define what constitutes an "anchor" log. Defaults to matching error logs. Use this to find non-error events (e.g. "event.duration > 1000000") or specific errors. Ignored if logId is provided.'
+      'Optional KQL query to define what constitutes an "interesting event" - the starting point for correlation. Defaults to matching error logs (ERROR, WARN, FATAL, HTTP 5xx, etc.). Use this to find non-error events (e.g. "event.duration > 1000000" for slow requests) or specific errors. Ignored if logId is provided.'
     ),
   correlationFields: z
     .array(z.string())
@@ -153,8 +153,8 @@ Do NOT use for:
       {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
-        logsKqlFilter,
-        anchorKqlFilter,
+        logsFilter,
+        interestingEventFilter,
         index,
         correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
         logId,
@@ -174,8 +174,8 @@ Do NOT use for:
           logsIndices,
           startTime,
           endTime,
-          logsKqlFilter,
-          anchorKqlFilter,
+          logsFilter,
+          interestingEventFilter,
           correlationFields,
           logger,
           logId,
@@ -205,7 +205,7 @@ Do NOT use for:
         const message = getNoResultsMessage({
           sequences,
           logId,
-          anchorKqlFilter,
+          interestingEventFilter,
           correlationFields,
         });
         return {
