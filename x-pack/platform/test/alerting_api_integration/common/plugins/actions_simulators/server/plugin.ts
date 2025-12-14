@@ -25,6 +25,7 @@ import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
+import { initPlugin as initSFCServer } from './single_file_connector_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
 import { initPlugin as initTorq } from './torq_simulation';
@@ -95,6 +96,11 @@ export async function getSwimlaneServer(): Promise<http.Server> {
 
 export async function getServiceNowServer(): Promise<http.Server> {
   return await initServiceNow();
+}
+
+export async function getSFCServer(): Promise<http.Server> {
+  const { httpServer } = await initSFCServer();
+  return httpServer;
 }
 
 interface FixtureSetupDeps {

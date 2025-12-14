@@ -138,12 +138,10 @@ export default ({ getService }: FtrProviderContext) => {
           nowMinus2M,
           privMonUtils.integrationsSync.OKTA_INDEX
         );
-        await privMonUtils.runSync();
-        const snapA = await privMonUtils.integrationsSync.expectUserCount(4);
+        const snapA = await privMonUtils.scheduleEngineAndWaitForUserCount(4);
 
         // PHASE 2: Re-run with no changes => no processing, marker should be default (now-1M)
-        await privMonUtils.runSync();
-        const snapB = await privMonUtils.integrationsSync.expectUserCount(4);
+        const snapB = await privMonUtils.scheduleEngineAndWaitForUserCount(4);
         expect(new Set(snapB)).toEqual(new Set(snapA));
 
         const markerAfterPhase2 = await privMonUtils.integrationsSync.getLastProcessedMarker(
@@ -159,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
           nowMinus1w,
           privMonUtils.integrationsSync.OKTA_INDEX
         );
-        await privMonUtils.runSync();
+        await privMonUtils.scheduleEngineAndWaitForUserCount(4);
         const markerAfterPhase3 = await privMonUtils.integrationsSync.getLastProcessedMarker(
           privMonUtils.integrationsSync.OKTA_INDEX
         );
@@ -177,8 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
           privMonUtils.integrationsSync.OKTA_INDEX
         );
 
-        await privMonUtils.runSync();
-        await privMonUtils.integrationsSync.expectUserCount(5);
+        await privMonUtils.scheduleEngineAndWaitForUserCount(5);
 
         const markerAfterPhase4 = await privMonUtils.integrationsSync.getLastProcessedMarker(
           privMonUtils.integrationsSync.OKTA_INDEX

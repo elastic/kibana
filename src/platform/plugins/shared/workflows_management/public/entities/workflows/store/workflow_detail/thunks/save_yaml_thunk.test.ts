@@ -15,6 +15,11 @@ import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setWorkflow, setYamlString } from '../slice';
 
+// Need to mock the loading states to avoid import issues with other mocks
+jest.mock('../utils/loading_states', () => ({
+  addLoadingStateReducers: jest.fn(),
+  initialLoadingState: { isSavingYaml: false },
+}));
 // Mock the loadWorkflowThunk
 jest.mock('./load_workflow_thunk');
 const mockLoadWorkflowThunk = loadWorkflowThunk as jest.MockedFunction<typeof loadWorkflowThunk>;

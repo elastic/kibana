@@ -191,6 +191,37 @@ export const i18nMessages = {
             defaultMessage: 'Target pattern',
           }
         ),
+        defaultRowLimitLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitLabel',
+          {
+            defaultMessage: 'Row limit',
+          }
+        ),
+        defaultRowLimitHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitHelpText',
+          {
+            defaultMessage: 'Maximum number of rows to return from ES|QL queries.',
+          }
+        ),
+        customInstructionsLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsLabel',
+          {
+            defaultMessage: 'Custom instructions',
+          }
+        ),
+        customInstructionsHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsHelpText',
+          {
+            defaultMessage:
+              'Additional guidance for ES|QL query generation, such as field selection or limit logic.',
+          }
+        ),
+        customInstructionsPlaceholder: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsPlaceholder',
+          {
+            defaultMessage: 'e.g., "Always include timestamp field" ',
+          }
+        ),
       },
       esql: {
         queryLabel: i18n.translate(
@@ -211,6 +242,25 @@ export const i18nMessages = {
           'xpack.onechat.tools.newTool.configuration.form.workflow.workflowLabel',
           {
             defaultMessage: 'Workflow',
+          }
+        ),
+        waitForCompletionLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionLabel',
+          {
+            defaultMessage: 'Workflow execution',
+          }
+        ),
+        waitForCompletionHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionHelpText',
+          {
+            defaultMessage:
+              'If checked, the tool waits until the workflow completes (up to 120s) and returns the results. If unchecked, the workflow runs in the background and you can ask the agent to check the execution status.',
+          }
+        ),
+        waitForCompletionCheckboxLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionCheckboxLabel',
+          {
+            defaultMessage: 'Wait until the workflow completes',
           }
         ),
       },

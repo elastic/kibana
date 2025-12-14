@@ -119,6 +119,21 @@
       "userDefined": false
     },
     {
+      "name": "histogramField",
+      "type": "histogram",
+      "userDefined": false
+    },
+    {
+      "name": "exponentialHistogramField",
+      "type": "exponential_histogram",
+      "userDefined": false
+    },
+    {
+      "name": "tdigestField",
+      "type": "tdigest",
+      "userDefined": false
+    },
+    {
       "name": "any#Char$Field",
       "type": "double",
       "userDefined": false

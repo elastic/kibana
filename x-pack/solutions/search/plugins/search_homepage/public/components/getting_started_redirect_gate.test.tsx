@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { GettingStartedRedirectGate } from './getting_started_redirect_gate';
 import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useSearchGettingStartedFeatureFlag } from '../hooks/use_search_getting_started_feature_flag';
@@ -39,35 +39,48 @@ describe('GettingStartedRedirectGate', () => {
       </GettingStartedRedirectGate>
     );
 
-  it('renders children', () => {
-    (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
-    const { getByTestId } = renderGate();
-    expect(getByTestId('child')).toBeInTheDocument();
+  describe('when feature flag is disabled', () => {
+    beforeEach(() => {
+      (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(false);
+    });
+
+    it('always renders children and never redirects', () => {
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('renders children even when not visited', () => {
+      // localStorage is empty (not visited)
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
   });
 
-  it('navigates if feature is enabled and localStorage key is missing', () => {
-    (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
-    renderGate();
-    expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted');
-  });
+  describe('when feature flag is enabled', () => {
+    beforeEach(() => {
+      (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
+    });
 
-  it('navigates if feature is enabled and key is "false"', () => {
-    (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
-    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'false');
-    renderGate();
-    expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted');
-  });
+    it('renders children when already visited', () => {
+      localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+      const { getByTestId } = renderGate();
+      expect(getByTestId('child')).toBeInTheDocument();
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
 
-  it('does not navigate if key is "true"', () => {
-    (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(true);
-    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
-    renderGate();
-    expect(navigateToApp).not.toHaveBeenCalled();
-  });
+    it('does NOT render children and redirects when not visited', async () => {
+      const { queryByTestId } = renderGate();
+      expect(queryByTestId('child')).not.toBeInTheDocument();
+      await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
+    });
 
-  it('does not navigate when feature flag is disabled', () => {
-    (useSearchGettingStartedFeatureFlag as jest.Mock).mockReturnValue(false);
-    renderGate();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    it('does NOT render children and redirects when visited=false', async () => {
+      localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'false');
+      const { queryByTestId } = renderGate();
+      expect(queryByTestId('child')).not.toBeInTheDocument();
+      await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
+    });
   });
 });

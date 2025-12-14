@@ -128,6 +128,8 @@ export interface MessageCompleteEventData {
   message_id: string;
   /** full text content of the message */
   message_content: string;
+  /** optional structured data */
+  structured_output?: object;
 }
 
 export type MessageCompleteEvent = ChatEventBase<

@@ -6,14 +6,14 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { ConnectorTypesResponseV2 } from '../../../../common/routes/connector/response';
+import type { GetAllConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
 import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { transformListTypesResponseV2 } from '../list_types/transforms';
+import { transformListTypesResponseV1 } from '../list_types/transforms';
 
 export const listTypesWithSystemRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -47,8 +47,8 @@ export const listTypesWithSystemRoute = (
           includeSystemActionTypes: true,
         });
 
-        const responseBody: ConnectorTypesResponseV2[] =
-          transformListTypesResponseV2(connectorTypes);
+        const responseBody: GetAllConnectorTypesResponseV1 =
+          transformListTypesResponseV1(connectorTypes);
 
         return res.ok({ body: responseBody });
       })

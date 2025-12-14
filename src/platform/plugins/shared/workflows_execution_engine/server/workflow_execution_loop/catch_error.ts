@@ -9,6 +9,7 @@
 
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
+import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
@@ -70,9 +71,9 @@ export async function catchError(
     }
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
-      await failedStepExecutionRuntime.failStep(
+      failedStepExecutionRuntime.failStep(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        params.workflowExecutionState.getWorkflowExecution().error!
+        new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
       );
     }
 
@@ -86,6 +87,12 @@ export async function catchError(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const scopeEntry = workflowScopeStack.getCurrentScope()!;
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
+      const currentNodeId = params.workflowExecutionState.getWorkflowExecution().currentNodeId;
+
+      if (!currentNodeId) {
+        throw new Error('No current node ID in workflow execution state. This should not happen.');
+      }
+
       params.workflowExecutionState.updateWorkflowExecution({
         currentNodeId: scopeEntry.nodeId,
         scopeStack: newWorkflowScopeStack.stackFrames,
@@ -100,9 +107,13 @@ export async function catchError(
 
       if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
+        const failedContext = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: currentNodeId,
+          stackFrames: workflowScopeStack.stackFrames,
+        });
 
         try {
-          await stepErrorCatcher.catchError();
+          await Promise.resolve(stepErrorCatcher.catchError(failedContext));
         } catch (error) {
           params.workflowExecutionState.updateWorkflowExecution({
             error,
@@ -112,9 +123,9 @@ export async function catchError(
 
       if (params.workflowExecutionState.getWorkflowExecution().error) {
         if (stepExecutionRuntime.stepExecutionExists()) {
-          await stepExecutionRuntime.failStep(
+          stepExecutionRuntime.failStep(
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            params.workflowExecutionState.getWorkflowExecution().error!
+            new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
           );
         }
       }

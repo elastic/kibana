@@ -39,7 +39,7 @@ export class OneChatPageObject extends FtrService {
    * Type a message in the conversation input
    */
   async typeMessage(message: string) {
-    const inputElement = await this.testSubjects.find('onechatAppConversationInputFormTextArea');
+    const inputElement = await this.testSubjects.find('agentBuilderConversationInputEditor');
     await inputElement.click();
     await inputElement.type(message);
   }
@@ -48,7 +48,7 @@ export class OneChatPageObject extends FtrService {
    * Send the current message
    */
   async sendMessage() {
-    const sendButton = await this.testSubjects.find('onechatAppConversationInputFormSubmitButton');
+    const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
     await sendButton.click();
   }
 
@@ -187,7 +187,7 @@ export class OneChatPageObject extends FtrService {
   }
 
   /**
-   * Delete a conversation by hovering and clicking the delete button
+   * Delete a conversation by clicking the more actions button and then the delete button
    */
   async deleteConversation(conversationId: string) {
     await this.openConversationsHistory();
@@ -195,10 +195,12 @@ export class OneChatPageObject extends FtrService {
     // Click on conversation to open it
     const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
     await conversationItem.click();
-    // Click on conversation title (it's a button)
-    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
-    await titleElement.click();
 
+    // Click on the more actions button
+    const moreActionsButton = await this.testSubjects.find('agentBuilderMoreActionsButton');
+    await moreActionsButton.click();
+
+    // Click on the delete button from the popover
     const deleteButton = await this.testSubjects.find('agentBuilderConversationDeleteButton');
     await deleteButton.click();
 
@@ -245,7 +247,7 @@ export class OneChatPageObject extends FtrService {
    * Get the thinking details text
    */
   async getThinkingDetails() {
-    const responseElement = await this.testSubjects.find('agentBuilderRoundResponse');
+    const responseElement = await this.testSubjects.find('agentBuilderThinkingPanel');
     return await responseElement.getVisibleText();
   }
 

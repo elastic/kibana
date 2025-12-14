@@ -10,14 +10,17 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../constants';
+import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
+import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
+import { throwOnUnmappedKeys } from '../scope_tooling';
+import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
-    path: `${PUBLIC_API_PATH}/{id}`,
-    summary: `Update an existing dashboard`,
+    path: `${DASHBOARD_API_PATH}/{id}`,
+    summary: `Replace current dashboard state with the dashboard state from request body.`,
     ...commonRouteConfig,
   });
 
@@ -31,6 +34,11 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
+          query: schema.maybe(
+            schema.object({
+              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
+            })
+          ),
           body: getUpdateRequestBodySchema(),
         },
         response: {
@@ -42,6 +50,9 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
+        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
+        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
+
         const result = await update(ctx, req.params.id, req.body);
         return res.ok({ body: result });
       } catch (e) {

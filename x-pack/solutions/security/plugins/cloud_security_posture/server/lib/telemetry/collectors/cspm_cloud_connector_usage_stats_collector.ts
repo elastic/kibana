@@ -79,6 +79,7 @@ export const getCspmCloudConnectorUsageStats = async (
         updated_at: connector.updated_at,
         hasCredentials: hasValidCredentials(connector.cloudProvider, connector.vars || {}),
         cloud_provider: connector.cloudProvider,
+        account_type: connector.accountType,
         packagePolicyIds,
         packagePolicyCount: connectorPackagePolicies.length,
       };

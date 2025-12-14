@@ -262,6 +262,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should be able to customize ESQL histogram and then choose a breakdown field after switching to another data view', async () => {
+      await discover.selectTextBaseLang();
+
+      await monacoEditor.setCodeEditorValue('from logstash-* | sort @timestamp desc | limit 100');
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      await discover.changeVisShape('Line');
+
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '100'
+      );
+
+      expect(await discover.getCurrentVisTitle()).to.be('Line');
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
+
+      await monacoEditor.setCodeEditorValue('from logs* | sort @timestamp desc | limit 100');
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getCurrentVisTitle()).to.be('Bar');
+      });
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
+
+      await discover.chooseBreakdownField('extension');
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getCurrentVisTitle()).to.be('Bar');
+      });
+
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
+      const list = await discover.getHistogramLegendList();
+      expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '100'
+      );
+    });
+
     it('should be able to load a saved search with custom histogram vis, edit vis and revert changes', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 

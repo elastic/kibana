@@ -6,6 +6,7 @@
  */
 
 import { platformCoreTools } from '@kbn/onechat-common/tools';
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -15,19 +16,32 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
   // Observability
-  'observability.search_knowledge_base',
   'observability.get_data_sources',
   'observability.get_anomaly_detection_jobs',
+  'observability.run_log_rate_analysis',
+  'observability.get_log_categories',
   'observability.get_alerts',
   'observability.get_services',
   'observability.get_downstream_dependencies',
+  // Dashboards
+  'platform.dashboard.create_dashboard',
+  'platform.dashboard.update_dashboard',
+  // Security Solution
+  `${internalNamespaces.security}.entity_risk_score`,
+  `${internalNamespaces.security}.attack_discovery_search`,
+  `${internalNamespaces.security}.security_labs_search`,
+  `${internalNamespaces.security}.alerts`,
 ];
 
 /**
  * This is a manually maintained list of all built-in agents registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
-export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = ['observability.agent'];
+export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
+  'observability.agent',
+  'platform.dashboard.dashboard_agent',
+  `${internalNamespaces.security}.agent`,
+];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
   return AGENT_BUILDER_BUILTIN_TOOLS.includes(toolName);

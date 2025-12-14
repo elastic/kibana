@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
+import type {
+  ESQLAstExpression,
+  ESQLAstHeaderCommand,
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLProperNode,
+  ESQLSingleAstItem,
+} from '../types';
 
 /**
  * Normalizes AST "item" list to only contain *single* items.
@@ -55,7 +62,9 @@ export const lastItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined =>
   return last as ESQLSingleAstItem;
 };
 
-export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
+export function* children(
+  node: ESQLProperNode
+): Iterable<ESQLAstExpression | ESQLCommand | ESQLAstHeaderCommand> {
   switch (node.type) {
     case 'function':
     case 'command':
@@ -88,6 +97,41 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
     }
     case 'parens': {
       yield node.child;
+      break;
+    }
+  }
+}
+
+export function* childrenFoAnyNode(
+  node: ESQLProperNode
+): Iterable<ESQLAstExpression | ESQLCommand | ESQLAstHeaderCommand> {
+  if ('args' in node && Array.isArray(node.args)) {
+    yield* singleItems(node.args);
+    return;
+  }
+
+  switch (node.type) {
+    case 'query': {
+      if (node.header) {
+        yield* node.header;
+      }
+      yield* node.commands;
+      break;
+    }
+    case 'source': {
+      if (node.prefix) {
+        yield node.prefix;
+      }
+      if (node.index) {
+        yield node.index;
+      }
+      if (node.selector) {
+        yield node.selector;
+      }
+      break;
+    }
+    default: {
+      yield* children(node);
       break;
     }
   }

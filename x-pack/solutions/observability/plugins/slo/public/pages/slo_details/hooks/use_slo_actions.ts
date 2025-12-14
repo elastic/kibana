@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/public';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import path from 'path';
@@ -61,7 +60,7 @@ export const useSloActions = ({
       setIsEditRuleFlyoutOpen(true);
       setIsActionsPopoverOpen(false);
     } else {
-      const locator = locators.get<RulesParams>(rulesLocatorID);
+      const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
       if (!locator) return undefined;
 
       if (slo.remote && slo.remote.kibanaUrl !== '') {

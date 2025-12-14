@@ -341,6 +341,7 @@ export default function (providerContext: FtrProviderContext) {
         ...res.attributes,
         installed_kibana: sortBy(res.attributes.installed_kibana, ['id']),
         package_assets: sortBy(res.attributes.package_assets, ['id']),
+        installed_es: sortBy(res.attributes.installed_es, ['id']),
       }).eql({
         installed_kibana_space_id: 'default',
         installed_kibana: sortBy(
@@ -396,85 +397,91 @@ export default function (providerContext: FtrProviderContext) {
           ],
           'id'
         ),
-        installed_es: [
-          {
-            id: 'all_assets',
-            type: 'ilm_policy',
-          },
-          {
-            id: 'default',
-            type: 'ml_model',
-          },
-          {
-            id: 'logs-all_assets.test_logs-all_assets',
-            type: 'data_stream_ilm_policy',
-          },
-          {
-            id: 'logs-all_assets.test_logs-0.2.0',
-            type: 'ingest_pipeline',
-          },
-          {
-            id: 'logs-all_assets.test_logs-0.2.0-pipeline1',
-            type: 'ingest_pipeline',
-          },
-          {
-            id: 'logs-all_assets.test_logs2-0.2.0',
-            type: 'ingest_pipeline',
-          },
-          {
-            id: 'metrics-all_assets.test_metrics-0.2.0',
-            type: 'ingest_pipeline',
-          },
-          {
-            id: 'logs-all_assets.test_logs',
-            type: 'index_template',
-          },
-          {
-            id: 'logs-all_assets.test_logs@package',
-            type: 'component_template',
-          },
-          {
-            id: 'logs@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'all_assets@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'logs-all_assets.test_logs@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'logs-all_assets.test_logs2',
-            type: 'index_template',
-          },
-          {
-            id: 'logs-all_assets.test_logs2@package',
-            type: 'component_template',
-          },
-          {
-            id: 'logs-all_assets.test_logs2@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'metrics-all_assets.test_metrics',
-            type: 'index_template',
-          },
-          {
-            id: 'metrics-all_assets.test_metrics@package',
-            type: 'component_template',
-          },
-
-          {
-            id: 'metrics@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'metrics-all_assets.test_metrics@custom',
-            type: 'component_template',
-          },
-        ],
+        installed_es: sortBy(
+          [
+            {
+              id: 'all_assets',
+              type: 'ilm_policy',
+            },
+            {
+              id: 'default',
+              type: 'ml_model',
+            },
+            {
+              id: 'logs-all_assets.test_logs-all_assets',
+              type: 'data_stream_ilm_policy',
+            },
+            {
+              id: 'logs-all_assets.test_logs-0.2.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs-0.2.0-pipeline1',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs2-0.2.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'metrics-all_assets.test_metrics-0.2.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs',
+              type: 'index_template',
+            },
+            {
+              id: 'logs-all_assets.test_logs@package',
+              type: 'component_template',
+            },
+            {
+              id: 'logs@custom',
+              type: 'component_template',
+            },
+            {
+              id: 'all_assets@custom',
+              type: 'component_template',
+            },
+            {
+              id: 'logs-all_assets.test_logs@custom',
+              type: 'component_template',
+            },
+            {
+              id: 'logs-all_assets.test_logs2',
+              type: 'index_template',
+            },
+            {
+              id: 'logs-all_assets.test_logs2@package',
+              type: 'component_template',
+            },
+            {
+              id: 'logs-all_assets.test_logs2@custom',
+              type: 'component_template',
+            },
+            {
+              id: 'metrics-all_assets.test_metrics',
+              type: 'index_template',
+            },
+            {
+              id: 'metrics-all_assets.test_metrics@package',
+              type: 'component_template',
+            },
+            {
+              id: 'metrics@custom',
+              type: 'component_template',
+            },
+            {
+              id: 'metrics-all_assets.test_metrics@custom',
+              type: 'component_template',
+            },
+            {
+              id: 'all_assets-README.md',
+              type: 'knowledge_base',
+            },
+          ],
+          'id'
+        ),
         es_index_patterns: {
           test_logs: 'logs-all_assets.test_logs-*',
           test_metrics: 'metrics-all_assets.test_metrics-*',
@@ -618,6 +625,11 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'ef67e7e0-dca3-5a62-a42a-745db5ad7c1f',
             path: 'all_assets-0.2.0/data_stream/test_logs/fields/fields.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'f8da8ce3-77bb-5fa9-ad05-9f362684d494',
+            path: 'all_assets-0.2.0/elasticsearch/esql_view/test_query.yml',
             type: 'epm-packages-assets',
           },
         ],

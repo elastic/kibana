@@ -21,7 +21,6 @@ import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
-  GroupDefinition,
   SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
@@ -302,94 +301,6 @@ describe('initNavigation()', () => {
         ],
       });
     });
-
-    test('should leave "recentlyAccessed" as is', async () => {
-      const treeDefinition = await getNavigationTree();
-      const nodes = treeDefinition.body as ChromeProjectNavigationNode[];
-      expect(nodes[2]).toEqual({
-        type: 'recentlyAccessed',
-      });
-    });
-
-    test('should load preset', async () => {
-      const treeDefinition = await getNavigationTree();
-      const nodes = treeDefinition.body as ChromeProjectNavigationNode[];
-
-      expect(nodes[3]).toMatchInlineSnapshot(`
-        Object {
-          "children": Array [
-            Object {
-              "deepLink": Object {
-                "baseUrl": "/app",
-                "href": "/app/discover",
-                "id": "discover",
-                "title": "DISCOVER",
-                "url": "/app/discover",
-                "visibleIn": Array [
-                  "globalSearch",
-                ],
-              },
-              "href": "/app/discover",
-              "id": "discover",
-              "isExternalLink": false,
-              "onClick": undefined,
-              "path": "rootNav:analytics.discover",
-              "sideNavStatus": "visible",
-              "title": "DISCOVER",
-            },
-            Object {
-              "deepLink": Object {
-                "baseUrl": "/app",
-                "href": "/app/dashboards",
-                "id": "dashboards",
-                "title": "DASHBOARDS",
-                "url": "/app/dashboards",
-                "visibleIn": Array [
-                  "globalSearch",
-                ],
-              },
-              "href": "/app/dashboards",
-              "id": "dashboards",
-              "isExternalLink": false,
-              "onClick": undefined,
-              "path": "rootNav:analytics.dashboards",
-              "sideNavStatus": "visible",
-              "title": "DASHBOARDS",
-            },
-            Object {
-              "deepLink": Object {
-                "baseUrl": "/app",
-                "href": "/app/visualize",
-                "id": "visualize",
-                "title": "VISUALIZE",
-                "url": "/app/visualize",
-                "visibleIn": Array [
-                  "globalSearch",
-                ],
-              },
-              "href": "/app/visualize",
-              "id": "visualize",
-              "isExternalLink": false,
-              "onClick": undefined,
-              "path": "rootNav:analytics.visualize",
-              "sideNavStatus": "visible",
-              "title": "VISUALIZE",
-            },
-          ],
-          "deepLink": undefined,
-          "href": undefined,
-          "icon": "stats",
-          "id": "rootNav:analytics",
-          "isExternalLink": false,
-          "onClick": undefined,
-          "path": "rootNav:analytics",
-          "renderAs": "accordion",
-          "sideNavStatus": "visible",
-          "title": "Data exploration",
-          "type": "navGroup",
-        }
-      `);
-    });
   });
 
   test('should handle race condition when initNavigation() is called after getNavigationTreeUi$()', async () => {
@@ -578,7 +489,6 @@ describe('breadcrumbs', () => {
           id: 'root',
           title: 'Root',
           breadcrumbStatus: 'hidden' as 'hidden',
-          type: 'navGroup',
           children: [
             {
               id: 'subNav',
@@ -822,7 +732,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toHaveLength(4);
 
     // navigation node contents changed, but not the path
-    const [node] = mockNavigation.body as [GroupDefinition];
+    const [node] = mockNavigation.body;
     updateDefinition({
       body: [{ ...node, title: 'Changed title' }, ...mockNavigation.body],
     });

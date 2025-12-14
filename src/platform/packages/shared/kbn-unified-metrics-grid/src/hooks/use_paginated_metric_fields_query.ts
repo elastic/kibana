@@ -34,7 +34,7 @@ export const usePaginatedMetricFieldsQuery = <TQueryKey extends readonly unknown
   ) => Promise<PaginatedResponse | undefined>;
   enabled?: boolean;
 }) => {
-  const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
+  const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching, isRefetching } =
     useInfiniteQuery({
       queryKey,
       queryFn,
@@ -64,6 +64,6 @@ export const usePaginatedMetricFieldsQuery = <TQueryKey extends readonly unknown
   return {
     data: metricFieldsData,
     status,
-    isFetching,
+    isFetching: hasNextPage || isFetchingNextPage || isRefetching || isFetching,
   };
 };

@@ -7,6 +7,7 @@
 
 export type {
   Attachment,
+  UnknownAttachment,
   AttachmentInput,
   TextAttachment,
   ScreenContextAttachment,

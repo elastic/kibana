@@ -85,7 +85,8 @@ export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
 
 export function buildStepExecutionsTree(
   stepExecutions: WorkflowStepExecutionDto[],
-  executionContext?: Record<string, any>
+  executionContext?: Record<string, any>,
+  executionStatus?: ExecutionStatus
 ): StepExecutionTreeItem[] {
   const root = {};
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
@@ -155,12 +156,23 @@ export function buildStepExecutionsTree(
   }
 
   const regularSteps = toArray(root);
-  // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context (the only pseudo step for now)
+  // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context
   const pseudoSteps: StepExecutionTreeItem[] = [];
+
+  if (executionStatus !== undefined) {
+    pseudoSteps.push({
+      stepId: 'Overview',
+      stepType: '__overview',
+      executionIndex: 0,
+      stepExecutionId: '__overview',
+      status: executionStatus,
+      children: [],
+    });
+  }
 
   if (executionContext) {
     const hasEvent = executionContext.event && Object.keys(executionContext.event).length > 0;
-    const hasInputs = executionContext.inputs && Object.keys(executionContext.inputs).length > 0;
+    const hasInputs = executionContext.inputs !== undefined;
 
     if (hasEvent) {
       pseudoSteps.push({
@@ -174,7 +186,10 @@ export function buildStepExecutionsTree(
       });
     }
 
-    if (hasInputs) {
+    // in scheduled workflows, inputs are available but are presented in the trigger itself.
+    // This is to avoid showing the inputs pseudo-step when the event is present
+    // as the inputs are already displayed in the event pseudo-step
+    if (hasInputs && !hasEvent) {
       pseudoSteps.push({
         stepId: 'Inputs',
         stepType: '__inputs',

@@ -16,6 +16,7 @@ export interface EisGatewayConfig {
   ports: [number, number];
   mount: {
     acl: string;
+    endpointMetadata: string;
     tls: {
       cert: string;
       key: string;
@@ -48,8 +49,32 @@ interface AccessControlListConfig {
         security: boolean;
       };
     };
-    task_types: string[];
   };
+}
+
+interface EndpointMetadataConfig {
+  inference_endpoints: Array<{
+    id: string;
+    model_name: string;
+    task_types: {
+      elasticsearch: string;
+      eis: string;
+    };
+    status: string;
+    properties: string[];
+    release_date: string;
+    end_of_life_date?: string;
+    configuration?: {
+      similarity?: string;
+      dimensions?: number;
+      element_type?: string;
+      chunking_settings?: {
+        strategy: string;
+        max_chunk_size: number;
+        sentence_overlap: number;
+      };
+    };
+  }>;
 }
 
 export async function getEisGatewayConfig({
@@ -84,7 +109,6 @@ export async function getEisGatewayConfig({
           security: false,
         },
       },
-      task_types: ['chat'],
     },
     elser_model_2: {
       allow_cloud_trials: true,
@@ -101,7 +125,6 @@ export async function getEisGatewayConfig({
           security: false,
         },
       },
-      task_types: ['embed/text/sparse'],
     },
     'jina-embeddings-v3': {
       allow_cloud_trials: true,
@@ -118,13 +141,77 @@ export async function getEisGatewayConfig({
           security: false,
         },
       },
-      task_types: ['embed/text/dense'],
     },
   };
 
   const aclFilePath = await writeTempfile('acl.yaml', dump(aclContents));
 
   log.debug(`Wrote ACL file to ${aclFilePath}`);
+
+  // This file is meant for LOCAL DEVELOPMENT ONLY!
+  // We have different versions of this in serverless-gitops via Helm values.
+  const endpointMetadataContents: EndpointMetadataConfig = {
+    inference_endpoints: [
+      {
+        id: `.${EIS_CHAT_MODEL_NAME}-elastic`,
+        model_name: EIS_CHAT_MODEL_NAME,
+        task_types: {
+          elasticsearch: 'chat_completion',
+          eis: 'chat',
+        },
+        status: 'ga',
+        properties: ['multilingual'],
+        release_date: '2025-06-23',
+        end_of_life_date: '2026-04-15',
+      },
+      {
+        id: '.elser-2-elastic',
+        model_name: 'elser_model_2',
+        task_types: {
+          elasticsearch: 'sparse_embedding',
+          eis: 'embed/text/sparse',
+        },
+        status: 'preview',
+        properties: ['english'],
+        release_date: '2025-10-01',
+        configuration: {
+          chunking_settings: {
+            strategy: 'sentence',
+            max_chunk_size: 250,
+            sentence_overlap: 1,
+          },
+        },
+      },
+      {
+        id: '.jina-embeddings-v3',
+        model_name: 'jina-embeddings-v3',
+        task_types: {
+          elasticsearch: 'text_embedding',
+          eis: 'embed/text/dense',
+        },
+        status: 'beta',
+        properties: ['multilingual', 'open-weights'],
+        release_date: '2025-11-30',
+        configuration: {
+          similarity: 'cosine',
+          dimensions: 1024,
+          element_type: 'float',
+          chunking_settings: {
+            strategy: 'sentence',
+            max_chunk_size: 250,
+            sentence_overlap: 1,
+          },
+        },
+      },
+    ],
+  };
+
+  const endpointMetadataFilePath = await writeTempfile(
+    'endpoint-metadata.yaml',
+    dump(endpointMetadataContents)
+  );
+
+  log.debug(`Wrote endpoint metadata file to ${endpointMetadataFilePath}`);
 
   const { tls, ca } = await generateCertificates({
     log,
@@ -139,6 +226,7 @@ export async function getEisGatewayConfig({
     },
     mount: {
       acl: aclFilePath,
+      endpointMetadata: endpointMetadataFilePath,
       tls,
       ca,
     },

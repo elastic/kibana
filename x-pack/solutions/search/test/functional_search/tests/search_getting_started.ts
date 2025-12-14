@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchGettingStarted',
     'searchHomePage',
     'searchNavigation',
+    'solutionNavigation',
   ]);
   const searchSpace = getService('searchSpace');
   const browser = getService('browser');
@@ -177,9 +178,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const href = await testSubjects.getAttribute('gettingStartedSearchLabs-btn', 'href');
             expect(href).to.contain('search-labs');
           });
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
+          it('renders Elastic Training callout and navigates correctly', async () => {
+            const href = await testSubjects.getAttribute(
+              'gettingStartedElasticTraining-btn',
+              'href'
+            );
+            expect(href).to.contain('training');
           });
           it('renders Elasticsearch Documentation callout and navigates correctly', async () => {
             const href = await testSubjects.getAttribute(
@@ -187,6 +191,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'href'
             );
             expect(href).to.contain('docs/solutions/search/get-started');
+          });
+        });
+      });
+
+      describe('Getting Started navigation', function () {
+        it('renders Getting Started side nav item', async () => {
+          await pageObjects.searchNavigation.navigateToElasticsearchSearchGettingStartedPage();
+          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+            deepLinkId: 'searchGettingStarted',
+          });
+        });
+
+        it('Getting Started nav item is active and shows correct breadcrumbs', async () => {
+          await pageObjects.solutionNavigation.sidenav.clickLink({
+            deepLinkId: 'searchGettingStarted',
+          });
+          await testSubjects.existOrFail('gettingStartedHeader');
+          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+            deepLinkId: 'searchGettingStarted',
+          });
+          await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+            text: 'Getting started',
           });
         });
       });

@@ -31,7 +31,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { isMapWithStringValues, FieldType } from '../types/types';
+import { FieldType, isMapWithStringValues } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -99,7 +99,6 @@ interface InferenceServicesProps {
     currentSolution?: SolutionView;
     isPreconfigured?: boolean;
     allowContextWindowLength?: boolean;
-    enableCustomHeaders?: boolean;
     reenterSecretsOnEdit?: boolean;
     allowTemperature?: boolean;
   };
@@ -117,7 +116,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     enforceAdaptiveAllocations,
     isPreconfigured,
     currentSolution,
-    enableCustomHeaders,
     reenterSecretsOnEdit,
   },
 }) => {
@@ -187,10 +185,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
       const hiddenFields = [...(overrides?.hidden ?? [])];
 
-      if (enableCustomHeaders !== true) {
-        hiddenFields.unshift('headers');
-      }
-
       if (provider?.configurations) {
         Object.entries(provider.configurations).forEach(([field, configEntry]) => {
           if (Object.values(FieldType).includes(configEntry.type) === false) {
@@ -207,7 +201,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
       return overrides;
     },
-    [enforceAdaptiveAllocations, enableCustomHeaders]
+    [enforceAdaptiveAllocations]
   );
 
   const providerName = useMemo(
@@ -253,9 +247,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           // Remove fields of unknown and unhandled types
           Object.values(FieldType).includes(
             newProvider?.configurations[k]?.type ?? ('' as FieldType)
-          ) === false ||
-          // Tempo fix for inference endpoint creation to ensure headers aren't sent until full custom header support is added here https://github.com/elastic/kibana/pull/242187
-          (newProvider?.configurations[k]?.type === FieldType.MAP && enableCustomHeaders !== true)
+          ) === false
         ) {
           delete newConfig[k];
         } else if (
@@ -289,7 +281,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, secrets, updateFieldValues, updatedProviders, getOverrides, enableCustomHeaders]
+    [config, secrets, updateFieldValues, updatedProviders, getOverrides]
   );
 
   const onProviderChange = useCallback(

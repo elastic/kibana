@@ -76,7 +76,19 @@ export const inferenceKeys = {
   getConnectors: () => ['get-inference-connectors'] as const,
 };
 
-const DEFAULT_SEARCH_FIELDS = ['title', 'description', 'incremental_id.text'];
+const DEFAULT_SEARCH_FIELDS = [
+  'cases.title',
+  'cases.description',
+  'cases.incremental_id.text',
+  'cases.observables.value',
+  'cases.customFields.value',
+  'cases-comments.comment',
+  'cases-comments.alertId',
+  'cases-comments.eventId',
+];
+
+export const DEFAULT_FROM_DATE = 'now-30d';
+export const DEFAULT_TO_DATE = 'now';
 
 // TODO: Remove reporters. Move searchFields to API.
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
@@ -90,6 +102,8 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   owner: [],
   category: [],
   customFields: {},
+  from: DEFAULT_FROM_DATE,
+  to: DEFAULT_TO_DATE,
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {

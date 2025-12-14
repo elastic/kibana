@@ -58,6 +58,8 @@ export {
   isConversationNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
+  isAgentExecutionError,
+  isContextLengthExceededAgentError,
   createOnechatError,
   createInternalError,
   createToolNotFoundError,
@@ -72,6 +74,7 @@ export {
   type OnechatConversationNotFoundError,
   type OnechatBadRequestError,
   type OnechatRequestAbortedError,
+  type OnechatAgentExecutionError,
   type SerializedOnechatError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
@@ -79,8 +82,10 @@ export { EsResourceType } from './base/resources';
 export {
   oneChatDefaultAgentId,
   AgentType,
+  AgentExecutionErrorCode,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
   type AgentAnswerStepConfiguration,

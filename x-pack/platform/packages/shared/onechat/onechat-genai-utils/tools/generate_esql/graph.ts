@@ -34,6 +34,7 @@ const StateAnnotation = Annotation.Root({
   maxRetries: Annotation<number>(),
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
+  rowLimit: Annotation<number | undefined>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -126,6 +127,7 @@ export const createNlToEsqlGraph = ({
         previousActions: state.actions,
         additionalInstructions: state.additionalInstructions,
         additionalContext: state.additionalContext,
+        rowLimit: state.rowLimit,
       })
     );
 
