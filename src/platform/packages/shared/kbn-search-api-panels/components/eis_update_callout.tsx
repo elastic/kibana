@@ -10,11 +10,10 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiImage,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -52,34 +51,22 @@ export const EisUpdateCallout = ({
   }
 
   return (
-    <EuiPanel
-      grow={false}
+    <EuiCallOut
       data-telemetry-id={dataId}
       data-test-subj={dataId}
       css={({ euiTheme }) => ({
         color: euiTheme.colors.primaryText,
-        border: `1px ${euiTheme.colors.borderBaseSubdued} solid`,
-        position: 'relative',
+        backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
+        border: `${euiTheme.border.thin}`,
       })}
-      paddingSize="m"
-      color="subdued"
+      onDismiss={onDismissTour}
     >
-      <div style={{ position: 'absolute', top: 8, right: 8 }}>
-        <EuiButtonIcon
-          iconType="cross"
-          aria-label={i18n.EIS_CALLOUT_DISMISS_ARIA}
-          onClick={onDismissTour}
-          size="s"
-          data-test-subj="eisUpdateCalloutDismissBtn"
-        />
-      </div>
       <EuiFlexGroup direction={direction} alignItems="flexStart">
         <EuiImage src={searchRocketIcon} alt={i18n.EIS_CALLOUT_ICON_ALT} size="original" />
         <div>
-          <EuiTitle size="xxs">
-            <h2>{i18n.EIS_CALLOUT_TITLE}</h2>
+          <EuiTitle>
+            <h4>{i18n.EIS_CALLOUT_TITLE}</h4>
           </EuiTitle>
-          <EuiSpacer size="xs" />
           <EuiText color="subdued" size="s">
             <p>{i18n.EIS_UPDATE_CALLOUT_DESCRIPTION}</p>
           </EuiText>
@@ -107,6 +94,6 @@ export const EisUpdateCallout = ({
           </EuiFlexGroup>
         </div>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCallOut>
   );
 };
