@@ -8,14 +8,20 @@
  */
 
 export {
-  DataMapStepTypeId,
+  dataDedupeStepCommonDefinition,
+  DataDedupeStepTypeId,
+  type DataDedupeStepInputSchema,
+  type DataDedupeStepOutputSchema,
+} from './data_dedupe_step';
+export {
   dataMapStepCommonDefinition,
+  DataMapStepTypeId,
   type DataMapStepInputSchema,
   type DataMapStepOutputSchema,
 } from './data_map_step';
 export {
-  DataSetStepTypeId,
   dataSetStepCommonDefinition,
+  DataSetStepTypeId,
   type DataSetStepInputSchema,
   type DataSetStepOutputSchema,
 } from './data_set_step';
