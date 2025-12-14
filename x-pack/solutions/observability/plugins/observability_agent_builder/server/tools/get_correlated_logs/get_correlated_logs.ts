@@ -85,14 +85,24 @@ export function createGetCorrelatedLogsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getCorrelatedLogsSchema> = {
     id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Finds log sequences leading up to errors or other events of interest.
+    description: `Retrieves complete log sequences around events of interest (errors, slow requests, anomalies) to understand what happened.
+
+When to use:
+- Investigating WHY something failed or behaved unexpectedly
+- Understanding the sequence of events leading to an error or incident
+- Following a request/transaction across services using correlation IDs (trace.id, request.id, etc.)
+- An alert fired and you need to understand the root cause
 
 How it works:
-1. Finds "anchor" logs matching your criteria (default: error/warning logs with severity ERROR, WARN, FATAL, HTTP 5xx, etc.)
-2. For each anchor, fetches all logs sharing that acorrelation ID to show the full sequence of events
+1. Finds "anchor" logs matching your criteria (default: errors with severity ERROR, WARN, FATAL, HTTP 5xx, etc.)
+2. Groups logs by correlation ID - a shared identifier that links related logs across a distributed system
+3. Returns chronologically sorted sequences showing the full story before and after each anchor
 
-Returns: { sequences: [{ correlation: { field: "trace.id", value: "abc123" }, logs: [...] }] }
-Each sequence contains chronologically sorted logs sharing the same correlation ID.`,
+Returns: { sequences: [{ correlation: { field, value }, logs: [...] }] }
+
+Do NOT use for:
+- Getting a high-level overview of log patterns (use get_log_categories)
+- Analyzing why log volume changed (use run_log_rate_analysis)`,
     schema: getCorrelatedLogsSchema,
     tags: ['observability', 'logs'],
     handler: async (
@@ -154,7 +164,6 @@ Each sequence contains chronologically sorted logs sharing the same correlation 
       } catch (error) {
         logger.error(`Error fetching errors and surrounding logs: ${error.message}`);
         logger.debug(error);
-        console.log(error);
 
         return {
           results: [

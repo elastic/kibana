@@ -66,8 +66,6 @@ export async function getAnchorLogsForTimeRange({
     aggs: buildDiversifiedSamplerAggregations(correlationFields, maxSequences),
   };
 
-  console.log('searchRequest', JSON.stringify(searchRequest, null, 2));
-
   const response = await search(searchRequest);
 
   const anchorLogs = parseAnchorLogsFromAggregations(
@@ -76,8 +74,6 @@ export async function getAnchorLogsForTimeRange({
   );
 
   logger.debug(`Found ${anchorLogs.length} unique anchor logs across correlation fields`);
-
-  console.log('anchorLogs', JSON.stringify(anchorLogs, null, 2));
 
   return anchorLogs.slice(0, maxSequences);
 }
@@ -154,9 +150,6 @@ function parseAnchorLogsFromAggregations(
     const aggName = getAggNameForField(field);
     const filterAgg = aggregations[aggName];
     if (!filterAgg) return [];
-
-    console.log(`Processing aggregation for field "${field}"`);
-    console.log(JSON.stringify(filterAgg, null, 2));
 
     const buckets = filterAgg.diverse_sampler?.unique_values?.buckets ?? [];
 
