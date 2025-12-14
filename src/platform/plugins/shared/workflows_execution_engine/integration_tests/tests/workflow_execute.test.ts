@@ -476,6 +476,137 @@ steps:
       expect(executeStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
       expect(executeStepExecutions[0].error).toBeDefined();
     });
+
+    it('should propagate error from child workflow.fail to parent workflow', async () => {
+      // Create a child workflow that uses workflow.fail
+      const childWorkflow: EsWorkflow = {
+        id: 'child-workflow-fail-id',
+        name: 'child-workflow-fail',
+        description: 'Child workflow that fails',
+        enabled: true,
+        tags: [],
+        valid: true,
+        createdAt: new Date(),
+        createdBy: 'system',
+        lastUpdatedAt: new Date(),
+        lastUpdatedBy: 'system',
+        definition: {
+          version: '1',
+          name: 'child-workflow-fail',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'fail_step',
+              type: 'workflow.fail',
+              with: {
+                message: 'Child workflow intentionally failed',
+              },
+            },
+          ],
+        },
+        yaml: `
+steps:
+  - name: fail_step
+    type: workflow.fail
+    with:
+      message: "Child workflow intentionally failed"
+`,
+        deleted_at: null,
+      };
+      workflowRepositoryMock.workflows.set('child-workflow-fail-id', childWorkflow);
+
+      // First run - parent workflow starts child execution and enters wait state
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: `
+steps:
+  - name: executeChild
+    type: workflow.execute
+    with:
+      workflow-id: "child-workflow-fail-id"
+      await: true
+`,
+      });
+
+      // Get the child execution that was created by executeWorkflow
+      const initialChildExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          childWorkflowExecutionId
+        );
+
+      if (!initialChildExecution) {
+        throw new Error(`Child execution ${childWorkflowExecutionId} not found`);
+      }
+
+      // Now actually run the child workflow to completion (it will fail with workflow.fail)
+      // We need to temporarily change the execution ID to match the child's ID
+      const originalExecutionId = 'fake_workflow_execution_id';
+      const originalExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          originalExecutionId
+        );
+
+      // Create child execution with the correct ID and run it
+      const childExecutionToRun: Partial<EsWorkflowExecution> = {
+        ...initialChildExecution,
+        id: childWorkflowExecutionId,
+        workflowId: 'child-workflow-fail-id',
+        workflowDefinition: childWorkflow.definition as any,
+        status: ExecutionStatus.PENDING,
+      };
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
+        childWorkflowExecutionId,
+        childExecutionToRun as EsWorkflowExecution
+      );
+
+      // Import runWorkflow to execute the child
+      const { runWorkflow: runChildWorkflow } = await import(
+        '../../server/execution_functions/run_workflow'
+      );
+      await runChildWorkflow({
+        workflowRunId: childWorkflowExecutionId,
+        spaceId: 'fake_space_id',
+        taskAbortController: workflowRunFixture.taskAbortController,
+        dependencies: workflowRunFixture.dependencies,
+        logger: workflowRunFixture.loggerMock,
+        config: workflowRunFixture.configMock,
+        fakeRequest: workflowRunFixture.fakeKibanaRequest,
+      });
+
+      // Get the updated child execution after it completes
+      const completedChildExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          childWorkflowExecutionId
+        );
+
+      // Verify child workflow failed with the expected error
+      expect(completedChildExecution?.status).toBe(ExecutionStatus.FAILED);
+      expect(completedChildExecution?.error).toBeDefined();
+      expect(completedChildExecution?.error?.message).toBe('Child workflow intentionally failed');
+      expect(completedChildExecution?.context?.output).toEqual({
+        message: 'Child workflow intentionally failed',
+      });
+
+      // Restore original execution if it existed
+      if (originalExecution) {
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
+          originalExecutionId,
+          originalExecution
+        );
+      }
+
+      // Resume parent workflow - should detect child failure and propagate error
+      await workflowRunFixture.resumeWorkflow();
+
+      const executeStepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepId === 'executeChild');
+
+      // Verify parent step failed with the child's error
+      expect(executeStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
+      expect(executeStepExecutions[0].error).toBeDefined();
+      expect(executeStepExecutions[0].error?.message).toBe('Child workflow intentionally failed');
+    });
   });
 
   describe('workflow resolution', () => {

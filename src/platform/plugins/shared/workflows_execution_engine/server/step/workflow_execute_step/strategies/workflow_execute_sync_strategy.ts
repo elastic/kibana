@@ -150,30 +150,44 @@ export class WorkflowExecuteSyncStrategy {
           );
         }
 
-        // Finish step with results
-        // Use finishedAt if available, otherwise use current time (execution is terminal)
-        const completedAt =
-          execution.finishedAt && execution.finishedAt.trim() !== ''
-            ? execution.finishedAt
-            : new Date().toISOString();
-
-        this.stepExecutionRuntime.finishStep({
-          workflowId: state.workflowId,
-          executionId: state.executionId,
-          awaited: true,
-          status: execution.status,
-          output,
-          error: execution.error,
-          startedAt: execution.startedAt,
-          completedAt,
-        });
-
-        // If sub-workflow failed, fail this step too
+        // Check if sub-workflow failed before finishing the step
         if (execution.status === ExecutionStatus.FAILED) {
-          const error = execution.error
-            ? new ExecutionError(execution.error)
-            : new Error('Sub-workflow execution failed');
+          let error: Error;
+          if (execution.error) {
+            // Create ExecutionError from the child's error
+            // If message is empty, try to get it from context.output.message (workflow.fail pattern)
+            if (!execution.error.message || execution.error.message.trim() === '') {
+              const errorMessage =
+                (execution.context?.output as Record<string, unknown>)?.message ||
+                'Sub-workflow execution failed';
+
+              error = new ExecutionError({
+                type: execution.error.type || 'Error',
+                message: typeof errorMessage === 'string' ? errorMessage : String(errorMessage),
+                ...(execution.error.details && { details: execution.error.details }),
+              });
+            } else {
+              error = new ExecutionError(execution.error);
+            }
+          } else {
+            // No error object, but workflow failed - try to get message from context.output
+            const errorMessage =
+              (execution.context?.output as Record<string, unknown>)?.message ||
+              'Sub-workflow execution failed';
+
+            error = new ExecutionError({
+              type: 'Error',
+              message: typeof errorMessage === 'string' ? errorMessage : String(errorMessage),
+            });
+          }
           this.stepExecutionRuntime.failStep(error);
+        } else {
+          // Pass the output directly as the step output (not wrapped in an object)
+          // This allows parent workflows to access child outputs via steps.<step-id>.output.field
+          // Convert JsonValue to Record<string, unknown> | undefined for finishStep
+          const stepOutput: Record<string, unknown> | undefined =
+            output === null ? undefined : (output as Record<string, unknown>);
+          this.stepExecutionRuntime.finishStep(stepOutput);
         }
 
         this.workflowExecutionRuntime.navigateToNextNode();

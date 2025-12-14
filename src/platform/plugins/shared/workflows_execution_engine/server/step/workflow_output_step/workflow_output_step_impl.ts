@@ -86,7 +86,7 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowOutputStep;
-    const { with: outputValues, status = 'completed' } = step;
+    const { with: outputValues } = step;
 
     try {
       // Get the workflow definition to check for declared outputs
@@ -119,9 +119,9 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
           this.stepExecutionRuntime.failStep(validationError);
           await this.stepExecutionRuntime.flushEventLogs();
 
-          // Mark workflow as failed and stop execution
+          // Mark workflow as failed
           this.workflowExecutionRuntime.setWorkflowError(validationError);
-          this.workflowExecutionRuntime.navigateToNode(''); // Clear next node to stop execution
+          this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
           return;
         }
       }
@@ -131,40 +131,62 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
         tags: ['workflow-output', 'success'],
       });
 
-      // Complete the step successfully with the output values as step output
-      this.stepExecutionRuntime.finishStep(outputValues);
-      await this.stepExecutionRuntime.flushEventLogs();
+      // Determine the execution status based on the step's status parameter
+      const stepStatus = step.status || 'completed';
+      let executionStatus: ExecutionStatus;
+      let outcome: 'success' | 'failure' | 'unknown';
 
       // Store outputs in workflow execution context
       const currentContext = (workflowExecution.context as Record<string, unknown>) || {};
       currentContext.output = outputValues;
+      workflowExecution.context = currentContext;
 
-      // Determine the execution status based on the step's status parameter
-      let executionStatus: ExecutionStatus;
-      let outcome: 'success' | 'failure' | 'unknown';
-
-      switch (status) {
+      switch (stepStatus) {
         case 'completed':
           executionStatus = ExecutionStatus.COMPLETED;
           outcome = 'success';
+          // Complete the step successfully with the output values
+          this.stepExecutionRuntime.finishStep(outputValues);
           break;
         case 'cancelled':
           executionStatus = ExecutionStatus.CANCELLED;
           outcome = 'unknown';
+          // Complete the step successfully with the output values (cancellation is not an error)
+          this.stepExecutionRuntime.finishStep(outputValues);
           break;
         case 'failed':
           executionStatus = ExecutionStatus.FAILED;
           outcome = 'failure';
-          this.workflowExecutionRuntime.setWorkflowError(
-            new Error('Workflow terminated with failed status via workflow.output step')
-          );
+          // For workflow.fail steps, use the message from the output if available
+          const errorMessage =
+            typeof outputValues.message === 'string'
+              ? outputValues.message
+              : 'Workflow terminated with failed status';
+
+          const failureError = new Error(errorMessage);
+
+          this.workflowLogger.logInfo(`Workflow failed with message: ${errorMessage}`, {
+            event: { action: 'workflow-output-error-set', outcome: 'failure' },
+            tags: ['workflow-output', 'error'],
+            error: {
+              message: errorMessage,
+              type: failureError.name,
+            },
+          });
+
+          // Fail the step with the error
+          // Note: failStep() already sets the workflow error, so we don't need to call setWorkflowError() separately
+          this.stepExecutionRuntime.failStep(failureError);
           break;
         default:
           executionStatus = ExecutionStatus.COMPLETED;
           outcome = 'success';
+          this.stepExecutionRuntime.finishStep(outputValues);
       }
 
-      this.workflowLogger.logInfo(`Workflow terminated with status: ${status}`, {
+      await this.stepExecutionRuntime.flushEventLogs();
+
+      this.workflowLogger.logInfo(`Workflow terminated with status: ${stepStatus}`, {
         event: {
           action: 'workflow-terminated',
           outcome,
@@ -189,7 +211,7 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
       // Mark workflow as failed
       this.workflowExecutionRuntime.setWorkflowError(errorObj);
-      this.workflowExecutionRuntime.navigateToNode(''); // Stop execution
+      this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
     }
   }
 }

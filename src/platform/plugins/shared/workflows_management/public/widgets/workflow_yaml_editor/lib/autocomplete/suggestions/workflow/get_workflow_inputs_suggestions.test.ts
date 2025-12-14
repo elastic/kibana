@@ -87,6 +87,7 @@ describe('getWorkflowInputsSuggestions', () => {
         },
         totalWorkflows: 1,
       },
+      workflowDefinition: null,
       ...overrides,
     };
   };

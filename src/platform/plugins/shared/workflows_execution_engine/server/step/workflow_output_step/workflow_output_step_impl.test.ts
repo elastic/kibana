@@ -81,6 +81,16 @@ describe('WorkflowOutputStepImpl', () => {
       expect(mockWorkflowRuntime.setWorkflowStatus).toHaveBeenCalledWith('completed');
     });
 
+    it('should store output in workflow execution context', async () => {
+      const mockExecution = mockWorkflowRuntime.getWorkflowExecution();
+      await impl.run();
+      expect(mockExecution.context).toEqual(
+        expect.objectContaining({
+          output: { result: 'success', count: 42 },
+        })
+      );
+    });
+
     it('should flush event logs', async () => {
       await impl.run();
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalled();
@@ -122,10 +132,11 @@ describe('WorkflowOutputStepImpl', () => {
       expect(mockWorkflowRuntime.setWorkflowError).not.toHaveBeenCalled();
     });
 
-    it('should set workflow status to failed and call setWorkflowError when status is failed', async () => {
+    it('should set workflow status to failed and call failStep with error when status is failed', async () => {
       mockNode.configuration = {
         ...mockNode.configuration,
         status: 'failed',
+        with: { message: 'Custom failure message' },
       };
       impl = new WorkflowOutputStepImpl(
         mockNode,
@@ -136,9 +147,33 @@ describe('WorkflowOutputStepImpl', () => {
 
       await impl.run();
       expect(mockWorkflowRuntime.setWorkflowStatus).toHaveBeenCalledWith('failed');
-      expect(mockWorkflowRuntime.setWorkflowError).toHaveBeenCalledWith(
+      // failStep() is called with the error, which also sets the workflow error
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining('failed status'),
+          message: 'Custom failure message',
+        })
+      );
+    });
+
+    it('should use default error message when status is failed but no message provided', async () => {
+      mockNode.configuration = {
+        ...mockNode.configuration,
+        status: 'failed',
+        with: { someOtherField: 'value' },
+      };
+      impl = new WorkflowOutputStepImpl(
+        mockNode,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await impl.run();
+      expect(mockWorkflowRuntime.setWorkflowStatus).toHaveBeenCalledWith('failed');
+      // failStep() is called with the error, which also sets the workflow error
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Workflow terminated with failed status',
         })
       );
     });

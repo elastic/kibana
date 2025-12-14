@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Document } from 'yaml';
+import { parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { validateVariable } from './validate_variable';
+import { validateVariables } from './validate_variables';
+import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 
 // Mock the imports
 jest.mock('../../workflow_context/lib/get_context_for_path');
 jest.mock('./validate_variable');
 
-import { validateVariable } from './validate_variable';
-import { validateVariables } from './validate_variables';
 import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
@@ -58,6 +61,11 @@ describe('validateVariables', () => {
   } as WorkflowYaml;
 
   const mockWorkflowGraph = WorkflowGraph.fromWorkflowDefinition(mockWorkflowDefinition);
+  const mockYamlDocument: Document = parseDocument('name: Test Workflow');
+  const mockWorkflows: WorkflowsResponse = {
+    workflows: {},
+    totalWorkflows: 0,
+  };
 
   it('should return array of validation results when no variables have errors', () => {
     const variables = [
@@ -69,7 +77,13 @@ describe('validateVariables', () => {
     mockGetContextSchemaForPath.mockReturnValue({} as any);
     mockValidateVariable.mockReturnValue({} as YamlValidationResult); // No errors
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(result).toHaveLength(3);
     expect(mockValidateVariable).toHaveBeenCalledTimes(3);
@@ -122,7 +136,13 @@ describe('validateVariables', () => {
         owner: 'variable-validation',
       });
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(result).toHaveLength(3);
     expect(result[0].message).toBe(null);
@@ -137,7 +157,13 @@ describe('validateVariables', () => {
       throw new Error('Invalid path');
     });
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
@@ -218,7 +244,13 @@ describe('validateVariables', () => {
         owner: 'variable-validation',
       });
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(result).toHaveLength(5);
     expect(result[0].message).toBe(null);
@@ -231,7 +263,13 @@ describe('validateVariables', () => {
   });
 
   it('should handle empty variable list', () => {
-    const result = validateVariables([], mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      [],
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(result).toEqual([]);
     expect(mockGetContextSchemaForPath).not.toHaveBeenCalled();
@@ -248,12 +286,20 @@ describe('validateVariables', () => {
     mockGetContextSchemaForPath.mockReturnValue(mockContext as any);
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
-    validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);
+    validateVariables(
+      [variable],
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(mockGetContextSchemaForPath).toHaveBeenCalledWith(
       mockWorkflowDefinition,
       mockWorkflowGraph,
-      ['steps', 0, 'params', 'value']
+      ['steps', 0, 'params', 'value'],
+      mockYamlDocument,
+      mockWorkflows
     );
     expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext);
   });
@@ -279,7 +325,13 @@ describe('validateVariables', () => {
       owner: 'variable-validation',
     });
 
-    const result = validateVariables([foreachVariable], mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      [foreachVariable],
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(result).toHaveLength(1);
     expect(result[0].message).toContain('Foreach parameter');
@@ -307,7 +359,13 @@ describe('validateVariables', () => {
       owner: 'variable-validation',
     });
 
-    const result = validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      [variable],
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockWorkflows
+    );
 
     expect(result[0]).toEqual({
       id: 'test-error',

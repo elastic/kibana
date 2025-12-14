@@ -67,6 +67,7 @@ describe('getVariableSuggestions', () => {
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: false,
     isInTriggersContext: false,
+    workflowDefinition: null,
     ...overrides,
   });
 

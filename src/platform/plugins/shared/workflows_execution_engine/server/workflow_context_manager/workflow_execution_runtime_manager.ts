@@ -204,8 +204,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowError(error: Error | undefined): void {
     const executionError = error ? ExecutionError.fromError(error) : undefined;
+    const serializedError = executionError ? executionError.toSerializableObject() : undefined;
+
     this.workflowExecutionState.updateWorkflowExecution({
-      error: executionError ? executionError.toSerializableObject() : undefined,
+      error: serializedError,
     });
   }
 
@@ -221,12 +223,25 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowStatus(status: ExecutionStatus): void {
     const finishedAt = new Date().toISOString();
-    this.workflowExecutionState.updateWorkflowExecution({
+
+    // Clear nextNodeId to signal that workflow is terminal
+    this.nextNodeId = undefined;
+
+    const update: Partial<EsWorkflowExecution> = {
       status,
+      currentNodeId: undefined, // Clear the current node to stop execution
       finishedAt,
       duration:
         new Date(finishedAt).getTime() - new Date(this.workflowExecution.startedAt).getTime(),
-    });
+    };
+
+    // Preserve the error field if it exists (e.g., from workflow.fail)
+    const currentExecution = this.workflowExecutionState.getWorkflowExecution();
+    if (currentExecution.error) {
+      update.error = currentExecution.error;
+    }
+
+    this.workflowExecutionState.updateWorkflowExecution(update);
   }
 
   public async start(): Promise<void> {
@@ -394,12 +409,14 @@ export class WorkflowExecutionRuntimeManager {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       currentNodeId: this.nextNodeId,
     };
-    if (!this.nextNodeId) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
-    }
 
-    if (workflowExecution.error) {
+    if (isTerminalStatus(workflowExecution.status)) {
+      workflowExecutionUpdate.status = workflowExecution.status;
+    } else if (workflowExecution.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
+      workflowExecutionUpdate.error = workflowExecution.error;
+    } else if (!this.nextNodeId) {
+      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 
     if (
