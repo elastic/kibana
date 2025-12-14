@@ -333,6 +333,14 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details > .monaco-scrollable-element > .body > .header > .type {
       white-space: normal !important;
     }
+
+    // Modifies the height of the signature popup to make it fit under the page header.
+    // This is temprary until https://github.com/elastic/kibana/issues/245694 is resolved.
+    // This solution is succeptible to errors if the editor height or the page header height changes.
+    .parameter-hints-widget > .phwrapper {
+      max-height: 90px !important;
+      overflow: auto;
+    }
   `;
 };
 

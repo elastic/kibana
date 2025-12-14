@@ -2821,10 +2821,10 @@
     "@elastic/react-search-ui-views" "1.24.1"
     "@elastic/search-ui" "1.24.1"
 
-"@elastic/request-converter@^9.2.0":
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.2.0.tgz#0a93948f6887b5c902e58a9bf5ac79dc6da12d70"
-  integrity sha512-dUVpSciCd3XQj2ghYZB7cGdQWMvFi/k0Hvd6KDfgEkg9uFh+xjng0axCvq/HHfLsClwoptDUw1G8B80CAK0i3g==
+"@elastic/request-converter@^9.2.2":
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.2.2.tgz#0aa5586c272a9624cb1148be773cde60da29d2d8"
+  integrity sha512-CbKhDKGAKUZG/RQaHlAdjomavYoi0mJUMXVX4iJM/U2Glm1Yg8MBB9gyfRaAb8l1eQ1TMLFX4KUNqtGVSxL7Tw==
   dependencies:
     base64url "^3.0.1"
     commander "^12.1.0"
@@ -4530,6 +4530,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/access-control-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""
@@ -4554,6 +4558,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-agent-confirmation-modal@link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -4575,6 +4583,10 @@
   uid ""
 
 "@kbn/ai-assistant@link:x-pack/platform/packages/shared/kbn-ai-assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-insights@link:x-pack/platform/packages/shared/ai-insights":
   version "0.0.0"
   uid ""
 
@@ -4998,6 +5010,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-access-control-server@link:src/platform/packages/shared/content-management/access_control/access_control_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""
@@ -5207,10 +5227,6 @@
   uid ""
 
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-navigation-tour@link:src/core/packages/chrome/navigation-tour":
   version "0.0.0"
   uid ""
 
@@ -6570,6 +6586,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ux-example-plugin@link:examples/esql_ux_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
@@ -7586,10 +7606,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
-  version "0.0.0"
-  uid ""
-
 "@kbn/observability-ai-assistant-app-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_app":
   version "0.0.0"
   uid ""
@@ -7731,6 +7747,10 @@
   uid ""
 
 "@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
+  version "0.0.0"
+  uid ""
+
+"@kbn/otel-demo@link:src/platform/packages/shared/kbn-otel-demo":
   version "0.0.0"
   uid ""
 
@@ -8899,6 +8919,10 @@
   uid ""
 
 "@kbn/streamlang-tests@link:x-pack/platform/packages/shared/kbn-streamlang-tests":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streamlang-yaml-editor@link:x-pack/platform/packages/shared/kbn-streamlang-yaml-editor":
   version "0.0.0"
   uid ""
 
@@ -21710,10 +21734,10 @@ functions-have-names@^1.2.3:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
-fuse.js@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-7.0.0.tgz#6573c9fcd4c8268e403b4fc7d7131ffcf99a9eb2"
-  integrity sha512-14F4hBIxqKvD4Zz/XjDc3y94mNZN6pRv3U13Udo0lNLCWRBUsrMv2xwcF/y/Z5sV6+FQW+/ow68cHpm4sunt8Q==
+fuse.js@^7.1.0:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-7.1.0.tgz#306228b4befeee11e05b027087c2744158527d09"
+  integrity sha512-trLf4SzuuUxfusZADLINj+dE8clK1frKdmqiJNb1Es75fmI5oY6X2mxLVUciLLjxqw/xr72Dhy+lER6dGd02FQ==
 
 gaxios@^6.0.0, gaxios@^6.1.1:
   version "6.6.0"
