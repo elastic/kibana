@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApplicationStart } from '@kbn/core/public';
+import { WORKFLOWS_UI_SETTING_ENABLED_ID } from '../../../common';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -211,9 +212,19 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
 };
 
 export const MetricPanels = () => {
+  const { services } = useKibana();
+  const isWorkflowsUiEnabled = services.uiSettings.get<boolean>(
+    WORKFLOWS_UI_SETTING_ENABLED_ID,
+    false
+  );
+
+  const panels = isWorkflowsUiEnabled
+    ? METRIC_PANEL_ITEMS
+    : METRIC_PANEL_ITEMS.filter((p) => p.type !== 'workflows');
+
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
-      {METRIC_PANEL_ITEMS.map((panel, index) => (
+      {panels.map((panel, index) => (
         <EuiFlexItem key={panel.type + '-' + index}>
           <MetricPanelEmpty panel={panel} />
         </EuiFlexItem>
