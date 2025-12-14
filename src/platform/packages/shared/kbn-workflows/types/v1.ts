@@ -77,7 +77,7 @@ export interface EsWorkflowExecution {
   error: SerializedError | null;
   createdBy: string;
   startedAt: string;
-  finishedAt: string;
+  finishedAt?: string;
   cancelRequested: boolean;
   cancellationReason?: string;
   cancelledAt?: string;
