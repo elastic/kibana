@@ -20,7 +20,8 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IndexTemplate } from '../../../../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import { formatDataRetention } from '../../../../utils';
 import { ErrorState } from './error_state';
 import { EmptyState } from './empty_state';

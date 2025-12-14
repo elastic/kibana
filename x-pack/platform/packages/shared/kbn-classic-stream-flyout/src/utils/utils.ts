@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexMode, type IndexTemplate } from '../types';
+import {
+  IndexMode,
+  type TemplateListItem as IndexTemplate,
+} from '@kbn/index-management-shared-types';
 
 export const formatDataRetention = (template: IndexTemplate): string | undefined => {
   const { lifecycle } = template;

@@ -24,7 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { IndexTemplate } from '../../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 import { SelectTemplateStep, NameAndConfirmStep } from './steps';
 import {
   type StreamNameValidator,

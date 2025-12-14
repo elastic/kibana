@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IndexTemplate } from '../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import {
   hasEmptyWildcards,
   hasInvalidFormat,
@@ -177,6 +178,9 @@ describe('validation_utils', () => {
       indexPatterns: ['logs-*'],
       allowAutoCreate: 'NO_OVERWRITE',
       _kbnMeta: { type: 'default', hasDatastream: true },
+      hasSettings: false,
+      hasAliases: false,
+      hasMappings: false,
     };
 
     describe('without external validator', () => {

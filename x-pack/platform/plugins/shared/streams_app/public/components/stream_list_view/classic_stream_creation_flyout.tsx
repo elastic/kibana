@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import type {
   IndexManagementLocatorParams,
-  IndexManagementIndexTemplate,
+  TemplateListItem as IndexTemplate,
 } from '@kbn/index-management-shared-types';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { createIlmApiClient } from '@kbn/index-lifecycle-management-common-shared';
@@ -102,11 +102,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   );
 
   const handleValidate = useCallback(
-    async (
-      streamName: string,
-      selectedTemplate: IndexManagementIndexTemplate,
-      validationSignal?: AbortSignal
-    ) => {
+    async (streamName: string, selectedTemplate: IndexTemplate, validationSignal?: AbortSignal) => {
       try {
         const response = await streamsRepositoryClient.fetch(
           'POST /internal/streams/_validate_classic_stream',

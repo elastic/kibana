@@ -7,7 +7,8 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useReducer } from 'react';
-import type { IndexTemplate } from '../../../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import { useStreamValidation } from './use_stream_validation';
 import type { StreamNameValidator } from '../../../utils';
 import { formReducer, initialFormState } from '../reducers/form_reducer';
@@ -23,6 +24,9 @@ describe('useStreamValidation', () => {
     indexPatterns: ['logs-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   };
 
   // Helper to set up hook with form reducer

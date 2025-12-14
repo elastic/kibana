@@ -8,7 +8,8 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
-import type { IndexTemplate } from '../../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 
 const MOCK_TEMPLATES: IndexTemplate[] = [
@@ -20,6 +21,9 @@ const MOCK_TEMPLATES: IndexTemplate[] = [
     indexMode: 'standard',
     composedOf: ['logs@mappings', 'logs@settings'],
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'template-2',
@@ -28,6 +32,9 @@ const MOCK_TEMPLATES: IndexTemplate[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     indexMode: 'logsdb',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'template-3',
@@ -35,6 +42,9 @@ const MOCK_TEMPLATES: IndexTemplate[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'multi-pattern-template',
@@ -45,6 +55,9 @@ const MOCK_TEMPLATES: IndexTemplate[] = [
     version: 12,
     composedOf: ['logs@mappings', 'logs@settings'],
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'very-long-pattern-template',
@@ -55,6 +68,9 @@ const MOCK_TEMPLATES: IndexTemplate[] = [
     version: 12,
     composedOf: ['logs@mappings', 'logs@settings'],
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
 ];
 

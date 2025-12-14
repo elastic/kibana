@@ -9,7 +9,8 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, act } from '@testing-library/react';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { IndexTemplate } from '../../../../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import { ConfirmTemplateDetailsSection } from './confirm_template_details_section';
 import type { IlmPolicyFetcher } from '../../../../utils';
 
@@ -18,6 +19,9 @@ const createMockTemplate = (overrides: Partial<IndexTemplate> = {}): IndexTempla
   indexPatterns: ['test-*'],
   allowAutoCreate: 'NO_OVERWRITE',
   _kbnMeta: { type: 'default', hasDatastream: true },
+  hasSettings: false,
+  hasAliases: false,
+  hasMappings: false,
   ...overrides,
 });
 

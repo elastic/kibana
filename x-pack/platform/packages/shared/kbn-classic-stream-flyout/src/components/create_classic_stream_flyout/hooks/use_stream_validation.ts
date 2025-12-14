@@ -6,7 +6,7 @@
  */
 
 import { useCallback, type Dispatch } from 'react';
-import type { IndexTemplate } from '../../../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
 import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';

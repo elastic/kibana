@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexTemplate } from '../types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
 /**
  * Checks if a stream name has unfilled wildcards (contains *)
