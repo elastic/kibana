@@ -497,6 +497,18 @@ export class StreamsApp {
     return targetCondition.getByRole('button', { name: 'Create nested step' });
   }
 
+  async getConditionContextMenuButton(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+
+    const allButtons = await targetCondition
+      .getByTestId('streamsAppStreamDetailEnrichmentStepContextMenuButton')
+      .all();
+
+    // Return the condition's context menu button, not nested conditions / actions.
+    return allButtons[0];
+  }
+
   // Gets the first level of nested steps under a condition at position 'pos'
   async getConditionNestedStepsList(pos: number) {
     const conditions = await this.getConditionsListItems();
@@ -858,6 +870,59 @@ export class StreamsApp {
     const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
     await expect(modal).toBeVisible();
     await expect(modal.getByTestId('streamsAppCreateStreamConfirmationModalTitle')).toBeVisible();
+  }
+
+  /**
+   * Pipeline Suggestions utility methods
+   */
+  getSuggestPipelineButton() {
+    return this.page.getByTestId('streamsAppGenerateSuggestionButton');
+  }
+
+  async clickSuggestPipelineButton() {
+    const button = this.getSuggestPipelineButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getSuggestPipelinePanel() {
+    return this.page.getByTestId('streamsAppSuggestPipelinePanel');
+  }
+
+  getPipelineSuggestionCallout() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionCallout');
+  }
+
+  getPipelineSuggestionAcceptButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionAcceptButton');
+  }
+
+  async acceptPipelineSuggestion() {
+    const button = this.getPipelineSuggestionAcceptButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getPipelineSuggestionRejectButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionRejectButton');
+  }
+
+  async rejectPipelineSuggestion() {
+    const button = this.getPipelineSuggestionRejectButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getRegeneratePipelineSuggestionButton() {
+    return this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+  }
+
+  async regeneratePipelineSuggestion() {
+    const regenerateButton = this.getRegeneratePipelineSuggestionButton();
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
   }
 
   /**

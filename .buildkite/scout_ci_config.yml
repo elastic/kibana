@@ -13,6 +13,7 @@ plugins:
     - profiling
     - security_solution
     - slo
+    - spaces
     - streams_app
     - workflows_extensions
   disabled:

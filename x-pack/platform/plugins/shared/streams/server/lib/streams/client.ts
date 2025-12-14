@@ -587,15 +587,15 @@ export class StreamsClient {
   private getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
   ): Streams.ClassicStream.Definition {
-    const now = new Date().toISOString();
+    const timestamp = new Date(0).toISOString();
 
     const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
-      updated_at: now,
+      updated_at: timestamp,
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: now },
+        processing: { steps: [], updated_at: timestamp },
         settings: {},
         classic: {},
         failure_store: { inherit: {} },
