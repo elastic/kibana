@@ -35,8 +35,7 @@ const createMockEuiThemeContext = (): UseEuiTheme => ({
   } as any,
   colorMode: 'LIGHT' as const,
   modifications: {},
-  setColorMode: jest.fn(),
-  setDefaultColorMode: jest.fn(),
+  highContrastMode: false,
 });
 
 describe('getMonacoWorkflowOverridesStyles', () => {
