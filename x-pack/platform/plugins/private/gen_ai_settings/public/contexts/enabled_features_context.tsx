@@ -52,14 +52,24 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     const showAiAssistantsVisibilitySetting =
       config.showAiAssistantsVisibilitySetting === false ? false : !isSolutionView;
 
+    const hasObservabilityAssistant =
+      services.application.capabilities.observabilityAIAssistant?.show === true;
+    const hasSecurityAssistant =
+      services.application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+    const hasAgent = services.application.capabilities.agentBuilder?.manageAgents === true;
+    const hasAgentAndAnyAssistant = (hasObservabilityAssistant || hasSecurityAssistant) && hasAgent;
+
+    const showChatExperienceSetting =
+      config.showChatExperienceSetting === false ? false : hasAgentAndAnyAssistant;
+
     return {
       showSpacesIntegration: config.showSpacesIntegration,
       showAiBreadcrumb: config.showAiBreadcrumb,
       isPermissionsBased: isSolutionView,
       showAiAssistantsVisibilitySetting,
-      showChatExperienceSetting: config.showChatExperienceSetting,
+      showChatExperienceSetting,
     };
-  }, [config, activeSpace]);
+  }, [config, activeSpace, services]);
 
   return (
     <EnabledFeaturesContext.Provider value={contextFeatures}>
