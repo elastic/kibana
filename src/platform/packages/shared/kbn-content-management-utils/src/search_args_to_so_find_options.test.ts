@@ -171,7 +171,9 @@ describe('searchArgsToSOFindOptionsDefault', () => {
         },
       });
 
-      expect(result.filter).toBe('(created_by:"user1" OR created_by:"user2" OR created_by:"user3")');
+      expect(result.filter).toBe(
+        '(created_by:"user1" OR created_by:"user2" OR created_by:"user3")'
+      );
     });
 
     it('should build KQL filter for excluded users', () => {

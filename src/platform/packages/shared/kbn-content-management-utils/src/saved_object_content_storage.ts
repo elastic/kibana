@@ -168,10 +168,18 @@ const buildFacetAggregations = (
 export const parseFacetsFromAggregations = (
   aggregations: any,
   facetsRequested: SearchQuery['facets']
-): { tags?: Array<{ key: string; doc_count: number }>; createdBy?: Array<{ key: string; doc_count: number }> } | undefined => {
+):
+  | {
+      tags?: Array<{ key: string; doc_count: number }>;
+      createdBy?: Array<{ key: string; doc_count: number }>;
+    }
+  | undefined => {
   if (!aggregations || !facetsRequested) return undefined;
 
-  const facets: { tags?: Array<{ key: string; doc_count: number }>; createdBy?: Array<{ key: string; doc_count: number }> } = {};
+  const facets: {
+    tags?: Array<{ key: string; doc_count: number }>;
+    createdBy?: Array<{ key: string; doc_count: number }>;
+  } = {};
 
   // Parse tag facets
   if (facetsRequested.tags && aggregations.tags?.filtered_tags?.tag_ids?.buckets) {
@@ -182,7 +190,10 @@ export const parseFacetsFromAggregations = (
     }));
 
     // Add missing count if requested and available
-    if (facetsRequested.tags?.includeMissing && aggregations.missing_tags?.doc_count !== undefined) {
+    if (
+      facetsRequested.tags?.includeMissing &&
+      aggregations.missing_tags?.doc_count !== undefined
+    ) {
       facets.tags?.push({
         key: '__missing__',
         doc_count: aggregations.missing_tags.doc_count,
@@ -199,7 +210,10 @@ export const parseFacetsFromAggregations = (
     }));
 
     // Add missing count if requested and available
-    if (facetsRequested.createdBy?.includeMissing && aggregations.missing_created_by?.doc_count !== undefined) {
+    if (
+      facetsRequested.createdBy?.includeMissing &&
+      aggregations.missing_created_by?.doc_count !== undefined
+    ) {
       facets.createdBy?.push({
         key: '__missing__',
         doc_count: aggregations.missing_created_by.doc_count,
