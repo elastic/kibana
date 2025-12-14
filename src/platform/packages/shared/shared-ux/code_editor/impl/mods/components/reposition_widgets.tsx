@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useEffect, useCallback, useRef, type PropsWithChildren } from 'react';
+import React, {
+  type FC,
+  useEffect,
+  useCallback,
+  useRef,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import type { monaco } from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
-import { Global } from '@emotion/react';
+import { Global, type GlobalProps } from '@emotion/react';
 
 /**
  *
@@ -22,6 +29,9 @@ export const RepositionWidgets: FC<
   }>
 > = ({ children, editor, enableSuggestWidgetRepositioning }) => {
   const { euiTheme } = useEuiTheme();
+  const [globalStyleModifierClassNamesRecord, setGlobalStyleModifierClassNamesRecord] = useState<
+    GlobalProps['styles']
+  >({});
   const headerOffset = useRef(
     'var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))'
   );
@@ -39,7 +49,18 @@ export const RepositionWidgets: FC<
       if (widget && widget.onDidShow && widget.onDidHide && enableSuggestWidgetRepositioning) {
         let $widgetNode: HTMLElement | null = null;
 
-        // add a className that hides the widget by default so we might be to correctly position the widget,
+        // Add the modifier className to the global style modifier class names record
+        setGlobalStyleModifierClassNamesRecord((prev) => ({
+          ...prev,
+          [`.${modifierClassName}`]: {
+            // @ts-expect-error -- the handling of showing and hiding of the widgets by monaco
+            // happens through style attributes hence the need for the important modifier
+            visibility: 'hidden !important',
+          },
+        }));
+
+        // add the just declared modifier className on the widget to hide the widget by default
+        // so we might be able to correctly position the widget,
         // then make it visible
         ($widgetNode = domNodeGetter(widget))?.classList?.add(modifierClassName);
 
@@ -81,6 +102,16 @@ export const RepositionWidgets: FC<
         enableSuggestWidgetRepositioning
       ) {
         let $widgetNode: HTMLElement | null = null;
+
+        // Add the modifier className to the global style modifier class names record
+        setGlobalStyleModifierClassNamesRecord((prev) => ({
+          ...prev,
+          [`.${modifierClassName}`]: {
+            // @ts-expect-error -- the handling of showing and hiding of the widgets by monaco
+            // happens through style attributes hence the need for the important modifier
+            visibility: 'hidden !important',
+          },
+        }));
 
         // add a className that hides the widget by default so we might be able to correctly position the widget,
         // then make it visible after the fact
@@ -124,20 +155,8 @@ export const RepositionWidgets: FC<
 
   return (
     <React.Fragment>
-      {enableSuggestWidgetRepositioning && (
-        <Global
-          // @ts-expect-error -- it's necessary that we apply the important modifier
-          styles={{
-            [`.${suggestWidgetModifierClassName}`]: {
-              visibility: 'hidden !important',
-            },
-            [`.${parameterHintsWidgetModifierClassName}`]: {
-              visibility: 'hidden !important',
-            },
-          }}
-        />
-      )}
-      <React.Fragment>{children}</React.Fragment>
+      {enableSuggestWidgetRepositioning && <Global styles={globalStyleModifierClassNamesRecord} />}
+      <React.Fragment key="children">{children}</React.Fragment>
     </React.Fragment>
   );
 };
