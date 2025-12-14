@@ -29,13 +29,16 @@ export async function createSyntheticLogsWithErrorsAndCorrelationIds({
       const baseTime = timestamp;
 
       return logs.map((event, index) => {
-        const { level, message, ...logAttributes } = event;
-        return log
-          .create()
-          .message(message)
-          .logLevel(level.toUpperCase())
-          .defaults(logAttributes)
-          .timestamp(baseTime + index * 10000);
+        const { level, message, '@timestamp': eventTimestamp, ...logAttributes } = event;
+        return (
+          log
+            .create()
+            .message(message)
+            .logLevel(level.toUpperCase())
+            .defaults(logAttributes)
+            // @ts-expect-error
+            .timestamp(eventTimestamp ?? baseTime + index * 10000)
+        );
       });
     });
 
