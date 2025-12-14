@@ -6,15 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiSpacer,
   EuiPanel,
   EuiFlexGroup,
+  EuiFlexItem,
   useGeneratedHtmlId,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { ClusterData } from '../../../../common/cluster_listing';
@@ -32,6 +31,7 @@ import {
   NodesCard,
   SlosCard,
   WorkloadResourcesTable,
+  ClusterHealthPanel,
 } from './overview_tab';
 
 interface ClusterDetailFlyoutProps {
@@ -45,7 +45,6 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
   timeRange,
   onClose,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'clusterDetailFlyout',
   });
@@ -117,30 +116,21 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
                 </EuiPanel>
               </EuiFlexGroup>
               <EuiFlexGroup gutterSize="s">
-                <EuiPanel hasBorder paddingSize="none">
-                  <NetworkTrafficChart
-                    clusterName={cluster.clusterName}
-                    timeRange={timeRange}
-                    height={250}
-                  />
-                </EuiPanel>
-                {/* TODO: Cluster health card */}
-                <EuiPanel hasBorder paddingSize="none">
-                  <div
-                    style={{
-                      height: '250px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: euiTheme.colors.subduedText,
-                    }}
-                  >
-                    {i18n.translate(
-                      'xpack.kubernetesPoc.renderTabContent.div.clusterHealthComingSoonLabel',
-                      { defaultMessage: 'Cluster Health (Coming Soon)' }
-                    )}
-                  </div>
-                </EuiPanel>
+                <EuiFlexItem grow={1}>
+                  <EuiPanel hasBorder paddingSize="none" style={{ height: '100%' }}>
+                    <NetworkTrafficChart
+                      clusterName={cluster.clusterName}
+                      timeRange={timeRange}
+                      height={250}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+                {/* Cluster health panel */}
+                <EuiFlexItem grow={1}>
+                  <EuiPanel hasBorder paddingSize="none" style={{ height: '100%' }}>
+                    <ClusterHealthPanel height={250} />
+                  </EuiPanel>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </div>
           </EuiFlexGroup>

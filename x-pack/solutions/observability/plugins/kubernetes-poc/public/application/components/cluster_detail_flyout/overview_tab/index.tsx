@@ -16,3 +16,4 @@ export { NetworkTrafficChart } from './network_traffic_chart';
 export { NodesCard } from './nodes_card';
 export { SlosCard } from './slos_card';
 export { WorkloadResourcesTable } from './workload_resources_table';
+export { ClusterHealthPanel } from './cluster_health_panel';
