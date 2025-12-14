@@ -89,7 +89,10 @@ const locatorObjectSchema = z.object({
 
 const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObjectSchema);
 
-const relativeUrlSchema = z.string().max(1024);
+const relativeUrlSchema = z
+  .string()
+  .max(4096)
+  .transform((relativeUrl) => sanitizeString(relativeUrl));
 const relativeUrlsSchema = z.array(relativeUrlSchema).max(100);
 
 const jobParamsSchema = z
