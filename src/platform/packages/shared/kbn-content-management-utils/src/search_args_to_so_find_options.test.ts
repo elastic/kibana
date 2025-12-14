@@ -215,10 +215,10 @@ describe('searchArgsToSOFindOptionsDefault', () => {
         },
       });
 
-      expect(result.filter).toBe('NOT created_by:*');
+      expect(result.filter).toBe('(NOT created_by:*)');
     });
 
-    it('should combine included users with includeNoCreator', () => {
+    it('should combine included users with includeNoCreator using OR logic', () => {
       const result = searchArgsToSOFindOptionsDefault({
         ...baseParams,
         query: {
@@ -230,7 +230,7 @@ describe('searchArgsToSOFindOptionsDefault', () => {
         },
       });
 
-      expect(result.filter).toBe('(created_by:"user1" OR created_by:"user2") AND NOT created_by:*');
+      expect(result.filter).toBe('(created_by:"user1" OR created_by:"user2" OR NOT created_by:*)');
     });
 
     it('should combine included and excluded users', () => {

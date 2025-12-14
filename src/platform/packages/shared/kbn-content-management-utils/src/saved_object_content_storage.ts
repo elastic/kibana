@@ -48,27 +48,38 @@ export interface SearchArgsToSOFindOptionsOptionsDefault {
 const buildCreatedByFilter = (createdBy: SearchQuery['createdBy']): string | undefined => {
   if (!createdBy) return undefined;
 
-  const conditions: string[] = [];
+  const includeConditions: string[] = [];
+  const excludeConditions: string[] = [];
 
   // Include specific users
   if (createdBy.included?.length) {
     const userConditions = createdBy.included.map((uid) => `created_by:"${uid}"`);
-    conditions.push(`(${userConditions.join(' OR ')})`);
+    includeConditions.push(...userConditions);
   }
 
-  // Exclude specific users
-  if (createdBy.excluded?.length) {
-    const excludeConditions = createdBy.excluded.map((uid) => `NOT created_by:"${uid}"`);
-    conditions.push(excludeConditions.join(' AND '));
-  }
-
-  // Include items with no creator
+  // Include items with no creator (OR with included users)
   if (createdBy.includeNoCreator) {
-    conditions.push('NOT created_by:*');
+    includeConditions.push('NOT created_by:*');
   }
 
-  if (conditions.length === 0) return undefined;
-  return conditions.join(' AND ');
+  // Exclude specific users (AND logic - must not match any)
+  if (createdBy.excluded?.length) {
+    excludeConditions.push(
+      ...createdBy.excluded.map((uid) => `NOT created_by:"${uid}"`)
+    );
+  }
+
+  // Combine include (OR) and exclude (AND) conditions
+  const parts: string[] = [];
+  if (includeConditions.length > 0) {
+    parts.push(`(${includeConditions.join(' OR ')})`);
+  }
+  if (excludeConditions.length > 0) {
+    parts.push(excludeConditions.join(' AND '));
+  }
+
+  if (parts.length === 0) return undefined;
+  return parts.join(' AND ');
 };
 
 /**
@@ -163,6 +174,14 @@ const buildFacetAggregations = (
 };
 
 /**
+ * Elasticsearch aggregation bucket structure
+ */
+interface AggregationBucket {
+  key: string;
+  doc_count: number;
+}
+
+/**
  * Parses Elasticsearch aggregation results into facet format.
  */
 export const parseFacetsFromAggregations = (
@@ -183,8 +202,8 @@ export const parseFacetsFromAggregations = (
 
   // Parse tag facets
   if (facetsRequested.tags && aggregations.tags?.filtered_tags?.tag_ids?.buckets) {
-    const tagBuckets = aggregations.tags.filtered_tags.tag_ids.buckets;
-    facets.tags = tagBuckets.map((bucket: any) => ({
+    const tagBuckets: AggregationBucket[] = aggregations.tags.filtered_tags.tag_ids.buckets;
+    facets.tags = tagBuckets.map((bucket) => ({
       key: bucket.key,
       doc_count: bucket.doc_count,
     }));
@@ -203,8 +222,8 @@ export const parseFacetsFromAggregations = (
 
   // Parse createdBy facets
   if (facetsRequested.createdBy && aggregations.created_by?.buckets) {
-    const createdByBuckets = aggregations.created_by.buckets;
-    facets.createdBy = createdByBuckets.map((bucket: any) => ({
+    const createdByBuckets: AggregationBucket[] = aggregations.created_by.buckets;
+    facets.createdBy = createdByBuckets.map((bucket) => ({
       key: bucket.key,
       doc_count: bucket.doc_count,
     }));
