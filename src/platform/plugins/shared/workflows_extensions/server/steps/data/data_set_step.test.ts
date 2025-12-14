@@ -8,7 +8,7 @@
  */
 
 import { dataSetStepDefinition } from './data_set_step';
-import type { StepHandlerContext } from '../step_registry/types';
+import type { StepHandlerContext } from '../../step_registry/types';
 
 const createMockContext = (
   input: Record<string, unknown>

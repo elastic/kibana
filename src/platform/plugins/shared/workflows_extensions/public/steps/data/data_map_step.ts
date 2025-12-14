@@ -9,8 +9,8 @@
 
 import { icon as listIcon } from '@elastic/eui/es/components/icon/assets/list';
 import { i18n } from '@kbn/i18n';
-import { dataMapStepCommonDefinition, DataMapStepTypeId } from '../../common/step_types';
-import type { PublicStepDefinition } from '../step_registry/types';
+import { dataMapStepCommonDefinition, DataMapStepTypeId } from '../../../common/steps/data';
+import type { PublicStepDefinition } from '../../step_registry/types';
 
 export const dataMapStepDefinition: PublicStepDefinition = {
   ...dataMapStepCommonDefinition,

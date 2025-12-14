@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { OrStringRecursive } from '@kbn/utility-types';
 import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
@@ -102,9 +103,10 @@ export interface StepHandlerContext<TInput = unknown> {
   input: TInput;
 
   /**
-   * The raw input configuration before template rendering
+   * The raw input configuration before template rendering.
+   * Has the same shape as input, but values may contain template strings.
    */
-  rawInput: unknown;
+  rawInput: OrStringRecursive<TInput>;
 
   /**
    * Runtime context manager for accessing workflow state, context, and template evaluation

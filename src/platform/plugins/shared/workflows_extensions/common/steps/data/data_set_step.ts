@@ -8,25 +8,22 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { CommonStepDefinition } from '../step_registry/types';
+import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const DataMapStepTypeId = 'data.map';
+export const DataSetStepTypeId = 'data.set';
 
-export const InputSchema = z.object({
-  items: z.unknown(),
-  fields: z.record(z.string(), z.unknown()),
-});
+export const InputSchema = z.record(z.string(), z.unknown());
 
-export const OutputSchema = z.array(z.record(z.string(), z.unknown()));
+export const OutputSchema = z.record(z.string(), z.unknown());
 
-export type DataMapStepInputSchema = typeof InputSchema;
-export type DataMapStepOutputSchema = typeof OutputSchema;
+export type DataSetStepInputSchema = typeof InputSchema;
+export type DataSetStepOutputSchema = typeof OutputSchema;
 
-export const dataMapStepCommonDefinition: CommonStepDefinition<
-  DataMapStepInputSchema,
-  DataMapStepOutputSchema
+export const dataSetStepCommonDefinition: CommonStepDefinition<
+  DataSetStepInputSchema,
+  DataSetStepOutputSchema
 > = {
-  id: DataMapStepTypeId,
+  id: DataSetStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
 };

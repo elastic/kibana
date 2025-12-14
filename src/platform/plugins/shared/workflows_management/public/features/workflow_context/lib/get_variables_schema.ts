@@ -11,46 +11,11 @@ import { getStepId } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { DataSetStepTypeId } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
-
-function inferZodTypeFromValue(value: unknown): z.ZodTypeAny {
-  if (typeof value === 'string') {
-    return z.string();
-  }
-  if (typeof value === 'number') {
-    return z.number();
-  }
-  if (typeof value === 'boolean') {
-    return z.boolean();
-  }
-  if (value === null) {
-    return z.null();
-  }
-  if (value === undefined) {
-    return z.undefined();
-  }
-  if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return z.array(z.unknown());
-    }
-    const firstElementType = inferZodTypeFromValue(value[0]);
-    return z.array(firstElementType);
-  }
-  if (typeof value === 'object') {
-    const objectSchema: Record<string, z.ZodTypeAny> = {};
-    for (const key of Object.keys(value)) {
-      objectSchema[key] = inferZodTypeFromValue((value as Record<string, unknown>)[key]);
-    }
-    return z.object(objectSchema);
-  }
-  return z.unknown();
-}
+import { inferZodType } from '../../../../common/lib/zod';
 
 export function getVariablesSchema(workflowExecutionGraph: WorkflowGraph, stepName: string) {
   const stepId = getStepId(stepName);
-  const stepNode =
-    workflowExecutionGraph.getNode(stepId) ||
-    workflowExecutionGraph.getNode(`enterForeach_${stepId}`) ||
-    workflowExecutionGraph.getNode(`enterCondition_${stepId}`);
+  const stepNode = workflowExecutionGraph.getStepNode(stepId);
 
   if (!stepNode) {
     return z.object({}).optional();
@@ -72,7 +37,7 @@ export function getVariablesSchema(workflowExecutionGraph: WorkflowGraph, stepNa
 
       for (const key of Object.keys(withConfig)) {
         const value = withConfig[key];
-        stepSchema[key] = inferZodTypeFromValue(value);
+        stepSchema[key] = inferZodType(value);
       }
 
       variablesSchema = variablesSchema.extend(stepSchema);

@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataMapStepCommonDefinition } from '../../common/step_types';
-import { createServerStepDefinition } from '../step_registry/types';
+import { dataMapStepCommonDefinition } from '../../../common/steps/data';
+import { createServerStepDefinition } from '../../step_registry/types';
 
 export const dataMapStepDefinition = createServerStepDefinition({
   ...dataMapStepCommonDefinition,
   handler: async (context) => {
     try {
-      const rawInput = context.rawInput as { items: unknown; fields: Record<string, unknown> };
-      const items = context.contextManager.renderInputTemplate(rawInput.items);
-      const rawFields = rawInput.fields;
+      const items = context.contextManager.renderInputTemplate(context.rawInput.items);
+      const rawFields = context.rawInput.fields;
 
       if (!Array.isArray(items)) {
         context.logger.error('Input items is not an array');

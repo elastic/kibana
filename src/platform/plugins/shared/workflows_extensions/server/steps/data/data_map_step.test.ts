@@ -8,7 +8,7 @@
  */
 
 import { dataMapStepDefinition } from './data_map_step';
-import type { StepHandlerContext } from '../step_registry/types';
+import type { StepHandlerContext } from '../../step_registry/types';
 
 const createMockContext = (input: {
   items: unknown;

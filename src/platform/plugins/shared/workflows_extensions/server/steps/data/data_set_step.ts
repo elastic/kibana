@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataSetStepCommonDefinition } from '../../common/step_types';
-import { createServerStepDefinition } from '../step_registry/types';
+import { dataSetStepCommonDefinition } from '../../../common/steps/data';
+import { createServerStepDefinition } from '../../step_registry/types';
 
 export const dataSetStepDefinition = createServerStepDefinition({
   ...dataSetStepCommonDefinition,
