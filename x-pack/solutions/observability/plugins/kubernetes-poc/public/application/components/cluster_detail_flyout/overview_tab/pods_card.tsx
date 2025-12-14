@@ -28,10 +28,10 @@ interface PodsData {
  * Phase values: 1=Pending, 2=Running (healthy), 3=Succeeded, 4=Failed (unhealthy)
  */
 const getPodsEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "${clusterName}" 
+| WHERE k8s.cluster.name == "${clusterName}"
   AND k8s.pod.uid IS NOT NULL
   AND k8s.pod.phase IS NOT NULL
-| STATS 
+| STATS
     total_pods = COUNT_DISTINCT(k8s.pod.uid),
     healthy_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 2,
     unhealthy_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 4`;
@@ -82,8 +82,7 @@ export const PodsCard: React.FC<PodsCardProps> = ({ clusterName, timeRange, heig
   return (
     <div
       style={{
-        padding: '12px',
-        height: `${height}px`,
+        height: `100%`,
         display: 'flex',
         flexDirection: 'column',
       }}

@@ -14,7 +14,6 @@ import { MetricCard } from './metric_card';
 interface MemoryTotalCardProps {
   clusterName: string;
   timeRange: TimeRange;
-  height?: number;
 }
 
 interface MemoryTotalData {
@@ -34,11 +33,7 @@ const getMemoryTotalEsql = (clusterName: string) => `FROM remote_cluster:metrics
   BY k8s.node.name
 | STATS total_memory_bytes = SUM(node_memory)`;
 
-export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({
-  clusterName,
-  timeRange,
-  height = 100,
-}) => {
+export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({ clusterName, timeRange }) => {
   const query = useMemo(() => getMemoryTotalEsql(clusterName), [clusterName]);
 
   const { data, loading } = useEsqlQuery<MemoryTotalData>({
@@ -55,10 +50,12 @@ export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({
       title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryLabel', {
         defaultMessage: 'Memory',
       })}
+      subtitle={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
+        defaultMessage: 'Total',
+      })}
       value={totalMemoryBytes}
       isLoading={loading}
       formatter="bytes"
-      height={height}
     />
   );
 };

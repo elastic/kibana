@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEsqlQuery } from '../../../../hooks/use_esql_query';
-import { MetricCard } from './metric_card';
+import { useEsqlQuery } from '../../../hooks/use_esql_query';
+import { MetricCard } from '../cluster_detail_flyout/overview_tab/metric_card';
 
-interface NamespacesCardProps {
-  clusterName: string;
+interface NamespacesMetricCardProps {
   timeRange: TimeRange;
 }
 
@@ -22,33 +21,27 @@ interface NamespacesData {
 }
 
 /**
- * ES|QL query for total number of namespaces in the cluster.
+ * ES|QL query for total namespace count across all clusters
  */
-const getNamespacesEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "${clusterName}" 
+const NAMESPACES_ESQL = `FROM remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL
   AND k8s.namespace.name IS NOT NULL
 | STATS namespace_count = COUNT_DISTINCT(k8s.namespace.name)`;
 
-export const NamespacesCard: React.FC<NamespacesCardProps> = ({ clusterName, timeRange }) => {
+export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({ timeRange }) => {
   const { euiTheme } = useEuiTheme();
-  const query = useMemo(() => getNamespacesEsql(clusterName), [clusterName]);
-
   const { data, loading } = useEsqlQuery<NamespacesData>({
-    query,
+    query: NAMESPACES_ESQL,
     timeRange,
   });
 
-  // Get the first row of results (single aggregation result)
   const namespacesData = data?.[0];
   const namespaceCount = namespacesData?.namespace_count ?? null;
 
   return (
     <MetricCard
-      title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.namespacesLabel', {
+      title={i18n.translate('xpack.kubernetesPoc.kubernetesOverview.namespacesLabel', {
         defaultMessage: 'Namespaces',
-      })}
-      subtitle={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
-        defaultMessage: 'Total',
       })}
       value={namespaceCount}
       isLoading={loading}

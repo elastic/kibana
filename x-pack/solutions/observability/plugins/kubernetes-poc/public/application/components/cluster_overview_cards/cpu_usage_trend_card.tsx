@@ -49,7 +49,7 @@ export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
 
   const attributes: TypedLensByValueInput['attributes'] = useMemo(
     () => ({
-      title: 'CPU Util by Cluster',
+      title: 'CPU util trend by cluster',
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -158,8 +158,8 @@ export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
   return (
     <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
       <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterOverview.cpuUsageByClusterTitle', {
-          defaultMessage: 'CPU Util by Cluster',
+        {i18n.translate('xpack.kubernetesPoc.clusterOverview.cpuUtilTrendByClusterTitle', {
+          defaultMessage: 'CPU util trend by cluster',
         })}
       </EuiText>
       <LensComponent

@@ -49,7 +49,7 @@ export const VolumeUsageTrendCard: React.FC<VolumeUsageTrendCardProps> = ({
 
   const attributes: TypedLensByValueInput['attributes'] = useMemo(
     () => ({
-      title: 'Volume Util by Cluster',
+      title: 'Volume util trend by cluster',
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -158,8 +158,8 @@ export const VolumeUsageTrendCard: React.FC<VolumeUsageTrendCardProps> = ({
   return (
     <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
       <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterOverview.volumeUsageByClusterTitle', {
-          defaultMessage: 'Volume Util by Cluster',
+        {i18n.translate('xpack.kubernetesPoc.clusterOverview.volumeUtilTrendByClusterTitle', {
+          defaultMessage: 'Volume util trend by cluster',
         })}
       </EuiText>
       <LensComponent

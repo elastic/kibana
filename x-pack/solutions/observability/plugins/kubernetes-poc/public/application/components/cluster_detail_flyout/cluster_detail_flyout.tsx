@@ -58,24 +58,24 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
           <EuiSpacer size="s" />
           {/* Metric Cards Row */}
           <EuiFlexGroup gutterSize="s">
-            <EuiPanel hasBorder paddingSize="none">
+            <EuiPanel hasBorder paddingSize="s">
               <DiskSizeCard clusterName={cluster.clusterName} timeRange={timeRange} height={120} />
             </EuiPanel>
-            <EuiPanel hasBorder paddingSize="none">
+            <EuiPanel hasBorder paddingSize="s">
               <MemoryTotalCard
                 clusterName={cluster.clusterName}
                 timeRange={timeRange}
                 height={120}
               />
             </EuiPanel>
-            <EuiPanel hasBorder paddingSize="none">
+            <EuiPanel hasBorder paddingSize="s">
               <NamespacesCard
                 clusterName={cluster.clusterName}
                 timeRange={timeRange}
                 height={120}
               />
             </EuiPanel>
-            <EuiPanel hasBorder paddingSize="none">
+            <EuiPanel hasBorder paddingSize="s">
               <PodsCard clusterName={cluster.clusterName} timeRange={timeRange} height={120} />
             </EuiPanel>
           </EuiFlexGroup>
@@ -84,14 +84,14 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
 
           {/* Row 2: Memory util & Pods util (50/50) */}
           <EuiFlexGroup gutterSize="s">
-            <EuiPanel hasBorder paddingSize="none">
+            <EuiPanel hasBorder paddingSize="s">
               <MemoryUtilChart
                 clusterName={cluster.clusterName}
                 timeRange={timeRange}
                 height={250}
               />
             </EuiPanel>
-            <EuiPanel hasBorder paddingSize="none">
+            <EuiPanel hasBorder paddingSize="s">
               <PodsUtilChart clusterName={cluster.clusterName} timeRange={timeRange} height={250} />
             </EuiPanel>
           </EuiFlexGroup>
@@ -101,23 +101,23 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
           {/* Row 3: CPU util (full height left) | Nodes, SLOs, Network Traffic, Cluster Health (stacked right) */}
           <EuiFlexGroup gutterSize="s" alignItems="stretch">
             {/* Left column: CPU util - height = 120 + 8 + 250 = 378px */}
-            <EuiPanel hasBorder paddingSize="none" style={{ flex: 1 }}>
+            <EuiPanel hasBorder paddingSize="s" style={{ flex: 1 }}>
               <CpuUtilChart clusterName={cluster.clusterName} timeRange={timeRange} height={378} />
             </EuiPanel>
 
             {/* Right column: Nodes, SLOs, Network Traffic, Cluster Health */}
             <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <EuiFlexGroup gutterSize="s">
-                <EuiPanel hasBorder paddingSize="none">
+                <EuiPanel hasBorder paddingSize="s">
                   <NodesCard clusterName={cluster.clusterName} timeRange={timeRange} height={120} />
                 </EuiPanel>
-                <EuiPanel hasBorder paddingSize="none">
+                <EuiPanel hasBorder paddingSize="s">
                   <SlosCard height={120} />
                 </EuiPanel>
               </EuiFlexGroup>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={1}>
-                  <EuiPanel hasBorder paddingSize="none" style={{ height: '100%' }}>
+                  <EuiPanel hasBorder paddingSize="s" style={{ height: '100%' }}>
                     <NetworkTrafficChart
                       clusterName={cluster.clusterName}
                       timeRange={timeRange}

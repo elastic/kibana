@@ -53,8 +53,7 @@ export const SlosCard: React.FC<SlosCardProps> = ({ height = 120 }) => {
   return (
     <div
       style={{
-        padding: '12px',
-        height: `${height}px`,
+        height: `100%`,
         display: 'flex',
         flexDirection: 'column',
       }}

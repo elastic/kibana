@@ -49,7 +49,7 @@ export const MemoryUsageTrendCard: React.FC<MemoryUsageTrendCardProps> = ({
 
   const attributes: TypedLensByValueInput['attributes'] = useMemo(
     () => ({
-      title: 'Memory Util by Cluster',
+      title: 'Memory util trend by cluster',
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -158,8 +158,8 @@ export const MemoryUsageTrendCard: React.FC<MemoryUsageTrendCardProps> = ({
   return (
     <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
       <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterOverview.memoryUsageByClusterTitle', {
-          defaultMessage: 'Memory Util by Cluster',
+        {i18n.translate('xpack.kubernetesPoc.clusterOverview.memoryUtilTrendByClusterTitle', {
+          defaultMessage: 'Memory util trend by cluster',
         })}
       </EuiText>
       <LensComponent

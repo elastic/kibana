@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiText, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export type MetricValueFormatter = 'bytes' | 'number';
 
@@ -17,7 +16,8 @@ interface MetricCardProps {
   isLoading?: boolean;
   formatter?: MetricValueFormatter;
   valueColor?: string;
-  height?: number;
+  /** Optional subtitle displayed below the title (e.g., "Total", "Healthy"). If omitted, no subtitle is shown. */
+  subtitle?: string;
 }
 
 /**
@@ -45,7 +45,7 @@ const formatNumber = (value: number): string => {
 
 /**
  * Reusable metric card component matching Figma design.
- * Displays a title, "Total" label, and a large formatted value.
+ * Displays a title, optional subtitle, and a large formatted value.
  */
 export const MetricCard: React.FC<MetricCardProps> = ({
   title,
@@ -53,12 +53,12 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   isLoading = false,
   formatter = 'number',
   valueColor,
-  height = 100,
+  subtitle,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const formattedValue = React.useMemo(() => {
-    if (value === null || value === undefined) return '—';
+    if (value === null || value === undefined) return '0';
 
     switch (formatter) {
       case 'bytes':
@@ -75,12 +75,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <div
       style={{
-        padding: '12px',
-        height: `${height}px`,
+        height: `100%`,
         display: 'flex',
         flexDirection: 'column',
-        border: `1px solid ${euiTheme.border.color}`,
-        borderRadius: euiTheme.border.radius.medium,
         backgroundColor: euiTheme.colors.emptyShade,
       }}
     >
@@ -90,24 +87,24 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         style={{
           fontWeight: 700,
           color: euiTheme.colors.text,
-          marginBottom: '4px',
+          marginBottom: subtitle ? '4px' : '8px',
         }}
       >
         {title}
       </EuiText>
 
-      {/* "Total" label */}
-      <EuiText
-        size="xs"
-        color="subdued"
-        style={{
-          marginBottom: '8px',
-        }}
-      >
-        {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
-          defaultMessage: 'Total',
-        })}
-      </EuiText>
+      {/* Subtitle (optional) */}
+      {subtitle && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          style={{
+            marginBottom: '8px',
+          }}
+        >
+          {subtitle}
+        </EuiText>
+      )}
 
       {/* Value */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>

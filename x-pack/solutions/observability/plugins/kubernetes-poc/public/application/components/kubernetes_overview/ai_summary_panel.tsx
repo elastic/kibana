@@ -11,20 +11,21 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiPanel,
   EuiHorizontalRule,
   EuiButtonEmpty,
   EuiPopover,
   EuiContextMenu,
+  EuiLoadingSpinner,
   useEuiTheme,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface ClusterHealthPanelProps {
-  height?: number;
+interface AiSummaryPanelProps {
+  isLoading?: boolean;
 }
 
-export const ClusterHealthPanel: React.FC<ClusterHealthPanelProps> = ({ height = 250 }) => {
+export const AiSummaryPanel: React.FC<AiSummaryPanelProps> = ({ isLoading = false }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
@@ -49,14 +50,14 @@ export const ClusterHealthPanel: React.FC<ClusterHealthPanelProps> = ({ height =
       id: 0,
       items: [
         {
-          name: i18n.translate('xpack.kubernetesPoc.clusterHealthPanel.refreshLabel', {
+          name: i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.refreshLabel', {
             defaultMessage: 'Refresh',
           }),
           icon: 'refresh',
           onClick: closePopover,
         },
         {
-          name: i18n.translate('xpack.kubernetesPoc.clusterHealthPanel.settingsLabel', {
+          name: i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.settingsLabel', {
             defaultMessage: 'Settings',
           }),
           icon: 'gear',
@@ -70,29 +71,34 @@ export const ClusterHealthPanel: React.FC<ClusterHealthPanelProps> = ({ height =
     <EuiButtonEmpty
       iconType="boxesVertical"
       onClick={togglePopover}
-      aria-label={i18n.translate('xpack.kubernetesPoc.clusterHealthPanel.optionsAriaLabel', {
+      aria-label={i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.optionsAriaLabel', {
         defaultMessage: 'Options',
       })}
       size="xs"
       color="text"
       css={{ minWidth: 'auto', minBlockSize: 'auto' }}
-      data-test-subj="clusterHealthPanelOptionsButton"
+      data-test-subj="aiSummaryPanelOptionsButton"
     />
   );
 
+  // Placeholder summary text matching the Figma design
+  const summaryText = i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.summaryText', {
+    defaultMessage:
+      'The cluster is running smoothly, with most workloads healthy and control plane components responding normally. Two worker nodes show increased memory pressure, and CPU usage is rising in the production namespace. Pod restarts and network latency remain low, and no critical alerts were triggered in the last hour. Overall, capacity is sufficient but worth monitoring.',
+  });
+
   return (
-    <div
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
       css={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.m}`,
         background: `linear-gradient(135deg, ${euiTheme.colors.lightestShade} 0%, rgba(125, 107, 255, 0.08) 50%, rgba(54, 162, 235, 0.06) 100%)`,
-        borderRadius: euiTheme.border.radius.medium,
       }}
     >
       {/* Header */}
-      <EuiSpacer size="s" />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceBetween"
@@ -101,16 +107,18 @@ export const ClusterHealthPanel: React.FC<ClusterHealthPanelProps> = ({ height =
         css={{ flexGrow: 0 }}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon type="sparkles" size="m" color="primary" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <span style={{ fontWeight: 600, fontSize: '14px' }}>
-                {i18n.translate('xpack.kubernetesPoc.clusterHealthPanel.title', {
-                  defaultMessage: 'Cluster health',
-                })}
-              </span>
+              <EuiText>
+                <h4 style={{ margin: 0, fontWeight: 600 }}>
+                  {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.title', {
+                    defaultMessage: 'AI Summary',
+                  })}
+                </h4>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -126,21 +134,22 @@ export const ClusterHealthPanel: React.FC<ClusterHealthPanelProps> = ({ height =
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
 
-      <EuiHorizontalRule
-        margin="none"
-        style={{ marginTop: euiTheme.size.xs, marginBottom: euiTheme.size.xs }}
-      />
+      <EuiHorizontalRule margin="s" />
 
       {/* Body */}
       <div style={{ flex: 1, overflow: 'auto' }}>
-        <EuiText size="s" color="default">
-          {i18n.translate('xpack.kubernetesPoc.clusterHealthPanel.description', {
-            defaultMessage:
-              'The cluster is running smoothly, with most workloads healthy and control plane components responding normally. Two worker nodes show increased memory pressure, and CPU usage is rising in the production namespace. Pod restarts and network latency remain low, and no critical alerts were triggered in the last hour. Overall, capacity is sufficient but worth monitoring.',
-          })}
-        </EuiText>
+        {isLoading ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiText size="s" color="default">
+            {summaryText}
+          </EuiText>
+        )}
       </div>
 
       {/* Footer */}
@@ -159,7 +168,7 @@ export const ClusterHealthPanel: React.FC<ClusterHealthPanelProps> = ({ height =
         >
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.kubernetesPoc.clusterHealthPanel.generatedOn', {
+              {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.generatedOn', {
                 defaultMessage: 'Generated on {date}',
                 values: { date: formatDate() },
               })}
@@ -173,15 +182,15 @@ export const ClusterHealthPanel: React.FC<ClusterHealthPanelProps> = ({ height =
               onClick={() => {
                 // Placeholder for add to chat functionality
               }}
-              data-test-subj="clusterHealthPanelAddToChatButton"
+              data-test-subj="aiSummaryPanelAddToChatButton"
             >
-              {i18n.translate('xpack.kubernetesPoc.clusterHealthPanel.addToChat', {
+              {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.addToChat', {
                 defaultMessage: 'Add to chat',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-    </div>
+    </EuiPanel>
   );
 };

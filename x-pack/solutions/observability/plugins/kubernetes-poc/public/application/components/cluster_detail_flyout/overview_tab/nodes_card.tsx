@@ -28,10 +28,10 @@ interface NodesData {
  * Nodes with condition_ready > 0 are healthy, <= 0 are unhealthy.
  */
 const getNodesEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
-| WHERE k8s.cluster.name == "${clusterName}" 
+| WHERE k8s.cluster.name == "${clusterName}"
   AND k8s.node.name IS NOT NULL
   AND k8s.node.condition_ready IS NOT NULL
-| STATS 
+| STATS
     total_nodes = COUNT_DISTINCT(k8s.node.name),
     healthy_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,
     unhealthy_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready <= 0`;
@@ -82,8 +82,7 @@ export const NodesCard: React.FC<NodesCardProps> = ({ clusterName, timeRange, he
   return (
     <div
       style={{
-        padding: '12px',
-        height: `${height}px`,
+        height: `100%`,
         display: 'flex',
         flexDirection: 'column',
       }}

@@ -14,7 +14,6 @@ import { MetricCard } from './metric_card';
 interface DiskSizeCardProps {
   clusterName: string;
   timeRange: TimeRange;
-  height?: number;
 }
 
 interface DiskSizeData {
@@ -34,11 +33,7 @@ const getDiskSizeEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
   BY k8s.node.name
 | STATS total_disk_bytes = SUM(disk_capacity)`;
 
-export const DiskSizeCard: React.FC<DiskSizeCardProps> = ({
-  clusterName,
-  timeRange,
-  height = 100,
-}) => {
+export const DiskSizeCard: React.FC<DiskSizeCardProps> = ({ clusterName, timeRange }) => {
   const query = useMemo(() => getDiskSizeEsql(clusterName), [clusterName]);
 
   const { data, loading } = useEsqlQuery<DiskSizeData>({
@@ -55,10 +50,12 @@ export const DiskSizeCard: React.FC<DiskSizeCardProps> = ({
       title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.diskSizeLabel', {
         defaultMessage: 'Disk size',
       })}
+      subtitle={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
+        defaultMessage: 'Total',
+      })}
       value={totalDiskBytes}
       isLoading={loading}
       formatter="bytes"
-      height={height}
     />
   );
 };
