@@ -14,7 +14,7 @@ import {
 import { z } from '@kbn/zod';
 import { conditionSchema } from '@kbn/streamlang';
 import { from as fromRxjs, map } from 'rxjs';
-import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/promps_config_service';
+import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
