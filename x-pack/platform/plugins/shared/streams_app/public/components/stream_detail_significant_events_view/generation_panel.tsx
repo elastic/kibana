@@ -17,7 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FeatureSelectorProps, FeaturesSelector } from './feature_selector';
+import type { FeatureSelectorProps } from './feature_selector';
+import { FeaturesSelector } from './feature_selector';
 import { AssetImage } from '../asset_image';
 import { ConnectorListButton } from '../connector_list_button/connector_list_button';
 
