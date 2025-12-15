@@ -50,5 +50,28 @@ export default function (providerContext: FtrProviderContext) {
       const updatedAgentPolicy = await apiClient.getAgentPolicy(agentPolicy.item.id);
       expect(updatedAgentPolicy.item.revision).to.be(agentPolicy.item.revision);
     });
+
+    it('should reindex knowledge base when setting is enabled', async function () {
+      await apiClient.installPackage({ pkgName: 'knowledge_base_test', pkgVersion: '1.0.0' });
+
+      await apiClient.putSettings({
+        integration_knowledge_enabled: true,
+      });
+
+      const updatedSettings = await apiClient.getSettings();
+      expect(updatedSettings.item.integration_knowledge_enabled).to.be(true);
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      const response = await apiClient.getPackage({
+        pkgName: 'knowledge_base_test',
+        pkgVersion: '1.0.0',
+      });
+      expect(
+        response.item.installationInfo?.installed_es.some(
+          (esAsset) => esAsset.type === 'knowledge_base'
+        )
+      ).to.be(true);
+    });
   });
 }
