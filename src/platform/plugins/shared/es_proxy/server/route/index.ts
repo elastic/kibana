@@ -75,6 +75,8 @@ const handler: (method: string) => RequestHandler<{ path: string }> =
   };
 
 export const registerProxyRoute = (deps: RouteDependencies) => {
+  // see /src/platform/plugins/shared/console/server/lib/proxy_request.ts
+  // need to add HEAD
   deps.router.post(defaultRouteConfig, handler('POST'));
   deps.router.delete(defaultRouteConfig, handler('DELETE'));
   deps.router.patch(defaultRouteConfig, handler('PATCH'));
