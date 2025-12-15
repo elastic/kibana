@@ -65,7 +65,6 @@ export const useAgentBuilderAttachment = ({
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
-      // always launch attachments with default agent
       agentId: THREAT_HUNTING_AGENT,
     });
   }, [attachmentType, attachmentData, attachmentPrompt, onechat]);
