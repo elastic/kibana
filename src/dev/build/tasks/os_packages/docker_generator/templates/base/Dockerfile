@@ -186,7 +186,10 @@ CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
     /bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
-    chmod 0555 /app/kibana.sh
+    chown root:root /app/kibana.sh && \
+    chown root:root /app && \
+    chmod 0555 /app/kibana.sh && \
+    chmod 0555 /app
 {{/cloud}}
 
 {{^cloud}}
