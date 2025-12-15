@@ -20,15 +20,20 @@ export function applyFipsOverrides(vars: any) {
     exclude: skipTags,
   };
 
-  vars.security = {
-    ...vars.security,
+  if (vars.esTestCluster.serverArgs.includes("'xpack.security.enabled=false'")) {
     /*
      * When running in FIPS mode, security must be enabled. Many suites expect that there will be no authc/authz.
      * Test user's roles are set to `defaultRoles`, the most privileged roles are added here
-     *  so that more tests can be run successfully
+     * so that more tests can be run successfully.
+     *
+     * Tests that were already testing with security enabled should continue to work as expected
+     * without adding roles to the test user.
      */
-    defaultRoles: ['superuser', 'kibana_admin', 'system_indices_superuser'],
-  };
+    vars.security = {
+      ...vars.security,
+      defaultRoles: ['superuser', 'kibana_admin', 'system_indices_superuser'],
+    };
+  }
 
   const newServerArgs = vars.esTestCluster.serverArgs.filter(
     (arg: string) => arg !== 'xpack.security.enabled=false'

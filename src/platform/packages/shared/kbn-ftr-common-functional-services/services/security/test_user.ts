@@ -10,8 +10,6 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 
-import { fipsIsEnabled } from '@kbn/test';
-
 import type { Role } from './role';
 import type { User } from './user';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -50,18 +48,6 @@ export class TestUser extends FtrService {
 
   async setRoles(roles: string[], options?: { skipBrowserRefresh?: boolean }) {
     if (!this.enabled) {
-      return;
-    }
-
-    /*
-     * When running in FIPS mode, security must be enabled. Many suites expect that there will be no authc/authz.
-     * Test user is configured to get `defaultRole` which is being overridden in `fips_overrides.ts` to the most privileged
-     * roles available so that more tests can be run successfully
-     */
-    if (fipsIsEnabled()) {
-      this.log.debug(
-        `FTR is running in FIPS mode and does not allow for Test User's roles to be overridden`
-      );
       return;
     }
 
