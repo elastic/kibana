@@ -200,14 +200,14 @@ export const qualityIndicatorDegradedTooltipText = i18n.translate(
   'xpack.datasetQuality.qualityIndicatorDegradedTooltipText',
   {
     defaultMessage:
-      'Some documents have missing or malformed fields. Ingestion is working but certain data may be incomplete or inconsistent.',
+      'Some documents have missing or malformed fields. Ingestion is working but data may be incomplete or inconsistent.',
   }
 );
 
 export const qualityIndicatorPoorTooltipText = i18n.translate(
   'xpack.datasetQuality.qualityIndicatorPoorTooltipText',
   {
-    defaultMessage: 'Many documents have have missing or malformed field, or fail ingestions.',
+    defaultMessage: 'More than 3% of documents have missing or malformed fields, or are failing ingestion.',
   }
 );
 
