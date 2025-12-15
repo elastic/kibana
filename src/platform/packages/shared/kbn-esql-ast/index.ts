@@ -35,24 +35,10 @@ export type {
 
 export * from './src/parser';
 export * from './src/ast';
-export * as synth from './src/synth';
-export { qry, cmd, exp } from './src/synth';
 export * from './src/composer';
-
-export { esql, e } from './src/composer/esql';
-
-export {
-  LeafPrinter,
-  BasicPrettyPrinter,
-  type BasicPrettyPrinterMultilineOptions,
-  type BasicPrettyPrinterOptions,
-  WrappingPrettyPrinter,
-  type WrappingPrettyPrinterOptions,
-} from './src/pretty_print';
-
-export { EsqlQuery } from './src/query';
-
+export * from './src/pretty_print';
 export * from './src/commands';
+
 // temporary export to ease migration
 export { getNoValidCallSignatureError } from './src/commands/definitions/utils/validation/utils';
 // temporary export to ease migration

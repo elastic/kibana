@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParseOptions } from '../parser';
-import type { ESQLAstExpression, ESQLProperNode } from '../types';
+import type { ParseOptions } from '../../parser';
+import type { ESQLAstExpression, ESQLProperNode } from '../../types';
 import type { SynthLiteralFragment } from './synth_literal_fragment';
 import type { SynthNode } from './synth_node';
 

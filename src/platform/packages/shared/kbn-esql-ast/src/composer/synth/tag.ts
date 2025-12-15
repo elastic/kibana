@@ -8,14 +8,14 @@
  */
 
 import { holeToFragment } from './holes';
-import type { ESQLProperNode } from '../types';
+import type { ESQLProperNode } from '../../types';
 import type {
   SynthGenerator,
   SynthMethod,
   SynthTaggedTemplateWithOpts,
   SynthTemplateHole,
 } from './types';
-import type { ParseOptions } from '../parser';
+import type { ParseOptions } from '../../parser';
 
 export const createTag = <N extends ESQLProperNode>(
   generator: SynthGenerator<N>
