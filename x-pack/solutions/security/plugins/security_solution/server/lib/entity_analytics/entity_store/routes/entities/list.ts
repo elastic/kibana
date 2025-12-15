@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -26,11 +25,8 @@ import type { ListEntitiesResponse } from '../../../../../../common/api/entity_a
 import { ListEntitiesRequestQuery } from '../../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { APP_ID } from '../../../../../../common';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
-import type { Entity } from '../../../../../../common/api/entity_analytics';
-
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { key } from 'vega';
 
 export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -78,7 +74,11 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
           });
 
           records.forEach((record) => {
-            return convertKeysToSnakeCase(record as ECSEntity);
+            return lowercaseEntityKeysForProperties(record, [
+              'behaviors',
+              'lifecycle',
+              'attributes',
+            ]);
           });
 
           return response.ok({
@@ -102,50 +102,28 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
     );
 };
 
-function convertKeysToSnakeCase(record: ECSEntity): Entity {
-  if (record.entity.behaviors !== undefined) {
-    ['Brute_force_victim', 'New_country_login', 'Used_usb_device'].forEach((k) => {
-      if (record.entity.behaviors?.[k] !== undefined) {
-        record.entity.behaviors[k.toLowerCase()] = record.entity.behaviors[k];
-        delete record.entity.behaviors[k];
-      }
-    });
-  }
-  if (record.entity.lifecycle !== undefined) {
-    ['First_seen', 'Last_seen'].forEach((k) => {
-      if (record.entity.lifecycle?.[k] !== undefined) {
-        record.entity.lifecycle[k.toLowerCase()] = record.entity.lifecycle[k];
-        delete record.entity.lifecycle[k];
-      }
-    });
-  }
-  if (record.entity.attributes !== undefined) {
-    ['Privileged', 'Asset', 'Managed', 'Mfa_enabled'].forEach((k) => {
-      if (record.entity.attributes?.[k] !== undefined) {
-        record.entity.attributes[k.toLowerCase()] = record.entity.attributes[k];
-        delete record.entity.attributes[k];
-      }
-    });
-  }
-  return record;
-}
+export function lowercaseEntityKeysForProperties<T extends Record<string, any>>(
+  obj: T,
+  properties: string[]
+): void {
+  for (const prop of properties) {
+    if (!(prop in obj.entity)) {
+      continue;
+    }
+    const sub = obj.entity[prop];
 
-interface ECSEntity extends Entity {
-  entity: Entity['entity'] & {
-    behaviors?: {
-      Brute_force_victim: boolean | undefined;
-      New_country_login: boolean | undefined;
-      Used_usb_device: boolean | undefined;
-    };
-    lifecycle?: {
-      First_seen: string | undefined;
-      Last_seen: string | undefined;
-    };
-    attributes?: {
-      Privileged: boolean | undefined;
-      Asset: boolean | undefined;
-      Managed: boolean | undefined;
-      Mfa_enabled: boolean | undefined;
-    };
-  };
+    if (!sub || typeof sub !== 'object' || Array.isArray(sub)) {
+      continue;
+    }
+
+    const keys = Object.keys(sub);
+    for (const k of keys) {
+      const newKey = k.toLowerCase();
+      if (newKey in sub) {
+        continue;
+      }
+      sub[newKey] = sub[k];
+      delete sub[k];
+    }
+  }
 }
