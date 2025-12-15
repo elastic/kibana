@@ -18,7 +18,6 @@ import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
   savedDiscoverySessionsM2,
-  allSetM7,
   detectionRulesInstalledM3,
   installedPackagesM1,
   casesM6,
@@ -38,7 +37,7 @@ import type { NBAMilestone, DetectorF } from '../types';
 const TASK_TYPE = 'security:trial-companion-milestone';
 const TASK_TITLE = 'This task periodically checks currently achieved milestones.';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const INTERVAL = '1m'; // testing purposes
+const INTERVAL = '1m';
 const TIMEOUT = '10m';
 
 export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneServiceDepsF = (
@@ -73,7 +72,6 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
       casesM6(usageCollectorDeps)
     );
   }
-  detectors.push(allSetM7(logger));
   const repo: TrialCompanionMilestoneRepository = new TrialCompanionMilestoneRepositoryImpl(
     logger,
     soClient

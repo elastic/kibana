@@ -39,7 +39,6 @@ const Template: StoryFn<NBANotificationProps> = (args) => {
 };
 
 const nbaM1 = ALL_NBA.get(Milestone.M1);
-const nbaM7 = ALL_NBA.get(Milestone.M7);
 
 export const Milestone1InstallIntegrations: StoryObj<NBANotificationProps> = {
   render: Template,
@@ -49,16 +48,5 @@ export const Milestone1InstallIntegrations: StoryObj<NBANotificationProps> = {
     viewButtonText: nbaM1?.apps?.[0].text,
     onSeenBanner: action('onSeenBanner'),
     onViewButton: action('onViewButton'),
-  },
-};
-
-export const Milestone7WithoutViewButton: StoryObj<NBANotificationProps> = {
-  render: Template,
-  args: {
-    title: nbaM7?.title,
-    message: nbaM7?.message,
-    viewButtonText: undefined,
-    onSeenBanner: action('onSeenBanner'),
-    onViewButton: undefined,
   },
 };

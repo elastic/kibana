@@ -58,13 +58,6 @@ export const installedPackagesM1 = (logger: Logger, packageService: PackageServi
   };
 };
 
-// for testing / demo purposes
-export const allSetM7 = (logger: Logger): DetectorF => {
-  return async (): Promise<Milestone | undefined> => {
-    return Milestone.M7;
-  };
-};
-
 export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
     // Extract enabled rule count from detection_rules usage

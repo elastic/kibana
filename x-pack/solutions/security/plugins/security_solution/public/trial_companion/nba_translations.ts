@@ -115,12 +115,6 @@ const NBA_M6: NBA = toNBA(
   ]
 );
 
-const NBA_M7: NBA = toNBA(
-  Milestone.M7,
-  'Congratulations! You’ve completed all the steps to get started with Security.',
-  'You’re all set!'
-);
-
 export const ALL_NBA = new Map<Milestone, NBA>([
   [Milestone.M1, NBA_M1],
   [Milestone.M2, NBA_M2],
@@ -128,5 +122,4 @@ export const ALL_NBA = new Map<Milestone, NBA>([
   [Milestone.M4, NBA_M4],
   [Milestone.M5, NBA_M5],
   [Milestone.M6, NBA_M6],
-  [Milestone.M7, NBA_M7],
 ]);

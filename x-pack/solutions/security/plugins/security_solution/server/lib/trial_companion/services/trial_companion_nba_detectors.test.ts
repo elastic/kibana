@@ -10,7 +10,6 @@ import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
   casesM6,
   installedPackagesM1,
-  allSetM7,
   savedDiscoverySessionsM2,
   detectionRulesInstalledM3,
 } from './trial_companion_nba_detectors';
@@ -63,10 +62,6 @@ describe('Trial companion NBA detectors', () => {
   ])('savedDiscoverySessionsM2 with total: %s', async (total, expected) => {
     soClient.find.mockResolvedValueOnce({ saved_objects: [], total, per_page: 0, page: 0 });
     await expect(savedDiscoverySessionsM2(deps)()).resolves.toEqual(expected);
-  });
-
-  it('allSetM7 return constant', async () => {
-    await expect(allSetM7(deps.logger)()).resolves.toEqual(Milestone.M7);
   });
 
   describe('installedPackagesM1', () => {
