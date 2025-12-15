@@ -179,10 +179,11 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     canCancel,
     cancel,
     cleanConversation: () => {
+      // Cleaning the conversation only happens when we are on "/new" and the user wants to back out of a pending or errored conversation and return to an empty conversation state
       if (isLoading) {
+        // Conversation round is pending, unsubscribe from chat events and resolve mutation
         unsubscribeFromChatEvents();
       } else if (Boolean(error)) {
-        conversationActions.removeOptimisticRound();
         removeError();
         removePendingMessage();
       }
