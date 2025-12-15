@@ -27,36 +27,28 @@ export const buildFunctionDocumentation = (
   examples: string[] | undefined
 ) => `
 ${detail}
-\
----
-\
-***${declarationLabel}***
+
+**${declarationLabel}**
 ${signatures
   .map(
     ({ declaration, license }) => `
-\
-  - \`\`${declaration}\`\`${license || ''}\
-\
+\`\`\`typescript
+${declaration}${license || ''}
+\`\`\`
 `
   )
   .join('\n\n')}
-  ${
-    examples?.length
-      ? `\
----
-***${examplesLabel}***
-\
-  ${examples
-    .map(
-      (i) => `
-  - \`\`${i}\`\`
-`
-    )
-    .join('')}
 
+${
+  examples?.length
+    ? `\
+**${examplesLabel}**
+\`\`\`esql
+${examples.map((i) => i).join('')}
+\`\`\`
 `
-      : ''
-  }`;
+    : ''
+}`;
 
 /** @internal **/
 export const buildDocumentation = (declaration: string, examples?: string[]) => `

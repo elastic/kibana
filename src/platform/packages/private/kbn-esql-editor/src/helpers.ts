@@ -323,9 +323,13 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
     }
+
     .suggest-details {
-      padding-left: ${theme.euiTheme.size.s};
+      padding-left: ${theme.euiTheme.size.m};
+      padding-right: ${theme.euiTheme.size.m};
+      text-align: justify;
     }
+
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
@@ -340,6 +344,16 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .parameter-hints-widget > .phwrapper {
       max-height: 90px !important;
       overflow: auto;
+    }
+
+    .suggest-details .rendered-markdown > p > strong {
+      display: block;
+      margin-top: ${theme.euiTheme.size.m};
+      font-size: ${theme.euiTheme.size.base};
+    }
+
+    .suggest-details [data-code] {
+      overflow-x: auto !important;
     }
   `;
 };
