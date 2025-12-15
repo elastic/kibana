@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolHealthStatus, ToolHealthState } from '../../../../../common/http_api/tools';
 import type { ToolHealthProperties } from './storage';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 export type ToolHealthDocument = SearchHit<ToolHealthProperties>;
 

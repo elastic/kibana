@@ -9,13 +9,9 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/onechat-common';
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
-import type {
-  LlmDescriptionHandler,
-  ToolHandlerFn,
-} from '@kbn/onechat-server';
+import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/onechat-server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
 /**
  * Descriptor for a tool type.
@@ -60,14 +56,12 @@ export interface ToolTypeConversionContext {
   request: KibanaRequest;
   spaceId: string;
   esClient: ElasticsearchClient;
-  actions: ActionsPluginStart;
 }
 
 export interface ToolTypeValidatorContext {
   request: KibanaRequest;
   spaceId: string;
   esClient: ElasticsearchClient;
-  actions: ActionsPluginStart;
 }
 
 export type ToolTypeCreateValidator<ToolTypeConfig extends object = Record<string, any>> = (opts: {
@@ -142,7 +136,6 @@ export interface ToolHandlerDynamicProps<
 export interface ToolDynamicPropsContext {
   spaceId: string;
   request: KibanaRequest;
-  actions: ActionsPluginStart;
 }
 
 export type ToolHandlerDynamicPropsFn<

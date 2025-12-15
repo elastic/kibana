@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AnyToolTypeDefinition } from './definitions';
 import { getEsqlToolType } from './esql';
@@ -15,15 +16,17 @@ import { getMcpToolType } from './mcp';
 
 export const getToolTypeDefinitions = ({
   workflowsManagement,
+  actions,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
+  actions: ActionsPluginStart;
 }): AnyToolTypeDefinition[] => {
   const toolTypes: AnyToolTypeDefinition<any, any, any>[] = [
     getBuiltinToolType(),
     getEsqlToolType(),
     getIndexSearchToolType(),
     getWorkflowToolType({ workflowsManagement }),
-    getMcpToolType(),
+    getMcpToolType({ actions }),
   ];
   return toolTypes;
 };

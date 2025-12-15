@@ -149,14 +149,14 @@ async function executeMcpTool({
  * - Input schema: Retrieved by calling listTools on the MCP connector
  * - Execution: Calls the connector's callTool sub-action with the tool name and arguments
  */
-export const getMcpToolType = (): ToolTypeDefinition<
-  ToolType.mcp,
-  McpToolConfig,
-  z.ZodObject<any>
-> => {
+export const getMcpToolType = ({
+  actions,
+}: {
+  actions: ActionsPluginStart;
+}): ToolTypeDefinition<ToolType.mcp, McpToolConfig, z.ZodObject<any>> => {
   return {
     toolType: ToolType.mcp,
-    getDynamicProps: (config, { request, actions }) => {
+    getDynamicProps: (config, { request }) => {
       return {
         getHandler: () => {
           return async (params, context) => {
@@ -259,7 +259,7 @@ export const getMcpToolType = (): ToolTypeDefinition<
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
 
-    validateForCreate: async ({ config, context: { request, actions } }) => {
+    validateForCreate: async ({ config, context: { request } }) => {
       await validateConfig({
         actions,
         request,
@@ -268,7 +268,7 @@ export const getMcpToolType = (): ToolTypeDefinition<
       return config;
     },
 
-    validateForUpdate: async ({ update, current, context: { request, actions } }) => {
+    validateForUpdate: async ({ update, current, context: { request } }) => {
       const mergedConfig = {
         ...current,
         ...update,

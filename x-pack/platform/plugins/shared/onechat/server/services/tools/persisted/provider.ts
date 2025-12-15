@@ -10,7 +10,6 @@ import type { ToolType } from '@kbn/onechat-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
 import { isEnabledDefinition } from '../tool_types/definitions';
@@ -26,7 +25,6 @@ export const createPersistedProviderFn =
     logger: Logger;
     esClient: ElasticsearchClient;
     toolTypes: AnyToolTypeDefinition[];
-    actions: ActionsPluginStart;
   }): ToolProviderFn<false> =>
   ({ request, space }) => {
     return createPersistedToolClient({
@@ -42,14 +40,12 @@ export const createPersistedToolClient = ({
   logger,
   esClient,
   space,
-  actions,
 }: {
   toolTypes: AnyToolTypeDefinition[];
   logger: Logger;
   esClient: ElasticsearchClient;
   space: string;
   request: KibanaRequest;
-  actions: ActionsPluginStart;
 }): WritableToolProvider => {
   const toolClient = createClient({ space, esClient, logger });
   const definitionMap = toolTypes.filter(isEnabledDefinition).reduce((map, def) => {
@@ -62,7 +58,6 @@ export const createPersistedToolClient = ({
       esClient,
       request,
       spaceId: space,
-      actions,
     };
   };
 
@@ -71,7 +66,6 @@ export const createPersistedToolClient = ({
       esClient,
       request,
       spaceId: space,
-      actions,
     };
   };
 
