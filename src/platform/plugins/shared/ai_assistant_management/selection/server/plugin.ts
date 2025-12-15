@@ -15,7 +15,6 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
@@ -50,7 +49,10 @@ export class AIAssistantManagementSelectionPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
     this.registerUiSettings(core, plugins);
@@ -59,7 +61,10 @@ export class AIAssistantManagementSelectionPlugin
   }
 
   private registerUiSettings(
-    core: CoreSetup,
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
     const { cloud } = plugins;
@@ -85,7 +90,7 @@ export class AIAssistantManagementSelectionPlugin
             if (request) {
               try {
                 const [, startServices] = await core.getStartServices();
-                const spaces = (startServices as { spaces?: SpacesPluginStart }).spaces;
+                const spaces = startServices.spaces;
                 if (spaces) {
                   const activeSpace = await spaces.spacesService.getActiveSpace(request);
                   if (activeSpace?.solution === 'es') {
