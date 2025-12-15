@@ -65,12 +65,15 @@ describe('scripts library client', () => {
 
     it('should create a file record and upload file content to it', async () => {
       await scriptsClient.create(createBodyMock);
+      const scriptSoId = (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create as jest.Mock
+      ).mock.calls[0][2].id;
 
       expect(filesPluginClient.create).toHaveBeenCalledWith({
-        id: expect.any(String),
         metadata: {
           mime: 'application/text',
           name: 'foo.txt',
+          meta: { scriptId: scriptSoId },
         },
       });
 
@@ -79,9 +82,10 @@ describe('scripts library client', () => {
       });
     });
 
-    it('should create a new script entry in the library using same id as File storage', async () => {
+    it('should create a script entry (SO) with expected content', async () => {
       await scriptsClient.create(createBodyMock);
-      const scriptId = filesPluginClient.create.mock.calls[0][0].id;
+      const soClientMock = endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient();
+      const scriptSoId = (soClientMock.create as jest.Mock).mock.calls[0][2].id;
 
       expect(
         endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
@@ -91,8 +95,11 @@ describe('scripts library client', () => {
           description: 'does some stuff',
           example: 'bash -c script_one.sh',
           path_to_executable: undefined,
-          hash: 'e5441eb2bb',
-          id: scriptId,
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          id: scriptSoId,
           instructions: 'just execute it',
           name: 'script one',
           platform: ['linux', 'macos'],
@@ -102,7 +109,7 @@ describe('scripts library client', () => {
           updated_by: 'elastic',
           updated_at: expect.any(String),
         },
-        { id: scriptId }
+        { id: scriptSoId }
       );
     });
 
@@ -131,6 +138,9 @@ describe('scripts library client', () => {
         downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
         id: '1-2-3',
         name: 'my script',
+        fileHash: 'e5441eb2bb',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
         platform: ['macos', 'linux'],
         requiresInput: false,
         updatedAt: '2025-11-24T16:04:17.471Z',
@@ -251,6 +261,9 @@ describe('scripts library client', () => {
             id: '1-2-3',
             instructions: undefined,
             name: 'my script',
+            fileHash: 'e5441eb2bb',
+            fileName: 'my_script.sh',
+            fileSize: 12098,
             pathToExecutable: undefined,
             platform: ['macos', 'linux'],
             requiresInput: false,

@@ -10,7 +10,8 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { once } from 'lodash';
-import { getSloSettings, getSummaryIndices } from '../services/slo_settings';
+import { DefaultSLOSettingsRepository } from '../services/slo_settings_repository';
+import { getSummaryIndices } from '../services/utils/get_summary_indices';
 
 export interface SloClient {
   getSummaryIndices(): Promise<string[]>;
@@ -24,9 +25,10 @@ export function getSloClientWithRequest({
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
 }): SloClient {
-  const getSummaryIndicesOnce = once(async () => {
-    const settings = await getSloSettings(soClient);
+  const settingsRepository = new DefaultSLOSettingsRepository(soClient);
 
+  const getSummaryIndicesOnce = once(async () => {
+    const settings = await settingsRepository.get();
     const { indices } = await getSummaryIndices(esClient, settings);
 
     return indices;

@@ -2,7 +2,7 @@
 
 exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
-  class="euiPage emotion-euiPage-row-grow"
+  class="euiPage emotion-euiPage-row-transparent-grow"
   data-test-subj="noDataContainer"
 >
   <h1
@@ -113,7 +113,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 
 exports[`NoData should show text next to the spinner while checking a setting 1`] = `
 <div
-  class="euiPage emotion-euiPage-row-grow"
+  class="euiPage emotion-euiPage-row-transparent-grow"
   data-test-subj="noDataContainer"
 >
   <h1
