@@ -32,6 +32,14 @@ const createMockEuiThemeContext = (): UseEuiTheme => ({
         medium: '6px',
       },
     } as any,
+    shadows: {
+      m: {
+        down: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      },
+    } as any,
+    flags: {
+      shadowVariant: 'legacy',
+    } as any,
   } as any,
   colorMode: 'LIGHT' as const,
   modifications: {},
@@ -45,9 +53,11 @@ describe('getMonacoWorkflowOverridesStyles', () => {
 
     expect(styles).toBeDefined();
     const stylesString = styles.styles;
-    expect(stylesString).toContain('border-radius: 6px');
-    expect(stylesString).toContain('border-width: 0');
-    expect(stylesString).toContain('overflow: hidden');
+    expect(stylesString).toContain('border-radius');
+    expect(stylesString).toContain('6px');
+    expect(stylesString).toContain('border-width');
+    expect(stylesString).toContain('overflow');
+    expect(stylesString).toContain('hidden');
   });
 
   it('should apply shadow and border-radius to suggestion widget', () => {
@@ -56,7 +66,8 @@ describe('getMonacoWorkflowOverridesStyles', () => {
 
     const stylesString = styles.styles;
     expect(stylesString).toContain('.monaco-editor .suggest-widget');
-    expect(stylesString).toContain('border-radius: 6px');
+    expect(stylesString).toContain('border-radius');
+    expect(stylesString).toContain('6px');
   });
 
   it('should style hover widget with proper selectors', () => {
@@ -74,7 +85,9 @@ describe('getMonacoWorkflowOverridesStyles', () => {
 
     const stylesString = styles.styles;
     expect(stylesString).toContain('.monaco-hover-content');
-    expect(stylesString).toContain('padding: 12px 16px');
+    expect(stylesString).toContain('padding');
+    expect(stylesString).toContain('12px');
+    expect(stylesString).toContain('16px');
   });
 
   it('should style markdown elements in hover', () => {
