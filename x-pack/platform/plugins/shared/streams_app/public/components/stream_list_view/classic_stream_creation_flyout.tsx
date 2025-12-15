@@ -87,7 +87,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         });
 
         router.push('/{key}/management/{tab}', {
-          path: { key: streamName, tab: 'schema' },
+          path: { key: streamName, tab: 'retention' },
           query: {},
         });
 
