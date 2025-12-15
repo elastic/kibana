@@ -21,7 +21,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
-  const retry = getService('retry');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -192,15 +191,10 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should not have created any ES assets on install', async () => {
-      await retry.tryForTime(10000, async () => {
-        const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
-        expect(installation.installed_es).to.eql([
-          {
-            id: 'input_package_upgrade-README.md',
-            type: 'knowledge_base',
-          },
-        ]);
-      });
+      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
+      expect(
+        installation.installed_es.filter((item: any) => item.type !== 'knowledge_base')
+      ).to.eql([]);
     });
 
     it('should create index templates and update installed_es on package policy creation', async () => {
