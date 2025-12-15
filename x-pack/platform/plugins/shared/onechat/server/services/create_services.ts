@@ -97,6 +97,7 @@ export class ServiceManager {
       elasticsearch,
       inference,
       spaces,
+      actions,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
