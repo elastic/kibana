@@ -94,8 +94,8 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        this._definition.ingest.processing,
-        startingStateStreamDefinition.ingest.processing
+        _.omit(this._definition.ingest.processing, ['updated_at']),
+        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
       );
 
     this._changes.lifecycle =
@@ -119,6 +119,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         this._definition.ingest.failure_store,
         startingStateStreamDefinition.ingest.failure_store
       );
+
+    // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
+    // we should keep the existing updated_at as processing wasn't touched.
+    if (startingStateStreamDefinition && !this._changes.processing) {
+      this._definition.ingest.processing.updated_at =
+        startingStateStreamDefinition.ingest.processing.updated_at;
+    }
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }

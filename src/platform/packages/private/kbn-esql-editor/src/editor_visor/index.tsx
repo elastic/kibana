@@ -90,7 +90,7 @@ export function QuickSearchVisor({
         if (selectedSourceNames && searchValue.trim()) {
           // Support of time_series
           const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
-          const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("${searchValue.trim()}")`;
+          const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("""${searchValue.trim()}""")`;
           onUpdateAndSubmitQuery(newQuery);
           // Clear the search value after submitting the query
           setSearchValue('');

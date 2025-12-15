@@ -2403,6 +2403,31 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TraceRootSpan",
+        "type": "Interface",
+        "tags": [],
+        "label": "TraceRootSpan",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/traces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.TraceRootSpan.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/traces.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.Transaction",
         "type": "Interface",
         "tags": [],
@@ -2864,6 +2889,82 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.UnifiedSpanDocument",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedSpanDocument",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.UnifiedSpanDocument",
+            "text": "UnifiedSpanDocument"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Span",
+            "text": "Span"
+          },
+          ", \"transaction\">,Pick<",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
+          ", \"transaction\">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/traces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.UnifiedSpanDocument._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/traces.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.UnifiedSpanDocument._index",
+            "type": "string",
+            "tags": [],
+            "label": "_index",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/traces.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.UnifiedSpanDocument.duration",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "signature": [
+              "string | number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/traces.ts",
             "deprecated": false,
             "trackAdoption": false
           }

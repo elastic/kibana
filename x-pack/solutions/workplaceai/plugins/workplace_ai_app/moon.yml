@@ -34,8 +34,6 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/data-sources-registry-plugin'
   - '@kbn/react-query'
-  - '@kbn/workplaceai-api-keys-components'
-  - '@kbn/workplaceai-api-keys-server'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-data-connectors'
   - '@kbn/deeplinks-analytics'
@@ -45,6 +43,10 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/share-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/elastic-assistant'
+  - '@kbn/ai-assistant-connector-selector-action'
+  - '@kbn/core-application-browser'
 tags:
   - plugin
   - prod

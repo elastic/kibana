@@ -15,7 +15,7 @@ export const downloadToDisk = async (fileUrl: string, filePath: string) => {
   const dirPath = Path.dirname(filePath);
   await mkdir(dirPath, { recursive: true });
   const writeStream = createWriteStream(filePath);
-  let readStream: ReadStream | NodeJS.ReadableStream;
+  let readStream: ReadStream;
 
   const parsedUrl = new URL(fileUrl);
 
@@ -25,10 +25,10 @@ export const downloadToDisk = async (fileUrl: string, filePath: string) => {
   } else {
     const res = await fetch(fileUrl);
 
-    readStream = res.body;
+    readStream = res.body as ReadStream;
   }
 
-  await new Promise((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     readStream.pipe(writeStream);
     readStream.on('error', reject);
     writeStream.on('finish', resolve);

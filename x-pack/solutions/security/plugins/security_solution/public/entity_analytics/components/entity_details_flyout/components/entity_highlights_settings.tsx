@@ -24,8 +24,13 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAskAiAssistant } from '../tabs/risk_inputs/use_ask_ai_assistant';
 import { getAnonymizedEntityIdentifier } from '../utils/helpers';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 interface EntityHighlightsSettingsProps {
   onRegenerate: () => void;
@@ -43,6 +48,7 @@ interface EntityHighlightsSettingsProps {
   } | null;
   closePopover: () => void;
   openPopover: () => void;
+  isAssistantVisible: boolean;
   isLoading: boolean;
   isPopoverOpen: boolean;
 }
@@ -59,7 +65,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   isPopoverOpen,
   entityType,
   entityIdentifier,
-
+  isAssistantVisible,
   assistantResult,
 }) => {
   const anonymizedEntityIdentifier = getAnonymizedEntityIdentifier(
@@ -92,6 +98,26 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     getPromptContext,
     replacements: assistantResult?.replacements,
   });
+
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+
+  const entityAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.entity,
+      attachmentData: {
+        identifierType: entityType,
+        identifier: entityIdentifier,
+        attachmentLabel: `${entityType}: ${entityIdentifier}`,
+      },
+      attachmentPrompt: ENTITY_PROMPT,
+    }),
+    [entityIdentifier, entityType]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
+  const onAgentBuildAttachmentClick = useCallback(() => {
+    openAgentBuilderFlyout();
+    closePopover();
+  }, [closePopover, openAgentBuilderFlyout]);
 
   const items = useMemo(
     () => [
@@ -141,26 +167,43 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
           </EuiFlexGroup>
         </EuiContextMenuItem>
 
-        <EuiContextMenuItem
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-            {
-              defaultMessage: 'Ask AI Assistant',
-            }
-          )}
-          key={'ask-ai-assistant'}
-          onClick={() => {
-            showAssistantOverlay();
-            closePopover();
-          }}
-          icon={<AssistantIcon />}
-          disabled={isLoading}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
-            defaultMessage="Ask AI Assistant"
-          />
-        </EuiContextMenuItem>
+        {isAgentBuilderEnabled ? (
+          <EuiContextMenuItem
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+              {
+                defaultMessage: 'Ask AI Assistant',
+              }
+            )}
+            key={'ask-ai-assistant'}
+            disabled={isLoading}
+          >
+            <NewAgentBuilderAttachment onClick={onAgentBuildAttachmentClick} size="s" />
+          </EuiContextMenuItem>
+        ) : (
+          isAssistantVisible && (
+            <EuiContextMenuItem
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+                {
+                  defaultMessage: 'Ask AI Assistant',
+                }
+              )}
+              key={'ask-ai-assistant'}
+              onClick={() => {
+                showAssistantOverlay();
+                closePopover();
+              }}
+              icon={<AssistantIcon />}
+              disabled={isLoading}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
+                defaultMessage="Ask AI Assistant"
+              />
+            </EuiContextMenuItem>
+          )
+        )}
 
         <EuiContextMenuItem
           aria-label={i18n.translate(
@@ -185,6 +228,9 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       showAnonymizedValues,
       onChangeShowAnonymizedValues,
       selectedConversationHasAnonymizedValues,
+      isAgentBuilderEnabled,
+      onAgentBuildAttachmentClick,
+      isAssistantVisible,
       setConnectorId,
       connectorId,
       showAssistantOverlay,

@@ -13,10 +13,9 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
-import type { TabState } from './types';
+import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
-import type { DiscoverAppState } from '../discover_app_state_container';
 
 export const fromSavedObjectTabToTabState = ({
   tab,

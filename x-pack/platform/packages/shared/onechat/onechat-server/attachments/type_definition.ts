@@ -7,6 +7,8 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AttachmentBoundedTool } from './tools';
 
 /**
  * Server-side definition of an attachment type.
@@ -23,10 +25,17 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   /**
    * format the attachment to presented to the LLM
    */
-  format: (attachment: Attachment<TType, TContent>) => MaybePromise<AgentFormattedAttachment>;
+  format: (
+    attachment: Attachment<TType, TContent>,
+    context: AttachmentFormatContext
+  ) => MaybePromise<AgentFormattedAttachment>;
   /**
-   * should return the list of tools which should be exposed to the agent
+   * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.
+   *
+   * Should be used to expose generic tools related to the attachment type.
+   *
+   * E.g. the "esql" attachment type exposes the "execute_esql" tool that way.
    */
   getTools?: () => string[];
   /**
@@ -35,6 +44,14 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * are present in the conversation.
    */
   getAgentDescription?: () => string;
+}
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.format} function.
+ */
+export interface AttachmentFormatContext {
+  request: KibanaRequest;
+  spaceId: string;
 }
 
 /**
@@ -74,4 +91,15 @@ export interface AgentFormattedAttachment {
    * Should return the representation of the attachment, which will be presented to the agent.
    */
   getRepresentation: () => MaybePromise<AttachmentRepresentation>;
+  /**
+   * Can be used to expose tools which are specific to the attachment instance.
+   *
+   * **Important**: when multiple attachments of the same type are present in the conversation,
+   * this function will be called for each of them, and all the tools will be exposed to the agent.
+   * This is why:
+   * - the tools should be "scoped" to the attachment instance (no id parameter for references, for example)
+   * - the tool ids should be unique (so generated based on the attachment instance or attachment id)
+   * - the descriptions should be explicit that they are specific to the attachment instance (specifying the attachment id for example)
+   */
+  getBoundedTools?: () => MaybePromise<AttachmentBoundedTool[]>;
 }

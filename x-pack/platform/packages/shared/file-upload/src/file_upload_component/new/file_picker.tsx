@@ -5,12 +5,13 @@
  * 2.0.
  */
 import type { EuiFilePickerProps } from '@elastic/eui';
-import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useRef } from 'react';
-import type { FileUploadManager } from '../../..';
+import type { FileUploadManager } from '../../../file_upload_manager';
 
 interface Props {
   fileUploadManager: FileUploadManager;
@@ -33,10 +34,20 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
   );
 
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {fullWidth === false ? <EuiFlexItem grow={true} /> : null}
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
+          label={
+            <EuiTitle size="xxxs">
+              <h6>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.uploadView.uploadFilesLabel"
+                  defaultMessage="Upload data"
+                />
+              </h6>
+            </EuiTitle>
+          }
           fullWidth
           helpText={i18n.translate('xpack.fileUpload.aboutPanel.supportedFormatsDescription', {
             defaultMessage: 'Supported formats: PDF, TXT, CSV, log files and NDJSON',

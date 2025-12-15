@@ -78,6 +78,7 @@ export interface AppDependencies {
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;

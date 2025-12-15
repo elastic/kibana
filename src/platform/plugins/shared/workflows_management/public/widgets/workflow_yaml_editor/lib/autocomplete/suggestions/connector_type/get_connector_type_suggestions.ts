@@ -238,7 +238,7 @@ function getBuiltInStepTypesFromSchema(): Array<{
   const stepTypes = stepSchemas.map(({ schema, description, icon }) => {
     // Extract the literal type value from the Zod schema
     const typeField = schema.shape.type;
-    const stepType = typeField._def.value; // Get the literal value from z.literal()
+    const stepType = typeField.def.values[0]; // Get the literal value from z.literal()
 
     return {
       type: stepType,

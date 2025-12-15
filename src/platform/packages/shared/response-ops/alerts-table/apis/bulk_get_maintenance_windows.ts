@@ -8,7 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../constants';
 

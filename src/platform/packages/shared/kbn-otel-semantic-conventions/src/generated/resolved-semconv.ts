@@ -13,7 +13,7 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 137
- * Metric groups: 488
+ * Metric groups: 490
  * Hardcoded fields: 34
  * Total fields: 1178
  *
@@ -1113,7 +1113,7 @@ export const semconvFlat = {
   'container.image.tags': {
     name: 'container.image.tags',
     description:
-      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
+      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
     type: 'keyword',
     example: 'v1.27.1,3.5.7-0',
   },
@@ -2793,6 +2793,18 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'true',
   },
+  'k8s.pod.hostname': {
+    name: 'k8s.pod.hostname',
+    description: 'Specifies the hostname of the Pod.',
+    type: 'keyword',
+    example: 'collector-gateway',
+  },
+  'k8s.pod.ip': {
+    name: 'k8s.pod.ip',
+    description: 'IP address allocated to the Pod.',
+    type: 'keyword',
+    example: '172.18.0.2',
+  },
   'k8s.pod.label': {
     name: 'k8s.pod.label',
     description:
@@ -2805,6 +2817,12 @@ export const semconvFlat = {
     description: 'The name of the Pod.',
     type: 'keyword',
     example: 'opentelemetry-pod-autoconf',
+  },
+  'k8s.pod.start_time': {
+    name: 'k8s.pod.start_time',
+    description: 'The start timestamp of the Pod.',
+    type: 'keyword',
+    example: 'Thu Dec 04 2025 08:41:03 GMT+0000 (Coordinated Universal Time)',
   },
   'k8s.pod.status.phase': {
     name: 'k8s.pod.status.phase',
@@ -3581,7 +3599,7 @@ export const semconvFlat = {
   'metrics.dotnet.gc.heap.total_allocated': {
     name: 'metrics.dotnet.gc.heap.total_allocated',
     description:
-      'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
+      'The _approximate_ number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
     type: 'double',
   },
   'metrics.dotnet.gc.last_collection.heap.fragmentation.size': {
@@ -5139,9 +5157,9 @@ export const semconvFlat = {
     description: 'The time the process has been running.',
     type: 'double',
   },
-  'metrics.rpc.client.duration': {
-    name: 'metrics.rpc.client.duration',
-    description: 'Measures the duration of outbound RPC.',
+  'metrics.rpc.client.call.duration': {
+    name: 'metrics.rpc.client.call.duration',
+    description: 'Measures the duration of outbound remote procedure calls (RPC).',
     type: 'double',
   },
   'metrics.rpc.client.request.size': {
@@ -5154,9 +5172,9 @@ export const semconvFlat = {
     description: 'Measures the size of RPC response messages (uncompressed).',
     type: 'double',
   },
-  'metrics.rpc.server.duration': {
-    name: 'metrics.rpc.server.duration',
-    description: 'Measures the duration of inbound RPC.',
+  'metrics.rpc.server.call.duration': {
+    name: 'metrics.rpc.server.call.duration',
+    description: 'Measures the duration of inbound remote procedure calls (RPC).',
     type: 'double',
   },
   'metrics.rpc.server.request.size': {
@@ -5993,12 +6011,6 @@ export const semconvFlat = {
     description: 'The Schema URL for the resource.',
     type: 'keyword',
   },
-  'rpc.connect_rpc.error_code': {
-    name: 'rpc.connect_rpc.error_code',
-    description:
-      'The [error codes](https://connectrpc.com//docs/protocol/#error-codes) of the Connect request. Error codes are always string values.',
-    type: 'keyword',
-  },
   'rpc.connect_rpc.request.metadata': {
     name: 'rpc.connect_rpc.request.metadata',
     description:
@@ -6026,24 +6038,6 @@ export const semconvFlat = {
       'gRPC response metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
     type: 'keyword',
     example: 'attribute_value',
-  },
-  'rpc.grpc.status_code': {
-    name: 'rpc.grpc.status_code',
-    description:
-      'The gRPC status code of the last gRPC requests performed in scope of this export call.',
-    type: 'keyword',
-  },
-  'rpc.jsonrpc.error_code': {
-    name: 'rpc.jsonrpc.error_code',
-    description: '`error.code` property of response if it is an error response.',
-    type: 'long',
-    example: '-32700',
-  },
-  'rpc.jsonrpc.error_message': {
-    name: 'rpc.jsonrpc.error_message',
-    description: '`error.message` property of response if it is an error response.',
-    type: 'keyword',
-    example: 'Parse error',
   },
   'rpc.jsonrpc.request_id': {
     name: 'rpc.jsonrpc.request_id',
@@ -6085,6 +6079,13 @@ export const semconvFlat = {
     description: 'This is the logical name of the method from the RPC interface perspective.',
     type: 'keyword',
     example: 'e',
+  },
+  'rpc.response.status_code': {
+    name: 'rpc.response.status_code',
+    description:
+      'The gRPC status code of the last gRPC request performed in scope of this export call.',
+    type: 'keyword',
+    example: 'OK',
   },
   'rpc.service': {
     name: 'rpc.service',
@@ -6206,7 +6207,7 @@ export const semconvFlat = {
   'service.version': {
     name: 'service.version',
     description:
-      'The version string of the service API or implementation. The format is not defined by these conventions.',
+      'The version string of the service component. The format is not defined by these conventions.',
     type: 'keyword',
     example: '2.0.0',
   },

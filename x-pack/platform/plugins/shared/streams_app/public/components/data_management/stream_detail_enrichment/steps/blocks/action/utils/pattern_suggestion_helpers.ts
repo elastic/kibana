@@ -8,7 +8,6 @@
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { get } from 'lodash';
-import { useAbortController } from '@kbn/react-hooks';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
@@ -93,7 +92,6 @@ export function usePatternSuggestionDependencies() {
     },
   } = useKibana();
 
-  const abortController = useAbortController();
   const stepsWithoutCurrent = useSimulatorSelector((snapshot) =>
     snapshot.context.steps.slice(0, -1)
   );
@@ -106,7 +104,6 @@ export function usePatternSuggestionDependencies() {
     notifications,
     telemetryClient,
     streamsRepositoryClient,
-    abortController,
     stepsWithoutCurrent,
     previewDocsFilter,
     originalSamples,

@@ -19,6 +19,7 @@ node scripts/scout.js run-tests \
 --kibana-install-dir "$KIBANA_BUILD_LOCATION"
 
 echo '--- Running Scout EUI Helpers Tests'
+SCOUT_TARGET_TYPE='local' SCOUT_TARGET_MODE='serverless=security' \
 "${KIBANA_DIR:-$(pwd)}/node_modules/.bin/playwright" test \
   --project local \
   --grep @svlSecurity \
