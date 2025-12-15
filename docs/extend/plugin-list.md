@@ -102,6 +102,7 @@ mapped_pages:
 | [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega) | WARNING: Missing or empty README. |
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
+| [visualizationListing](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualization_listing/README.md) | This plugin contains the library listing page for visualizations. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
 | [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
 | [workflowsExtensions](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_extensions/README.md) | Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types. |
