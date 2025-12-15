@@ -7,31 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParseOptions } from '../parser';
-import { Parser } from '../parser';
+import type { ParseOptions } from '../../parser';
+import { Parser } from '../../parser';
 import { createTag } from './tag';
-import { SynthNode } from './synth_node';
 import type { SynthGenerator } from './types';
-import type { ESQLAstHeaderCommand } from '../types';
+import type { ESQLAstExpression } from '../../types';
+import { SynthNode } from './synth_node';
 
-const generator: SynthGenerator<ESQLAstHeaderCommand> = (
+const generator: SynthGenerator<ESQLAstExpression> = (
   src: string,
   { withFormatting = true, ...rest }: ParseOptions = {}
-): ESQLAstHeaderCommand => {
-  src = src.trimStart();
-
-  const { root } = Parser.parseHeaderCommand(src, { withFormatting, ...rest });
-
-  // The parser returns the header command as ESQLCommand type, but it's actually
-  // an ESQLAstSetHeaderCommand at runtime
-  const node = SynthNode.from(root as any);
+): ESQLAstExpression => {
+  const { root } = Parser.parseExpression(src, { withFormatting, ...rest });
+  const node = SynthNode.from(root);
 
   return node;
 };
 
-export const header = createTag<ESQLAstHeaderCommand>(generator);
+export const expression = createTag<ESQLAstExpression>(generator);
 
 /**
  * Short 3-letter alias for DX convenience.
  */
-export const hdr = header;
+export const exp = expression;

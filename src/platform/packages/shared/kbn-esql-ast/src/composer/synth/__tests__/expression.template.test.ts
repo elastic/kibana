@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '../../pretty_print';
+import { BasicPrettyPrinter } from '../../../pretty_print';
 import { exp } from '../expression';
 
 test('can be used as templated string tag', () => {
