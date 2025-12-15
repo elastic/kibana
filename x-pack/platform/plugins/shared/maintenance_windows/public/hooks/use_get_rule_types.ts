@@ -7,8 +7,8 @@
 
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../utils/kibana_react';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import { useKibana } from '../utils/kibana_react';
 
 export const useGetRuleTypes = () => {
   const {
