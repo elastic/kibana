@@ -116,16 +116,16 @@ export const createSampleRowByMetric = ({
   }
 
   const specByFieldName = new Map<string, MetricField>();
+  const pendingSamples = new Set<string>();
+
   for (const spec of fieldSpecs) {
     specByFieldName.set(spec.name, spec);
+    pendingSamples.add(spec.name);
   }
 
-  const metricFieldNames = [...specByFieldName.keys()];
-  const pendingSamples = new Set(fieldSpecs.map((s) => s.name));
-
   for (const row of rows) {
-    for (const fieldName of metricFieldNames) {
-      if (hasValue(row[fieldName])) {
+    for (const fieldName in row) {
+      if (specByFieldName.has(fieldName) && hasValue(row[fieldName])) {
         const spec = specByFieldName.get(fieldName)!;
         specByRow.set(row, spec);
 
