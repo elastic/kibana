@@ -35,8 +35,8 @@ export const runAgentStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: custom_agent
   type: ${RunAgentStepTypeId}
+  agent_id: "my-custom-agent"
   with:
-    agent_id: "my-custom-agent"
     message: "{{ workflow.input.message }}"
 \`\`\``,
     ],
