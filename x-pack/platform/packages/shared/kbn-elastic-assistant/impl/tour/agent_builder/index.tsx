@@ -17,11 +17,17 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import type { AgentBuilderTourState } from './step_config';
 import { agentBuilderTourStep1, tourDefaultConfig } from './step_config';
 import { AGENT_BUILDER_TOUR_CONTINUE, AGENT_BUILDER_TOUR_SKIP } from './translations';
 import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
+
+// Event type constants - these match the event types registered in Security Solution
+const AGENT_BUILDER_EVENT_TYPES = {
+  OptInStepReached: 'Agent Builder Opt-In Step Reached',
+} as const;
 
 interface Props {
   children?: EuiTourStepProps['children'];
@@ -37,6 +43,7 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
   onContinue,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { analytics } = useKibana().services;
   const tourStorageKey = useTourStorageKey(storageKey);
   const [tourState, setTourState] = useLocalStorage<AgentBuilderTourState>(
     tourStorageKey,
@@ -65,8 +72,13 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
 
   const handleContinue = useCallback(() => {
     finishTour();
+    // Track opt-in step reached from tour
+    analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
+      step: 'initial',
+      source: 'security_ab_tour',
+    });
     onContinue?.();
-  }, [finishTour, onContinue]);
+  }, [finishTour, onContinue, analytics]);
 
   if (!children) {
     return null;

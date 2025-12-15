@@ -90,7 +90,14 @@ export const AskAiAssistant = <T extends EntityType>({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              telemetry={{
+                pathway: 'entity_flyout',
+                attachmentType: 'entity',
+                attachmentCount: 1,
+              }}
+            />
           ) : (
             <EuiButton
               data-test-subj="explain-with-ai-button"

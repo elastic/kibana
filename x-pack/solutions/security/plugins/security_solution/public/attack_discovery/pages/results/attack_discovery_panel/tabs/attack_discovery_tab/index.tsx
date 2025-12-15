@@ -128,7 +128,14 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              telemetry={{
+                pathway: 'attack_discovery',
+                attachmentType: 'attack_discovery',
+                attachmentCount: 1,
+              }}
+            />
           ) : (
             <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
           )}

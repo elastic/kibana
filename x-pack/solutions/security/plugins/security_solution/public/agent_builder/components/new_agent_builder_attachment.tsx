@@ -7,11 +7,28 @@
 
 import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { onechatIconType } from '@kbn/onechat-plugin/public';
 import * as i18n from './translations';
 import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
+import { useKibana } from '../../common/lib/kibana/use_kibana';
+import { AgentBuilderEventTypes } from '../../common/lib/telemetry';
+
+export interface NewAgentBuilderAttachmentTelemetry {
+  /**
+   * Pathway where "Add to Chat" was clicked
+   */
+  pathway: 'alerts_flyout' | 'entity_flyout' | 'rules_table' | 'rule_creation' | 'attack_discovery' | 'other';
+  /**
+   * Attachment type
+   */
+  attachmentType?: 'alert' | 'entity' | 'rule' | 'attack_discovery' | 'other';
+  /**
+   * Attachment count
+   */
+  attachmentCount?: number;
+}
 
 export interface NewAgentBuilderAttachmentProps {
   /**
@@ -31,6 +48,10 @@ export interface NewAgentBuilderAttachmentProps {
    * Whether the button is disabled
    */
   disabled?: boolean;
+  /**
+   * Telemetry data for tracking "Add to Chat" clicks
+   */
+  telemetry?: NewAgentBuilderAttachmentTelemetry;
 }
 
 /**
@@ -42,8 +63,23 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   onClick,
   size = 'm',
   disabled = false,
+  telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const { telemetry } = useKibana().services;
+
+  const handleClick = useCallback(() => {
+    // Track "Add to Chat" clicked
+    if (telemetryData) {
+      telemetry?.reportEvent(AgentBuilderEventTypes.AddToChatClicked, {
+        pathway: telemetryData.pathway,
+        attachmentType: telemetryData.attachmentType,
+        attachmentCount: telemetryData.attachmentCount,
+      });
+    }
+    onClick();
+  }, [onClick, telemetry, telemetryData]);
+
   if (!isAgentBuilderEnabled) {
     return null;
   }
@@ -52,7 +88,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       aria-label={i18n.ADD_TO_CHAT}
       color={color}
       data-test-subj={'newAgentBuilderAttachment'}
-      onClick={onClick}
+      onClick={handleClick}
       size={size}
       disabled={disabled}
     >

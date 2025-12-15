@@ -77,7 +77,14 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             {isAgentChatExperienceEnabled ? (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'alerts_flyout',
+                  attachmentType: 'alert',
+                  attachmentCount: 1,
+                }}
+              />
             ) : (
               showAssistant && (
                 <NewChatByTitle

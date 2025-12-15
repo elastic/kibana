@@ -87,7 +87,15 @@ const ActionableSummaryComponent: React.FC<Props> = ({
 
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} size="xs" />
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              size="xs"
+              telemetry={{
+                pathway: 'attack_discovery',
+                attachmentType: 'attack_discovery',
+                attachmentCount: 1,
+              }}
+            />
           ) : (
             <ViewInAiAssistant
               compact={true}

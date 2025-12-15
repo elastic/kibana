@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +22,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { robotIconType } from './robot_icon';
 import { useAssistantContext } from '../../../..';
@@ -30,6 +31,15 @@ import { KNOWLEDGE_BASE_TAB } from '../const';
 import * as i18n from './translations';
 import { AgentBuilderTourStep } from '../../../tour/agent_builder';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../tour/const';
+
+// Event type constants - these match the event types registered in Security Solution
+const AGENT_BUILDER_EVENT_TYPES = {
+  OptInStepReached: 'Agent Builder Opt-In Step Reached',
+  OptInConfirmationShown: 'Agent Builder Opt-In Confirmation Shown',
+  OptInConfirmed: 'Agent Builder Opt-In Confirmed',
+  OptInCancelled: 'Agent Builder Opt-In Cancelled',
+  OptOut: 'Agent Builder Opt-Out',
+} as const;
 
 interface Params {
   isDisabled?: boolean;
@@ -46,6 +56,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       toasts,
     } = useAssistantContext();
 
+    const { analytics } = useKibana().services;
     const [isPopoverOpen, setPopover] = useState(false);
 
     const [isAlertsSettingsModalVisible, setIsAlertsSettingsModalVisible] = useState(false);
@@ -56,6 +67,15 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
     const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
     const [isAIAgentModalVisible, setIsAIAgentModalVisible] = useState(false);
+
+    // Track confirmation modal shown
+    useEffect(() => {
+      if (isAIAgentModalVisible) {
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown, {
+          source: 'security_settings_menu',
+        });
+      }
+    }, [isAIAgentModalVisible, analytics]);
 
     const onButtonClick = useCallback(() => {
       setPopover(!isPopoverOpen);
@@ -68,12 +88,26 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const handleOpenAIAgentModal = useCallback(() => {
       setIsAIAgentModalVisible(true);
       closePopover();
-    }, [closePopover]);
+      // Track opt-in step reached (initial step)
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
+        step: 'initial',
+        source: 'security_settings_menu',
+      });
+    }, [closePopover, analytics]);
     const handleCancelAIAgent = useCallback(() => {
       setIsAIAgentModalVisible(false);
-    }, []);
+      // Track opt-in cancelled at confirmation modal step
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInCancelled, {
+        source: 'security_settings_menu',
+        step: 'confirmation_modal',
+      });
+    }, [analytics]);
     const handleConfirmAIAgent = useCallback(async () => {
       try {
+        // Track opt-in confirmed
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInConfirmed, {
+          source: 'security_settings_menu',
+        });
         await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
         setIsAIAgentModalVisible(false);
         window.location.reload();
@@ -83,8 +117,14 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             title: i18n.AI_AGENT_SWITCH_ERROR,
           });
         }
+        // Track error
+        analytics?.reportEvent('Agent Builder Error', {
+          errorType: 'opt_in_error',
+          errorMessage: error instanceof Error ? error.message : String(error),
+          context: 'opt_in',
+        });
       }
-    }, [settings.client, toasts]);
+    }, [settings.client, toasts, analytics]);
 
     const handleNavigateToSettings = useCallback(() => {
       if (assistantAvailability.hasSearchAILakeConfigurations) {
@@ -244,11 +284,18 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     return (
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
-          <AgentBuilderTourStep
-            isDisabled={isAgentUpgradeDisabled}
-            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
-            onContinue={handleOpenAIAgentModal}
-          >
+            <AgentBuilderTourStep
+              isDisabled={isAgentUpgradeDisabled}
+              storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
+              onContinue={() => {
+                // Track opt-in step reached from tour
+                analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
+                  step: 'initial',
+                  source: 'security_ab_tour',
+                });
+                handleOpenAIAgentModal();
+              }}
+            >
             <EuiPopover
               button={
                 <EuiButtonIcon

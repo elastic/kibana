@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -14,42 +14,118 @@ import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 
+// Event type constants - these match the event types registered in Security Solution
+const AGENT_BUILDER_EVENT_TYPES = {
+  OptInStepReached: 'Agent Builder Opt-In Step Reached',
+  OptInConfirmationShown: 'Agent Builder Opt-In Confirmation Shown',
+  OptInConfirmed: 'Agent Builder Opt-In Confirmed',
+  OptInCancelled: 'Agent Builder Opt-In Cancelled',
+  OptOut: 'Agent Builder Opt-Out',
+  Error: 'Agent Builder Error',
+} as const;
+
+const TELEMETRY_SOURCE = 'stack_management' as const;
+
+type AnalyticsService =
+  | { reportEvent: (eventType: string, payload: Record<string, unknown>) => void }
+  | undefined;
+
+/**
+ * Helper function to safely report telemetry events
+ */
+const reportTelemetryEvent = (
+  analytics: AnalyticsService,
+  eventType: string,
+  payload: Record<string, unknown>
+): void => {
+  analytics?.reportEvent(eventType, payload);
+};
+
+/**
+ * Helper function to track telemetry events for chat experience changes
+ */
+const trackChatExperienceTelemetry = (
+  analytics: AnalyticsService,
+  newValue: AIChatExperience | undefined,
+  currentValue: AIChatExperience | undefined
+): void => {
+  if (newValue === AIChatExperience.Agent) {
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown, {
+      source: TELEMETRY_SOURCE,
+    });
+  } else if (newValue === AIChatExperience.Assistant && currentValue === AIChatExperience.Agent) {
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptOut, {
+      source: TELEMETRY_SOURCE,
+    });
+  }
+};
+
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
-    services: { settings, notifications, docLinks, application, featureFlags },
+    services: { settings, notifications, docLinks, application, featureFlags, analytics },
   } = useKibana();
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
 
+  const field = fields[AI_CHAT_EXPERIENCE_TYPE];
+  const currentValue = field?.savedValue;
+  const hasTrackedInitialStep = useRef(false);
+
+  // Track initial step reached when component mounts (user views the opt-in settings)
+  useEffect(() => {
+    if (!hasTrackedInitialStep.current && currentValue !== AIChatExperience.Agent) {
+      reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
+        step: 'initial',
+        source: TELEMETRY_SOURCE,
+      });
+      hasTrackedInitialStep.current = true;
+    }
+  }, [analytics, currentValue]);
+
   // Show confirmation modal for AI Agents selection
   const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
     (id, change) => {
-      if (id === AI_CHAT_EXPERIENCE_TYPE && change?.unsavedValue === AIChatExperience.Agent) {
-        setConfirmModalOpen(true);
+      if (id === AI_CHAT_EXPERIENCE_TYPE) {
+        const newValue = change?.unsavedValue;
+
+        // Track telemetry events
+        trackChatExperienceTelemetry(analytics, newValue, currentValue);
+
+        // Handle modal display logic
+        if (newValue === AIChatExperience.Agent) {
+          setConfirmModalOpen(true);
+        }
       }
       handleFieldChange(id, change);
     },
-    [handleFieldChange]
+    [handleFieldChange, analytics, currentValue]
   );
 
-  const handleConfirmAgent = () => {
+  const handleConfirmAgent = useCallback(() => {
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInConfirmed, {
+      source: TELEMETRY_SOURCE,
+    });
     setConfirmModalOpen(false);
-  };
+    // The actual setting change is handled by FieldRow when user saves
+  }, [analytics]);
 
   const handleCancelAgent = useCallback(() => {
     setConfirmModalOpen(false);
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInCancelled, {
+      source: TELEMETRY_SOURCE,
+      step: 'confirmation_modal',
+    });
     // Clear the unsaved change by passing undefined
     handleFieldChange(AI_CHAT_EXPERIENCE_TYPE, undefined);
-  }, [handleFieldChange]);
+  }, [handleFieldChange, analytics]);
 
   // Don't render if AI Agents feature is disabled
   if (!isAiAgentsEnabled) {
     return null;
   }
 
-  const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   if (!field) return null;
 
   const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;

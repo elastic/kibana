@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  AnalyticsServiceSetup,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { OnechatConfig } from './config';
@@ -25,6 +31,7 @@ import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
+import { agentBuilderServerTelemetryEvents } from './telemetry/events';
 
 export class OnechatPlugin
   implements
@@ -41,6 +48,7 @@ export class OnechatPlugin
   private serviceManager = new ServiceManager();
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
+  private analytics?: AnalyticsServiceSetup;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -63,6 +71,12 @@ export class OnechatPlugin
     } else {
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
+
+    // Register server-side EBT events for Agent Builder
+    this.analytics = coreSetup.analytics;
+    agentBuilderServerTelemetryEvents.forEach((eventConfig) => {
+      coreSetup.analytics.registerEventType(eventConfig);
+    });
 
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
@@ -124,6 +138,7 @@ export class OnechatPlugin
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
+      analytics: this.analytics,
     });
 
     const { tools, agents, runnerFactory } = startServices;

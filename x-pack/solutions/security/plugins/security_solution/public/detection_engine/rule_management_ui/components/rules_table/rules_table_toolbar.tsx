@@ -124,7 +124,14 @@ export const RulesTableToolbar = React.memo(() => {
         {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
           <>
             {isAgentChatExperienceEnabled ? (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'rules_table',
+                  attachmentType: 'rule',
+                  attachmentCount: selectedRules.length,
+                }}
+              />
             ) : (
               <NewChat
                 category="detection-rules"

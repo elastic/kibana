@@ -13,7 +13,12 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { type ChatEvent, oneChatDefaultAgentId, isRoundCompleteEvent } from '@kbn/onechat-common';
+import {
+  type ChatEvent,
+  oneChatDefaultAgentId,
+  isRoundCompleteEvent,
+  ConversationRoundStepType,
+} from '@kbn/onechat-common';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -32,6 +37,9 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { TrackingService } from '../../telemetry';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { MESSAGE_RECEIVED_EVENT } from '../../telemetry/events';
+import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from '../../telemetry/utils';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -41,6 +49,7 @@ interface ChatServiceDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   trackingService?: TrackingService;
+  analytics?: AnalyticsServiceSetup;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
@@ -72,7 +81,7 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
     browserApiTools,
   }: ChatConverseParams): Observable<ChatEvent> {
-    const { trackingService } = this.dependencies;
+    const { trackingService, analytics } = this.dependencies;
     const requestId = trackingService?.trackQueryStart();
 
     return withConverseSpan({ agentId, conversationId }, (span) => {
@@ -164,6 +173,29 @@ class ChatServiceImpl implements ChatService {
                   const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
                   if (conversationId) {
                     trackingService.trackConversationRound(conversationId, currentRoundCount);
+                  }
+                }
+
+                // Track MessageReceived event for Agent Builder
+                if (isRoundCompleteEvent(event) && analytics) {
+                  const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
+                  // Only track if this is an agent conversation (not default assistant)
+                  if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
+                    const round = event.data.round;
+                    const toolsInvoked =
+                      round.steps
+                        ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
+                        .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
+
+                    analytics.reportEvent(MESSAGE_RECEIVED_EVENT.eventType, {
+                      conversationId: effectiveConversationId,
+                      responseLength: round.response?.message?.length,
+                      roundNumber: currentRoundCount,
+                      agentId: normalizedAgentId,
+                      toolsUsed: toolsInvoked,
+                      toolCount: toolsInvoked.length > 0 ? toolsInvoked.length : undefined,
+                      toolsInvoked: toolsInvoked.length > 0 ? toolsInvoked : undefined,
+                    });
                   }
                 }
               } catch (error) {

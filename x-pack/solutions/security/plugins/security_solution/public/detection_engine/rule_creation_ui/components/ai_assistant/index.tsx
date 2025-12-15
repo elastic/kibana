@@ -132,7 +132,15 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
         values={{
           AiAssistantNewChatLink: isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} size="xs" />
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              size="xs"
+              telemetry={{
+                pathway: 'rule_creation',
+                attachmentType: 'rule',
+                attachmentCount: 1,
+              }}
+            />
           ) : (
             <NewChat
               asLink={true}

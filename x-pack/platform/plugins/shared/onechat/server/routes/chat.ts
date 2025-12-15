@@ -30,6 +30,8 @@ import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { MESSAGE_SENT_EVENT } from '../telemetry/events';
+import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 export function registerChatRoutes({
   router,
@@ -430,6 +432,26 @@ export function registerChatRoutes({
               attachmentsService,
             })
           : [];
+
+        // Track MessageSent event for Agent Builder
+        try {
+          const normalizedAgentId = normalizeAgentIdForTelemetry(payload.agent_id);
+          // Only track if this is an agent conversation (not default assistant)
+          if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
+            coreSetup.analytics.reportEvent(MESSAGE_SENT_EVENT.eventType, {
+              conversationId: payload.conversation_id || 'new',
+              messageLength: payload.input?.length,
+              hasAttachments: attachments.length > 0,
+              attachmentCount: attachments.length > 0 ? attachments.length : undefined,
+              attachmentTypes:
+                attachments.length > 0 ? attachments.map((a) => a.type || 'unknown') : undefined,
+              agentId: normalizedAgentId,
+            });
+          }
+        } catch (error) {
+          // Don't fail the request if telemetry fails
+          logger.debug('Failed to report MessageSent telemetry event', { error });
+        }
 
         const chatEvents$ = callConverse({
           payload,

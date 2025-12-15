@@ -20,6 +20,7 @@ import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { TrackingService } from '../telemetry/tracking_service';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -53,4 +54,5 @@ export interface ServicesStartDeps {
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   trackingService?: TrackingService;
+  analytics?: AnalyticsServiceSetup;
 }

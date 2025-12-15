@@ -57,7 +57,7 @@ const TakeActionComponent: React.FC<Props> = ({
   );
 
   const {
-    services: { cases },
+    services: { cases, telemetry },
   } = useKibana();
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 
@@ -213,8 +213,14 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
+    // Track "Add to Chat" clicked from context menu
+    telemetry?.reportEvent('Add to Chat Clicked', {
+      pathway: 'attack_discovery',
+      attachmentType: 'alert',
+      attachmentCount: attackDiscoveries.length,
+    });
     openAgentBuilderFlyout();
-  }, [closePopover, openAgentBuilderFlyout]);
+  }, [closePopover, openAgentBuilderFlyout, telemetry, attackDiscoveries.length]);
 
   // button for the popover:
   const button = useMemo(

@@ -105,7 +105,15 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         </EuiCodeBlock>
         <>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} color={color} />
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              color={color}
+              telemetry={{
+                pathway: 'rule_creation',
+                attachmentType: 'rule',
+                attachmentCount: 1,
+              }}
+            />
           ) : (
             hasAssistantPrivilege && (
               <NewChat

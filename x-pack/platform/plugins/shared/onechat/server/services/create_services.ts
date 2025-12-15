@@ -55,6 +55,7 @@ export class ServiceManager {
     uiSettings,
     savedObjects,
     trackingService,
+    analytics,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -117,6 +118,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       trackingService,
+      analytics,
     });
 
     this.internalStart = {
