@@ -295,7 +295,7 @@ describe('Scripts library schemas', () => {
       );
     });
 
-    it('should error is only `version` is provided', () => {
+    it('should error if only `version` is provided', () => {
       expect(() => PatchUpdateRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
         'At least one field must be defined for update'
       );

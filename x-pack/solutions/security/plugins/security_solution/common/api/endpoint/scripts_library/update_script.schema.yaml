@@ -49,38 +49,32 @@ components:
     PatchUpdateScriptRouteRequestBody:
       type: object
       description: The script entry properties to be updated. At least one property must be provided.
+      minProperties: 1
       properties:
         name:
           type: string
           description: Name of the script
-          required: false
         platform:
           type: array
           description: Platforms supported by the the script
-          required: false
           items:
             $ref: './common.yaml#/components/schemas/EndpointScriptPlatform'
         file:
           type: object
           format: binary
           description: The script file upload
-          required: false
         description:
           type: string
           description: Description of the script and its purpose/functionality
-          required: false
         instructions:
           type: string
           description: Instructions for using the script, including details around its supported input arguments
-          required: false
         example:
           type: string
           description: Example usage of the script
-          required: false
         requiresInput:
           type: boolean
           description: Whether the script requires input arguments
-          required: false
         pathToExecutable:
           type: string
           description: >
@@ -88,7 +82,6 @@ components:
             This property defines the relative path to the file included in the archive that should be executed
             once its contents are extracted. The path should be relative to the root of the archive.
           example: ./bin/script.sh
-          required: false
 
 
 
