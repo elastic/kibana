@@ -63,7 +63,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     );
 
     await procs.waitForAllToStop();
-
     await shutdownEs();
   });
 }
