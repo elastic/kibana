@@ -4530,6 +4530,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/access-control-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""
@@ -4554,6 +4558,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-agent-confirmation-modal@link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -4575,6 +4583,10 @@
   uid ""
 
 "@kbn/ai-assistant@link:x-pack/platform/packages/shared/kbn-ai-assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-insights@link:x-pack/platform/packages/shared/ai-insights":
   version "0.0.0"
   uid ""
 
@@ -4998,6 +5010,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-access-control-server@link:src/platform/packages/shared/content-management/access_control/access_control_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""
@@ -5207,10 +5227,6 @@
   uid ""
 
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-navigation-tour@link:src/core/packages/chrome/navigation-tour":
   version "0.0.0"
   uid ""
 
@@ -7587,10 +7603,6 @@
   uid ""
 
 "@kbn/observability-agent-builder-plugin@link:x-pack/solutions/observability/plugins/observability_agent_builder":
-  version "0.0.0"
-  uid ""
-
-"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
   version "0.0.0"
   uid ""
 
