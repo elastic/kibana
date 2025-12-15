@@ -63,7 +63,7 @@ export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
           <EuiText size="s">
             <FormattedMessage
               id="home.setupCloudConnect.description"
-              defaultMessage="Use Elastic Cloud services like AutoOps and Elastic Inference Service in your self-managed clusters."
+              defaultMessage="Use Elastic Cloud services like AutoOps and Elastic Inference Service for your self-managed clusters."
             />
           </EuiText>
           <EuiSpacer size="m" />
