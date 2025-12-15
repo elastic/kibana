@@ -28,14 +28,7 @@ export const getKey = (
   params: Omit<UseFindTemplatesQueryParams, 'http' | 'toasts' | 'enabled'>
 ) => [
   'ruleTemplates',
-  params.search,
-  params.perPage,
-  params.sortField,
-  params.sortOrder,
-  params.refresh,
-  params.defaultSearchOperator,
-  params.ruleTypeId,
-  params.tags,
+  params,
 ];
 
 export const useFindTemplatesQuery = ({

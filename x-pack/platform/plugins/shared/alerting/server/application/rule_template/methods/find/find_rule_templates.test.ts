@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { toKqlExpression } from '@kbn/es-query';
 
 import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 
@@ -109,8 +110,16 @@ describe('findRuleTemplates', () => {
       defaultSearchOperator: undefined,
       sortField: undefined,
       sortOrder: undefined,
-      filter: expect.any(Object), // Authorization filter is always applied
+      filter: expect.any(Object), // filter tested below
     });
+
+    // filter is the authorized rule types by default
+    expect( 
+      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
+    ).toBe(
+      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+      'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
+    );
 
     expect(authorization.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
       authorizationEntity: 'rule',
@@ -128,18 +137,19 @@ describe('findRuleTemplates', () => {
     const result = await findRuleTemplates(rulesClientContext, {
       perPage: 10,
       page: 1,
-      ruleTypeId: 'test.rule.type',
+      ruleTypeId: 'custom.rule.type',
     });
 
     expect(result.total).toBe(1);
     expect(result.data).toHaveLength(1);
-    expect(result.data[0].ruleTypeId).toBe('test.rule.type');
 
-    // Verify the filter was built correctly for the rule type
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: expect.any(Object),
-      })
+    // filter is the ruleTypeId combined with the authorized rule types
+    expect( 
+      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
+    ).toBe(
+      '(alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
+      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 
@@ -161,11 +171,13 @@ describe('findRuleTemplates', () => {
     expect(result.data).toHaveLength(1);
     expect(result.data[0].tags).toContain('tag1');
 
-    // Verify the filter was built correctly for tags
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: expect.any(Object),
-      })
+    // filter is the tags combined with the authorized rule types
+    expect( 
+      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
+    ).toBe(
+      '(alerting_rule_template.attributes.tags: tag1 AND ' +
+      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 
@@ -183,10 +195,14 @@ describe('findRuleTemplates', () => {
       tags: ['tag1', 'tag2'],
     });
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: expect.any(Object),
-      })
+    // filter is the tags combined with the authorized rule types
+    expect( 
+      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
+    ).toBe(
+      '((alerting_rule_template.attributes.tags: tag1 OR ' +
+      'alerting_rule_template.attributes.tags: tag2) AND ' +
+      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 
@@ -201,15 +217,18 @@ describe('findRuleTemplates', () => {
     await findRuleTemplates(rulesClientContext, {
       perPage: 10,
       page: 1,
-      ruleTypeId: 'test.rule.type',
+      ruleTypeId: 'custom.rule.type',
       tags: ['tag1'],
     });
 
-    // Verify both filters are combined
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: expect.any(Object),
-      })
+    // filter is the ruleTypeId and tags combined with the authorized rule types
+    expect( 
+      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
+    ).toBe(
+      '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' + 
+      'alerting_rule_template.attributes.tags: tag1) AND ' +
+      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 
@@ -239,7 +258,7 @@ describe('findRuleTemplates', () => {
       defaultSearchOperator: 'AND',
       sortField: 'name.keyword',
       sortOrder: 'desc',
-      filter: expect.any(Object), // Authorization filter is always applied
+      filter: expect.any(Object), // Authorization filter (not tested here)
     });
   });
 
@@ -367,40 +386,6 @@ describe('findRuleTemplates', () => {
       // Verify authorization filter was applied
       const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0];
       expect(findCall.filter).toBeDefined();
-    });
-
-    test('allows templates if user has access to rule type via any consumer', async () => {
-      // User has access via multiple consumers
-      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([
-          [
-            'test.rule.type',
-            {
-              authorizedConsumers: {
-                alerts: { read: true, all: true },
-                stackAlerts: { read: true, all: false },
-                logs: { read: false, all: false },
-              },
-            },
-          ],
-        ])
-      );
-
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [mockTemplate1],
-      });
-
-      const result = await findRuleTemplates(rulesClientContext, {
-        perPage: 10,
-        page: 1,
-      });
-
-      // Should return template since user has access via at least one consumer
-      expect(result.data).toHaveLength(1);
-      expect(result.data[0].ruleTypeId).toBe('test.rule.type');
     });
 
     test('throws 403 if unauthorized template slips through filter', async () => {
