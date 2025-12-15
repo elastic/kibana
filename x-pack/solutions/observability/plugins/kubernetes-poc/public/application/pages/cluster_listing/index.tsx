@@ -161,17 +161,17 @@ export const ClusterListingPage: React.FC = () => {
         {/* Right column: Trend charts */}
         <EuiFlexItem grow={true}>
           <EuiPanel hasBorder paddingSize="none">
-            <VolumeUsageTrendCard timeRange={appliedTimeRange} />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiPanel hasBorder paddingSize="none">
             <CpuUsageTrendCard timeRange={appliedTimeRange} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiPanel hasBorder paddingSize="none">
             <MemoryUsageTrendCard timeRange={appliedTimeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiPanel hasBorder paddingSize="none">
+            <VolumeUsageTrendCard timeRange={appliedTimeRange} />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

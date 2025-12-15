@@ -726,6 +726,12 @@ Verify **only the files you changed in this commit**:
    # Pass closest tsconfig.json file to your changed tests/helpers
    node scripts/type_check --project x-pack/solutions/observability/plugins/kubernetes-poc/tsconfig.json
    ```
+  
+5. **Pre-commit:** Auto fix formating a ESlint errors
+
+   ```bash
+   node scripts/precommit_hook --fix
+   ```
 
 ## References
 

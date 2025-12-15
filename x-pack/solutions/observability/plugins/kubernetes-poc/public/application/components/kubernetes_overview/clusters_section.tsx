@@ -52,17 +52,17 @@ export const ClustersSection: React.FC<ClustersSectionProps> = ({ timeRange }) =
       <EuiFlexGroup gutterSize="s" style={{ marginTop: euiTheme.size.s }}>
         <EuiFlexItem grow={1}>
           <EuiPanel hasBorder paddingSize="none">
-            <VolumeUsageTrendCard timeRange={timeRange} />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder paddingSize="none">
             <CpuUsageTrendCard timeRange={timeRange} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel hasBorder paddingSize="none">
             <MemoryUsageTrendCard timeRange={timeRange} />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder paddingSize="none">
+            <VolumeUsageTrendCard timeRange={timeRange} />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
