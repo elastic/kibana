@@ -14,6 +14,7 @@ import type {
   HasType,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
@@ -34,6 +35,7 @@ export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
   HasSupportedTriggers &
   PublishesDataLoading &
   PublishesDataViews &
+  PublishesProjectRoutingOverrides &
   PublishesUnifiedSearch &
   HasLibraryTransforms<MapByReferenceState, MapByValueState> & {
     getLayerList: () => ILayer[];

@@ -176,7 +176,7 @@ export const getNavigationTreeDefinition = ({
                 },
               ],
               icon: 'database',
-              id: DATA_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to anchor the tour step
+              id: DATA_MANAGEMENT_NAV_ID,
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.dataManagement', {
                 defaultMessage: 'Data management',
