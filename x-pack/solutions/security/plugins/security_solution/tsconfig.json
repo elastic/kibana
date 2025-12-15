@@ -269,6 +269,7 @@
     "@kbn/onechat-plugin",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/onechat-browser",
-    "@kbn/content-management-tabbed-table-list-view"
+    "@kbn/content-management-tabbed-table-list-view",
+    "@kbn/ai-assistant-common"
   ]
 }

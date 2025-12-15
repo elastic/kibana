@@ -9,8 +9,8 @@
 
 import { EsqlQuery } from '../../query';
 import type { ESQLAstQueryExpression } from '../../types';
-import { singleItems } from '../../visitor/utils';
-import { Walker } from '../../walker';
+import { singleItems } from '../../ast/visitor/utils';
+import { Walker } from '../../ast/walker';
 
 const removeParserFields = (tree: ESQLAstQueryExpression): void => {
   Walker.walk(tree, {

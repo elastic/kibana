@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { isEqual, isEmpty } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
@@ -47,7 +46,6 @@ import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 import { ProcessorErrors } from './processor_metrics';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { SetProcessorForm } from './set';
-import { useKibana } from '../../../../../../hooks/use_kibana';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
@@ -57,7 +55,6 @@ import { selectStreamType } from '../../../state_management/stream_enrichment_st
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
-  const { appParams, core } = useKibana();
 
   const getEnrichmentState = useGetStreamEnrichmentState();
 
@@ -102,9 +99,6 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
   const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
   const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
 
-  const hasStreamChanges = useStreamEnrichmentSelector((state) =>
-    state.can({ type: 'stream.reset' })
-  );
   const hasStepChanges = useSelector(
     stepRef,
     (snapshot) => !isEqual(snapshot.context.previousStep, snapshot.context.step)
@@ -114,14 +108,8 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const type = useWatch({ control: methods.control, name: 'action' });
 
-  useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasStreamChanges || hasStepChanges,
-    history: appParams.history,
-    http: core.http,
-    navigateToUrl: core.application.navigateToUrl,
-    openConfirm: core.overlays.openConfirm,
-    shouldPromptOnReplace: false,
-  });
+  // Note: Navigation prompts for unsaved changes are handled at the page level (page_content.tsx)
+  // This editor only handles cancel confirmation via useDiscardConfirm below
 
   const handleCancel = useDiscardConfirm(() => stepRef.send({ type: 'step.cancel' }), {
     enabled: hasStepChanges,

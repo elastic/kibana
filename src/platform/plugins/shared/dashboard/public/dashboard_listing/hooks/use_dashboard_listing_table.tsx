@@ -16,6 +16,15 @@ import type { TableListViewTableProps } from '@kbn/content-management-table-list
 import type { Reference } from '@kbn/content-management-utils';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
+import { asyncMap } from '@kbn/std';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
+import {
+  checkForDuplicateDashboardTitle,
+  dashboardClient,
+  findService,
+} from '../../dashboard_client';
+import { getAccessControlClient } from '../../services/access_control_service';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import {
@@ -25,6 +34,10 @@ import {
 } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
+import {
+  SAVED_OBJECT_DELETE_TIME,
+  SAVED_OBJECT_LOADED_TIME,
+} from '../../utils/telemetry_constants';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
@@ -104,6 +117,8 @@ export const useDashboardListingTable = ({
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
   );
+
+  const accessControlClient = getAccessControlClient();
 
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -340,6 +355,38 @@ export const useDashboardListingTable = ({
         contentTypeFilter === TAB_IDS.VISUALIZATIONS
           ? (getVisualizationListingColumn() as EuiBasicTableColumn<DashboardListingUserContent>)
           : undefined,
+      rowItemActions: (item) => {
+        const isDisabled = () => {
+          if (!showWriteControls) return true;
+          if (item?.managed === true) return true;
+          if (item?.canManageAccessControl === false && item?.accessMode === 'write_restricted')
+            return true;
+          return false;
+        };
+
+        const getReason = () => {
+          if (!showWriteControls) {
+            return contentEditorFlyoutStrings.readonlyReason.missingPrivileges;
+          }
+          if (item?.managed) {
+            return contentEditorFlyoutStrings.readonlyReason.managedEntity;
+          }
+          if (item?.canManageAccessControl === false) {
+            return contentEditorFlyoutStrings.readonlyReason.accessControl;
+          }
+        };
+
+        return {
+          edit: {
+            enabled: !isDisabled(),
+            reason: getReason(),
+          },
+          delete: {
+            enabled: !isDisabled(),
+            reason: getReason(),
+          },
+        };
+      },
     };
   }, [
     contentEditorValidators,

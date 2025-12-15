@@ -12,17 +12,15 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { VisualizationListItem, VisualizationStage } from '@kbn/visualizations-plugin/public';
 import type { DashboardListingViewRegistry } from '../plugin';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 
+export type TabId = (typeof TAB_IDS)[keyof typeof TAB_IDS];
 export type { VisualizationListItem, VisualizationStage };
-
 export const TAB_IDS = {
   DASHBOARDS: 'dashboards',
   VISUALIZATIONS: 'visualizations',
   ANNOTATIONS: 'annotations',
 } as const;
-
-export type TabId = (typeof TAB_IDS)[keyof typeof TAB_IDS];
-
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
   initialFilter?: string;
@@ -47,6 +45,8 @@ export interface DashboardSavedObjectUserContent extends DashboardListingItemBas
   attributes: DashboardListingItemBase['attributes'] & {
     timeRestore: boolean;
   };
+  canManageAccessControl?: boolean;
+  accessMode?: SavedObjectAccessControl['accessMode'];
 }
 
 export interface DashboardVisualizationUserContent extends DashboardListingItemBase {
