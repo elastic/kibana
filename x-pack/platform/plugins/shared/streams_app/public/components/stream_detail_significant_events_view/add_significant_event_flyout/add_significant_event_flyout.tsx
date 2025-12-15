@@ -157,6 +157,7 @@ export function AddSignificantEventFlyout({
                     title: nextQuery.title,
                     feature: nextQuery.feature,
                     severity_score: nextQuery.severity_score,
+                    evidence: nextQuery.evidence,
                   })),
               ]);
 

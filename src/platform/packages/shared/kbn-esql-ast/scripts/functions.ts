@@ -31,6 +31,7 @@ export const extraFunctions: FunctionDefinition[] = [
         ],
         minParams: 2,
         returnType: 'unknown',
+        isSignatureRepeating: true,
       },
     ],
     examples: [

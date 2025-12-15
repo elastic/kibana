@@ -186,7 +186,7 @@ function getReferenceCriteria(layerId: string) {
  * @returns Lens API Dataset configuration
  */
 export const buildDatasetState = (
-  layer: FormBasedLayer | FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
@@ -364,12 +364,13 @@ export const buildDatasourceStates = (
     | { type: 'adHocDataView'; index: string; timeFieldName: string }
   > = {};
   // a few charts types support multiple layers
-  const configLayers = 'layers' in config ? config.layers : [config];
+  const hasMultipleLayers = 'layers' in config;
+  const configLayers = hasMultipleLayers ? config.layers : [config];
   // @ts-expect-error upgrade typescript v5.9.3
   for (let i = 0; i < configLayers.length; i++) {
     // @ts-expect-error upgrade typescript v5.9.3
     const layer = configLayers[i];
-    const layerId = `${layer.type ?? 'layer'}_${i}`;
+    const layerId = hasMultipleLayers && 'type' in layer ? `${layer.type}_${i}` : `layer_${i}`;
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {

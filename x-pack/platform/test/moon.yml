@@ -164,8 +164,9 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/connector-schemas'
   - '@kbn/es-types'
-  - '@kbn/automatic-import-v2-plugin'
   - '@kbn/streamlang'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/automatic-import-v2-plugin'
 tags:
   - test-helper
   - package

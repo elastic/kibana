@@ -8,6 +8,8 @@
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
+export const headerHeight = 88;
+
 const maxConversationWidthStyles = css`
   max-width: 800px;
 `;

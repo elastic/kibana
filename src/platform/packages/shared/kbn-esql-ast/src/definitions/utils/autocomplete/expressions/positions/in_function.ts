@@ -86,6 +86,7 @@ function buildInFunctionParameterContext(
     hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
     functionDefinition,
     firstArgumentType: analyzer.getFirstArgumentType(),
+    firstValueType: analyzer.getFirstValueType(),
     currentParameterIndex: analyzer.getCurrentParameterIndex(),
     validSignatures: analyzer.getValidSignatures(),
   };

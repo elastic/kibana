@@ -112,35 +112,37 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
       savedObjectOptions
     );
 
-    try {
-      await taskManager.ensureScheduled(
-        {
-          id: so.id,
-          taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
-          schedule: params.schedule,
-          scope: params.scope ?? [],
-          params: {
-            configId: so.id,
-            spaceId: context.spaceId,
-          },
-          state: {},
-        },
-        {
-          request: params.request,
-        }
-      );
-    } catch (e) {
-      context.logger.error(
-        `Failed to schedule task for gap auto fill scheduler ${so.id}. Will attempt to delete the saved object.`
-      );
+    if (params.enabled) {
       try {
-        await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
-      } catch (deleteError) {
-        context.logger.error(
-          `Failed to delete gap auto fill saved object for gap auto fill scheduler ${so.id}.`
+        await taskManager.ensureScheduled(
+          {
+            id: so.id,
+            taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
+            schedule: params.schedule,
+            scope: params.scope ?? [],
+            params: {
+              configId: so.id,
+              spaceId: context.spaceId,
+            },
+            state: {},
+          },
+          {
+            request: params.request,
+          }
         );
+      } catch (e) {
+        context.logger.error(
+          `Failed to schedule task for gap auto fill scheduler ${so.id}. Will attempt to delete the saved object.`
+        );
+        try {
+          await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
+        } catch (deleteError) {
+          context.logger.error(
+            `Failed to delete gap auto fill saved object for gap auto fill scheduler ${so.id}.`
+          );
+        }
+        throw e;
       }
-      throw e;
     }
 
     // Log successful creation

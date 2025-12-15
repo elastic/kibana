@@ -41,6 +41,7 @@ import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
+import { compactMap } from '../../utils/compact_map';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -136,6 +137,7 @@ export async function getUnifiedTraceItems({
           minimum_should_match: 1,
         },
       },
+      collapse: { field: SPAN_ID },
       fields: [...fields, ...optionalFields],
       sort: [
         { _score: 'asc' },
@@ -176,36 +178,34 @@ export async function getUnifiedTraceItems({
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
 
   return {
-    traceItems: unifiedTraceItems.hits.hits
-      .map((hit) => {
-        const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
-        const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
-        const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
-        const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
+    traceItems: compactMap(unifiedTraceItems.hits.hits, (hit) => {
+      const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
+      const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
+      const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
+      const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
 
-        if (!id || !name) {
-          return undefined;
-        }
+      if (!id || !name) {
+        return undefined;
+      }
 
-        return {
-          id,
-          name,
-          timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
-          traceId: event[TRACE_ID],
-          duration: resolveDuration(apmDuration, event[DURATION]),
-          status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
-          errors: errorsByDocId[id] ?? [],
-          parentId: event[PARENT_ID],
-          serviceName: event[SERVICE_NAME],
-          type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
-          spanLinksCount: {
-            incoming: incomingSpanLinksCountById[id] ?? 0,
-            outgoing:
-              event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
-          },
-        } satisfies TraceItem;
-      })
-      .filter((_) => _) as TraceItem[],
+      return {
+        id,
+        name,
+        timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
+        traceId: event[TRACE_ID],
+        duration: resolveDuration(apmDuration, event[DURATION]),
+        status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
+        errors: errorsByDocId[id] ?? [],
+        parentId: event[PARENT_ID],
+        serviceName: event[SERVICE_NAME],
+        type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
+        spanLinksCount: {
+          incoming: incomingSpanLinksCountById[id] ?? 0,
+          outgoing:
+            event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
+        },
+      } satisfies TraceItem;
+    }),
     unifiedTraceErrors,
   };
 }

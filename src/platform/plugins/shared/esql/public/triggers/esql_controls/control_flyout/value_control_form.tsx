@@ -29,6 +29,7 @@ import {
   EsqlControlType,
   type ESQLControlState,
   type ControlWidthOptions,
+  type ESQLControlVariable,
 } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
@@ -50,6 +51,7 @@ interface ValueControlFormProps {
   valuesRetrieval?: string;
   timeRange?: TimeRange;
   currentApp?: string;
+  esqlVariables: ESQLControlVariable[];
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -71,6 +73,7 @@ export function ValueControlForm({
   valuesRetrieval,
   timeRange,
   currentApp,
+  esqlVariables,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
   const theme = useEuiTheme();
@@ -177,6 +180,7 @@ export function ValueControlForm({
           filter: undefined,
           dropNullColumns: true,
           timeRange,
+          variables: esqlVariables,
         }).then((results) => {
           if (!isMounted()) {
             return;
@@ -206,7 +210,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange]
+    [isMounted, search, timeRange, esqlVariables]
   );
 
   useEffect(() => {
@@ -297,6 +301,7 @@ export function ValueControlForm({
             formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
               defaultMessage: 'Values query',
             })}
+            esqlVariables={esqlVariables}
           />
           {showValuesPreview && (
             <EuiFormRow

@@ -75,7 +75,6 @@ export interface UsageStats {
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enablePrivilegedUserMonitoring': boolean;
-  'securitySolution:enableEsqlRiskScoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'securitySolution:defaultValueReportMinutes': string;
@@ -182,7 +181,7 @@ export interface UsageStats {
   'cases:incrementalIdDisplay:enabled': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
-  'observability:streamsEnableSignificantEventsAnalyzer': boolean;
+  'observability:streamsEnableSignificantEventsDiscovery': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableGroupStreams': boolean;

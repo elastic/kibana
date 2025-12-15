@@ -60,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
         'SampleDataIngest:InstallSampleData',
         'Synthetics:Clean-Up-Package-Policies',
+        'Synthetics:Sync-Global-Params-Private-Locations',
         'Synthetics:Sync-Private-Location-Monitors',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',

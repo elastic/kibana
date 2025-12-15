@@ -47,7 +47,7 @@ Run a shell command on an endpoint.`,
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.object({
     ...getShapeAt(endpoint_execute_action_request, 'body'),

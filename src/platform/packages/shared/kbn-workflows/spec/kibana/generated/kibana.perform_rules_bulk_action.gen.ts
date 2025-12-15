@@ -55,7 +55,17 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     headerParams: [],
     pathParams: [],
     urlParams: ['dry_run'],
-    bodyParams: [],
+    bodyParams: [
+      'action',
+      'gaps_range_end',
+      'gaps_range_start',
+      'ids',
+      'query',
+      'duplicate',
+      'run',
+      'fill_gaps',
+      'edit',
+    ],
   },
   paramsSchema: z.object({
     ...getShapeAt(perform_rules_bulk_action_request, 'body'),

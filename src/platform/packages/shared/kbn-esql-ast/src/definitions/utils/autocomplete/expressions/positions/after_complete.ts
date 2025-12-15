@@ -55,14 +55,14 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       return suggestions;
     }
 
-    const validSignatures = functionParameterContext.validSignatures ?? [];
-    const currentParamIndex = functionParameterContext.currentParameterIndex ?? 0;
+    const analyzer = SignatureAnalyzer.from(functionParameterContext);
 
-    const hasMoreParams = validSignatures.some(
-      (sig) => (sig.params && sig.params.length > currentParamIndex + 1) || sig.minParams != null
-    );
+    // For repeating signatures (CASE): boolean at position 2,4,6... is a condition → suggest comma
+    if (analyzer?.isAmbiguousPosition) {
+      return [...suggestions, commaCompleteItem];
+    }
 
-    if (hasMoreParams) {
+    if (analyzer?.hasMoreParams) {
       return [...suggestions, commaCompleteItem];
     }
 
@@ -178,9 +178,9 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       isLiteral: paramState.isLiteral,
       hasMoreParams: paramState.hasMoreParams,
       isVariadic: paramState.isVariadic,
-      firstArgumentType: functionParameterContext.firstArgumentType,
-      shouldSuggestOperators: operatorDecision.shouldSuggest,
-      functionSignatures: functionParameterContext.validSignatures,
+      isAmbiguousPosition: signatureAnalysis?.isAmbiguousPosition,
+      functionSignatures: signatureAnalysis?.getValidSignatures(),
+      expressionType,
       isCursorFollowedByComma: options.isCursorFollowedByComma,
     });
   }

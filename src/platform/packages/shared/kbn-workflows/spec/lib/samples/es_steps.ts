@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// es
+// Document Operations: Create, read, update, delete documents
+// Search and Query: Execute searches and retrieve data
+// Index Operations: Create, list, delete indices
 export const ES_VALID_SAMPLE_STEPS = [
   {
     name: 'create-document',

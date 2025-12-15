@@ -141,8 +141,8 @@ export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
   'observability:streamsEnableSignificantEvents';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ANALYZER =
-  'observability:streamsEnableSignificantEventsAnalyzer';
+export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY =
+  'observability:streamsEnableSignificantEventsDiscovery';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
 export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEnableAttachments';

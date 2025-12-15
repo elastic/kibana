@@ -20,8 +20,8 @@ export interface AlertsPrivelegesState {
   hasIndexUpdateDelete: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexRead: boolean | null;
-  hasKibanaCRUD: boolean;
-  hasKibanaREAD: boolean;
+  hasSiemCRUD: boolean;
+  hasSiemRead: boolean;
 }
 /**
  * Hook to get user privilege from
@@ -30,7 +30,7 @@ export interface AlertsPrivelegesState {
 export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
-    kibanaSecuritySolutionsPrivileges: { crud: hasKibanaCRUD, read: hasKibanaREAD },
+    siemPrivileges: { crud: hasSiemCRUD, read: hasSiemRead },
   } = useUserPrivileges();
 
   const indexName = useMemo(() => {
@@ -50,8 +50,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
-        hasKibanaCRUD,
-        hasKibanaREAD,
+        hasSiemCRUD,
+        hasSiemRead,
       };
     }
 
@@ -68,8 +68,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
           result.index[indexName].index ||
           result.index[indexName].write,
         hasIndexUpdateDelete: result.index[indexName].write,
-        hasKibanaCRUD,
-        hasKibanaREAD,
+        hasSiemCRUD,
+        hasSiemRead,
       };
     }
 
@@ -81,10 +81,10 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
       hasIndexWrite: null,
       hasIndexUpdateDelete: null,
       hasIndexMaintenance: null,
-      hasKibanaCRUD: false,
-      hasKibanaREAD: false,
+      hasSiemCRUD: false,
+      hasSiemRead: false,
     };
-  }, [error, result, indexName, hasKibanaCRUD, hasKibanaREAD]);
+  }, [error, result, indexName, hasSiemCRUD, hasSiemRead]);
 
   return { loading: loading ?? false, ...privileges };
 };

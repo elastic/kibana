@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/restorable-state'
   - '@kbn/esql-types'
+  - '@kbn/presentation-panel-plugin'
 tags:
   - shared-browser
   - package

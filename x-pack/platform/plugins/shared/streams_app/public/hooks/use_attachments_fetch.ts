@@ -9,11 +9,15 @@ import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export const useAttachmentsFetch = ({
-  name,
-  attachmentType,
+  streamName,
+  filters,
 }: {
-  name: string;
-  attachmentType?: AttachmentType;
+  streamName: string;
+  filters?: {
+    query?: string;
+    attachmentTypes?: AttachmentType[];
+    tags?: string[];
+  };
 }) => {
   const {
     services: { telemetryClient },
@@ -24,19 +28,31 @@ export const useAttachmentsFetch = ({
     },
   } = useKibana();
 
+  const { query, attachmentTypes, tags } = filters ?? {};
+
   const attachmentsFetch = useStreamsAppFetch(
     async ({ signal }) => {
+      // Build query params object, only including defined values
+      const queryParams: {
+        query?: string;
+        attachmentTypes?: AttachmentType[];
+        tags?: string[];
+      } = {};
+
+      if (query) queryParams.query = query;
+      if (attachmentTypes && attachmentTypes.length > 0)
+        queryParams.attachmentTypes = attachmentTypes;
+      if (tags && tags.length > 0) queryParams.tags = tags;
+
       const response = await streamsRepositoryClient.fetch(
         'GET /api/streams/{streamName}/attachments 2023-10-31',
         {
           signal,
           params: {
             path: {
-              streamName: name,
+              streamName,
             },
-            query: {
-              attachmentType,
-            },
+            query: queryParams,
           },
         }
       );
@@ -51,7 +67,7 @@ export const useAttachmentsFetch = ({
       );
 
       telemetryClient.trackAttachmentCounts({
-        name,
+        name: streamName,
         dashboards: attachmentCounts.dashboard || 0,
         rules: attachmentCounts.rule,
         slos: attachmentCounts.slo,
@@ -59,7 +75,7 @@ export const useAttachmentsFetch = ({
 
       return response;
     },
-    [name, attachmentType, streamsRepositoryClient, telemetryClient]
+    [streamName, query, attachmentTypes, tags, streamsRepositoryClient, telemetryClient]
   );
 
   return attachmentsFetch;

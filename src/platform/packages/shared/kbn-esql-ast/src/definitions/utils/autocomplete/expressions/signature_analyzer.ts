@@ -28,7 +28,8 @@ export class SignatureAnalyzer {
 
   private readonly paramDefinitions: FunctionParameter[];
 
-  private readonly firstArgumentType?: string;
+  private readonly firstArgumentType?: string; // e.g. COALESCE, CONCAT
+  private readonly firstValueType?: string; // e.g. CASE
   private readonly currentParameterIndex: number;
   private readonly hasMoreMandatoryArgs: boolean;
 
@@ -36,12 +37,14 @@ export class SignatureAnalyzer {
     signatures: Signature[],
     paramDefinitions: FunctionParameter[],
     firstArgumentType: string | undefined,
+    firstValueType: string | undefined,
     currentParameterIndex: number,
     hasMoreMandatoryArgs: boolean
   ) {
     this.signatures = signatures;
     this.paramDefinitions = paramDefinitions;
     this.firstArgumentType = firstArgumentType;
+    this.firstValueType = firstValueType;
     this.currentParameterIndex = currentParameterIndex;
     this.hasMoreMandatoryArgs = hasMoreMandatoryArgs;
   }
@@ -62,11 +65,17 @@ export class SignatureAnalyzer {
     const validationResult = getValidSignaturesAndTypesToSuggestNext(node, context, fnDefinition);
 
     const firstArgumentType = validationResult.enrichedArgs[0]?.dataType;
+    // For CASE (isSignatureRepeating), the first value is at index 1
+    const hasRepeatingSignature = fnDefinition.signatures.some((sig) => sig.isSignatureRepeating);
+    const firstValueType = hasRepeatingSignature
+      ? validationResult.enrichedArgs[1]?.dataType
+      : undefined;
 
     return new SignatureAnalyzer(
       validationResult.validSignatures,
       validationResult.compatibleParamDefs,
       firstArgumentType,
+      firstValueType,
       validationResult.argIndex,
       validationResult.hasMoreMandatoryArgs
     );
@@ -84,9 +93,14 @@ export class SignatureAnalyzer {
       return null;
     }
 
-    const signatures = context.validSignatures ?? context.functionDefinition.signatures ?? [];
+    // Use original signatures for isSignatureRepeating check (validSignatures may be empty for CASE beyond 2 args)
+    const signatures =
+      context.validSignatures && context.validSignatures.length > 0
+        ? context.validSignatures
+        : context.functionDefinition.signatures ?? [];
     const paramDefinitions = context.paramDefinitions ?? [];
     const firstArgumentType = context.firstArgumentType;
+    const firstValueType = context.firstValueType;
     const currentParameterIndex = context.currentParameterIndex ?? 0;
     const hasMoreMandatoryArgs = Boolean(context.hasMoreMandatoryArgs);
 
@@ -94,6 +108,7 @@ export class SignatureAnalyzer {
       signatures,
       paramDefinitions,
       firstArgumentType,
+      firstValueType,
       currentParameterIndex,
       hasMoreMandatoryArgs
     );
@@ -143,6 +158,28 @@ export class SignatureAnalyzer {
    */
   public get isVariadic(): boolean {
     return this.signatures.some((sig) => sig.minParams != null);
+  }
+
+  /** Returns true if function has a repeating signature pattern (e.g. CASE). */
+  public get hasRepeatingSignature(): boolean {
+    return this.signatures.some(({ isSignatureRepeating }) => isSignatureRepeating);
+  }
+
+  /** Returns true if a value can be accepted at current position in a repeating signature. */
+  public get isRepeatingValuePosition(): boolean {
+    return this.hasRepeatingSignature && this.currentParameterIndex >= 1;
+  }
+
+  /**
+   * Returns true if current position in a repeating signature is ambiguous.
+   * Positions 2, 4, 6... could be either a new condition OR a default value.
+   */
+  public get isAmbiguousPosition(): boolean {
+    return (
+      this.hasRepeatingSignature &&
+      this.currentParameterIndex >= 2 &&
+      this.currentParameterIndex % 2 === 0
+    );
   }
 
   /**
@@ -205,6 +242,20 @@ export class SignatureAnalyzer {
    * Returns compatible parameter definitions for the current position.
    */
   public getCompatibleParamDefs(): FunctionParameter[] {
+    const repeatingSignature = this.signatures.find((s) => s.isSignatureRepeating);
+
+    if (repeatingSignature && this.currentParameterIndex >= repeatingSignature.params.length) {
+      const paramIndex = this.currentParameterIndex % repeatingSignature.params.length;
+
+      // Even positions (2, 4, 6...) could be either a new condition OR a default value
+      // Return both param types to allow suggestions for both cases
+      if (paramIndex === 0) {
+        return repeatingSignature.params; // [boolean, any]
+      }
+
+      return [repeatingSignature.params[paramIndex]];
+    }
+
     return this.paramDefinitions;
   }
 
@@ -220,6 +271,13 @@ export class SignatureAnalyzer {
    */
   public getFirstArgumentType(): string | undefined {
     return this.firstArgumentType;
+  }
+
+  /**
+   * Returns the first value type for CASE (index 1).
+   */
+  public getFirstValueType(): string | undefined {
+    return this.firstValueType;
   }
 
   /**
@@ -263,8 +321,25 @@ export class SignatureAnalyzer {
    * - Other homogeneous types → returns types matching first parameter
    */
   public getAcceptedTypes(): FunctionParameterType[] {
-    // Special case 1: functions accepting arbitrary expressions (CASE, etc.)
+    // Positions 2, 4, 6... in repeating signatures: could be condition or default → accept any
+    if (this.isAmbiguousPosition) {
+      return ['any'];
+    }
+
+    // Repeating signatures (e.g. CASE) require value type homogeneity
+    // CASE(cond, longField, cond2, /) → suggest only long/integer at position 3
     if (this.acceptsArbitraryExpressions) {
+      if (
+        this.isRepeatingValuePosition &&
+        this.firstValueType &&
+        this.firstValueType !== 'unknown'
+      ) {
+        // text/keyword are interchangeable in ES|QL, so suggest both
+        const isTextual = this.firstValueType === 'text' || this.firstValueType === 'keyword';
+
+        return isTextual ? ['text', 'keyword'] : [this.firstValueType as FunctionParameterType];
+      }
+
       return ['any'];
     }
 
@@ -327,8 +402,27 @@ export class SignatureAnalyzer {
     hasMoreParams: boolean;
     isVariadic: boolean;
   } {
+    const repeatingSignature = this.signatures.find((s) => s.isSignatureRepeating);
+
+    let typeMatches: boolean;
+
+    if (repeatingSignature) {
+      const paramIndex = this.currentParameterIndex % repeatingSignature.params.length;
+      const param = repeatingSignature.params[paramIndex];
+
+      // Bypass PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING for boolean conditions
+      // String literals should not match boolean at condition positions
+      const isConditionPosition = paramIndex === 0;
+      const effectiveIsLiteral =
+        isConditionPosition && param.type === 'boolean' ? false : isLiteral;
+
+      typeMatches = argMatchesParamType(expressionType, param.type, effectiveIsLiteral, false);
+    } else {
+      typeMatches = this.isCurrentTypeCompatible(expressionType, isLiteral);
+    }
+
     return {
-      typeMatches: this.isCurrentTypeCompatible(expressionType, isLiteral),
+      typeMatches,
       isLiteral,
       hasMoreParams: this.hasMoreParams,
       isVariadic: this.isVariadic,

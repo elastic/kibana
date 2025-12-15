@@ -70,6 +70,8 @@ export interface FunctionParameterContext {
   // Function definition for function-specific parameter handling (e.g., CASE function)
   functionDefinition?: FunctionDefinition;
   firstArgumentType?: SupportedDataType | 'unknown';
+  // Type of first value in repeating signatures, used to enforce type homogeneity
+  firstValueType?: SupportedDataType | 'unknown';
   currentParameterIndex?: number;
   validSignatures?: Signature[];
 }

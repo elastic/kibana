@@ -59,6 +59,7 @@ export const useAgentBuilderAttachment = ({
 
     // Open the conversation flyout with attachment and prefilled message
     onechat.openConversationFlyout({
+      autoSendInitialMessage: false,
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],

@@ -59,6 +59,7 @@ export {
   getTimeseriesIndices,
   getInferenceEndpoints,
   getEditorExtensions,
+  hasDateBreakdown,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

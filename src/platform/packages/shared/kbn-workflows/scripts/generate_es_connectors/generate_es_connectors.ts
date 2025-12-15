@@ -8,6 +8,7 @@
  */
 
 import { createClient } from '@hey-api/openapi-ts';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import type { OpenAPIV3 } from 'openapi-types';
 import Path from 'path';
@@ -16,6 +17,7 @@ import {
   ES_CONTRACTS_OUTPUT_FILE_PATH,
   ES_GENERATED_OUTPUT_FOLDER_PATH,
   ES_SPEC_OPENAPI_PATH,
+  ES_SPEC_OUTPUT_PATH,
   ES_SPEC_SCHEMA_PATH,
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
@@ -103,12 +105,13 @@ function generateContracts() {
 }
 
 function generateEsConnectorsIndexFile(contracts: ContractMeta[]) {
+  const esSpecCommitHash = getShortEsSpecCommitHash();
   return `${getLicenseHeader()}
 
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
- * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
+ * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/${esSpecCommitHash}).
  * Generated at: ${new Date().toISOString()}
  * Source: elasticsearch-specification repository (${contracts.length} APIs)
  * 
@@ -155,6 +158,18 @@ import { ${contract.schemaImports.join(',\n')} } from './schemas/${OPENAPI_TS_OU
 // export contract
 ${generateContractBlock(contract)}
 `;
+}
+
+function getShortEsSpecCommitHash(): string {
+  try {
+    return execSync('git rev-parse HEAD', { cwd: ES_SPEC_OUTPUT_PATH })
+      .toString()
+      .trim()
+      .substring(0, 7);
+  } catch (error) {
+    console.error('❌ Failed to get Elasticsearch specification commit hash:', error);
+    return 'unknown';
+  }
 }
 
 async function generateZodSchemas() {

@@ -6640,7 +6640,7 @@
         "tags": [],
         "label": "SavedObjectsSearchOptions",
         "description": [
-          "\nOptions for the saved objects raw search operation.\n"
+          "\nOptions for the saved objects raw search operation.\n\nThis interface extends the Elasticsearch `SearchRequest` type and allows using\nthe full Elasticsearch query DSL, including aggregations.\n"
         ],
         "signature": [
           "SavedObjectsSearchOptions",

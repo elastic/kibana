@@ -32,4 +32,5 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconAlienvaultOtx" */ './icons/alienvault_otx')
     ),
   ],
+  ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './icons/notion'))],
 ]);
