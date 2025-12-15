@@ -62,7 +62,7 @@ export interface ICommandMethods<TContext = any> {
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
     query: string,
-    newFields: IAdditionalFields
+    newFields?: IAdditionalFields
   ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
 }
 

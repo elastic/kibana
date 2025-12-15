@@ -12,8 +12,11 @@ import {
   isAssignment,
   isColumn,
   isFunctionExpression,
+  esqlCommandRegistry,
   type ESQLCommand,
   type ESQLColumn,
+  isOptionNode,
+  isProperNode,
 } from '@kbn/esql-ast';
 
 export interface UserDefinedColumnsPerCommand {
@@ -32,16 +35,18 @@ export interface UserDefinedColumnsPerCommand {
  * @param query The ES|QL query string to parse
  * @returns Object mapping command indices to arrays of user-defined columns
  */
-export function getUserDefinedColumns(query: string): UserDefinedColumnsPerCommand {
+export async function getUserDefinedColumns(query: string): Promise<UserDefinedColumnsPerCommand> {
   const { root } = Parser.parse(query);
   const result: UserDefinedColumnsPerCommand = {};
 
-  root.commands.forEach((command, commandIndex) => {
-    const userDefinedColumns = getUserDefinedColumnsFromCommand(command);
-    if (userDefinedColumns.length > 0) {
-      result[commandIndex] = userDefinedColumns;
-    }
-  });
+  await Promise.all(
+    root.commands.map(async (command, commandIndex) => {
+      const userDefinedColumns = await getUserDefinedColumnsFromCommand(command, query);
+      if (userDefinedColumns.length > 0) {
+        result[commandIndex] = userDefinedColumns;
+      }
+    })
+  );
 
   return result;
 }
@@ -51,14 +56,18 @@ export function getUserDefinedColumns(query: string): UserDefinedColumnsPerComma
  * 1. Assignment operators (=) - creates new columns
  * 2. Rename operators (AS) - creates aliases
  */
-function getUserDefinedColumnsFromCommand(command: ESQLCommand): string[] {
+async function getUserDefinedColumnsFromCommand(
+  command: ESQLCommand,
+  query: string
+): Promise<string[]> {
   const userDefinedColumns: string[] = [];
+  const columnsInOptions: Set<string> = new Set(); // Track columns mentioned in option nodes (like BY clauses)
 
-  const processArgument = (arg: any) => {
-    // Handle assignment (=) - creates new columns in EVAL, STATS etc.
+  // Manual parsing to detect user-defined columns
+  const processArgument = async (arg: unknown) => {
+    // Handle assignment (=)
     if (isAssignment(arg) && isColumn(arg.args[0])) {
       const leftColumn = arg.args[0] as ESQLColumn;
-
       userDefinedColumns.push(leftColumn.name);
     }
 
@@ -72,26 +81,46 @@ function getUserDefinedColumnsFromCommand(command: ESQLCommand): string[] {
     }
 
     // Handle standalone function calls that automatically create columns (e.g., STATS count())
-    // Only consider variadic-call functions, not binary expressions (operators like >, =, etc.)
     else if (
       isFunctionExpression(arg) &&
       arg.subtype === 'variadic-call' &&
       arg.text &&
       arg.name !== 'as'
     ) {
-      // Use the text representation (e.g., "count()") as the column name
       userDefinedColumns.push(arg.text);
     }
 
     // Handle option arguments (like BY clauses) that can contain assignments
-    else if (arg.type === 'option' && arg.args) {
-      arg.args.forEach(processArgument);
+    else if (isProperNode(arg) && isOptionNode(arg)) {
+      arg.args.forEach((optionArg) => {
+        if (isColumn(optionArg)) {
+          columnsInOptions.add(optionArg.name);
+        }
+      });
+      await Promise.all(arg.args.map(processArgument));
     }
   };
 
-  command.args.forEach(processArgument);
+  await Promise.all(command.args.map(processArgument));
 
-  return userDefinedColumns;
+  // Get additional user-defined columns from the command's columnsAfter method, if it exists
+  const commandDef = esqlCommandRegistry.getCommandByName(command.name);
+  if (commandDef?.methods.columnsAfter) {
+    try {
+      const esColumns = await commandDef.methods.columnsAfter(command, [], query);
+      esColumns.forEach((col) => {
+        if (col && col.name) {
+          if (!columnsInOptions.has(col.name)) {
+            userDefinedColumns.push(col.name);
+          }
+        }
+      });
+    } catch (error) {
+      // Ignore errors from columnsAfter
+    }
+  }
+
+  return [...new Set(userDefinedColumns)];
 }
 
 /**
@@ -99,15 +128,15 @@ function getUserDefinedColumnsFromCommand(command: ESQLCommand): string[] {
  * @param query The ES|QL query string
  * @returns Array of user-defined column names
  */
-export function getAllUserDefinedColumnNames(query: string): string[] {
-  const columnsPerCommand = getUserDefinedColumns(query);
+export async function getAllUserDefinedColumnNames(query: string): Promise<string[]> {
+  const columnsPerCommand = await getUserDefinedColumns(query);
   const allColumns: string[] = [];
 
   Object.values(columnsPerCommand).forEach((columns: string[]) => {
     columns.forEach((col: string) => allColumns.push(col));
   });
 
-  return [...new Set(allColumns)]; // Remove duplicates
+  return [...new Set(allColumns)];
 }
 
 /**
@@ -116,6 +145,7 @@ export function getAllUserDefinedColumnNames(query: string): string[] {
  * @param columnName The column name to check
  * @returns true if the column is user-defined, false otherwise
  */
-export function isUserDefinedColumn(query: string, columnName: string): boolean {
-  return getAllUserDefinedColumnNames(query).includes(columnName);
+export async function isUserDefinedColumn(query: string, columnName: string): Promise<boolean> {
+  const allColumnNames = await getAllUserDefinedColumnNames(query);
+  return allColumnNames.includes(columnName);
 }

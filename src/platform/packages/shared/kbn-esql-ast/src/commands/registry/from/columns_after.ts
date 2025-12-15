@@ -25,7 +25,7 @@ export const columnsAfter = async (
 
   const promises = [
     ...sources.map((source) =>
-      additionalFields.fromFrom({ ...command, args: [source, ...options] })
+      additionalFields?.fromFrom({ ...command, args: [source, ...options] })
     ),
     ...subqueries.map((subquery) => processSubquery(subquery.child, query, additionalFields)),
   ];

@@ -16,5 +16,5 @@ export const columnsAfter = (
   _query: string,
   additionalFields: IAdditionalFields
 ) => {
-  return additionalFields.fromFrom(command);
+  return additionalFields?.fromFrom(command);
 };

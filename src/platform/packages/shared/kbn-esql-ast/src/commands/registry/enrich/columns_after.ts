@@ -19,7 +19,7 @@ export const columnsAfter = async (
   query: string,
   additionalFields: IAdditionalFields
 ) => {
-  const enrichFields = await additionalFields.fromEnrich(command);
+  const enrichFields = await additionalFields?.fromEnrich(command);
   let fieldsToAdd = enrichFields;
 
   // the with option scopes down the fields that are added

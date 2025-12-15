@@ -17,6 +17,6 @@ export const columnsAfter = async (
   query: string,
   additionalFields: IAdditionalFields
 ) => {
-  const joinFields = await additionalFields.fromJoin(command);
+  const joinFields = await additionalFields?.fromJoin(command);
   return uniqBy([...(joinFields ?? []), ...previousColumns], 'name');
 };
