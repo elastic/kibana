@@ -121,7 +121,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
     },
     [fetchNext]
   );
-  
+
   return (
     <EuiFlexGroup
       style={{
@@ -175,7 +175,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
             data-test-subj="templateList-loadMoreTrigger"
           />
         )}
-        
+
         {loadingMore && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
