@@ -27,11 +27,9 @@
       "dataViews",
       "fieldFormats",
       "unifiedSearch",
-      "embeddable"
+      "embeddable",
+      "secrets"
     ],
-    "optionalPlugins": [
-      "alerting",
-      "serverless"
-    ]
+    "optionalPlugins": ["alerting", "serverless"]
   }
 }

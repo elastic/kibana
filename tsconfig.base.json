@@ -1900,6 +1900,8 @@
       "@kbn/search-types/*": ["src/platform/packages/shared/kbn-search-types/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/platform/plugins/shared/searchprofiler"],
       "@kbn/searchprofiler-plugin/*": ["x-pack/platform/plugins/shared/searchprofiler/*"],
+      "@kbn/secrets": ["src/platform/plugins/shared/secrets"],
+      "@kbn/secrets/*": ["src/platform/plugins/shared/secrets/*"],
       "@kbn/security-ai-prompts": ["x-pack/solutions/security/packages/security-ai-prompts"],
       "@kbn/security-ai-prompts/*": ["x-pack/solutions/security/packages/security-ai-prompts/*"],
       "@kbn/security-api-integration-helpers": ["x-pack/platform/test/security_api_integration/packages/helpers"],

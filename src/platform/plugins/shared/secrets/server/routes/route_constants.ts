@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { setupSavedObjects } from './setup';
+/**
+ * Common route options used across secrets routes
+ */
+export const SECRET_ROUTE_OPTIONS = {
+  tags: ['api', 'secrets'],
+};

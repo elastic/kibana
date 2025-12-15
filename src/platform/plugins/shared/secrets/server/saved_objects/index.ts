@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { workflowSystemIndex } from '../../storage/indices';
-
-export const WORKFLOW_SECRET_SAVED_OBJECT_TYPE = 'workflow_secret';
-export const WORKFLOW_SECRET_SAVED_OBJECT_INDEX = workflowSystemIndex('secrets');
+export { setupSecretsSavedObjects } from './setup';

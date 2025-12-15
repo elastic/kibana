@@ -940,6 +940,7 @@
     "@kbn/search-synonyms": "link:x-pack/solutions/search/plugins/search_synonyms",
     "@kbn/search-types": "link:src/platform/packages/shared/kbn-search-types",
     "@kbn/searchprofiler-plugin": "link:x-pack/platform/plugins/shared/searchprofiler",
+    "@kbn/secrets": "link:src/platform/plugins/shared/secrets",
     "@kbn/security-ai-prompts": "link:x-pack/solutions/security/packages/security-ai-prompts",
     "@kbn/security-api-key-management": "link:x-pack/platform/packages/shared/security/api_key_management",
     "@kbn/security-authorization-core": "link:x-pack/platform/packages/private/security/authorization_core",

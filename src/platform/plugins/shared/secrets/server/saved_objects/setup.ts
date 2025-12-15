@@ -9,22 +9,22 @@
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { WORKFLOW_SECRET_SAVED_OBJECT_INDEX, WORKFLOW_SECRET_SAVED_OBJECT_TYPE } from './constants';
-import { workflowSecretMappings } from './mappings';
+import { SECRET_SAVED_OBJECT_INDEX, SECRET_SAVED_OBJECT_TYPE } from './constants';
+import { secretMappings } from './mappings';
 
-export function setupSavedObjects(
+export function setupSecretsSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   savedObjects.registerType({
-    name: WORKFLOW_SECRET_SAVED_OBJECT_TYPE,
-    indexPattern: WORKFLOW_SECRET_SAVED_OBJECT_INDEX,
-    mappings: workflowSecretMappings,
+    name: SECRET_SAVED_OBJECT_TYPE,
+    indexPattern: SECRET_SAVED_OBJECT_INDEX,
+    mappings: secretMappings,
     hidden: true,
     namespaceType: 'agnostic',
   });
   encryptedSavedObjects.registerType({
-    type: WORKFLOW_SECRET_SAVED_OBJECT_TYPE,
+    type: SECRET_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secret']),
     attributesToIncludeInAAD: new Set(['name', 'description']),
   });

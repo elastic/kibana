@@ -9,7 +9,7 @@
 
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
-export const workflowSecretMappings: SavedObjectsTypeMappingDefinition = {
+export const secretMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     name: {
@@ -21,9 +21,6 @@ export const workflowSecretMappings: SavedObjectsTypeMappingDefinition = {
     // NO NEED TO BE INDEXED
     // secret: {
     //   type: 'binary',
-    // },
-    // expiresAt: {
-    //   type: 'date',
     // },
     // createdAt: {
     //   type: 'date',
