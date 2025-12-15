@@ -77,6 +77,6 @@ describe('HeaderButtons', () => {
     );
 
     expect(getByTestId('migrationVendorBadge')).toBeInTheDocument();
-    expect(getByTestId('migrationVendorBadge')).toHaveTextContent('QRADAR');
+    expect(getByTestId('migrationVendorBadge')).toHaveTextContent('QRadar');
   });
 });
