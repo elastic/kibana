@@ -13,12 +13,18 @@ import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import { MigrationSource, type MigrationStepProps } from '../../../../../common/types';
+import * as useAppToastsModule from '../../../../../../common/hooks/use_app_toasts';
 
 jest.mock('../../../../service/hooks/use_enhance_rules');
+
+jest.mock('../../../../../../common/hooks/use_app_toasts');
+
+const useAppToastsMock = jest.spyOn(useAppToastsModule, 'useAppToasts');
 
 const mockEnhanceRules = jest.fn();
 
 describe('EnhancementsDataInput', () => {
+  const addErrorMock = jest.fn();
   const defaultProps: MigrationStepProps = {
     dataInputStep: QradarDataInputStep.Enhancements,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
@@ -30,6 +36,10 @@ describe('EnhancementsDataInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useAppToastsMock.mockReturnValue({
+      addError: addErrorMock,
+    });
+
     (useEnhanceRules as jest.Mock).mockReturnValue({
       enhanceRules: mockEnhanceRules,
       isLoading: false,
@@ -229,5 +239,25 @@ describe('EnhancementsDataInput', () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     expect(getByTestId('enhancementTypeSelect')).toBeDisabled();
+  });
+
+  it('should raise error toast if JSON parsing fails', async () => {
+    const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
+
+    const invalidJsonContent = 'not valid json {{{';
+    const file = new File([invalidJsonContent], 'invalid.json', {
+      type: 'application/json',
+    });
+
+    const filePicker = getByTestId('enhancementFilePicker');
+    await act(async () => {
+      fireEvent.change(filePicker, { target: { files: [file] } });
+    });
+
+    await waitFor(() => {
+      expect(addErrorMock).toHaveBeenCalledWith(expect.any(SyntaxError), {
+        title: 'Invalid JSON file',
+      });
+    });
   });
 });

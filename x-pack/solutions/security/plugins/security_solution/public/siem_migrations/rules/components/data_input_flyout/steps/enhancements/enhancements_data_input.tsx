@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import type { MigrationStepProps } from '../../../../../common/types';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
@@ -83,11 +84,19 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const filePickerRef = React.useRef<EuiFilePickerClass>(null);
 
     const { enhanceRules, isLoading } = useEnhanceRules();
+    const { addError } = useAppToasts();
 
-    const onFileParsed = useCallback((content: string) => {
-      const parsed: QRadarMitreMappingsData = JSON.parse(content);
-      setParsedData(parsed);
-    }, []);
+    const onFileParsed = useCallback(
+      (content: string) => {
+        try {
+          const parsed: QRadarMitreMappingsData = JSON.parse(content);
+          setParsedData(parsed);
+        } catch (err) {
+          addError(err, { title: i18n.INVALID_JSON_ERROR });
+        }
+      },
+      [addError]
+    );
 
     const { parseFile, isParsing, error: parseError } = useParseFileInput(onFileParsed);
 
