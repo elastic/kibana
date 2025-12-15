@@ -29,7 +29,6 @@ export const LogAIAssistant = ({
     ObservabilityAIAssistantContextualInsight,
     getContextualInsightMessages,
   },
-  onechat,
 }: LogAIAssistantProps) => {
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
