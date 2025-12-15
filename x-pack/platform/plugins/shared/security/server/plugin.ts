@@ -342,6 +342,7 @@ export class SecurityPlugin
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       docLinks: core.docLinks,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled,
     });
 
     return Object.freeze<SecurityPluginSetup>({

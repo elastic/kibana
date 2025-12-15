@@ -1,30 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { schema } from '@kbn/config-schema';
-import type { CheckGlobalAccessControlPrivilegeDependencies } from './types';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 
-export const registerAccessControl = async ({
-  http,
+import type { RouteDefinitionParams } from '..';
+import { MANAGE_ACCESS_CONTROL_ACTION } from '../../saved_objects/access_control_service';
+
+export const defineAccessControlRoutes = async ({
+  router,
+  authz,
   isAccessControlEnabled,
-  getStartServices,
-}: CheckGlobalAccessControlPrivilegeDependencies) => {
-  const router = http.createRouter();
-
+}: RouteDefinitionParams) => {
   router.get(
     {
-      path: '/internal/access_control/global_access/{contentTypeId}',
+      path: '/internal/access_control/admin_access/{savedObjectTypeId}',
       validate: {
         request: {
           params: schema.object({
-            contentTypeId: schema.string(),
+            savedObjectTypeId: schema.string(),
           }),
         },
         response: {
@@ -44,7 +42,9 @@ export const registerAccessControl = async ({
       },
     },
     async (_ctx, request, response) => {
-      if (!isAccessControlEnabled) {
+      const soType = request.params.savedObjectTypeId;
+      const enabled = isAccessControlEnabled(soType) && authz.mode.useRbacForRequest(request);
+      if (!enabled) {
         return response.ok({
           body: {
             isGloballyAuthorized: true,
@@ -52,24 +52,11 @@ export const registerAccessControl = async ({
         });
       }
 
-      const { security } = await getStartServices();
-      const contentTypeId = request.params.contentTypeId;
-
-      const authorization = security?.authz;
-
-      if (!authorization) {
-        return response.ok({
-          body: {
-            isGloballyAuthorized: false,
-          },
-        });
-      }
-
       const privileges = {
-        kibana: authorization.actions.savedObject.get(contentTypeId, 'manage_access_control'),
+        kibana: authz.actions.savedObject.get(soType, MANAGE_ACCESS_CONTROL_ACTION),
       };
 
-      const { hasAllRequested } = await authorization
+      const { hasAllRequested } = await authz
         .checkPrivilegesWithRequest(request)
         .globally(privileges);
 
@@ -123,12 +110,13 @@ export const registerAccessControl = async ({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route changes the access mode of saved objects',
+          reason: 'This route defers to saved object RBAC and access control authorization',
         },
       },
     },
     async (ctx, request, response) => {
-      if (!isAccessControlEnabled) {
+      const enabled = isAccessControlEnabled() && authz.mode.useRbacForRequest(request);
+      if (!enabled) {
         return response.badRequest({ body: 'Access control is not enabled' });
       }
 
@@ -175,9 +163,8 @@ export const registerAccessControl = async ({
       },
     },
     async (_ctx, request, response) => {
-      const { security: securityStart } = await getStartServices();
-      const useRbacForRequest = securityStart?.authz.mode.useRbacForRequest(request);
-      const enabled = isAccessControlEnabled && useRbacForRequest;
+      const useRbacForRequest = authz.mode.useRbacForRequest(request);
+      const enabled = isAccessControlEnabled() && useRbacForRequest;
       return response.ok({
         body: {
           isAccessControlEnabled: enabled,

@@ -245,7 +245,7 @@ export class SavedObjectsService
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
-      isAccessControlEnabled: () => accessControlEnabled,
+      isAccessControlEnabled: (type?: string) => this.typeRegistry.isAccessControlEnabled(type),
     };
   }
 

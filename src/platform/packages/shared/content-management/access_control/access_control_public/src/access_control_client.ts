@@ -39,7 +39,7 @@ export class AccessControlClient implements AccessControlClientPublic {
 
   async checkGlobalPrivilege(contentTypeId: string): Promise<CheckGlobalPrivilegeResponse> {
     const response = await this.deps.http.get<CheckGlobalPrivilegeResponse>(
-      `/internal/access_control/global_access/${contentTypeId}`
+      `/internal/access_control/admin_access/${contentTypeId}`
     );
 
     return {

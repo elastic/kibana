@@ -33,7 +33,7 @@ export interface ISavedObjectTypeRegistryInternal extends ISavedObjectTypeRegist
    *
    * @internal
    */
-  isAccessControlEnabled(): boolean;
+  isAccessControlEnabled(type?: string): boolean;
 }
 
 /**
@@ -170,8 +170,8 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistryInternal.isAccessControlEnabled} */
-  public isAccessControlEnabled() {
-    return this.accessControlEnabled;
+  public isAccessControlEnabled(type?: string) {
+    return this.accessControlEnabled && (type === undefined || this.supportsAccessControl(type));
   }
 }
 
