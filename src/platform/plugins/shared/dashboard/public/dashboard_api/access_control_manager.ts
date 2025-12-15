@@ -15,7 +15,8 @@ import { getAccessControlClient } from '../services/access_control_service';
 
 export function initializeAccessControlManager(
   savedObjectResult?: DashboardReadResponseBody,
-  savedObjectId$?: BehaviorSubject<string | undefined>
+  savedObjectId$?: BehaviorSubject<string | undefined>,
+  clearCacheFunction?: (id: string) => void
 ) {
   const accessControl$ = new BehaviorSubject<Partial<SavedObjectAccessControl>>({
     owner: savedObjectResult?.data?.access_control?.owner,
@@ -41,6 +42,7 @@ export function initializeAccessControlManager(
         ...currentAccessControl,
         accessMode,
       });
+      clearCacheFunction?.(dashboardId);
     } catch (error) {
       throw error;
     }

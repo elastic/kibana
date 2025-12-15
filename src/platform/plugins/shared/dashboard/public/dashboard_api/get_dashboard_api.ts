@@ -53,6 +53,7 @@ export function getDashboardApi({
   savedObjectId,
   user,
   isAccessControlEnabled,
+  clearCacheFunction,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[] | undefined;
@@ -61,13 +62,18 @@ export function getDashboardApi({
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
+  clearCacheFunction?: (id: string) => void;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
-  const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
+  const accessControlManager = initializeAccessControlManager(
+    readResult,
+    savedObjectId$,
+    clearCacheFunction
+  );
 
   const viewModeManager = initializeViewModeManager({
     incomingEmbeddables,
