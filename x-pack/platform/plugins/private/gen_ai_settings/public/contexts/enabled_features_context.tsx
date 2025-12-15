@@ -18,6 +18,7 @@ export interface EnabledFeatures {
   isPermissionsBased: boolean;
   showAiBreadcrumb: boolean;
   showAiAssistantsVisibilitySetting: boolean;
+  showChatExperienceSetting: boolean;
 }
 
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
@@ -25,6 +26,7 @@ export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   isPermissionsBased: false,
   showAiBreadcrumb: true,
   showAiAssistantsVisibilitySetting: true,
+  showChatExperienceSetting: true,
 });
 
 interface Props {
@@ -55,6 +57,7 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
       showAiBreadcrumb: config.showAiBreadcrumb,
       isPermissionsBased: isSolutionView,
       showAiAssistantsVisibilitySetting,
+      showChatExperienceSetting: config.showChatExperienceSetting,
     };
   }, [config, activeSpace]);
 
