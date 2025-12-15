@@ -20,6 +20,7 @@ import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../utils/create_default_data_view', () => ({
   createDefaultDataView: jest.fn(),
@@ -79,6 +80,12 @@ describe('createInitListener', () => {
         application,
         uiSettings,
         spaces,
+        storage: {
+          get: jest.fn((key: string) => key),
+          set: jest.fn((key: string, value: string) => key),
+          remove: jest.fn((key: string) => key),
+          clear: jest.fn(() => {}),
+        } as unknown as Storage,
       },
       false
     );
