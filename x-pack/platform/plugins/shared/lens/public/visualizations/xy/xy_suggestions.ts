@@ -51,6 +51,7 @@ export function getSuggestions({
   mainPalette,
   isFromContext,
   allowMixed,
+  datasourceId,
 }: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
   const incompleteTable =
     !table.isMultiRow ||
@@ -76,7 +77,8 @@ export function getSuggestions({
     state,
     subVisualizationId as SeriesType | undefined,
     mainPalette,
-    allowMixed
+    allowMixed,
+    datasourceId
   );
 
   if (Array.isArray(suggestions)) {
@@ -92,7 +94,8 @@ function getSuggestionForColumns(
   currentState?: XYState,
   seriesType?: SeriesType,
   mainPalette?: SuggestionRequest['mainPalette'],
-  allowMixed?: boolean
+  allowMixed?: boolean,
+  datasourceId?: string
 ): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
   const sharedArgs = {
@@ -106,7 +109,13 @@ function getSuggestionForColumns(
     allowMixed,
   };
 
-  if (buckets.length >= 1) {
+  // we have 2 different suggestion: with DSL we can split by only when we have a max of 2 buckets (one for the X and the other for the breakdown)
+  // in ESQL we instead suggest split by with more then 1 buckets always.
+  const whenToSuggestSplitBy =
+    datasourceId === 'textBased'
+      ? buckets.length >= 1
+      : buckets.length === 1 || buckets.length === 2;
+  if (whenToSuggestSplitBy) {
     const [xValue, ...splitBy] = getBucketMappings(table, currentState);
     return getSuggestionsForLayer({
       ...sharedArgs,
