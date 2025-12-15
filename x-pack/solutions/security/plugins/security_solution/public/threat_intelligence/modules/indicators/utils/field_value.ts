@@ -61,13 +61,5 @@ export const getIndicatorFieldAndValue = (
  * @param value Indicator string|null value for the field
  * @returns true if correct, false if not
  */
-export const fieldAndValueValid = (field: string | null, value: NormalizedValue): boolean => {
-  if (!field) return false;
-  if (value == null) return false;
-
-  if (Array.isArray(value)) {
-    return value.some((v) => v && v !== EMPTY_VALUE);
-  }
-
-  return value !== EMPTY_VALUE;
-};
+export const fieldAndValueValid = (field: string | null, value: string | null): boolean =>
+  !!value && value !== EMPTY_VALUE && !!field;
