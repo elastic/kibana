@@ -15,8 +15,8 @@ import {
   type ESQLStatsQueryMeta,
   constructCascadeQuery,
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useCallback, useMemo } from 'react';
 import { apm } from '@elastic/apm-rum';
 import {
@@ -114,6 +114,7 @@ interface UseScopedESQLQueryFetchClientProps
     | 'timeRange'
     | 'scopedProfilesManager'
     | 'esqlVariables'
+    | 'inspectorAdapters'
   > {
   query: AggregateQuery;
 }
@@ -130,10 +131,9 @@ export function useScopedESQLQueryFetchClient({
   filters,
   timeRange,
   scopedProfilesManager,
+  inspectorAdapters,
 }: UseScopedESQLQueryFetchClientProps) {
   const abortController = useRef<AbortController | null>(null);
-
-  const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
   useEffect(
     // handle cleanup for when the component unmounts
@@ -157,6 +157,15 @@ export function useScopedESQLQueryFetchClient({
         timeRange,
         scopedProfilesManager,
         inspectorAdapters,
+        inspectorConfig: {
+          title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
+            defaultMessage: 'Cascade Row Data Query',
+          }),
+          description: i18n.translate('discover.dataCascade.inspector.cascadeQueryDescription', {
+            defaultMessage:
+              'This request queries Elasticsearch to fetch the documents matching the value of the expanded cascade row.',
+          }),
+        },
       }),
     [
       data,

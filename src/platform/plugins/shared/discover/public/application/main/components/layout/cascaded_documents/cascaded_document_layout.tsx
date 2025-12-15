@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
@@ -17,6 +17,7 @@ import {
   DataCascadeRowCell,
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@kbn/esql-ast';
@@ -51,6 +52,7 @@ export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'>
   cascadeConfig: CascadedDocumentsRestorableState;
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
+  registerCascadeRequestsInspectorAdapter: (requestAdapter: RequestAdapter) => void;
 }
 
 const ESQLDataCascade = React.memo(
@@ -62,6 +64,7 @@ const ESQLDataCascade = React.memo(
     cascadeGroupingChangeHandler,
     togglePopover,
     queryMeta,
+    registerCascadeRequestsInspectorAdapter,
     ...props
   }: ESQLDataCascadeProps) => {
     const [query, defaultFilters] = useAppStateSelector((state) => [state.query, state.filters]);
@@ -73,6 +76,12 @@ const ESQLDataCascade = React.memo(
     const globalTimeRange = globalState?.timeRange;
     const { scopedProfilesManager } = useScopedServices();
     const { expressions } = useDiscoverServices();
+
+    const cascadeRequestsInspectorAdapter = useRef<RequestAdapter | null>(new RequestAdapter());
+
+    useEffect(() => {
+      registerCascadeRequestsInspectorAdapter(cascadeRequestsInspectorAdapter.current);
+    }, [registerCascadeRequestsInspectorAdapter]);
 
     const cascadeGroupData = useGroupedCascadeData({
       cascadeConfig,
@@ -98,6 +107,7 @@ const ESQLDataCascade = React.memo(
         },
       }),
       scopedProfilesManager,
+      inspectorAdapters: { requests: cascadeRequestsInspectorAdapter.current },
     });
 
     const { onCascadeGroupNodeExpanded, onCascadeLeafNodeExpanded } =

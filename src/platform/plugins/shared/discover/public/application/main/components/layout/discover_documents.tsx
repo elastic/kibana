@@ -182,6 +182,13 @@ function DiscoverDocumentsComponent({
 
   const cascadeConfig = useReadCascadeConfig();
 
+  const registerCascadeRequestsInspectorAdapter = useCallback(
+    (requestAdapter: RequestAdapter) => {
+      stateContainer.dataState.inspectorAdapters.cascadeRequests = requestAdapter;
+    },
+    [stateContainer.dataState.inspectorAdapters]
+  );
+
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
       dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
@@ -529,9 +536,10 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             viewModeToggle={viewModeToggle}
-            onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
             onFullScreenChange={setIsDataGridFullScreen}
             cascadeConfig={cascadeConfig}
+            onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
+            registerCascadeRequestsInspectorAdapter={registerCascadeRequestsInspectorAdapter}
           />
         </CellActionsProvider>
       </div>

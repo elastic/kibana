@@ -37,9 +37,11 @@ export function useInspector({
 
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
-    const requestAdapters = inspectorAdapters.lensRequests
-      ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
-      : [inspectorAdapters.requests];
+    const requestAdapters = [
+      inspectorAdapters.requests,
+      inspectorAdapters.lensRequests,
+      inspectorAdapters.cascadeRequests,
+    ].filter(Boolean) as RequestAdapter[];
 
     const session = inspector.open(
       {

@@ -33,6 +33,7 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
         onCascadeGroupingChange?: undefined;
         onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
         viewModeToggle?: never;
+        registerCascadeRequestsInspectorAdapter?: never;
       }
     | {
         cascadeConfig: CascadedDocumentsRestorableState | undefined;
@@ -40,6 +41,7 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
         onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
         onUpdateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
         viewModeToggle: React.ReactElement | undefined;
+        registerCascadeRequestsInspectorAdapter: (requestAdapter: RequestAdapter) => void;
       }
   );
 
