@@ -21,7 +21,7 @@ import {
   useFetchAnonymizationFields,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { EntityType } from '../../../../../common/search_strategy';
@@ -82,12 +82,15 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled =
-    !hasAssistantPrivilege ||
-    !isAssistantVisible ||
-    !isAssistantEnabled ||
-    !hasEntityHighlightsLicense;
-  const isLoading = isChatLoading || isAnonymizationFieldsLoading;
+  const disabled = useMemo(
+    () => !hasAssistantPrivilege || !isAssistantEnabled || !hasEntityHighlightsLicense,
+    [hasAssistantPrivilege, isAssistantEnabled, hasEntityHighlightsLicense]
+  );
+
+  const isLoading = useMemo(
+    () => isChatLoading || isAnonymizationFieldsLoading,
+    [isAnonymizationFieldsLoading, isChatLoading]
+  );
 
   if (disabled) {
     return null;
@@ -118,12 +121,13 @@ export const EntityHighlightsAccordion: React.FC<{
             onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
             setConnectorId={setConnectorId}
             connectorId={connectorId}
-            entityType={entityType}
-            entityIdentifier={entityIdentifier}
             closePopover={closePopover}
             openPopover={onButtonClick}
             isLoading={isLoading}
             isPopoverOpen={isPopoverOpen}
+            isAssistantVisible={isAssistantVisible}
+            entityType={entityType}
+            entityIdentifier={entityIdentifier}
           />
         }
       >

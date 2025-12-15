@@ -158,20 +158,6 @@ describe('EntityHighlights', () => {
     expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 
-  it('returns null when assistant is not visible', () => {
-    mockUseAssistantAvailability.mockReturnValue({
-      hasAssistantPrivilege: true,
-      isAssistantEnabled: true,
-      isAssistantVisible: false,
-    });
-
-    render(<EntityHighlightsAccordion {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
-  });
-
   it('returns null when assistant is not enabled', () => {
     mockUseAssistantAvailability.mockReturnValue({
       hasAssistantPrivilege: true,

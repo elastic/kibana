@@ -24,8 +24,8 @@ import { noop } from 'lodash';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAskAiAssistant } from '../tabs/risk_inputs/use_ask_ai_assistant';
@@ -46,6 +46,7 @@ interface EntityHighlightsSettingsProps {
   } | null;
   closePopover: () => void;
   openPopover: () => void;
+  isAssistantVisible: boolean;
   isLoading: boolean;
   isPopoverOpen: boolean;
 }
@@ -55,12 +56,13 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   onChangeShowAnonymizedValues,
   setConnectorId,
   connectorId,
-  entityType,
-  entityIdentifier,
   closePopover,
   openPopover,
   isLoading,
   isPopoverOpen,
+  entityType,
+  entityIdentifier,
+  isAssistantVisible,
   assistantResult,
 }) => {
   const selectedConversationHasAnonymizedValues = useMemo(
@@ -92,14 +94,15 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     replacements: assistantResult?.replacements,
   });
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+
   const entityAttachment = useMemo(
     () => ({
       attachmentType: SecurityAgentBuilderAttachments.entity,
       attachmentData: {
         identifierType: entityType,
         identifier: entityIdentifier,
-        attachmentLabel: entityIdentifier,
+        attachmentLabel: `${entityType}: ${entityIdentifier}`,
       },
       attachmentPrompt: ENTITY_PROMPT,
     }),
@@ -158,26 +161,28 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
             />
           </EuiContextMenuItem>
         ) : (
-          <EuiContextMenuItem
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-              {
-                defaultMessage: 'Ask AI Assistant',
-              }
-            )}
-            key={'ask-ai-assistant'}
-            onClick={() => {
-              showAssistantOverlay();
-              closePopover();
-            }}
-            icon={<AssistantIcon />}
-            disabled={isLoading || !assistantResult}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
-              defaultMessage="Ask AI Assistant"
-            />
-          </EuiContextMenuItem>
+          isAssistantVisible && (
+            <EuiContextMenuItem
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+                {
+                  defaultMessage: 'Ask AI Assistant',
+                }
+              )}
+              key={'ask-ai-assistant'}
+              onClick={() => {
+                showAssistantOverlay();
+                closePopover();
+              }}
+              icon={<AssistantIcon />}
+              disabled={isLoading || !assistantResult}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
+                defaultMessage="Ask AI Assistant"
+              />
+            </EuiContextMenuItem>
+          )
         )}
 
         <EuiContextMenuItem
@@ -201,6 +206,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       onChangeShowAnonymizedValues,
       selectedConversationHasAnonymizedValues,
       onAgentBuildAttachmentClick,
+      isAssistantVisible,
       setConnectorId,
       connectorId,
       showAssistantOverlay,
