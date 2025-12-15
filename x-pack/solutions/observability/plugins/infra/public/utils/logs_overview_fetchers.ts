@@ -38,10 +38,11 @@ type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
 export function getLogsHasDataFetcher(getStartServices: InfraClientStartServicesAccessor) {
   return async () => {
-    const [, { logsShared }] = await getStartServices();
+    const [coreStart, { logsShared }] = await getStartServices();
     const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
     const logViewStatus = await logsShared.logViews.client.getResolvedLogViewStatus(
-      resolvedLogView
+      resolvedLogView,
+      coreStart.uiSettings
     );
 
     const hasData = logViewStatus.index === 'available';
