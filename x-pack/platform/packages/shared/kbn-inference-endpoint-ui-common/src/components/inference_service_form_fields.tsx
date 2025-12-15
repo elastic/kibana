@@ -105,6 +105,7 @@ interface InferenceServicesProps {
     allowContextWindowLength?: boolean;
     reenterSecretsOnEdit?: boolean;
     allowTemperature?: boolean;
+    enableEisPromoTour?: boolean;
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -121,6 +122,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     isPreconfigured,
     currentSolution,
     reenterSecretsOnEdit,
+    enableEisPromoTour,
   },
 }) => {
   const {
@@ -548,47 +550,52 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           const selectInput = providerSuperSelect(isInvalid);
-          return (
+          const formRow = (
+            <EuiFormRow
+              id="providerSelectBox"
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.inferenceEndpointUICommon.components.serviceLabel"
+                  defaultMessage="Service"
+                />
+              }
+              isInvalid={isInvalid}
+              error={errorMessage}
+            >
+              <>
+                <EuiSpacer size="s" />
+                <EuiInputPopover
+                  id={'providerInputPopoverId'}
+                  fullWidth
+                  input={selectInput}
+                  isOpen={isProviderPopoverOpen}
+                  closePopover={closeProviderPopover}
+                  className="rightArrowIcon"
+                >
+                  <SelectableProvider
+                    currentSolution={currentSolution}
+                    providers={updatedProviders ?? []}
+                    onClosePopover={closeProviderPopover}
+                    onProviderChange={onProviderChange}
+                    onSolutionFilterChange={toggleAndApplyFilter}
+                    solutionFilter={solutionFilter}
+                  />
+                </EuiInputPopover>
+              </>
+            </EuiFormRow>
+          );
+          return enableEisPromoTour ? (
             <EisCloudConnectPromoTour
               promoId="eisInferenceEndpointFlyout"
               navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
               isSelfManaged={!cloud?.isCloudEnabled}
               isReady={isFlyoutOpen}
             >
-              <EuiFormRow
-                id="providerSelectBox"
-                fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.inferenceEndpointUICommon.components.serviceLabel"
-                    defaultMessage="Service"
-                  />
-                }
-                isInvalid={isInvalid}
-                error={errorMessage}
-              >
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiInputPopover
-                    id={'providerInputPopoverId'}
-                    fullWidth
-                    input={selectInput}
-                    isOpen={isProviderPopoverOpen}
-                    closePopover={closeProviderPopover}
-                    className="rightArrowIcon"
-                  >
-                    <SelectableProvider
-                      currentSolution={currentSolution}
-                      providers={updatedProviders ?? []}
-                      onClosePopover={closeProviderPopover}
-                      onProviderChange={onProviderChange}
-                      onSolutionFilterChange={toggleAndApplyFilter}
-                      solutionFilter={solutionFilter}
-                    />
-                  </EuiInputPopover>
-                </>
-              </EuiFormRow>
+              {formRow}
             </EisCloudConnectPromoTour>
+          ) : (
+            formRow
           );
         }}
       </UseField>
