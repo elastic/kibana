@@ -24,6 +24,11 @@ export const getCommandContext = async (
       return {
         inferenceEndpoints,
       };
+    case 'rerank':
+      return {
+        inferenceEndpoints:
+          (await callbacks?.getInferenceEndpoints?.('rerank'))?.inferenceEndpoints || [],
+      };
     case 'enrich':
       const policies = await helpers.getPolicies();
       const policiesMap = new Map(policies.map((policy) => [policy.name, policy]));
