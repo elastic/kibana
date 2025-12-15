@@ -101,7 +101,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
       error={error}
       onOpen={onOpen}
       onStartConversation={onStartConversation}
-      data-test-subj="obsAlertAiInsight"
     />
   );
 }

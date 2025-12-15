@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker } from '../ast/walker';
-import { Builder } from '../ast/builder';
-import { BasicPrettyPrinter } from '../pretty_print';
-import { printAst, type PrintAstOptions } from '../shared/debug';
-import type { ESQLProperNode } from '../types';
+import { Walker } from '../../ast/walker';
+import { Builder } from '../../ast/builder';
+import { BasicPrettyPrinter } from '../../pretty_print';
+import { printAst, type PrintAstOptions } from '../../shared/debug';
+import type { ESQLProperNode } from '../../types';
 
 /**
  * This is used as a prototype of AST nodes created by the synth methods.

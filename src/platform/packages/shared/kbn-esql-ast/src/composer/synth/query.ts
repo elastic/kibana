@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParseOptions } from '../parser';
-import { Parser } from '../parser';
+import type { ParseOptions } from '../../parser';
+import { Parser } from '../../parser';
 import { createTag } from './tag';
 import { SynthNode } from './synth_node';
-import { HEADER_COMMANDS, SOURCE_COMMANDS } from '../parser';
+import { HEADER_COMMANDS, SOURCE_COMMANDS } from '../../parser';
 import type { SynthGenerator } from './types';
-import type { ESQLAstQueryExpression } from '../types';
+import type { ESQLAstQueryExpression } from '../../types';
 
 const doesNotStartWithProcessingCommand = (src: string): boolean => {
   const tokens = Parser.tokens(src, 1);

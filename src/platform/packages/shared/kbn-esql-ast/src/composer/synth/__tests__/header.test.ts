@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '../../pretty_print';
+import { BasicPrettyPrinter } from '../../../pretty_print';
 import { header, hdr } from '../header';
 
 test('can create a SET command with string value', () => {

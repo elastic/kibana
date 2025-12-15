@@ -21,6 +21,7 @@ import {
 import type { ILicense } from '@kbn/licensing-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { StartConversationButton } from './start_conversation_button';
+import { AiInsightErrorBanner } from './ai_insight_error_banner';
 
 export interface AiInsightProps {
   title: string;
@@ -28,10 +29,9 @@ export interface AiInsightProps {
   license: ILicense | undefined | null;
   content?: string;
   onStartConversation?: () => void;
-  onOpen?: () => void;
+  onOpen: () => void;
   isLoading?: boolean;
   error?: string;
-  ['data-test-subj']?: string;
 }
 
 export function AiInsight({
@@ -43,7 +43,6 @@ export function AiInsight({
   onOpen,
   isLoading,
   error,
-  'data-test-subj': dataTestSubj,
 }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -67,7 +66,7 @@ export function AiInsight({
             responsive={false}
             gutterSize="m"
             alignItems="flexStart"
-            data-test-subj={dataTestSubj}
+            data-test-subj="agentBuilderAiInsight"
           >
             <EuiFlexItem grow={false}>
               <EuiIcon
@@ -92,25 +91,23 @@ export function AiInsight({
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={(open) => {
           setIsOpen(open);
-          if (open && onOpen) {
+          if (open && !error && !content && !isLoading) {
             onOpen();
           }
         }}
       >
         <EuiSpacer size="m" />
-        <EuiPanel hasBorder={false} hasShadow={false} color="subdued">
+        <EuiPanel color="subdued">
           {isLoading ? (
             <EuiSkeletonText lines={3} />
           ) : error ? (
-            <EuiText size="s" color="danger">
-              <p>{error}</p>
-            </EuiText>
+            <AiInsightErrorBanner error={error} onRetry={onOpen} />
           ) : (
             <EuiMarkdownFormat textSize="s">{content ?? ''}</EuiMarkdownFormat>
           )}
         </EuiPanel>
 
-        {onStartConversation && Boolean(content && content.trim()) ? (
+        {!isLoading && onStartConversation && Boolean(content && content.trim()) ? (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
