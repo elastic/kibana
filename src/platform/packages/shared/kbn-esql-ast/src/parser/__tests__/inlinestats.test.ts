@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('INLINE STATS', () => {
   describe('correctly formatted', () => {
