@@ -164,8 +164,9 @@ describe('my test suite', () => {
 1. Register a URL-based snapshot repository
 2. Retrieve snapshot metadata (uses `--snapshot-name` if provided; otherwise picks the latest SUCCESS snapshot)
 3. Restore indices to temporary locations (prefixed with `snapshot-loader-temp-`)
-4. Create an ingest pipeline that transforms `@timestamp` fields:
-   - The most recent timestamp in the snapshot becomes "now"
+4. Query restored indices to find the latest `@timestamp` in the data
+5. Create an ingest pipeline that transforms `@timestamp` fields:
+   - The latest timestamp from the data becomes "now"
    - All other timestamps are adjusted by the same offset, preserving relative timing
-5. Reindex through the pipeline to the target data streams
-6. Clean up temporary indices, pipeline, and repository
+6. Reindex through the pipeline to the target data streams
+7. Clean up temporary indices, pipeline, and repository

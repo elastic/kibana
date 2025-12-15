@@ -26,6 +26,41 @@ import { reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
+interface EsqlResponse {
+  columns: Array<{ name: string; type: string }>;
+  values: unknown[][];
+}
+
+export async function getMaxTimestampFromData({
+  esClient,
+  logger,
+  tempIndices,
+}: {
+  esClient: Client;
+  logger: Logger;
+  tempIndices: string[];
+}): Promise<string> {
+  const indexPattern = tempIndices.join(',');
+  const query = `FROM ${indexPattern}
+| STATS max_ts = MAX(\`@timestamp\`)
+| KEEP max_ts`;
+
+  logger.debug(`Querying max timestamp from restored indices: ${indexPattern}`);
+
+  const response = (await esClient.esql.query({ query })) as unknown as EsqlResponse;
+
+  if (!response.values || response.values.length === 0 || response.values[0][0] == null) {
+    throw new Error(
+      `No @timestamp found in restored indices. ` +
+        `Ensure the data contains documents with a valid @timestamp field.`
+    );
+  }
+
+  const maxTimestamp = String(response.values[0][0]);
+  logger.info(`Derived max timestamp from data: ${maxTimestamp}`);
+  return maxTimestamp;
+}
+
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
   const { esClient, logger, snapshotUrl, snapshotName, patterns, concurrency } = config;
 
@@ -50,7 +85,6 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     logger.info('Step 2/4: Retrieving snapshot metadata...');
     const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName, snapshotName });
     result.snapshotName = snapshotInfo.snapshot;
-    result.maxTimestamp = snapshotInfo.endTime;
 
     const indicesToRestore = filterIndicesToRestore(snapshotInfo.indices, patterns);
     logger.info(
@@ -77,6 +111,12 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       renameReplacement: `${TEMP_INDEX_PREFIX}$1`,
     });
     result.restoredIndices = restoredIndices;
+
+    result.maxTimestamp = await getMaxTimestampFromData({
+      esClient,
+      logger,
+      tempIndices: restoredIndices,
+    });
 
     await createTimestampPipeline({
       esClient,

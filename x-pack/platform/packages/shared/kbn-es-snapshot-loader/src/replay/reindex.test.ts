@@ -12,17 +12,21 @@ import {
   reindexAllIndices,
 } from './reindex';
 import { createTimestampPipeline } from './pipeline';
+import { getMaxTimestampFromData } from '.';
 import { loggerMock } from '@kbn/logging-mocks';
 
 const logger = loggerMock.create();
 
-const createMockEsClient = (): Client =>
+const createMockEsClient = (esqlResponse?: { values: unknown[][] }): Client =>
   ({
     ingest: {
       putPipeline: jest.fn().mockResolvedValue({}),
       deletePipeline: jest.fn().mockResolvedValue({}),
     },
     reindex: jest.fn(),
+    esql: {
+      query: jest.fn().mockResolvedValue(esqlResponse ?? { columns: [], values: [] }),
+    },
   } as unknown as Client);
 
 describe('getDestinationInfo', () => {
@@ -85,7 +89,7 @@ describe('createTimestampPipeline', () => {
 });
 
 describe('reindexAllIndices', () => {
-  it('uus reindex API with correct parameters', async () => {
+  it('uses reindex API with correct parameters', async () => {
     const esClient = createMockEsClient();
     (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
       timed_out: false,
@@ -158,5 +162,35 @@ describe('reindexAllIndices', () => {
     });
 
     expect(result).toEqual([]);
+  });
+});
+
+describe('getMaxTimestampFromData', () => {
+  it('returns max timestamp from ES|QL query result', async () => {
+    const maxTimestamp = '2024-01-15T12:00:00.000Z';
+    const esClient = createMockEsClient({ values: [[maxTimestamp]] });
+
+    const result = await getMaxTimestampFromData({
+      esClient,
+      logger,
+      tempIndices: ['snapshot-loader-temp-logs-1', 'snapshot-loader-temp-logs-2'],
+    });
+
+    expect(result).toBe(maxTimestamp);
+    expect(esClient.esql.query).toHaveBeenCalledWith({
+      query: expect.stringContaining('snapshot-loader-temp-logs-1,snapshot-loader-temp-logs-2'),
+    });
+  });
+
+  it('throws error when no values returned', async () => {
+    const esClient = createMockEsClient({ values: [] });
+
+    await expect(
+      getMaxTimestampFromData({
+        esClient,
+        logger,
+        tempIndices: ['snapshot-loader-temp-logs-1'],
+      })
+    ).rejects.toThrow(/No @timestamp found in restored indices/);
   });
 });
