@@ -15,6 +15,7 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Condition, FilterCondition, RangeCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
@@ -123,7 +124,14 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
       parts.push(`< ${lt}`);
     }
 
-    displayText = parts.length > 0 ? parts.join(' to ') : '-';
+    displayText =
+      parts.length > 0
+        ? parts.join(
+            i18n.translate('xpack.streams.conditionDisplay.rangeSeparator', {
+              defaultMessage: ' to ',
+            })
+          )
+        : '-';
   }
 
   return (
