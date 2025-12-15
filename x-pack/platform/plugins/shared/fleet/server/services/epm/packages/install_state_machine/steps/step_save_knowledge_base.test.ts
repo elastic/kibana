@@ -12,9 +12,8 @@ import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/typ
 import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
 import type { InstallContext } from '../_state_machine_package_install';
 
-import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
-
 import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
+import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
 
 // Mock the app context service
 jest.mock('../../../../app_context', () => ({

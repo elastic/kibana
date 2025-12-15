@@ -174,7 +174,6 @@ export const getShareMenuItems =
         if (totalHits >= maxRows) {
           return (
             <EuiCallOut
-              announceOnMount
               size="s"
               color="warning"
               title={i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.title', {
