@@ -86,6 +86,15 @@ export interface AddPrebuiltRulesTableState {
    * Current pagination state
    */
   pagination: PaginationOptions;
+  /**
+   * Currently selected table sorting
+   */
+  sortingOptions: ReviewPrebuiltRuleInstallationSort;
+
+  /**
+   * Currently selected table filter
+   */
+  filterOptions: AddPrebuiltRulesTableFilterOptions;
 }
 
 export interface AddPrebuiltRulesTableFilterOptions {
@@ -101,6 +110,7 @@ export interface AddPrebuiltRulesTableActions {
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleResponse[]) => void;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
+  setSortingOptions: Dispatch<SetStateAction<ReviewPrebuiltRuleInstallationSort>>;
   openRulePreview: (ruleId: RuleSignatureId) => void;
 }
 

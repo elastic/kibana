@@ -8,6 +8,9 @@
 import { z } from '@kbn/zod';
 import { SortOrder } from '../../model';
 
+export type ReviewPrebuiltRuleInstallationSortField = z.infer<
+  typeof ReviewPrebuiltRuleInstallationSortField
+>;
 export const ReviewPrebuiltRuleInstallationSortField = z.enum(['name', 'risk_score', 'severity']);
 
 export type ReviewPrebuiltRuleInstallationSort = z.infer<typeof ReviewPrebuiltRuleInstallationSort>;
