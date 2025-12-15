@@ -7,9 +7,9 @@
 
 import { useCallback } from 'react';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
-import { AgentBuilderEventTypes } from '../../common/lib/telemetry';
 
 export interface UseAgentBuilderAttachmentParams {
   /**
@@ -48,7 +48,7 @@ export const useAgentBuilderAttachment = ({
     try {
       if (!onechat?.openConversationFlyout) {
         // Track error if onechat service is not available
-        telemetry?.reportEvent(AgentBuilderEventTypes.Error, {
+        telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
           errorType: 'invocation_error',
           errorMessage: 'onechat service or openConversationFlyout not available',
           context: 'invocation',
@@ -77,7 +77,7 @@ export const useAgentBuilderAttachment = ({
       });
     } catch (error) {
       // Track error
-      telemetry?.reportEvent(AgentBuilderEventTypes.Error, {
+      telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
         errorType: 'invocation_error',
         errorMessage: error instanceof Error ? error.message : String(error),
         context: 'invocation',

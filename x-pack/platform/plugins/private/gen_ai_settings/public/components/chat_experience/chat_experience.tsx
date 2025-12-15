@@ -13,16 +13,7 @@ import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_ag
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
-
-// Event type constants - these match the event types registered in Security Solution
-const AGENT_BUILDER_EVENT_TYPES = {
-  OptInStepReached: 'Agent Builder Opt-In Step Reached',
-  OptInConfirmationShown: 'Agent Builder Opt-In Confirmation Shown',
-  OptInConfirmed: 'Agent Builder Opt-In Confirmed',
-  OptInCancelled: 'Agent Builder Opt-In Cancelled',
-  OptOut: 'Agent Builder Opt-Out',
-  Error: 'Agent Builder Error',
-} as const;
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 
 const TELEMETRY_SOURCE = 'stack_management' as const;
 
@@ -95,7 +86,7 @@ export const ChatExperience: React.FC = () => {
 
         // Handle modal display logic
         if (newValue === AIChatExperience.Agent) {
-          setConfirmModalOpen(true);
+        setConfirmModalOpen(true);
         }
       }
       handleFieldChange(id, change);

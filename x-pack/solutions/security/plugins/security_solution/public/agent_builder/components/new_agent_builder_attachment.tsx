@@ -10,16 +10,22 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui
 import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { onechatIconType } from '@kbn/onechat-plugin/public';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import * as i18n from './translations';
 import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
-import { AgentBuilderEventTypes } from '../../common/lib/telemetry';
 
 export interface NewAgentBuilderAttachmentTelemetry {
   /**
    * Pathway where "Add to Chat" was clicked
    */
-  pathway: 'alerts_flyout' | 'entity_flyout' | 'rules_table' | 'rule_creation' | 'attack_discovery' | 'other';
+  pathway:
+    | 'alerts_flyout'
+    | 'entity_flyout'
+    | 'rules_table'
+    | 'rule_creation'
+    | 'attack_discovery'
+    | 'other';
   /**
    * Attachment type
    */
@@ -71,7 +77,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   const handleClick = useCallback(() => {
     // Track "Add to Chat" clicked
     if (telemetryData) {
-      telemetry?.reportEvent(AgentBuilderEventTypes.AddToChatClicked, {
+      telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
         pathway: telemetryData.pathway,
         attachmentType: telemetryData.attachmentType,
         attachmentCount: telemetryData.attachmentCount,

@@ -284,9 +284,9 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     return (
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
-            <AgentBuilderTourStep
-              isDisabled={isAgentUpgradeDisabled}
-              storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
+          <AgentBuilderTourStep
+            isDisabled={isAgentUpgradeDisabled}
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
               onContinue={() => {
                 // Track opt-in step reached from tour
                 analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
@@ -295,7 +295,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
                 });
                 handleOpenAIAgentModal();
               }}
-            >
+          >
             <EuiPopover
               button={
                 <EuiButtonIcon

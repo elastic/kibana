@@ -5,11 +5,123 @@
  * 2.0.
  */
 
-import type { AgentBuilderTelemetryEvent } from './types';
-import { AgentBuilderEventTypes } from './types';
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { RootSchema } from '@kbn/core/public';
 
-export const optInStepReachedEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.OptInStepReached,
+/**
+ * Event type constants for Agent Builder telemetry events.
+ */
+export const AGENT_BUILDER_EVENT_TYPES = {
+  OptInStepReached: 'Agent Builder Opt-In Step Reached',
+  OptInConfirmationShown: 'Agent Builder Opt-In Confirmation Shown',
+  OptInConfirmed: 'Agent Builder Opt-In Confirmed',
+  OptInCancelled: 'Agent Builder Opt-In Cancelled',
+  OptOut: 'Agent Builder Opt-Out',
+  AddToChatClicked: 'Add to Chat Clicked',
+  MessageSent: 'Agent Builder Message Sent',
+  MessageReceived: 'Agent Builder Message Received',
+  AgentBuilderError: 'Agent Builder Error',
+} as const;
+
+export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
+export type OptInStep = 'initial' | 'confirmation_modal' | 'final';
+export type AttachmentType = 'alert' | 'entity' | 'rule' | 'attack_discovery' | 'other';
+export type Pathway =
+  | 'alerts_flyout'
+  | 'entity_flyout'
+  | 'rules_table'
+  | 'rule_creation'
+  | 'attack_discovery'
+  | 'other';
+export type ErrorContext = 'opt_in' | 'message_send' | 'tool_execution' | 'invocation' | 'other';
+
+export interface ReportOptInStepReachedParams {
+  step: OptInStep;
+  source: OptInSource;
+}
+
+export interface ReportOptInConfirmationShownParams {
+  source: OptInSource;
+}
+
+export interface ReportOptInConfirmedParams {
+  source: OptInSource;
+}
+
+export interface ReportOptInCancelledParams {
+  source: OptInSource;
+  step: OptInStep;
+}
+
+export interface ReportOptOutParams {
+  source: 'security_settings_menu' | 'stack_management';
+}
+
+export interface ReportAddToChatClickedParams {
+  pathway: Pathway;
+  attachmentType?: AttachmentType;
+  attachmentCount?: number;
+}
+
+export interface ReportMessageSentParams {
+  conversationId: string;
+  messageLength?: number;
+  hasAttachments: boolean;
+  attachmentCount?: number;
+  attachmentTypes?: string[];
+  agentId?: string;
+}
+
+export interface ReportMessageReceivedParams {
+  conversationId: string;
+  responseLength?: number;
+  roundNumber?: number;
+  agentId?: string;
+  toolsUsed?: string[];
+  toolCount?: number;
+  toolsInvoked?: string[];
+}
+
+export interface ReportAgentBuilderErrorParams {
+  errorType: string;
+  errorMessage?: string;
+  context?: ErrorContext;
+  conversationId?: string;
+  agentId?: string;
+  pathway?: string;
+}
+
+export interface AgentBuilderTelemetryEventsMap {
+  [AGENT_BUILDER_EVENT_TYPES.OptInStepReached]: ReportOptInStepReachedParams;
+  [AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown]: ReportOptInConfirmationShownParams;
+  [AGENT_BUILDER_EVENT_TYPES.OptInConfirmed]: ReportOptInConfirmedParams;
+  [AGENT_BUILDER_EVENT_TYPES.OptInCancelled]: ReportOptInCancelledParams;
+  [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
+  [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
+  [AGENT_BUILDER_EVENT_TYPES.MessageSent]: ReportMessageSentParams;
+  [AGENT_BUILDER_EVENT_TYPES.MessageReceived]: ReportMessageReceivedParams;
+  [AGENT_BUILDER_EVENT_TYPES.AgentBuilderError]: ReportAgentBuilderErrorParams;
+}
+
+export interface AgentBuilderTelemetryEvent {
+  eventType: (typeof AGENT_BUILDER_EVENT_TYPES)[keyof typeof AGENT_BUILDER_EVENT_TYPES];
+  schema: RootSchema<AgentBuilderTelemetryEventsMap[keyof AgentBuilderTelemetryEventsMap]>;
+}
+
+// Type union of all event type strings for use in union types
+export type AgentBuilderEventTypes =
+  | typeof AGENT_BUILDER_EVENT_TYPES.OptInStepReached
+  | typeof AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown
+  | typeof AGENT_BUILDER_EVENT_TYPES.OptInConfirmed
+  | typeof AGENT_BUILDER_EVENT_TYPES.OptInCancelled
+  | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
+  | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
+  | typeof AGENT_BUILDER_EVENT_TYPES.MessageSent
+  | typeof AGENT_BUILDER_EVENT_TYPES.MessageReceived
+  | typeof AGENT_BUILDER_EVENT_TYPES.AgentBuilderError;
+
+const optInStepReachedEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.OptInStepReached,
   schema: {
     step: {
       type: 'keyword',
@@ -29,8 +141,8 @@ export const optInStepReachedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const optInConfirmationShownEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.OptInConfirmationShown,
+const optInConfirmationShownEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown,
   schema: {
     source: {
       type: 'keyword',
@@ -43,8 +155,8 @@ export const optInConfirmationShownEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const optInConfirmedEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.OptInConfirmed,
+const optInConfirmedEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.OptInConfirmed,
   schema: {
     source: {
       type: 'keyword',
@@ -57,8 +169,8 @@ export const optInConfirmedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const optInCancelledEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.OptInCancelled,
+const optInCancelledEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.OptInCancelled,
   schema: {
     source: {
       type: 'keyword',
@@ -78,8 +190,8 @@ export const optInCancelledEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const optOutEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.OptOut,
+const optOutEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.OptOut,
   schema: {
     source: {
       type: 'keyword',
@@ -91,8 +203,8 @@ export const optOutEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.AddToChatClicked,
+const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.AddToChatClicked,
   schema: {
     pathway: {
       type: 'keyword',
@@ -119,8 +231,8 @@ export const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const messageSentEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.MessageSent,
+const messageSentEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.MessageSent,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -170,8 +282,8 @@ export const messageSentEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const messageReceivedEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.MessageReceived,
+const messageReceivedEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.MessageReceived,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -232,8 +344,8 @@ export const messageReceivedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const errorEvent: AgentBuilderTelemetryEvent = {
-  eventType: AgentBuilderEventTypes.Error,
+const agentBuilderErrorEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.AgentBuilderError,
   schema: {
     errorType: {
       type: 'keyword',
@@ -282,7 +394,7 @@ export const errorEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const agentBuilderTelemetryEvents = [
+export const agentBuilderTelemetryEvents: AgentBuilderTelemetryEvent[] = [
   optInStepReachedEvent,
   optInConfirmationShownEvent,
   optInConfirmedEvent,
@@ -291,5 +403,14 @@ export const agentBuilderTelemetryEvents = [
   addToChatClickedEvent,
   messageSentEvent,
   messageReceivedEvent,
-  errorEvent,
+  agentBuilderErrorEvent,
 ];
+
+/**
+ * Registers Agent Builder telemetry events with the analytics service.
+ */
+export const registerAgentBuilderTelemetryEvents = (analytics: AnalyticsServiceSetup) => {
+  agentBuilderTelemetryEvents.forEach((eventConfig) => {
+    analytics.registerEventType(eventConfig);
+  });
+};
