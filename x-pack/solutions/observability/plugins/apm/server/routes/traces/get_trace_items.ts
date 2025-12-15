@@ -97,6 +97,7 @@ export async function getApmTraceError(params: {
   const response = await getApmTraceErrorQuery(params);
 
   return compactMap(response.hits.hits, (hit): Error | undefined => {
+    const errorSource = 'error' in hit._source ? hit._source : undefined;
     const event = hit.fields
       ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
       : undefined;
@@ -118,11 +119,14 @@ export async function getApmTraceError(params: {
       timestamp: unflattened.timestamp,
       service: { name: unflattened.service.name },
       error: {
-        exception: error?.exception,
+        exception:
+          (errorSource?.error.exception?.length ?? 0) > 0
+            ? errorSource?.error?.exception?.[0]
+            : error.exception,
         grouping_key: error?.grouping_key,
         culprit: error?.culprit,
         id: error?.id,
-        log: error?.log,
+        log: errorSource?.error.log,
       },
     };
   });
