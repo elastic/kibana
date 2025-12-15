@@ -454,7 +454,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
     ({ rowData }) =>
       selectedColumns
         .map((selectedColumn) => {
-          // only allow grouping columns to be rendered in the meta part of the row header
+          // only allow aggregation columns to be rendered in the meta part of the row header
           if (namedColumnsFromQuery.indexOf(selectedColumn) < 0) {
             return null;
           }

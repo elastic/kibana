@@ -139,7 +139,7 @@ export function useScopedESQLQueryFetchClient({
     // handle cleanup for when the component unmounts
     () => () => {
       // cancel any pending requests
-      abortController.current?.abort();
+      abortController.current?.abort('unmount cleanup');
     },
     []
   );
@@ -207,7 +207,17 @@ export function useScopedESQLQueryFetchClient({
 
       abortController.current = new AbortController();
 
-      const { records } = await scopedESQLQueryFetch(newQuery, abortController.current!.signal);
+      const { records } = await scopedESQLQueryFetch(
+        newQuery,
+        abortController.current!.signal
+      ).catch((error) => {
+        // handle abort errors gracefully
+        if (error.message.includes('aborted')) {
+          return { records: [] };
+        }
+        // rethrow other errors
+        throw error;
+      });
 
       return records;
     },

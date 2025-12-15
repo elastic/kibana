@@ -557,10 +557,10 @@ function handleStatsByCategorizeLeafOperation(
   editorQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd, idx, arr) => {
     if (idx === arr.length - 1 && (cmd.name === 'stats' || cmd.name === 'sample')) {
       // however, when the last command is a stats command, we don't want to include it in the cascade operation query
-      // since where commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a stats command
+      // since WHERE commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a STATS command
       // and moreover this STATS command doesn't provide any useful context even if it defines new runtime fields
       // as we would have already selected the definition of the field if our operation stats command references it.
-      // Similarly, when the last command is a sample command, we don't want to include it in the cascade operation query since we want all matching documents to be considered.
+      // Similarly, when the last command is a SAMPLE command, we don't want to include it in the cascade operation query since we want all matching documents to be considered.
       return;
     }
 

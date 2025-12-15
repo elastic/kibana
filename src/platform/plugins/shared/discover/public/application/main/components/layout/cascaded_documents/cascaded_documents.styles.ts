@@ -16,7 +16,7 @@ export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape 
     flexDirection: 'column',
     height: '100%',
     width: '100%',
-    padding: euiTheme.size.s,
+    padding: `0 ${euiTheme.size.s} ${euiTheme.size.s}`,
 
     // EUI Data Grid uses fixed positioning to render
     // full screen mode, and since data cascade rows have a transform applied on them

@@ -389,7 +389,7 @@ describe('cascaded documents helpers utils', () => {
           const nodePath = ['tags.keyword'];
           const nodePathMap = { 'tags.keyword': 'some random pattern' };
 
-          const mockImpl = (fieldName) => {
+          const mockImpl: jest.Mocked<typeof dataViewMock.fields.getByName> = (fieldName) => {
             return {
               esTypes: ['text', 'keyword'],
               aggregatable: fieldName === 'tags.keyword',

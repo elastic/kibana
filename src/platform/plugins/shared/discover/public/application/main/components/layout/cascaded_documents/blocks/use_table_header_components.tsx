@@ -15,7 +15,7 @@ import {
   EuiPopover,
   EuiSelectable,
   EuiFilterGroup,
-  EuiFilterButton,
+  EuiDataGridToolbarControl,
 } from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -94,21 +94,20 @@ function CascadeGroupingSelectionPopover({
       panelPaddingSize="none"
       button={
         <EuiFilterGroup compressed>
-          <EuiFilterButton
+          <EuiDataGridToolbarControl
+            size="s"
             iconSide="left"
             iconType="inspect"
             color="text"
-            badgeColor="subdued"
             onClick={toggleSelectionPopover}
-            hasActiveFilters={true}
-            numFilters={currentSelectedColumns.length}
+            badgeContent={currentSelectedColumns.length}
             data-test-subj="discoverEnableCascadeLayoutSwitch"
           >
             <FormattedMessage
               id="discover.cascade.header.layoutSwitchLabel"
               defaultMessage="Group By"
             />
-          </EuiFilterButton>
+          </EuiDataGridToolbarControl>
         </EuiFilterGroup>
       }
     >
