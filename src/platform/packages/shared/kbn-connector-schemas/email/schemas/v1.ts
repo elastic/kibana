@@ -13,8 +13,8 @@ const PORT_MAX = 256 * 256 - 1;
 export const portSchema = () => z.coerce.number().min(1).max(PORT_MAX);
 
 const ConfigSchemaProps = {
-  service: z.string().default('other'),
-  host: z.string().nullable().default(null),
+  service: z.string().max(512).default('other'),
+  host: z.string().max(512).nullable().default(null),
   port: portSchema().nullable().default(null),
   secure: z.boolean().nullable().default(null),
   from: z.string(),
