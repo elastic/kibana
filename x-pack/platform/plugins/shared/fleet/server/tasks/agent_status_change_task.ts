@@ -195,15 +195,8 @@ export class AgentStatusChangeTask {
       }
 
       const updateErrors = {};
-      const agentsToUpdate = [];
-
-      for (const agent of agentPageResults) {
-        throwIfAborted(abortController);
-
-        if (agent.status !== agent.last_known_status) {
-          agentsToUpdate.push(agent);
-        }
-      }
+      const agentsToUpdate = agentPageResults;
+      throwIfAborted(abortController);
 
       if (agentsToUpdate.length === 0) {
         continue;

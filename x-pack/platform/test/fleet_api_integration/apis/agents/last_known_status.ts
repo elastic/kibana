@@ -38,12 +38,12 @@ export default function (providerContext: FtrProviderContext) {
 
       const SCENARIOS = [
         {
-          name: 'should return hasChanged:true for an offline agent without last_known_status',
-          agentAttrs: {},
+          name: 'should return hasChanged:true for an online agent without last_known_status',
+          agentAttrs: {}, // Create an online agent
           expectedHasChanged: true,
         },
         {
-          name: 'should return hasChanged:true for an offline agent with last_known_status:offline',
+          name: 'should return hasChanged:true for an online agent with last_known_status:offline',
           agentAttrs: { last_known_status: 'offline' },
           expectedHasChanged: true,
         },
