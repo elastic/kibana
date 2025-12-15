@@ -69,9 +69,4 @@ export {
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from './dashboard_drilldown_options/types';
 
-/**
- * A lazily-loaded ExpressionInput component.
- */
-export const LazyExpressionInput = React.lazy(() => import('./expression_input'));
-
 export type * from './types';

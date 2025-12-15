@@ -8,7 +8,6 @@
  */
 
 import type { PresentationUtilPluginStart } from './types';
-import { registerExpressionsLanguage } from '.';
 import { setStubKibanaServices } from './services/mocks';
 
 const createStartContract = (): PresentationUtilPluginStart => {
@@ -20,7 +19,6 @@ const createStartContract = (): PresentationUtilPluginStart => {
       reset: jest.fn(),
       setProjectStatus: jest.fn(),
     },
-    registerExpressionsLanguage,
   };
   return startContract;
 };

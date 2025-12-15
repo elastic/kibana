@@ -15,7 +15,6 @@ import type {
   PresentationUtilPluginStartDeps,
 } from './types';
 
-import { registerExpressionsLanguage } from '.';
 import { setKibanaServices } from './services/kibana_services';
 import { getPresentationLabsService } from './services/presentation_labs_service';
 
@@ -43,7 +42,6 @@ export class PresentationUtilPlugin
 
     return {
       labsService: getPresentationLabsService(),
-      registerExpressionsLanguage,
     };
   }
 
