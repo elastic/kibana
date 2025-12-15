@@ -16,8 +16,6 @@ import { explainLogMessageButtonLabel, explainLogMessageDescription } from './tr
 // Illegal import statement: "@kbn/logs-shared-plugin" (platform) is importing "@kbn/observability-agent-builder-plugin" (observability/private).
 const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 const OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID = 'observability.log';
-const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
 export interface LogAIInsightDocument {
   fields: LogEntryField[];
@@ -30,7 +28,7 @@ export interface LogAIInsightProps {
 
 export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProps) {
   const {
-    services: { http, featureFlags },
+    services: { http },
   } = useKibanaContextForPlugin();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -92,14 +90,6 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
     ];
   }, [summary, context, index, id]);
 
-  const isObservabilityAgentEnabled = featureFlags.getBooleanValue(
-    OBSERVABILITY_AGENT_FEATURE_FLAG,
-    OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
-  );
-
-  if (!onechat || !isObservabilityAgentEnabled) {
-    return null;
-  }
   return (
     <>
       <AiInsight
