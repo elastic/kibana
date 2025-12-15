@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, first, map, skip, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, tap, type Subject } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-containers';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
@@ -24,7 +24,6 @@ import {
   getDashboardBackupService,
   type DashboardBackupState,
 } from '../services/dashboard_backup_service';
-import type { initializeFiltersManager } from './filters_manager';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
@@ -34,7 +33,6 @@ const DEBOUNCE_TIME = 100;
 
 export function initializeUnsavedChangesManager({
   layoutManager,
-  filtersManager,
   savedObjectId$,
   lastSavedState,
   settingsManager,
@@ -42,16 +40,17 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   unifiedSearchManager,
   projectRoutingManager,
+  forcePublishOnReset$,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   layoutManager: ReturnType<typeof initializeLayoutManager>;
-  filtersManager: ReturnType<typeof initializeFiltersManager>;
   viewMode$: PublishingSubject<ViewMode>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
+  forcePublishOnReset$: Subject<void>;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -147,11 +146,9 @@ export function initializeUnsavedChangesManager({
         projectRoutingManager?.internalApi.reset(savedState);
         settingsManager.internalApi.reset(savedState);
 
-        // when auto-apply is `false`, wait for children to update their filters, then publish
+        // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
         if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-          filtersManager.api.unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
-            filtersManager.api.publishFilters();
-          });
+          forcePublishOnReset$.next();
         }
       },
       hasUnsavedChanges$,

@@ -7,18 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type { AppliesTimeslice } from '@kbn/presentation-publishing';
 import { apiAppliesTimeslice, type PublishingSubject } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatestWith, filter } from 'rxjs';
-import type { TimeSlice } from '@kbn/controls-schemas';
+import deepEqual from 'fast-deep-equal';
+import {
+  BehaviorSubject,
+  combineLatestWith,
+  filter,
+  first,
+  skip,
+  switchMap,
+  type Subject,
+} from 'rxjs';
 import type { initializeSettingsManager } from './settings_manager';
 
 export const initializeTimesliceManager = (
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>,
-  settingsManager: ReturnType<typeof initializeSettingsManager>
+  settingsManager: ReturnType<typeof initializeSettingsManager>,
+  forcePublish$: Subject<void>
 ) => {
   const unpublishedTimeslice$ = new BehaviorSubject<TimeSlice | undefined>(undefined);
 
@@ -44,16 +53,38 @@ export const initializeTimesliceManager = (
   ).subscribe((newTimeslice) => {
     // Guard against children that publish an empty timeslice
     const [from, to] = newTimeslice ?? [];
-    if (typeof from !== 'number' || typeof to !== 'number') unpublishedTimeslice$.next(undefined);
-    else unpublishedTimeslice$.next(newTimeslice);
+    if (typeof from !== 'number' || typeof to !== 'number') {
+      unpublishedTimeslice$.next(undefined);
+    } else {
+      unpublishedTimeslice$.next(newTimeslice);
+    }
   });
 
+  /** when auto-apply is `true`, push timeslice from `unpublishedTimeslice$` directly to published */
   const autoPublishTimesliceSubscription = unpublishedTimeslice$
     .pipe(
       combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
-      filter(
-        ([unpublishedTimeslice, autoApplyFilters]) => !unpublishedTimeslice || autoApplyFilters
-      )
+      filter(([_, autoApplyFilters]) => autoApplyFilters)
+    )
+    .subscribe(() => {
+      publishTimeslice();
+    });
+
+  /** when auto-apply is `false`, publish the first time slice once the child is done loading */
+  if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
+    unpublishedTimeslice$.pipe(skip(1), first()).subscribe(() => {
+      publishTimeslice();
+    });
+  }
+
+  /** when auto-apply is `false` and the dashboard is reset, wait for new time slice to be updated and publish it */
+  const forcePublishSubscription = forcePublish$
+    .pipe(
+      switchMap(async () => {
+        await new Promise((resolve) => {
+          unpublishedTimeslice$.pipe(skip(1), first()).subscribe(resolve);
+        });
+      })
     )
     .subscribe(() => {
       publishTimeslice();
@@ -62,6 +93,7 @@ export const initializeTimesliceManager = (
   return {
     api: { timeslice$, publishedTimeslice$: timeslice$, unpublishedTimeslice$, publishTimeslice },
     cleanup: () => {
+      forcePublishSubscription.unsubscribe();
       childrenTimesliceSubscription.unsubscribe();
       autoPublishTimesliceSubscription.unsubscribe();
     },

@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import { getReferencesForPanelId } from '../../common';
 
@@ -100,11 +100,18 @@ export function getDashboardApi({
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
   const settingsManager = initializeSettingsManager(initialState);
 
+  const forcePublishOnReset$ = new Subject<void>();
+
   const esqlVariablesManager = initializeESQLVariablesManager(
     layoutManager.api.children$,
-    settingsManager
+    settingsManager,
+    forcePublishOnReset$
   );
-  const timesliceManager = initializeTimesliceManager(layoutManager.api.children$, settingsManager);
+  const timesliceManager = initializeTimesliceManager(
+    layoutManager.api.children$,
+    settingsManager,
+    forcePublishOnReset$
+  );
 
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
@@ -116,7 +123,8 @@ export function getDashboardApi({
   const filtersManager = initializeFiltersManager(
     unifiedSearchManager,
     layoutManager,
-    settingsManager
+    settingsManager,
+    forcePublishOnReset$
   );
   const projectRoutingManager = initializeProjectRoutingManager(
     initialState,
@@ -131,8 +139,8 @@ export function getDashboardApi({
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
-    filtersManager,
     projectRoutingManager,
+    forcePublishOnReset$,
   });
 
   function getState() {
