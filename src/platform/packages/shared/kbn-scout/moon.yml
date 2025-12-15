@@ -37,7 +37,6 @@ dependsOn:
   - '@kbn/projects-solutions-groups'
   - '@kbn/zod'
   - '@kbn/core-http-common'
-  - '@kbn/streams-schema'
   - '@kbn/axe-config'
 tags:
   - test-helper
