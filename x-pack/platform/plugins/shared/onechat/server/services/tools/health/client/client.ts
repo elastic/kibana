@@ -186,8 +186,8 @@ class ToolHealthClientImpl implements ToolHealthClient {
       });
 
       return response.hits.hits
-        .filter((hit): hit is ToolHealthDocument => !!hit._source)
-        .map((hit) => fromEs(hit));
+        .filter((hit) => !!hit._source)
+        .map((hit) => fromEs(hit as ToolHealthDocument));
     } catch (error) {
       this.logger.error(`Failed to list health states for space ${this.space}: ${error}`);
       throw createInternalError(`Failed to list health states for space ${this.space}`, {
