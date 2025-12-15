@@ -122,7 +122,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.logger.debug('about to refresh milestones in the saved objects store');
     try {
       const saved = await this.getMilestoneRepository().getCurrent();
-      this.logger.debug(`Current milestone from SO: ${JSON.stringify(saved)}`);
+      this.logger.debug(() => `Current milestone from SO: ${JSON.stringify(saved)}`);
 
       let currentMilestoneId: Milestone | undefined;
       // potential optimization: stop checking once we reach the final milestone, we could check SO in start function
