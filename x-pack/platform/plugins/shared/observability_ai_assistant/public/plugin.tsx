@@ -62,7 +62,10 @@ export class ObservabilityAIAssistantPlugin
     coreStart: CoreStart,
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPublicStart {
-    const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(
+      AI_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
 
     const service = (this.service = createService({
       analytics: coreStart.analytics,
