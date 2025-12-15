@@ -7,7 +7,6 @@
 
 import type {
   ApiServicesFixture,
-  ApiServicesTypes,
   ScoutPage,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
@@ -19,7 +18,19 @@ import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/
 import type { StreamsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
-interface CustomApiServicesTypes extends ApiServicesTypes {
+// Define the base type locally since ApiServicesTypes export may not be available
+// This matches the structure in @kbn/scout
+interface BaseApiServicesTypes {
+  streams?: {
+    condition?: unknown;
+    streamlangDSL?: unknown;
+    routingStatus?: string;
+    streamDefinition?: unknown;
+    ingestUpsertRequest?: unknown;
+  };
+}
+
+interface CustomApiServicesTypes extends BaseApiServicesTypes {
   streams: {
     condition: Condition;
     streamlangDSL: StreamlangDSL;
@@ -29,6 +40,9 @@ interface CustomApiServicesTypes extends ApiServicesTypes {
   };
 }
 
+// Export the typed fixture type for use in tests
+export type TypedApiServicesFixture = ApiServicesFixture<CustomApiServicesTypes>;
+
 export interface StreamsTestFixtures extends ScoutTestFixtures {
   pageObjects: StreamsPageObjects;
 }
@@ -37,8 +51,20 @@ export const test = baseTest
   .extend({
     // Extend apiServices to provide typed StreamsApiService
     apiServices: async ({ apiServices }, use) => {
-      // The runtime object is the same, we just provide explicit types
-      const typedApiServices = apiServices as unknown as ApiServicesFixture<CustomApiServicesTypes>;
+      // Create a typed wrapper that provides properly typed methods
+      const typedApiServices: ApiServicesFixture<CustomApiServicesTypes> = {
+        ...apiServices,
+        streams: {
+          ...apiServices.streams,
+          // Override getStreamDefinition to return the correct type
+          getStreamDefinition: async (streamName: string) => {
+            const result = await apiServices.streams.getStreamDefinition(streamName);
+            return result as IngestStream.all.GetResponse;
+          },
+        },
+      } as ApiServicesFixture<CustomApiServicesTypes>;
+
+      // Use 'as any' to bypass Playwright's strict type checking for generic fixture types
       await (use as any)(typedApiServices);
     },
   })
