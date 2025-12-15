@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AiInsight } from '@kbn/observability-agent-builder';
+import { AiInsight } from '@kbn/ai-insights';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
 // Constants in the observability_agent_builder plugin:
@@ -97,7 +97,6 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
       error={error}
       onOpen={onOpen}
       onStartConversation={onStartConversation}
-      data-test-subj="obsAlertAiInsight"
     />
   );
 }
