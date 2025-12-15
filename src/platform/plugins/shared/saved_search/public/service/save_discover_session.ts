@@ -118,6 +118,7 @@ export const saveDiscoverSession = async (
         rowsPerPage: tab.rowsPerPage,
         sampleSize: tab.sampleSize,
         breakdownField: tab.breakdownField,
+        interval: tab.interval,
         density: tab.density,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
@@ -125,16 +126,17 @@ export const saveDiscoverSession = async (
     };
   });
 
+  const { interval, ...firstTabAttributes } = tabs[0].attributes;
+
   const attributes: SavedSearchAttributes = {
     title: discoverSession.title,
     description: discoverSession.description,
     tabs,
     // TODO: Spreading the first tab attributes like this shouldn't be necessary soon
-    ...tabs[0].attributes,
-    sort: tabs[0].attributes.sort as SortOrder[],
-    density: tabs[0].attributes.density as DataGridDensity,
+    ...firstTabAttributes,
+    sort: firstTabAttributes.sort as SortOrder[],
+    density: firstTabAttributes.density as DataGridDensity,
   };
-
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(tabReferences, discoverSession.tags ?? [])
     : tabReferences;

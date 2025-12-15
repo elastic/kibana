@@ -72,6 +72,7 @@ describe('toSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": undefined,
+        "interval": undefined,
         "isTextBasedQuery": false,
         "managed": false,
         "references": Array [
@@ -205,6 +206,7 @@ describe('toSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": undefined,
+        "interval": undefined,
         "isTextBasedQuery": false,
         "managed": false,
         "references": Array [

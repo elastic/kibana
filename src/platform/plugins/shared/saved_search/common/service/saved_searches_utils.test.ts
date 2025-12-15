@@ -32,6 +32,7 @@ describe('saved_searches_utils', () => {
             rowsPerPage: 250,
             sampleSize: 1000,
             breakdownField: 'extension.keyword',
+            interval: 'm',
           },
         },
       ];
@@ -48,6 +49,7 @@ describe('saved_searches_utils', () => {
         rowsPerPage: 250,
         sampleSize: 1000,
         breakdownField: 'extension.keyword',
+        interval: 'm',
         controlGroupJson: undefined,
         tabs,
       };
@@ -77,6 +79,7 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
+          "interval": "m",
           "isTextBasedQuery": false,
           "managed": false,
           "references": Array [],
@@ -120,6 +123,7 @@ describe('saved_searches_utils', () => {
                 ],
                 "grid": Object {},
                 "hideChart": true,
+                "interval": "m",
                 "isTextBasedQuery": false,
                 "kibanaSavedObjectMeta": Object {
                   "searchSourceJSON": "{}",

@@ -52,6 +52,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'refreshInterval',
         'rowsPerPage',
         'breakdownField',
+        'interval',
         'sampleSize',
         'density',
         'visContext',

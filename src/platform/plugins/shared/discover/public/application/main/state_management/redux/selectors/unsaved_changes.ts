@@ -210,6 +210,7 @@ const TAB_COMPARATORS: TabComparators = {
   rowsPerPage: fieldComparator('rowsPerPage', 0),
   sampleSize: fieldComparator('sampleSize', 0),
   breakdownField: fieldComparator('breakdownField', ''),
+  interval: fieldComparator('interval', 'auto'),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,
   controlGroupJson: fieldComparator('controlGroupJson', '{}'),

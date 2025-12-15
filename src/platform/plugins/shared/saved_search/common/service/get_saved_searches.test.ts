@@ -91,6 +91,7 @@ describe('getSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
+        "interval": undefined,
         "isTextBasedQuery": undefined,
         "managed": false,
         "references": Array [
@@ -242,6 +243,7 @@ describe('getSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": true,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
+        "interval": undefined,
         "isTextBasedQuery": true,
         "managed": false,
         "references": Array [
