@@ -9,13 +9,12 @@
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { coreServices, embeddableService } from '../../../services/kibana_services';
 import { navigateToVisualization } from './navigation';
-import type { DashboardVisualizationUserContent } from '../../types';
+import type { DashboardListingUserContent, DashboardVisualizationUserContent } from '../../types';
 
 export async function editDashboardListingItem(
-  item: UserContentCommonSchema,
+  item: DashboardListingUserContent,
   goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void
 ): Promise<void> {
   const { id, type } = item;

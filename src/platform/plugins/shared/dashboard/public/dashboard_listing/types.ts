@@ -14,12 +14,14 @@ import type { VisualizationListItem, VisualizationStage } from '@kbn/visualizati
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardListingViewRegistry } from '../plugin';
 
-export type TabId = (typeof TAB_IDS)[keyof typeof TAB_IDS];
 export type { VisualizationListItem, VisualizationStage };
+
 export const TAB_IDS = {
   DASHBOARDS: 'dashboards',
   VISUALIZATIONS: 'visualizations',
 } as const;
+
+export type TabId = (typeof TAB_IDS)[keyof typeof TAB_IDS];
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
   initialFilter?: string;
@@ -64,3 +66,8 @@ export interface DashboardVisualizationUserContent extends UserContentCommonSche
     readOnly?: boolean;
   };
 }
+
+// Union type for all content types that can appear in the dashboard listing
+export type DashboardListingUserContent =
+  | DashboardSavedObjectUserContent
+  | DashboardVisualizationUserContent;

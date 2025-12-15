@@ -16,7 +16,6 @@ import {
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
   coreServices,
   savedObjectsTaggingService,
@@ -24,7 +23,7 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps } from './types';
+import type { DashboardListingProps, DashboardListingUserContent } from './types';
 
 export const DashboardListingTable = ({
   disableCreateDashboardButton,
@@ -70,7 +69,7 @@ export const DashboardListingTable = ({
             unsavedDashboardIds={unsavedDashboardIds}
             refreshUnsavedDashboards={refreshUnsavedDashboards}
           />
-          <TableListViewTable<UserContentCommonSchema>
+          <TableListViewTable<DashboardListingUserContent>
             tableCaption={tableCaption}
             {...tableListViewTable}
             onFetchSuccess={() => {}}

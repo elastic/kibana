@@ -13,7 +13,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
@@ -23,7 +22,6 @@ import {
   dashboardClient,
   findService,
 } from '../../dashboard_client';
-import { getAccessControlClient } from '../../services/access_control_service';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import {
@@ -42,14 +40,10 @@ import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import {
   TAB_IDS,
   type TabId,
+  type DashboardListingUserContent,
   type DashboardVisualizationUserContent,
   type DashboardSavedObjectUserContent,
 } from '../types';
-import {
-  checkForDuplicateDashboardTitle,
-  dashboardClient,
-  findService,
-} from '../../dashboard_client';
 import { findDashboardListingItems } from './helpers/find_items';
 import { deleteDashboardListingItems } from './helpers/delete_items';
 import { editDashboardListingItem } from './helpers/edit_item';
@@ -60,13 +54,13 @@ import {
   getVisualizationListingEmptyPrompt,
 } from '../utils/visualization_listing_helpers';
 
-type GetDetailViewLink = TableListViewTableProps<UserContentCommonSchema>['getDetailViewLink'];
+type GetDetailViewLink = TableListViewTableProps<DashboardListingUserContent>['getDetailViewLink'];
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 type DashboardListingViewTableProps = Omit<
-  TableListViewTableProps<UserContentCommonSchema>,
+  TableListViewTableProps<DashboardListingUserContent>,
   'tableCaption' | 'onFetchSuccess' | 'setPageDataTestSubject'
 > & { title: string };
 
@@ -111,8 +105,6 @@ export const useDashboardListingTable = ({
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
   );
-
-  const accessControlClient = getAccessControlClient();
 
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -215,12 +207,12 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    (item: UserContentCommonSchema) => editDashboardListingItem(item, goToDashboard),
+    (item: DashboardListingUserContent) => editDashboardListingItem(item, goToDashboard),
     [goToDashboard]
   );
 
   const getDetailViewLink = useCallback<NonNullable<GetDetailViewLink>>(
-    (entity: UserContentCommonSchema) => {
+    (entity: DashboardListingUserContent) => {
       if (entity.type !== 'dashboard') {
         return undefined;
       }
@@ -231,7 +223,7 @@ export const useDashboardListingTable = ({
     [getDashboardUrl]
   );
 
-  const getOnClickTitle = useCallback((item: UserContentCommonSchema) => {
+  const getOnClickTitle = useCallback((item: DashboardListingUserContent) => {
     const { id, type } = item;
 
     // Dashboards: let the link handle it (no onClick needed)
@@ -261,31 +253,6 @@ export const useDashboardListingTable = ({
 
     // Default: open in visualize app
     return () => navigateToVisualization(embeddableService.getStateTransfer(), id!);
-  }, []);
-
-  const rowItemActions = useCallback((item: UserContentCommonSchema) => {
-    const { showWriteControls } = getDashboardCapabilities();
-    const { managed, type } = item;
-    const isReadOnlyVisualization =
-      type !== 'dashboard' &&
-      type !== 'event-annotation-group' &&
-      (item as DashboardVisualizationUserContent).attributes.readOnly;
-
-    // Disable edit for managed items or read-only visualizations
-    if (!showWriteControls || managed || isReadOnlyVisualization) {
-      return {
-        edit: {
-          enabled: false,
-          reason: managed
-            ? dashboardListingTableStrings.getManagementItemDisabledEditMessage()
-            : isReadOnlyVisualization
-            ? dashboardListingTableStrings.getReadOnlyVisualizationMessage()
-            : undefined,
-        },
-      };
-    }
-
-    return undefined;
   }, []);
 
   const findItems = useCallback(
@@ -339,7 +306,6 @@ export const useDashboardListingTable = ({
       findItems,
       getDetailViewLink,
       getOnClickTitle,
-      rowItemActions,
       headingId,
       id: dashboardListingId,
       initialFilter,
@@ -349,16 +315,28 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
       createdByEnabled: contentTypeFilter === TAB_IDS.DASHBOARDS,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
-      customTableColumn:
-        contentTypeFilter === TAB_IDS.VISUALIZATIONS
-          ? (getVisualizationListingColumn() as EuiBasicTableColumn<UserContentCommonSchema>)
-          : undefined,
       rowItemActions: (item) => {
+        const { managed, type } = item;
+
+        // Check for read-only visualizations (our addition for multi-tab)
+        const isReadOnlyVisualization =
+          type !== 'dashboard' &&
+          type !== 'event-annotation-group' &&
+          (item as DashboardVisualizationUserContent).attributes.readOnly;
+
+        // Main's access control logic (dashboard-only)
         const isDisabled = () => {
           if (!showWriteControls) return true;
-          if (item?.managed === true) return true;
-          if (item?.canManageAccessControl === false && item?.accessMode === 'write_restricted')
-            return true;
+          if (managed === true) return true;
+          if (type === 'dashboard') {
+            const dashboardItem = item as DashboardSavedObjectUserContent;
+            if (
+              dashboardItem.canManageAccessControl === false &&
+              dashboardItem.accessMode === 'write_restricted'
+            )
+              return true;
+          }
+          if (isReadOnlyVisualization) return true;
           return false;
         };
 
@@ -366,11 +344,17 @@ export const useDashboardListingTable = ({
           if (!showWriteControls) {
             return contentEditorFlyoutStrings.readonlyReason.missingPrivileges;
           }
-          if (item?.managed) {
+          if (managed) {
             return contentEditorFlyoutStrings.readonlyReason.managedEntity;
           }
-          if (item?.canManageAccessControl === false) {
-            return contentEditorFlyoutStrings.readonlyReason.accessControl;
+          if (type === 'dashboard') {
+            const dashboardItem = item as DashboardSavedObjectUserContent;
+            if (dashboardItem.canManageAccessControl === false) {
+              return contentEditorFlyoutStrings.readonlyReason.accessControl;
+            }
+          }
+          if (isReadOnlyVisualization) {
+            return dashboardListingTableStrings.getReadOnlyVisualizationMessage();
           }
         };
 
@@ -385,6 +369,10 @@ export const useDashboardListingTable = ({
           },
         };
       },
+      customTableColumn:
+        contentTypeFilter === TAB_IDS.VISUALIZATIONS
+          ? (getVisualizationListingColumn() as EuiBasicTableColumn<DashboardListingUserContent>)
+          : undefined,
     };
   }, [
     contentEditorValidators,
@@ -404,7 +392,6 @@ export const useDashboardListingTable = ({
     initialFilter,
     initialPageSize,
     listingLimit,
-    rowItemActions,
     showCreateDashboardButton,
     title,
     unsavedDashboardIds,

@@ -8,7 +8,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { toTableListViewSavedObject } from '@kbn/visualizations-plugin/public';
 
@@ -20,7 +19,14 @@ import {
   visualizationsService,
 } from '../../../services/kibana_services';
 import { findService } from '../../../dashboard_client';
-import { TAB_IDS, type TabId, type DashboardVisualizationUserContent } from '../../types';
+import { getAccessControlClient } from '../../../services/access_control_service';
+import {
+  TAB_IDS,
+  type TabId,
+  type DashboardListingUserContent,
+  type DashboardVisualizationUserContent,
+  type DashboardSavedObjectUserContent,
+} from '../../types';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 
@@ -30,7 +36,7 @@ export async function findDashboardListingItems(
   searchTerm: string,
   tabId: TabId,
   options?: { references?: Reference[]; referencesToExclude?: Reference[] }
-): Promise<{ total: number; hits: UserContentCommonSchema[] }> {
+): Promise<{ total: number; hits: DashboardListingUserContent[] }> {
   const { references, referencesToExclude } = options ?? {};
   const limit = coreServices.uiSettings.get<number>(SAVED_OBJECTS_LIMIT_SETTING);
   const startTime = window.performance.now();
@@ -61,6 +67,18 @@ export async function findDashboardListingItems(
     };
   }
 
+  // For dashboards, check access control
+  const accessControlClient = getAccessControlClient();
+
+  const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
+    coreServices.userProfile.getCurrent(),
+    accessControlClient.checkGlobalPrivilege(DASHBOARD_SAVED_OBJECT_TYPE),
+  ]);
+
+  const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
+  const isGloballyAuthorized =
+    globalPrivilegeResponse.status === 'fulfilled' ? globalPrivilegeResponse.value : undefined;
+
   const { total, dashboards } = await findService.search({
     search: searchTerm,
     per_page: limit,
@@ -74,20 +92,35 @@ export async function findDashboardListingItems(
   const tagApi = savedObjectsTaggingService?.getTaggingApi();
   return {
     total,
-    hits: dashboards.map(({ id, data, meta }) => ({
-      type: 'dashboard' as const,
-      id,
-      updatedAt: meta.updated_at!,
-      createdAt: meta.created_at,
-      createdBy: meta.created_by,
-      updatedBy: meta.updated_by,
-      references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
-      managed: meta.managed,
-      attributes: {
-        title: data.title,
-        description: data.description,
-        timeRestore: Boolean(data.time_range),
-      },
-    })),
+    hits: dashboards.map(({ id, data, meta }) => {
+      const canManageAccessControl =
+        isGloballyAuthorized ||
+        accessControlClient.checkUserAccessControl({
+          accessControl: {
+            owner: data?.access_control?.owner,
+            accessMode: data?.access_control?.access_mode,
+          },
+          createdBy: meta.created_at,
+          userId,
+        });
+
+      return {
+        type: 'dashboard' as const,
+        id,
+        updatedAt: meta.updated_at!,
+        createdAt: meta.created_at,
+        createdBy: meta.created_by,
+        updatedBy: meta.updated_by,
+        references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
+        managed: meta.managed,
+        canManageAccessControl,
+        accessMode: data?.access_control?.access_mode,
+        attributes: {
+          title: data.title,
+          description: data.description,
+          timeRestore: Boolean(data.time_range),
+        },
+      } as DashboardSavedObjectUserContent;
+    }),
   };
 }
