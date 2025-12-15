@@ -56,7 +56,7 @@ export const EIS_UPDATE_CALLOUT_DESCRIPTION = i18n.translate(
   'searchApiPanels.eisUpdate.callout.description',
   {
     defaultMessage:
-      'Explore how to start using inference models from the Elastic Inference Service.',
+      'Boost your vector search and AI workflows with the GPU-accelerated Elastic Inference Service (EIS), providing consistent low-latency, high throughput, and consumption-based pricing.',
   }
 );
 

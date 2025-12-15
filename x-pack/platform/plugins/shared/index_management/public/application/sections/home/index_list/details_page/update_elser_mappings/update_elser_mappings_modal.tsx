@@ -166,12 +166,12 @@ export function UpdateElserMappingsModal({
         <EuiText>
           {i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.costsTransparency', {
             defaultMessage:
-              'Performing inference, NLP tasks, and other ML activities on the Elastic Inference Service (EIS) incurs additional costs for tokens.',
+              'Performing inference and other ML tasks using the Elastic Inference Service (EIS) will incur token-based costs.',
           })}
         </EuiText>
         <EuiSpacer size="s" />
         <EuiLink
-          href={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
+          href={documentationService.docLinks.enterpriseSearch.elasticInferenceServicePricing}
           target="_blank"
           external
         >

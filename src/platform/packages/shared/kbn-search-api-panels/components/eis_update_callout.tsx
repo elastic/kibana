@@ -58,6 +58,7 @@ export const EisUpdateCallout = ({
         color: euiTheme.colors.primaryText,
         backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
         border: `${euiTheme.border.thin}`,
+        borderRadius: `${euiTheme.border.radius.medium}`,
       })}
       onDismiss={onDismissTour}
     >
