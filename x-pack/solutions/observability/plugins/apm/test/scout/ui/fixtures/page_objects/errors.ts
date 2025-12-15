@@ -20,7 +20,6 @@ export class ErrorsPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services/${serviceName}/errors?rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
   }
 
   async gotoErrorDetailsPage(
@@ -34,7 +33,6 @@ export class ErrorsPage {
         'apm'
       )}/services/${serviceName}/errors/${errorGroupingKey}?rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
   }
 
   async getSearchBar() {
