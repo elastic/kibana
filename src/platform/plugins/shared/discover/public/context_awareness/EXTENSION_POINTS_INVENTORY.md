@@ -21,7 +21,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `FunctionComponent<PropsWithChildren<{}>>`
 
 **Screenshot:**
-![App wrapper example](./docs/extension_points/get_render_app_wrapper.jpeg)
+![App wrapper example](./docs/extension_points/get_render_app_wrapper.png)
 
 **Implementation examples:**
 - [Security root profile](profile_providers/security/security_root_profile/profile.tsx)
@@ -39,7 +39,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `{ columns?, rowHeight?, breakdownField?, hideChart? }`
 
 **Screenshot:**
-![Default app state example](./docs/extension_points/get_default_app_state.jpeg)
+![Default app state example](./docs/extension_points/get_default_app_state.png)
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_default_app_state.ts)
@@ -56,7 +56,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `Array of DataViewSpec-like objects with stable id`
 
 **Screenshot:**
-![Default ad-hoc data views example](./docs/extension_points/get_default_ad_hoc_data_views.jpeg)
+![Default ad-hoc data views example](./docs/extension_points/get_default_ad_hoc_data_views.png)
 
 **Implementation examples:**
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_default_ad_hoc_data_views.ts)
@@ -75,7 +75,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `TypedLensByValueInput['attributes']`
 
 **Screenshot:**
-![Modified vis attributes example](./docs/extension_points/get_modified_vis_attributes.jpeg)
+![Modified vis attributes example](./docs/extension_points/get_modified_vis_attributes.png)
 
 **Implementation examples:**
 - [Metrics data source profile](profile_providers/common/metrics_data_source_profile/profile.ts)
@@ -107,7 +107,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `CustomCellRenderer` mapping (field name -> renderer)
 
 **Screenshot:**
-![Cell renderers example](./docs/extension_points/get_cell_renderers.jpeg)
+![Cell renderers example](./docs/extension_points/get_cell_renderers.png)
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_cell_renderers.tsx)
@@ -125,7 +125,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `UnifiedDataTableProps['getRowIndicator'] | undefined`
 
 **Screenshot:**
-![Row indicator example](./docs/extension_points/get_row_indicator_provider.jpeg)
+![Row indicator example](./docs/extension_points/get_row_indicator_provider.png)
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_row_indicator_provider.ts)
@@ -141,7 +141,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `UnifiedDataTableProps['rowAdditionalLeadingControls'] | undefined`
 
 **Screenshot:**
-![Row leading controls example](./docs/extension_points/get_row_additional_leading_controls.jpeg)
+![Row leading controls example](./docs/extension_points/get_row_additional_leading_controls.png)
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_row_additional_leading_controls.ts)
@@ -157,7 +157,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `AdditionalCellAction[]` (`id`, `getDisplayName`, `getIconType`, `isCompatible?`, `execute`)
 
 **Screenshot:**
-![Additional cell actions example](./docs/extension_points/get_additional_cell_actions.jpeg)
+![Additional cell actions example](./docs/extension_points/get_additional_cell_actions.png)
 
 **Implementation examples:**
 - See [types.ts](./types.ts) for the `AdditionalCellAction` interface definition
@@ -173,7 +173,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `{ paginationMode }`
 
 **Screenshot:**
-![Pagination config example](./docs/extension_points/get_pagination_config.jpeg)
+![Pagination config example](./docs/extension_points/get_pagination_config.png)
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_pagination_config.ts)
@@ -191,7 +191,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry }`
 
 **Screenshot:**
-![Doc viewer example](./docs/extension_points/get_doc_viewer.jpeg)
+![Doc viewer example](./docs/extension_points/get_doc_viewer.png)
 
 **Implementation examples:**
 - [Log document profile](profile_providers/observability/log_document_profile/accessors/get_doc_viewer.tsx)
@@ -212,7 +212,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `{ appMenuRegistry(prev) => AppMenuRegistry }` (params include `dataView`, `adHocDataViews`, `isEsqlMode`, `authorizedRuleTypeIds`)
 
 **Screenshot:**
-![App menu example](./docs/extension_points/get_app_menu.jpeg)
+![App menu example](./docs/extension_points/get_app_menu.png)
 
 **Implementation examples:**
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_app_menu.tsx)
@@ -230,7 +230,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `CustomGridColumnsConfiguration`
 
 **Screenshot:**
-![Columns configuration example](./docs/extension_points/get_columns_configuration.jpeg)
+![Columns configuration example](./docs/extension_points/get_columns_configuration.png)
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_columns_configuration.tsx)
@@ -249,7 +249,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Returns:** `{ recommendedFields: string[] }`
 
 **Screenshot:**
-![Recommended fields example](./docs/extension_points/get_recommended_fields.jpeg)
+![Recommended fields example](./docs/extension_points/get_recommended_fields.png)
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_recommended_fields.ts)
