@@ -75,7 +75,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     setIsFeatureDetectionLoading(true);
     setIsFeatureDetectionFlyoutOpen(true);
 
-    identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
+    identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!)
       .then((data) => {
         setDetectedFeatures(data.features);
       })
