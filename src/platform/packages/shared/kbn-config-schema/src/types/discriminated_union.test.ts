@@ -72,47 +72,6 @@ test('includes namespace in failure', () => {
   );
 });
 
-test('fails if nested discriminatedOneOf types fail due to discriminator', () => {
-  const type = schema.discriminatedOneOf('discriminator1', [
-    schema.object({
-      discriminator1: schema.literal('foo'),
-      foo: schema.discriminatedOneOf('discriminator2', [
-        schema.object({ discriminator2: schema.literal('foo'), foo: schema.string() }),
-        schema.object({ discriminator2: schema.literal('bar'), foo: schema.number() }),
-      ]),
-    }),
-    schema.object({ discriminator1: schema.literal('foo'), foo: schema.number() }),
-  ]);
-
-  expect(() =>
-    type.validate({ discriminator1: 'foo', foo: { discriminator2: 'baz', foo: 12 } })
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo]: Error: value [baz] did not match any of the allowed values for [discriminator2]: [Error: expected value to equal [foo], Error: expected value to equal [bar]]"`
-  );
-});
-
-test('fails if nested discriminatedOneOf types fail', () => {
-  const type = schema.discriminatedOneOf('discriminator1', [
-    schema.object({
-      discriminator1: schema.literal('1'),
-      foo1: schema.discriminatedOneOf('discriminator2', [
-        schema.object({ discriminator2: schema.literal('foo'), foo2: schema.string() }),
-        schema.object({ discriminator2: schema.literal('bar'), foo2: schema.number() }),
-      ]),
-    }),
-    schema.object({ discriminator1: schema.literal('2'), foo: schema.number() }),
-  ]);
-
-  expect(() =>
-    type.validate({
-      discriminator1: '1',
-      foo1: { discriminator2: 'bar', foo2: 'should be a number' },
-    })
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo1.foo2]: Error: Error: expected value of type [number] but got [string]"`
-  );
-});
-
 test('fails when no discriminator is provided', () => {
   const type = schema.discriminatedOneOf('type', [
     schema.object({ type: schema.literal('foo'), foo: schema.string() }),
@@ -157,5 +116,46 @@ test('fails weirdly if discriminator keys are not ordered consistently', () => {
 
   expect(() => type.validate({ type: 'foo1', nothing: 12 })).toThrowErrorMatchingInlineSnapshot(
     `"[foo]: Error: expected value of type [string] but got [undefined]"`
+  );
+});
+
+test('fails if nested discriminatedOneOf types fail due to discriminator', () => {
+  const type = schema.discriminatedOneOf('discriminator1', [
+    schema.object({
+      discriminator1: schema.literal('foo'),
+      foo: schema.discriminatedOneOf('discriminator2', [
+        schema.object({ discriminator2: schema.literal('foo'), foo: schema.string() }),
+        schema.object({ discriminator2: schema.literal('bar'), foo: schema.number() }),
+      ]),
+    }),
+    schema.object({ discriminator1: schema.literal('foo'), foo: schema.number() }),
+  ]);
+
+  expect(() =>
+    type.validate({ discriminator1: 'foo', foo: { discriminator2: 'baz', foo: 12 } })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo]: Error: value [baz] did not match any of the allowed values for [discriminator2]: [Error: expected value to equal [foo], Error: expected value to equal [bar]]"`
+  );
+});
+
+test('fails if nested discriminatedOneOf types fail', () => {
+  const type = schema.discriminatedOneOf('discriminator1', [
+    schema.object({
+      discriminator1: schema.literal('1'),
+      foo1: schema.discriminatedOneOf('discriminator2', [
+        schema.object({ discriminator2: schema.literal('foo'), foo2: schema.string() }),
+        schema.object({ discriminator2: schema.literal('bar'), foo2: schema.number() }),
+      ]),
+    }),
+    schema.object({ discriminator1: schema.literal('2'), foo: schema.number() }),
+  ]);
+
+  expect(() =>
+    type.validate({
+      discriminator1: '1',
+      foo1: { discriminator2: 'bar', foo2: 'should be a number' },
+    })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo1.foo2]: Error: Error: expected value of type [number] but got [string]"`
   );
 });
