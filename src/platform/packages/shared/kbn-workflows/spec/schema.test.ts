@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CollisionStrategy } from './schema';
 import {
   CollisionStrategySchema,
   WorkflowSchemaForAutocomplete,
@@ -197,21 +198,11 @@ describe('WorkflowSettingsSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should default to "queue" when not specified', () => {
+    it('should allow collision_strategy to be omitted', () => {
       const result = WorkflowSettingsSchema.safeParse({});
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.collision_strategy).toBe('queue');
-      }
-    });
-
-    it('should allow collision_strategy to be explicitly set to undefined', () => {
-      const result = WorkflowSettingsSchema.safeParse({
-        collision_strategy: undefined,
-      });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.collision_strategy).toBe('queue'); // default applies
+        expect(result.data.collision_strategy).toBeUndefined();
       }
     });
   });
@@ -258,21 +249,11 @@ describe('WorkflowSettingsSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should default to 1 when not specified', () => {
+    it('should allow max_concurrency_per_group to be omitted', () => {
       const result = WorkflowSettingsSchema.safeParse({});
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.max_concurrency_per_group).toBe(1);
-      }
-    });
-
-    it('should allow max_concurrency_per_group to be explicitly set to undefined', () => {
-      const result = WorkflowSettingsSchema.safeParse({
-        max_concurrency_per_group: undefined,
-      });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.max_concurrency_per_group).toBe(1); // default applies
+        expect(result.data.max_concurrency_per_group).toBeUndefined();
       }
     });
   });
@@ -288,6 +269,18 @@ describe('WorkflowSettingsSchema', () => {
       expect(CollisionStrategySchema.safeParse('invalid').success).toBe(false);
       expect(CollisionStrategySchema.safeParse('').success).toBe(false);
       expect(CollisionStrategySchema.safeParse(null).success).toBe(false);
+    });
+
+    it('should export CollisionStrategy type that matches valid values', () => {
+      // Verify the type can be used and matches the schema values
+      const validStrategies: CollisionStrategy[] = ['queue', 'drop', 'cancel-in-progress'];
+      validStrategies.forEach((strategy) => {
+        const result = CollisionStrategySchema.safeParse(strategy);
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data).toBe(strategy);
+        }
+      });
     });
   });
 });
