@@ -41,15 +41,17 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
     })
   ),
   sort_field: schema.maybe(
-    schema.string({
+    schema.oneOf([schema.literal('name'), schema.literal('tags')], {
+      defaultValue: 'name',
       meta: {
         description:
-          'Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.',
+          'Determines which field is used to sort the results.',
       },
     })
   ),
   sort_order: schema.maybe(
     schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
       meta: {
         description: 'Determines the sort order.',
       },
