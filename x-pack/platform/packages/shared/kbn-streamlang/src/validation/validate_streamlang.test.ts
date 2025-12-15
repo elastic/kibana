@@ -1697,7 +1697,7 @@ describe('validateStreamlang', () => {
         steps: [
           {
             action: 'math',
-            expression: 'abs(attributes.value) + sqrt(attributes.other)',
+            expression: 'attributes.value + log(attributes.other)',
             to: 'attributes.result',
           },
         ],
