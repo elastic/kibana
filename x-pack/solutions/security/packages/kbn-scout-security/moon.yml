@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/es'
-  - '@kbn/security-solution-plugin'
 tags:
   - test-helper
   - package
