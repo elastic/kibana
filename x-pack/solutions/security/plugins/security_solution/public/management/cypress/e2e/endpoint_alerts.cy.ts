@@ -8,7 +8,7 @@
 import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
 import { getAlertsTableRows, navigateToAlertsList } from '../screens/alerts';
 import { waitForEndpointAlerts } from '../tasks/alerts';
-import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../tasks/fleet';
+import { createAgentPolicyTask } from '../tasks/fleet';
 import { createEndpointHost } from '../tasks/create_endpoint_host';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
@@ -23,19 +23,19 @@ describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login(ROLE.soc_manager);
-    getEndpointIntegrationVersion().then((version) => {
-      return createAgentPolicyTask(version, 'alerts test').then((data) => {
-        indexedPolicy = data;
-        policy = indexedPolicy.integrationPolicies[0];
+    // getEndpointIntegrationVersion().then((version) => {
+    return createAgentPolicyTask('9.2.0', 'alerts test').then((data) => {
+      indexedPolicy = data;
+      policy = indexedPolicy.integrationPolicies[0];
 
-        return enableAllPolicyProtections(policy.id).then(() => {
-          // Create and enroll a new Endpoint host
-          return createEndpointHost(policy.policy_ids[0]).then((host) => {
-            createdHost = host as CreateAndEnrollEndpointHostResponse;
-          });
+      return enableAllPolicyProtections(policy.id).then(() => {
+        // Create and enroll a new Endpoint host
+        return createEndpointHost(policy.policy_ids[0], '9.2.0').then((host) => {
+          createdHost = host as CreateAndEnrollEndpointHostResponse;
         });
       });
     });
+    // });
   });
 
   afterEach(() => {
