@@ -980,7 +980,7 @@ export class TaskManagerRunner implements TaskRunner {
           if (SavedObjectsErrorHelpers.isConflictError(error)) {
             stop();
             this.logger.warn(
-              `Conflict error trying to update retryAt for a long-running task. Cancelling: ${this.id}`,
+              `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
               { tags: [this.id, this.taskType] }
             );
             await this.cancel();

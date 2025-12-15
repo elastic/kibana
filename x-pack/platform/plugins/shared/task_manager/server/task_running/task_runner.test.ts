@@ -1842,7 +1842,7 @@ describe('TaskManagerRunner', () => {
 
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Unable to update retryAt for long running task: foo - Saved object [type/id] conflict',
+        'Conflict error trying to update retryAt for a long-running task. Cancelling task: foo',
         {
           tags: ['foo', 'bar'],
         }
