@@ -816,6 +816,7 @@
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "ilm_migration_status",
+    "integration_knowledge_enabled",
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
     "secret_storage_requirements_met",
@@ -1199,6 +1200,7 @@
     "solution"
   ],
   "spaces-usage-stats": [],
+  "stream-prompts": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
