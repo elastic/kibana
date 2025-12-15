@@ -22,6 +22,7 @@ import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_schemas';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
@@ -79,6 +80,12 @@ Do NOT use for:
 - Analyzing changes in log volume over time (use run_log_rate_analysis)`,
     schema: getLogsSchema,
     tags: ['observability', 'logs'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       { index, start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, terms },
       { esClient }
