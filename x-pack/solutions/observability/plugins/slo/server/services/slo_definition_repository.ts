@@ -20,27 +20,26 @@ import type { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
-export interface SLORepository {
+interface SearchParams {
+  pagination: Pagination;
+  search?: string;
+  filters?: { includeOutdatedOnly: boolean; tags: string[] };
+}
+
+export interface SLODefinitionRepository {
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
-  search(
-    search: string,
-    pagination: Pagination,
-    options?: {
-      includeOutdatedOnly: boolean;
-      tags: string[];
-    }
-  ): Promise<Paginated<SLODefinition>>;
+  search({ search, pagination, filters }: SearchParams): Promise<Paginated<SLODefinition>>;
 }
 
-export class KibanaSavedObjectsSLORepository implements SLORepository {
+export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
-    const { storedSLO, references } = toStoredSLO(slo);
+    const { storedSLO, references } = this.toStoredSLO(slo);
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, storedSLO, { references });
     return slo;
   }
@@ -57,7 +56,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       existingSavedObjectId = findResponse.saved_objects[0].id;
     }
 
-    const { storedSLO, references } = toStoredSLO(slo);
+    const { storedSLO, references } = this.toStoredSLO(slo);
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, storedSLO, {
       id: existingSavedObjectId,
       overwrite: true,
@@ -118,15 +117,12 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     return response.saved_objects.map((so) => this.toSLO(so)).filter(this.isSLO);
   }
 
-  async search(
-    search: string,
-    pagination: Pagination,
-    options: {
-      includeOutdatedOnly?: boolean;
-      tags: string[];
-    } = { tags: [] }
-  ): Promise<Paginated<SLODefinition>> {
-    const { includeOutdatedOnly, tags } = options;
+  async search({
+    search,
+    pagination,
+    filters = { includeOutdatedOnly: false, tags: [] },
+  }: SearchParams): Promise<Paginated<SLODefinition>> {
+    const { includeOutdatedOnly, tags } = filters;
     const filter = [];
     if (tags.length > 0) {
       filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
@@ -140,8 +136,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
-      search,
-      searchFields: ['name'],
+      ...(!!search && { search, searchFields: ['name'] }),
       ...(filter.length && { filter: filter.join(' AND ') }),
       sortField: 'id',
       sortOrder: 'asc',
@@ -157,7 +152,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     };
   }
 
-  toSLO(storedSLOObject: SavedObject<StoredSLODefinition>): SLODefinition | undefined {
+  private toSLO(storedSLOObject: SavedObject<StoredSLODefinition>): SLODefinition | undefined {
     const storedSLO = storedSLOObject.attributes;
     const dashboardsIds = this.getDashboardsIds({
       dashboardsRef: storedSLO.artifacts?.dashboards,
@@ -190,7 +185,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     return result.right;
   }
 
-  getDashboardsIds({
+  private getDashboardsIds({
     dashboardsRef,
     references,
   }: {
@@ -216,26 +211,26 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   private isSLO(slo: SLODefinition | undefined): slo is SLODefinition {
     return slo !== undefined;
   }
-}
 
-export function toStoredSLO(slo: SLODefinition): {
-  storedSLO: StoredSLODefinition;
-  references: SavedObjectReference[];
-} {
-  const dashboardsRef: { refId: string }[] = [];
-  const references: SavedObjectReference[] = [];
-  if (slo.artifacts?.dashboards?.length) {
-    slo.artifacts.dashboards.forEach(({ id }, index) => {
-      const refId = `dashboard-${index}`;
-      references.push({ id, type: 'dashboard', name: refId });
-      dashboardsRef.push({ refId });
-    });
+  private toStoredSLO(slo: SLODefinition): {
+    storedSLO: StoredSLODefinition;
+    references: SavedObjectReference[];
+  } {
+    const dashboardsRef: { refId: string }[] = [];
+    const references: SavedObjectReference[] = [];
+    if (slo.artifacts?.dashboards?.length) {
+      slo.artifacts.dashboards.forEach(({ id }, index) => {
+        const refId = `dashboard-${index}`;
+        references.push({ id, type: 'dashboard', name: refId });
+        dashboardsRef.push({ refId });
+      });
+    }
+    return {
+      storedSLO: storedSloDefinitionSchema.encode({
+        ...slo,
+        artifacts: { dashboards: dashboardsRef },
+      }),
+      references,
+    };
   }
-  return {
-    storedSLO: storedSloDefinitionSchema.encode({
-      ...slo,
-      artifacts: { dashboards: dashboardsRef },
-    }),
-    references,
-  };
 }

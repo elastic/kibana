@@ -15,7 +15,7 @@ import {
   getWildcardPipelineId,
 } from '../../common/constants';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 
 interface Options {
@@ -25,7 +25,7 @@ interface Options {
 
 export class DeleteSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,

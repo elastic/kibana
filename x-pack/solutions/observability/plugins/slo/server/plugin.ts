@@ -33,7 +33,7 @@ import {
   DefaultResourceInstaller,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
+  DefaultSLODefinitionRepository,
 } from './services';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -181,7 +181,7 @@ export class SLOPlugin
             pluginsStart.ruleRegistry.getRacClientWithRequest(request),
           ]);
 
-          const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+          const repository = new DefaultSLODefinitionRepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
