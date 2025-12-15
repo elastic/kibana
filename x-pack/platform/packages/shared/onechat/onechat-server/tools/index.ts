@@ -23,6 +23,7 @@ export {
   type ToolHandlerResult,
   type ToolHandlerPromptReturn,
   type ToolHandlerStandardReturn,
+  type ToolStateManager,
   isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,
 } from './handler';

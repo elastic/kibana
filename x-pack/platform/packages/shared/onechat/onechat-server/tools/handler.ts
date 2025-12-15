@@ -18,6 +18,7 @@ import type {
   ToolProvider,
   ToolResultStore,
   ToolPromptManager,
+  ToolStateManager,
 } from '../runner';
 
 /**
@@ -109,4 +110,8 @@ export interface ToolHandlerContext {
    * Service used to send and read interruptions.
    */
   prompts: ToolPromptManager;
+  /**
+   * Manager to store/load tool state during interrupted executions.
+   */
+  stateManager: ToolStateManager;
 }

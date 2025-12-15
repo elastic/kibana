@@ -24,6 +24,7 @@ import type {
   WritableToolResultStore,
   AttachmentsService,
   PromptManager,
+  ConversationStateManager,
 } from '../runner';
 
 export type AgentHandlerFn = (
@@ -81,6 +82,10 @@ export interface AgentHandlerContext {
    * Used to manage interruptions.
    */
   promptManager: PromptManager;
+  /**
+   * Used to access and store state during interrupted executions.
+   */
+  stateManager: ConversationStateManager;
   /**
    * Event emitter that can be used to emits custom events
    */

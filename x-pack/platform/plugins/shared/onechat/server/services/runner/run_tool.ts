@@ -131,6 +131,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     resultStore,
     logger,
     promptManager,
+    stateManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
@@ -145,6 +146,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
       request,
     }),
+    stateManager: stateManager.getToolStateManager({ toolId, toolCallId }),
     prompts: promptManager.forTool({ toolId, toolCallId, toolParams }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),

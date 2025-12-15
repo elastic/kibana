@@ -39,6 +39,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     logger,
     promptManager,
+    stateManager,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -55,6 +56,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       request,
     }),
     resultStore,
+    stateManager,
     promptManager,
     attachments: createAttachmentsService({
       attachmentsStart: attachmentsService,

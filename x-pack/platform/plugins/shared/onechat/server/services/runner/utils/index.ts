@@ -15,3 +15,4 @@ export { createAttachmentsService } from './attachments';
 export { createToolProvider } from './tools';
 export { extractConversationToolResults } from './extract_conversation_tool_results';
 export { createInterruptManager, initPromptManager } from './interrupts';
+export { createConversationStateManager } from './state_manager';
