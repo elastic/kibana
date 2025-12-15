@@ -9,6 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import { type CloudConnectorFormProps } from '../types';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 import {
@@ -22,7 +23,6 @@ import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
-import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,
