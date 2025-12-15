@@ -110,15 +110,9 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
   const onAgentBuildAttachmentClick = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log('[EntityHighlightsSettings] onAgentBuildAttachmentClick called', {
-      hasOpenAgentBuilderFlyout: !!openAgentBuilderFlyout,
-      isLoading,
-      hasAssistantResult: !!assistantResult,
-    });
     openAgentBuilderFlyout();
     closePopover();
-  }, [closePopover, openAgentBuilderFlyout, isLoading, assistantResult]);
+  }, [closePopover, openAgentBuilderFlyout]);
 
   const items = useMemo(
     () => [
