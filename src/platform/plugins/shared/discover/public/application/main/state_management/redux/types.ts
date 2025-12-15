@@ -156,6 +156,7 @@ export interface TabState extends TabItem {
     rowHeight: boolean;
     breakdownField: boolean;
     hideChart: boolean;
+    interval: boolean;
   };
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;

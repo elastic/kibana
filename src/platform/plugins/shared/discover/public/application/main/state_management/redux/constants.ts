@@ -32,6 +32,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     rowHeight: false,
     breakdownField: false,
     hideChart: false,
+    interval: false,
   },
   uiState: {},
 };

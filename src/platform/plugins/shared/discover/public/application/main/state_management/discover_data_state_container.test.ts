@@ -187,6 +187,7 @@ describe('test getDataStateContainer', () => {
           rowHeight: true,
           breakdownField: true,
           hideChart: false,
+          interval: false,
         },
       })
     );
@@ -205,6 +206,7 @@ describe('test getDataStateContainer', () => {
       rowHeight: false,
       breakdownField: false,
       hideChart: false,
+      interval: false,
     });
     expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
     expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
@@ -231,6 +233,7 @@ describe('test getDataStateContainer', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          interval: false,
         },
       })
     );
@@ -247,6 +250,7 @@ describe('test getDataStateContainer', () => {
       rowHeight: false,
       breakdownField: false,
       hideChart: false,
+      interval: false,
     });
     expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
     expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();

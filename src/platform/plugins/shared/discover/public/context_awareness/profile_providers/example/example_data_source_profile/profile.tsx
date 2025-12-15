@@ -279,6 +279,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     },
     getDefaultAppState: () => () => ({
       breakdownField: 'log.level',
+      interval: 'auto',
       columns: [
         {
           name: '@timestamp',

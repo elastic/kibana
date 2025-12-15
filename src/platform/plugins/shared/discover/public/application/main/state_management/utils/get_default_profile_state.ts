@@ -48,6 +48,10 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
+      if (resetDefaultProfileState.interval && defaultState.interval !== undefined) {
+        stateUpdate.interval = defaultState.interval;
+      }
+
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
 

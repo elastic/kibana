@@ -262,6 +262,10 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+  /**
+   * Histogram interval for Discover (e.g. 'auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y')
+   */
+  interval?: string;
 }
 
 /**

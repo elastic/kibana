@@ -188,6 +188,44 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.breakdownField).toEqual('');
   });
 
+  it('should pass interval if state has interval', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+    };
+    expect(savedSearch.interval).toBeUndefined();
+    updateSavedSearch({
+      savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState,
+      services: discoverServiceMock,
+      appState: {
+        interval: 'm',
+      },
+    });
+    expect(savedSearch.interval).toEqual('m');
+  });
+
+  it('should pass "auto" if state already has interval', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+      interval: 'm',
+    };
+    updateSavedSearch({
+      savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
+      globalState,
+      services: discoverServiceMock,
+      appState: {
+        interval: undefined,
+      },
+    });
+    expect(savedSearch.interval).toEqual('auto');
+  });
+
   it('should set query and filters from services', async () => {
     const savedSearch = {
       ...savedSearchMock,
