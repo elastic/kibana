@@ -140,7 +140,7 @@ export interface FunctionParameter {
    * Provides information that is useful for getting parameter values from external sources.
    * For example, an inference endpoint
    */
-  hint: ParameterHint;
+  hint?: ParameterHint;
 }
 
 export interface ElasticsearchCommandDefinition {

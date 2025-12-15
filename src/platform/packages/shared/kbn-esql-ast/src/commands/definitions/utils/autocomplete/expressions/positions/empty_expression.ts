@@ -21,6 +21,7 @@ import type {
   FunctionDefinition,
   FunctionParameter,
   FunctionParameterType,
+  ParameterHint,
 } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
@@ -29,6 +30,7 @@ import {
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
+import { parametersFromHintsMap } from '../../parameters_from_hints';
 
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
@@ -383,9 +385,9 @@ async function buildSuggestionsFromHints(
   paramDefinitions: FunctionParameter[],
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
-  const hints = paramDefinitions
+  const hints: ParameterHint[] = paramDefinitions
     .filter((param) => param.hint !== undefined)
-    .map((param) => param.hint);
+    .map((param) => param.hint!);
 
   if (hints.length > 0) {
     return (
