@@ -44,6 +44,81 @@ export const useSubscribeToChatEvents = ({
     subscriptionRef.current?.unsubscribe();
   };
 
+  const nextChatEvent = (event: ChatEvent) => {
+    // chunk received, we append it to the chunk buffer
+    if (isMessageChunkEvent(event)) {
+      conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
+    }
+    // full message received, override chunk buffer
+    else if (isMessageCompleteEvent(event)) {
+      conversationActions.setAssistantMessage({
+        assistantMessage: event.data.message_content,
+      });
+    } else if (isToolProgressEvent(event)) {
+      conversationActions.setToolCallProgress({
+        progress: { message: event.data.message },
+        toolCallId: event.data.tool_call_id,
+      });
+      // Individual tool progression message should also be displayed as reasoning
+      setAgentReasoning(event.data.message);
+    } else if (isReasoningEvent(event)) {
+      conversationActions.addReasoningStep({
+        step: createReasoningStep({
+          reasoning: event.data.reasoning,
+          transient: event.data.transient,
+        }),
+      });
+      setAgentReasoning(event.data.reasoning);
+    } else if (isToolCallEvent(event)) {
+      conversationActions.addToolCall({
+        step: createToolCallStep({
+          params: event.data.params,
+          results: [],
+          tool_call_id: event.data.tool_call_id,
+          tool_id: event.data.tool_id,
+        }),
+      });
+    } else if (isBrowserToolCallEvent(event)) {
+      // Check if this is a browser tool call and execute it immediately
+      const toolId = event.data.tool_id;
+      if (toolId && browserToolExecutor && browserApiTools) {
+        const toolDef = browserApiTools.find((tool) => tool.id === toolId);
+        if (toolDef) {
+          const toolsMap = new Map([[toolId, toolDef]]);
+          browserToolExecutor
+            .executeToolCalls(
+              [
+                {
+                  tool_id: toolId,
+                  call_id: event.data.tool_call_id,
+                  params: event.data.params,
+                  timestamp: Date.now(),
+                },
+              ],
+              toolsMap
+            )
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.error('Failed to execute browser tool:', error);
+            });
+        }
+      }
+    } else if (isToolResultEvent(event)) {
+      const { tool_call_id: toolCallId, results } = event.data;
+      conversationActions.setToolCallResult({ results, toolCallId });
+    } else if (isRoundCompleteEvent(event)) {
+      // Now we have the full response and can stop the loading indicators
+      setIsResponseLoading(false);
+    } else if (isConversationCreatedEvent(event)) {
+      const { conversation_id: id, title } = event.data;
+      conversationActions.onConversationCreated({ conversationId: id, title });
+    } else if (isThinkingCompleteEvent(event)) {
+      conversationActions.setTimeToFirstToken({
+        timeToFirstToken: event.data.time_to_first_token,
+      });
+    }
+  };
+
   const subscribeToChatEvents = (events$: Observable<ChatEvent>) => {
     return new Promise<void>((resolve, reject) => {
       if (unsubscribedRef.current) {
@@ -56,85 +131,11 @@ export const useSubscribeToChatEvents = ({
             // When the subscription is unsubscribed from, `complete` will not be called, but the `finalize` callback will be
             if (unsubscribedRef.current) {
               resolve();
-              unsubscribedRef.current = false;
             }
           })
         )
         .subscribe({
-          next: (event) => {
-            // chunk received, we append it to the chunk buffer
-            if (isMessageChunkEvent(event)) {
-              conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
-            }
-            // full message received, override chunk buffer
-            else if (isMessageCompleteEvent(event)) {
-              conversationActions.setAssistantMessage({
-                assistantMessage: event.data.message_content,
-              });
-            } else if (isToolProgressEvent(event)) {
-              conversationActions.setToolCallProgress({
-                progress: { message: event.data.message },
-                toolCallId: event.data.tool_call_id,
-              });
-              // Individual tool progression message should also be displayed as reasoning
-              setAgentReasoning(event.data.message);
-            } else if (isReasoningEvent(event)) {
-              conversationActions.addReasoningStep({
-                step: createReasoningStep({
-                  reasoning: event.data.reasoning,
-                  transient: event.data.transient,
-                }),
-              });
-              setAgentReasoning(event.data.reasoning);
-            } else if (isToolCallEvent(event)) {
-              conversationActions.addToolCall({
-                step: createToolCallStep({
-                  params: event.data.params,
-                  results: [],
-                  tool_call_id: event.data.tool_call_id,
-                  tool_id: event.data.tool_id,
-                }),
-              });
-            } else if (isBrowserToolCallEvent(event)) {
-              // Check if this is a browser tool call and execute it immediately
-              const toolId = event.data.tool_id;
-              if (toolId && browserToolExecutor && browserApiTools) {
-                const toolDef = browserApiTools.find((tool) => tool.id === toolId);
-                if (toolDef) {
-                  const toolsMap = new Map([[toolId, toolDef]]);
-                  browserToolExecutor
-                    .executeToolCalls(
-                      [
-                        {
-                          tool_id: toolId,
-                          call_id: event.data.tool_call_id,
-                          params: event.data.params,
-                          timestamp: Date.now(),
-                        },
-                      ],
-                      toolsMap
-                    )
-                    .catch((error) => {
-                      // eslint-disable-next-line no-console
-                      console.error('Failed to execute browser tool:', error);
-                    });
-                }
-              }
-            } else if (isToolResultEvent(event)) {
-              const { tool_call_id: toolCallId, results } = event.data;
-              conversationActions.setToolCallResult({ results, toolCallId });
-            } else if (isRoundCompleteEvent(event)) {
-              // Now we have the full response and can stop the loading indicators
-              setIsResponseLoading(false);
-            } else if (isConversationCreatedEvent(event)) {
-              const { conversation_id: id, title } = event.data;
-              conversationActions.onConversationCreated({ conversationId: id, title });
-            } else if (isThinkingCompleteEvent(event)) {
-              conversationActions.setTimeToFirstToken({
-                timeToFirstToken: event.data.time_to_first_token,
-              });
-            }
-          },
+          next: nextChatEvent,
           complete: () => {
             resolve();
           },
@@ -147,6 +148,10 @@ export const useSubscribeToChatEvents = ({
             reject(err);
           },
         });
+    }).finally(() => {
+      if (unsubscribedRef.current) {
+        unsubscribedRef.current = false;
+      }
     });
   };
 
