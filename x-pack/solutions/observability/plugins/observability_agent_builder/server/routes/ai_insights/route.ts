@@ -6,14 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import moment from 'moment';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
 import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
-import { getLogDocumentById } from './get_log_document_by_id';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -140,31 +138,14 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const inferenceClient = inference.getClient({ request });
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-      const logEntry = await getLogDocumentById({
-        esClient: esClient.asCurrentUser,
-        index,
-        id,
-      });
-
-      if (!logEntry) {
-        throw new Error('Log entry not found');
-      }
-
-      const serviceSummary = await dataRegistry.getData('apmServiceSummary', {
-        request,
-        serviceName: logEntry.service.name,
-        serviceEnvironment: logEntry.service.environment,
-        start: moment(logEntry['@timestamp']).subtract(24, 'hours').toISOString(),
-        end: moment(logEntry['@timestamp']).add(24, 'hours').toISOString(),
-      });
-
       const { summary, context } = await getLogAiInsights({
         index,
         id,
-        fields: logEntry,
-        serviceSummary,
         inferenceClient,
         connectorId,
+        request,
+        esClient,
+        dataRegistry,
       });
 
       return { summary, context };

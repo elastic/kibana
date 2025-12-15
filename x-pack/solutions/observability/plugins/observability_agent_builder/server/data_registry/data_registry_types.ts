@@ -23,7 +23,7 @@ interface ChangePointGrouping {
   changes: TimeseriesChangePoint[];
 }
 
-export interface ServiceSummary {
+interface ServiceSummary {
   'service.name': string;
   'service.environment': string[];
   'agent.name'?: string;

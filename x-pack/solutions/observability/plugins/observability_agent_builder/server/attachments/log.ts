@@ -106,7 +106,7 @@ export function createLogAttachmentType({
     getTools: () => [],
     getAgentDescription: () =>
       dedent(
-        `An Observability Log attachment. The log ID is provided - use the ${GET_LOG_DETAILS_TOOL_ID} tool to fetch the full log information.`
+        `An Observability Log attachment. The log ID is provided - use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch the full log information.`
       ),
   };
 }

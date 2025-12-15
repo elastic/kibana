@@ -156,7 +156,6 @@ dependsOn:
   - '@kbn/onechat-plugin'
   - '@kbn/ai-insights'
   - '@kbn/observability-agent-builder-plugin'
-  - '@kbn/observability-agent-builder'
   - '@kbn/server-route-repository-client'
 tags:
   - plugin

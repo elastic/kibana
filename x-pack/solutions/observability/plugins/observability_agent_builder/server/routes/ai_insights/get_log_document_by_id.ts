@@ -24,7 +24,7 @@ export const getLogDocumentById = async ({
   esClient: ElasticsearchClient;
   index: string;
   id: string;
-}): Promise<Record<string, unknown> | undefined> => {
+}): Promise<LogDocument | undefined> => {
   const result = await esClient.get<LogDocument>({
     index,
     id,

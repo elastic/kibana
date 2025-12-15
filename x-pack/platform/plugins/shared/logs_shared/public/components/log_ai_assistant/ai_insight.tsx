@@ -35,7 +35,7 @@ export function LogEntryAgentBuilderAiInsight({
 
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
-  const [context, setContext] = useState('');
+  const [context, setSummaryContext] = useState('');
   const { index, id } = useMemo(() => {
     return {
       index: doc?.fields.find((field) => field.field === '_index')?.value[0],
@@ -46,7 +46,7 @@ export function LogEntryAgentBuilderAiInsight({
   const fetchAiInsights = async () => {
     setIsLoading(true);
     try {
-      const response = await http.post<{ summary: string; context: string }>(
+      const response = await http?.post<{ summary: string; context: string }>(
         '/internal/observability_agent_builder/ai_insights/log',
         {
           body: JSON.stringify({
@@ -56,7 +56,7 @@ export function LogEntryAgentBuilderAiInsight({
         }
       );
       setSummary(response?.summary ?? '');
-      setContext(response?.context);
+      setSummaryContext(response?.context ?? '');
     } catch (e) {
       setSummary('');
       setSummaryContext('');
