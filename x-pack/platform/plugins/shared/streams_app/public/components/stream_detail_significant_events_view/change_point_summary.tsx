@@ -96,7 +96,12 @@ function SummaryItem({
 
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
-          <b>Significant event:</b> {change.query.title}
+          <b>
+            {i18n.translate('xpack.streams.changePointSummary.significantEvent', {
+              defaultMessage: 'Significant event:',
+            })}
+          </b>{' '}
+          {change.query.title}
         </EuiText>
       </EuiFlexItem>
     </>
