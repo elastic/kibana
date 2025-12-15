@@ -7,11 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import {
-  AIAssistantType,
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-} from '@kbn/ai-assistant-management-plugin/public';
+import { PREFERRED_CHAT_EXPERIENCE_SETTING_KEY } from '@kbn/ai-assistant-management-plugin/public';
 import { useAgentBuilderOptIn } from './use_agent_builder_opt_in';
 import * as useKibanaModule from './use_kibana';
 import * as useIsAgentBuilderEnabledModule from './use_is_agent_builder_enabled';
@@ -190,10 +186,6 @@ describe('useAgentBuilderOptIn', () => {
     expect(servicesWithNavigation.settings!.client!.set).toHaveBeenCalledWith(
       PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
       AIChatExperience.Agent
-    );
-    expect(servicesWithNavigation.settings!.client!.set).toHaveBeenCalledWith(
-      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-      AIAssistantType.Default
     );
     expect(servicesWithNavigation.application!.navigateToApp).toHaveBeenCalledWith(
       'observability',

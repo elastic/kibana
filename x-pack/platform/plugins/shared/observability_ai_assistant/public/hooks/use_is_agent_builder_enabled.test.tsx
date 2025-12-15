@@ -39,15 +39,12 @@ describe('useIsAgentBuilderEnabled', () => {
     );
   });
 
-  it('reads the chat experience setting with the expected key and default', () => {
+  it('reads the chat experience setting with the expected key', () => {
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
 
     const { result } = renderHook(() => useIsAgentBuilderEnabled());
 
-    expect(mockUseUiSetting$).toHaveBeenCalledWith(
-      AI_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    );
+    expect(mockUseUiSetting$).toHaveBeenCalledWith(AI_CHAT_EXPERIENCE_TYPE);
     expect(result.current.isAgentChatExperienceEnabled).toBe(true);
   });
 
