@@ -183,6 +183,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
     });
 
+<<<<<<< HEAD
     it('renders tour', async () => {
       await solutionNavigation.sidenav.tour.reset();
       await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
@@ -196,6 +197,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.tour.expectHidden();
     });
 
+=======
+>>>>>>> main
     it('opens panel on legacy management landing page', async () => {
       await common.navigateToApp('management');
       await testSubjects.exists('cards-navigation-page');

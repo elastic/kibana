@@ -14,14 +14,9 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  AGENT_BUILDER_ENABLED_SETTING_ID,
-  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import { registerAnalytics, registerApp } from './register';
 import { OnechatNavControlInitiator } from './components/nav_control/lazy_onechat_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -35,17 +30,19 @@ import {
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
+import { registerStepDefinitions } from './step_types';
+import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
+  ConversationFlyoutRef,
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
-import type { ConversationFlyoutRef } from './types';
 
 export class OnechatPlugin
   implements
@@ -72,11 +69,6 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
-    );
-
     const navigationService = new NavigationService({
       management: deps.management.locator,
       licenseManagement: deps.licenseManagement?.locator,
@@ -84,30 +76,21 @@ export class OnechatPlugin
 
     this.setupServices = { navigationService };
 
-    if (isAgentBuilderEnabled) {
-      registerApp({
-        core,
-        getServices: () => {
-          if (!this.internalServices) {
-            throw new Error('getServices called before plugin start');
-          }
-          return this.internalServices;
-        },
-      });
-
-      registerAnalytics({ analytics: core.analytics });
-      registerLocators(deps.share);
-    }
-
-    try {
-      core.getStartServices().then(([coreStart]) => {
-        const { capabilities } = coreStart.application;
-        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
-          registerManagementSection({ core, management: deps.management });
+    registerApp({
+      core,
+      getServices: () => {
+        if (!this.internalServices) {
+          throw new Error('getServices called before plugin start');
         }
-      });
-    } catch (error) {
-      this.logger.error('Error registering Agent Builder management section', error);
+        return this.internalServices;
+      },
+    });
+
+    registerAnalytics({ analytics: core.analytics });
+    registerLocators(deps.share);
+
+    if (deps.workflowsExtensions) {
+      registerStepDefinitions(deps.workflowsExtensions);
     }
 
     return {};
@@ -144,16 +127,10 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
-    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
-    );
-    const isAgentBuilderNavEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-      false
-    );
+    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
 
     const onechatService: OnechatPluginStart = {
+      agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
@@ -196,7 +173,7 @@ export class OnechatPlugin
       },
     };
 
-    if (isAgentBuilderEnabled && isAgentBuilderNavEnabled) {
+    if (hasAgentBuilder) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
