@@ -4187,6 +4187,7 @@
     {
       "groupName": "langchain",
       "matchDepNames": [
+        "deepagents",
         "langchain",
         "@langchain/aws",
         "@langchain/classic",
