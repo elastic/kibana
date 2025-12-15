@@ -44,8 +44,7 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
     schema.oneOf([schema.literal('name'), schema.literal('tags')], {
       defaultValue: 'name',
       meta: {
-        description:
-          'Determines which field is used to sort the results.',
+        description: 'Determines which field is used to sort the results.',
       },
     })
   ),
