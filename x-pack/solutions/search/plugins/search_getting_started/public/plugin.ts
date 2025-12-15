@@ -59,7 +59,7 @@ export class SearchGettingStartedPlugin
 
         return renderApp(coreStart, services, element, queryClient);
       },
-      status: AppStatus.inaccessible,
+      status: AppStatus.accessible,
       updater$: this.appUpdater$,
       order: 1,
       visibleIn: ['globalSearch', 'sideNav'],
@@ -69,31 +69,16 @@ export class SearchGettingStartedPlugin
   }
 
   public start(core: CoreStart) {
-    // Combine both feature flag and user role checks
-    core.userProfile.getCurrent().then((userProfile) => {
-      const userRoles = userProfile?.user.roles || [];
-      const isViewerRole = userRoles.length === 1 && userRoles.includes('viewer');
-
-      // If viewer role, keep app inaccessible permanently
-      if (isViewerRole) {
+    this.featureFlagSubscription = core.featureFlags
+      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, true)
+      .subscribe((featureFlagEnabled) => {
+        const status: AppStatus = featureFlagEnabled
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
         this.appUpdater$.next(() => ({
-          status: AppStatus.inaccessible,
+          status,
         }));
-      } else {
-        // Subscribe to feature flag changes (only matters if not a viewer)
-        this.featureFlagSubscription = core.featureFlags
-          .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
-          .subscribe((featureFlagEnabled) => {
-            const status: AppStatus = featureFlagEnabled
-              ? AppStatus.accessible
-              : AppStatus.inaccessible;
-            this.appUpdater$.next(() => ({
-              status,
-            }));
-          });
-      }
-    });
-
+      });
     return {};
   }
 
