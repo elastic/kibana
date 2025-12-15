@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { isWhereBlock } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate5/react';
 import React from 'react';
 import { ConditionDisplay } from '../../../../shared';
@@ -38,7 +38,7 @@ export const WhereBlockSummary = ({
     stepRef.send({ type: 'step.edit' });
   };
 
-  if (!isWhereBlock(step)) return null;
+  if (!isConditionBlock(step)) return null;
 
   return (
     <EuiFlexGroup
@@ -61,7 +61,7 @@ export const WhereBlockSummary = ({
         onClick={onClick}
       >
         <ConditionDisplay
-          condition={step.where}
+          condition={step.condition}
           showKeyword={true}
           keyword="WHERE"
           keywordWrapper={(children) => (

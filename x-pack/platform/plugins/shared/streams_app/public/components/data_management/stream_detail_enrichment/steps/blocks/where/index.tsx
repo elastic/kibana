@@ -22,9 +22,9 @@ import useToggle from 'react-use/lib/useToggle';
 import { useConditionFilteringEnabled } from '../../../hooks/use_condition_filtering_enabled';
 import { isRootStep, isStepUnderEdit } from '../../../state_management/steps_state_machine';
 import {
+  useInteractiveModeSelector,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamEnrichmentSelector,
 } from '../../../state_management/stream_enrichment_state_machine';
 import { collectDescendantIds } from '../../../state_management/stream_enrichment_state_machine/utils';
 import { getStepPanelColour } from '../../../utils';
@@ -39,7 +39,7 @@ import { WhereBlockSummary } from './summary';
 export const WhereBlock = (props: StepConfigurationProps) => {
   const { stepRef, stepUnderEdit, rootLevelMap, stepsProcessingSummaryMap, level } = props;
   const { euiTheme } = useEuiTheme();
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+  const stepRefs = useInteractiveModeSelector((state) => state.context.stepRefs);
   const isFirstMount = useFirstMountState();
   const freshBlockRef = useRef<HTMLDivElement>(null);
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
@@ -55,7 +55,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
   const [isExpanded, toggle] = useToggle(true);
 
-  const childSteps = useStreamEnrichmentSelector((state) =>
+  const childSteps = useInteractiveModeSelector((state) =>
     state.context.stepRefs.filter(
       (ref) => ref.getSnapshot().context.step.parentId === step.customIdentifier
     )

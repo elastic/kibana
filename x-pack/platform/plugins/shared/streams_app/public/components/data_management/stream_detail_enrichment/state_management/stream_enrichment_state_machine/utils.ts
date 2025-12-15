@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { type StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,7 +28,6 @@ import {
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
 import type { StepActorRef } from '../steps_state_machine';
-import { isStepUnderEdit } from '../steps_state_machine';
 import type { StreamEnrichmentContextType } from './types';
 
 export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
@@ -97,62 +94,6 @@ export function getActiveDataSourceSamples(
   }));
 }
 
-/**
- * Gets processors for simulation based on current editing state.
- * - If no processor is being edited: returns all new processors
- * - If a processor is being edited: returns new processors up to and including the one being edited
- */
-export function getStepsForSimulation({
-  stepRefs,
-  isPartialSimulation,
-  selectedConditionId,
-}: Pick<StreamEnrichmentContextType, 'stepRefs'> & {
-  isPartialSimulation: boolean;
-  selectedConditionId?: string;
-}) {
-  let newStepSnapshots = stepRefs
-    .map((procRef) => procRef.getSnapshot())
-    .filter(
-      (snapshot) =>
-        isWhereBlock(snapshot.context.step) || (isPartialSimulation ? snapshot.context.isNew : true)
-    );
-
-  // Truncate to the selected condition subtree (and everything before it)
-  if (selectedConditionId) {
-    const conditionAndDescendants = collectDescendantIds(selectedConditionId, stepRefs);
-
-    conditionAndDescendants.add(selectedConditionId);
-
-    const lastIndex = newStepSnapshots.findLastIndex((snapshot) =>
-      conditionAndDescendants.has(snapshot.context.step.customIdentifier)
-    );
-
-    if (lastIndex !== -1) {
-      newStepSnapshots = newStepSnapshots.slice(0, lastIndex + 1);
-    }
-  }
-
-  // Find if any processor is currently being edited
-  const editingProcessorIndex = newStepSnapshots.findIndex(
-    (snapshot) => isActionBlock(snapshot.context.step) && isStepUnderEdit(snapshot)
-  );
-
-  // If a processor is being edited, set new processors up to and including the one being edited
-  if (editingProcessorIndex !== -1) {
-    newStepSnapshots = newStepSnapshots.slice(0, editingProcessorIndex + 1);
-  }
-
-  // Return processors
-  return newStepSnapshots.map((snapshot) => snapshot.context.step);
-}
-
-export function getConfiguredSteps(context: StreamEnrichmentContextType) {
-  return context.stepRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.matches('configured'))
-    .map((proc) => proc.context.step);
-}
-
 export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefinition | undefined {
   if (!context.simulatorRef) {
     return undefined;
@@ -178,26 +119,6 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
-
-export const spawnStep = <
-  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
->(
-  step: StreamlangStepWithUIAttributes,
-  assignArgs: TAssignArgs,
-  options?: { isNew: boolean; isUpdated?: boolean }
-) => {
-  const { spawn, self } = assignArgs;
-
-  return spawn('stepMachine', {
-    id: step.customIdentifier,
-    input: {
-      parentRef: self,
-      step,
-      isNew: options?.isNew ?? false,
-      isUpdated: options?.isUpdated ?? false,
-    },
-  });
-};
 
 export const spawnDataSource = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>

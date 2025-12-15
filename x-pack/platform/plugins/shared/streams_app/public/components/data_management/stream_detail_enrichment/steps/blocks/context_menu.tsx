@@ -13,13 +13,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
+import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate5/react';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
 import { useConditionFilteringEnabled } from '../../hooks/use_condition_filtering_enabled';
 import {
+  useInteractiveModeSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
@@ -90,25 +91,26 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
 }) => {
   const { reorderStep, duplicateProcessor, filterDocumentsByCondition } =
     useStreamEnrichmentEvents();
-  const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
-  const canDuplicate = useStreamEnrichmentSelector((snapshot) =>
+  const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const canDuplicate = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
   );
-  const canReorder = useStreamEnrichmentSelector(
+  const canReorder = useInteractiveModeSelector(
     (snapshot) =>
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'up' }) ||
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'down' })
   );
-  const canDelete = useStreamEnrichmentSelector((snapshot) =>
+  const canDelete = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.delete', id: stepRef.id })
   );
 
-  const stepRefs = useStreamEnrichmentSelector((snapshot) => snapshot.context.stepRefs);
+  const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
+
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
-  const isWhere = isWhereBlock(step);
+  const isWhere = isConditionBlock(step);
   const hasCustomDescription =
     isActionBlock(step) &&
     typeof step.description === 'string' &&
