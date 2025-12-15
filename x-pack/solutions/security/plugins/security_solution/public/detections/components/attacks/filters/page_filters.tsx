@@ -13,15 +13,13 @@ import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_f
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
 
-export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
@@ -30,33 +28,20 @@ export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
     persist: true,
     hideExists: true,
   },
-  {
-    title: 'Severity',
-    fieldName: 'kibana.alert.severity',
-    selectedOptions: [],
-    hideActionBar: true,
-    hideExists: true,
-  },
-  {
-    title: 'User',
-    fieldName: 'user.name',
-  },
-  {
-    title: 'Host',
-    fieldName: 'host.name',
-  },
 ];
+
+const RULE_TYPES = [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
 
 export type PageFiltersProps = Pick<
   AlertFilterControlsProps,
   'filters' | 'onFiltersChange' | 'query' | 'timeRange' | 'onInit'
 > & {
-  dataView: DataView | DataViewSpec;
+  dataView: DataView;
 };
 
-export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+const FILTER_CONTROLS_STORAGE_KEY = 'attacks-page-filters';
 
+export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
   const { http, notifications, dataViews } = useKibana().services;
   const services = useMemo(
     () => ({
@@ -84,31 +69,20 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
   );
 
   const setFilterControlsUrlState = useCallback(
-    (newFilterControls: FilterControlConfig[]) => {
-      urlStorage.set(URL_PARAM_KEY.pageFilter, newFilterControls);
-    },
+    (newFilterControls: FilterControlConfig[]) =>
+      urlStorage.set(URL_PARAM_KEY.pageFilter, newFilterControls),
     [urlStorage]
-  );
-
-  // TODO change to .getIndexPattern() once we remove the newDataViewPickerEnabled feature flag and we have a DataView object
-  const alertsIndicesTitle = useMemo(
-    () =>
-      dataView.title
-        ?.split(',')
-        .filter((index) => index.includes(DEFAULT_ALERTS_INDEX))
-        .join(','),
-    [dataView]
   );
 
   const customDataViewSpec = useMemo(
     () => ({
-      id: SECURITY_ALERT_DATA_VIEW.id,
-      name: SECURITY_ALERT_DATA_VIEW.name,
-      allowNoIndex: true,
-      title: alertsIndicesTitle,
-      timeFieldName: '@timestamp',
+      id: dataView.id,
+      name: dataView.name,
+      allowNoIndex: dataView.allowNoIndex,
+      title: dataView.getIndexPattern(),
+      timeFieldName: dataView.timeFieldName,
     }),
-    [alertsIndicesTitle]
+    [dataView]
   );
 
   const spaceId = useSpaceId();
@@ -122,13 +96,14 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
       ControlGroupRenderer={ControlGroupRenderer}
       controlsUrlState={filterControlsUrlState}
       dataViewSpec={customDataViewSpec}
-      defaultControls={DEFAULT_DETECTION_PAGE_FILTERS}
+      defaultControls={DEFAULT_ATTACKS_PAGE_FILTERS}
       maxControls={4}
-      preventCacheClearOnUnmount={newDataViewPickerEnabled}
-      ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
+      preventCacheClearOnUnmount={true}
+      ruleTypeIds={RULE_TYPES}
       services={services}
       setControlsUrlState={setFilterControlsUrlState}
       spaceId={spaceId}
+      storageKey={FILTER_CONTROLS_STORAGE_KEY}
       {...props}
     />
   );
