@@ -39,7 +39,9 @@
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/response-ops-recurring-schedule-form",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/shared-ux-router",
+    "@kbn/response-ops-rules-apis"
   ],
   "exclude": ["target/**/*"]
 }
