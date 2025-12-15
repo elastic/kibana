@@ -110,9 +110,15 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
   const onAgentBuildAttachmentClick = useCallback(() => {
+    // eslint-disable-next-line no-console
+    console.log('[EntityHighlightsSettings] onAgentBuildAttachmentClick called', {
+      hasOpenAgentBuilderFlyout: !!openAgentBuilderFlyout,
+      isLoading,
+      hasAssistantResult: !!assistantResult,
+    });
     openAgentBuilderFlyout();
     closePopover();
-  }, [closePopover, openAgentBuilderFlyout]);
+  }, [closePopover, openAgentBuilderFlyout, isLoading, assistantResult]);
 
   const items = useMemo(
     () => [
@@ -153,11 +159,11 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               }
             )}
             key={'ask-ai-assistant'}
-            disabled={isLoading || !assistantResult}
           >
             <NewAgentBuilderAttachment
-              onClick={isLoading || !assistantResult ? noop : onAgentBuildAttachmentClick}
+              onClick={onAgentBuildAttachmentClick}
               size="s"
+              disabled={isLoading || !assistantResult}
             />
           </EuiContextMenuItem>
         ) : (
