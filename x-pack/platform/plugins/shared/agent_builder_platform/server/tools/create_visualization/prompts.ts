@@ -35,14 +35,14 @@ ${JSON.stringify(schema, null, 2)}
 
 ${
   existingConfig
-    ? `Existing configuration to modify: 
+    ? `Existing configuration to modify:
   <existing_configuration>
   ${existingConfig}
   </existing_configuration>
   `
     : ''
 }
-  
+
 ${existingConfig ? `Existing configuration to modify: ${existingConfig}` : ''}
 
 ${additionalInstructions}
@@ -64,5 +64,6 @@ IMPORTANT: Return ONLY the JSON configuration wrapped in a markdown code block l
 
 ${additionalContext}`,
     ],
+    ['human', 'Generate the visualization configuration.'],
   ];
 };
