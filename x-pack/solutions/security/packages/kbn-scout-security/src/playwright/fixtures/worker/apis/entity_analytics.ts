@@ -10,7 +10,7 @@ import { measurePerformanceAsync } from '@kbn/scout';
 import type {
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
-} from '../../constants/entity_analytics';
+} from '../../../constants/entity_analytics';
 
 const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
 const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
