@@ -17,6 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
@@ -237,8 +238,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           promoId="inferenceEndpointManagement"
           isSelfManaged={!cloud?.isCloudEnabled}
           direction="row"
-          // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
-          navigateToApp={() => application.navigateToApp('cloud_connect')}
+          navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
         />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">

@@ -31,6 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { EisCloudConnectPromoTour } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { FieldType, isMapWithStringValues } from '../types/types';
@@ -550,8 +551,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           return (
             <EisCloudConnectPromoTour
               promoId="eisInferenceEndpointFlyout"
-              // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
-              navigateToApp={() => application.navigateToApp('cloud_connect')}
+              navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
               isSelfManaged={!cloud?.isCloudEnabled}
               isReady={isFlyoutOpen}
             >

@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { EisCloudConnectPromoCallout } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
@@ -58,8 +59,7 @@ export const IndexDetailsData = ({
         promoId="indexDetailsData"
         isSelfManaged={!cloud?.isCloudEnabled}
         direction="row"
-        // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
-        navigateToApp={() => application.navigateToApp('cloud_connect')}
+        navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
         addSpacer="top"
       />
       <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">

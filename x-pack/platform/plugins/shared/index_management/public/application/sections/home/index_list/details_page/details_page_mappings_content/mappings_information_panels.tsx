@@ -24,6 +24,7 @@ import {
   EisPromotionalCallout,
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import { documentationService } from '../../../../../services';
 import { useAppContext } from '../../../../../app_context';
@@ -96,8 +97,7 @@ export const MappingsInformationPanels = ({
           promoId="indexDetailsMappings"
           isSelfManaged={!cloud?.isCloudEnabled}
           direction="column"
-          // TODO: Replace app string with cloud connect deep link once this PR is merged: https://github.com/elastic/kibana/pull/245950/
-          navigateToApp={() => application.navigateToApp('cloud_connect')}
+          navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
         />
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
