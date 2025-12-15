@@ -16,11 +16,11 @@ import type { ToolFormData } from '../types/tool_form_types';
 import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
 import { ToolFormMode } from '../tool_form';
 
-interface ConfigurationProps {
+export interface TypeProps {
   mode: ToolFormMode;
 }
 
-export const Configuration = ({ mode }: ConfigurationProps) => {
+export const Type = ({ mode }: TypeProps) => {
   const {
     formState: { errors },
     control,
@@ -71,7 +71,7 @@ export const Configuration = ({ mode }: ConfigurationProps) => {
           )}
         />
       </EuiFormRow>
-      <ConfigurationComponent />
+      <ConfigurationComponent mode={mode} />
     </ToolFormSection>
   );
 };

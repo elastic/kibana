@@ -11,6 +11,8 @@ import type {
   SerializedOnechatError,
 } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { Tool as McpTool } from '@kbn/mcp-client';
+import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ToolTypeInfo } from '../tools';
 
 export interface ListToolsResponse {
@@ -167,4 +169,37 @@ export interface BulkCreateMcpToolsResponse {
     skipped: number;
     failed: number;
   };
+}
+
+export interface ConnectorItem {
+  id: string;
+  name: string;
+  actionTypeId: string;
+  config?: Record<string, unknown>;
+  isPreconfigured: boolean;
+  isDeprecated: boolean;
+  isSystemAction: boolean;
+  isMissingSecrets?: boolean;
+  isConnectorTypeDeprecated: boolean;
+}
+
+export interface McpConnectorItem extends ConnectorItem {
+  actionTypeId: typeof MCP_CONNECTOR_ID;
+  isPreconfigured: false;
+}
+
+export const isMcpConnectorItem = (connector: ConnectorItem): connector is McpConnectorItem => {
+  return connector.actionTypeId === MCP_CONNECTOR_ID;
+};
+
+export interface ListConnectorsResponse {
+  connectors: ConnectorItem[];
+}
+
+export interface GetConnectorResponse {
+  connector: ConnectorItem;
+}
+
+export interface ListMcpToolsResponse {
+  mcpTools: McpTool[];
 }

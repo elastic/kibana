@@ -6,28 +6,18 @@
  */
 
 import type { EuiMarkdownEditorRef } from '@elastic/eui';
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiMarkdownEditor,
-  EuiText,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFieldText, EuiFormRow, EuiMarkdownEditor } from '@elastic/eui';
 import React, { useRef } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import { ToolFormMode } from '../tool_form';
 import type { ToolFormData } from '../types/tool_form_types';
-export interface SystemReferencesProps {
+
+export interface DetailsProps {
   mode: ToolFormMode;
 }
-export const SystemReferences = ({ mode }: SystemReferencesProps) => {
-  const { euiTheme } = useEuiTheme();
+export const Details = ({ mode }: DetailsProps) => {
   const {
     control,
     formState: { errors },
@@ -43,41 +33,6 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
       title={i18nMessages.systemReferences.documentation.title}
       icon="bullseye"
       description={i18nMessages.systemReferences.documentation.description}
-      content={
-        <EuiFlexGroup
-          direction="column"
-          css={css`
-            background-color: ${euiTheme.colors.backgroundBaseSubdued};
-            padding: ${euiTheme.size.base};
-          `}
-        >
-          <EuiText color={euiTheme.colors.textHeading}>
-            <h4>{i18nMessages.systemReferences.documentation.fieldsHelp.title}</h4>
-          </EuiText>
-          <EuiFlexItem grow={0}>
-            <EuiText size="s">
-              <strong>{i18nMessages.systemReferences.documentation.fieldsHelp.toolId.label}</strong>
-              <EuiTextColor color="subdued">
-                <div>
-                  {i18nMessages.systemReferences.documentation.fieldsHelp.toolId.description}
-                </div>
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={0}>
-            <EuiText size="s">
-              <strong>
-                {i18nMessages.systemReferences.documentation.fieldsHelp.description.label}
-              </strong>
-              <EuiTextColor color="subdued">
-                <div>
-                  {i18nMessages.systemReferences.documentation.fieldsHelp.description.description}
-                </div>
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
     >
       <EuiFormRow
         data-test-subj="agentBuilderToolIdRow"

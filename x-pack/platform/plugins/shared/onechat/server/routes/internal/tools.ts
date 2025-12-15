@@ -8,6 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolType, validateToolId } from '@kbn/onechat-common';
+import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
+import type { ListToolsResponse } from '@kbn/mcp-client';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -21,11 +24,16 @@ import type {
   ListToolHealthResponse,
   BulkCreateMcpToolsResponse,
   BulkCreateMcpToolResult,
+  ListConnectorsResponse,
+  ConnectorItem,
+  ListMcpToolsResponse,
+  GetConnectorResponse,
 } from '../../../common/http_api/tools';
 import { validateConnector } from '../../services/tools/tool_types/mcp/validate_configuration';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 import { getToolTypeInfo } from '../../services/tools/utils';
+import { toConnectorItem } from '../utils';
 
 export function registerInternalToolsRoutes({
   router,
@@ -421,6 +429,124 @@ export function registerInternalToolsRoutes({
 
       return response.ok<GetToolHealthResponse>({
         body: { health },
+      });
+    })
+  );
+
+  // list connectors (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_list_connectors`,
+      validate: {
+        query: schema.object({
+          type: schema.maybe(schema.string()),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+      const allConnectors = await actionsClient.getAll();
+
+      const { type } = request.query;
+
+      const connectors: ConnectorItem[] = allConnectors
+        .filter((connector) => (type ? connector.actionTypeId === type : true))
+        .map(toConnectorItem);
+
+      return response.ok<ListConnectorsResponse>({
+        body: {
+          connectors,
+        },
+      });
+    })
+  );
+
+  // get connector by ID (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_get_connector/{connectorId}`,
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+      const { connectorId } = request.params;
+
+      const connector = await actionsClient.get({ id: connectorId });
+
+      return response.ok<GetConnectorResponse>({
+        body: {
+          connector: toConnectorItem(connector),
+        },
+      });
+    })
+  );
+
+  // list MCP tools (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_list_mcp_tools`,
+      validate: {
+        query: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+
+      const { connectorId } = request.query;
+
+      const connector = await actionsClient.get({ id: connectorId });
+
+      if (connector.actionTypeId !== MCP_CONNECTOR_ID) {
+        response.badRequest({
+          body: {
+            message: `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_ID}', got '${connector.actionTypeId}'`,
+          },
+        });
+      }
+
+      const executeResult = (await actionsClient.execute({
+        actionId: request.query.connectorId,
+        params: {
+          subAction: 'listTools',
+        },
+      })) as ActionTypeExecutorResult<ListToolsResponse>;
+
+      if (executeResult.status === 'error') {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to list MCP tools for connector '${connectorId}': ${executeResult.message}`,
+          },
+        });
+      }
+
+      const mcpTools = executeResult.data?.tools ?? [];
+
+      return response.ok<ListMcpToolsResponse>({
+        body: {
+          mcpTools,
+        },
       });
     })
   );
