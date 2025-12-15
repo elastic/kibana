@@ -6,7 +6,14 @@
  */
 import React from 'react';
 import type { EuiConfirmModalProps } from '@elastic/eui';
-import { EuiCallOut, EuiCodeBlock, EuiConfirmModal, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiConfirmModal,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export function ConverToEsqlModal({
@@ -57,7 +64,19 @@ export function ConverToEsqlModal({
       <EuiSpacer size="l" />
 
       {queryCount === 1 ? (
-        <EuiCodeBlock isCopyable>{Object.entries(queries)[0][1]}</EuiCodeBlock>
+        <>
+          <EuiText size="xs" component="div">
+            <p>
+              <strong>
+                {i18n.translate('xpack.lens.config.queryPreviewDescription', {
+                  defaultMessage: 'Query preview',
+                })}
+              </strong>
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock isCopyable>{Object.entries(queries)[0][1]}</EuiCodeBlock>
+        </>
       ) : null}
     </EuiConfirmModal>
   );
