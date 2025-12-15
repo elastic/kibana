@@ -61,6 +61,7 @@ export {
   getInferenceEndpoints,
   getEditorExtensions,
   hasDateBreakdown,
+  getProjectRoutingFromEsqlQuery,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';
