@@ -91,6 +91,27 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       tabInitialInternalState = cloneDeep(tabState.initialInternalState);
     }
 
+    if (esqlControls) {
+      tabInitialInternalState = {
+        ...tabInitialInternalState,
+        controlGroupJson: JSON.stringify(esqlControls),
+      };
+
+      dispatch(
+        internalStateSlice.actions.setControlGroupState({
+          tabId,
+          controlGroupState: esqlControls,
+        })
+      );
+
+      dispatch(
+        internalStateSlice.actions.setEsqlVariables({
+          tabId,
+          esqlVariables: extractEsqlVariables(esqlControls),
+        })
+      );
+    }
+
     // Get a snapshot of the current URL state before any async work is done
     // to avoid race conditions if the URL changes during tab initialization,
     // e.g. if the user quickly switches tabs
@@ -236,16 +257,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     if (getState().tabs.unsafeCurrentId === tabId) {
       // Push the tab's initial search session ID to the URL if one exists,
       // unless it should be overridden by a search session ID already in the URL
-      if (esqlControls) {
-        savedSearch.controlGroupJson = JSON.stringify(esqlControls);
-        dispatch(
-          internalStateSlice.actions.setEsqlVariables({
-            tabId,
-            esqlVariables: extractEsqlVariables(esqlControls),
-          })
-        );
-      }
-
       if (
         tabInitialInternalState?.searchSessionId &&
         !searchSessionManager.hasSearchSessionIdInURL()
