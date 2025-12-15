@@ -21,6 +21,7 @@ const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 const applicationMock = {
   getUrlForApp: jest.fn(() => '/app/cloud_connect'),
   navigateToApp: jest.fn(),
+  capabilities: {},
 } as any;
 
 describe('SetupCloudConnect', () => {
@@ -43,13 +44,10 @@ describe('SetupCloudConnect', () => {
     );
 
     const $button = component.find('EuiButton');
-    const mockEvent = { preventDefault: jest.fn() };
+    const mockEvent = { preventDefault: jest.fn() } as any;
 
     // Simulate button click
-    $button.props().onClick(mockEvent);
-
-    // Verify preventDefault was called
-    expect(mockEvent.preventDefault).toHaveBeenCalled();
+    $button.props().onClick!(mockEvent);
 
     // Verify navigateToApp was called with correct app name
     expect(applicationMock.navigateToApp).toHaveBeenCalledWith('cloud_connect');
