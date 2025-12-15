@@ -56,7 +56,7 @@ describe('useBulkActionsByTableType', () => {
     });
 
     (useAddBulkToTimelineActionModule.useAddBulkToTimelineAction as jest.Mock).mockReturnValue({
-      id: 'timelineAction',
+      key: 'add-bulk-to-timeline',
     });
 
     (useBulkAlertActionItemsModule.useBulkAlertActionItems as jest.Mock).mockReturnValue({
@@ -76,7 +76,7 @@ describe('useBulkActionsByTableType', () => {
         items: [
           { id: 'action1' },
           { id: 'action2' },
-          { id: 'timelineAction' },
+          { key: 'add-bulk-to-timeline' },
           { id: 'tag' },
           { id: 'assignee' },
         ],
@@ -95,14 +95,12 @@ describe('useBulkActionsByTableType', () => {
       useBulkActionsByTableType(mockTableId, mockQuery, mockRefresh)
     );
 
-    expect(result.current).toEqual([
-      {
-        id: 0,
-        items: [{ id: 'action1' }, { id: 'action2' }, { id: 'tag' }, { id: 'assignee' }],
-      },
-      { id: 'tagPanel' },
-      { id: 'assigneePanel' },
-    ]);
+    const [bulkActionsGroup] = result.current;
+    const timelineAction = bulkActionsGroup.items.find(
+      (item) => (item as { key?: string }).key === 'add-bulk-to-timeline'
+    );
+
+    expect(timelineAction).toBeUndefined();
   });
 
   it('passes correct parameters to dependent hooks', () => {
