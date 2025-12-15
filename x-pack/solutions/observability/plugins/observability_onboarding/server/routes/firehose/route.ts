@@ -78,7 +78,7 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
      * and can be installed separately in case it fails to install
      * during onboarding.
      */
-    packageClient.ensureInstalledPackage({ pkgName: 'aws' }).catch((error) => {
+    packageClient.ensureInstalledPackage({ pkgName: 'aws', spaceId }).catch((error) => {
       logger.error(`Failed installing AWS package: ${error}`);
     });
 
