@@ -95,7 +95,7 @@ export function SignificantEventsGenerationPanel({
               <EuiTitle size="xs">
                 <h4>
                   {i18n.translate(
-                    'xpack.streams.significantEvents.noFeatures.generationContextTitle',
+                    'xpack.streams.significantEvents.significantEventsGenerationPanel.generationContextTitle',
                     {
                       defaultMessage: 'Generation context',
                     }
@@ -104,10 +104,13 @@ export function SignificantEventsGenerationPanel({
               </EuiTitle>
 
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.streams.significantEvents.noFeatures.description', {
-                  defaultMessage:
-                    'Features are logical subsets of your data and they provide the best context for generation sigificant events generation.',
-                })}
+                {i18n.translate(
+                  'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
+                  {
+                    defaultMessage:
+                      'Features are logical subsets of your data and they provide the best context for generation sigificant events generation.',
+                  }
+                )}
               </EuiText>
             </EuiFlexItem>
 
@@ -136,7 +139,7 @@ export function SignificantEventsGenerationPanel({
                 onClick: () => onGenerateSuggestionsClick(),
                 'data-test-subj': 'significant_events_generate_suggestions_button',
                 children: i18n.translate(
-                  'xpack.streams.significantEvents.emptyState.generateSuggestionsButtonLabel',
+                  'xpack.streams.significantEvents.significantEventsGenerationPanel.generateSuggestionsButtonLabel',
                   {
                     defaultMessage: 'Generate suggestions',
                   }
@@ -157,9 +160,12 @@ export function SignificantEventsGenerationPanel({
 
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.streams.significantEvents.noFeatures.orStartWithLabel', {
-                    defaultMessage: 'or start with',
-                  })}
+                  {i18n.translate(
+                    'xpack.streams.significantEvents.significantEventsGenerationPanel.orStartWithLabel',
+                    {
+                      defaultMessage: 'or start with',
+                    }
+                  )}
                 </EuiText>
               </EuiFlexItem>
 
@@ -180,7 +186,7 @@ export function SignificantEventsGenerationPanel({
                       isDisabled: isLoadingGeneration,
                       'data-test-subj': 'significant_events_identify_features_button',
                       children: i18n.translate(
-                        'xpack.streams.significantEvents.noFeatures.featureIdentificationButtonLabel',
+                        'xpack.streams.significantEvents.significantEventsGenerationPanel.featureIdentificationButtonLabel',
                         {
                           defaultMessage: 'Identify features',
                         }
@@ -196,12 +202,12 @@ export function SignificantEventsGenerationPanel({
                     size="s"
                     color="text"
                     fill={false}
-                    data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                    data-test-subj="significant_events_manual_entry_button"
                     onClick={onManualEntryClick}
                     iconType="plusInCircle"
                   >
                     {i18n.translate(
-                      'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
+                      'xpack.streams.significantEvents.significantEventsGenerationPanel.manualEntryButtonLabel',
                       {
                         defaultMessage: 'Manual entry',
                       }
