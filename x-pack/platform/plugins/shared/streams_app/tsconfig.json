@@ -94,6 +94,7 @@
     "@kbn/discover-contextual-components",
     "@kbn/es-types",
     "@kbn/esql-utils",
+    "@kbn/traced-es-client",
     "@kbn/streamlang-yaml-editor",
     "@kbn/tooling-log",
     "@kbn/inference-common",
