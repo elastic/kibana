@@ -18,7 +18,6 @@ import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeFiltersManager } from './filters_manager';
 import { getLastSavedState } from './default_dashboard_state';
@@ -305,7 +304,7 @@ export function getDashboardApi({
     api: {
       ...dashboardApi,
       ...searchSessionManager.api,
-    },
+    } as DashboardApi,
     internalApi,
     cleanup: () => {
       dataLoadingManager.cleanup();
