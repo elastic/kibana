@@ -9,7 +9,7 @@
 
 import { BasicPrettyPrinter } from '../../pretty_print';
 import type { ESQLProperNode } from '../../types';
-import { Walker } from '../../walker/walker';
+import { Walker } from '../../ast/walker/walker';
 import { exp } from '../expression';
 
 test('can generate integer literal', () => {
