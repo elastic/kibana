@@ -41,7 +41,7 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
 export function getRequestConfig(
   headers: object,
   esConfig: ESConfigForProxy
-): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
+): { agent: Agent; timeout: number; headers: object } {
   const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
   const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
 
@@ -96,10 +96,7 @@ export const createHandler =
 
       // Because this can technically be provided by a settings-defined proxy config, we need to
       // preserve these property names to maintain BWC.
-      const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
-        request.headers,
-        legacyConfig
-      );
+      const { timeout, agent, headers } = getRequestConfig(request.headers, legacyConfig);
 
       const requestHeaders = {
         ...headers,
@@ -117,7 +114,6 @@ export const createHandler =
         uri,
         timeout,
         payload: body,
-        rejectUnauthorized,
         agent,
       });
     } catch (e) {
