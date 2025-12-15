@@ -846,7 +846,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
 
-    test(`returns empty authorization map for partially authorized if the authorized types are not part of the query`, async () => {
+    test(`passes an empty type map to the query when partially authorized but no types are authorized for find or are hidden`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
