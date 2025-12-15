@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProxyConfig } from './proxy_config';
 export { proxyRequest } from './proxy_request';
 export { getElasticsearchProxyConfig } from './elasticsearch_proxy_config';
 export { setHeaders } from './set_headers';
