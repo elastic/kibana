@@ -20,7 +20,32 @@ import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from './constants';
+
+export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    hideActionBar: true,
+    persist: true,
+    hideExists: true,
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+    hideActionBar: true,
+    hideExists: true,
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
 
 export type PageFiltersProps = Pick<
   AlertFilterControlsProps,
