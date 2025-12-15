@@ -57,7 +57,7 @@ export function SloEditPage() {
           ]
         : []),
       {
-        text: sloId
+        text: isEditMode
           ? i18n.translate('xpack.slo.breadcrumbs.sloEditLabel', {
               defaultMessage: 'Edit',
             })
