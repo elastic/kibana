@@ -16,6 +16,7 @@ export interface AutoOpsPromotionCalloutProps {
   learnMoreLink: string;
   cloudConnectUrl?: string;
   onConnectClick?: (e: React.MouseEvent) => void;
+  hasCloudConnectPermission?: boolean;
   overrideCalloutProps?: Partial<Omit<EuiCallOutProps, 'children' | 'title' | 'onDismiss'>>;
 }
 
@@ -25,6 +26,7 @@ export const AutoOpsPromotionCallout = ({
   learnMoreLink,
   cloudConnectUrl = '/app/cloud_connect',
   onConnectClick,
+  hasCloudConnectPermission,
   overrideCalloutProps = {},
 }: AutoOpsPromotionCalloutProps) => {
   const [isDismissed, setIsDismissed] = useState(false);
@@ -44,6 +46,18 @@ export const AutoOpsPromotionCallout = ({
   if (isDismissed) {
     return null;
   }
+
+  // Determine button behavior based on cloudConnect permission
+  const buttonProps = hasCloudConnectPermission === false
+    ? {
+        href: 'https://cloud.elastic.co/connect-cluster-services-portal',
+        target: '_blank' as const,
+        rel: 'noopener noreferrer',
+      }
+    : {
+        href: cloudConnectUrl,
+        onClick: onConnectClick,
+      };
 
   return (
     <EuiCallOut
@@ -79,8 +93,7 @@ export const AutoOpsPromotionCallout = ({
         color="accent"
         fill
         size="s"
-        href={cloudConnectUrl}
-        onClick={onConnectClick}
+        {...buttonProps}
         data-test-subj="autoOpsPromotionCalloutConnectButton"
       >
         <FormattedMessage

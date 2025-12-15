@@ -30,6 +30,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       application: {
         getUrlForApp: jest.fn(() => '/app/cloud_connect'),
         navigateToApp: jest.fn(),
+        capabilities: {
+          cloudConnect: {
+            show: true,
+            configure: true,
+          },
+        },
       },
     },
   }),

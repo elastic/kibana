@@ -50,6 +50,10 @@ export const ManagementLandingPage = ({
     e.preventDefault();
     coreStart.application.navigateToApp('cloud_connect');
   };
+  const hasCloudConnectPermission = Boolean(
+    coreStart.application.capabilities.cloudConnect?.show ||
+      coreStart.application.capabilities.cloudConnect?.configure
+  );
 
   useEffect(() => {
     onAppMounted('');
@@ -88,6 +92,7 @@ export const ManagementLandingPage = ({
                 learnMoreLink={learnMoreLink}
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
+                hasCloudConnectPermission={hasCloudConnectPermission}
                 overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
               />
             </div>

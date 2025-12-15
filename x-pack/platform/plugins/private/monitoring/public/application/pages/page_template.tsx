@@ -73,6 +73,10 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
     e.preventDefault();
     services.application.navigateToApp('cloud_connect');
   };
+  const hasCloudConnectPermission = Boolean(
+    services.application.capabilities.cloudConnect?.show ||
+      services.application.capabilities.cloudConnect?.configure
+  );
 
   const getPageDataResponseHandler = useCallback(
     (result: any) => {
@@ -149,6 +153,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
             learnMoreLink={learnMoreLink}
             cloudConnectUrl={cloudConnectUrl}
             onConnectClick={handleConnectClick}
+            hasCloudConnectPermission={hasCloudConnectPermission}
           />
         )}
         <EuiSpacer size="m" />

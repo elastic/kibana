@@ -60,6 +60,10 @@ export function NoData(props) {
     e.preventDefault();
     services.application.navigateToApp('cloud_connect');
   };
+  const hasCloudConnectPermission = Boolean(
+    services.application.capabilities.cloudConnect?.show ||
+      services.application.capabilities.cloudConnect?.configure
+  );
 
   async function startSetup() {
     setIsLoading(true);
@@ -133,6 +137,7 @@ export function NoData(props) {
                 learnMoreLink={learnMoreLink}
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
+                hasCloudConnectPermission={hasCloudConnectPermission}
                 overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
               />
               <EuiSpacer size="m" />
@@ -187,6 +192,7 @@ export function NoData(props) {
               learnMoreLink={learnMoreLink}
               cloudConnectUrl={cloudConnectUrl}
               onConnectClick={handleConnectClick}
+              hasCloudConnectPermission={hasCloudConnectPermission}
               overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
             />
             <EuiSpacer size="m" />
