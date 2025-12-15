@@ -141,6 +141,56 @@ describe('Case view helpers', () => {
           [fieldName]: [`${type}-123`, `${type}-123-abc`],
         });
       });
+
+      it(`filters out ${type} comments with empty string ${fieldName}`, () => {
+        const caseData = {
+          ...basicCase,
+          comments: [
+            { ...commentTemplate, [fieldName]: '' },
+            { ...commentTemplate, [fieldName]: `${type}-123` },
+          ],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, '123');
+        expect(result.comments).toHaveLength(1);
+        expect(result.comments[0]).toEqual({
+          ...commentTemplate,
+          [fieldName]: [`${type}-123`],
+        });
+      });
+
+      it(`filters out ${type} comments with empty array ${fieldName}`, () => {
+        const caseData = {
+          ...basicCase,
+          comments: [
+            { ...commentTemplate, [fieldName]: [] },
+            { ...commentTemplate, [fieldName]: `${type}-123` },
+          ],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, '123');
+        expect(result.comments).toHaveLength(1);
+        expect(result.comments[0]).toEqual({
+          ...commentTemplate,
+          [fieldName]: [`${type}-123`],
+        });
+      });
+
+      it(`filters out empty strings from array ${fieldName} while keeping valid IDs`, () => {
+        const caseData = {
+          ...basicCase,
+          comments: [
+            {
+              ...commentTemplate,
+              [fieldName]: ['', `${type}-123`, '', `${type}-456`],
+            },
+          ],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, '123');
+        expect(result.comments).toHaveLength(1);
+        expect(result.comments[0]).toEqual({
+          ...commentTemplate,
+          [fieldName]: [`${type}-123`],
+        });
+      });
     });
   });
 });

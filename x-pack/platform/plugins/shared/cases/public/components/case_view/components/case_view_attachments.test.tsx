@@ -153,16 +153,34 @@ describe('Case View Attachments tab', () => {
     expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
   });
 
-  it('shows the alerts tab with the correct count', async () => {
+  it('shows the alerts tab based on totalAlerts when search is not applied', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={{ ...caseData, totalAlerts: 3 }}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    const badge = await screen.findByTestId('case-view-alerts-stats-badge');
+
+    expect(badge).toHaveTextContent('3');
+  });
+
+  it('shows the alerts tab based on alert comment count when search is applied', async () => {
     const alerts = Array.from({ length: 3 }, (_, i) => ({
       ...alertCommentWithIndices,
       id: `alert-${i}`,
     }));
     renderWithTestingProviders(
       <CaseViewAttachments
-        caseData={{ ...caseData, comments: alerts }}
+        caseData={{ ...caseData, totalAlerts: 5, comments: alerts }}
         activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
         onSearch={onSearchMock}
+        searchTerm="search"
       />,
       {
         wrapperProps: { license: basicLicense },
@@ -326,14 +344,10 @@ describe('Case View Attachments tab', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display the events tab with correct count when the feature is enabled', async () => {
-    const events = Array.from({ length: 4 }, (_, i) => ({
-      ...eventComment,
-      id: `event-${i}`,
-    }));
+  it('should display the events tab based on totalEvents when the feature is enabled and search is not applied', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
-        caseData={{ ...caseData, comments: events }}
+        caseData={{ ...caseData, totalEvents: 4 }}
         activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
         onSearch={onSearchMock}
       />,
@@ -346,6 +360,29 @@ describe('Case View Attachments tab', () => {
 
     const badge = await screen.findByTestId('case-view-events-stats-badge');
     expect(badge).toHaveTextContent('4');
+  });
+
+  it('should display the events tab with correct count when the feature is enabled', async () => {
+    const events = Array.from({ length: 2 }, (_, i) => ({
+      ...eventComment,
+      id: `event-${i}`,
+    }));
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={{ ...caseData, totalEvents: 4, comments: events }}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+        searchTerm="search"
+      />,
+      {
+        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
+      }
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
+
+    const badge = await screen.findByTestId('case-view-events-stats-badge');
+    expect(badge).toHaveTextContent('2');
   });
 
   it('should not display the events tab when the feature is disabled', async () => {

@@ -30,7 +30,7 @@ const filterAlertCommentByIds = (
   searchTerm: string
 ): AlertAttachmentUI | null => {
   const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-  const filteredIds = ids.filter((id: string) => id.includes(searchTerm));
+  const filteredIds = ids.filter((id: string) => Boolean(id) && id.includes(searchTerm));
   if (filteredIds.length === 0) {
     return null;
   }
@@ -49,7 +49,7 @@ const filterEventCommentByIds = (
   searchTerm: string
 ): EventAttachmentUI | null => {
   const ids = Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId];
-  const filteredIds = ids.filter((id: string) => id.includes(searchTerm));
+  const filteredIds = ids.filter((id: string) => Boolean(id) && id.includes(searchTerm));
   if (filteredIds.length === 0) {
     return null;
   }

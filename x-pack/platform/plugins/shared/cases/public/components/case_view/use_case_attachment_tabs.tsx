@@ -209,27 +209,33 @@ export const useCaseAttachmentTabs = ({
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
-  const totalAlerts = useMemo(() => {
-    return features.alerts.enabled
-      ? caseData.comments
-          .filter((comment) => comment.type === AttachmentType.alert)
-          .map((comment) => comment.alertId)
-          .flat().length
-      : 0;
-  }, [features.alerts.enabled, caseData.comments]);
-
-  const totalEvents = useMemo(() => {
-    return features.events.enabled
-      ? caseData.comments
-          .filter((comment) => comment.type === AttachmentType.event)
-          .map((comment) => comment.eventId)
-          .flat().length
-      : 0;
-  }, [features.events.enabled, caseData.comments]);
+  const stats = useMemo(() => {
+    if (!searchTerm) {
+      return {
+        totalAlerts: Number(caseData.totalAlerts),
+        totalEvents: Number(caseData.totalEvents),
+      };
+    }
+    return caseData.comments.reduce(
+      (acc, comment) => {
+        if (comment.type === AttachmentType.alert && features.alerts.enabled) {
+          acc.totalAlerts = Array.isArray(comment.alertId)
+            ? acc.totalAlerts + comment.alertId.length
+            : acc.totalAlerts + 1;
+        } else if (comment.type === AttachmentType.event && features.events.enabled) {
+          acc.totalEvents = Array.isArray(comment.eventId)
+            ? acc.totalEvents + comment.eventId.length
+            : acc.totalEvents + 1;
+        }
+        return acc;
+      },
+      { totalEvents: 0, totalAlerts: 0 }
+    );
+  }, [searchTerm, features, caseData]);
 
   const totalAttachments =
-    totalAlerts +
-    totalEvents +
+    stats.totalAlerts +
+    stats.totalEvents +
     Number(fileStatsData?.total) +
     (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
 
@@ -243,7 +249,7 @@ export const useCaseAttachmentTabs = ({
               badge: (
                 <AlertsBadge
                   isExperimental={features.alerts.isExperimental}
-                  totalAlerts={totalAlerts}
+                  totalAlerts={stats.totalAlerts}
                   activeTab={activeTab}
                   euiTheme={euiTheme}
                 />
@@ -257,7 +263,11 @@ export const useCaseAttachmentTabs = ({
               id: CASE_VIEW_PAGE_TABS.EVENTS,
               name: EVENTS_TAB,
               badge: (
-                <EventsBadge totalEvents={totalEvents} activeTab={activeTab} euiTheme={euiTheme} />
+                <EventsBadge
+                  totalEvents={stats.totalEvents}
+                  activeTab={activeTab}
+                  euiTheme={euiTheme}
+                />
               ),
             },
           ]
@@ -294,8 +304,8 @@ export const useCaseAttachmentTabs = ({
     [
       activeTab,
       canShowObservableTabs,
-      totalAlerts,
-      totalEvents,
+      stats.totalAlerts,
+      stats.totalEvents,
       euiTheme,
       features.alerts.enabled,
       features.alerts.isExperimental,
