@@ -133,7 +133,6 @@ export const ENTITY_RISK_SCORE_TOOL: AssistantTool = {
 
         const data = {
           ...latestRiskScore,
-          // modifiers already in latestRiskScore from PR #244634
           inputs: enhancedInputs,
           id_value: input.identifier, // Replace id_value for the anonymized identifier to avoid leaking user data
         };
