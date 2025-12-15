@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+/* eslint-disable no-continue */
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -106,6 +106,7 @@ export const listEntitiesRoute = (
     );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function lowercaseEntityKeysForProperties<T extends Record<string, any>>(
   obj: T,
   properties: string[]
