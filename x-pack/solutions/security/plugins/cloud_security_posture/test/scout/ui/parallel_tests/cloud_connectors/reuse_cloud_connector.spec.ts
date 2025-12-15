@@ -23,10 +23,10 @@ function createMockAgentlessPolicyResponse(
   const mockConnectorId = connectorId || `mock-connector-${Date.now()}`;
 
   // Convert legacy inputs format to array format for the response
-  const inputsArray = Object.entries(requestBody.inputs).map(([type, input]) => ({
+  const inputsArray = Object.entries(requestBody.inputs ?? {}).map(([type, input]) => ({
     type,
     enabled: input.enabled,
-    streams: Object.entries(input.streams).map(([streamKey, stream]) => ({
+    streams: Object.entries(input.streams ?? {}).map(([streamKey, stream]) => ({
       enabled: stream.enabled,
       data_stream: { type: 'logs', dataset: streamKey },
       vars: stream.vars,
@@ -204,13 +204,13 @@ spaceTest.describe(
         expect(capturedRequestBody!.name).toBe(integrationName);
 
         // Validate the AWS input and stream vars
-        const awsInputKey = Object.keys(capturedRequestBody!.inputs).find((key) =>
+        const awsInputKey = Object.keys(capturedRequestBody!.inputs ?? {}).find((key) =>
           key.includes(AWS_INPUT_KEY_PATTERN)
         );
         expect(awsInputKey).toBeDefined();
 
-        const awsInput = capturedRequestBody!.inputs[awsInputKey!];
-        const findingsStream = awsInput.streams[FINDINGS_STREAM_KEY];
+        const awsInput = capturedRequestBody!.inputs![awsInputKey!];
+        const findingsStream = awsInput.streams![FINDINGS_STREAM_KEY];
         expect(findingsStream).toBeDefined();
         expect(findingsStream.vars).toBeDefined();
         expect(findingsStream.vars![AWS_CREDENTIALS_TYPE_KEY]).toBe(
@@ -301,13 +301,13 @@ spaceTest.describe(
         expect(capturedRequestBody!.name).toBe(integrationName);
 
         // Validate the Azure input and stream vars
-        const azureInputKey = Object.keys(capturedRequestBody!.inputs).find((key) =>
+        const azureInputKey = Object.keys(capturedRequestBody!.inputs ?? {}).find((key) =>
           key.includes(AZURE_INPUT_KEY_PATTERN)
         );
         expect(azureInputKey).toBeDefined();
 
-        const azureInput = capturedRequestBody!.inputs[azureInputKey!];
-        const findingsStream = azureInput.streams[FINDINGS_STREAM_KEY];
+        const azureInput = capturedRequestBody!.inputs![azureInputKey!];
+        const findingsStream = azureInput.streams![FINDINGS_STREAM_KEY];
         expect(findingsStream).toBeDefined();
         expect(findingsStream.vars).toBeDefined();
         expect(findingsStream.vars![AZURE_CREDENTIALS_TYPE_KEY]).toBe(

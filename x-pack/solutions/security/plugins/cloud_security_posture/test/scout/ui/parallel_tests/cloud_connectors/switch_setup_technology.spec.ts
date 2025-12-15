@@ -27,10 +27,10 @@ function createMockAgentlessPolicyResponse(requestBody: AgentlessPolicyRequestBo
   const mockConnectorId = `mock-connector-${Date.now()}`;
 
   // Convert legacy inputs format to array format for the response
-  const inputsArray = Object.entries(requestBody.inputs).map(([type, input]) => ({
+  const inputsArray = Object.entries(requestBody.inputs ?? {}).map(([type, input]) => ({
     type,
     enabled: input.enabled,
-    streams: Object.entries(input.streams).map(([streamKey, stream]) => ({
+    streams: Object.entries(input.streams ?? {}).map(([streamKey, stream]) => ({
       enabled: stream.enabled,
       data_stream: { type: 'logs', dataset: streamKey },
       vars: stream.vars,
@@ -131,7 +131,7 @@ spaceTest.describe(
         expect(awsInputKey).toBeDefined();
 
         const awsInput = capturedRequestBody!.inputs![awsInputKey!];
-        const findingsStream = awsInput.streams['cloud_security_posture.findings'];
+        const findingsStream = awsInput.streams!['cloud_security_posture.findings'];
         expect(findingsStream).toBeDefined();
         expect(findingsStream.vars).toBeDefined();
 
@@ -210,7 +210,7 @@ spaceTest.describe(
         expect(azureInputKey).toBeDefined();
 
         const azureInput = capturedRequestBody!.inputs![azureInputKey!];
-        const findingsStream = azureInput.streams['cloud_security_posture.findings'];
+        const findingsStream = azureInput.streams!['cloud_security_posture.findings'];
         expect(findingsStream).toBeDefined();
         expect(findingsStream.vars).toBeDefined();
 
