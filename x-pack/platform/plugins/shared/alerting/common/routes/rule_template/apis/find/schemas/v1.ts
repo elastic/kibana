@@ -12,6 +12,7 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
   per_page: schema.number({
     defaultValue: 10,
     min: 0,
+    max: 100,
     meta: {
       description: 'The number of rule templates to return per page.',
     },
