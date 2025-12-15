@@ -8,6 +8,6 @@ fileGroups:
 
 tasks:
   source:
-    script: 'echo noop > /dev/null'
+    script: 'echo noop'
     inputs:
       - "@group(src)"
