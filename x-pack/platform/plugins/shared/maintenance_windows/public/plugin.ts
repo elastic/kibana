@@ -17,7 +17,7 @@ export class MaintenanceWindowsPublicPlugin
   implements
     Plugin<
       void,
-      {},
+      void,
       MaintenanceWindowsPublicSetupDependencies,
       MaintenanceWindowsPublicStartDependencies
     >
@@ -48,12 +48,11 @@ export class MaintenanceWindowsPublicPlugin
         });
       },
     });
-    return {};
+
+    return;
   }
 
-  public start() {
-    return {};
-  }
+  public start(): void {}
 
-  public stop() {}
+  public stop(): void {}
 }

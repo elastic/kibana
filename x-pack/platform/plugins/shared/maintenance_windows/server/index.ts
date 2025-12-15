@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { MaintenanceWindowClient as MaintenanceWindowClientClass } from './client';
-import type { MaintenanceWindowsConfig } from './config';
-import { configSchema } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { MaintenanceWindowsPlugin } = await import('./plugin');
   return new MaintenanceWindowsPlugin(initContext);
-};
-
-export const config: PluginConfigDescriptor<MaintenanceWindowsConfig> = {
-  schema: configSchema,
 };
 
 export type {
@@ -27,7 +21,5 @@ export type {
 } from './types';
 
 export type MaintenanceWindowClient = PublicMethodsOf<MaintenanceWindowClientClass>;
-
-export type { MaintenanceWindowsConfig } from './config';
 
 export { maintenanceWindowCategoryIdTypes } from './application/constants';
