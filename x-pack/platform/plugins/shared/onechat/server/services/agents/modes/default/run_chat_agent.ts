@@ -8,13 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
-import {
-  ChatAgentEvent,
-  ConversationRound,
-  ConversationRoundStatus,
-  RoundInput,
-} from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/onechat-server';
 import type { StructuredTool } from '@langchain/core/tools';
 import {
@@ -23,9 +17,11 @@ import {
   extractRound,
   prepareConversation,
   selectTools,
+  getPendingRound,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
+import { ensureValidInput } from '../utils/preflight_checks';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
@@ -62,15 +58,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   },
   { logger, request, modelProvider, toolProvider, promptManager, attachments, events }
 ) => {
-  // TODO: do preflight checks
+  ensureValidInput({ input: nextInput, conversation });
 
-  let pendingRound: ConversationRound | undefined;
-  if (conversation?.rounds.length) {
-    const lastRound = conversation.rounds[conversation.rounds.length - 1];
-    if (lastRound.status === ConversationRoundStatus.awaitingPrompt) {
-      pendingRound = lastRound;
-    }
-  }
+  const pendingRound = getPendingRound(conversation);
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -190,7 +180,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   /////
   // throw new Error('dev mode')
-  throw new Error('dev mode\n' + JSON.stringify(round, undefined, 2));
+  // throw new Error('dev mode\n' + JSON.stringify(round, undefined, 2));
   /////
 
   return {

@@ -5,31 +5,36 @@
  * 2.0.
  */
 
+import { createBadRequestError } from '@kbn/onechat-common/base/errors';
 import type { Conversation, RawRoundInput } from '@kbn/onechat-common';
 import { ConversationRoundStatus } from '@kbn/onechat-common';
 
-const preflightChecks = ({
+export const ensureValidInput = ({
   input,
   conversation,
 }: {
   input: RawRoundInput;
   conversation?: Conversation;
 }) => {
-  if (conversation) {
-    const status = conversation.rounds[conversation.rounds.length - 1].status;
-    if (status === ConversationRoundStatus.interruptionPending) {
-      if (!hasInterruptInput(input)) {
-        // TODO: throw error
-      }
-    } else {
-      if (!hasStandardInput(input)) {
-        // TODO: throw error
-      }
-    }
-  } else {
+  const lastRoundStatus = conversation?.rounds.length
+    ? conversation.rounds[conversation.rounds.length - 1].status
+    : ConversationRoundStatus.completed;
+
+  // standard scenario - we need input to continue
+  if (lastRoundStatus === ConversationRoundStatus.completed) {
     if (!hasStandardInput(input)) {
-      // TODO: throw error
+      throw createBadRequestError(`No standard input was provided to continue the conversation.`);
     }
+  }
+
+  // prompt pending - we need a prompt response to continue
+  if (lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
+    if (!hasPromptResponse(input)) {
+      throw createBadRequestError(
+        `Conversation is awaiting a prompt response, but none was provided.`
+      );
+    }
+    // todo: validate the prompt shape
   }
 };
 
@@ -37,6 +42,6 @@ const hasStandardInput = (input: RawRoundInput): boolean => {
   return input.message !== undefined || (input.attachments?.length ?? 0) > 0;
 };
 
-const hasInterruptInput = (input: RawRoundInput): boolean => {
-  return input.interrupt_response !== undefined && Object.keys(input.interrupt_response).length > 0;
+const hasPromptResponse = (input: RawRoundInput): boolean => {
+  return input.prompt_response !== undefined && Object.keys(input.prompt_response).length > 0;
 };
