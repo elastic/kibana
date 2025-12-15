@@ -445,6 +445,22 @@ describe('structurally can walk all nodes', () => {
           },
         ]);
       });
+
+      test('can walk thtough columns with qualified names', () => {
+        const query = 'FROM index | KEEP [index].[a]';
+        const { ast } = parse(query);
+        const columns: ESQLColumn[] = [];
+        walk(ast, {
+          visitColumn: (node) => columns.push(node),
+        });
+        expect(columns).toMatchObject([
+          {
+            type: 'column',
+            name: '[index].[a]',
+            qualifier: { name: 'index' },
+          },
+        ]);
+      });
     });
 
     describe('functions', () => {
