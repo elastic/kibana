@@ -85,7 +85,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const { enhanceRules, isLoading } = useEnhanceRules();
 
     const onFileParsed = useCallback((content: string) => {
-      const parsed = JSON.parse(content) as QRadarMitreMappingsData;
+      const parsed: QRadarMitreMappingsData = JSON.parse(content);
       setParsedData(parsed);
     }, []);
 
@@ -142,9 +142,9 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
 
     const typeOptions = useMemo(
       () =>
-        QRADAR_ENHANCEMENT_OPTS.map((option) => ({
-          value: option.value,
-          inputDisplay: option.inputDisplay,
+        Array.from(QRADAR_ENHANCEMENT_OPTS.keys()).map((enhancementType) => ({
+          value: enhancementType,
+          inputDisplay: QRADAR_ENHANCEMENT_OPTS.get(enhancementType),
         })),
       []
     );
@@ -211,10 +211,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
               {addedEnhancements.map((enhancement, index) => (
                 <EuiFlexItem key={index}>
                   <EuiText size="s">
-                    {`${
-                      QRADAR_ENHANCEMENT_OPTS.find((opt) => opt.value === enhancement.type)
-                        ?.inputDisplay
-                    } - ${enhancement.fileName}`}
+                    {`${QRADAR_ENHANCEMENT_OPTS.get(enhancement.type)} - ${enhancement.fileName}`}
                   </EuiText>
                 </EuiFlexItem>
               ))}

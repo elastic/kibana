@@ -10,18 +10,11 @@ export enum EnhancementType {
   // Future enhancement types can be added here
 }
 
-export interface EnhancementTypeOption {
-  value: EnhancementType;
-  inputDisplay: string;
-}
+export type EnhancementTypeOption = Map<EnhancementType, string>;
 
-export const QRADAR_ENHANCEMENT_OPTS: EnhancementTypeOption[] = [
-  {
-    value: EnhancementType.MITRE,
-    inputDisplay: 'MITRE ATT&CK Mappings',
-  },
-  // Future options can be added here
-];
+export const QRADAR_ENHANCEMENT_OPTS: EnhancementTypeOption = new Map([
+  [EnhancementType.MITRE, 'MITRE ATT&CK Mappings'],
+]);
 
 export interface AddedEnhancement {
   type: EnhancementType;
