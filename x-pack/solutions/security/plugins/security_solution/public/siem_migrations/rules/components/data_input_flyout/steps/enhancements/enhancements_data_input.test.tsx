@@ -38,6 +38,10 @@ describe('EnhancementsDataInput', () => {
     jest.clearAllMocks();
     useAppToastsMock.mockReturnValue({
       addError: addErrorMock,
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      addInfo: jest.fn(),
+      remove: jest.fn(),
     });
 
     (useEnhanceRules as jest.Mock).mockReturnValue({
@@ -47,21 +51,21 @@ describe('EnhancementsDataInput', () => {
     });
   });
 
-  it('renders step number', () => {
+  it('should render step number when component is mounted', () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     expect(getByTestId('enhancementsStepNumber')).toBeInTheDocument();
     expect(getByTestId('enhancementsStepNumber')).toHaveTextContent('2');
   });
 
-  it('renders title', () => {
+  it('should render title when component is mounted', () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     expect(getByTestId('enhancementsTitle')).toBeInTheDocument();
     expect(getByTestId('enhancementsTitle')).toHaveTextContent('Add enhancements');
   });
 
-  it('renders content when step is current and migrationStats is provided', () => {
+  it('should render content when step is current and migrationStats is provided', () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     expect(getByTestId('enhancementTypeSelect')).toBeInTheDocument();
@@ -69,7 +73,7 @@ describe('EnhancementsDataInput', () => {
     expect(getByTestId('addEnhancementButton')).toBeInTheDocument();
   });
 
-  it('does not render content when step is not current', () => {
+  it('should not render content when step is not current', () => {
     const { queryByTestId } = render(
       <EnhancementsDataInput {...defaultProps} dataInputStep={QradarDataInputStep.Rules} />
     );
@@ -79,7 +83,7 @@ describe('EnhancementsDataInput', () => {
     expect(queryByTestId('addEnhancementButton')).not.toBeInTheDocument();
   });
 
-  it('does not render content when migrationStats is undefined', () => {
+  it('should not render content when migrationStats is undefined', () => {
     const { queryByTestId } = render(
       <EnhancementsDataInput {...defaultProps} migrationStats={undefined} />
     );
@@ -89,13 +93,13 @@ describe('EnhancementsDataInput', () => {
     expect(queryByTestId('addEnhancementButton')).not.toBeInTheDocument();
   });
 
-  it('disables Add button when no file is selected', () => {
+  it('should disable Add button when no file is selected', () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     expect(getByTestId('addEnhancementButton')).toBeDisabled();
   });
 
-  it('enables Add button when a valid JSON file is selected', async () => {
+  it('should enable Add button when a valid JSON file is selected', async () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     const validJsonContent = JSON.stringify({
@@ -124,7 +128,7 @@ describe('EnhancementsDataInput', () => {
     });
   });
 
-  it('shows error and keeps Add button disabled for invalid JSON file', async () => {
+  it('should show error and keep Add button disabled when invalid JSON file is selected', async () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     const invalidJsonContent = 'not valid json {{{';
@@ -142,7 +146,7 @@ describe('EnhancementsDataInput', () => {
     });
   });
 
-  it('calls enhanceRules when Add button is clicked', async () => {
+  it('should call enhanceRules when Add button is clicked', async () => {
     mockEnhanceRules.mockResolvedValue(true);
 
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
@@ -186,7 +190,7 @@ describe('EnhancementsDataInput', () => {
     });
   });
 
-  it('adds enhancement to list after successful upload', async () => {
+  it('should add enhancement to list when upload is successful', async () => {
     mockEnhanceRules.mockResolvedValue(true);
 
     const { getByTestId, getByText } = render(<EnhancementsDataInput {...defaultProps} />);
@@ -219,7 +223,7 @@ describe('EnhancementsDataInput', () => {
     });
   });
 
-  it('shows empty state message when no enhancements added', () => {
+  it('should show empty state message when no enhancements are added', () => {
     const { getByText } = render(<EnhancementsDataInput {...defaultProps} />);
 
     expect(
@@ -229,7 +233,7 @@ describe('EnhancementsDataInput', () => {
     ).toBeInTheDocument();
   });
 
-  it('disables controls when loading', () => {
+  it('should disable controls when loading', () => {
     (useEnhanceRules as jest.Mock).mockReturnValue({
       enhanceRules: mockEnhanceRules,
       isLoading: true,
@@ -241,7 +245,7 @@ describe('EnhancementsDataInput', () => {
     expect(getByTestId('enhancementTypeSelect')).toBeDisabled();
   });
 
-  it('should raise error toast if JSON parsing fails', async () => {
+  it('should raise error toast when JSON parsing fails', async () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     const invalidJsonContent = 'not valid json {{{';
