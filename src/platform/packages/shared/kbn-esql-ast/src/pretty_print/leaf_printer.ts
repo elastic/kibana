@@ -62,30 +62,7 @@ export const LeafPrinter = {
 
   column: (node: ESQLColumn) => {
     const printColumnFromArgs = (args: (ESQLIdentifier | ESQLParam)[]) => {
-      let formatted = '';
-      for (const arg of args) {
-        switch (arg.type) {
-          case 'identifier': {
-            if (formatted.length > 0) {
-              formatted += '.';
-            }
-
-            formatted += LeafPrinter.identifier(arg);
-
-            break;
-          }
-          case 'literal': {
-            if (formatted.length > 0) {
-              formatted += '.';
-            }
-
-            formatted += LeafPrinter.literal(arg);
-
-            break;
-          }
-        }
-      }
-      return formatted;
+      return args.map(LeafPrinter.print).join('.');
     };
 
     if (node.qualifier) {
