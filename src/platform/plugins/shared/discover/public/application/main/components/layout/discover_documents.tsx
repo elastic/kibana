@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
@@ -182,8 +183,10 @@ function DiscoverDocumentsComponent({
 
   const cascadeConfig = useReadCascadeConfig();
 
-  const registerCascadeRequestsInspectorAdapter = useCallback(
-    (requestAdapter: RequestAdapter) => {
+  const registerCascadeRequestsInspectorAdapter = useCallback<
+    NonNullable<ComponentProps<typeof DiscoverGrid>['registerCascadeRequestsInspectorAdapter']>
+  >(
+    (requestAdapter) => {
       stateContainer.dataState.inspectorAdapters.cascadeRequests = requestAdapter;
     },
     [stateContainer.dataState.inspectorAdapters]

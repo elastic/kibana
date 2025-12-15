@@ -77,7 +77,7 @@ const ESQLDataCascade = React.memo(
     const { scopedProfilesManager } = useScopedServices();
     const { expressions } = useDiscoverServices();
 
-    const cascadeRequestsInspectorAdapter = useRef<RequestAdapter | null>(new RequestAdapter());
+    const cascadeRequestsInspectorAdapter = useRef<RequestAdapter>(new RequestAdapter());
 
     useEffect(() => {
       registerCascadeRequestsInspectorAdapter(cascadeRequestsInspectorAdapter.current);

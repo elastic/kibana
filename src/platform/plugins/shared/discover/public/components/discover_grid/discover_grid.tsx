@@ -16,6 +16,7 @@ import {
 } from '@kbn/unified-data-table';
 import type { AggregateQuery } from '@kbn/es-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
@@ -57,6 +58,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   externalAdditionalControls: customExternalAdditionalControls,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   onFullScreenChange,
+  registerCascadeRequestsInspectorAdapter,
   cascadeConfig,
   ...props
 }) => {
@@ -145,6 +147,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
         cascadeConfig={cascadeConfig!}
         onUpdateESQLQuery={onUpdateESQLQuery!}
         cascadeGroupingChangeHandler={cascadeGroupingChangeHandler}
+        registerCascadeRequestsInspectorAdapter={registerCascadeRequestsInspectorAdapter!}
       />
     </Suspense>
   ) : (

@@ -245,7 +245,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     useEffect(() => {
       // propagate localized changes of the data grid density,
       // so that other rows can use the same density value
-      onUpdateDataGridDensity(cascadeDataGridDensityState);
+      onUpdateDataGridDensity?.(cascadeDataGridDensityState);
     }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
@@ -330,6 +330,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           onFullScreenChange={setIsCellInFullScreenMode}
           externalCustomRenderers={externalCustomRenderers}
           paginationMode="infinite"
+          sampleSizeState={cellData.length}
         />
       </EuiPanel>
     );

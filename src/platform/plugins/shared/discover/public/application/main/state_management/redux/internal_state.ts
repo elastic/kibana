@@ -341,7 +341,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{ cascadeUiState: TabState['uiState']['cascadedDocuments'] }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.cascadedDocuments = action.payload.cascadeUiState;
       }),
   },
@@ -463,7 +463,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: (action, listenerApi) => {
       const { services } = listenerApi.extra;
 
-      withTab(listenerApi.getState(), action, ({ appState, uiState, id: tabId }) => {
+      withTab(listenerApi.getState(), action.payload, ({ appState, uiState, id: tabId }) => {
         if (
           isOfAggregateQueryType(appState.query) &&
           services.discoverFeatureFlags.getCascadeLayoutEnabled()
