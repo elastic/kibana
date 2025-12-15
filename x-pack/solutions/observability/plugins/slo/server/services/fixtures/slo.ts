@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   CreateSLOParams,
   HistogramIndicator,
@@ -23,13 +22,10 @@ import type {
   KQLCustomIndicator,
   MetricCustomIndicator,
   SLODefinition,
-  StoredSLODefinition,
 } from '../../domain/models';
 import { Duration, DurationUnit } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
 import { twoMinute } from './duration';
 import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
-import { toStoredSLO } from '../slo_definition_repository';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
