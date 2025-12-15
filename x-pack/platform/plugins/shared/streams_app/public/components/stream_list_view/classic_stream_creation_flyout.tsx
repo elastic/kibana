@@ -154,6 +154,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       onCreate={handleCreate}
       onCreateTemplate={handleCreateTemplate}
       templates={templatesListFetch.value || []}
+      isLoadingTemplates={templatesListFetch.loading}
       hasErrorLoadingTemplates={!!templatesListFetch.error}
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}

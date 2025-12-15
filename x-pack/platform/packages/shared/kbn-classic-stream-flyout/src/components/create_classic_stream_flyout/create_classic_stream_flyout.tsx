@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -65,6 +66,8 @@ interface CreateClassicStreamFlyoutProps {
   onCreateTemplate: () => void;
   /** Available index templates to select from */
   templates: IndexTemplate[];
+  /** Whether templates are currently being loaded */
+  isLoadingTemplates?: boolean;
   /** Whether there was an error loading templates */
   hasErrorLoadingTemplates?: boolean;
   /** Callback to retry loading templates */
@@ -87,6 +90,7 @@ export const CreateClassicStreamFlyout = ({
   onCreate,
   onCreateTemplate,
   templates,
+  isLoadingTemplates = false,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
   onValidate,
@@ -197,6 +201,15 @@ export const CreateClassicStreamFlyout = ({
   const renderCurrentStepContent = () => {
     switch (currentStep) {
       case ClassicStreamStep.SELECT_TEMPLATE:
+        if (isLoadingTemplates) {
+          return (
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
         return (
           <SelectTemplateStep
             templates={templates}
