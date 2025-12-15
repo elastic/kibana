@@ -9,7 +9,7 @@
 
 import { Parser, parse } from '..';
 import { EsqlQuery } from '../../query';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('function AST nodes', () => {
   describe('"variadic-call"', () => {
