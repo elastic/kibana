@@ -128,7 +128,6 @@ describe('MCP tool_type', () => {
         })
       ).rejects.toThrow('Failed to list MCP tools');
     });
-
   });
 
   describe('getMcpToolType', () => {
