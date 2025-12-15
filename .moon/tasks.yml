@@ -7,7 +7,11 @@ fileGroups:
     - "/tsconfig.browser.json"
 
 tasks:
+  env: # prints env variables in the context of a moon project
+    script: 'env'
+    options:
+      cache: false
   source:
-    script: 'echo noop'
+    script: "echo source-check at $MOON_PROJECT_ID@$MOON_TASK_HASH"
     inputs:
       - "@group(src)"
