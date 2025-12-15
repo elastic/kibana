@@ -4211,7 +4211,7 @@
             "label": "solution",
             "description": [],
             "signature": [
-              "\"security\" | \"observability\" | \"stack\""
+              "\"stack\" | \"security\" | \"observability\""
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,

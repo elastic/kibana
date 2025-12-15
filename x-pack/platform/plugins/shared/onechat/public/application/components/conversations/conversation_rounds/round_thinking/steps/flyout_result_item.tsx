@@ -29,6 +29,7 @@ interface FlyoutResultItemProps {
   flyoutResultItems: ToolResult[];
   onOpenFlyout: (results: ToolResult[]) => void;
   icon?: ReactNode;
+  textColor?: string;
 }
 
 export const FlyoutResultItem: React.FC<FlyoutResultItemProps> = ({
@@ -37,12 +38,13 @@ export const FlyoutResultItem: React.FC<FlyoutResultItemProps> = ({
   flyoutResultItems,
   onOpenFlyout,
   icon,
+  textColor,
 }) => {
   const responseId = `tool-response-${stepIndex}-${step.tool_id}`;
   const inspectButtonId = `inspect-response-${stepIndex}-${step.tool_id}`;
 
   return (
-    <ThinkingItemLayout icon={icon}>
+    <ThinkingItemLayout icon={icon} textColor={textColor}>
       <EuiText size="s">
         <p id={responseId} role="status" aria-label={labels.toolResponse}>
           <FormattedMessage
