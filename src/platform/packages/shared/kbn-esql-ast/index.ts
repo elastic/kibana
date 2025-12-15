@@ -33,15 +33,8 @@ export type {
   ESQLForkParens,
 } from './src/types';
 
-export * from './src/ast/is';
-export * from './src/ast/location';
-
-export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
-
 export * from './src/parser';
-
-export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
-
+export * from './src/ast';
 export * as synth from './src/synth';
 export { qry, cmd, exp } from './src/synth';
 export * from './src/composer';
@@ -58,10 +51,6 @@ export {
 } from './src/pretty_print';
 
 export { EsqlQuery } from './src/query';
-
-export * as mutate from './src/mutate';
-
-export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';
 
 export * from './src/commands';
 // temporary export to ease migration
