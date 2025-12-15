@@ -36,6 +36,7 @@ import { render } from '../../utils/test_helper';
 import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
+import {} from './components/slo_list_search_bar';
 
 const mockHistoryReplace = jest.fn();
 const mockHistoryPush = jest.fn();
@@ -59,6 +60,7 @@ jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_create_data_view');
+jest.mock('./components/slo_list_search_bar');
 jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
