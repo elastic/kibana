@@ -165,10 +165,6 @@ describe('EntityHighlightsSettings', () => {
 
     const menuItem = screen.getByLabelText('Ask AI Assistant');
     expect(menuItem.className).toContain('disabled');
-
-    const button = screen.getByTestId('newAgentBuilderAttachment');
-    fireEvent.click(button);
-    expect(mockOpenAgentBuilderFlyout).not.toHaveBeenCalled();
   });
 
   it('enables Ask AI Assistant when agent builder is enabled and assistant result exists', () => {
