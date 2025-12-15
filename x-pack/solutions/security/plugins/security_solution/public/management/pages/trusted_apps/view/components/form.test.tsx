@@ -429,7 +429,7 @@ describe('Trusted apps form', () => {
       afterEach(() => {
         cleanup();
       });
-      
+
       it('should update tags to include "form_mode:advanced" and show advanced mode warning', async () => {
         await userEvent.click(getAdvancedModeToggle());
 
@@ -630,7 +630,7 @@ describe('Trusted apps form', () => {
           render();
 
           // Click the "Process Descendants" button to ensure it's selected
-           await userEvent.click(
+          await userEvent.click(
             renderResult.getByTestId('trustedApps-filterProcessDescendantsButton')
           );
 
@@ -649,7 +649,9 @@ describe('Trusted apps form', () => {
 
           // The process descendants tag should be present in the tags array
           const expectedAfterSwitchBack = createOnChangeArgs({
-            item: createItem({ tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG] }),
+            item: createItem({
+              tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+            }),
           });
           expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchBack);
         });
