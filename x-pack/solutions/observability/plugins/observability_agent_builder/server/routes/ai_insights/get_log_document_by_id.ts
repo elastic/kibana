@@ -7,6 +7,15 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+export interface LogDocument {
+  '@timestamp'?: string;
+  service?: {
+    name?: string;
+    environment?: string;
+  };
+  [key: string]: unknown;
+}
+
 export const getLogDocumentById = async ({
   esClient,
   index,
@@ -16,7 +25,7 @@ export const getLogDocumentById = async ({
   index: string;
   id: string;
 }): Promise<Record<string, unknown> | undefined> => {
-  const result = await esClient.get<Record<string, unknown>>({
+  const result = await esClient.get<LogDocument>({
     index,
     id,
   });

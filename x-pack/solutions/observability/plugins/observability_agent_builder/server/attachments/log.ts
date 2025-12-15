@@ -19,7 +19,7 @@ import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/dat
 import { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
 import { getLogDocumentById } from '../routes/ai_insights/get_log_document_by_id';
 
-const GET_LOG_DETAILS_TOOL_ID = 'get_log_details';
+const GET_LOG_DOCUMENT_TOOL_ID = 'get_log_document';
 
 const logDataSchema = z.object({
   id: z.string(),
@@ -55,13 +55,13 @@ export function createLogAttachmentType({
       return {
         getRepresentation: () => ({
           type: 'text',
-          value: `Observability Log ID: ${index}:${id}. Use the ${GET_LOG_DETAILS_TOOL_ID} tool to fetch full log information.`,
+          value: `Observability Log ID: ${index}:${id}. Use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch full log document.`,
         }),
         getBoundedTools: () => [
           {
-            id: GET_LOG_DETAILS_TOOL_ID,
+            id: GET_LOG_DOCUMENT_TOOL_ID,
             type: ToolType.builtin,
-            description: `Fetch the full log information for log ${index}:${id}.`,
+            description: `Fetch the log document for ${index}:${id}.`,
             schema: z.object({}),
             handler: async (_args, context) => {
               try {
@@ -78,12 +78,12 @@ export function createLogAttachmentType({
                   results: [
                     {
                       type: ToolResultType.other,
-                      data: logDetails,
+                      data: logEntry,
                     },
                   ],
                 };
               } catch (error) {
-                logger.error(`Failed to fetch log details for attachment: ${error?.message}`);
+                logger.error(`Failed to fetch log document for attachment: ${error?.message}`);
                 logger.debug(error);
 
                 return {
@@ -91,7 +91,7 @@ export function createLogAttachmentType({
                     {
                       type: ToolResultType.error,
                       data: {
-                        message: `Failed to fetch log details: ${error.message}`,
+                        message: `Failed to fetch log document: ${error.message}`,
                         stack: error.stack,
                       },
                     },

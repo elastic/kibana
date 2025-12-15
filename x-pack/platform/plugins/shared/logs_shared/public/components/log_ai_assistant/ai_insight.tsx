@@ -59,7 +59,7 @@ export function LogEntryAgentBuilderAiInsight({
       setContext(response?.context);
     } catch (e) {
       setSummary('');
-      setContext('');
+      setSummaryContext('');
     } finally {
       setIsLoading(false);
     }
