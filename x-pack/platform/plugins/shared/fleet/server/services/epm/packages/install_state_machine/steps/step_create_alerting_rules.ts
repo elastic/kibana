@@ -161,23 +161,24 @@ export async function stepCreateAlertingRules(
     return assetResults;
   }
 
-  // User scoped ES client is required to ensure the ESQL that is validated is authorized to the indexes used
-  // An internal ES client will fail on non managed indexes.
-  const userRequest = createKibanaRequestFromAuth(authorizationHeader);
-  const userEsClient = appContextService.getUserScopedESClient(userRequest);
-
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
   if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
     return assetResults;
   }
+
   await withPackageSpan('Install elastic agent rules', async () => {
     const rulesClient = context.authorizationHeader
       ? await appContextService
           .getAlertingStart()
           ?.getRulesClientWithRequest(createKibanaRequestFromAuth(context.authorizationHeader))
       : undefined;
+
+    // User scoped ES client is required to ensure the ESQL that is validated is authorized to the indexes used
+    // An internal ES client will fail on non managed indexes.
+    const userRequest = createKibanaRequestFromAuth(authorizationHeader);
+    const userEsClient = appContextService.getUserScopedESClient(userRequest);
 
     const alertTemplateAssets: ArchiveAsset[] = [];
     await packageInstallContext.archiveIterator.traverseEntries(
