@@ -17,7 +17,6 @@ import {
   getCloudConnectorNameFromPackagePolicy,
   extractAccountType,
 } from './integration_helpers';
-import { incrementCloudConnectorPackageCount } from './lifecycle';
 
 /**
  * Result of cloud connector integration with a package policy
@@ -100,9 +99,6 @@ export async function createAndIntegrateCloudConnector(params: {
           `Cloud connector ${existingCloudConnectorId} is for ${existingConnector.cloudProvider} but policy requires ${cloudProvider}`
         );
       }
-
-      // Increment the usage count
-      await incrementCloudConnectorPackageCount(soClient, existingCloudConnectorId, logger);
 
       logger.info(`Successfully reused cloud connector: ${existingCloudConnectorId}`);
 

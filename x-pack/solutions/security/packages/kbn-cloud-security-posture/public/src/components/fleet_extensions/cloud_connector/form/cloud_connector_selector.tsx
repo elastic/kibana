@@ -15,6 +15,7 @@ import {
   EuiTextTruncate,
   EuiButtonIcon,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -141,6 +142,18 @@ export const CloudConnectorSelector = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AccountBadge accountType={connector.accountType} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="default">
+                {i18n.translate(
+                  'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.integrationCountBadge',
+                  {
+                    defaultMessage:
+                      'Used by {count, plural, one {# integration} other {# integrations}}',
+                    values: { count: connector.packagePolicyCount },
+                  }
+                )}
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

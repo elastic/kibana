@@ -20,7 +20,11 @@ import type {
   CreateCloudConnectorRequest,
   UpdateCloudConnectorRequest,
 } from '../../common/types/rest_spec/cloud_connector';
-import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common/constants';
+import {
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../common/constants';
 import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
@@ -73,6 +77,68 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
    */
   private static normalizeName(name: string): string {
     return name.trim().replace(/\s+/g, ' ');
+  }
+
+  /**
+   * Queries package policies to get a map of cloud connector IDs to their package policy counts.
+   * This is used to compute packagePolicyCount dynamically instead of storing it.
+   * @param soClient - Saved objects client
+   * @returns Map of cloud connector ID to package policy count
+   */
+  private async getPackagePolicyCountsMap(
+    soClient: SavedObjectsClientContract
+  ): Promise<Map<string, number>> {
+    const logger = this.getLogger('getPackagePolicyCountsMap');
+
+    try {
+      const packagePolicies = await soClient.find<{ cloud_connector_id?: string }>({
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`,
+        perPage: SO_SEARCH_LIMIT,
+        fields: ['cloud_connector_id'],
+      });
+
+      const countMap = new Map<string, number>();
+      packagePolicies.saved_objects.forEach((policy) => {
+        const connectorId = policy.attributes.cloud_connector_id;
+        if (connectorId) {
+          countMap.set(connectorId, (countMap.get(connectorId) || 0) + 1);
+        }
+      });
+
+      return countMap;
+    } catch (error) {
+      logger.error(`Failed to get package policy counts: ${error.message}`);
+      return new Map();
+    }
+  }
+
+  /**
+   * Gets the package policy count for a specific cloud connector.
+   * @param soClient - Saved objects client
+   * @param cloudConnectorId - ID of the cloud connector
+   * @returns The number of package policies using this cloud connector
+   */
+  private async getPackagePolicyCount(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string
+  ): Promise<number> {
+    const logger = this.getLogger('getPackagePolicyCount');
+
+    try {
+      const result = await soClient.find<{ cloud_connector_id?: string }>({
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`,
+        perPage: 0, // We only need the count
+      });
+
+      return result.total;
+    } catch (error) {
+      logger.error(
+        `Failed to get package policy count for connector ${cloudConnectorId}: ${error.message}`
+      );
+      return 0;
+    }
   }
 
   /**
@@ -144,7 +210,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudProvider,
         accountType: cloudConnector.accountType,
         vars,
-        packagePolicyCount: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -156,9 +221,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       logger.info('Successfully created cloud connector');
 
+      // packagePolicyCount is computed dynamically - new connectors start with 1
+      // since they're created alongside a package policy
       return {
         id: savedObject.id,
         ...savedObject.attributes,
+        packagePolicyCount: 1,
       };
     } catch (error) {
       logger.error(
@@ -202,11 +270,19 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>(findOptions);
 
+      // Only compute package policy counts if we're fetching all fields
+      // (not when using fields filter for internal queries like duplicate name checking)
+      const shouldComputeCounts = !options?.fields;
+      const countMap = shouldComputeCounts
+        ? await this.getPackagePolicyCountsMap(soClient)
+        : new Map<string, number>();
+
       logger.debug('Successfully retrieved cloud connectors list');
 
       return cloudConnectors.saved_objects.map((savedObject) => ({
         id: savedObject.id,
         ...savedObject.attributes,
+        packagePolicyCount: countMap.get(savedObject.id) || 0,
       }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list', error.message);
@@ -230,11 +306,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudConnectorId
       );
 
+      // Compute packagePolicyCount dynamically
+      const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
+
       logger.info(`Successfully retrieved cloud connector ${cloudConnectorId}`);
 
       return {
         id: cloudConnector.id,
         ...cloudConnector.attributes,
+        packagePolicyCount,
       };
     } catch (error) {
       logger.error('Failed to get cloud connector', error.message);
@@ -301,6 +381,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
 
+      const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
+
       // Return the updated cloud connector with merged attributes
       const mergedAttributes = {
         ...existingCloudConnector.attributes,
@@ -310,6 +392,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: cloudConnectorId,
         ...mergedAttributes,
+        packagePolicyCount,
       };
     } catch (error) {
       logger.error(
@@ -331,23 +414,26 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     try {
       logger.info(`Deleting cloud connector ${cloudConnectorId} (force: ${force})`);
 
-      // First, get the cloud connector to check packagePolicyCount
+      // First, get the cloud connector to get its name for error messages
       const cloudConnector = await soClient.get<CloudConnectorSOAttributes>(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         cloudConnectorId
       );
 
+      // Query actual package policy count dynamically (source of truth)
+      const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
+
       // Check if cloud connector is still in use by package policies (unless force is true)
-      if (!force && cloudConnector.attributes.packagePolicyCount > 0) {
-        const errorMessage = `Cannot delete cloud connector "${cloudConnector.attributes.name}" as it is being used by ${cloudConnector.attributes.packagePolicyCount} package policies`;
+      if (!force && packagePolicyCount > 0) {
+        const errorMessage = `Cannot delete cloud connector "${cloudConnector.attributes.name}" as it is being used by ${packagePolicyCount} package policies`;
         logger.error(errorMessage);
         throw new CloudConnectorDeleteError(errorMessage);
       }
 
       // Log a warning if force deleting a connector that's still in use
-      if (force && cloudConnector.attributes.packagePolicyCount > 0) {
+      if (force && packagePolicyCount > 0) {
         logger.warn(
-          `Force deleting cloud connector "${cloudConnector.attributes.name}" which is still being used by ${cloudConnector.attributes.packagePolicyCount} package policies`
+          `Force deleting cloud connector "${cloudConnector.attributes.name}" which is still being used by ${packagePolicyCount} package policies`
         );
       }
 
