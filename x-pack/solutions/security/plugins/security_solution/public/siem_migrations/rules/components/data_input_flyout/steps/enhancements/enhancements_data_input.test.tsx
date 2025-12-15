@@ -8,12 +8,12 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { EnhancementsDataInput } from './enhancements_data_input';
-import { QradarDataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import { MigrationSource, type MigrationStepProps } from '../../../../../common/types';
 import * as useAppToastsModule from '../../../../../../common/hooks/use_app_toasts';
+import { QradarDataInputStep } from '../../types';
 
 jest.mock('../../../../service/hooks/use_enhance_rules');
 
@@ -51,7 +51,7 @@ describe('EnhancementsDataInput', () => {
     const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
 
     expect(getByTestId('enhancementsStepNumber')).toBeInTheDocument();
-    expect(getByTestId('enhancementsStepNumber')).toHaveTextContent('2');
+    expect(getByTestId('enhancementsStepNumber')).toHaveTextContent('3');
   });
 
   it('should render title when component is mounted', () => {

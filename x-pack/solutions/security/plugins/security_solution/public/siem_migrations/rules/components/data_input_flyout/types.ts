@@ -13,6 +13,7 @@ export type OnResourcesCreated = () => void;
 export enum QradarDataInputStepId {
   Rules = 'qradar_rules',
   ReferenceSet = 'qradar_reference_set',
+  Enhancements = 'qradar_enhancements',
 }
 
 export enum QradarDataInputStep {
