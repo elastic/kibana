@@ -14,7 +14,7 @@ import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { isColumn, isOptionNode } from '../../../../ast/is';
-import { SuggestionCategory } from '../../../../sorting/types';
+import { SuggestionCategory } from '../../../../shared/sorting/types';
 
 export const METADATA_FIELDS = [
   '_version',
