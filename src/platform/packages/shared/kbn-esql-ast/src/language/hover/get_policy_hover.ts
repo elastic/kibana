@@ -32,13 +32,13 @@ export async function getPolicyHover(
     result.push(
       ...[
         {
-          value: `${i18n.translate('kbn-esql-validation-autocomplete.esql.hover.policyIndexes', {
+          value: `${i18n.translate('kbn-esql-ast.esql.hover.policyIndexes', {
             defaultMessage: '**Indexes**',
           })}: ${policyMetadata.sourceIndices.join(', ')}`,
         },
         {
           value: `${i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.hover.policyMatchingField',
+            'kbn-esql-ast.esql.hover.policyMatchingField',
             {
               defaultMessage: '**Matching field**',
             }
@@ -46,7 +46,7 @@ export async function getPolicyHover(
         },
         {
           value: `${i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.hover.policyEnrichedFields',
+            'kbn-esql-ast.esql.hover.policyEnrichedFields',
             {
               defaultMessage: '**Fields**',
             }

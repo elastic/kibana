@@ -15,13 +15,13 @@ import { fromCache, setToCache } from './hover_cache';
 
 const TIME_SYSTEM_DESCRIPTIONS = {
   '?_tstart': i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    'kbn-esql-ast.esql.autocomplete.timeSystemParamStart',
     {
       defaultMessage: 'The start time from the date picker',
     }
   ),
   '?_tend': i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    'kbn-esql-ast.esql.autocomplete.timeSystemParamEnd',
     {
       defaultMessage: 'The end time from the date picker',
     }
