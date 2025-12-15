@@ -80,10 +80,8 @@ export class ObservabilityAIAssistantAppPlugin
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-        const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
-          AI_CHAT_EXPERIENCE_TYPE,
-          AIChatExperience.Classic
-        );
+        const chatExperience$ =
+          coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
         // Restrict access when the chat experience is set to Agent (reactive while mounted)
         const initialChatExperience = await firstValueFrom(chatExperience$);
