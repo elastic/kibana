@@ -148,7 +148,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
           updated = saved;
         }
       }
-      this.logger.debug(`Current milestone updated: ${JSON.stringify(updated)}`);
+      this.logger.debug(() => `Current milestone updated: ${JSON.stringify(updated)}`);
     } catch (e) {
       this.logger.error(`Error refreshing milestones: ${e.message}`);
     }
