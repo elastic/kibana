@@ -309,7 +309,6 @@ export class DashboardPageControls extends FtrService {
 
   public async hoverOverExistingControl(controlId: string) {
     const elementToHover = await this.getControlElementById(controlId);
-    const isPinned = await this.isControlPinned(controlId);
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
       await elementToHover.focus();

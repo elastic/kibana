@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const queryBar = getService('queryBar');
   const dashboardSettings = getService('dashboardSettings');
-  const retry = getService('retry');
 
   const { dashboard, header, dashboardControls } = getPageObjects([
     'dashboardControls',
