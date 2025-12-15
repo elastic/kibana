@@ -10,7 +10,13 @@ import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { RollbackAvailableCheckResponse } from '../../../../common/types';
+import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../common';
+
+import type {
+  BulkRollbackAvailableCheckResponse,
+  Installation,
+  RollbackAvailableCheckResponse,
+} from '../../../../common/types';
 
 import { PackageRollbackError } from '../../../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
@@ -71,6 +77,25 @@ export async function rollbackAvailableCheck(
   return {
     isAvailable: true,
   };
+}
+
+export async function bulkRollbackAvailableCheck(): Promise<BulkRollbackAvailableCheckResponse> {
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  const result = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    fields: ['name'],
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed`,
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const installedPackageNames = result.saved_objects.map((so) => so.attributes.name);
+  const items: Record<string, RollbackAvailableCheckResponse> = {};
+
+  for (const pkgName of installedPackageNames) {
+    const { isAvailable } = await rollbackAvailableCheck(pkgName);
+    items[pkgName] = { isAvailable };
+  }
+  return items;
 }
 
 export async function rollbackInstallation(options: {
