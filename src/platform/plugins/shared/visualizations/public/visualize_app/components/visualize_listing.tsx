@@ -9,7 +9,7 @@
 
 import type { MouseEvent, MutableRefObject } from 'react';
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -43,7 +43,12 @@ import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_fo
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import type { VisualizeServices } from '../types';
-import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
+import {
+  getNoItemsMessage,
+  getCustomColumn,
+  getCustomSortingOptions,
+  getVisualizationListingTableStyles,
+} from '../utils';
 import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import {
   toTableListViewSavedObject,
@@ -51,26 +56,7 @@ import {
 } from '../../utils/to_table_list_view_saved_object';
 
 const visualizeListingStyles = {
-  table: ({ euiTheme }: UseEuiTheme) => css`
-    .visListingTable__typeImage,
-    .visListingTable__typeIcon {
-      margin-right: ${euiTheme.size.s};
-      position: relative;
-      top: -1px;
-    }
-
-    .visListingTable__typeImage {
-      ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
-    }
-
-    .visListingTable__experimentalIcon {
-      width: ${euiTheme.size.l};
-      vertical-align: middle;
-      padding: 0 ${euiTheme.size.s};
-      margin-left: ${euiTheme.size.s};
-    }
-  `,
-
+  table: getVisualizationListingTableStyles,
   calloutLink: css`
     text-decoration: underline;
   `,

@@ -8,8 +8,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { logicalSizeCSS, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   TableListTab,
@@ -31,7 +29,7 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { TAB_IDS, type DashboardListingProps, type DashboardListingUserContent } from './types';
+import { type DashboardListingProps, type DashboardSavedObjectUserContent } from './types';
 
 type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
@@ -43,7 +41,7 @@ type GetDashboardListingTabsParams = Pick<
 >;
 
 type TabContentProps = Omit<GetDashboardListingTabsParams, 'listingViewRegistry'> & {
-  parentProps: TableListTabParentProps<DashboardListingUserContent>;
+  parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>;
 };
 
 const getBaseKibanaProviderProps = () => ({
@@ -70,7 +68,6 @@ const DashboardsTabContent = ({
     getDashboardUrl,
     useSessionStorageIntegration,
     initialFilter,
-    contentTypeFilter: TAB_IDS.DASHBOARDS,
   });
 
   const dashboardFavoritesClient = useMemo(() => {
@@ -92,53 +89,11 @@ const DashboardsTabContent = ({
         unsavedDashboardIds={unsavedDashboardIds}
         refreshUnsavedDashboards={refreshUnsavedDashboards}
       />
-      <TableListViewTable<DashboardListingUserContent>
+      <TableListViewTable<DashboardSavedObjectUserContent>
         tableCaption={tableListViewTableProps.title}
         {...tableListViewTableProps}
         {...parentProps}
       />
-    </TableListViewKibanaProvider>
-  );
-};
-
-const VisualizationsTabContent = ({
-  goToDashboard,
-  getDashboardUrl,
-  useSessionStorageIntegration,
-  initialFilter,
-  parentProps,
-}: TabContentProps) => {
-  const { euiTheme } = useEuiTheme();
-  const { tableListViewTableProps } = useDashboardListingTable({
-    goToDashboard,
-    getDashboardUrl,
-    useSessionStorageIntegration,
-    initialFilter,
-    contentTypeFilter: TAB_IDS.VISUALIZATIONS,
-  });
-
-  return (
-    <TableListViewKibanaProvider {...getBaseKibanaProviderProps()}>
-      <div
-        css={css`
-          .visListingTable__typeImage,
-          .visListingTable__typeIcon {
-            margin-right: ${euiTheme.size.s};
-            position: relative;
-            top: -1px;
-          }
-
-          .visListingTable__typeImage {
-            ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
-          }
-        `}
-      >
-        <TableListViewTable<DashboardListingUserContent>
-          tableCaption={tableListViewTableProps.title}
-          {...tableListViewTableProps}
-          {...parentProps}
-        />
-      </div>
     </TableListViewKibanaProvider>
   );
 };
@@ -149,7 +104,7 @@ export const getDashboardListingTabs = ({
   useSessionStorageIntegration,
   initialFilter,
   listingViewRegistry,
-}: GetDashboardListingTabsParams): TableListTab<DashboardListingUserContent>[] => {
+}: GetDashboardListingTabsParams): TableListTab<DashboardSavedObjectUserContent>[] => {
   const commonProps = {
     goToDashboard,
     getDashboardUrl,
@@ -157,30 +112,20 @@ export const getDashboardListingTabs = ({
     initialFilter,
   };
 
-  const dashboardsTab: TableListTab<DashboardListingUserContent> = {
+  const dashboardsTab: TableListTab<DashboardSavedObjectUserContent> = {
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
       defaultMessage: 'Dashboards',
     }),
-    id: TAB_IDS.DASHBOARDS,
+    id: 'dashboards',
     getTableList: (parentProps) => (
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
   };
 
-  const visualizationsTab: TableListTab<DashboardListingUserContent> = {
-    title: i18n.translate('dashboard.listing.tabs.visualizations.title', {
-      defaultMessage: 'Visualizations',
-    }),
-    id: TAB_IDS.VISUALIZATIONS,
-    getTableList: (parentProps) => (
-      <VisualizationsTabContent {...commonProps} parentProps={parentProps} />
-    ),
-  };
-
-  // Additional tabs from registry (e.g., annotation groups from Event Annotation Listing plugin)
+  // Additional tabs from registry (e.g., visualizations and annotation groups)
   const registryTabs = listingViewRegistry
     ? Array.from(listingViewRegistry as Set<TableListTab>)
     : [];
 
-  return [dashboardsTab, visualizationsTab, ...registryTabs];
+  return [dashboardsTab, ...registryTabs];
 };

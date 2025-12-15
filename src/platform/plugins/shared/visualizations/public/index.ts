@@ -75,4 +75,13 @@ export const getConvertToLensModule = async () => {
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
 
-export { toTableListViewSavedObject } from './utils/to_table_list_view_saved_object';
+export {
+  toTableListViewSavedObject,
+  type VisualizeUserContent,
+} from './utils/to_table_list_view_saved_object';
+export {
+  getCustomColumn,
+  getCustomSortingOptions,
+  getNoItemsMessage,
+  getVisualizationListingTableStyles,
+} from './visualize_app/utils';

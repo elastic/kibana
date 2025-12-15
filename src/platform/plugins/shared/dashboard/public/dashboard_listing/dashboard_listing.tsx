@@ -19,7 +19,7 @@ import { QueryClientProvider } from '@kbn/react-query';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import { TAB_IDS, type DashboardListingProps } from './types';
+import { type DashboardListingProps } from './types';
 
 export const DashboardListing = ({
   children,
@@ -54,7 +54,7 @@ export const DashboardListing = ({
     ]
   );
 
-  const activeTabId = tabs.find((tab) => tab.id === activeTabParam)?.id ?? TAB_IDS.DASHBOARDS;
+  const activeTabId = tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
 
   const changeActiveTab = (tabId: string) => {
     coreServices.application.navigateToUrl(`#/list/${tabId}`);
