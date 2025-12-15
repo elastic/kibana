@@ -8,7 +8,7 @@
  */
 
 import { printTree } from 'tree-dump';
-import * as synth from '../synth';
+import * as synth from './synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { composerQuerySymbol, processTemplateHoles, validateParamName } from './util';
 import { Builder } from '../ast/builder';

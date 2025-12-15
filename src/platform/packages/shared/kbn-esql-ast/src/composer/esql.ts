@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as synth from '../synth';
+import * as synth from './synth';
 import { ComposerQuery } from './composer_query';
 import { DoubleParameterHole, ParameterHole } from './parameter_hole';
 import { processTemplateHoles, removeNopCommands, validateParamName } from './util';
