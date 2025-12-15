@@ -6,14 +6,16 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
   sendMessage: ({ message }: { message: string }) => void;
   isResponseLoading: boolean;
-  error: unknown;
   pendingMessage: string | undefined;
+  error: unknown;
+  errorSteps: ConversationRoundStep[];
   agentReasoning: string | null;
   retry: () => void;
   canCancel: boolean;
@@ -34,8 +36,9 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
   const {
     sendMessage,
     isResponseLoading,
-    error,
     pendingMessage,
+    error,
+    errorSteps,
     agentReasoning,
     retry,
     canCancel,
@@ -48,8 +51,9 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
       value={{
         sendMessage,
         isResponseLoading,
-        error,
         pendingMessage,
+        error,
+        errorSteps,
         agentReasoning,
         retry,
         canCancel,

@@ -53,9 +53,8 @@ import {
 import { DiscoverBadgeButton } from '../stream_badges';
 
 const datePickerStyle = css`
-  .euiFormControlLayout {
-    height: 40px;
-  }
+  .euiFormControlLayout,
+  .euiSuperDatePicker button,
   .euiButton {
     height: 40px;
   }

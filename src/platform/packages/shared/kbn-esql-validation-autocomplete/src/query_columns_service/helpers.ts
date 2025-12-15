@@ -14,16 +14,11 @@ import {
   synth,
   type ESQLAstCommand,
 } from '@kbn/esql-ast';
-import type {
-  ESQLColumnData,
-  ESQLFieldWithMetadata,
-  ESQLPolicy,
-} from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLColumnData, ESQLPolicy } from '@kbn/esql-ast/src/commands/registry/types';
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast/src/types';
-
-import type { IAdditionalFields } from '@kbn/esql-ast/src/commands_registry/registry';
+import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { IAdditionalFields } from '@kbn/esql-ast/src/commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
-import type { ESQLCallbacks } from '../shared/types';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -85,7 +80,7 @@ function createGetFromFields(fetchFields: (query: string) => Promise<ESQLFieldWi
 }
 // Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
-  const metadata = await getEcsMetadata();
+  const metadata = await getEcsMetadata(resourceRetriever);
   const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
   const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
   return fieldsWithMetadata;

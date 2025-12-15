@@ -21,12 +21,13 @@ export async function update(
   updateBody: DashboardUpdateRequestBody
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  const { access_control: accessControl, ...restOfData } = updateBody.data;
 
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(updateBody.data);
+  } = transformDashboardIn(restOfData);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }

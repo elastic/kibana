@@ -77,3 +77,5 @@ Formatting Requirements:
   - Organize the response into visually distinct sections.
   - Use concise, actionable language.
   - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).`;
+
+export const ENTITY_PROMPT = `Investigate the entity and suggest next steps.`;
