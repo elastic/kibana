@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder } from '../ast/builder';
+import { Builder } from '../../ast/builder';
 import type {
   ESQLColumn,
   ESQLDecimalLiteral,
@@ -15,7 +15,7 @@ import type {
   ESQLParamLiteral,
   ESQLSource,
   ESQLStringLiteral,
-} from '../types';
+} from '../../types';
 import { SynthLiteralFragment } from './synth_literal_fragment';
 import { SynthNode } from './synth_node';
 
