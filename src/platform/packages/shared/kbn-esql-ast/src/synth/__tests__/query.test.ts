@@ -8,7 +8,7 @@
  */
 
 import { synth } from '../../..';
-import { Builder } from '../../builder';
+import { Builder } from '../../ast/builder';
 import { BasicPrettyPrinter } from '../../pretty_print';
 import { query } from '../query';
 
