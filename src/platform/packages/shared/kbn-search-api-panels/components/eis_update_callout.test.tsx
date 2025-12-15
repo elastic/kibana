@@ -78,7 +78,7 @@ describe('EisUpdateCallout', () => {
   it('calls onDismissTour when dismiss button is clicked', () => {
     renderEisUpdateCallout();
 
-    const dismissButton = screen.getByTestId('eisUpdateCalloutDismissBtn');
+    const dismissButton = screen.getByTestId('euiDismissCalloutButton');
     fireEvent.click(dismissButton);
 
     expect(mockOnDismissTour).toHaveBeenCalledTimes(1);

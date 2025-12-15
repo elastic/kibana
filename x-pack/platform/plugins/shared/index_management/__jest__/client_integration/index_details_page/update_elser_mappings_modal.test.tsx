@@ -143,8 +143,8 @@ describe('UpdateElserMappingsModal', () => {
     expect(screen.getByTestId('updateElserMappingsModal')).toBeInTheDocument();
     expect(screen.getByTestId('updateElserMappingsSelect')).toBeInTheDocument();
 
-    expect(screen.getByText('name')).toBeInTheDocument();
-    expect(screen.getByText('text')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'name' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'text' })).toBeInTheDocument();
 
     const badges = screen.getAllByText('.elser-2-elasticsearch');
     expect(badges).toHaveLength(2);
@@ -159,7 +159,7 @@ describe('UpdateElserMappingsModal', () => {
   it('should enable Apply button when at least one option is checked', async () => {
     renderEisUpdateCallout();
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByText('name');
+    const firstOption = within(selectable).getByRole('option', { name: 'name' });
     await userEvent.click(firstOption);
 
     const applyBtn = screen.getByTestId('UpdateElserMappingsModalApplyBtn');
@@ -176,7 +176,7 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByText('name');
+    const firstOption = within(selectable).getByRole('option', { name: 'name' });
     await userEvent.click(firstOption);
 
     updateIndexMappingsMock.mockResolvedValue({ error: null, data: null });
@@ -194,7 +194,7 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByText('name');
+    const firstOption = within(selectable).getByRole('option', { name: 'name' });
     await userEvent.click(firstOption);
 
     const errorMessage = 'Something has gone wrong';

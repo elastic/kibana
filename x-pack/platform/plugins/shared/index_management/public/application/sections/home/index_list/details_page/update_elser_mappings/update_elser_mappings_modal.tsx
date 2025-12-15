@@ -36,7 +36,7 @@ import { notificationService } from '../../../../../services/notification';
 import type { NormalizedFields } from '../../../../../components/mappings_editor/types';
 
 export interface MappingsOptionData {
-  path: string;
+  name: string;
 }
 
 export interface UpdateElserMappingsModalProps {
@@ -63,20 +63,20 @@ export function UpdateElserMappingsModal({
     const elserMappings = Object.values(mappings.byId).filter(isElserOnMlNodeSemanticField);
 
     return elserMappings.map((field) => ({
-      label: field.source.name,
+      label: field.path.join('.'),
+      name: field.source.name,
       key: field.id,
       prepend: <EuiToken iconType="tokenSemanticText" />,
       append: <EuiBadge color="hollow">{field.source.inference_id as string}</EuiBadge>,
-      path: field.path.length > 1 ? field.path.join('.') : '',
     }));
   };
 
   const renderMappingOption = useCallback((option: EuiSelectableOption<MappingsOptionData>) => {
     return (
       <>
-        <EuiText size="s">{option.label}</EuiText>
+        <EuiText size="s">{option.name}</EuiText>
         <EuiText size="xs" color="subdued" className="eui-displayBlock">
-          <small>{option.path || ''}</small>
+          <small>{option.label || ''}</small>
         </EuiText>
       </>
     );
