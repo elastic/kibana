@@ -562,6 +562,14 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
 
   try {
+    if (
+      data.supports_agentless &&
+      appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI
+    ) {
+      throw new FleetError(
+        'To update agentless agent policies, use the Fleet agentless policies API.'
+      );
+    }
     const authzFleetAgentsAll = fleetContext.authz.fleet.allAgents;
 
     const requestSpaceId = spaceId;
