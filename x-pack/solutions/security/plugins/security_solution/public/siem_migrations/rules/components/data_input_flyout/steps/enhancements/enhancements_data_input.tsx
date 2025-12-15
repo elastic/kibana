@@ -28,9 +28,9 @@ import type { QRadarMitreMappingsData } from '../../../../../../../common/siem_m
 import { useParseFileInput } from '../../../../../common/hooks/use_parse_file_input';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
-import { QradarDataInputStep } from '../constants';
 import * as i18n from './translations';
 import { EnhancementType, QRADAR_ENHANCEMENT_OPTS, type AddedEnhancement } from './types';
+import { QradarDataInputStep } from '../../types';
 
 export const EnhancementsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats }) => {

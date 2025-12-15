@@ -18,6 +18,6 @@ export enum QradarDataInputStepId {
 export enum QradarDataInputStep {
   Rules = 1,
   ReferenceSet = 2,
-  MitreMapping = 3,
+  Enhancements = 3,
   End = 10,
 }
