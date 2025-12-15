@@ -29,13 +29,9 @@ export type ScoutPage = Page & {
   gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
   /**
    * Waits for the Kibana loading spinner indicator to disappear.
-   * @param options - Optional configuration object.
-   * @param options.timeout - The timeout in milliseconds to wait for the indicator to disappear (default: 10000).
    * @returns A Promise resolving when the indicator is hidden.
    */
-  waitForLoadingIndicatorHidden: (options?: {
-    timeout?: number;
-  }) => ReturnType<Page['waitForSelector']>;
+  waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
   /**
    * Presses a key until the element with the css selector is in focus. If multiple elements match it will
    * press the key until the first occurrence of the element is focused.

@@ -13,7 +13,9 @@ export class AgentKeysPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-keys`);
-    await this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+    await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
     this.page.getByRole('heading', { name: 'Settings', level: 1 });
 
     return this.page;

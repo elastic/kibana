@@ -28,7 +28,9 @@ export class ServiceMapPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+    return await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async gotoDetailedServiceMapWithDateSelected(start: string, end: string) {
@@ -37,7 +39,9 @@ export class ServiceMapPage {
         'apm'
       )}/services/opbeans-java/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+    return await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async getSearchBar() {

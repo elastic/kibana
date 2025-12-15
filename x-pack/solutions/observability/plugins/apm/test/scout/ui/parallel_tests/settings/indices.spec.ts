@@ -42,7 +42,9 @@ test.describe('Indices', { tag: ['@ess'] }, () => {
     await expect(applyButton).toBeEnabled();
 
     await indicesPage.clickApplyChanges();
-    await page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+    await page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
 
     await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
   });

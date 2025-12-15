@@ -16,7 +16,9 @@ export class ServiceGroupsPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/service-groups?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+    return await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async typeInTheSearchBar(text: string) {

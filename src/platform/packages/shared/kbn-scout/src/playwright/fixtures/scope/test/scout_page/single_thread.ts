@@ -103,10 +103,9 @@ export function extendPlaywrightPage({
   extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
     page.goto(kbnUrl.app(appName, { pathOptions }));
   // Method to wait for global loading indicator to be hidden
-  extendedPage.waitForLoadingIndicatorHidden = (options?: { timeout?: number }) =>
+  extendedPage.waitForLoadingIndicatorHidden = () =>
     extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
       state: 'attached',
-      timeout: options?.timeout ?? 10000,
     });
   // Method to press a key until an element with the provided selector is in focus.
   extendedPage.keyTo = async (

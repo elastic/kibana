@@ -69,7 +69,9 @@ test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
       await page.getByTestId('apmDeleteGroupButton').click();
 
       // after deletion there should be no service groups
-      await page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+      await page
+        .getByTestId('apmSettingsHeaderLink')
+        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
       await expect(
         page.getByRole('heading', { name: 'No service groups', level: 2 })
       ).toBeVisible();

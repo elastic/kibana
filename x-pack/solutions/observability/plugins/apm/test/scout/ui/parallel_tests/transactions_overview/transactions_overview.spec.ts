@@ -52,7 +52,9 @@ test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Navigate to Overview tab
     await page.getByTestId('overviewTab').click();
-    await page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+    await page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
 
     // Verify transaction type is still 'Worker'
     await expect(transactionTypeFilter).toHaveValue('Worker');

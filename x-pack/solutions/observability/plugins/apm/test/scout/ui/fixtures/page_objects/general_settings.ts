@@ -13,7 +13,9 @@ export class GeneralSettingsPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/general-settings`);
-    return this.page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+    return await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async getInspectEsQueriesButton() {

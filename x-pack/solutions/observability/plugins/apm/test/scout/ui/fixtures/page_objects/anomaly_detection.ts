@@ -59,6 +59,7 @@ export class AnomalyDetectionPage {
 
   async deleteMlJob() {
     const manageJobsButton = this.page.testSubj.locator('apmMLManageJobsTextLink');
+    await manageJobsButton.waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
     await manageJobsButton.click();
     const allActionsButton = this.page.getByLabel('All actions, row 1');
     await allActionsButton.click();

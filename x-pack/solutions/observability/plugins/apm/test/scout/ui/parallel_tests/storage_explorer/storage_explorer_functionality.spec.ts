@@ -79,7 +79,9 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       });
 
       await page.goto(`${baseUrl}?${urlParams.toString()}`);
-      await page.waitForLoadingIndicatorHidden({ timeout: BIGGER_TIMEOUT });
+      await page
+        .getByTestId('apmSettingsHeaderLink')
+        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
 
       await expect(page).toHaveURL(/.*environment=production.*/);
       await expect(storageExplorerPage.pageTitle).toBeVisible();

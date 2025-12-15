@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class TransactionDetailsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -29,21 +30,21 @@ export class TransactionDetailsPage {
         }
       )}`
     );
-    await this.waitForPageToLoad();
+    await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async reload() {
     await this.page.reload();
-    await this.waitForPageToLoad();
+    await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async fillApmUnifiedSearchBar(query: string) {
     const searchBar = this.page.getByTestId('apmUnifiedSearchBar');
     await searchBar.fill(query);
     await searchBar.press('Enter');
-  }
-
-  private async waitForPageToLoad() {
-    await this.page.getByTestId('apmUnifiedSearchBar').waitFor();
   }
 }
