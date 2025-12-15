@@ -8,7 +8,8 @@
  */
 import { synth } from '../../../..';
 import type { ESQLColumnData } from '../types';
-import { columnsAfter, extractDissectColumnNames } from './columns_after';
+import { columnsAfter } from './columns_after';
+import { extractDissectColumnNames } from './utils';
 
 describe('DISSECT', () => {
   // Test cases for dissect patterns

@@ -123,6 +123,14 @@ export interface ESQLUserDefinedColumn {
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
 
+export interface ESQLCommandSummary {
+  /**
+   * A list of columns names which were newly created by the
+   * STATS command.
+   */
+  newColumns: Set<string>;
+}
+
 export interface ESQLPolicy {
   name: string;
   sourceIndices: string[];
