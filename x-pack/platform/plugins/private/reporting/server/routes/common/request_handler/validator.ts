@@ -11,13 +11,20 @@ import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
+
 const sanitizeString = (input: string) => {
   if (typeof input !== 'string') {
     return '';
   }
-  const window = new JSDOM('').window;
-  const purify = DOMPurify(window);
-  return purify.sanitize(input);
+  return purify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true,
+    SAFE_FOR_TEMPLATES: true,
+    RETURN_TRUSTED_TYPE: false,
+  });
 };
 
 export function validateTimezone(timezone: string) {

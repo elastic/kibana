@@ -36,6 +36,21 @@ describe('validateJobParams', () => {
     expect(result.title).toBe('Monthly Report');
   });
 
+  it('sanitizes relativeUrl', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00Z',
+      relativeUrl: '/app/dashboards#/view/123?x=1&y=2<script>alert("xss")</script>',
+    };
+
+    const result = validateJobParams(validParams);
+    expect(result.relativeUrl).toBe('/app/dashboards#/view/123?x=1&amp;y=2');
+  });
+
   it('sanitizes objectType', () => {
     const validParams = {
       title: 'Monthly Report',
