@@ -13,8 +13,8 @@ const PORT_MAX = 256 * 256 - 1;
 export const portSchema = () => z.coerce.number().min(1).max(PORT_MAX);
 
 const ConfigSchemaProps = {
-  service: z.string().default('other'),
-  host: z.string().nullable().default(null),
+  service: z.string().max(512).default('other'),
+  host: z.string().max(512).nullable().default(null),
   port: portSchema().nullable().default(null),
   secure: z.boolean().nullable().default(null),
   from: z.string(),
@@ -43,13 +43,13 @@ const AttachmentSchemaProps = {
 export const AttachmentSchema = z.object(AttachmentSchemaProps).strict();
 
 export const ParamsSchemaProps = {
-  to: z.array(z.string()).default([]),
-  cc: z.array(z.string()).default([]),
-  bcc: z.array(z.string()).default([]),
-  subject: z.string(),
-  message: z.string(),
-  messageHTML: z.string().nullable().default(null),
-  // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
+  to: z.array(z.string().max(512)).max(100).default([]),
+  cc: z.array(z.string().max(512)).max(100).default([]),
+  bcc: z.array(z.string().max(512)).max(100).default([]),
+  subject: z.string().max(1024),
+  message: z.string().max(10240),
+  messageHTML: z.string().max(10240).nullable().default(null),
+  // kibanaFooterLink isn't intended for users to set, this is here to be able to programmatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: z
     .object({
