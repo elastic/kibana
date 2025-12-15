@@ -27,7 +27,12 @@ export function registerDashboardUsageCollector(
     schema: {
       access_mode: {
         DYNAMIC_KEY: {
-          total: { type: 'long' },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'The number of dashboards that have an applied access mode.',
+            },
+          },
         },
       },
       panels: {

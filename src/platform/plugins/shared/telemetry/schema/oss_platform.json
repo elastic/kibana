@@ -9596,7 +9596,10 @@
             "DYNAMIC_KEY": {
               "properties": {
                 "total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of dashboards that have an applied access mode."
+                  }
                 }
               }
             }
