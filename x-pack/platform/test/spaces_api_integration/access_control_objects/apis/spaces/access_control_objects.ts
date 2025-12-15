@@ -272,7 +272,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('owner', adminUid);
       });
 
-      it('should reject when attempting to overwrite an object owned by another user if not admin', async () => {
+      it('should reject when attempting to overwrite an object owned by another user if not admin', async function () {
+        this.tags('skipFIPS');
+
         const { cookie: objectOwnerCookie, profileUid: adminUid } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -487,8 +489,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('failure modes', () => {
-        it('rejects when overwriting and all objects are write-restricted and inaccessible', async () => {
+      describe('failure modes', function () {
+        this.tags('skipFIPS');
+
+        it('rejects when overwriting and all objects are write-restricted and inaccessible', async function () {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
@@ -794,7 +798,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should throw when updating write-restricted objects owned by a different user when not admin', async () => {
+      it('should throw when updating write-restricted objects owned by a different user when not admin', async function () {
+        this.tags('skipFIPS');
+
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -1334,7 +1340,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('throws when trying to delete write-restricted object owned by a different user when not admin', async () => {
+      it('throws when trying to delete write-restricted object owned by a different user when not admin', async function () {
+        this.tags('skipFIPS');
+
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -1996,7 +2004,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
       });
 
-      it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
+      it('should throw when transferring ownership of object owned by a different user and not admin', async function () {
+        this.tags('skipFIPS');
+
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth

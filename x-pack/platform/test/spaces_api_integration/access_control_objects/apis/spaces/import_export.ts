@@ -366,7 +366,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('ovewriting objects', () => {
-        it('should disallow overwrite of owned objects if not owned by the current user', async () => {
+        it('should disallow overwrite of owned objects if not owned by the current user', async function () {
+          this.tags('skipFIPS');
+
           const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
           let createResponse = await supertestWithoutAuth
@@ -485,7 +487,9 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
 
-        it('should throw if the import only contains objects are not overwritable by the current user', async () => {
+        it('should throw if the import only contains objects are not overwritable by the current user', async function () {
+          this.tags('skipFIPS');
+
           const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
           let createResponse = await supertestWithoutAuth
@@ -1135,7 +1139,9 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('should disallow create new retry with same ID for write-restricted objects not owned by the current user', async () => {
+      it('should disallow create new retry with same ID for write-restricted objects not owned by the current user', async function () {
+        this.tags('skipFIPS');
+
         const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
         let createResponse = await supertestWithoutAuth
