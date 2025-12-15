@@ -50,6 +50,7 @@ export function useSparkplotDataFromSigEvents({
       annotations: change
         ? [
             getAnnotationFromFormattedChangePoint({
+              time: change.time,
               changes: [change],
               theme,
               xFormatter,

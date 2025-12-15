@@ -13,10 +13,12 @@ import { ChangePointSummary } from '../change_point_summary';
 
 export function getAnnotationFromFormattedChangePoint({
   theme,
+  time,
   changes,
   xFormatter,
 }: {
   theme: EuiThemeComputed;
+  time: number;
   changes: FormattedChangePoint[];
   xFormatter: TickFormatter;
 }) {
@@ -25,8 +27,8 @@ export function getAnnotationFromFormattedChangePoint({
   return {
     color,
     icon: <EuiIcon type="dot" color={color} />,
-    id: `change_point_${change.time}`,
+    id: `change_point_${time}`,
     label: <ChangePointSummary xFormatter={xFormatter} changes={changes} />,
-    x: change.time,
+    x: time,
   };
 }

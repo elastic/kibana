@@ -41,8 +41,9 @@ export function SignificantEventsHistogramChart({
       return [];
     }
 
-    return Object.values(groupBy(changes, 'time')).map((groupedByTimestamp) =>
+    return Object.entries(groupBy(changes, 'time')).map(([time, groupedByTimestamp]) =>
       getAnnotationFromFormattedChangePoint({
+        time: Number(time),
         changes: groupedByTimestamp,
         theme,
         xFormatter,
