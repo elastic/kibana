@@ -29,6 +29,18 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
   },
   {
+    id: 'data.dedupe',
+    handlerHash: '5a78bd7be2b658dfdbf85e6c42a06457adc13b6abcfe72bb2234ed4623dfb24e',
+  },
+  {
+    id: 'data.map',
+    handlerHash: 'a501de21b6b9dcd3e2ab54466ca5443643dc3df414a0b13f55469073532d88cd',
+  },
+  {
+    id: 'data.set',
+    handlerHash: '8b225aea28c857082b98e93c9c9d3c984190be2a2c3f5531452853230a0d6184',
+  },
+  {
     id: 'onechat.runAgent',
     handlerHash: '4f61ed4415041b7423c43fb4a2ef0d19032360092cef14b99587c2003ba7667e',
   },
