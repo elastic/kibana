@@ -32,7 +32,7 @@ const TITLE_CASE_GLOSSARY = [
   'Data Frame Analytics Jobs',
   'GenAI Settings',
   'AI Assistants',
-  'Role Mappinga',
+  'Role Mappings',
   'Cross-Cluster Replication',
   'Remote Clusters',
   'Saved Objects',
@@ -40,6 +40,10 @@ const TITLE_CASE_GLOSSARY = [
   'Data Views',
   'MITRE ATT&CK® Coverage',
   'License Management',
+  'Developer Tools',
+  'Stack Management',
+  'Alerts and Insights',
+  'AIOps labs',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));
