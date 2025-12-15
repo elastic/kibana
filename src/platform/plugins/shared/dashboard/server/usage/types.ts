@@ -11,7 +11,7 @@ import type { SavedObjectAccessControl, SavedObjectReference } from '@kbn/core/s
 import type { ControlGroupTelemetry } from '@kbn/controls-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 
-export interface DashboardSavedObjectInfo {
+export interface DashboardHit {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
   accessControl?: SavedObjectAccessControl;

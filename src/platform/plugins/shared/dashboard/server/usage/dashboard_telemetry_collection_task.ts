@@ -27,13 +27,13 @@ import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
-  collectDashboardInfo,
+  collectSectionsAndAccessControl,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../dashboard_saved_object';
-import type { DashboardSavedObjectInfo } from './types';
+import type { DashboardHit } from './types';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
@@ -96,9 +96,9 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
       async run() {
         let dashboardData = getEmptyDashboardData();
         const controlsCollector = controlsCollectorFactory(embeddable);
-        const processDashboards = (dashboards: DashboardSavedObjectInfo[]) => {
+        const processDashboards = (dashboards: DashboardHit[]) => {
           for (const dashboard of dashboards) {
-            dashboardData = collectDashboardInfo(dashboard, dashboardData);
+            dashboardData = collectSectionsAndAccessControl(dashboard, dashboardData);
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
 
             try {
@@ -152,7 +152,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                 }
                 return undefined;
               })
-              .filter((s): s is DashboardSavedObjectInfo => s !== undefined)
+              .filter((s): s is DashboardHit => s !== undefined)
           );
 
           while (result._scroll_id && result.hits.hits.length > 0) {
@@ -171,7 +171,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                   }
                   return undefined;
                 })
-                .filter((s): s is DashboardSavedObjectInfo => s !== undefined)
+                .filter((s): s is DashboardHit => s !== undefined)
             );
           }
 

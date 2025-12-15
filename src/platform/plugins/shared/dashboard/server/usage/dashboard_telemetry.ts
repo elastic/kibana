@@ -23,7 +23,7 @@ import type {
 } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState } from './task_state';
-import type { DashboardCollectorData, DashboardSavedObjectInfo } from './types';
+import type { DashboardCollectorData, DashboardHit } from './types';
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
   panels: {
@@ -79,8 +79,8 @@ export const collectPanelsByType = (
   }
 };
 
-export const collectDashboardInfo = (
-  dashboard: DashboardSavedObjectInfo,
+export const collectSectionsAndAccessControl = (
+  dashboard: DashboardHit,
   collectorData: DashboardCollectorData
 ) => {
   if (dashboard.accessControl?.accessMode) {
