@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isBoolean, isString, isNil } from 'lodash';
+import { isFinite } from 'lodash';
 import type {
   Condition,
   FilterCondition,
@@ -16,6 +16,7 @@ import type {
 } from '../../types/conditions';
 import { BINARY_OPERATORS } from '../../types/conditions';
 import { painlessFieldAccessor } from '../../types/utils';
+import { evaluateDateMath, encodeValue } from './painless_date_math_helpers';
 
 // Utility: get the field name from a filter condition
 function safePainlessField(conditionOrField: FilterCondition | string) {
@@ -23,124 +24,6 @@ function safePainlessField(conditionOrField: FilterCondition | string) {
     return painlessFieldAccessor(conditionOrField);
   }
   return painlessFieldAccessor(conditionOrField.field);
-}
-
-function encodeValue(value: StringOrNumberOrBoolean | null | undefined) {
-  if (isString(value)) {
-    return `"${value}"`;
-  }
-  if (isBoolean(value)) {
-    return value ? 'true' : 'false';
-  }
-  if (isNil(value)) {
-    return 'null';
-  }
-
-  return value;
-}
-
-// Helper function to evaluate date math expressions in Painless
-function evaluateDateMath(expression: string): string {
-  const expr = String(expression).trim();
-
-  // Check if it's a date math expression (contains 'now' or '||')
-  if (expr.includes('now') || expr.includes('||')) {
-    let code: string;
-    let remainingExpr: string;
-
-    // Parse the anchor date and any subsequent operations
-    if (expr.startsWith('now')) {
-      // Anchor is 'now'
-      code = 'System.currentTimeMillis()';
-      remainingExpr = expr.substring(3); // Remove 'now'
-    } else if (expr.includes('||')) {
-      // Anchor is a date string with ||
-      const [dateStr, mathExpr] = expr.split('||');
-
-      // Normalize various date formats to ISO format for Painless
-      const normalizedDate = normalizeDateString(dateStr.trim());
-
-      // Parse the date string to get milliseconds
-      code = `Instant.parse(${encodeValue(normalizedDate)}).toEpochMilli()`;
-      remainingExpr = mathExpr || '';
-    } else {
-      // Not a valid date math expression
-      const encoded = encodeValue(String(expression));
-      return typeof encoded === 'string' ? encoded : String(encoded);
-    }
-
-    // Milliseconds per unit for offset calculations
-    const msPerUnit: Record<string, number> = {
-      y: 365.25 * 24 * 60 * 60 * 1000, // approximate year
-      M: 30 * 24 * 60 * 60 * 1000, // approximate month
-      w: 7 * 24 * 60 * 60 * 1000,
-      d: 24 * 60 * 60 * 1000,
-      h: 60 * 60 * 1000,
-      H: 60 * 60 * 1000,
-      m: 60 * 1000,
-      s: 1000,
-    };
-
-    // Parse and apply all offset operations (e.g., +1M, -1d)
-    const offsetRegex = /([+-])(\d+)([yMwdhHms])/g;
-    let match;
-    while ((match = offsetRegex.exec(remainingExpr)) !== null) {
-      const sign = match[1];
-      const amount = parseInt(match[2], 10);
-      const unit = match[3];
-
-      const ms = msPerUnit[unit];
-      if (ms) {
-        const offsetMs = amount * ms;
-        code = sign === '+' ? `(${code} + ${offsetMs}L)` : `(${code} - ${offsetMs}L)`;
-      }
-    }
-
-    // Parse and apply rounding operation (e.g., /d)
-    const roundMatch = remainingExpr.match(/\/([yMwdhHms])/);
-    if (roundMatch) {
-      const roundUnit = roundMatch[1];
-      const roundMs = msPerUnit[roundUnit];
-      if (roundMs) {
-        // Round down to the nearest unit
-        code = `((long)(${code} / ${roundMs}L) * ${roundMs}L)`;
-      }
-    }
-
-    // Convert milliseconds to ISO date string for comparison
-    return `(Instant.ofEpochMilli(${code}).toString())`;
-  }
-
-  // Not a date math expression, return as-is (already quoted by encodeValue)
-  const encoded = encodeValue(String(expression));
-  return typeof encoded === 'string' ? encoded : String(encoded);
-}
-
-// Helper to normalize various date formats to ISO format
-function normalizeDateString(dateStr: string): string {
-  // Try to parse and convert common date formats to ISO
-  // Support formats like: 2001.02.01, 2001-02-01, 2001/02/01
-
-  // Replace dots or slashes with dashes
-  let normalized = dateStr.replace(/\./g, '-').replace(/\//g, '-');
-
-  // If it's just a date (no time), add time component for ISO format
-  if (!normalized.includes('T') && !normalized.includes(' ')) {
-    normalized += 'T00:00:00Z';
-  } else if (normalized.includes(' ')) {
-    // Replace space with T for ISO format
-    normalized = normalized.replace(' ', 'T');
-    if (!normalized.endsWith('Z') && !normalized.includes('+') && !normalized.includes('-', 10)) {
-      normalized += 'Z';
-    }
-  }
-
-  // Ensure it ends with Z if no timezone specified
-  if (!normalized.endsWith('Z') && !normalized.includes('+') && !normalized.includes('-', 10)) {
-    normalized += 'Z';
-  }
-
-  return normalized;
 }
 
 function generateRangeComparisonClauses(
@@ -158,7 +41,7 @@ function generateRangeComparisonClauses(
 
   // Check if the value is numeric
   const numericValue = typeof value === 'number' ? value : Number(value);
-  const isNumeric = !isNaN(numericValue);
+  const isNumeric = isFinite(numericValue);
 
   if (isNumeric) {
     // Handle numeric comparisons (integers, floats)
