@@ -33,6 +33,7 @@ export interface BaseWidgetProps<
   formConfig: FormConfig;
   /* Configuration specific to the field */
   fieldConfig: {
+    label?: string;
     validations: [
       {
         validator: (...args: Parameters<ValidationFunc>) => ReturnType<ValidationFunc<any>>;

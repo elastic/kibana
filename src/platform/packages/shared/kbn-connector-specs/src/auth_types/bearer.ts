@@ -17,7 +17,7 @@ const authSchema = z
     token: z
       .string()
       .min(1, { message: i18n.BEARER_AUTH_REQUIRED_MESSAGE })
-      .meta({ sensitive: true }),
+      .meta({ sensitive: true, label: i18n.BEARER_TOKEN_LABEL }),
   })
   .meta({ label: i18n.BEARER_AUTH_LABEL });
 

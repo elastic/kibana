@@ -5,14 +5,16 @@ plugins:
     - console
     - discover_enhanced
     - index_management
+    - infra
     - maps
     - observability
     - observability_onboarding
     - painless_lab
     - profiling
     - security_solution
-    - streams_app
     - slo
+    - spaces
+    - streams_app
     - workflows_extensions
   disabled:
 

@@ -10,7 +10,7 @@ import type { RelatedIntegration } from '../../../../../common/api/detection_eng
 import { type GetRuleMigrationIntegrationsResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/api/util/authz';
+import { authz } from './util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsIntegrationsRoute = (

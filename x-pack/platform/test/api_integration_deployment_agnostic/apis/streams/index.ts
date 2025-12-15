@@ -17,6 +17,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./schema'));
     loadTestFile(require.resolve('./processing_date_suggestions'));
     loadTestFile(require.resolve('./processing_simulate'));
+    loadTestFile(require.resolve('./processing_validation'));
     loadTestFile(require.resolve('./root_stream'));
     loadTestFile(require.resolve('./group_streams'));
     loadTestFile(require.resolve('./lifecycle'));
@@ -32,5 +33,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./global_search'));
     loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./snapshot_restore'));
   });
 }

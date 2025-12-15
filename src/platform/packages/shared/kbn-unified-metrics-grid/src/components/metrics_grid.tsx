@@ -16,7 +16,6 @@ import type {
   Dimension,
   DimensionFilters,
 } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { css } from '@emotion/react';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
@@ -26,16 +25,17 @@ import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export type MetricsGridProps = Pick<
-  ChartSectionProps,
-  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'
+  UnifiedMetricsGridProps,
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
   filters?: DimensionFilters;
   dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
 };
 
@@ -46,6 +46,7 @@ export const MetricsGrid = ({
   fields,
   onBrushEnd,
   onFilter,
+  actions,
   dimensions,
   services,
   columns,
@@ -164,6 +165,7 @@ export const MetricsGrid = ({
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
+                  actions={actions}
                   fetchParams={fetchParams}
                   discoverFetch$={discoverFetch$}
                   rowIndex={rowIndex}
@@ -191,14 +193,17 @@ export const MetricsGrid = ({
 };
 
 interface ChartItemProps
-  extends Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'> {
+  extends Pick<
+    UnifiedMetricsGridProps,
+    'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+  > {
   id: string;
   metric: MetricField;
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
   filters: DimensionFilters;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
@@ -220,6 +225,7 @@ const ChartItem = React.memo(
         services,
         onBrushEnd,
         onFilter,
+        actions,
         fetchParams,
         discoverFetch$,
         rowIndex,
@@ -273,10 +279,12 @@ const ChartItem = React.memo(
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
+            onExploreInDiscoverTab={actions.openInNewTab}
             onViewDetails={handleViewDetailsCallback}
             title={metric.name}
             chartLayers={chartLayers}
             titleHighlight={searchTerm}
+            extraDisabledActions={['ACTION_OPEN_IN_DISCOVER']}
           />
         </A11yGridCell>
       );

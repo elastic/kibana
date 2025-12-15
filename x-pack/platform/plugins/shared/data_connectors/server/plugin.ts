@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { registerDataSources } from './data_sources';
 import type {
   DataConnectorsServerSetup,
   DataConnectorsServerSetupDependencies,
@@ -24,11 +25,22 @@ export class DataConnectorsServerPlugin
     >
 {
   constructor(context: PluginInitializerContext) {}
-  setup(core: CoreSetup): DataConnectorsServerSetup {
+
+  setup(
+    core: CoreSetup,
+    plugins: DataConnectorsServerSetupDependencies
+  ): DataConnectorsServerSetup {
     const { uiSettings } = core;
+    const { dataSourcesRegistry } = plugins;
+
+    // Register WorkplaceAI-owned data sources
+    registerDataSources(dataSourcesRegistry);
+
     registerUISettings({ uiSettings });
+
     return {};
   }
+
   start(core: CoreStart): DataConnectorsServerStart {
     return {};
   }

@@ -15,6 +15,7 @@ import {
   setPolicy,
   createBootstrapIndex,
 } from '@kbn/securitysolution-es-utils';
+import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
 import type { CreateAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
 import type {
   SecuritySolutionApiRequestHandlerContext,
@@ -42,7 +43,7 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [INITIALIZE_SECURITY_SOLUTION],
         },
       },
     })

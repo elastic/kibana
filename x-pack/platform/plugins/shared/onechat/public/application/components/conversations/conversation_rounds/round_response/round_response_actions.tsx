@@ -40,17 +40,22 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   }, [content, addSuccessToast]);
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup
+      direction="row"
+      justifyContent="spaceBetween"
+      gutterSize="xs"
+      responsive={false}
+      css={css`
+        opacity: ${isVisible ? 1 : 0};
+        transition: opacity 0.2s ease;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="copyClipboard"
           aria-label={labels.copy}
           onClick={handleCopy}
           color="text"
-          css={css`
-            opacity: ${isVisible ? 1 : 0};
-            transition: opacity 0.2s ease;
-          `}
           data-test-subj="roundResponseCopyButton"
         />
       </EuiFlexItem>

@@ -50,13 +50,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
 
+        expect(classicStream).not.to.be(undefined);
         expect(classicStream).to.eql({
           name: TEST_STREAM_NAME,
           description: '',
+          updated_at: classicStream!.updated_at,
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
-            processing: { steps: [] },
+            processing: {
+              steps: [],
+              updated_at: (classicStream as Streams.ClassicStream.Definition).ingest.processing
+                .updated_at,
+            },
             classic: {},
             failure_store: { inherit: {} },
           },
@@ -123,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(stream).to.eql({
           name: TEST_STREAM_NAME,
           description: '',
+          updated_at: stream.updated_at,
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -137,6 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   where: { always: {} },
                 },
               ],
+              updated_at: stream.ingest.processing.updated_at,
             },
             classic: {},
             failure_store: { inherit: {} },
@@ -790,7 +798,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 streamName: ORPHANED_STREAM_NAME,
               },
               query: {
-                attachmentType: 'dashboard',
+                attachmentTypes: ['dashboard'],
               },
             },
           }
@@ -830,7 +838,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 streamName: 'non-existing-stream',
               },
               query: {
-                attachmentType: 'dashboard',
+                attachmentTypes: ['dashboard'],
               },
             },
           }

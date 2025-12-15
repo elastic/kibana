@@ -292,9 +292,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (!editedDataView.isPersisted()) {
         await stateContainer.actions.updateAdHocDataViewId(editedDataView);
       }
+      if (editedDataView?.id) {
+        // `tab.uiState.fieldListExistingFieldsInfo` needs to be reset when user edits fields,
+        // otherwise the edited field would be shown under "Empty" section in the sidebar
+        // when switching to a tab with the same data view id.
+        dispatch(
+          internalStateActions.resetAffectedFieldListExistingFieldsInfoUiState({
+            dataViewId: editedDataView.id,
+          })
+        );
+      }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn]
+    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch]
   );
 
   const onDisableFilters = useCallback(() => {

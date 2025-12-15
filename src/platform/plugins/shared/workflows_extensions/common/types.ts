@@ -10,22 +10,8 @@
 import type { CommonStepDefinition } from './step_registry/types';
 
 /**
- * Exposes methods for other plugins to register step UI definition.
- */
-export interface WorkflowsExtensionsSetupContract<TStepDefinition extends CommonStepDefinition> {
-  /**
-   * Register user-facing definition for a workflow step.
-   * This should be called during the plugin's setup phase.
-   *
-   * @param definition - The step definition containing label, description, and icon
-   * @throws Error if definition for the same step type ID is already registered
-   */
-  registerStepDefinition(definition: TStepDefinition): void;
-}
-
-/**
- * Public-side plugin start contract.
- * Exposes methods for retrieving registered step definition.
+ * Common contract for workflows extensions start.
+ * Exposes methods for retrieving registered step definitions.
  */
 export interface WorkflowsExtensionsStartContract<TStepDefinition extends CommonStepDefinition> {
   /**
