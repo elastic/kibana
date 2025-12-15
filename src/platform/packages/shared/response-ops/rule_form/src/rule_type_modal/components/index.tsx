@@ -8,7 +8,7 @@
  */
 
 import { countBy } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
@@ -42,14 +42,15 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   const [searchString, setSearchString] = useState<string>('');
   const [selectedMode, setSelectedMode] = useState<'ruleType' | 'template'>('ruleType');
 
-  // Debounce search string for template API calls to avoid excessive requests
+  // Debounced search string for template API calls to avoid excessive requests
   const [debouncedSearchString, setDebouncedSearchString] = useState<string>('');
-
   const { run: updateDebouncedSearch } = useDebounceFn(setDebouncedSearchString, DEBOUNCE_OPTIONS);
 
-  useEffect(() => {
-    updateDebouncedSearch(searchString);
-  }, [searchString, updateDebouncedSearch]);
+  // Update both immediate and debounced search strings on user input
+  const updateSearch = useCallback((value: string) => {
+    setSearchString(value);
+    updateDebouncedSearch(value);
+  }, [updateDebouncedSearch]);
 
   const registeredRuleTypesWithAppContext = registeredRuleTypes.filter(
     ({ requiresAppContext }) => !requiresAppContext
@@ -98,7 +99,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
       ruleTypes={ruleTypes}
       ruleTypeCountsByProducer={ruleTypeCountsByProducer}
       ruleTypesLoading={ruleTypesLoading}
-      onChangeSearch={setSearchString}
+      onChangeSearch={updateSearch}
       onFilterByProducer={setSelectedProducer}
       selectedProducer={selectedProducer}
       searchString={searchString}
