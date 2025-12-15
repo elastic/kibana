@@ -79,3 +79,18 @@ export const useEntityAnalyticsIntegrations = () => {
     };
   });
 };
+
+export const usePrivilegedAccessDetectionIntegration = () => {
+  const { data: pad } = useGetPackageInfoByKeyQuery(
+    'pad',
+    undefined, // When package version is undefined it gets the latest version
+    {
+      prerelease: true, // This is a technical preview package, delete this line when it is GA
+    },
+    {
+      suspense: false,
+    }
+  );
+
+  return isGetInfoResponse(pad) ? pad.item : undefined;
+};
