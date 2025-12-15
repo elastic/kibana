@@ -153,11 +153,11 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               }
             )}
             key={'ask-ai-assistant'}
-            disabled={isLoading || !assistantResult}
           >
             <NewAgentBuilderAttachment
-              onClick={isLoading || !assistantResult ? noop : onAgentBuildAttachmentClick}
+              onClick={onAgentBuildAttachmentClick}
               size="s"
+              disabled={isLoading || !assistantResult}
             />
           </EuiContextMenuItem>
         ) : (
