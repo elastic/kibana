@@ -9,6 +9,54 @@ Load Elasticsearch snapshots for testing environments. Provides two operations:
 
 **Currently only `file://` URLs are supported** (local file share snapshot repositories). Elasticsearch must be started with `path.repo` configured to allow URL-based repository registration.
 
+When starting Elasticsearch for development configure snapshot repository path:
+
+```bash
+yarn es snapshot --E path.repo="/tmp/es-snapshots"
+```
+
+## Creating Snapshots
+
+Before using restore or replay, you need a snapshot. This section covers how to create snapshots compatible with `@kbn/es-snapshot-loader`.
+
+### 1. Register a Snapshot Repository
+
+First, register a file system repository. The `location` must be within the `path.repo` directory configured when starting Elasticsearch:
+
+```bash
+curl -X PUT "http://elastic:changeme@localhost:9200/_snapshot/my-repository" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "fs",
+    "settings": {
+      "location": "/tmp/es-backups"
+    }
+  }'
+```
+
+### 2. Create the Snapshot
+
+Create a snapshot with only the indices you need. Avoid snapshotting global state or all indices unless your dataset requires it:
+
+```bash
+curl -X PUT "http://elastic:changeme@localhost:9200/_snapshot/my-repository/snapshot_1?wait_for_completion=true" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "indices": "logs-*,metrics-*,traces-*",
+    "include_global_state": false
+  }'
+```
+
+### How This Fits with Restore/Replay
+
+Once you have a snapshot:
+
+- **For restore**: Use `--snapshot-url file:///tmp/es-snapshots/my-repository` pointing to your repository directory. The loader will register this as a read-only URL repository and restore indices directly.
+
+- **For replay**: Same as restore, but replay is designed for data streams (`logs-*`, `metrics-*`, `traces-*`). It transforms timestamps so your historical data appears fresh/useful for testing timestamp-aware features.
+
+The snapshot repository path you used when creating the snapshot becomes the `--snapshot-url` (as a `file://` URL) when restoring or replaying.
+
 ## CLI Usage
 
 ### Restore
