@@ -15,9 +15,8 @@ import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { docLinks } from '../common/doc_links';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import { registerAnalytics, registerApp } from './register';
 import { OnechatNavControlInitiator } from './components/nav_control/lazy_onechat_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -31,6 +30,7 @@ import {
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
+import { registerStepDefinitions } from './step_types';
 import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
@@ -38,11 +38,11 @@ import type {
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
+  ConversationFlyoutRef,
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
-import type { ConversationFlyoutRef } from './types';
 
 export class OnechatPlugin
   implements
@@ -89,15 +89,8 @@ export class OnechatPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    try {
-      core.getStartServices().then(([coreStart]) => {
-        const { capabilities } = coreStart.application;
-        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
-          registerManagementSection({ core, management: deps.management });
-        }
-      });
-    } catch (error) {
-      this.logger.error('Error registering Agent Builder management section', error);
+    if (deps.workflowsExtensions) {
+      registerStepDefinitions(deps.workflowsExtensions);
     }
 
     return {};
