@@ -44,10 +44,6 @@ const useMetricsExperienceStateMock =
     typeof metricsExperienceStateProvider.useMetricsExperienceState
   >;
 
-const useMetricFieldsFilterMock = hooks.useMetricFieldsFilter as jest.MockedFunction<
-  typeof hooks.useMetricFieldsFilter
->;
-
 const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
 
 const dimensions: Dimension[] = [
@@ -106,20 +102,12 @@ describe('MetricsExperienceGridContent', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      selectedDimensionValues: [],
-      selectedValuesMetricFields: [],
-      onDimensionValuesChange: jest.fn(),
       onDimensionsChange: jest.fn(),
-      dimensionFilters: undefined,
       onPageChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
-    });
-
-    useMetricFieldsFilterMock.mockReturnValue({
-      filteredFields: allFields,
     });
 
     usePaginationMock.mockReturnValue({
@@ -143,17 +131,13 @@ describe('MetricsExperienceGridContent', () => {
   });
 
   it('renders the no data state when filtered/paginated fields returns no fields', () => {
-    useMetricFieldsFilterMock.mockReturnValue({
-      filteredFields: [],
-    });
-
     usePaginationMock.mockReturnValue({
       currentPageItems: [],
       totalPages: 0,
       totalCount: 0,
     });
 
-    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
+    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} fields={[]} />, {
       wrapper: IntlProvider,
     });
 
@@ -172,12 +156,8 @@ describe('MetricsExperienceGridContent', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      selectedDimensionValues: [],
-      selectedValuesMetricFields: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onDimensionValuesChange: jest.fn(),
-      dimensionFilters: undefined,
       isFullscreen: false,
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
@@ -186,10 +166,6 @@ describe('MetricsExperienceGridContent', () => {
 
     const cpuFields = allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu'));
 
-    useMetricFieldsFilterMock.mockReturnValue({
-      filteredFields: cpuFields,
-    });
-
     usePaginationMock.mockReturnValue({
       currentPageItems: cpuFields.slice(0, 5),
       totalPages: 2,
@@ -197,7 +173,7 @@ describe('MetricsExperienceGridContent', () => {
     });
 
     const { getByText } = render(
-      <MetricsExperienceGridContent {...defaultProps} fields={allFieldsSomeWithCpu} />,
+      <MetricsExperienceGridContent {...defaultProps} fields={cpuFields} />,
       {
         wrapper: IntlProvider,
       }

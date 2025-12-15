@@ -11,7 +11,6 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
-import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
@@ -133,12 +132,8 @@ describe('MetricsExperienceGrid', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      selectedDimensionValues: [],
-      selectedValuesMetricFields: [],
-      dimensionFilters: undefined,
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onDimensionValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange: jest.fn(),
@@ -219,7 +214,7 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('renders the toolbar', () => {
-    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
@@ -227,30 +222,6 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
-    expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
-  });
-
-  it('render <ValuesSelector /> when dimensions are selected', () => {
-    useMetricsExperienceStateMock.mockReturnValue({
-      currentPage: 0,
-      selectedDimensions: [{ name: 'foo', type: ES_FIELD_TYPES.KEYWORD }],
-      selectedDimensionValues: [`foo${FIELD_VALUE_SEPARATOR}bar`],
-      selectedValuesMetricFields: [],
-      dimensionFilters: { foo: ['bar'] },
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
-      onDimensionValuesChange: jest.fn(),
-      isFullscreen: false,
-      searchTerm: '',
-      onSearchTermChange: jest.fn(),
-      onToggleFullscreen: jest.fn(),
-    });
-
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument();
   });
 
   it('shows and updates the search input when the search button is clicked', () => {
@@ -261,12 +232,8 @@ describe('MetricsExperienceGrid', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      selectedDimensionValues: [],
-      selectedValuesMetricFields: [],
-      dimensionFilters: undefined,
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onDimensionValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange,
@@ -307,12 +274,8 @@ describe('MetricsExperienceGrid', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      selectedDimensionValues: [],
-      selectedValuesMetricFields: [],
-      dimensionFilters: undefined,
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onDimensionValuesChange: jest.fn(),
       isFullscreen,
       searchTerm: '',
       onSearchTermChange: jest.fn(),
