@@ -11,7 +11,7 @@ import type { ParseOptions } from '../parser';
 import { Parser } from '../parser';
 import { createTag } from './tag';
 import { SynthNode } from './synth_node';
-import { HEADER_COMMANDS, SOURCE_COMMANDS } from '../parser/constants';
+import { HEADER_COMMANDS, SOURCE_COMMANDS } from '../parser';
 import type { SynthGenerator } from './types';
 import type { ESQLAstQueryExpression } from '../types';
 
