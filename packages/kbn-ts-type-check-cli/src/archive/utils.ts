@@ -143,16 +143,13 @@ export async function cleanTypeCheckArtifacts(log: SomeDevLog) {
  */
 export async function calculateFileHash(filePath: string): Promise<string | null> {
   const fullPath = Path.resolve(REPO_ROOT, filePath);
-  try {
-    const hash = createHash('sha256');
-    await pipeline(Fs.createReadStream(fullPath), hash);
-    return hash.digest('hex');
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return null;
-    }
-    throw error;
+  if (!Fs.existsSync(fullPath)) {
+    return null;
   }
+
+  const hash = createHash('sha256');
+  await pipeline(Fs.createReadStream(fullPath), hash);
+  return hash.digest('hex');
 }
 
 /**
