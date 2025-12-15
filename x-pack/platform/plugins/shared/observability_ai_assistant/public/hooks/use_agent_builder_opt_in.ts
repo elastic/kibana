@@ -50,7 +50,6 @@ export interface UseAgentBuilderOptInResult {
   /**
    * Confirm switching to the Agent Builder:
    * - Updates preferred chat experience to Agent
-   * - Updates preferred assistant type to Default
    * - Optionally navigates to Observability home (when enabled)
    * - Opens the Agent Builder flyout
    */
@@ -105,7 +104,6 @@ export const useAgentBuilderOptIn = ({
     try {
       await Promise.all([
         settings.client.set(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, AIChatExperience.Agent),
-        // settings.client.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default),
       ]);
 
       if (navigateFromConversationApp) {
