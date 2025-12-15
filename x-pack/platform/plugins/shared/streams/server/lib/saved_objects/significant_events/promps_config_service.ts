@@ -48,7 +48,7 @@ export class PromptsConfigService {
       {
         ...defaultsPrompts,
         ...existing,
-        ...attributes,
+        ...Object.fromEntries(Object.entries(attributes).filter(([, value]) => Boolean(value))),
       },
       {
         ...(options ?? {}),
