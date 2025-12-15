@@ -48,7 +48,7 @@ export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
         <EuiFlexItem>
           <EuiImage
             alt={i18n.translate('home.setupCloudConnect.illustration.alt.text', {
-              defaultMessage: 'Illustration for cloud connect setup',
+              defaultMessage: 'Illustration for Cloud Connect setup',
             })}
             src={addBasePath('/plugins/kibanaReact/assets/') + 'illustration_cloud_migration.png'}
           />
