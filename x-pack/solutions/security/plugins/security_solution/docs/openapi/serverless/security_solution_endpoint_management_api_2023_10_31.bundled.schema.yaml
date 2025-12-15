@@ -1182,6 +1182,18 @@ components:
           type: string
         example:
           type: string
+        fileHash:
+          description: SHA256 hash of the script file that was uploaded
+          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          type: string
+        fileName:
+          description: Name of the script file that was uploaded
+          example: collect_host_data.sh
+          type: string
+        fileSize:
+          description: Size of the script file that was uploaded in bytes
+          example: 12345
+          type: integer
         id:
           example: 123e4567-e89b-12d3-a456-426655440000
           format: uuid

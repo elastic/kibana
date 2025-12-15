@@ -22,9 +22,11 @@ interface RoundThinkingProps {
 const fadeIn = keyframes`
   from {
     opacity: 0;
+    transform: translate(-8px, -8px);
   }
   to {
     opacity: 1;
+    transform: translate(0, 0);
   }
 `;
 
@@ -37,7 +39,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
   };
 
   const fadeInStyles = css`
-    animation: ${fadeIn} ${euiTheme.animation.normal} ease-in;
+    animation: ${fadeIn} ${euiTheme.animation.fast} ease-out;
   `;
 
   if (showThinkingPanel) {

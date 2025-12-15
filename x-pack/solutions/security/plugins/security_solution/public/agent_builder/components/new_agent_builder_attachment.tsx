@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { EuiButtonColor, IconType } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { memo } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { onechatIconType } from '@kbn/onechat-plugin/public';
 import * as i18n from './translations';
+import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
 
 export interface NewAgentBuilderAttachmentProps {
   /**
@@ -18,10 +19,6 @@ export interface NewAgentBuilderAttachmentProps {
    * @default 'primary'
    */
   color?: EuiButtonColor;
-  /**
-   * icon type
-   */
-  iconType?: IconType;
   /**
    * Callback when button is clicked
    */
@@ -31,9 +28,9 @@ export interface NewAgentBuilderAttachmentProps {
    */
   size?: EuiButtonEmptySizes;
   /**
-   * Optional button text
+   * Whether the button is disabled
    */
-  text?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -42,24 +39,28 @@ export interface NewAgentBuilderAttachmentProps {
  */
 export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment({
   color = 'primary',
-  iconType = onechatIconType,
   onClick,
   size = 'm',
-  text = i18n.VIEW_IN_AGENT_BUILDER,
+  disabled = false,
 }: NewAgentBuilderAttachmentProps) {
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  if (!isAgentBuilderEnabled) {
+    return null;
+  }
   return (
     <EuiButtonEmpty
-      aria-label={text}
+      aria-label={i18n.ADD_TO_CHAT}
       color={color}
       data-test-subj={'newAgentBuilderAttachment'}
       onClick={onClick}
       size={size}
+      disabled={disabled}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} color={color === 'primary' ? 'default' : color} />
+          <EuiIcon type={onechatIconType} color={color === 'primary' ? 'default' : color} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{text}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18n.ADD_TO_CHAT}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiButtonEmpty>
   );
