@@ -58,4 +58,4 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
   },
 });
 
-export * as testData from './constants';
+export * as testData from '../../common/fixtures/constants';

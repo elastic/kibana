@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiI18nNumber } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { RoundModelUsageStats } from '@kbn/onechat-common';
 import { useToasts } from '../../../../hooks/use_toasts';
 
 const labels = {
@@ -25,13 +23,11 @@ const labels = {
 
 interface RoundResponseActionsProps {
   content: string;
-  modelUsage: RoundModelUsageStats;
   isVisible: boolean;
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   content,
-  modelUsage,
   isVisible,
 }) => {
   const { addSuccessToast } = useToasts();
@@ -62,18 +58,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           color="text"
           data-test-subj="roundResponseCopyButton"
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.onechat.roundResponseActions.tokenUsage"
-            defaultMessage="Input tokens: {inputTokens} / Output tokens: {outputTokens}"
-            values={{
-              inputTokens: <EuiI18nNumber value={modelUsage.input_tokens} />,
-              outputTokens: <EuiI18nNumber value={modelUsage.output_tokens} />,
-            }}
-          />
-        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
