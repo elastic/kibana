@@ -71,6 +71,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       beatsAndLogstashConfiguration: `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/find-cloud-id`,
       elasticsearchBillingManagingCosts: `${ELASTIC_DOCS}deploy-manage/cloud-organization/billing/elasticsearch-billing-dimensions#elasticsearch-billing-managing-elasticsearch-costs`,
       indexManagement: `${ELASTIC_DOCS}manage-data/lifecycle/index-lifecycle-management/migrate-index-management`,
+      cloudConnect: `${ELASTIC_DOCS}deploy-manage/cloud-connect`,
     },
     console: {
       guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
@@ -128,6 +129,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       connectorsDropbox: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-dropbox`,
       connectorsContentExtraction: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-content-extraction`,
       connectorsGithub: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-github`,
+      connectorsGitlab: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-gitlab`,
       connectorsGmail: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-gmail`,
       connectorsGoogleCloudStorage: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-google-cloud`,
       connectorsGoogleDrive: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-google-drive`,

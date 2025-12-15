@@ -174,6 +174,7 @@ export const FetcherConfigSchema = z
     max_redirects: z.number().optional(),
     keep_alive: z.boolean().optional(),
   })
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
 
 export const HttpStepSchema = BaseStepSchema.extend({
