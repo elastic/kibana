@@ -43,19 +43,35 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
+  - '@kbn/spaces-plugin'
+  - '@kbn/inference-plugin'
+  - '@kbn/logging'
   - '@kbn/inference-common'
   - '@kbn/std'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
-  - '@kbn/logging'
+  - '@kbn/ai-assistant-common'
 tags:
   - plugin
   - prod
   - group-observability
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - server/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

@@ -20,7 +20,7 @@
       "inference",
       "discoverShared"
     ],
-    "optionalPlugins": ["ml"],
+    "optionalPlugins": ["ml", "spaces"],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": []
   }

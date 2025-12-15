@@ -30,11 +30,11 @@
     "@kbn/inference-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
-    "@kbn/inference-common",
     "@kbn/std",
-    "@kbn/inference-plugin",
+    "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
     "@kbn/logging",
+    "@kbn/ai-assistant-common"
   ],
   "exclude": ["target/**/*"]
 }
