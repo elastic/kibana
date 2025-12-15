@@ -13,17 +13,14 @@ import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { dashboardControls, timePicker, dashboard } = getPageObjects([
+  const { dashboardControls, dashboard } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
-    'common',
-    'header',
   ]);
 
   const DASHBOARD_NAME = 'Test Pin Controls';

@@ -18,9 +18,9 @@ import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeFiltersManager } from './filters_manager';
+import { getLastSavedState } from './default_dashboard_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { saveDashboard } from './save_modal/save_dashboard';
@@ -134,7 +134,7 @@ export function getDashboardApi({
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
-    lastSavedState: readResult?.data ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: getLastSavedState(readResult),
     layoutManager,
     savedObjectId$,
     settingsManager,
@@ -169,7 +169,6 @@ export function getDashboardApi({
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
   const dashboardApi = {
-    esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...viewModeManager.api,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,
@@ -182,6 +181,7 @@ export function getDashboardApi({
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
     ...esqlVariablesManager.api,
+    esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
     ...initializeTrackContentfulRender(),
@@ -304,7 +304,7 @@ export function getDashboardApi({
     api: {
       ...dashboardApi,
       ...searchSessionManager.api,
-    },
+    } as DashboardApi,
     internalApi,
     cleanup: () => {
       dataLoadingManager.cleanup();

@@ -15,7 +15,7 @@ import { getAccessControlClient } from '../../services/access_control_service';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { getLastSavedState } from '../default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
@@ -81,8 +81,7 @@ export async function loadDashboardApi({
     creationOptions,
     incomingEmbeddables,
     initialState: {
-      ...DEFAULT_DASHBOARD_STATE,
-      ...readResult?.data,
+      ...getLastSavedState(readResult),
       ...unsavedChanges,
       ...overrideState,
     },
