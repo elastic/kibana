@@ -16,15 +16,8 @@ import {
   type ESQLColumn,
 } from '@kbn/esql-ast';
 
-export interface UserDefinedColumn {
-  /** The name of the user-defined column */
-  name: string;
-  /** The original column name (for RENAME commands) */
-  originalName?: string;
-}
-
 export interface UserDefinedColumnsPerCommand {
-  [commandIndex: number]: UserDefinedColumn[];
+  [commandIndex: number]: string[];
 }
 
 /**
@@ -58,29 +51,23 @@ export function getUserDefinedColumns(query: string): UserDefinedColumnsPerComma
  * 1. Assignment operators (=) - creates new columns
  * 2. Rename operators (AS) - creates aliases
  */
-function getUserDefinedColumnsFromCommand(command: ESQLCommand): UserDefinedColumn[] {
-  const userDefinedColumns: UserDefinedColumn[] = [];
+function getUserDefinedColumnsFromCommand(command: ESQLCommand): string[] {
+  const userDefinedColumns: string[] = [];
 
   const processArgument = (arg: any) => {
     // Handle assignment (=) - creates new columns in EVAL, STATS etc.
     if (isAssignment(arg) && isColumn(arg.args[0])) {
       const leftColumn = arg.args[0] as ESQLColumn;
 
-      userDefinedColumns.push({
-        name: leftColumn.name,
-      });
+      userDefinedColumns.push(leftColumn.name);
     }
 
     // Handle rename (AS)
     else if (isFunctionExpression(arg) && arg.name === 'as') {
       if (arg.args.length >= 2 && isColumn(arg.args[0]) && isColumn(arg.args[1])) {
-        const originalCol = arg.args[0] as ESQLColumn;
         const newNameCol = arg.args[1] as ESQLColumn;
 
-        userDefinedColumns.push({
-          name: newNameCol.name,
-          originalName: originalCol.name,
-        });
+        userDefinedColumns.push(newNameCol.name);
       }
     }
 
@@ -93,9 +80,7 @@ function getUserDefinedColumnsFromCommand(command: ESQLCommand): UserDefinedColu
       arg.name !== 'as'
     ) {
       // Use the text representation (e.g., "count()") as the column name
-      userDefinedColumns.push({
-        name: arg.text,
-      });
+      userDefinedColumns.push(arg.text);
     }
 
     // Handle option arguments (like BY clauses) that can contain assignments
@@ -118,8 +103,8 @@ export function getAllUserDefinedColumnNames(query: string): string[] {
   const columnsPerCommand = getUserDefinedColumns(query);
   const allColumns: string[] = [];
 
-  Object.values(columnsPerCommand).forEach((columns: UserDefinedColumn[]) => {
-    columns.forEach((col: UserDefinedColumn) => allColumns.push(col.name));
+  Object.values(columnsPerCommand).forEach((columns: string[]) => {
+    columns.forEach((col: string) => allColumns.push(col));
   });
 
   return [...new Set(allColumns)]; // Remove duplicates

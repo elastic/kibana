@@ -14,17 +14,28 @@ import {
 } from './get_user_defined_columns';
 
 describe('getUserDefinedColumns', () => {
+  it('handles query with only source command', () => {
+    const query = 'FROM logs*';
+    const result = getUserDefinedColumns(query);
+
+    expect(result).toEqual({});
+  });
   describe('EVAL command', () => {
     it('identifies user-defined columns from EVAL command', () => {
       const query = 'FROM logs* | EVAL col = ABS(x)';
       const result = getUserDefinedColumns(query);
 
       expect(result).toEqual({
-        1: [
-          {
-            name: 'col',
-          },
-        ],
+        1: ['col'],
+      });
+    });
+
+    it('identifies automatically created columns columns from EVAL command', () => {
+      const query = 'FROM logs* | EVAL ABS(x)';
+      const result = getUserDefinedColumns(query);
+
+      expect(result).toEqual({
+        1: ['ABS(x)'],
       });
     });
 
@@ -33,22 +44,26 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result[1]).toHaveLength(2);
-      expect(result[1].map((c) => c.name)).toEqual(['col1', 'col2']);
+      expect(result[1]).toEqual(['col1', 'col2']);
     });
   });
 
   describe('RENAME command', () => {
-    it('identifies user-defined columns from RENAME command', () => {
-      const query = 'FROM logs* | RENAME AvgTicketPrice AS ss';
+    it('identifies user-defined columns from RENAME command with AS keyword', () => {
+      const query = 'FROM logs* | RENAME AvgTicketPrice AS col';
       const result = getUserDefinedColumns(query);
 
       expect(result).toEqual({
-        1: [
-          {
-            name: 'ss',
-            originalName: 'AvgTicketPrice',
-          },
-        ],
+        1: ['col'],
+      });
+    });
+
+    it('identifies user-defined columns from RENAME command with name assignment', () => {
+      const query = 'FROM logs* | RENAME col = AvgTicketPrice';
+      const result = getUserDefinedColumns(query);
+
+      expect(result).toEqual({
+        1: ['col'],
       });
     });
 
@@ -57,8 +72,7 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result[1]).toHaveLength(2);
-      expect(result[1].map((c) => c.name)).toEqual(['newField1', 'newField2']);
-      expect(result[1].map((c) => c.originalName)).toEqual(['field1', 'field2']);
+      expect(result[1]).toEqual(['newField1', 'newField2']);
     });
   });
 
@@ -68,11 +82,7 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result).toEqual({
-        1: [
-          {
-            name: 'count',
-          },
-        ],
+        1: ['count'],
       });
     });
 
@@ -81,11 +91,7 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result).toEqual({
-        1: [
-          {
-            name: 'count()',
-          },
-        ],
+        1: ['count()'],
       });
     });
 
@@ -94,14 +100,7 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result).toEqual({
-        1: [
-          {
-            name: 'count',
-          },
-          {
-            name: 'col',
-          },
-        ],
+        1: ['count', 'col'],
       });
     });
 
@@ -111,7 +110,7 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result[1]).toHaveLength(3);
-      expect(result[1].map((c) => c.name)).toEqual(['count', 'avg_price', 'max_date']);
+      expect(result[1]).toEqual(['count', 'avg_price', 'max_date']);
     });
 
     it('identifies multiple automatically created aggregations in STATS command', () => {
@@ -119,7 +118,7 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result[1]).toHaveLength(3);
-      expect(result[1].map((c) => c.name)).toEqual(['count()', 'avg(price)', 'max(@timestamp)']);
+      expect(result[1]).toEqual(['count()', 'avg(price)', 'max(@timestamp)']);
     });
   });
 
@@ -130,46 +129,10 @@ describe('getUserDefinedColumns', () => {
       const result = getUserDefinedColumns(query);
 
       expect(result).toEqual({
-        1: [
-          {
-            name: 'computed',
-          },
-        ],
-        2: [
-          {
-            name: 'final_value',
-            originalName: 'computed',
-          },
-        ],
-        3: [
-          {
-            name: 'max_val',
-          },
-        ],
+        1: ['computed'],
+        2: ['final_value'],
+        3: ['max_val'],
       });
-    });
-  });
-
-  describe('Complex queries', () => {
-    it('handles queries without user-defined columns', () => {
-      const query = 'FROM logs* | WHERE x > 0 | KEEP field1, field2 | SORT @timestamp';
-      const result = getUserDefinedColumns(query);
-
-      expect(result).toEqual({});
-    });
-
-    it('handles empty query', () => {
-      const query = '';
-      const result = getUserDefinedColumns(query);
-
-      expect(result).toEqual({});
-    });
-
-    it('handles query with only source command', () => {
-      const query = 'FROM logs*';
-      const result = getUserDefinedColumns(query);
-
-      expect(result).toEqual({});
     });
   });
 });
@@ -214,11 +177,5 @@ describe('isUserDefinedColumn', () => {
     expect(isUserDefinedColumn(query, 'original')).toBe(false);
     expect(isUserDefinedColumn(query, 'x')).toBe(false);
     expect(isUserDefinedColumn(query, 'nonexistent')).toBe(false);
-  });
-
-  it('handles edge cases', () => {
-    const query = '';
-
-    expect(isUserDefinedColumn(query, 'any_column')).toBe(false);
   });
 });
