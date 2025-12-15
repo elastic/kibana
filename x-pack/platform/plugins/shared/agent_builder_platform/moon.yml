@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/onechat-plugin'
   - '@kbn/core-lifecycle-server'
-  - '@kbn/esql-validation-autocomplete'
   - '@kbn/inference-common'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/i18n'

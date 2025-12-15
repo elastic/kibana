@@ -577,7 +577,6 @@
     "@kbn/esql-types": "link:src/platform/packages/shared/kbn-esql-types",
     "@kbn/esql-utils": "link:src/platform/packages/shared/kbn-esql-utils",
     "@kbn/esql-ux-example-plugin": "link:examples/esql_ux_example",
-    "@kbn/esql-validation-autocomplete": "link:src/platform/packages/shared/kbn-esql-validation-autocomplete",
     "@kbn/esql-validation-example-plugin": "link:examples/esql_validation_example",
     "@kbn/eui-provider-dev-warning": "link:src/platform/test/plugin_functional/plugins/eui_provider_dev_warning",
     "@kbn/event-annotation-common": "link:src/platform/packages/shared/kbn-event-annotation-common",
