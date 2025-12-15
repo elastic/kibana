@@ -29,6 +29,7 @@ export const registerLookupIndexRoutes = (
           indexName: schema.string(),
         }),
         body: schema.object({
+          // maxSize fixes: Unbounded array in schema validation vulnerability,
           operations: schema.arrayOf(schema.any(), { maxSize: 10000 }),
         }),
       },
