@@ -17,12 +17,14 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
+import * as i18n from '../../../pages/add_rules/translations';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesTableFilters } from './add_prebuilt_rules_table_filters';
 import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
+import type { ReviewPrebuiltRuleInstallationSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_sort';
 
 /**
  * Table Component for displaying new rules that are available to be installed
@@ -57,7 +59,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       if (sort) {
         setSortingOptions([
           {
-            field: sort.field,
+            field: sort.field as ReviewPrebuiltRuleInstallationSortField,
             order: sort.direction,
           },
         ]);
@@ -65,8 +67,6 @@ export const AddPrebuiltRulesTable = React.memo(() => {
     },
     [setPagination, setSortingOptions]
   );
-
-  console.log('dbg pagination.page - 1', pagination.page - 1);
 
   return (
     <>
@@ -128,6 +128,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 data-test-subj="add-prebuilt-rules-table"
                 columns={rulesColumns}
                 onChange={handleTableChange}
+                tableCaption={i18n.PAGE_TITLE}
               />
             </>
           )
