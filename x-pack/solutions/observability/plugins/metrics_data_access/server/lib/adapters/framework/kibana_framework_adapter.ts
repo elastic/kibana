@@ -165,6 +165,7 @@ export class KibanaFramework {
     }
 
     let apiResult;
+
     switch (endpoint) {
       case 'search':
         apiResult = elasticsearch.client.asCurrentUser.search({
