@@ -152,6 +152,17 @@ export const internalStateSlice = createSlice({
       state.tabsBarVisibility = action.payload;
     },
 
+    markNonActiveTabsForRefetch: (state) => {
+      // Mark all non-active tabs to refetch on selection
+      // Used when projectRouting changes in CPS Manager
+      const currentTabId = state.tabs.unsafeCurrentId;
+      state.tabs.allIds.forEach((tabId) => {
+        if (tabId !== currentTabId && state.tabs.byId[tabId]) {
+          state.tabs.byId[tabId].forceFetchOnSelect = true;
+        }
+      });
+    },
+
     setExpandedDoc: (
       state,
       action: PayloadAction<{
