@@ -16,7 +16,7 @@ import type { ModuleDiscoveryInfo } from './config_discovery';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
 
 // Module-level object to store mock modules that the jest.mock can access
-export const mockTestableModulesStore: { modules: ScoutTestableModuleWithConfigs[] } = {
+export const mockTestableModules: { modules: ScoutTestableModuleWithConfigs[] } = {
   modules: [],
 };
 
@@ -58,7 +58,7 @@ jest.mock('@kbn/scout-reporting/src/registry', () => {
   return {
     testableModules: {
       get allIncludingConfigs() {
-        return testModule.mockTestableModulesStore.modules;
+        return testModule.mockTestableModules.modules;
       },
     },
   };
@@ -128,7 +128,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
 
     // Default mock modules
-    mockTestableModulesStore.modules = [
+    mockTestableModules.modules = [
       {
         name: 'pluginA',
         group: 'groupA',
@@ -362,7 +362,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up modules with no matching tags
-    mockTestableModulesStore.modules = [
+    mockTestableModules.modules = [
       {
         name: 'pluginNoMatch',
         group: 'groupX',
@@ -445,7 +445,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up a module with a config that has no passed tests
-    mockTestableModulesStore.modules = [
+    mockTestableModules.modules = [
       {
         name: 'pluginNoTests',
         group: 'groupY',
@@ -498,7 +498,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up a module with mixed test statuses and file types
-    mockTestableModulesStore.modules = [
+    mockTestableModules.modules = [
       {
         name: 'pluginMixedTests',
         group: 'groupZ',
@@ -600,7 +600,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up a module with various tags to test serverRunFlags computation
-    mockTestableModulesStore.modules = [
+    mockTestableModules.modules = [
       {
         name: 'pluginTestModes',
         group: 'groupTest',
@@ -670,7 +670,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
   describe('"--flatten" flag', () => {
     beforeEach(() => {
       // Set up modules with different groups and serverRunFlags for flatten testing
-      mockTestableModulesStore.modules = [
+      mockTestableModules.modules = [
         {
           name: 'pluginSearch',
           group: 'search',
@@ -830,7 +830,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       };
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
-        mockTestableModulesStore.modules.map((m) => ({
+        mockTestableModules.modules.map((m) => ({
           name: m.name,
           group: m.group,
           type: m.type,
@@ -909,7 +909,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       };
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
-        mockTestableModulesStore.modules.map((m) => ({
+        mockTestableModules.modules.map((m) => ({
           name: m.name,
           group: m.group,
           type: m.type,
@@ -993,7 +993,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       });
 
       // Set up a module with a config that has multiple serverRunFlags
-      mockTestableModulesStore.modules = [
+      mockTestableModules.modules = [
         {
           name: 'pluginMultiMode',
           group: 'test',

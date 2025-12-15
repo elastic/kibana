@@ -80,7 +80,8 @@ fi
 # Otherwise, we need to handle the case where SCOUT_CONFIG is set directly
 if [[ -z "${module_data:-}" && -n "$SCOUT_CONFIG" ]]; then
   echo "⚠️ Warning: SCOUT_CONFIG is set but module_data is not available. Server run flags cannot be determined from tags."
-  echo "   Consider using SCOUT_CONFIG_GROUP_KEY instead to get serverRunFlags from the JSON file."
+  echo "   As a result, tests may not run in the expected modes or with the correct configuration, which could lead to unexpected failures or incomplete test coverage."
+  echo "   Execution will proceed, but it is strongly recommended to use SCOUT_CONFIG_GROUP_KEY instead to ensure serverRunFlags are set from the JSON file."
 fi
 
 results=()
