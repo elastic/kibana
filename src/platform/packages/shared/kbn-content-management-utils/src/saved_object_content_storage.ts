@@ -8,7 +8,8 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SearchQuery, SearchIn } from '@kbn/content-management-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
+import type { SearchQuery, SearchIn, FacetBucket } from '@kbn/content-management-plugin/common';
 import type {
   ContentStorage,
   StorageContext,
@@ -128,6 +129,105 @@ const combineFilters = (...filters: Array<string | undefined>): string | undefin
   return validFilters.map((f) => `(${f})`).join(' AND ');
 };
 
+/** Default size for facet aggregations. */
+const DEFAULT_FACET_SIZE = 100;
+
+/**
+ * Builds aggregations for facet requests.
+ *
+ * @param facets - The facets configuration from the search query.
+ * @param savedObjectType - The saved object type for field path prefixing.
+ * @returns Aggregations object for SavedObjects find, or `undefined` if no facets requested.
+ */
+export const buildFacetAggregations = (
+  facets: SearchQuery['facets'],
+  savedObjectType: string
+): Record<string, estypes.AggregationsAggregationContainer> | undefined => {
+  if (!facets) return undefined;
+
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+
+  // Tag facets: use nested aggregation on references.
+  if (facets.tags) {
+    const size = facets.tags.size ?? DEFAULT_FACET_SIZE;
+    aggs.tagFacet = {
+      nested: { path: 'references' },
+      aggs: {
+        tagFilter: {
+          filter: { term: { 'references.type': 'tag' } },
+          aggs: {
+            tagIds: {
+              terms: {
+                field: 'references.id',
+                size,
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  // CreatedBy facets: use terms aggregation on created_by field.
+  if (facets.createdBy) {
+    const size = facets.createdBy.size ?? DEFAULT_FACET_SIZE;
+    aggs.createdByFacet = {
+      terms: {
+        field: `${savedObjectType}.created_by`,
+        size,
+        ...(facets.createdBy.includeMissing && { missing: '__missing__' }),
+      },
+    };
+  }
+
+  return Object.keys(aggs).length > 0 ? aggs : undefined;
+};
+
+/**
+ * Parses facet aggregation results from the SavedObjects response.
+ *
+ * @param aggregations - The aggregations object from the SavedObjects find response.
+ * @returns Parsed facet results, or `undefined` if no aggregations.
+ */
+export const parseFacetAggregations = (
+  aggregations: unknown
+): { tags?: FacetBucket[]; createdBy?: FacetBucket[] } | undefined => {
+  if (!aggregations || typeof aggregations !== 'object') return undefined;
+
+  const aggs = aggregations as Record<string, unknown>;
+  const result: { tags?: FacetBucket[]; createdBy?: FacetBucket[] } = {};
+
+  // Parse tag facets from nested aggregation.
+  if (aggs.tagFacet) {
+    const tagFacet = aggs.tagFacet as {
+      tagFilter?: { tagIds?: { buckets?: Array<{ key: string; doc_count: number }> } };
+    };
+    const buckets = tagFacet.tagFilter?.tagIds?.buckets;
+    if (buckets && Array.isArray(buckets)) {
+      result.tags = buckets.map((bucket) => ({
+        key: bucket.key,
+        doc_count: bucket.doc_count,
+      }));
+    }
+  }
+
+  // Parse createdBy facets from terms aggregation.
+  if (aggs.createdByFacet) {
+    const createdByFacet = aggs.createdByFacet as {
+      buckets?: Array<{ key: string; doc_count: number }>;
+    };
+    const buckets = createdByFacet.buckets;
+    if (buckets && Array.isArray(buckets)) {
+      result.createdBy = buckets.map((bucket) => ({
+        key: bucket.key,
+        doc_count: bucket.doc_count,
+      }));
+    }
+  }
+
+  return result.tags || result.createdBy ? result : undefined;
+};
+
 export const searchArgsToSOFindOptionsDefault = <T extends string>(
   params: SearchIn<T, SearchArgsToSOFindOptionsOptionsDefault>
 ): SavedObjectsFindOptions => {
@@ -137,6 +237,9 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
   const createdByKqlFilter = buildCreatedByFilter(query.createdBy, contentTypeId);
   const favoritesKqlFilter = buildFavoritesFilter(query.favorites, contentTypeId);
   const combinedFilter = combineFilters(createdByKqlFilter, favoritesKqlFilter);
+
+  // Build aggregations for facets.
+  const aggs = buildFacetAggregations(query.facets, contentTypeId);
 
   return {
     type: contentTypeId,
@@ -154,6 +257,8 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     }),
     // Server-side filtering support.
     ...(combinedFilter && { filter: combinedFilter }),
+    // Facet aggregations.
+    ...(aggs && { aggs }),
   };
 };
 
@@ -533,7 +638,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
     const soClient = await SOContentStorage.getSOClientFromRequest(ctx);
 
-    // Validate and UP transform the options
+    // Validate and UP transform the options.
     const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
       Types['SearchOptions'],
       Types['SearchOptions']
@@ -547,13 +652,22 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       query,
       options: optionsToLatest,
     });
-    // Execute the query in the DB
+    // Execute the query in the DB.
     const soResponse = await soClient.find<Types['Attributes']>(soQuery);
-    const response = {
+
+    // Parse facet aggregations if present.
+    const facets = parseFacetAggregations(soResponse.aggregations);
+
+    const response: {
+      hits: Types['Item'][];
+      pagination: { total: number };
+      facets?: { tags?: FacetBucket[]; createdBy?: FacetBucket[] };
+    } = {
       hits: soResponse.saved_objects.map((so) => this.savedObjectToItem(so)),
       pagination: {
         total: soResponse.total,
       },
+      ...(facets && { facets }),
     };
 
     const validationError = transforms.search.out.result.validate(response);
@@ -565,7 +679,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       }
     }
 
-    // Validate the response and DOWN transform to the request version
+    // Validate the response and DOWN transform to the request version.
     const { value, error: resultError } = transforms.search.out.result.down<
       Types['SearchOut'],
       Types['SearchOut']

@@ -15,6 +15,8 @@ import {
   searchArgsToSOFindOptionsDefault,
   buildCreatedByFilter,
   buildFavoritesFilter,
+  buildFacetAggregations,
+  parseFacetAggregations,
 } from './saved_object_content_storage';
 import type { ContentManagementCrudTypes } from './types';
 
@@ -967,5 +969,237 @@ describe('buildFavoritesFilter', () => {
   test('should build OR filter for multiple favorite IDs', () => {
     const result = buildFavoritesFilter({ only: true, ids: ['id-1', 'id-2'] }, soType);
     expect(result).toBe('(dashboard.id:"id-1" OR dashboard.id:"id-2")');
+  });
+});
+
+describe('buildFacetAggregations', () => {
+  const soType = 'dashboard';
+
+  test('should return undefined when facets is undefined', () => {
+    const result = buildFacetAggregations(undefined, soType);
+    expect(result).toBeUndefined();
+  });
+
+  test('should return undefined when facets is empty object', () => {
+    const result = buildFacetAggregations({}, soType);
+    expect(result).toBeUndefined();
+  });
+
+  test('should build tag facet aggregation with nested structure', () => {
+    const result = buildFacetAggregations({ tags: {} }, soType);
+
+    expect(result).toEqual({
+      tagFacet: {
+        nested: { path: 'references' },
+        aggs: {
+          tagFilter: {
+            filter: { term: { 'references.type': 'tag' } },
+            aggs: {
+              tagIds: {
+                terms: {
+                  field: 'references.id',
+                  size: 100, // Default size.
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('should build tag facet aggregation with custom size', () => {
+    const result = buildFacetAggregations({ tags: { size: 50 } }, soType);
+
+    expect(result?.tagFacet.aggs?.tagFilter.aggs?.tagIds.terms?.size).toBe(50);
+  });
+
+  test('should build createdBy facet aggregation', () => {
+    const result = buildFacetAggregations({ createdBy: {} }, soType);
+
+    expect(result).toEqual({
+      createdByFacet: {
+        terms: {
+          field: 'dashboard.created_by',
+          size: 100, // Default size.
+        },
+      },
+    });
+  });
+
+  test('should build createdBy facet with custom size', () => {
+    const result = buildFacetAggregations({ createdBy: { size: 25 } }, soType);
+
+    expect(result?.createdByFacet.terms?.size).toBe(25);
+  });
+
+  test('should build createdBy facet with includeMissing', () => {
+    const result = buildFacetAggregations({ createdBy: { includeMissing: true } }, soType);
+
+    expect(result?.createdByFacet.terms?.missing).toBe('__missing__');
+  });
+
+  test('should build both tag and createdBy facets together', () => {
+    const result = buildFacetAggregations(
+      {
+        tags: { size: 50 },
+        createdBy: { size: 25 },
+      },
+      soType
+    );
+
+    expect(result).toHaveProperty('tagFacet');
+    expect(result).toHaveProperty('createdByFacet');
+  });
+});
+
+describe('parseFacetAggregations', () => {
+  test('should return undefined when aggregations is undefined', () => {
+    const result = parseFacetAggregations(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  test('should return undefined when aggregations is null', () => {
+    const result = parseFacetAggregations(null);
+    expect(result).toBeUndefined();
+  });
+
+  test('should return undefined when aggregations is empty object', () => {
+    const result = parseFacetAggregations({});
+    expect(result).toBeUndefined();
+  });
+
+  test('should parse tag facet results from nested aggregation', () => {
+    const aggregations = {
+      tagFacet: {
+        tagFilter: {
+          tagIds: {
+            buckets: [
+              { key: 'tag-1', doc_count: 10 },
+              { key: 'tag-2', doc_count: 5 },
+            ],
+          },
+        },
+      },
+    };
+
+    const result = parseFacetAggregations(aggregations);
+
+    expect(result).toEqual({
+      tags: [
+        { key: 'tag-1', doc_count: 10 },
+        { key: 'tag-2', doc_count: 5 },
+      ],
+    });
+  });
+
+  test('should parse createdBy facet results', () => {
+    const aggregations = {
+      createdByFacet: {
+        buckets: [
+          { key: 'user-a', doc_count: 15 },
+          { key: 'user-b', doc_count: 8 },
+        ],
+      },
+    };
+
+    const result = parseFacetAggregations(aggregations);
+
+    expect(result).toEqual({
+      createdBy: [
+        { key: 'user-a', doc_count: 15 },
+        { key: 'user-b', doc_count: 8 },
+      ],
+    });
+  });
+
+  test('should parse both tag and createdBy facets together', () => {
+    const aggregations = {
+      tagFacet: {
+        tagFilter: {
+          tagIds: {
+            buckets: [{ key: 'tag-1', doc_count: 10 }],
+          },
+        },
+      },
+      createdByFacet: {
+        buckets: [{ key: 'user-a', doc_count: 15 }],
+      },
+    };
+
+    const result = parseFacetAggregations(aggregations);
+
+    expect(result).toEqual({
+      tags: [{ key: 'tag-1', doc_count: 10 }],
+      createdBy: [{ key: 'user-a', doc_count: 15 }],
+    });
+  });
+
+  test('should handle empty buckets', () => {
+    const aggregations = {
+      tagFacet: {
+        tagFilter: {
+          tagIds: {
+            buckets: [],
+          },
+        },
+      },
+    };
+
+    const result = parseFacetAggregations(aggregations);
+
+    expect(result).toEqual({
+      tags: [],
+    });
+  });
+});
+
+describe('searchArgsToSOFindOptionsDefault facets', () => {
+  test('should include aggs when facets.tags is requested', () => {
+    const result = searchArgsToSOFindOptionsDefault({
+      contentTypeId: 'dashboard',
+      query: {
+        facets: { tags: {} },
+      },
+    });
+
+    expect(result.aggs).toBeDefined();
+    expect(result.aggs).toHaveProperty('tagFacet');
+  });
+
+  test('should include aggs when facets.createdBy is requested', () => {
+    const result = searchArgsToSOFindOptionsDefault({
+      contentTypeId: 'dashboard',
+      query: {
+        facets: { createdBy: {} },
+      },
+    });
+
+    expect(result.aggs).toBeDefined();
+    expect(result.aggs).toHaveProperty('createdByFacet');
+  });
+
+  test('should not include aggs when facets is not requested', () => {
+    const result = searchArgsToSOFindOptionsDefault({
+      contentTypeId: 'dashboard',
+      query: {},
+    });
+
+    expect(result.aggs).toBeUndefined();
+  });
+
+  test('should include both facet aggs when both are requested', () => {
+    const result = searchArgsToSOFindOptionsDefault({
+      contentTypeId: 'dashboard',
+      query: {
+        facets: {
+          tags: { size: 50 },
+          createdBy: { size: 25 },
+        },
+      },
+    });
+
+    expect(result.aggs).toHaveProperty('tagFacet');
+    expect(result.aggs).toHaveProperty('createdByFacet');
   });
 });
