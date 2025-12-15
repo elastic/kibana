@@ -253,7 +253,9 @@ const GroupingComponent = <T,>({
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               {additionalToolbarControls &&
                 additionalToolbarControls.map((control, index) => (
-                  <EuiFlexItem key={`additional-control-${index}`}>{control}</EuiFlexItem>
+                  <EuiFlexItem key={`additional-control-${index}`} grow={false}>
+                    {control}
+                  </EuiFlexItem>
                 ))}
               <EuiFlexItem>{groupSelector}</EuiFlexItem>
             </EuiFlexGroup>

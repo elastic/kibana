@@ -13,7 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { groupActions, groupByIdSelector } from './state';
-import type { GroupOption, Action, GroupMap } from './types';
+import type { GroupOption, Action, GroupMap, GroupSettings } from './types';
 import { defaultGroup } from './types';
 import { GroupSelector, isNoneGroup } from '..';
 import { getTelemetryEvent } from '../telemetry/const';
@@ -42,12 +42,13 @@ export interface UseGetGroupSelectorArgs {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  settings?: GroupSettings;
 }
 
 interface UseGetGroupSelectorStateless
   extends Pick<
     UseGetGroupSelectorArgs,
-    'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels' | 'title'
+    'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels' | 'settings'
   > {
   onGroupChange: (selectedGroups: string[]) => void;
 }
@@ -63,7 +64,7 @@ export const useGetGroupSelectorStateless = ({
   fields,
   onGroupChange,
   maxGroupingLevels,
-  title,
+  settings,
 }: UseGetGroupSelectorStateless) => {
   const onChange = useCallback(
     (groupSelection: string) => {
@@ -83,11 +84,11 @@ export const useGetGroupSelectorStateless = ({
           fields,
           maxGroupingLevels,
           options: defaultGroupingOptions,
-          title,
+          settings,
         }}
       />
     );
-  }, [groupingId, onChange, fields, maxGroupingLevels, defaultGroupingOptions, title]);
+  }, [groupingId, fields, maxGroupingLevels, defaultGroupingOptions, onChange, settings]);
 };
 
 export const useGetGroupSelector = ({
@@ -102,9 +103,13 @@ export const useGetGroupSelector = ({
   tracker,
   title,
   onOpenTracker,
+  settings,
 }: UseGetGroupSelectorArgs) => {
-  const { activeGroups: selectedGroups, options } =
-    groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
+  const {
+    activeGroups: selectedGroups,
+    options,
+    settings: groupSettings,
+  } = groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
   const setSelectedGroups = useCallback(
     (activeGroups: string[]) => {
@@ -210,20 +215,28 @@ export const useGetGroupSelector = ({
     }
   }, [defaultGroupingOptions, options, selectedGroups, setOptions]);
 
+  useEffect(() => {
+    dispatch(
+      groupActions.updateGroupSettings({
+        id: groupingId,
+        settings,
+      })
+    );
+  }, [dispatch, groupingId, settings]);
+
   return useMemo(() => {
     return (
       <GroupSelector
-        {...{
-          groupingId,
-          groupsSelected: selectedGroups,
-          'data-test-subj': 'alerts-table-group-selector',
-          onGroupChange: onChange,
-          fields,
-          maxGroupingLevels,
-          options,
-          title,
-          onOpenTracker,
-        }}
+        groupingId={groupingId}
+        groupsSelected={selectedGroups}
+        data-test-subj="alerts-table-group-selector"
+        onGroupChange={onChange}
+        fields={fields}
+        maxGroupingLevels={maxGroupingLevels}
+        options={options}
+        title={title}
+        onOpenTracker={onOpenTracker}
+        settings={groupSettings}
       />
     );
   }, [
@@ -235,5 +248,6 @@ export const useGetGroupSelector = ({
     options,
     title,
     onOpenTracker,
+    groupSettings,
   ]);
 };

@@ -28,3 +28,5 @@ export { inlineSuggest } from './src/inline_suggestions/inline_suggest';
 export { getPolicyHelper, getSourcesHelper } from './src/shared/resources_helpers';
 // Hover function
 export { getHoverItem } from './src/hover';
+// Signature help function
+export { getSignatureHelp } from './src/signature_help';

@@ -457,6 +457,21 @@
       },
       {
         "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.DeleteDataStreamRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; data_stream_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
         "id": "def-common.GetAllAutoImportIntegrationsResponse",
         "type": "Type",
         "tags": [],
@@ -910,6 +925,32 @@
           ", { integration_id: string; }, { integration_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.DeleteDataStreamRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "DeleteDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; data_stream_id: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { integration_id: string; data_stream_id: string; }, { integration_id: string; data_stream_id: string; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
