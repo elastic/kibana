@@ -34,24 +34,6 @@ const mockAggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
       operationType: 'terms',
       sourceField: 'host.keyword',
       isBucketed: true,
-      params: {
-        size: 5,
-        orderBy: {
-          type: 'column',
-          columnId: '1',
-        },
-        orderDirection: 'desc',
-        otherBucket: true,
-        missingBucket: false,
-        parentFormat: {
-          id: 'terms',
-        },
-        include: [],
-        exclude: [],
-        includeIsRegex: false,
-        excludeIsRegex: false,
-        secondaryFields: [],
-      },
     },
   ],
   [
@@ -62,9 +44,6 @@ const mockAggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
       operationType: 'average',
       sourceField: 'bytes',
       isBucketed: false,
-      params: {
-        // emptyAsNull: true,
-      },
     },
   ],
 ];
@@ -87,24 +66,6 @@ const mockLayer: FormBasedLayer = {
       operationType: 'terms',
       sourceField: 'host.keyword',
       isBucketed: true,
-      params: {
-        size: 5,
-        orderBy: {
-          type: 'column',
-          columnId: '1',
-        },
-        orderDirection: 'desc',
-        otherBucket: true,
-        missingBucket: false,
-        parentFormat: {
-          id: 'terms',
-        },
-        include: [],
-        exclude: [],
-        includeIsRegex: false,
-        excludeIsRegex: false,
-        secondaryFields: [],
-      },
     },
     '2': {
       label: 'Average of bytes',
@@ -112,9 +73,6 @@ const mockLayer: FormBasedLayer = {
       operationType: 'average',
       sourceField: 'bytes',
       isBucketed: false,
-      params: {
-        emptyAsNull: true,
-      },
     },
   },
   columnOrder: ['1', '2'],
