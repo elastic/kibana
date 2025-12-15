@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type { FormBasedLayer, TypedLensSerializedState } from '@kbn/lens-common';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -310,14 +310,34 @@ export function LensEditConfigurationFlyout({
 
   // The button is disabled when the visualization cannot be converted to ES|QL
   const { isConvertToEsqlButtonDisbaled } = useMemo(() => {
-    const layers = datasourceStates[datasourceId].state?.layers;
+    const datasourceState = datasourceStates[datasourceId].state;
 
-    if (!isSingleLayerVisualization || textBasedMode || !layers) {
+    if (!isSingleLayerVisualization || textBasedMode || !datasourceState) {
       return { isConvertToEsqlButtonDisabled: true };
     }
 
-    // Take the first (and only) layer
-    const singleLayer = layers[layerIds[0]];
+    // Validate datasourceState structure
+    if (
+      typeof datasourceState !== 'object' ||
+      datasourceState === null ||
+      !('layers' in datasourceState) ||
+      !datasourceState.layers
+    ) {
+      return { isConvertToEsqlButtonDisabled: true };
+    }
+
+    // Access the single layer safely
+    const layers = datasourceState.layers as Record<string, FormBasedLayer>;
+    const layerId = layerIds[0];
+
+    if (!layerId || !(layerId in layers)) {
+      return { isConvertToEsqlButtonDisabled: true };
+    }
+
+    const singleLayer = layers[layerId];
+    if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
+      return { isConvertToEsqlButtonDisabled: true };
+    }
 
     // Get the esAggEntries
     const { columnOrder } = singleLayer;
