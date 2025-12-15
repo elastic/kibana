@@ -20,7 +20,7 @@ export interface AutoOpsPromotionCalloutProps {
   overrideCalloutProps?: Partial<Omit<EuiCallOutProps, 'children' | 'title' | 'onDismiss'>>;
 }
 
-const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
+export const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
 
 export const AutoOpsPromotionCallout = ({
   learnMoreLink,

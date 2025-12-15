@@ -24,6 +24,10 @@ const applicationMock = {
 } as any;
 
 describe('SetupCloudConnect', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('renders as expected', () => {
     const component = shallowWithIntl(
       <SetupCloudConnect addBasePath={addBasePathMock} application={applicationMock} />
@@ -31,5 +35,23 @@ describe('SetupCloudConnect', () => {
 
     const $button = component.find('EuiButton');
     expect($button.props().href).toBe('/app/cloud_connect');
+  });
+
+  test('calls navigateToApp when button is clicked', () => {
+    const component = shallowWithIntl(
+      <SetupCloudConnect addBasePath={addBasePathMock} application={applicationMock} />
+    );
+
+    const $button = component.find('EuiButton');
+    const mockEvent = { preventDefault: jest.fn() };
+
+    // Simulate button click
+    $button.props().onClick(mockEvent);
+
+    // Verify preventDefault was called
+    expect(mockEvent.preventDefault).toHaveBeenCalled();
+
+    // Verify navigateToApp was called with correct app name
+    expect(applicationMock.navigateToApp).toHaveBeenCalledWith('cloud_connect');
   });
 });
