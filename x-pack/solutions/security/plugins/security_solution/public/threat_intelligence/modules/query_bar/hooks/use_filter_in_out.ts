@@ -8,11 +8,7 @@
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { NormalizedValue } from '../../indicators/utils/field_value';
-import {
-  fieldAndValueValid,
-  getIndicatorFieldAndValue,
-  asArray,
-} from '../../indicators/utils/field_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import type { FilterIn, FilterOut } from '../utils/filter';
@@ -61,11 +57,12 @@ export const useFilterInOut = ({
   const filterFn = useCallback((): void => {
     const existingFilters = filterManager.getFilters();
 
-    const values = asArray(value);
-
-    const newFilters = values.reduce<Filter[]>(
-      (acc, v) => updateFiltersArray(acc, key, v, filterType, sourcererDataView.id),
-      existingFilters
+    const newFilters: Filter[] = updateFiltersArray(
+      existingFilters,
+      key,
+      value,
+      filterType,
+      sourcererDataView.id
     );
     filterManager.setFilters(newFilters);
   }, [filterManager, filterType, key, sourcererDataView.id, value]);

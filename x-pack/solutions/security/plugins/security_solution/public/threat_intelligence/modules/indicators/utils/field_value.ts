@@ -14,14 +14,22 @@ import {
 
 export type NormalizedValue = string | string[] | null;
 
-export const normalizeAll = (v: string | string[] | null): NormalizedValue => {
+export const toSingleValue = (v: NormalizedValue): string | null => {
   if (v == null) return null;
-  if (Array.isArray(v)) return v.filter(Boolean);
+  if (Array.isArray(v)) return v.length > 0 ? v[0] : null;
   return v;
 };
 
-export const asArray = (v: NormalizedValue): string[] =>
-  v == null ? [] : Array.isArray(v) ? v : [v];
+export const normalizeIndicatorValue = (v: string | string[] | null): NormalizedValue => {
+  if (v == null) return null;
+  if (Array.isArray(v)) {
+    const cleaned = v.filter(Boolean);
+    if (cleaned.length === 0) return null;
+    if (cleaned.length === 1) return cleaned[0];
+    return cleaned;
+  }
+  return v;
+};
 
 /**
  * Retrieves a field/value pair from an Indicator
@@ -34,11 +42,11 @@ export const getIndicatorFieldAndValue = (
   field: string
 ): { key: string; value: NormalizedValue } => {
   const rawValue = unwrapValue(data, field as RawIndicatorFieldId);
-  const value = normalizeAll(rawValue);
+  const value = normalizeIndicatorValue(rawValue); // (see helper below)
 
   let key = field;
   if (field === RawIndicatorFieldId.Name) {
-    const nameOrigin = normalizeAll(unwrapValue(data, RawIndicatorFieldId.NameOrigin));
+    const nameOrigin = normalizeIndicatorValue(unwrapValue(data, RawIndicatorFieldId.NameOrigin));
     if (typeof nameOrigin === 'string' && nameOrigin) {
       key = nameOrigin;
     }
