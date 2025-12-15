@@ -391,7 +391,7 @@ describe('<TableSection />', () => {
     it('should pass enforcedGroups setting to GroupedAlertsTable', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -405,7 +405,7 @@ describe('<TableSection />', () => {
     it('should pass all grouping settings including enforcedGroups', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
