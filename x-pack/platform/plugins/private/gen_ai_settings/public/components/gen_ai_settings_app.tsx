@@ -330,7 +330,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                       ) : (
                         <FormattedMessage
                           id="genAiSettings.showAIAssistantDescriptionLabel"
-                          defaultMessage="Enable or disable AI-powered features in {space} settings."
+                          defaultMessage="You can enable or disable AI-powered features from the {space} settings page."
                           values={{
                             space: (
                               <strong>
