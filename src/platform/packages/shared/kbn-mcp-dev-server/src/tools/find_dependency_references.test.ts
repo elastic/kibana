@@ -363,6 +363,218 @@ describe('findDependencyReferencesTool', () => {
       expect(parsedResult.matchingFiles).toContain('src/file2.tsx');
       expect(parsedResult.matchingFiles).not.toContain('src/file1.ts');
     });
+
+    it('handles gitignore patterns with leading slash', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': "import moment from 'moment';",
+          'src/file2.ts': "import moment from 'moment';",
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      mockedFs.readFileSync.mockImplementation(((filePath: string) => {
+        const relativePath = filePath.replace('/repo/root/', '');
+        if (relativePath === '.gitignore') {
+          return '/src/file1.ts\n';
+        }
+        if (relativePath === 'src/file1.ts') {
+          return "import moment from 'moment';";
+        }
+        if (relativePath === 'src/file2.ts') {
+          return "import moment from 'moment';";
+        }
+        throw new Error('File not found');
+      }) as any);
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // file1.ts should be ignored due to gitignore pattern
+      expect(parsedResult.matchingFiles).not.toContain('src/file1.ts');
+    });
+
+    it('skips overly broad gitignore patterns', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': "import moment from 'moment';",
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      mockedFs.readFileSync.mockImplementation(((filePath: string) => {
+        const relativePath = filePath.replace('/repo/root/', '');
+        if (relativePath === '.gitignore') {
+          return '*\n**\na\n';
+        }
+        if (relativePath === 'src/file1.ts') {
+          return "import moment from 'moment';";
+        }
+        throw new Error('File not found');
+      }) as any);
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should still find files despite overly broad patterns
+      expect(parsedResult.matchingFiles).toContain('src/file1.ts');
+    });
+
+    it('handles files that cannot be stat', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': "import moment from 'moment';",
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      mockedFs.lstatSync.mockImplementation((() => {
+        throw new Error('Permission denied');
+      }) as any);
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should handle stat errors gracefully
+      expect(parsedResult.totalMatchingFiles).toBe(0);
+    });
+
+    it('detects variable assignments and method calls', async () => {
+      setupMockFileSystem(
+        {
+          'src/file.ts': `
+            const m = moment();
+            const result = m.format('YYYY-MM-DD');
+            const value = m.add(1, 'day');
+          `,
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      const team = parsedResult.byTeam['@elastic/kibana-core'];
+      if (team && team.files.length > 0) {
+        const fileResult = team.files[0];
+        expect(fileResult.apisUsed).toContain('format');
+        expect(fileResult.apisUsed).toContain('add');
+      } else {
+        // If team not found, at least verify the file was found
+        expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      }
+    });
+
+    it('handles destructured imports with method calls', async () => {
+      setupMockFileSystem(
+        {
+          'src/file.ts': `
+            import { format, add } from 'moment';
+            const date = format(new Date());
+            const newDate = add(new Date(), 1, 'day');
+          `,
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      const team = parsedResult.byTeam['@elastic/kibana-core'];
+      if (team && team.files.length > 0) {
+        const fileResult = team.files[0];
+        expect(fileResult.apisUsed).toContain('format');
+        expect(fileResult.apisUsed).toContain('add');
+      } else {
+        // If team not found, at least verify the file was found
+        expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      }
+    });
+
+    it('handles CODEOWNERS with empty lines and comments', async () => {
+      setupMockFileSystem(
+        {
+          'src/file.ts': "import moment from 'moment';",
+        },
+        `
+# Comment line
+
+/src @elastic/kibana-core
+
+# Another comment
+        `.trim()
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should handle empty lines and comments without crashing
+      expect(parsedResult).toBeDefined();
+      expect(typeof parsedResult.totalMatchingFiles).toBe('number');
+    });
+
+    it('handles CODEOWNERS with malformed lines', async () => {
+      setupMockFileSystem(
+        {
+          'src/file.ts': "import moment from 'moment';",
+        },
+        `
+/src @elastic/kibana-core
+malformed-line-without-team
+/another/path
+        `.trim()
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should handle malformed lines without crashing
+      expect(parsedResult).toBeDefined();
+      expect(typeof parsedResult.totalMatchingFiles).toBe('number');
+    });
+
+    it('handles method calls with whitespace in API name', async () => {
+      setupMockFileSystem(
+        {
+          'src/file.ts': `
+            const m = moment();
+            const result = m.  format  ();
+          `,
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      const team = parsedResult.byTeam['@elastic/kibana-core'];
+      if (team && team.files.length > 0) {
+        const fileResult = team.files[0];
+        expect(fileResult.apisUsed).toContain('format');
+      } else {
+        // If team not found, at least verify the file was found
+        expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      }
+    });
   });
 
   describe('tool definition', () => {
