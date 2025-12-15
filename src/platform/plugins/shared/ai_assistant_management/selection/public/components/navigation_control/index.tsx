@@ -144,7 +144,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                 <FormattedMessage
                   id="aiAssistantManagementSelection.headerButton.description"
                   defaultMessage={
-                    'Choose which chat experience to use throughout Kibana. {learnMoreLink}. <bold>This setting applies to all users in the space.</bold> To change it later, go to {genAiSettings}'
+                    'Choose which chat experience to use throughout Kibana. {learnMoreLink}. <bold>This setting applies to all users in the space.</bold> To change it later, go to {genAiSettings}.'
                   }
                   values={{
                     bold: (str) => <strong>{str}</strong>,
