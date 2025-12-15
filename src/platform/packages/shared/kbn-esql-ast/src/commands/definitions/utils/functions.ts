@@ -297,9 +297,10 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     text,
     asSnippet: true,
     kind: 'Function',
-    detail,
+    // detail,
     documentation: {
       value: buildFunctionDocumentation(
+        detail,
         fullSignatures.map((sig, index) => ({
           declaration: sig.declaration,
           license:

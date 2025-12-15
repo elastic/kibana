@@ -19,12 +19,15 @@ const examplesLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.examplesLab
 
 /** @internal */
 export const buildFunctionDocumentation = (
+  detail: string,
   signatures: Array<{
     declaration: string;
     license?: string;
   }>,
   examples: string[] | undefined
 ) => `
+${detail}
+\
 ---
 \
 ***${declarationLabel}***
