@@ -26,21 +26,17 @@ export async function validateConnector({
 }): Promise<void> {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
+  let connector;
   try {
-    const connector = await actionsClient.get({ id: connectorId });
-
-    if (connector.actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
-      throw createBadRequestError(
-        `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_TYPE_ID}', got '${connector.actionTypeId}'`
-      );
-    }
+    connector = await actionsClient.get({ id: connectorId });
   } catch (error) {
-    // Re-throw our custom errors
-    if (error && typeof error === 'object' && 'isBoom' in error) {
-      throw error;
-    }
-    // Connector not found or other error
     throw createBadRequestError(`Connector '${connectorId}' not found or not accessible`);
+  }
+
+  if (connector.actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
+    throw createBadRequestError(
+      `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_TYPE_ID}', got '${connector.actionTypeId}'`
+    );
   }
 }
 
@@ -58,27 +54,25 @@ export async function validateToolName({
   connectorId: string;
   toolName: string;
 }): Promise<void> {
+  let tools;
   try {
-    const { tools } = await listMcpTools({ actions, request, connectorId });
-    const tool = tools.find((t) => t.name === toolName);
-
-    if (!tool) {
-      const availableTools = tools.map((t) => t.name).join(', ');
-      throw createBadRequestError(
-        `Tool '${toolName}' not found on MCP connector '${connectorId}'. Available tools: ${
-          availableTools || 'none'
-        }`
-      );
-    }
+    const result = await listMcpTools({ actions, request, connectorId });
+    tools = result.tools;
   } catch (error) {
-    // Re-throw our custom errors
-    if (error && typeof error === 'object' && 'isBoom' in error) {
-      throw error;
-    }
     // If listTools fails, the connector may not be accessible or the MCP server may be down
     throw createBadRequestError(
       `Unable to verify tool '${toolName}' on connector '${connectorId}'. ` +
         `Ensure the connector has successfully connected to the MCP server.`
+    );
+  }
+
+  const tool = tools.find((t) => t.name === toolName);
+  if (!tool) {
+    const availableTools = tools.map((t) => t.name).join(', ');
+    throw createBadRequestError(
+      `Tool '${toolName}' not found on MCP connector '${connectorId}'. Available tools: ${
+        availableTools || 'none'
+      }`
     );
   }
 }

@@ -30,7 +30,9 @@ export const useToolTypes = () => {
 
   const toolTypes = useMemo(() => {
     return serverToolTypes.filter(
-      (toolType) => workflowsEnabled || !(toolType.type === ToolType.workflow)
+      (toolType) =>
+        toolType.type !== ToolType.mcp &&
+        (workflowsEnabled || toolType.type !== ToolType.workflow)
     );
   }, [serverToolTypes, workflowsEnabled]);
 
