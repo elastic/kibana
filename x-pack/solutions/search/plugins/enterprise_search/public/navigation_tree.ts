@@ -37,8 +37,10 @@ const icon = 'logoElasticsearch';
 
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
+  isCloudEnabled,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
+  isCloudEnabled?: boolean;
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
@@ -174,7 +176,7 @@ export const getNavigationTreeDefinition = ({
                 },
               ],
               icon: 'database',
-              id: DATA_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to anchor the tour step
+              id: DATA_MANAGEMENT_NAV_ID,
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.dataManagement', {
                 defaultMessage: 'Data management',
@@ -214,6 +216,15 @@ export const getNavigationTreeDefinition = ({
                       }),
                       breadcrumbStatus: 'hidden',
                     },
+                    // Only show Cloud Connect in on-prem deployments (not cloud)
+                    ...(isCloudEnabled
+                      ? []
+                      : [
+                          {
+                            id: 'cloud_connect' as const,
+                            link: 'cloud_connect' as const,
+                          },
+                        ]),
                     {
                       id: 'monitoring',
                       link: 'monitoring',
@@ -255,7 +266,6 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:genAiSettings' },
-                    { link: 'management:agentBuilder' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
