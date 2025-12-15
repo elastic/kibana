@@ -956,6 +956,14 @@ export class TaskManagerRunner implements TaskRunner {
         try {
           // Set retryAt to now + 5m
           const updatedRetryAt = new Date(Date.now() + 5 * 60 * 1000);
+          this.logger.debug(
+            `Attempting to update retryAt to ${updatedRetryAt.toISOString()} for long running task: ${
+              this.id
+            }.`,
+            {
+              tags: [this.id, this.taskType],
+            }
+          );
           const taskInstance = this.instance.task;
           this.instance = asReadyToRun(
             (await this.bufferedTaskStore.partialUpdate(
@@ -967,15 +975,20 @@ export class TaskManagerRunner implements TaskRunner {
             )) as ConcreteTaskInstanceWithStartedAt
           );
         } catch (error) {
-          this.logger.warn(
-            `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,
-            { tags: [this.id, this.taskType] }
-          );
           // If there is a 409 conflict error, stop the timer and try to cancel the task
           // as this task may have been picked up by another Kibana node.
           if (SavedObjectsErrorHelpers.isConflictError(error)) {
             stop();
+            this.logger.warn(
+              `Conflict error trying to update retryAt for a long-running task. Cancelling: ${this.id}`,
+              { tags: [this.id, this.taskType] }
+            );
             await this.cancel();
+          } else {
+            this.logger.warn(
+              `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,
+              { tags: [this.id, this.taskType] }
+            );
           }
         }
         timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
