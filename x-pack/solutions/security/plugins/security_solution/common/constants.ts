@@ -476,6 +476,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
+  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -583,6 +584,7 @@ export const PROMOTION_RULE_TAGS = [
  */
 export const ESSENTIAL_ALERT_FIELDS: string[] = [
   '_id',
+  '_index',
   '@timestamp',
   'message',
 
