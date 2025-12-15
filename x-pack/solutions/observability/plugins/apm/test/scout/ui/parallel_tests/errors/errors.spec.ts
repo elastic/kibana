@@ -147,7 +147,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
       await page.getByRole('link', { name: 'Open in Discover' }).click();
       await page.waitForLoadingIndicatorHidden();
       await expect(page.getByTestId('loadingSpinnerText')).not.toBeVisible();
-      await expect(page.getByTestId('breadcrumb first last')).toHaveText('Discover');
+      await expect(page.url()).toContain('app/discover');
     });
   });
 
