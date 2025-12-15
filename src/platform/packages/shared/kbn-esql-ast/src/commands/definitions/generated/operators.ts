@@ -2448,6 +2448,18 @@ const isNotNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'exponential_histogram',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'geo_point',
           optional: false,
           description:
@@ -2737,6 +2749,18 @@ const isNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'double',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'exponential_histogram',
           optional: false,
           description:
             'Value to check. It can be a single- or multi-valued column or an expression.',
