@@ -59,7 +59,7 @@ export function SignificantEventsGenerationPanel({
                   'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
                   {
                     defaultMessage:
-                      'Features are logical subsets of your data and they provide the best context for generation sigificant events generation.',
+                      'Features are logical subsets of your data and they provide the best context for significant events generation.',
                   }
                 )}
               </EuiText>
