@@ -126,56 +126,28 @@ describe('REJECTED_FUNCTIONS', () => {
 });
 
 describe('isSupportedFunction', () => {
-  it('should return true for log function', () => {
-    expect(isSupportedFunction('log')).toBe(true);
-  });
+  it.each(['log', 'eq', 'neq', 'lt', 'gt', 'lte', 'gte', 'add', 'subtract', 'multiply', 'divide'])(
+    'should return true for supported function: %s',
+    (func) => {
+      expect(isSupportedFunction(func)).toBe(true);
+    }
+  );
 
-  it('should return true for comparison functions', () => {
-    expect(isSupportedFunction('eq')).toBe(true);
-    expect(isSupportedFunction('neq')).toBe(true);
-    expect(isSupportedFunction('lt')).toBe(true);
-    expect(isSupportedFunction('gt')).toBe(true);
-    expect(isSupportedFunction('lte')).toBe(true);
-    expect(isSupportedFunction('gte')).toBe(true);
-  });
-
-  it('should return true for binary arithmetic operators', () => {
-    expect(isSupportedFunction('add')).toBe(true);
-    expect(isSupportedFunction('subtract')).toBe(true);
-    expect(isSupportedFunction('multiply')).toBe(true);
-    expect(isSupportedFunction('divide')).toBe(true);
-  });
-
-  it('should return false for now-rejected functions', () => {
-    expect(isSupportedFunction('abs')).toBe(false);
-    expect(isSupportedFunction('sqrt')).toBe(false);
-    expect(isSupportedFunction('pow')).toBe(false);
-    expect(isSupportedFunction('sin')).toBe(false);
-    expect(isSupportedFunction('pi')).toBe(false);
-  });
-
-  it('should return false for unknown functions', () => {
-    expect(isSupportedFunction('unknownFunc')).toBe(false);
-  });
+  it.each(['abs', 'sqrt', 'pow', 'sin', 'pi', 'unknownFunc'])(
+    'should return false for rejected/unknown function: %s',
+    (func) => {
+      expect(isSupportedFunction(func)).toBe(false);
+    }
+  );
 });
 
 describe('isRejectedFunction', () => {
-  it('should return true for rejected functions', () => {
-    expect(isRejectedFunction('mean')).toBe(true);
-    expect(isRejectedFunction('sum')).toBe(true);
-    expect(isRejectedFunction('random')).toBe(true);
-    expect(isRejectedFunction('abs')).toBe(true);
-    expect(isRejectedFunction('sqrt')).toBe(true);
+  it.each(['mean', 'sum', 'random', 'abs', 'sqrt'])('should return true for: %s', (func) => {
+    expect(isRejectedFunction(func)).toBe(true);
   });
 
-  it('should return false for supported functions', () => {
-    expect(isRejectedFunction('log')).toBe(false);
-    expect(isRejectedFunction('eq')).toBe(false);
-    expect(isRejectedFunction('add')).toBe(false);
-  });
-
-  it('should return false for unknown functions', () => {
-    expect(isRejectedFunction('unknownFunc')).toBe(false);
+  it.each(['log', 'eq', 'add', 'unknownFunc'])('should return false for: %s', (func) => {
+    expect(isRejectedFunction(func)).toBe(false);
   });
 });
 

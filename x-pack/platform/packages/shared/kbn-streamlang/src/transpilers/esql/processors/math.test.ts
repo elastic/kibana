@@ -463,100 +463,20 @@ describe('convertMathProcessorToESQL', () => {
   });
 
   describe('validation errors for rejected functions', () => {
-    it('should throw error for abs()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'abs(value)',
-        to: 'result',
-      };
+    it.each([
+      ['abs(value)', 'abs'],
+      ['sqrt(value)', 'sqrt'],
+      ['pow(base, 2)', 'pow'],
+      ['mod(a, 10)', 'mod'],
+      ['sin(angle)', 'sin'],
+      ['pi()', 'pi'],
+      ['log_ten(value)', 'log_ten'],
+      ['round(price)', 'round'],
+      ['mean(a, b, c)', 'mean'],
+    ])('should throw error for rejected function: %s', (expression, funcName) => {
+      const processor: MathProcessor = { action: 'math', expression, to: 'result' };
       expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'abs' is not supported/
-      );
-    });
-
-    it('should throw error for sqrt()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(value)',
-        to: 'result',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'sqrt' is not supported/
-      );
-    });
-
-    it('should throw error for pow()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'pow(base, 2)',
-        to: 'result',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'pow' is not supported/
-      );
-    });
-
-    it('should throw error for mod()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'mod(a, 10)',
-        to: 'result',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'mod' is not supported/
-      );
-    });
-
-    it('should throw error for trigonometric functions', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sin(angle)',
-        to: 'result',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'sin' is not supported/
-      );
-    });
-
-    it('should throw error for constants', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'pi()',
-        to: 'result',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(/Function 'pi' is not supported/);
-    });
-
-    it('should throw error for log_ten()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'log_ten(value)',
-        to: 'result',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'log_ten' is not supported/
-      );
-    });
-
-    it('should throw error for round()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'round(price)',
-        to: 'result',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'round' is not supported/
-      );
-    });
-
-    it('should throw error for mean()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'mean(a, b, c)',
-        to: 'average',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'mean' is not supported/
+        new RegExp(`Function '${funcName}' is not supported`)
       );
     });
 

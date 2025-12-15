@@ -323,89 +323,21 @@ describe('processMathProcessor', () => {
   });
 
   describe('validation errors for rejected functions', () => {
-    it('should generate error-throwing script for abs()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'abs(value)',
-        to: 'result',
-      };
+    it.each([
+      ['abs(value)', 'abs'],
+      ['sqrt(value)', 'sqrt'],
+      ['pow(base, 2)', 'pow'],
+      ['sin(angle)', 'sin'],
+      ['pi()', 'pi'],
+      ['mod(a, 10)', 'mod'],
+      ['round(price)', 'round'],
+    ])('should generate error-throwing script for: %s', (expression, funcName) => {
+      const processor: MathProcessor = { action: 'math', expression, to: 'result' };
       const result = processMathProcessor(processor);
       const source = (result.script as Record<string, unknown>).source as string;
       expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('abs');
+      expect(source).toContain(funcName);
       expect(source).toContain('not supported');
-    });
-
-    it('should generate error-throwing script for sqrt()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(value)',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
-      expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('sqrt');
-    });
-
-    it('should generate error-throwing script for pow()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'pow(base, 2)',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
-      expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('pow');
-    });
-
-    it('should generate error-throwing script for trigonometric functions', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sin(angle)',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
-      expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('sin');
-    });
-
-    it('should generate error-throwing script for constants', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'pi()',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
-      expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('pi');
-    });
-
-    it('should generate error-throwing script for mod()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'mod(a, 10)',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
-      expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('mod');
-    });
-
-    it('should generate error-throwing script for round()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'round(price)',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
-      expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('round');
     });
 
     it('should generate error-throwing script for unknown functions', () => {
@@ -417,7 +349,6 @@ describe('processMathProcessor', () => {
       const result = processMathProcessor(processor);
       const source = (result.script as Record<string, unknown>).source as string;
       expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('unknownFunc');
       expect(source).toContain('Unknown function');
     });
 

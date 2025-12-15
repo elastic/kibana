@@ -59,93 +59,45 @@ describe('validateMathExpression', () => {
   });
 
   describe('rejected functions (previously supported)', () => {
-    it('should reject abs()', () => {
-      const result = validateMathExpression('abs(x)');
+    it.each([
+      ['abs(x)', 'abs'],
+      ['sqrt(x)', 'sqrt'],
+      ['pow(x, 2)', 'pow'],
+      ['mod(a, 10)', 'mod'],
+      ['round(x)', 'round'],
+      ['ceil(x)', 'ceil'],
+      ['floor(x)', 'floor'],
+      ['sin(x)', 'sin'],
+      ['cos(x)', 'cos'],
+      ['tan(x)', 'tan'],
+      ['log_ten(x)', 'log_ten'],
+    ])('should reject %s', (expression, funcName) => {
+      const result = validateMathExpression(expression);
       expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain("Function 'abs' is not supported");
+      expect(result.errors[0]).toContain(`Function '${funcName}' is not supported`);
     });
 
-    it('should reject sqrt()', () => {
-      const result = validateMathExpression('sqrt(x)');
-      expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain("Function 'sqrt' is not supported");
-    });
-
-    it('should reject pow()', () => {
-      const result = validateMathExpression('pow(x, 2)');
-      expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain("Function 'pow' is not supported");
-    });
-
-    it('should reject mod()', () => {
-      const result = validateMathExpression('mod(a, 10)');
-      expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain("Function 'mod' is not supported");
-    });
-
-    it('should reject round()', () => {
-      const result = validateMathExpression('round(x)');
-      expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain("Function 'round' is not supported");
-    });
-
-    it('should reject ceil() and floor()', () => {
-      expect(validateMathExpression('ceil(x)').valid).toBe(false);
-      expect(validateMathExpression('floor(x)').valid).toBe(false);
-    });
-
-    it('should reject trigonometric functions', () => {
-      expect(validateMathExpression('sin(x)').valid).toBe(false);
-      expect(validateMathExpression('cos(x)').valid).toBe(false);
-      expect(validateMathExpression('tan(x)').valid).toBe(false);
-    });
-
-    it('should reject constants', () => {
+    it('should reject constants with literal suggestion', () => {
       const result = validateMathExpression('pi()');
       expect(result.valid).toBe(false);
       expect(result.errors[0]).toContain("Function 'pi' is not supported");
       expect(result.errors[0]).toContain('3.14159265359');
     });
-
-    it('should reject log_ten()', () => {
-      const result = validateMathExpression('log_ten(x)');
-      expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain("Function 'log_ten' is not supported");
-    });
   });
 
   describe('invalid expressions', () => {
-    it('should reject mean() with suggestion', () => {
-      const result = validateMathExpression('mean(a, b, c)');
+    it.each([
+      ['mean(a, b, c)', "Function 'mean' is not supported"],
+      ['sum(a, b)', "Function 'sum' is not supported"],
+      ['unknownFunc(x)', "Unknown function 'unknownFunc'"],
+      ['count(arr)', "Function 'count' is not supported"],
+      ['first(arr)', "Function 'first' is not supported"],
+      ['last(arr)', "Function 'last' is not supported"],
+      ['random(1, 10)', 'Non-deterministic'],
+    ])('should reject %s', (expression, expectedError) => {
+      const result = validateMathExpression(expression);
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toContain("Function 'mean' is not supported");
-    });
-
-    it('should reject sum() with suggestion', () => {
-      const result = validateMathExpression('sum(a, b)');
-      expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toContain("Function 'sum' is not supported");
-    });
-
-    it('should reject unknown functions', () => {
-      const result = validateMathExpression('unknownFunc(x)');
-      expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toContain("Unknown function 'unknownFunc'");
-    });
-
-    it('should reject array functions', () => {
-      expect(validateMathExpression('count(arr)').valid).toBe(false);
-      expect(validateMathExpression('first(arr)').valid).toBe(false);
-      expect(validateMathExpression('last(arr)').valid).toBe(false);
-    });
-
-    it('should reject random()', () => {
-      const result = validateMathExpression('random(1, 10)');
-      expect(result.valid).toBe(false);
-      expect(result.errors[0]).toContain('Non-deterministic');
+      expect(result.errors[0]).toContain(expectedError);
     });
 
     it('should collect multiple errors', () => {
