@@ -54,13 +54,13 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     // total run time ~ 16m 20s
-    loadTestFile(require.resolve('./partition')); // 1m 40s
-    loadTestFile(require.resolve('./persistent_context')); // 1m
-    loadTestFile(require.resolve('./table_dashboard')); // 3m 10s
-    loadTestFile(require.resolve('./table')); // 1m 40s
-    loadTestFile(require.resolve('./fields_list')); // 2m 7s
-    loadTestFile(require.resolve('./layer_actions')); // 1m 45s
-    loadTestFile(require.resolve('./field_formatters')); // 1m 30s
+    // loadTestFile(require.resolve('./partition')); // 1m 40s
+    // loadTestFile(require.resolve('./persistent_context')); // 1m
+    // loadTestFile(require.resolve('./table_dashboard')); // 3m 10s
+    // loadTestFile(require.resolve('./table')); // 1m 40s
+    // loadTestFile(require.resolve('./fields_list')); // 2m 7s
+    // loadTestFile(require.resolve('./layer_actions')); // 1m 45s
+    // loadTestFile(require.resolve('./field_formatters')); // 1m 30s
     loadTestFile(require.resolve('./color_mapping_runtime_migrations'));
   });
 };

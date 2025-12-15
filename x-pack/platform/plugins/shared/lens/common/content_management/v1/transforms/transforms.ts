@@ -29,9 +29,10 @@ export function transformToV1LensItemAttributes(
   attributes: LensAttributesV0 | LensAttributes
 ): LensAttributes {
   return [
+    // splitAccessors migration needs to run before the color mapping one
+    convertToSplitAccessors,
     convertToLegendStats,
     convertToRawColorMappingsFn,
-    convertToSplitAccessors,
     attributesCleanup,
     metricMigrations,
     addVersion,
