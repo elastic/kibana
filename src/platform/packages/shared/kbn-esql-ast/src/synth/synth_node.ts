@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker } from '../walker';
-import { Builder } from '../builder';
+import { Walker } from '../ast/walker';
+import { Builder } from '../ast/builder';
 import { BasicPrettyPrinter } from '../pretty_print';
-import { printAst, type PrintAstOptions } from '../debug';
+import { printAst, type PrintAstOptions } from '../shared/debug';
 import type { ESQLProperNode } from '../types';
 
 /**
