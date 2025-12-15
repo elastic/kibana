@@ -71,12 +71,7 @@ export const AgentsList: React.FC = () => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
       width: '48px',
       align: 'center',
-      render: (agent) =>
-        agent.readonly && !agent.avatar_symbol ? (
-          <EuiIcon type={agent.avatar_icon ?? 'logoElastic'} size="xl" />
-        ) : (
-          <AgentAvatar agent={agent} size="m" />
-        ),
+      render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
 

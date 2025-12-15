@@ -65,6 +65,8 @@ import type { LegacyMetricState } from '../visualizations/legacy_metric/types';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
 import type { LensPartitionVisualizationState } from '../visualizations/partition/types';
 import type { DatatableVisualizationState } from '../visualizations/datatable/types';
+import type { ChoroplethChartState } from '../visualizations/region_map/types';
+import type { LensTagCloudState } from '../visualizations/tagcloud/types';
 import type { LensTableRowContextMenuEvent } from '../visualizations/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -465,6 +467,8 @@ export type TypedLensSerializedState = Simplify<
       | TypedLensAttributes<'lnsDatatable', DatatableVisualizationState>
       | TypedLensAttributes<'lnsLegacyMetric', LegacyMetricState>
       | TypedLensAttributes<'lnsMetric', MetricVisualizationState>
+      | TypedLensAttributes<'lnsChoropleth', ChoroplethChartState>
+      | TypedLensAttributes<'lnsTagcloud', LensTagCloudState>
       | TypedLensAttributes<string, unknown>;
   }
 >;
