@@ -4,29 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
-import type { OnechatPluginStart } from '../../types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import type { OnechatPluginStart, OnechatStartDependencies } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 interface OnechatNavControlServices {
   onechat: OnechatPluginStart;
+  aiAssistantManagementSelection: OnechatStartDependencies['aiAssistantManagementSelection'];
 }
-
-const buttonCss = css`
-  padding: 0px 8px;
-`;
 
 export function OnechatNavControl() {
   const {
-    services: { onechat },
+    services: { onechat, aiAssistantManagementSelection },
   } = useKibana<OnechatNavControlServices>();
 
   const { show: hasShowPrivilege } = useUiPrivileges();
+
+  useEffect(() => {
+    if (!hasShowPrivilege) {
+      return;
+    }
+
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIChatExperience.Agent) {
+        onechat.openConversationFlyout();
+        aiAssistantManagementSelection.completeOpenChat();
+      }
+    });
+
+    return () => {
+      openChatSubscription.unsubscribe();
+    };
+  }, [hasShowPrivilege, onechat, aiAssistantManagementSelection]);
 
   if (!hasShowPrivilege) {
     return null;
@@ -35,7 +50,6 @@ export function OnechatNavControl() {
   return (
     <EuiToolTip content={buttonLabel}>
       <EuiButton
-        css={buttonCss}
         aria-label={buttonLabel}
         data-test-subj="OnechatNavControlButton"
         onClick={() => {
@@ -47,6 +61,7 @@ export function OnechatNavControl() {
         minWidth={0}
       >
         <RobotIcon size="m" />
+        <FormattedMessage id="xpack.onechat.navControl.linkLabel" defaultMessage="AI Agent" />
       </EuiButton>
     </EuiToolTip>
   );

@@ -269,6 +269,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/onechat-browser'
   - '@kbn/lazy-object'
+  - '@kbn/ai-assistant-common'
 tags:
   - plugin
   - prod
