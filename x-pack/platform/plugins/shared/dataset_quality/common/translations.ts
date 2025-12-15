@@ -207,7 +207,8 @@ export const qualityIndicatorDegradedTooltipText = i18n.translate(
 export const qualityIndicatorPoorTooltipText = i18n.translate(
   'xpack.datasetQuality.qualityIndicatorPoorTooltipText',
   {
-    defaultMessage: 'More than 3% of documents have missing or malformed fields, or are failing ingestion.',
+    defaultMessage:
+      'More than 3% of documents have missing or malformed fields, or are failing ingestion.',
   }
 );
 
