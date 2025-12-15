@@ -114,7 +114,7 @@ export const Sidebar: React.FC<Props> = ({
       </EuiAccordion>
       <EuiSpacer size="m" />
       <EuiAccordion
-        id="categoriesDeveloppedByElasticAccordion"
+        id="categoriesDevelopedByElasticAccordion"
         buttonContent={i18n.translate('xpack.fleet.epmList.filterByCategoryAccordionLabel', {
           defaultMessage: 'Developped by Elastic',
         })}
