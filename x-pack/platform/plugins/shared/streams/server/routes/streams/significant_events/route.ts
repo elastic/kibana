@@ -104,7 +104,10 @@ const readSignificantEventsRoute = createServerRoute({
       from: dateFromString,
       to: dateFromString,
       bucketSize: z.string(),
-      query: z.string().optional(),
+      query: z
+        .string()
+        .optional()
+        .describe('Query string to filter significant events on metadata fields '),
     }),
   }),
 
