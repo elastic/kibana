@@ -12,15 +12,22 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { getValidViewMode } from '../../application/main/utils/get_valid_view_mode';
+import { isEsqlMode } from '../initialize_fetch';
 
 export function isFieldStatsMode(
   savedSearch: SavedSearch,
   dataView: DataView | undefined,
   uiSettings: IUiSettingsClient
 ): boolean {
+  const validatedViewMode = getValidViewMode({
+    viewMode: savedSearch.viewMode,
+    isEsqlMode: isEsqlMode(savedSearch),
+  });
+
   return (
     Boolean(uiSettings.get(SHOW_FIELD_STATISTICS)) &&
-    savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
+    validatedViewMode === VIEW_MODE.AGGREGATED_LEVEL &&
     Boolean(dataView) &&
     Array.isArray(savedSearch.columns)
   );
