@@ -9,10 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/onechat-common';
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
-import type {
-  LlmDescriptionHandler,
-  ToolHandlerFn,
-} from '@kbn/onechat-server';
+import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/onechat-server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
