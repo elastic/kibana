@@ -12,7 +12,6 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type {
   LlmDescriptionHandler,
   ToolHandlerFn,
-  ToolAvailabilityResult,
 } from '@kbn/onechat-server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
