@@ -64,6 +64,7 @@ IMPORTANT: Return ONLY the JSON configuration wrapped in a markdown code block l
 
 ${additionalContext}`,
     ],
+    // Human message required for Bedrock to work properly
     ['human', 'Generate the visualization configuration.'],
   ];
 };
