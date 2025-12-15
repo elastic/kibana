@@ -7,25 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { getApmToolAvailability } from './get_apm_tool_availability';
-
-jest.mock('./build_apm_tool_resources', () => ({
-  buildApmToolResources: jest.fn(),
-}));
-
-jest.mock('../../routes/historical_data/has_historical_agent_data', () => ({
-  hasHistoricalAgentData: jest.fn(),
-}));
-
-import { buildApmToolResources } from './build_apm_tool_resources';
-import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
-
-const mockedBuildApmToolResources = buildApmToolResources as jest.MockedFunction<
-  typeof buildApmToolResources
->;
-const mockedHasHistoricalAgentData = hasHistoricalAgentData as jest.MockedFunction<
-  typeof hasHistoricalAgentData
->;
+import { getAgentBuilderResourceAvailability } from './get_agent_builder_resource_availability';
 
 const mockLogger = {
   debug: jest.fn(),
@@ -33,13 +15,11 @@ const mockLogger = {
 } as unknown as Logger;
 
 const mockCore = coreMock.createSetup();
-const plugins = {} as any;
 const request = httpServerMock.createKibanaRequest();
 
-describe('getApmToolAvailability', () => {
+describe('getAgentBuilderResourceAvailability', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-
     (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
       {
         featureFlags: {
@@ -54,6 +34,16 @@ describe('getApmToolAvailability', () => {
         },
       },
     ]);
+  });
+
+  it('returns available when space solution is Observability', async () => {
+    const result = await getAgentBuilderResourceAvailability({
+      core: mockCore as any,
+      request,
+      logger: mockLogger,
+    });
+
+    expect(result.status).toBe('available');
   });
 
   it('returns unavailable when space solution is Elasticsearch', async () => {
@@ -72,16 +62,14 @@ describe('getApmToolAvailability', () => {
       },
     ]);
 
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
+    const result = await getAgentBuilderResourceAvailability({
+      core: mockCore as any,
       request,
       logger: mockLogger,
     });
 
     expect(result.status).toBe('unavailable');
-    expect(result.reason).toMatch(/Observability tools are not available in this space/);
-    expect(mockedBuildApmToolResources).not.toHaveBeenCalled();
+    expect(result.reason).toMatch(/Observability .* not available in this space/);
   });
 
   it('returns unavailable when space solution is Security', async () => {
@@ -100,16 +88,14 @@ describe('getApmToolAvailability', () => {
       },
     ]);
 
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
+    const result = await getAgentBuilderResourceAvailability({
+      core: mockCore as any,
       request,
       logger: mockLogger,
     });
 
     expect(result.status).toBe('unavailable');
-    expect(result.reason).toMatch(/Observability tools are not available in this space/);
-    expect(mockedBuildApmToolResources).not.toHaveBeenCalled();
+    expect(result.reason).toMatch(/Observability .* not available in this space/);
   });
 
   it('returns available when space solution is undefined', async () => {
@@ -122,18 +108,14 @@ describe('getApmToolAvailability', () => {
       {
         spaces: {
           spacesService: {
-            getActiveSpace: jest.fn().mockResolvedValue({}),
+            getActiveSpace: jest.fn().mockResolvedValue({ solution: undefined }),
           },
         },
       },
     ]);
 
-    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} } as any);
-    mockedHasHistoricalAgentData.mockResolvedValue(true);
-
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
+    const result = await getAgentBuilderResourceAvailability({
+      core: mockCore as any,
       request,
       logger: mockLogger,
     });
@@ -141,36 +123,7 @@ describe('getApmToolAvailability', () => {
     expect(result.status).toBe('available');
   });
 
-  it('returns available when allowed space and historical data exists', async () => {
-    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} } as any);
-    mockedHasHistoricalAgentData.mockResolvedValue(true);
-
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
-      request,
-      logger: mockLogger,
-    });
-
-    expect(result.status).toBe('available');
-  });
-
-  it('returns unavailable when allowed space but no historical data', async () => {
-    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} } as any);
-    mockedHasHistoricalAgentData.mockResolvedValue(false);
-
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
-      request,
-      logger: mockLogger,
-    });
-
-    expect(result.status).toBe('unavailable');
-    expect(result.reason).toMatch(/No historical APM data/);
-  });
-
-  it('returns available when spaces plugin is unavailable but historical data exists', async () => {
+  it('returns available when spaces plugin is unavailable', async () => {
     (mockCore.getStartServices as unknown as jest.Mock).mockResolvedValue([
       {
         featureFlags: {
@@ -179,12 +132,8 @@ describe('getApmToolAvailability', () => {
       } as any,
       {} as any,
     ]);
-    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} } as any);
-    mockedHasHistoricalAgentData.mockResolvedValue(true);
-
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
+    const result = await getAgentBuilderResourceAvailability({
+      core: mockCore as any,
       request,
       logger: mockLogger,
     });
@@ -202,29 +151,13 @@ describe('getApmToolAvailability', () => {
       {} as any,
     ]);
 
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
+    const result = await getAgentBuilderResourceAvailability({
+      core: mockCore as any,
       request,
       logger: mockLogger,
     });
 
     expect(result.status).toBe('unavailable');
     expect(result.reason).toMatch(/AI agents are disabled/);
-    expect(mockedBuildApmToolResources).not.toHaveBeenCalled();
-  });
-
-  it('returns unavailable when availability check fails', async () => {
-    mockedBuildApmToolResources.mockRejectedValue(new Error('boom'));
-
-    const result = await getApmToolAvailability({
-      core: mockCore,
-      plugins,
-      request,
-      logger: mockLogger,
-    });
-
-    expect(result.status).toBe('unavailable');
-    expect(result.reason).toMatch(/Failed observability agent availability check/);
   });
 });
