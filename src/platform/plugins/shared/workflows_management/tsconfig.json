@@ -73,7 +73,8 @@
     "@kbn/workflows-extensions",
     "@kbn/alerts-ui-shared",
     "@kbn/licensing-plugin",
-    "@kbn/securitysolution-rules"
+    "@kbn/securitysolution-rules",
+    "@kbn/alerts-as-data-utils"
   ],
   "exclude": ["target/**/*"]
 }
