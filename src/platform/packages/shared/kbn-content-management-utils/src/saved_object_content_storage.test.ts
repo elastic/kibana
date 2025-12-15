@@ -10,7 +10,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import { SOContentStorage } from './saved_object_content_storage';
+import { SOContentStorage, searchArgsToSOFindOptionsDefault } from './saved_object_content_storage';
 import type { ContentManagementCrudTypes } from './types';
 
 import { schema } from '@kbn/config-schema';
@@ -610,5 +610,136 @@ describe('mSearch', () => {
     expect(logger.warn).toBeCalledWith(
       'Invalid response. [attributes.description]: expected value of type [string] but got [null]'
     );
+  });
+});
+
+describe('searchArgsToSOFindOptionsDefault', () => {
+  describe('sort parameter mapping', () => {
+    test('should pass sortField and sortOrder when sort is provided', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          text: 'test',
+          sort: {
+            field: 'updatedAt',
+            direction: 'desc',
+          },
+        },
+      });
+
+      expect(result.sortField).toBe('updatedAt');
+      expect(result.sortOrder).toBe('desc');
+    });
+
+    test('should handle ascending sort direction', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          sort: {
+            field: 'title',
+            direction: 'asc',
+          },
+        },
+      });
+
+      expect(result.sortField).toBe('title');
+      expect(result.sortOrder).toBe('asc');
+    });
+
+    test('should not include sortField and sortOrder when sort is not provided', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          text: 'test',
+        },
+      });
+
+      expect(result.sortField).toBeUndefined();
+      expect(result.sortOrder).toBeUndefined();
+    });
+
+    test('should handle common sort fields', () => {
+      const fields = ['title', 'updatedAt', 'createdAt'];
+
+      for (const field of fields) {
+        const result = searchArgsToSOFindOptionsDefault({
+          contentTypeId: 'dashboard',
+          query: {
+            sort: { field, direction: 'asc' },
+          },
+        });
+
+        expect(result.sortField).toBe(field);
+      }
+    });
+  });
+
+  describe('basic query mapping', () => {
+    test('should map contentTypeId to type', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {},
+      });
+
+      expect(result.type).toBe('dashboard');
+    });
+
+    test('should map text to search', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: { text: 'my search' },
+      });
+
+      expect(result.search).toBe('my search');
+    });
+
+    test('should map limit to perPage', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: { limit: 50 },
+      });
+
+      expect(result.perPage).toBe(50);
+    });
+
+    test('should map cursor to page', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: { cursor: '5' },
+      });
+
+      expect(result.page).toBe(5);
+    });
+  });
+
+  describe('options mapping', () => {
+    test('should use custom searchFields when provided', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {},
+        options: { searchFields: ['name', 'summary'] },
+      });
+
+      expect(result.searchFields).toEqual(['name', 'summary']);
+    });
+
+    test('should use default searchFields when not provided', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {},
+      });
+
+      expect(result.searchFields).toEqual(['description', 'title']);
+    });
+
+    test('should use custom fields when provided', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {},
+        options: { fields: ['id', 'name'] },
+      });
+
+      expect(result.fields).toEqual(['id', 'name']);
+    });
   });
 });

@@ -55,6 +55,11 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     searchFields: options?.searchFields ?? ['description', 'title'],
     fields: options?.fields ?? ['description', 'title'],
     ...tagsToFindOptions(query.tags),
+    // Server-side sorting support
+    ...(query.sort && {
+      sortField: query.sort.field,
+      sortOrder: query.sort.direction,
+    }),
   };
 };
 
