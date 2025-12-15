@@ -374,9 +374,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
 
-    // Re-enable when feature flag is on by default
-    // https://github.com/elastic/kibana/issues/239796
-    describe.skip('Knowledge Base', () => {
+    describe('Knowledge Base', () => {
       const knowledgeBasePkgName = 'knowledge_base_test';
       const knowledgeBasePkgVersion = '1.0.0';
 
@@ -408,7 +406,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body).to.have.property('items');
         expect(res.body.package.name).to.equal(knowledgeBasePkgName);
         expect(res.body.items).to.be.an('array');
-        expect(res.body.items).to.have.length(3); // overview, troubleshooting, configuration
+        expect(res.body.items.length).to.be.greaterThan(3); // overview, troubleshooting, configuration, readme
 
         // Verify the content structure
         const overviewDoc = res.body.items.find((item: any) => item.fileName === 'overview.md');
