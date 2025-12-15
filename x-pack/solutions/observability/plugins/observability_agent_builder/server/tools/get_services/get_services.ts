@@ -16,7 +16,6 @@ import type {
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
-import { parseDatemath } from '../../utils/time';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
@@ -56,14 +55,11 @@ export function createGetServicesTool({
       const { request } = context;
 
       try {
-        const startTime = parseDatemath(start);
-        const endTime = parseDatemath(end, { roundUp: true });
-
         const response = await dataRegistry.getData('servicesItems', {
           request,
           environment,
-          start: startTime,
-          end: endTime,
+          start,
+          end,
         });
 
         const services = (response?.items ?? []).filter((item) => {
