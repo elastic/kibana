@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["index.ts", "common/**/*.ts", "public/**/*.ts", "public/**/*.tsx", "server/**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-plugins-browser",
+    "@kbn/developer-toolbar",
+    "@kbn/core-chrome-layout-components",
+    "@kbn/config-schema",
+  ]
+}

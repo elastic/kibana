@@ -9,7 +9,7 @@
 
 import type * as types from '../types';
 import type { ESQLInlineCast, ESQLProperNode } from '../types';
-import { Walker } from '../walker';
+import { Walker } from './walker';
 
 export const isProperNode = (node: unknown): node is types.ESQLProperNode =>
   !!node &&
@@ -92,6 +92,14 @@ export const isColumn = (node: unknown): node is types.ESQLColumn =>
 
 export const isSource = (node: unknown): node is types.ESQLSource =>
   isProperNode(node) && node.type === 'source';
+
+export const isParens = (node: unknown): node is types.ESQLParens =>
+  isProperNode(node) && node.type === 'parens';
+
+export const isSubQuery = (
+  node: unknown
+): node is types.ESQLParens & { child: types.ESQLAstQueryExpression } =>
+  isParens(node) && isQuery(node.child);
 
 export const isMap = (node: unknown): node is types.ESQLMap =>
   isProperNode(node) && node.type === 'map';

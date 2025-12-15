@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { FunctionDefinitionTypes } from '@kbn/esql-ast';
-import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
-import { Location } from '@kbn/esql-ast/src/commands_registry/types';
-import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
+import { Location } from '@kbn/esql-ast/src/commands/registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/commands/definitions/utils/test_functions';
 import { getFunctionSignaturesByReturnType, setup, createCustomCallbackMocks } from './helpers';
 import { uniq } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -20,7 +20,7 @@ import {
   nullCheckOperators,
   inOperators,
   patternMatchOperators,
-} from '@kbn/esql-ast/src/definitions/all_operators';
+} from '@kbn/esql-ast/src/commands/definitions/all_operators';
 
 const arithmeticSymbols = arithmeticOperators.map(({ name }) => name);
 const comparisonSymbols = comparisonFunctions.map(({ name }) => name);
@@ -444,7 +444,7 @@ describe('functions arg suggestions', () => {
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField IN /)');
       const texts = suggestions.map(({ text }) => text);
 
-      expect(texts).toContain('( $0 )');
+      expect(texts).toContain('($0)');
     });
 
     it('NOT IN operator: suggests opening parenthesis for list', async () => {
@@ -452,36 +452,27 @@ describe('functions arg suggestions', () => {
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField NOT IN /)');
       const texts = suggestions.map(({ text }) => text);
 
-      expect(texts).toContain('( $0 )');
+      expect(texts).toContain('($0)');
     });
 
-    it('list operator inside nested function: field suggestions without trailing space', async () => {
+    it.each([
+      ['simple field', 'FROM index | WHERE integerField IN (/)'],
+      ['nested field', 'FROM index | WHERE kubernetes.something.something IN (/)'],
+      ['function result', 'FROM index | WHERE CONCAT(textField, keywordField) IN (/)'],
+      ['inside CASE', 'FROM index | EVAL col0 = CASE(keywordField IN (/)'],
+      [
+        'multiple IN - cursor on second',
+        'FROM index | WHERE integerField IN (1) AND keywordField IN (/)',
+      ],
+      ['nested IN inside CASE', 'FROM index | EVAL x = CASE(a IN (1), "yes", keywordField IN (/)'],
+    ])('IN operator with %s: suggests fields and functions', async (_, query) => {
       const { suggest } = await setup();
-      const suggestions = await suggest('FROM index | WHERE CASE(integerField IN (/)');
+      const suggestions = await suggest(query);
 
-      const fieldSuggestions = suggestions.filter((s) => s.kind === 'Variable');
-      const functionSuggestions = suggestions.filter((s) => s.kind === 'Function');
-
-      expect(suggestions.length).toBeGreaterThan(0);
-      expect(functionSuggestions.length).toBeGreaterThan(0);
-
-      if (fieldSuggestions.length > 0) {
-        fieldSuggestions.forEach((s) => {
-          expect(s.text).not.toMatch(/\s$/);
-        });
-      }
-    });
-
-    it('IN operator with empty list: suggests integer fields and functions', async () => {
-      const { suggest } = await setup();
-      const suggestions = await suggest('FROM index | WHERE integerField IN (/)');
-
-      const fieldSuggestions = suggestions.filter((s) => s.kind === 'Variable');
-      const functionSuggestions = suggestions.filter((s) => s.kind === 'Function');
+      const fieldSuggestions = suggestions.filter(({ kind }) => kind === 'Variable');
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(fieldSuggestions.length).toBeGreaterThan(0);
-      expect(functionSuggestions.length).toBeGreaterThan(0);
     });
 
     it('unary NOT operator in WHERE: suggests boolean fields and boolean-returning functions', async () => {
@@ -1640,41 +1631,6 @@ describe('functions arg suggestions', () => {
       comparisonSymbols.forEach((op) => expect(labels).not.toContain(op));
     });
 
-    it('LIKE operator suggests: all fields (any type), all functions, all literals - excludes: left operand, pattern literals', async () => {
-      const { suggest } = await setup();
-      const suggestions = await suggest('FROM index | EVAL r = CASE(textField LIKE /');
-
-      const byKind = suggestions.reduce((acc, s) => {
-        acc[s.kind] = acc[s.kind] || [];
-        acc[s.kind].push(s.label);
-        return acc;
-      }, {} as Record<string, string[]>);
-
-      const fields = byKind.Variable || [];
-      const functions = byKind.Function || [];
-
-      expect(fields).toEqual(
-        expect.arrayContaining([
-          'booleanField',
-          'dateField',
-          'doubleField',
-          'integerField',
-          'longField',
-          'ipField',
-          'keywordField',
-          'versionField',
-          'geoPointField',
-          'cartesianPointField',
-        ])
-      );
-
-      expect(fields).not.toContain('textField');
-
-      expect(functions).toEqual(
-        expect.arrayContaining(['CONCAT', 'REPLACE', 'TO_STRING', 'ABS', 'ROUND', 'COALESCE'])
-      );
-    });
-
     it.todo('suggests only string literals inside LIKE list in CASE');
   });
 
@@ -2018,6 +1974,40 @@ describe('functions arg suggestions', () => {
       );
 
       expect(labels).not.toContain('CASE');
+    });
+  });
+
+  describe('conditional function autocomplete', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          name: 'conditional_mock',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: 'Mock function with isSignatureRepeating',
+          locationsAvailable: [Location.EVAL, Location.STATS],
+          signatures: [
+            {
+              params: [
+                { name: 'condition', type: 'boolean' },
+                { name: 'value', type: 'any' },
+              ],
+              returnType: 'unknown',
+              minParams: 2,
+              isSignatureRepeating: true,
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('does not suggest comma after string literal at default position', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, "value", "default" /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain(',');
     });
   });
 });

@@ -14,6 +14,8 @@ import { handleConnectorResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { mustUseThoughtSignature } from './utils';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -27,15 +29,20 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
   }) => {
+    const connector = executor.getConnector();
+    const useThoughtSignature = mustUseThoughtSignature(
+      modelName ?? connector.config?.defaultModel
+    );
+
     return defer(() => {
       return executor.invoke({
         subAction: 'invokeStream',
         subActionParams: {
-          messages: messagesToGemini({ messages }),
+          messages: messagesToGemini({ messages, useThoughtSignature }),
           systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
-          temperature,
+          ...getTemperatureIfValid(temperature, { connector, modelName }),
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
@@ -161,8 +168,16 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
   };
 }
 
-function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[] {
-  return messages.map(messageToGeminiMapper()).reduce<GeminiMessage[]>((output, message) => {
+const skipThoughtSignatureHash = 'skip_thought_signature_validator';
+
+function messagesToGemini({
+  messages,
+  useThoughtSignature,
+}: {
+  messages: Message[];
+  useThoughtSignature: boolean;
+}): GeminiMessage[] {
+  let mapped = messages.map(messageToGeminiMapper()).reduce<GeminiMessage[]>((output, message) => {
     // merging consecutive messages from the same user, as Gemini requires multi-turn messages
     const previousMessage = output.length ? output[output.length - 1] : undefined;
     if (previousMessage?.role === message.role) {
@@ -172,7 +187,28 @@ function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[
     }
     return output;
   }, []);
+
+  if (useThoughtSignature) {
+    mapped = mapped.map((message, index, array) => {
+      if (index < array.length - 1) {
+        addThoughtSignatureToFirstFunctionCall(message);
+      }
+      return message;
+    });
+  }
+
+  return mapped;
 }
+
+const addThoughtSignatureToFirstFunctionCall = (message: GeminiMessage) => {
+  for (const part of message.parts) {
+    if (part.functionCall) {
+      // @ts-expect-error - Gemini types are not up to date, this is a valid property
+      part.thoughtSignature = skipThoughtSignatureHash;
+      break;
+    }
+  }
+};
 
 function messageToGeminiMapper() {
   return (message: Message): GeminiMessage => {

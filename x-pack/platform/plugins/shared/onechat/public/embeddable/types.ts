@@ -6,6 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { OnechatInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
@@ -14,13 +16,6 @@ export interface EmbeddableConversationDependencies {
 }
 
 export interface EmbeddableConversationProps {
-  /**
-   * Explicit conversation ID to load a specific conversation.
-   * Takes priority over sessionTag/agentId-based restoration.
-   * If not provided, the flyout will attempt to restore the last conversation.
-   */
-  conversationId?: string;
-
   /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
    * When true, a fresh conversation is always created.
@@ -53,13 +48,60 @@ export interface EmbeddableConversationProps {
   agentId?: string;
 
   /**
-   * Optional initial message to automatically send when starting a new conversation.
+   * Optional initial message content to use when starting a new conversation.
    * Only applies when creating a new conversation (not when restoring existing ones).
+   * Use with `autoSendInitialMessage` to control whether this message is automatically sent.
    *
    * Example: 'Show me error logs from the last hour'
    */
   initialMessage?: string;
+  /**
+   * Whether to automatically send the initial message when starting a new conversation.
+   * Only applies when creating a new conversation (not when restoring existing ones).
+   * Requires `initialMessage` to be provided.
+   *
+   * @default false
+   */
+  autoSendInitialMessage?: boolean;
+  /**
+   * Optional attachments with lazy content loading.
+   * Content will be fetched when starting a new conversation round.
+   * It will be appended only if it has changed since previous conversation round.
+   */
+  attachments?: AttachmentInput[];
+
+  /**
+   * Browser API tools that the agent can use to interact with the page.
+   * Tools are executed browser-side when the LLM requests them.
+   *
+   * Example:
+   * ```typescript
+   * browserApiTools: [{
+   *   id: 'dashboard.config.update_title',
+   *   description: 'Update the dashboard title',
+   *   schema: z.object({
+   *     title: z.string().describe('The new title')
+   *   }),
+   *   handler: async ({ title }) => {
+   *     dashboardApi.updateTitle(title);
+   *   }
+   * }]
+   * ```
+   */
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+}
+
+export interface EmbeddableConversationFlyoutProps {
+  onClose: () => void;
+  ariaLabelledBy: string;
+  /**
+   * Callback to register a function that will receive prop updates.
+   * Used internally to update flyout props without recreating it.
+   * @internal
+   */
+  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
-  EmbeddableConversationProps;
+  EmbeddableConversationProps &
+  EmbeddableConversationFlyoutProps;

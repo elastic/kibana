@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { MaintenanceWindow } from '../../../../common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 
 import { Frequency } from '@kbn/rrule';
 import { convertFromMaintenanceWindowToForm } from './convert_from_maintenance_window_to_form';
@@ -213,7 +213,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a custom daily schedule', () => {
+  test('should not convert a maintenance window that is recurring on a daily schedule', () => {
     const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
@@ -232,10 +232,37 @@ describe('convertFromMaintenanceWindowToForm', () => {
       timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
-        customFrequency: Frequency.DAILY,
         ends: 'never',
-        frequency: 'CUSTOM',
+        frequency: Frequency.DAILY,
         interval: 1,
+      },
+    });
+  });
+
+  test('should handle a maintenance window with recurring on a daily schedule and weekdays', () => {
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
+      title,
+      duration,
+      rRule: {
+        dtstart: startDate.toISOString(),
+        tzid: 'UTC',
+        freq: Frequency.DAILY,
+        interval: 1,
+        byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],
+      },
+    } as MaintenanceWindow);
+
+    expect(maintenanceWindow).toEqual({
+      title,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      timezone: ['UTC'],
+      recurring: true,
+      recurringSchedule: {
+        ends: 'never',
+        frequency: Frequency.DAILY,
+        interval: 1,
+        byweekday: { 1: true, 2: true, 3: true, 4: true, 5: true, 6: false, 7: false },
       },
     });
   });

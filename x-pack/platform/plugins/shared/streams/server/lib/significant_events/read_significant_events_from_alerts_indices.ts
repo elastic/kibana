@@ -12,11 +12,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
+import type { SignificantEventsGetResponse, StreamQueryKql } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import type { AssetClient } from '../streams/assets/asset_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
+import type { QueryLink } from '../../../common/assets';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string },
@@ -116,10 +117,7 @@ export async function readSignificantEventsFromAlertsIndices(
 
   if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
     return queryLinks.map((queryLink) => ({
-      id: queryLink.query.id,
-      title: queryLink.query.title,
-      kql: queryLink.query.kql,
-      feature: queryLink.query.feature,
+      ...toStreamQueryKql(queryLink),
       occurrences: [],
       change_points: {
         type: {
@@ -136,10 +134,7 @@ export async function readSignificantEventsFromAlertsIndices(
     const changePoints = get(bucket, 'change_points') ?? {};
 
     return {
-      id: queryLink.query.id,
-      title: queryLink.query.title,
-      kql: queryLink.query.kql,
-      feature: queryLink.query.feature,
+      ...toStreamQueryKql(queryLink),
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
             date: occurrence.key_as_string,
@@ -154,10 +149,7 @@ export async function readSignificantEventsFromAlertsIndices(
   const notFoundSignificantEvents = queryLinks
     .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
     .map((queryLink) => ({
-      id: queryLink.query.id,
-      title: queryLink.query.title,
-      kql: queryLink.query.kql,
-      feature: queryLink.query.feature,
+      ...toStreamQueryKql(queryLink),
       occurrences: [],
       change_points: {
         type: {
@@ -168,3 +160,14 @@ export async function readSignificantEventsFromAlertsIndices(
 
   return [...significantEvents, ...notFoundSignificantEvents];
 }
+
+const toStreamQueryKql = (queryLink: QueryLink): StreamQueryKql => {
+  return {
+    id: queryLink.query.id,
+    title: queryLink.query.title,
+    kql: queryLink.query.kql,
+    feature: queryLink.query.feature,
+    severity_score: queryLink.query.severity_score,
+    evidence: queryLink.query.evidence,
+  };
+};

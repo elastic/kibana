@@ -34,6 +34,7 @@ import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { createPackRequestBodySchema } from '../../../common/api';
+import { getUserInfo } from '../../lib/get_user_info';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -72,7 +73,13 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+
+        const currentUser = await getUserInfo({
+          request,
+          security: osqueryContext.security,
+          logger: osqueryContext.logFactory.get('pack'),
+        });
+        const username = currentUser?.username ?? undefined;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
@@ -125,9 +132,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             queries: convertPackQueriesToSO(queries),
             enabled,
             created_at: moment().toISOString(),
-            created_by: currentUser,
+            created_by: username,
             updated_at: moment().toISOString(),
-            updated_by: currentUser,
+            updated_by: username,
             shards: convertShardsToArray(shards),
           },
           {

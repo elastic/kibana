@@ -1,0 +1,56 @@
+openapi: 3.0.0
+info:
+  title: Get Attack discovery indices missing privileges - Internal API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/attack_discovery/_missing_privileges:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetAttackDiscoveryMissingPrivilegesInternal
+      description: Identifies the privileges required for Attack discovery and returns the missing privileges
+      summary: Retrieves the missing privileges for Attack discovery
+      deprecated: true
+      tags:
+        - attack_discovery
+        - attack_discovery_missing_privileges
+      responses:
+        200:
+          description: Indicates privileges have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The missing index privileges required for Attack discovery
+                items:
+                  $ref: '#/components/schemas/AttackDiscoveryMissingPrivileges'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    AttackDiscoveryMissingPrivileges:
+      type: object
+      required:
+        - index_name
+        - privileges
+      properties:
+        index_name:
+          type: string
+          description: The index name of the privilege missing
+        privileges:
+          type: array
+          items:
+            type: string
+          description: The index privileges level missing

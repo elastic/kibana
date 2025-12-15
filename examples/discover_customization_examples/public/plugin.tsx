@@ -261,7 +261,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                     },
                   };
                 }}
-                filters={stateContainer.appState.get().filters ?? []}
+                filters={stateContainer.getCurrentTab().appState.filters ?? []}
               />
             </EuiFlexItem>
           );

@@ -57,6 +57,11 @@ export type RoutingSamplesEvent =
   | {
       type: 'routingSamples.setSelectedPreview';
       preview: RoutingSamplesContext['selectedPreview'];
+      condition: Condition;
+    }
+  | {
+      type: 'routingSamples.updatePreviewName';
+      name: string;
     };
 
 export interface SearchParams extends RoutingSamplesInput {
@@ -109,6 +114,17 @@ export const routingSamplesMachine = setup({
         selectedPreview: params.preview,
       })
     ),
+    updatePreviewName: assign(({ context }, params: { name: string }) => {
+      if (!context.selectedPreview || context.selectedPreview.type !== 'suggestion') {
+        return {};
+      }
+      return {
+        selectedPreview: {
+          ...context.selectedPreview,
+          name: params.name,
+        },
+      };
+    }),
   },
   delays: {
     conditionUpdateDebounceTime: 500,
@@ -161,6 +177,18 @@ export const routingSamplesMachine = setup({
       actions: [
         {
           type: 'setSelectedPreview',
+          params: ({ event }) => event,
+        },
+        {
+          type: 'updateCondition',
+          params: ({ event }) => event,
+        },
+      ],
+    },
+    'routingSamples.updatePreviewName': {
+      actions: [
+        {
+          type: 'updatePreviewName',
           params: ({ event }) => event,
         },
       ],

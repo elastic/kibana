@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 import type { ESQLAstCompletionCommand, ESQLAstItem, ESQLFunction } from '../../types';
 
 describe('COMPLETION command', () => {
@@ -37,10 +37,9 @@ describe('COMPLETION command', () => {
       it('parses prompt when it is a param', () => {
         const text = `FROM index | COMPLETION ? WITH { "inference_id": "my_inference_endpoint" }`;
         const query = EsqlQuery.fromSrc(text);
-
         const promptArg = query.ast.commands[1].args[0] as ESQLAstItem[];
 
-        expect(promptArg[0]).toMatchObject({
+        expect(promptArg).toMatchObject({
           type: 'literal',
           literalType: 'param',
           paramType: 'unnamed',

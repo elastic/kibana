@@ -16,11 +16,18 @@ import {
   type NamedAggregation,
   type RawBucket,
   useGrouping,
+  type GroupSettings,
 } from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
+import type {
+  GetGroupStats,
+  GroupingArgs,
+  GroupPanelRenderer,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
+import type { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
@@ -56,6 +63,10 @@ export interface AlertsTableComponentProps {
      */
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
+  /**
+   * Data view scope
+   */
+  pageScope?: PageScope;
   // TODO remove when we remove the newDataViewPickerEnabled feature flag
   /**
    * DataViewSpec object to use internally to fetch the data
@@ -84,6 +95,21 @@ export interface AlertsTableComponentProps {
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   tableId: TableIdLiteral;
   to: string;
+  settings?: GroupSettings;
+
+  /**
+   * A callback function that is invoked whenever the grouping aggregations are updated.
+   * It receives the parsed aggregation data as its only argument. This can be used to
+   * react to changes in the grouped data, for example, to extract information from
+   * the aggregation results.
+   */
+  onAggregationsChange?: (
+    aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
+    groupingLevel?: number
+  ) => void;
+
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -180,12 +206,26 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
+  useEffect(() => {
+    dispatch(
+      updateGroups({
+        tableId: props.tableId,
+        settings: props.settings,
+      })
+    );
+  }, [dispatch, props.tableId, props.settings]);
+
   const fields = useMemo(
     () =>
       newDataViewPickerEnabled
         ? props.dataView?.fields.map((field) => field.spec) || []
         : Object.values(props.dataViewSpec.fields || {}),
     [newDataViewPickerEnabled, props.dataView?.fields, props.dataViewSpec.fields]
+  );
+
+  const multiValueFieldsToFlatten = useMemo(
+    () => fields.filter((field) => field.aggregatable).map((field) => field.name),
+    [fields]
   );
 
   const runtimeMappings = useMemo(
@@ -222,6 +262,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       getGroupStats: groupStatsRenderer,
       onGroupToggle,
       unit: defaultUnit,
+      multiValueFields: multiValueFieldsToFlatten,
     },
     defaultGroupingOptions: groupingOptions,
     fields,
@@ -230,6 +271,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onGroupChange,
     onOptionsChange,
     tracker: track,
+    settings: props.settings,
   });
   const groupId = useMemo(() => groupIdSelector(), []);
   const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
@@ -363,6 +405,9 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
           signalIndexName={dataViewTitle}
+          multiValueFieldsToFlatten={multiValueFieldsToFlatten}
+          onAggregationsChange={props.onAggregationsChange}
+          additionalToolbarControls={props.additionalToolbarControls}
         />
       );
     },
@@ -376,6 +421,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       runtimeMappings,
       selectedGroups,
       setPageVar,
+      multiValueFieldsToFlatten,
     ]
   );
 

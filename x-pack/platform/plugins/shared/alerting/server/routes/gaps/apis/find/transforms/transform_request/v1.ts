@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { FindGapsRequestBodyV1 } from '../../../../../../../common/routes/gaps/apis/find';
-import type { FindGapsParams } from '../../../../../../lib/rule_gaps/types';
+import type { FindGapsParams } from '../../../../../../application/gaps/types';
 
 export const transformRequest = ({
   page,

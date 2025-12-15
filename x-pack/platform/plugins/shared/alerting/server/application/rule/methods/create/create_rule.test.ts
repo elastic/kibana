@@ -3285,6 +3285,7 @@ describe('create()', () => {
 
   test('should create rule with flapping', async () => {
     const flapping = {
+      enabled: true,
       lookBackWindow: 10,
       statusChangeThreshold: 10,
     };
@@ -3321,7 +3322,7 @@ describe('create()', () => {
       ],
     });
 
-    const result = await rulesClient.create({ data, isFlappingEnabled: true });
+    const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       expect.objectContaining({
@@ -3340,22 +3341,6 @@ describe('create()', () => {
     );
 
     expect(result.flapping).toEqual(flapping);
-  });
-
-  test('throws error when creating a rule with flapping if global flapping is disabled', async () => {
-    const flapping = {
-      lookBackWindow: 10,
-      statusChangeThreshold: 10,
-    };
-
-    const data = getMockData({
-      name: 'my rule name',
-      flapping,
-    });
-
-    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error creating rule: can not create rule with flapping if global flapping is disabled"`
-    );
   });
 
   test('throws error when creating with an interval less than the minimum configured one when enforce = true', async () => {
@@ -3956,7 +3941,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 154"`
+      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 153"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -4013,7 +3998,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [155]"`
+      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [154]"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -4085,7 +4070,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '156',
+            uuid: '155',
           },
         ],
         alertTypeId: '123',
@@ -4319,13 +4304,13 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
-              uuid: '158',
+              uuid: '157',
             },
             {
               actionRef: 'system_action:system_action-id',
               actionTypeId: '.test',
               params: { foo: 'test' },
-              uuid: '159',
+              uuid: '158',
             },
           ],
           alertTypeId: '123',
@@ -4403,13 +4388,13 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          uuid: '160',
+          uuid: '159',
         },
         {
           actionRef: 'system_action:system_action-id',
           actionTypeId: '.test',
           params: { foo: 'test' },
-          uuid: '161',
+          uuid: '160',
         },
       ]);
     });
@@ -4553,7 +4538,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction, systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Cannot use the same system action twice]`
+        `[Error: Cannot use action system_action-id more than once for this rule]`
       );
     });
 

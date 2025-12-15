@@ -10,7 +10,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
 import { eventTypes } from '../common/events';
 import {
   AGENT_BUILDER_FULL_TITLE,
@@ -54,32 +53,21 @@ export const registerApp = ({
         title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
       },
     ],
-    async mount({ element, history }: AppMountParameters) {
+    async mount({ element, history, onAppLeave }: AppMountParameters) {
       const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();
 
       coreStart.chrome.docTitle.change(AGENT_BUILDER_FULL_TITLE);
       const services = getServices();
 
-      return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
-    },
-  });
-};
-
-export const registerManagementSection = ({
-  core,
-  management,
-}: {
-  core: CoreSetup<OnechatStartDependencies>;
-  management: ManagementSetup;
-}) => {
-  management.sections.section.ai.registerApp({
-    id: 'agentBuilder',
-    title: AGENT_BUILDER_FULL_TITLE,
-    order: 3,
-    mount: async (mountParams) => {
-      const { mountManagementSection } = await import('./management/mount_management_section');
-      return mountManagementSection({ core, mountParams });
+      return mountApp({
+        core: coreStart,
+        services,
+        element,
+        history,
+        plugins: startDependencies,
+        onAppLeave,
+      });
     },
   });
 };

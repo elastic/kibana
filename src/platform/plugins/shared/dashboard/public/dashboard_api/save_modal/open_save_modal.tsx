@@ -13,14 +13,20 @@ import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import type { DashboardSaveOptions } from './types';
-import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { DashboardSaveOptions, SaveDashboardReturn } from './types';
+import {
+  coreServices,
+  cpsService,
+  savedObjectsTaggingService,
+} from '../../services/kibana_services';
 import type { DashboardState } from '../../../common';
-import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
+import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
 import { DashboardSaveModal } from './save_modal';
+import { checkForDuplicateDashboardTitle } from '../../dashboard_client';
+import { saveDashboard } from './save_dashboard';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 /**
  * @description exclusively for user directed dashboard save actions, also
@@ -32,26 +38,31 @@ export async function openSaveModal({
   lastSavedId,
   serializeState,
   setTimeRestore,
+  setProjectRoutingRestore,
   tags,
   timeRestore,
+  projectRoutingRestore,
   title,
   viewMode,
+  accessControl,
 }: {
   description?: string;
   isManaged: boolean;
   lastSavedId: string | undefined;
   serializeState: () => { dashboardState: DashboardState; references: Reference[] };
   setTimeRestore: (timeRestore: boolean) => void;
+  setProjectRoutingRestore: (projectRoutingRestore: boolean) => void;
   tags?: string[];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   title: string;
   viewMode: ViewMode;
+  accessControl?: Partial<SavedObjectAccessControl>;
 }) {
   try {
     if (viewMode === 'edit' && isManaged) {
       return undefined;
     }
-    const dashboardContentManagementService = getDashboardContentManagementService();
     const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
     return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
       (resolve) => {
@@ -61,6 +72,8 @@ export async function openSaveModal({
           newDescription,
           newCopyOnSave,
           newTimeRestore,
+          newAccessMode,
+          newProjectRoutingRestore,
           onTitleDuplicate,
           isTitleDuplicateConfirmed,
         }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
@@ -73,7 +86,7 @@ export async function openSaveModal({
 
           try {
             if (
-              !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
+              !(await checkForDuplicateDashboardTitle({
                 title: newTitle,
                 onTitleDuplicate,
                 lastSavedTitle: title,
@@ -85,6 +98,7 @@ export async function openSaveModal({
             }
 
             setTimeRestore(newTimeRestore);
+            setProjectRoutingRestore(newProjectRoutingRestore);
             const { dashboardState, references } = serializeState();
 
             const dashboardStateToSave: DashboardState = {
@@ -99,11 +113,13 @@ export async function openSaveModal({
 
             const beforeAddTime = window.performance.now();
 
-            const saveResult = await dashboardContentManagementService.saveDashboardState({
+            const saveResult = await saveDashboard({
               references,
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
+              // Only pass access mode for new dashboard creation (no lastSavedId)
+              accessMode: !lastSavedId && newAccessMode ? newAccessMode : undefined,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;
@@ -112,7 +128,7 @@ export async function openSaveModal({
               eventName: SAVED_OBJECT_POST_TIME,
               duration: addDuration,
               meta: {
-                saved_object_type: DASHBOARD_CONTENT_ID,
+                saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
               },
             });
 
@@ -132,11 +148,15 @@ export async function openSaveModal({
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
             timeRestore={timeRestore}
+            projectRoutingRestore={projectRoutingRestore}
             showStoreTimeOnSave={!lastSavedId}
+            showStoreProjectRoutingOnSave={!lastSavedId && Boolean(cpsService?.cpsManager)}
             description={description ?? ''}
             showCopyOnSave={false}
             onSave={onSaveAttempt}
+            accessControl={accessControl}
             customModalTitle={getCustomModalTitle(viewMode)}
+            isDuplicateAction={Boolean(lastSavedId)}
           />
         );
       }
@@ -178,7 +198,7 @@ function generateDashboardNotSavedToast(title: string, errorMessage: any) {
 async function getSaveAsTitle(title: string) {
   const [baseTitle, baseCount] = extractTitleAndCount(title);
   let saveAsTitle = `${baseTitle} (${baseCount + 1})`;
-  await getDashboardContentManagementService().checkForDuplicateDashboardTitle({
+  await checkForDuplicateDashboardTitle({
     title: saveAsTitle,
     lastSavedTitle: title,
     copyOnSave: true,

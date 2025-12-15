@@ -27,12 +27,8 @@ import type {
   NavigationPublicStartDependencies,
   AddSolutionNavigationArg,
 } from './types';
-import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
+import { TopNavMenuExtensionsRegistry, createTopNav, createTopNavBeta } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-
-import { registerNavigationEventTypes } from './analytics';
-
-import { SolutionNavigationTourManager } from './solution_tour/solution_tour';
 
 export class NavigationPublicPlugin
   implements
@@ -53,8 +49,6 @@ export class NavigationPublicPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
-    registerNavigationEventTypes(core);
-
     this.isCloudTrialUser = deps.cloud?.isInTrial() ?? false;
 
     return {
@@ -128,25 +122,11 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    if (this.isSolutionNavEnabled || isServerless) {
-      const hideAnnouncements = core.settings.client.get('hideAnnouncements', false);
-      if (!hideAnnouncements) {
-        const { project } = core.chrome as InternalChromeStart;
-        const tourManager = new SolutionNavigationTourManager({
-          navigationTourManager: project.navigationTourManager,
-          spacesSolutionViewTourManager: spaces?.solutionViewTourManager,
-          userProfile: core.userProfile,
-          capabilities: core.application.capabilities,
-          featureFlags: core.featureFlags,
-        });
-        void tourManager.startTour();
-      }
-    }
-
     return {
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        TopNavMenuBeta: createTopNavBeta(),
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {

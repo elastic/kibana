@@ -17,10 +17,9 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { HttpSetup } from '@kbn/core/public';
-import type { KueryNode } from '@kbn/es-query';
+import type { Filter, KueryNode } from '@kbn/es-query';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import {
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
@@ -131,6 +130,11 @@ export interface PrebuildFieldsMap {
   [RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY]: PrebuildField<string>;
   [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_ID]: PrebuildField<string>;
   [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.QUERY_FILTERS]: PrebuildField<{
+    filters: Filter[];
+    dataViewId: string;
+  }>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.KQL_FILTERS]: PrebuildField<string>;
 }
 
 export type GetDescriptionFieldsFn<Params extends RuleTypeParams = RuleTypeParams> = ({
@@ -140,11 +144,10 @@ export type GetDescriptionFieldsFn<Params extends RuleTypeParams = RuleTypeParam
 }: {
   rule: Rule<Params>;
   prebuildFields: PrebuildFieldsMap | undefined;
-  http: HttpSetup | undefined;
+  http?: HttpSetup;
 }) => { title: string; description: NonNullable<ReactNode> }[];
 
 export {
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,

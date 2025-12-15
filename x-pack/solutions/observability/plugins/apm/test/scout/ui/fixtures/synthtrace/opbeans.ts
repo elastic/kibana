@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import { ERROR_MESSAGE, PRODUCT_TRANSACTION_NAME } from '../constants';
 
 export function opbeans({
   from,
@@ -44,12 +45,12 @@ export function opbeans({
     .rate(1)
     .generator((timestamp) => [
       opbeansJava
-        .transaction({ transactionName: 'GET /api/product' })
+        .transaction({ transactionName: PRODUCT_TRANSACTION_NAME })
         .timestamp(timestamp)
         .duration(1000)
         .failure()
         .errors(
-          opbeansJava.error({ message: '[MockError] Foo', type: `Exception` }).timestamp(timestamp)
+          opbeansJava.error({ message: ERROR_MESSAGE, type: 'Exception' }).timestamp(timestamp)
         )
         .children(
           opbeansJava

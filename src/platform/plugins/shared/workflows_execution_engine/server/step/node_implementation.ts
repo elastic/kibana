@@ -12,14 +12,16 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
+import type { SerializedError } from '@kbn/workflows';
 import type { ConnectorExecutor } from '../connector_executor';
+import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   input: any;
   output: any;
-  error: any;
+  error: SerializedError | undefined;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
@@ -35,16 +37,40 @@ export interface BaseStep {
 
 export type StepDefinition = BaseStep;
 
+/**
+ * Interface for node implementations within the workflow execution engine.
+ * These implementations define the behavior of various workflow steps.
+ */
 export interface NodeImplementation {
-  run(): Promise<void>;
+  /**
+   * Executes the node's logic.
+   */
+  run(): Promise<void> | void;
 }
 
+/**
+ * Node implementation that can catch errors within its scope.
+ * For example, retry steps or continue steps.
+ */
 export interface NodeWithErrorCatching {
-  catchError(): Promise<void>;
+  /**
+   * Handles errors that occur within the node's execution context.
+   * @param failedContext The context of the failed step execution.
+   */
+  catchError(failedContext: StepExecutionRuntime): Promise<void> | void;
 }
 
+/**
+ * Node implementation monitoring its scope.
+ * For example, timeout zones.
+ * @param monitoredContext The context of the monitored step execution.
+ */
 export interface MonitorableNode {
-  monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
+  /**
+   * Monitors the execution context of the node.
+   * @param monitoredContext The context of the monitored step execution.
+   */
+  monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
@@ -77,11 +103,13 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   public async run(): Promise<void> {
     let input: any;
-    await this.stepExecutionRuntime.startStep();
+    this.stepExecutionRuntime.startStep();
+    // flush event logs after start step
+    await this.stepExecutionRuntime.flushEventLogs();
 
     try {
       input = await this.getInput();
-      await this.stepExecutionRuntime.setInput(input);
+      this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
       // Don't update step execution runtime if abort was initiated
@@ -90,14 +118,17 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
 
       if (result.error) {
-        await this.stepExecutionRuntime.failStep(result.error);
+        this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
       } else {
-        await this.stepExecutionRuntime.finishStep(result.output);
+        this.stepExecutionRuntime.finishStep(result.output);
       }
     } catch (error) {
-      const result = await this.handleFailure(input, error);
-      await this.stepExecutionRuntime.failStep(result.error);
+      const result = this.handleFailure(input, error);
+      this.stepExecutionRuntime.failStep(result.error || error);
     }
+
+    // flush event logs after finishing the step
+    await this.stepExecutionRuntime.flushEventLogs();
 
     this.workflowExecutionRuntime.navigateToNextNode();
   }
@@ -106,21 +137,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   protected abstract _run(input?: any): Promise<RunStepResult>;
 
   // Helper for handling on-failure, retries, etc.
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
-    // Implement retry logic based on step['on-failure']
-    // Build comprehensive error message including cause chain (messages only)
-    const getErrorMessage = (err: any): string => {
-      if (!(err instanceof Error)) return String(err);
-      let msg = err.message;
-      if (err.cause) {
-        msg += `\nCaused by: ${getErrorMessage(err.cause)}`;
-      }
-      return msg;
-    };
+  protected handleFailure(input: any, error: any): RunStepResult {
     return {
       input,
       output: undefined,
-      error: getErrorMessage(error),
+      error: ExecutionError.fromError(error),
     };
   }
 }

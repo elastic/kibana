@@ -19,6 +19,7 @@ import type {
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
+import { getToolTypeInfo } from '../../services/tools/utils';
 
 export function registerInternalToolsRoutes({
   router,
@@ -132,11 +133,11 @@ export function registerInternalToolsRoutes({
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
 
-      const toolTypes = tools.getToolTypeInfo();
+      const toolTypes = tools.getToolDefinitions();
 
       return response.ok<GetToolTypeInfoResponse>({
         body: {
-          toolTypes,
+          toolTypes: getToolTypeInfo(toolTypes),
         },
       });
     })
@@ -169,7 +170,7 @@ export function registerInternalToolsRoutes({
       const currentSpace = (await ctx.onechat).spaces.getSpaceId();
 
       const { results } = await workflowsManagement.management.getWorkflows(
-        { page: request.query.page, limit: request.query.limit, enabled: [true] },
+        { page: request.query.page, size: request.query.limit, enabled: [true] },
         currentSpace
       );
 

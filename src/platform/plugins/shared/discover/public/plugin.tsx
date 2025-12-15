@@ -261,6 +261,7 @@ export class DiscoverPlugin
           return esqlLocatorGetLocation({
             discoverAppLocator,
             dataViews: plugins.dataViews,
+            http: core.http,
           });
         },
       });

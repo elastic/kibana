@@ -571,6 +571,52 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.ISavedObjectsRepository.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
+            ],
+            "signature": [
+              "<T extends ",
+              "SavedObjectsRawDocSource",
+              " = ",
+              "SavedObjectsRawDocSource",
+              ", A = unknown>(options: ",
+              "SavedObjectsSearchOptions",
+              ") => Promise<",
+              "SavedObjectsSearchResponse",
+              "<T, A>>"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                ],
+                "signature": [
+                  "SavedObjectsSearchOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsSearchResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.ISavedObjectsRepository.bulkGet",
             "type": "Function",
             "tags": [
@@ -1655,6 +1701,128 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.ISavedObjectsRepository.changeOwnership",
+            "type": "Function",
+            "tags": [],
+            "label": "changeOwnership",
+            "description": [
+              "\nChanges the ownership of one or more SavedObjects to a new owner.\n"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsChangeAccessControlObject",
+              "[], options: ",
+              "SavedObjectsChangeOwnershipOptions",
+              ") => Promise<",
+              "SavedObjectsChangeAccessControlResponse",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.changeOwnership.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "{@link SavedObjectsChangeAccessControlObject } - the objects to update"
+                ],
+                "signature": [
+                  "SavedObjectsChangeAccessControlObject",
+                  "[]"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.changeOwnership.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsChangeOwnershipOptions } - object containing owner profile_uid that will be the new owner"
+                ],
+                "signature": [
+                  "SavedObjectsChangeOwnershipOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsChangeAccessControlResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.ISavedObjectsRepository.changeAccessMode",
+            "type": "Function",
+            "tags": [],
+            "label": "changeAccessMode",
+            "description": [
+              "\nChanges the access mode of one or more SavedObjects to a new access mode.\n"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsChangeAccessControlObject",
+              "[], options: ",
+              "SavedObjectsChangeAccessModeOptions",
+              ") => Promise<",
+              "SavedObjectsChangeAccessControlResponse",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.changeAccessMode.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "{@link SavedObjectsChangeAccessControlObject } - the objects to update"
+                ],
+                "signature": [
+                  "SavedObjectsChangeAccessControlObject",
+                  "[]"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.changeAccessMode.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsChangeAccessControlOptions } - object containing access mode. If empty, is considered to be marked as editable"
+                ],
+                "signature": [
+                  "SavedObjectsChangeAccessModeOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2004,6 +2172,68 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObject.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "\nAccess control information of the saved object.\nThis can be be used to customize access to the object in addition to RBAC, e.g.\nto set an object to read-only mode, where it is only editable by the owner of\nthe object (or an admin), even if other users are granted write access via a role."
+            ],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectAccessControl",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectAccessControl",
+        "description": [
+          "\nDefinition of the Saved Object access control interface\n"
+        ],
+        "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectAccessControl.owner",
+            "type": "string",
+            "tags": [],
+            "label": "owner",
+            "description": [
+              "The ID of the user who owns this object."
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectAccessControl.accessMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessMode",
+            "description": [
+              "\nThe access mode of the object. `write_restricted` is editable only by the owner and admin users.\nAccess mode `default` is editable by all users with write access to the object."
+            ],
+            "signature": [
+              "\"default\" | \"write_restricted\""
             ],
             "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
@@ -2729,6 +2959,24 @@
             "path": "src/core/packages/saved-objects/api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsBulkCreateObject.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "\nThe access control settings for the object\n\nWe specifically exclude the owner property, as that is set during the operation\nusing the current user's profile ID."
+            ],
+            "signature": [
+              "Pick<",
+              "SavedObjectAccessControl",
+              ", \"accessMode\"> | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/bulk_create.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3313,6 +3561,139 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsChangeAccessControlObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsChangeAccessControlObject",
+        "description": [],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsChangeAccessControlObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsChangeAccessControlObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsChangeAccessControlResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsChangeAccessControlResponse",
+        "description": [
+          "\nReturn type of the Saved Objects `changeOwnership()` method.\n"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsChangeAccessControlResponse.objects",
+            "type": "Array",
+            "tags": [],
+            "label": "objects",
+            "description": [],
+            "signature": [
+              "SavedObjectsChangeAccessControlResponseObject",
+              "[]"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsChangeAccessModeOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsChangeAccessModeOptions",
+        "description": [],
+        "signature": [
+          "SavedObjectsChangeAccessModeOptions",
+          " extends ",
+          "SavedObjectsBaseOptions"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsChangeAccessModeOptions.accessMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessMode",
+            "description": [],
+            "signature": [
+              "\"default\" | \"write_restricted\" | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsChangeOwnershipOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsChangeOwnershipOptions",
+        "description": [],
+        "signature": [
+          "SavedObjectsChangeOwnershipOptions",
+          " extends ",
+          "SavedObjectsBaseOptions"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsChangeOwnershipOptions.newOwnerProfileUid",
+            "type": "string",
+            "tags": [],
+            "label": "newOwnerProfileUid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-server.SavedObjectsCheckConflictsObject",
         "type": "Interface",
         "tags": [],
@@ -3779,6 +4160,52 @@
             ],
             "returnComment": [
               "the {@link SavedObjectsFindResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsClientContract.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
+            ],
+            "signature": [
+              "<T extends ",
+              "SavedObjectsRawDocSource",
+              " = ",
+              "SavedObjectsRawDocSource",
+              ", A = unknown>(options: ",
+              "SavedObjectsSearchOptions",
+              ") => Promise<",
+              "SavedObjectsSearchResponse",
+              "<T, A>>"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                ],
+                "signature": [
+                  "SavedObjectsSearchOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsSearchResponse }"
             ]
           },
           {
@@ -4691,6 +5118,130 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsClientContract.changeOwnership",
+            "type": "Function",
+            "tags": [],
+            "label": "changeOwnership",
+            "description": [
+              "\nChanges the ownership of one or more SavedObjects to a new owner passed in the options.\n"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsChangeAccessControlObject",
+              "[], options: ",
+              "SavedObjectsChangeOwnershipOptions",
+              ") => Promise<",
+              "SavedObjectsChangeAccessControlResponse",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.changeOwnership.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- The objects to change ownership for"
+                ],
+                "signature": [
+                  "SavedObjectsChangeAccessControlObject",
+                  "[]"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.changeOwnership.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsChangeAccessControlOptions } - options for the change ownership operation"
+                ],
+                "signature": [
+                  "SavedObjectsChangeOwnershipOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsChangeAccessControlResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsClientContract.changeAccessMode",
+            "type": "Function",
+            "tags": [],
+            "label": "changeAccessMode",
+            "description": [
+              "\nChanges the access mode of one or more SavedObjects."
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsChangeAccessControlObject",
+              "[], options: ",
+              "SavedObjectsChangeAccessModeOptions",
+              ") => Promise<",
+              "SavedObjectsChangeAccessControlResponse",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.changeAccessMode.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- The objects to change access mode for"
+                ],
+                "signature": [
+                  "SavedObjectsChangeAccessControlObject",
+                  "[]"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.changeAccessMode.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsChangeAccessModeOptions } - options for the change access mode operation"
+                ],
+                "signature": [
+                  "SavedObjectsChangeAccessModeOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsChangeAccessControlResponse }"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -5086,6 +5637,24 @@
             "path": "src/core/packages/saved-objects/api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsCreateOptions.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "\nAccess control settings for the create operation.\n\nThese settings will be applied to any of the incoming objects which support access control that\ndo not already contain the accessControl property. We specifically exclude the owner property,\nas that is set during the operation using the current user's profile ID."
+            ],
+            "signature": [
+              "Pick<",
+              "SavedObjectAccessControl",
+              ", \"accessMode\"> | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5113,19 +5682,19 @@
               "the point-in-time finder client"
             ],
             "signature": [
-              "{ find: <T = unknown, A = unknown>(options: ",
-              "SavedObjectsFindOptions",
-              ", internalOptions?: ",
-              "SavedObjectsFindInternalOptions",
-              " | undefined) => Promise<",
-              "SavedObjectsFindResponse",
-              "<T, A>>; closePointInTime: (id: string, options?: ",
+              "{ closePointInTime: (id: string, options?: ",
               "SavedObjectsBaseOptions",
               " | undefined, internalOptions?: ",
               "SavedObjectsFindInternalOptions",
               " | undefined) => Promise<",
               "SavedObjectsClosePointInTimeResponse",
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
+              ">; find: <T = unknown, A = unknown>(options: ",
+              "SavedObjectsFindOptions",
+              ", internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsFindResponse",
+              "<T, A>>; openPointInTimeForType: (type: string | string[], options?: ",
               "SavedObjectsOpenPointInTimeOptions",
               " | undefined, internalOptions?: ",
               "SavedObjectsFindInternalOptions",
@@ -6167,6 +6736,204 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsRawDocSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsRawDocSource",
+        "description": [
+          "\nSaved object document as stored in `_source` of doc in ES index\nSimilar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]\n"
+        ],
+        "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.migrationVersion",
+            "type": "Object",
+            "tags": [],
+            "label": "migrationVersion",
+            "description": [],
+            "signature": [
+              "SavedObjectsMigrationVersion",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[] | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsRawDocSource.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[typeMapping: string]: any",
+            "description": [],
+            "signature": [
+              "[typeMapping: string]:  any"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-server.SavedObjectsRemoveReferencesToOptions",
         "type": "Interface",
         "tags": [],
@@ -6352,6 +7119,60 @@
               "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/apis/resolve.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsSearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsSearchOptions",
+        "description": [
+          "\nOptions for the saved objects raw search operation.\n\nThis interface extends the Elasticsearch `SearchRequest` type and allows using\nthe full Elasticsearch query DSL, including aggregations.\n"
+        ],
+        "signature": [
+          "SavedObjectsSearchOptions",
+          " extends Omit<",
+          "SearchRequest",
+          ", \"index\">"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsSearchOptions.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type or types of objects to find."
+            ],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsSearchOptions.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "The namespaces to search within."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6797,6 +7618,25 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsChangeAccessControlOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsChangeAccessControlOptions",
+        "description": [
+          "\nOptions for the changing ownership of a saved object\n"
+        ],
+        "signature": [
+          "SavedObjectsChangeOwnershipOptions",
+          " | ",
+          "SavedObjectsChangeAccessModeOptions"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/change_access_control.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-server.SavedObjectsClosePointInTimeOptions",
         "type": "Type",
         "tags": [],
@@ -6822,9 +7662,9 @@
           "\nOptions for the create point-in-time finder operation\n"
         ],
         "signature": [
-          "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
+          "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
           " | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
@@ -6851,19 +7691,19 @@
           "\nPoint-in-time finder client.\nPartially implements {@link ISavedObjectsRepository}\n"
         ],
         "signature": [
-          "{ find: <T = unknown, A = unknown>(options: ",
-          "SavedObjectsFindOptions",
-          ", internalOptions?: ",
-          "SavedObjectsFindInternalOptions",
-          " | undefined) => Promise<",
-          "SavedObjectsFindResponse",
-          "<T, A>>; closePointInTime: (id: string, options?: ",
+          "{ closePointInTime: (id: string, options?: ",
           "SavedObjectsBaseOptions",
           " | undefined, internalOptions?: ",
           "SavedObjectsFindInternalOptions",
           " | undefined) => Promise<",
           "SavedObjectsClosePointInTimeResponse",
-          ">; openPointInTimeForType: (type: string | string[], options?: ",
+          ">; find: <T = unknown, A = unknown>(options: ",
+          "SavedObjectsFindOptions",
+          ", internalOptions?: ",
+          "SavedObjectsFindInternalOptions",
+          " | undefined) => Promise<",
+          "SavedObjectsFindResponse",
+          "<T, A>>; openPointInTimeForType: (type: string | string[], options?: ",
           "SavedObjectsOpenPointInTimeOptions",
           " | undefined, internalOptions?: ",
           "SavedObjectsFindInternalOptions",
@@ -6872,6 +7712,24 @@
           ">; }"
         ],
         "path": "src/core/packages/saved-objects/api-server/src/apis/create_point_in_time_finder.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsSearchResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsSearchResponse",
+        "description": [
+          "\nResponse from the saved objects raw search operation."
+        ],
+        "signature": [
+          "SearchResponseBody",
+          "<Document, Aggregations>"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

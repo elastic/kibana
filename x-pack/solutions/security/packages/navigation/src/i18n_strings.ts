@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
+  alertDetections: {
+    title: i18n.translate('securitySolutionPackages.navLinks.alertDetections', {
+      defaultMessage: 'Detections',
+    }),
+    views: {
+      title: i18n.translate('securitySolutionPackages.navLinks.rules.views', {
+        defaultMessage: 'Views',
+      }),
+    },
+  },
   rules: {
     title: i18n.translate('securitySolutionPackages.navLinks.rules', {
       defaultMessage: 'Rules',
@@ -268,6 +278,11 @@ export const i18nStrings = {
     title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
       defaultMessage: 'Stack Management',
     }),
+    home: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.home', {
+        defaultMessage: 'Home',
+      }),
+    },
     serverlessTitle: i18n.translate(
       'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
       { defaultMessage: 'Admin and Settings' }

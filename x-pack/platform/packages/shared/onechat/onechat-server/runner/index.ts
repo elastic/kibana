@@ -6,14 +6,18 @@
  */
 
 export type {
+  Runner,
+  RunToolFn,
+  RunInternalToolFn,
   ScopedRunner,
   ScopedRunToolFn,
+  ScopedRunnerRunInternalToolParams,
+  ScopedRunInternalToolFn,
   ScopedRunnerRunToolsParams,
+  RunInternalToolParams,
   RunContext,
   RunContextStackEntry,
   RunToolParams,
-  RunToolFn,
-  Runner,
   RunToolReturn,
 } from './runner';
 export {
@@ -40,5 +44,11 @@ export type {
   SkillProviderGetOptions,
   SkillProviderListOptions,
 } from './skill_provider';
-export type { ModelProvider, ScopedModel } from './model_provider';
+export type { 
+  ModelProvider,
+  ScopedModel,
+  ModelProviderStats,
+  ModelCallInfo,
+} from './model_provider';
 export type { ToolResultStore, WritableToolResultStore } from './result_store';
+export type { AttachmentsService } from './attachments_service';

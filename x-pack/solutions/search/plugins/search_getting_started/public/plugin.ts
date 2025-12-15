@@ -19,6 +19,7 @@ import type {
   SearchGettingStartedAppPluginStartDependencies,
   SearchGettingStartedServicesContextDeps,
 } from './types';
+import { docLinks } from './common/doc_links';
 
 export class SearchGettingStartedPlugin
   implements
@@ -49,6 +50,7 @@ export class SearchGettingStartedPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
         const services: SearchGettingStartedServicesContextDeps = {
           ...depsStart,
           history,
@@ -57,7 +59,7 @@ export class SearchGettingStartedPlugin
 
         return renderApp(coreStart, services, element, queryClient);
       },
-      status: AppStatus.inaccessible,
+      status: AppStatus.accessible,
       updater$: this.appUpdater$,
       order: 1,
       visibleIn: ['globalSearch', 'sideNav'],
@@ -67,14 +69,12 @@ export class SearchGettingStartedPlugin
   }
 
   public start(core: CoreStart) {
-    // Create a subscription for the value of our feature flag
     this.featureFlagSubscription = core.featureFlags
-      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
+      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, true)
       .subscribe((featureFlagEnabled) => {
         const status: AppStatus = featureFlagEnabled
           ? AppStatus.accessible
           : AppStatus.inaccessible;
-        // This will update the Kibana application's status based on the current value of the feature flag
         this.appUpdater$.next(() => ({
           status,
         }));

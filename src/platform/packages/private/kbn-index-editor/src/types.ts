@@ -32,6 +32,7 @@ export interface EditLookupIndexContentContext {
     /** Indicates if new fields have been added to the index */
     indexHasNewFields: boolean;
   }) => void;
+  onOpenIndexInDiscover?: (indexName: string, esqlQuery: string) => Promise<void>;
 }
 
 export interface EditLookupIndexFlyoutDeps {
@@ -47,7 +48,7 @@ export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
   storage: Storage;
   indexUpdateService: IndexUpdateService;
   indexEditorTelemetryService: IndexEditorTelemetryService;
-  fileManager: FileUploadManager;
+  existingIndexName: string | undefined | null;
 };
 
 /** Extended kibana context */

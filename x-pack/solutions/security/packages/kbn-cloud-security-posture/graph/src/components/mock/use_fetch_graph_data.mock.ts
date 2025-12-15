@@ -6,6 +6,11 @@
  */
 
 import { useMemo } from 'react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { UseFetchGraphDataParams } from '../../hooks/use_fetch_graph_data';
 import { useMockDataContext } from './mock_context_provider';
 
@@ -40,7 +45,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             documentsData: [
               {
                 id: '1',
-                type: 'entity',
+                type: DOCUMENT_TYPE_ENTITY,
               },
             ],
           },
@@ -53,7 +58,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             documentsData: [
               {
                 id: '1',
-                type: 'alert',
+                type: DOCUMENT_TYPE_ALERT,
               },
             ],
           },
@@ -66,7 +71,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             documentsData: [
               {
                 id: '1',
-                type: 'event',
+                type: DOCUMENT_TYPE_EVENT,
               },
             ],
           },

@@ -470,91 +470,6 @@
     "interfaces": [
       {
         "parentPluginId": "apmDataAccess",
-        "id": "def-server.ApmDataAccessPrivilegesCheck",
-        "type": "Interface",
-        "tags": [],
-        "label": "ApmDataAccessPrivilegesCheck",
-        "description": [],
-        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.ApmDataAccessPrivilegesCheck.request",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.ApmDataAccessPrivilegesCheck.security",
-            "type": "Object",
-            "tags": [],
-            "label": "security",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.SecurityPluginStart",
-                "text": "SecurityPluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.ApmDataAccessPrivilegesCheck.getApmIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getApmIndices",
-            "description": [],
-            "signature": [
-              "(request: ",
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
-            ],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "apmDataAccess",
-                "id": "def-server.ApmDataAccessPrivilegesCheck.getApmIndices.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [],
-                "signature": [
-                  "KibanaRequest",
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "apmDataAccess",
         "id": "def-server.ApmDataAccessServicesParams",
         "type": "Interface",
         "tags": [],
@@ -686,35 +601,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1426,6 +1315,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ScrollResponse",
+              "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
               "<TDocument, TAggregations>>; }; searchApplication: ",
               "default",
               "; searchMvt: { (this: That, params: ",
@@ -1924,6 +1839,20 @@
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "apmDataAccess",
+            "id": "def-server.HostNamesRequest.schema",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "\"ecs\" | \"semconv\""
+            ],
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1955,7 +1884,7 @@
             "section": "def-common.ApmDataSource",
             "text": "ApmDataSource"
           },
-          "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources }: ",
+          "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources, schema, }: ",
           {
             "pluginId": "apmDataAccess",
             "scope": "server",
@@ -2131,7 +2060,7 @@
               "section": "def-common.ApmDataSource",
               "text": "ApmDataSource"
             },
-            "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources }: ",
+            "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources, schema, }: ",
             {
               "pluginId": "apmDataAccess",
               "scope": "server",
@@ -2200,56 +2129,7 @@
       "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "apmDataAccess",
-          "id": "def-server.ApmDataAccessPluginStart.hasPrivileges",
-          "type": "Function",
-          "tags": [],
-          "label": "hasPrivileges",
-          "description": [],
-          "signature": [
-            "(params: Pick<",
-            {
-              "pluginId": "apmDataAccess",
-              "scope": "server",
-              "docId": "kibApmDataAccessPluginApi",
-              "section": "def-server.ApmDataAccessPrivilegesCheck",
-              "text": "ApmDataAccessPrivilegesCheck"
-            },
-            ", \"request\">) => Promise<boolean>"
-          ],
-          "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "apmDataAccess",
-              "id": "def-server.ApmDataAccessPluginStart.hasPrivileges.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "params",
-              "description": [],
-              "signature": [
-                "Pick<",
-                {
-                  "pluginId": "apmDataAccess",
-                  "scope": "server",
-                  "docId": "kibApmDataAccessPluginApi",
-                  "section": "def-server.ApmDataAccessPrivilegesCheck",
-                  "text": "ApmDataAccessPrivilegesCheck"
-                },
-                ", \"request\">"
-              ],
-              "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        }
-      ],
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }

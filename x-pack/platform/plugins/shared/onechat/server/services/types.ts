@@ -19,16 +19,20 @@ import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { SkillsServiceSetup, SkillsServiceStart } from './skills';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
+import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
+import type { TrackingService } from '../telemetry/tracking_service';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
+  attachments: AttachmentServiceSetup;
   skills: SkillsServiceSetup;
 }
 
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
+  attachments: AttachmentServiceStart;
   skills: SkillsServiceStart;
   conversations: ConversationService;
   chat: ChatService;
@@ -38,6 +42,7 @@ export interface InternalStartServices {
 export interface ServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  trackingService?: TrackingService;
 }
 
 export interface ServicesStartDeps {
@@ -50,4 +55,5 @@ export interface ServicesStartDeps {
   // plugin deps
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
+  trackingService?: TrackingService;
 }

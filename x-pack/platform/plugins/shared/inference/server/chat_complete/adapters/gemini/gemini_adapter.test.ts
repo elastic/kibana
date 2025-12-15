@@ -11,17 +11,29 @@ import { noop, tap, lastValueFrom, toArray, of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, InferenceConnectorType } from '@kbn/inference-common';
 import { geminiAdapter } from './gemini_adapter';
 
 describe('geminiAdapter', () => {
   const logger = loggerMock.create();
   const executorMock = {
     invoke: jest.fn(),
-  } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
+    getConnector: jest.fn(),
+  } as InferenceExecutor & {
+    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
+    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    executorMock.getConnector.mockReset();
+    executorMock.getConnector.mockReturnValue({
+      type: InferenceConnectorType.Gemini,
+      name: 'gemini-connector',
+      connectorId: 'test-connector-id',
+      config: {},
+      capabilities: {},
+    });
     processVertexStreamMock.mockReset().mockImplementation(() => tap(noop));
   });
 

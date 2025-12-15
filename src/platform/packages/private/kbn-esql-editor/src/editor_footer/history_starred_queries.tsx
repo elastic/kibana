@@ -32,6 +32,7 @@ import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favor
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
+import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import {
   type QueryHistoryItem,
   getHistoryItems,
@@ -235,7 +236,7 @@ export function QueryList({
   listItems: QueryHistoryItem[];
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
-  onUpdateAndSubmit: (qs: string, isStarred: boolean) => void;
+  onUpdateAndSubmit: (qs: string, querySource: QuerySource) => void;
   height: number;
   starredQueriesService?: EsqlStarredQueriesService;
   tableCaption?: string;
@@ -305,7 +306,12 @@ export function QueryList({
                     data-test-subj="ESQLEditor-history-starred-queries-run-button"
                     role="button"
                     iconSize="m"
-                    onClick={() => onUpdateAndSubmit(item.queryString, isStarred)}
+                    onClick={() =>
+                      onUpdateAndSubmit(
+                        item.queryString,
+                        isStarred ? QuerySource.STARRED : QuerySource.HISTORY
+                      )
+                    }
                     css={css`
                       cursor: pointer;
                     `}
@@ -493,7 +499,7 @@ export function HistoryAndStarredQueriesTabs({
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
-  onUpdateAndSubmit: (qs: string, isStarred: boolean) => void;
+  onUpdateAndSubmit: (qs: string, querySource: QuerySource) => void;
   isSpaceReduced?: boolean;
   height: number;
 }) {

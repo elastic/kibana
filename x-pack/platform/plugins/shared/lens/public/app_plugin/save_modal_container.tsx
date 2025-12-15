@@ -29,6 +29,7 @@ import { APP_ID, getFullPath } from '../../common/constants';
 import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
 import { redirectToDashboard } from './save_modal_container_helpers';
 import { isLegacyEditorEmbeddable } from './app_helpers';
+import { transformToApiConfig } from '../react_embeddable/helper';
 
 type ExtraProps = Simplify<
   Pick<LensAppProps, 'initialInput'> &
@@ -372,8 +373,9 @@ export const runSaveLensVisualization = async (
     }
 
     if (shouldNavigateBackToOrigin) {
+      const apiConfig = transformToApiConfig({ ...newDoc, savedObjectId });
       redirectToOrigin({
-        state: { ...newDoc, savedObjectId },
+        state: apiConfig,
         isCopied: saveProps.newCopyOnSave,
       });
       return;

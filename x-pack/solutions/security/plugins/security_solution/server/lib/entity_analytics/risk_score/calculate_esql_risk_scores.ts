@@ -32,7 +32,9 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import { filterFromRange, processScores } from './calculate_risk_scores';
+import { filterFromRange } from './helpers';
+import { applyScoreModifiers } from './apply_score_modifiers';
+import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
@@ -41,6 +43,7 @@ type ESQLResults = Array<
 export const calculateScoresWithESQL = async (
   params: {
     assetCriticalityService: AssetCriticalityService;
+    privmonUserCrudService: PrivmonUserCrudService;
     esClient: ElasticsearchClient;
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
@@ -182,7 +185,6 @@ export const calculateScoresWithESQL = async (
         );
 
         const entityFilter = getFilters(params, entityType as EntityType);
-
         return esClient.esql
           .query({
             query,
@@ -190,16 +192,27 @@ export const calculateScoresWithESQL = async (
           })
           .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
 
-          .then((riskScoreBuckets) => {
-            return processScores({
-              assetCriticalityService: params.assetCriticalityService,
-              buckets: riskScoreBuckets,
-              identifierField: (EntityTypeToIdentifierField as Record<string, string>)[entityType],
-              logger,
+          .then(async (riskScoreBuckets) => {
+            const results = await applyScoreModifiers({
               now,
+              experimentalFeatures: params.experimentalFeatures,
               identifierType: entityType as EntityType,
+              deps: {
+                assetCriticalityService: params.assetCriticalityService,
+                privmonUserCrudService: params.privmonUserCrudService,
+                logger,
+              },
               weights: params.weights,
+              page: {
+                buckets: riskScoreBuckets,
+                bounds,
+                identifierField: (EntityTypeToIdentifierField as Record<string, string>)[
+                  entityType
+                ],
+              },
             });
+
+            return results;
           })
           .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
             return [
@@ -270,7 +283,7 @@ const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => 
           const esQuery = toElasticsearchQuery(kqlQuery);
           if (esQuery) {
             filters.push({
-              bool: { must_not: esQuery },
+              bool: { must: esQuery },
             });
           }
         } catch (error) {
@@ -359,7 +372,7 @@ export const getESQL = (
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
     BY ${identifierField}
-    | SORT scores DESC, ${identifierField} ASC
+    | SORT scores DESC
     | LIMIT ${pageSize}
   `;
 

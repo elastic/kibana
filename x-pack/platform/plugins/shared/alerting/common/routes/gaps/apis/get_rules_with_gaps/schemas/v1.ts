@@ -5,15 +5,38 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { gapFillStatus, gapStatus } from '../../../../../constants';
 
 export const getRuleIdsWithGapBodySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
-    statuses: schema.maybe(schema.arrayOf(schema.string())),
+    // Filters the underlying gap documents before aggregation. Matches the raw
+    // per-gap statuses.
+    statuses: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal(gapStatus.UNFILLED),
+          schema.literal(gapStatus.PARTIALLY_FILLED),
+          schema.literal(gapStatus.FILLED),
+        ])
+      )
+    ),
+    // Filters by the derived, per-rule status that is calculated from gap
+    // duration sums (unfilled > in_progress > filled precedence).
+    highest_priority_gap_fill_statuses: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal(gapFillStatus.UNFILLED),
+          schema.literal(gapFillStatus.IN_PROGRESS),
+          schema.literal(gapFillStatus.FILLED),
+        ])
+      )
+    ),
     has_unfilled_intervals: schema.maybe(schema.boolean()),
     has_in_progress_intervals: schema.maybe(schema.boolean()),
     has_filled_intervals: schema.maybe(schema.boolean()),
+    sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   },
   {
     validate({ start, end }) {

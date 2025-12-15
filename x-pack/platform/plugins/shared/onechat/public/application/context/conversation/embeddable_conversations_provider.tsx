@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { EmbeddableConversationInternalProps } from '../../../embeddable/types';
+import type {
+  EmbeddableConversationInternalProps,
+  EmbeddableConversationProps,
+} from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
-import { queryKeys } from '../../query_keys';
-import { newConversationId } from '../../utils/new_conversation';
 import { useConversationActions } from './use_conversation_actions';
-import { useResolveConversationId } from '../../hooks/use_resolve_conversation_id';
-import { useSaveLastConversationId } from '../../hooks/use_save_last_conversation_id';
+import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
+import { AppLeaveContext } from '../app_leave_context';
+import { AgentBuilderTourProvider } from '../agent_builder_tour_context';
 
+const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
@@ -29,99 +32,165 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   services,
   ...contextProps
 }) => {
+  // Track current props, starting with initial props
+  const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
+
+  // Register callback to receive prop updates from parent.
+  const onPropsUpdate = contextProps.onPropsUpdate;
+  useEffect(() => {
+    if (onPropsUpdate) {
+      onPropsUpdate((newProps) => {
+        setCurrentProps(newProps);
+      });
+    }
+  }, [onPropsUpdate]);
+
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
 
   const kibanaServices = useMemo(
     () => ({
       ...coreStart,
-      plugins: services.startDependencies,
+      plugins: {
+        ...services.startDependencies,
+      },
     }),
     [coreStart, services.startDependencies]
   );
 
-  const resolvedConversationId = useResolveConversationId({
-    newConversation: contextProps.newConversation,
-    conversationId: contextProps.conversationId,
-    sessionTag: contextProps.sessionTag,
-    agentId: contextProps.agentId,
+  const { persistedConversationId, updatePersistedConversationId } = usePersistedConversationId({
+    sessionTag: currentProps.sessionTag,
+    agentId: currentProps.agentId,
   });
 
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const hasInitializedConversationIdRef = useRef(false);
+
+  const setConversationId = useCallback(
+    (id?: string) => {
+      if (currentProps.newConversation && id) {
+        // reset new conversation flag when there is a valid id
+        setCurrentProps({ ...currentProps, newConversation: undefined });
+      }
+      if (id !== persistedConversationId) {
+        updatePersistedConversationId(id);
+      }
+    },
+    [currentProps, persistedConversationId, updatePersistedConversationId]
+  );
 
   const validateAndSetConversationId = useCallback(
     async (id: string) => {
       try {
         const conversation = await services.conversationsService.get({ conversationId: id });
-        setConversationId(conversation ? id : undefined);
+        setConversationId(conversation.id ?? undefined);
       } catch {
         setConversationId(undefined);
       }
     },
-    [services.conversationsService]
+    [services.conversationsService, setConversationId]
   );
 
+  // One-time initialization per provider instance:
+  // - If newConversation flag is set, clears the conversation ID to start fresh.
+  // - Otherwise, if there's a persisted conversation ID, validates and restores it.
+  // - Otherwise, clears the conversation ID.
+  // Guarded by hasInitializedConversationIdRef to prevent re-running on subsequent renders.
   useEffect(() => {
-    if (!resolvedConversationId) {
+    if (hasInitializedConversationIdRef.current) return;
+
+    if (contextProps.newConversation) {
       setConversationId(undefined);
-      return;
+    } else if (persistedConversationId) {
+      validateAndSetConversationId(persistedConversationId);
+    } else {
+      setConversationId(undefined);
     }
-    validateAndSetConversationId(resolvedConversationId);
-  }, [resolvedConversationId, validateAndSetConversationId]);
-
-  useSaveLastConversationId({
-    conversationId,
-    sessionTag: contextProps.sessionTag,
-    agentId: contextProps.agentId,
-  });
-
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+    hasInitializedConversationIdRef.current = true;
+  }, [
+    contextProps.newConversation,
+    persistedConversationId,
+    setConversationId,
+    validateAndSetConversationId,
+  ]);
 
   const onConversationCreated = useCallback(
     ({ conversationId: id }: { conversationId: string }) => {
-      // Update conversationId to show the newly created conversation in the UI
       setConversationId(id);
     },
-    []
+    [setConversationId]
   );
 
-  const onDeleteConversation = useCallback(
-    ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
-      if (isCurrentConversation) {
-        // For embeddable context, we can't navigate, just reset the conversation ID
-        setConversationId(undefined);
-      }
-    },
-    []
-  );
+  const onDeleteConversation = useCallback(() => {
+    setConversationId(undefined);
+  }, [setConversationId]);
+
+  // Derived conversation ID
+  const conversationId = useMemo(() => {
+    if (currentProps.newConversation) {
+      return undefined;
+    }
+    // After initialization, always use persisted ID
+    return persistedConversationId;
+  }, [currentProps, persistedConversationId]);
 
   const conversationActions = useConversationActions({
     conversationId,
-    queryKey,
     queryClient,
     conversationsService: services.conversationsService,
     onConversationCreated,
     onDeleteConversation,
   });
 
+  // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
+  const resetInitialMessage = useCallback(() => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      initialMessage: undefined,
+      autoSendInitialMessage: false,
+    }));
+  }, []);
+
+  // Resets the {attachments} array after attachment(s) have been sent as part of a Conversation Round.
+  const resetAttachments = useCallback(() => {
+    setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
+  }, []);
+
+  const removeAttachment = useCallback((attachmentIndex: number) => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
+    }));
+  }, []);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
-      sessionTag: contextProps.sessionTag,
-      agentId: contextProps.agentId,
-      initialMessage: contextProps.initialMessage,
-      setConversationId: (id: string) => {
-        setConversationId(id);
-      },
+      sessionTag: currentProps.sessionTag,
+      agentId: currentProps.agentId,
+      initialMessage: currentProps.initialMessage,
+      autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
+      resetInitialMessage,
+      browserApiTools: currentProps.browserApiTools,
+      setConversationId,
+      attachments: currentProps.attachments,
+      resetAttachments,
+      removeAttachment,
       conversationActions,
     }),
     [
       conversationId,
-      contextProps.sessionTag,
-      contextProps.agentId,
-      contextProps.initialMessage,
+      currentProps.sessionTag,
+      currentProps.agentId,
+      currentProps.initialMessage,
+      currentProps.autoSendInitialMessage,
+      currentProps.browserApiTools,
+      currentProps.attachments,
+      resetInitialMessage,
+      setConversationId,
+      resetAttachments,
+      removeAttachment,
       conversationActions,
     ]
   );
@@ -131,9 +200,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <OnechatServicesContext.Provider value={services}>
-            <ConversationContext.Provider value={conversationContextValue}>
-              <SendMessageProvider>{children}</SendMessageProvider>
-            </ConversationContext.Provider>
+            <AppLeaveContext.Provider value={noopOnAppLeave}>
+              <ConversationContext.Provider value={conversationContextValue}>
+                <AgentBuilderTourProvider>
+                  <SendMessageProvider>{children}</SendMessageProvider>
+                </AgentBuilderTourProvider>
+              </ConversationContext.Provider>
+            </AppLeaveContext.Provider>
           </OnechatServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>

@@ -38,6 +38,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pushFlyoutPaddingStyles } from '../../../../common.styles';
 import { docLinks } from '../../../../../common/doc_links';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -47,7 +48,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { isValidAgentAvatarColor } from '../../../utils/color';
 import { labels } from '../../../utils/i18n';
 import { zodResolver } from '../../../utils/zod_resolver';
-import { AgentAvatar } from '../agent_avatar';
+import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
@@ -271,10 +272,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     ]
   );
 
+  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+
+  const onTabClick = (tab: EuiTabbedContentTab) => {
+    setSelectedTabId(tab.id);
+  };
+
   const renderSaveButton = useCallback(
     ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
       const saveButton = (
         <EuiButton
+          data-test-subj="agentFormSaveButton"
           form={agentFormId}
           size={size}
           type="submit"
@@ -404,15 +412,15 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               <EuiFlexItem grow={false}>
                 <AgentAvatar
                   size="l"
-                  agent={{
-                    name: agentName,
-                    avatar_symbol: agentAvatarSymbol,
-                    avatar_color: agentAvatarColor,
-                  }}
+                  name={agentName}
+                  symbol={agentAvatarSymbol}
+                  color={agentAvatarColor}
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>{isCreateMode ? labels.agents.newAgent : agentName}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="agentFormPageTitle">
+              {isCreateMode ? labels.agents.newAgent : agentName}
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         description={
@@ -557,10 +565,20 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           <EuiForm
             id={agentFormId}
             component="form"
-            onSubmit={handleSubmit((data) => handleSave(data))}
+            onSubmit={handleSubmit(
+              (data) => handleSave(data),
+              () => {
+                // Switch to first tab (settings) when validation fails
+                setSelectedTabId('settings');
+              }
+            )}
             fullWidth
           >
-            <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+            <EuiTabbedContent
+              tabs={tabs}
+              selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
+              onTabClick={onTabClick}
+            />
           </EuiForm>
         </FormProvider>
         <EuiSpacer
@@ -575,7 +593,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         position="fixed"
         usePortal
       >
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" css={pushFlyoutPaddingStyles}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={labels.agents.settings.cancelButtonLabel}

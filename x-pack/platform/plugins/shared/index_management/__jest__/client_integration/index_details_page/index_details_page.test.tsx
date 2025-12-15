@@ -1039,7 +1039,7 @@ describe('<IndexDetailsPage />', () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       const docsLinkHref = testBed.actions.settings.getDocsLinkHref();
       // the url from the mocked docs mock
-      expect(docsLinkHref).toContain('index-modules');
+      expect(docsLinkHref).toContain('index-settings');
     });
 
     describe('error loading settings', () => {
