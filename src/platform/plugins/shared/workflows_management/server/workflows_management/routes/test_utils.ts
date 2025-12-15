@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
-import type { WorkflowsManagementApi } from '../workflows_management_api';
 import type { WorkflowsRequestHandlerContext } from '../types';
+import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 export const mockLogger = loggingSystemMock.create().get();
 
