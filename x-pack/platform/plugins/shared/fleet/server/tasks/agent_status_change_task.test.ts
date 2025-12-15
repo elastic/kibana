@@ -158,6 +158,18 @@ describe('AgentStatusChangeTask', () => {
           },
           last_known_status: 'offline',
         },
+        {
+          id: 'agent-3',
+          policy_id: 'agent-policy-3',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: {
+            host: {
+              hostname: 'host3',
+            },
+          },
+          last_known_status: 'online',
+        },
       ] as unknown as Agent[];
       mockedFetchAllAgentsByKuery
         .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
@@ -224,7 +236,20 @@ describe('AgentStatusChangeTask', () => {
     });
 
     it('should do nothing when no agents changed status', async () => {
-      const agents = [] as unknown as Agent[];
+      const agents = [
+        {
+          id: 'agent-3',
+          policy_id: 'agent-policy-3',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: {
+            host: {
+              hostname: 'host3',
+            },
+          },
+          last_known_status: 'online',
+        },
+      ] as unknown as Agent[];
       mockedFetchAllAgentsByKuery
         .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
         .mockResolvedValue(getMockFetchAllAgentsByKuery([]));

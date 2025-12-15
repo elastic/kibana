@@ -3461,14 +3461,6 @@
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
-                "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
-              },
-              {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
               },
@@ -4123,22 +4115,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -6441,8 +6417,8 @@
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
-                "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -6455,10 +6431,6 @@
               {
                 "plugin": "console",
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -7003,22 +6975,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8890,18 +8846,6 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
@@ -9679,10 +9623,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -15354,6 +15294,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/list_scripts.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
+              },
+              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/security_ai_prompts/find_prompts.ts"
               },
@@ -15428,10 +15372,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
               },
               {
                 "plugin": "securitySolution",

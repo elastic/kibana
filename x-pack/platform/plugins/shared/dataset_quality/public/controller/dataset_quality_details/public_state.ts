@@ -30,7 +30,6 @@ export const getPublicStateFromContext = (
     selectedIssueTypes: context.selectedIssueTypes,
     selectedFields: context.selectedFields,
     streamDefinition: context.streamDefinition,
-    streamsUrls: context.streamsUrls,
   };
 };
 
@@ -68,5 +67,4 @@ export const getContextFromPublicState = (
   selectedIssueTypes: publicState.selectedIssueTypes ?? DEFAULT_CONTEXT.selectedIssueTypes,
   selectedFields: publicState.selectedFields ?? DEFAULT_CONTEXT.selectedFields,
   streamDefinition: publicState.streamDefinition,
-  streamsUrls: publicState.streamsUrls,
 });

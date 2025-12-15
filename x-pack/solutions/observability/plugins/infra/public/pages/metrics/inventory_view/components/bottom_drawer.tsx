@@ -36,7 +36,6 @@ interface Props {
   formatter: InfraFormatter;
   view: string;
   nodeType: InventoryItemType;
-  loading: boolean;
 }
 
 const RelatedDashboards = () => {
@@ -58,15 +57,15 @@ const RelatedDashboards = () => {
   );
 };
 
-export const BottomDrawer = ({ interval, formatter, view, nodeType, loading }: Props) => {
+export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
 
   const { hasEcsSchema, hasSemconvSchema, hasEcsK8sIntegration, hasSemconvK8sIntegration } =
     useKubernetesDashboardPromotion(nodeType);
 
-  const showEcsK8sButton = !loading && hasEcsSchema && hasEcsK8sIntegration;
-  const showSemconvK8sButton = !loading && hasSemconvSchema && hasSemconvK8sIntegration;
+  const showEcsK8sButton = hasEcsSchema && hasEcsK8sIntegration;
+  const showSemconvK8sButton = hasSemconvSchema && hasSemconvK8sIntegration;
 
   useEffect(() => {
     if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));

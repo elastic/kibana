@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/slo-plugin",
-  "owner": ["@elastic/actionable-obs-team"],
+  "owner": ["@elastic/obs-ux-management-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {

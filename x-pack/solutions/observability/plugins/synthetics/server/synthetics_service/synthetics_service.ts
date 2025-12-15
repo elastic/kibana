@@ -217,7 +217,7 @@ export class SyntheticsService {
 
                 if (service.isAllowed && service.config.manifestUrl) {
                   void service.setupIndexTemplates();
-                  await service.pushConfigs(ALL_SPACES_ID);
+                  await service.pushConfigs();
                 } else {
                   if (!service.isAllowed) {
                     service.logger.debug('User is not allowed to access Synthetics service.');
@@ -430,7 +430,7 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs(spaceId: string) {
+  async pushConfigs() {
     const license = await this.getLicense();
     const service = this;
 
@@ -440,7 +440,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
-    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
+    const maintenanceWindows = await this.getMaintenanceWindows();
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
@@ -669,7 +669,7 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows(spaceId: string) {
+  async getMaintenanceWindows() {
     const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
       {} as KibanaRequest
     );
@@ -681,7 +681,6 @@ export class SyntheticsService {
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
-      namespaces: [spaceId],
     });
     return mws.data;
   }

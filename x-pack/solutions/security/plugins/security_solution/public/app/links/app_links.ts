@@ -5,13 +5,10 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import { firstValueFrom } from 'rxjs';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
 import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
 import { aiValueLinks } from '../../reports/links';
-import { configurationsLinks, getConfigurationsLinks } from '../../configurations/links';
+import { configurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
 import { siemReadinessLinks } from '../../siem_readiness/links';
@@ -57,13 +54,6 @@ export const getFilteredLinks = async (
 ): Promise<AppLinkItems> => {
   const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
 
-  const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
-  const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
-  const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
-
   return Object.freeze([
     dashboardsLinks,
     core.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
@@ -73,7 +63,7 @@ export const getFilteredLinks = async (
     attackDiscoveryLinks,
     findingsLinks,
     casesLinks,
-    filteredConfigurationsLinks,
+    configurationsLinks,
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,

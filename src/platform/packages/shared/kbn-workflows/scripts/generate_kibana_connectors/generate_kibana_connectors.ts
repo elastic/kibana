@@ -20,7 +20,6 @@ import {
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
-import { INCLUDED_OPERATIONS } from './included_operations';
 import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
@@ -44,9 +43,8 @@ import type { OperationObjectWithOperationId } from '../shared/types';
 
 export async function run() {
   cleanGeneratedFolder();
-  const contracts = generateContracts();
-  await generateZodSchemas(contracts);
-  saveKibanaConnectors(contracts);
+  await generateZodSchemas();
+  generateAndSaveKibanaConnectors();
   eslintFixGeneratedCode({
     paths: [
       KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
@@ -60,10 +58,11 @@ function cleanGeneratedFolder() {
   fs.mkdirSync(KIBANA_GENERATED_OUTPUT_FOLDER_PATH);
 }
 
-function saveKibanaConnectors(contracts: ContractMeta[]) {
+function generateAndSaveKibanaConnectors() {
   try {
     const startedAt = performance.now();
     console.log('2/3 Generating Kibana connectors...');
+    const contracts = generateContracts();
     const indexFile = generateKibanaConnectorsIndexFile(contracts);
     fs.writeFileSync(KIBANA_CONTRACTS_OUTPUT_FILE_PATH, indexFile);
     for (const contract of contracts) {
@@ -140,9 +139,7 @@ function generateKibanaConnectorFile(contract: ContractMeta) {
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
- * Source: /oas_docs/output/kibana.yaml, operations: ${contract.operations
-   .map((op) => op.id)
-   .join(', ')}
+ * Source: /oas_docs/output/kibana.yaml, operations: ${contract.operationIds.join(', ')}
  * 
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -165,27 +162,19 @@ ${generateContractBlock(contract)}
 `;
 }
 
-async function generateZodSchemas(contracts: ContractMeta[]) {
+async function generateZodSchemas() {
   try {
     const startedAt = performance.now();
     console.log('1/3 Generating Zod schemas from OpenAPI spec...');
 
     console.log('- Importing openapi-ts config...');
-    const buildOpenapiTsConfig = await import('./openapi_ts.config').then(
-      (module) => module.default
-    );
+    const openapiTsConfig = await import('./openapi_ts.config').then((module) => module.default);
     console.log(`- Openapi-ts config imported in ${formatDuration(startedAt, performance.now())}`);
+
     const createClientStartedAt = performance.now();
     console.log('- Creating Zod schemas with openapi-ts...');
-
     // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
-    await createClient(
-      buildOpenapiTsConfig({
-        include: contracts.flatMap((contract) =>
-          contract.operations.map((op) => `${op.method} ${op.path}`)
-        ),
-      })
-    );
+    await createClient(openapiTsConfig);
     console.log(
       `- Zod schemas generated in ${formatDuration(createClientStartedAt, performance.now())}`
     );
@@ -239,12 +228,10 @@ function generateContractMetasFromPath(
     const method = key.toLowerCase();
     const operation = pathItem[method as keyof typeof pathItem] as OperationObjectWithOperationId;
     const operationId = operation.operationId;
-
-    if (!operationId || !INCLUDED_OPERATIONS.includes(operationId)) {
+    if (!operationId) {
       // eslint-disable-next-line no-continue
       continue;
     }
-
     const type = `kibana.${toSnakeCase(operationId)}`;
     const summary = operation.summary ?? null;
     const description = operation.description ?? null;
@@ -268,13 +255,7 @@ function generateContractMetasFromPath(
 
       fileName: `kibana.${toSnakeCase(camelToSnake(operationId))}.gen.ts`,
       contractName,
-      operations: [
-        {
-          id: operationId,
-          method: method.toUpperCase(),
-          path,
-        },
-      ],
+      operationIds: [operationId],
       paramsSchemaString,
       outputSchemaString,
       schemaImports,

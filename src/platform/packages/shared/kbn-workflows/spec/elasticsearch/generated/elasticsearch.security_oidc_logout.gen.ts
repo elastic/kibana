@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * AUTO-GENERATED FILE - DO NOT EDIT
+ *
+ * Source: elasticsearch-specification repository, operations: security-oidc-logout
+ *
+ * To regenerate: node scripts/generate_workflow_es_contracts.js
+ */
+
+import { z } from '@kbn/zod/v4';
+
+import {
+  security_oidc_logout_request,
+  security_oidc_logout_response,
+} from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
+
+// export contract
+export const SECURITY_OIDC_LOGOUT_CONTRACT: InternalConnectorContract = {
+  type: 'elasticsearch.security.oidc_logout',
+  summary: `Logout of OpenID Connect`,
+  description: `Logout of OpenID Connect.
+
+Invalidate an access token and a refresh token that were generated as a response to the \`/_security/oidc/authenticate\` API.
+
+If the OpenID Connect authentication realm in Elasticsearch is accordingly configured, the response to this call will contain a URI pointing to the end session endpoint of the OpenID Connect Provider in order to perform single logout.
+
+Elasticsearch exposes all the necessary OpenID Connect related functionality with the OpenID Connect APIs.
+These APIs are used internally by Kibana in order to provide OpenID Connect based authentication, but can also be used by other, custom web applications or other clients.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-logout`,
+  methods: ['POST'],
+  patterns: ['_security/oidc/logout'],
+  documentation:
+    'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-logout',
+  parameterTypes: {
+    headerParams: [],
+    pathParams: [],
+    urlParams: [],
+    bodyParams: ['token', 'refresh_token'],
+  },
+  paramsSchema: z.object({
+    ...getShapeAt(security_oidc_logout_request, 'body'),
+    ...getShapeAt(security_oidc_logout_request, 'path'),
+    ...getShapeAt(security_oidc_logout_request, 'query'),
+  }),
+  outputSchema: security_oidc_logout_response,
+};

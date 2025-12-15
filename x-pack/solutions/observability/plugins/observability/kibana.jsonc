@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/observability-plugin",
   "owner": [
-    "@elastic/observability-ui"
+    "@elastic/obs-ux-management-team"
   ],
   "group": "observability",
   "visibility": "private",

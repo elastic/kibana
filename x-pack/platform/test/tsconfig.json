@@ -169,7 +169,6 @@
     "@kbn/onechat-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
-    "@kbn/access-control-test-plugin",
     "@kbn/alerting-types",
     "@kbn/visualizations-common",
     "@kbn/test-subj-selector",

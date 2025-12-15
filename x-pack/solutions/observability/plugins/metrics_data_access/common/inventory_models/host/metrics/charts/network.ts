@@ -9,8 +9,8 @@ import type { LensConfigWithId } from '../../../types';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
-  DEFAULT_LEGEND_STATS,
   NETWORK_LABEL,
   RX_LABEL,
   TX_LABEL,
@@ -41,10 +41,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -61,10 +58,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_HIDDEN_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -81,10 +75,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_HIDDEN_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 

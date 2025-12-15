@@ -15,17 +15,13 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
-import type {
-  SavedObjectAccessControl,
-  SavedObjectsCreateOptions,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
 import type { CreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
 import type { ApiExecutionContext } from './types';
-import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformCreateParams<T = unknown> {
   type: string;
@@ -107,30 +103,6 @@ export const performCreate = async <T>(
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
   }
 
-  const accessMode = options.accessControl?.accessMode;
-  const typeSupportsAccessControl = registry.supportsAccessControl(type);
-  let accessControlToWrite: SavedObjectAccessControl | undefined;
-  if (securityExtension) {
-    if (!typeSupportsAccessControl && accessMode) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Cannot create a saved object of type ${type} with an access mode because the type does not support access control`
-      );
-    }
-
-    if (!createdBy && accessMode) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Cannot create a saved object of type ${type} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
-      );
-    }
-    accessControlToWrite =
-      preflightResult?.existingDocument?._source?.accessControl ??
-      setAccessControl({
-        typeSupportsAccessControl,
-        createdBy,
-        accessMode,
-      });
-  }
-
   const authorizationResult = await securityExtension?.authorizeCreate({
     namespace,
     object: {
@@ -138,7 +110,6 @@ export const performCreate = async <T>(
       id,
       initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
-      accessControl: accessControlToWrite,
       name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
         attributes: {
           ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
@@ -177,7 +148,6 @@ export const performCreate = async <T>(
     ...(createdBy && { created_by: createdBy }),
     ...(updatedBy && { updated_by: updatedBy }),
     ...(Array.isArray(references) && { references }),
-    ...(accessControlToWrite && { accessControl: accessControlToWrite }),
   });
 
   /**

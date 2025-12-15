@@ -10,9 +10,9 @@ import {
   LOAD_LABEL,
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
-  DEFAULT_LEGEND_STATS,
 } from '../../../shared/charts/constants';
 import type { FormulasCatalog } from '../../../shared/metrics/types';
 import type { LensConfigWithId } from '../../../types';
@@ -40,10 +40,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_LEGEND,
     ...DEFAULT_XY_YBOUNDS,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
@@ -61,10 +58,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -79,22 +73,11 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
         xAxis: '@timestamp',
         yAxis: [formulas.get('cpuUsage')],
       },
-      {
-        type: 'reference',
-        yAxis: [
-          {
-            value: '1',
-          },
-        ],
-      },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
-    ...DEFAULT_XY_YBOUNDS,
+    ...DEFAULT_XY_HIDDEN_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+    ...DEFAULT_XY_YBOUNDS,
   };
 
   const normalizedLoad1mXY: LensConfigWithId = {
@@ -118,10 +101,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_HIDDEN_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 

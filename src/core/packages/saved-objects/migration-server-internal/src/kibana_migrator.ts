@@ -21,12 +21,14 @@ import type {
   ElasticsearchCapabilities,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 import {
   type IKibanaMigrator,
   type IndexMapping,
   type IndexTypesMap,
-  type ISavedObjectTypeRegistryInternal,
   type KibanaMigratorStatus,
   type MigrateDocumentOptions,
   type MigrationResult,
@@ -43,7 +45,7 @@ import { runV2Migration } from './run_v2_migration';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
-  typeRegistry: ISavedObjectTypeRegistryInternal;
+  typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   soMigrationsConfig: SavedObjectsMigrationConfigType;
@@ -67,7 +69,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly kibanaIndex: string;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
-  private readonly typeRegistry: ISavedObjectTypeRegistryInternal;
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly defaultIndexTypesMap: IndexTypesMap;
   private readonly hashToVersionMap: Record<string, string>;
   private readonly serializer: SavedObjectsSerializer;

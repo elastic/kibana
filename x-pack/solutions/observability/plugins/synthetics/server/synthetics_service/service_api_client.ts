@@ -25,7 +25,6 @@ import type {
   ServiceLocationErrors,
 } from '../../common/runtime_types';
 import type { ServiceConfig } from '../config';
-import { getSanitizedError } from './utils/sanitize_error';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -113,9 +112,7 @@ export class ServiceAPIClient {
           const { allowed, signupUrl } = data;
           return { allowed, signupUrl };
         } catch (error) {
-          this.logger.error(`Error getting isAllowed status, Error: ${error.message}`, {
-            error: getSanitizedError(error),
-          });
+          this.logger.error(`Error getting isAllowed status, Error: ${error.message}`, { error });
         }
       }
     } else {
@@ -181,9 +178,7 @@ export class ServiceAPIClient {
     try {
       return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
     } catch (error) {
-      this.logger.error(`Error syncing Synthetics monitors, Error: ${error.message}`, {
-        error: getSanitizedError(error),
-      });
+      this.logger.error(`Error syncing Synthetics monitors, Error: ${error.message}`, { error });
     }
   }
 

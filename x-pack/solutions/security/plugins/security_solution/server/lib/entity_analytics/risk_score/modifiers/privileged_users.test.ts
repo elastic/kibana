@@ -12,7 +12,7 @@ import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/pr
 import type { RiskScoreBucket } from '../../types';
 import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics';
 
-import { applyPrivmonModifier, PRIVILEGED_USER_MODIFIER } from './privileged_users';
+import { applyPrivmonModifier } from './privileged_users';
 import { allowedExperimentalValues } from '../../../../../common';
 
 // No need to mock bayesianUpdate - we'll use the actual implementation
@@ -222,17 +222,64 @@ describe('applyPrivmonModifier', () => {
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
-        modifier_value: 1.5,
-        type: 'watchlist',
-        subtype: 'privmon',
-        metadata: {
-          is_privileged_user: true,
-        },
+        category_3_score: expect.any(Number),
+        category_3_count: 1,
+        is_privileged_user: true,
+        privileged_user_modifier: 2,
       });
-      expect(result[1]).toBeUndefined();
+      expect(result[1]).toEqual({
+        category_3_score: 0,
+        category_3_count: 0,
+      });
     });
 
-    it('should use PRIVILEGED_USER_MODIFIER constant (value: 1)', async () => {
+    it('should apply global weight when provided', async () => {
+      const globalWeight = 0.8;
+      const result = await applyPrivmonModifier({
+        page: mockPage,
+        deps: {
+          privmonUserCrudService,
+          logger,
+        },
+        globalWeight,
+        experimentalFeatures,
+      });
+
+      // Verify contribution score is calculated with global weight
+      expect(result[0].category_3_score).toBeGreaterThan(0);
+    });
+
+    it('should not apply global weight when undefined', async () => {
+      const result = await applyPrivmonModifier({
+        page: mockPage,
+        deps: {
+          privmonUserCrudService,
+          logger,
+        },
+        globalWeight: undefined,
+        experimentalFeatures,
+      });
+
+      // Verify contribution score is calculated without global weight
+      expect(result[0].category_3_score).toBeGreaterThan(0);
+    });
+
+    it('should calculate contribution score correctly', async () => {
+      const result = await applyPrivmonModifier({
+        page: mockPage,
+        deps: {
+          privmonUserCrudService,
+          logger,
+        },
+        experimentalFeatures,
+      });
+
+      // Verify contribution score is calculated (should be greater than 0)
+      expect(result[0].category_3_score).toBeGreaterThan(0);
+      expect(result[0].category_3_score).toBeLessThan(100);
+    });
+
+    it('should use PRIVILEGED_USER_MODIFIER constant (value: 2)', async () => {
       const result = await applyPrivmonModifier({
         page: mockPage,
         deps: {
@@ -243,7 +290,7 @@ describe('applyPrivmonModifier', () => {
       });
 
       // Verify the modifier is applied (result should have privileged_user_modifier set)
-      expect(result[0]?.modifier_value).toBe(PRIVILEGED_USER_MODIFIER);
+      expect(result[0].privileged_user_modifier).toBe(2);
     });
   });
 
@@ -262,8 +309,56 @@ describe('applyPrivmonModifier', () => {
         experimentalFeatures,
       });
 
-      expect(result).toHaveLength(2);
-      expect(result).toEqual([undefined, undefined]);
+      expect(result).toEqual([
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+      ]);
+    });
+  });
+
+  describe('with partial privileged users', () => {
+    beforeEach(() => {
+      privmonUserCrudService.list.mockResolvedValue([
+        {
+          id: 'user-1',
+          user: {
+            name: 'test-user',
+            is_privileged: true,
+          },
+          '@timestamp': '2023-01-01T00:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('should apply modifier only to privileged users', async () => {
+      const result = await applyPrivmonModifier({
+        experimentalFeatures,
+        page: mockPage,
+        deps: {
+          privmonUserCrudService,
+          logger,
+        },
+      });
+
+      // First user is privileged
+      expect(result[0]).toEqual({
+        category_3_score: expect.any(Number),
+        category_3_count: 1,
+        is_privileged_user: true,
+        privileged_user_modifier: 2,
+      });
+
+      // Second user is not privileged
+      expect(result[1]).toEqual({
+        category_3_score: 0,
+        category_3_count: 0,
+      });
     });
   });
 
@@ -291,7 +386,10 @@ describe('applyPrivmonModifier', () => {
         },
       });
 
-      expect(result[0]).toBeUndefined();
+      expect(result[0]).toEqual({
+        category_3_score: 0,
+        category_3_count: 0,
+      });
     });
   });
 
@@ -325,7 +423,16 @@ describe('applyPrivmonModifier', () => {
         },
       });
 
-      expect(result).toEqual([undefined, undefined]);
+      expect(result).toEqual([
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+      ]);
     });
   });
 
@@ -347,7 +454,16 @@ describe('applyPrivmonModifier', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error retrieving privileged users')
       );
-      expect(result).toEqual([undefined, undefined]);
+      expect(result).toEqual([
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+      ]);
     });
 
     it('should continue scoring when service fails', async () => {
@@ -398,20 +514,16 @@ describe('applyPrivmonModifier', () => {
       });
 
       expect(result[0]).toEqual({
-        type: 'watchlist',
-        subtype: 'privmon',
-        modifier_value: 1.5,
-        metadata: {
-          is_privileged_user: true,
-        },
+        category_3_score: expect.any(Number),
+        category_3_count: 1,
+        is_privileged_user: true,
+        privileged_user_modifier: 2,
       });
       expect(result[1]).toEqual({
-        type: 'watchlist',
-        subtype: 'privmon',
-        modifier_value: 1.5,
-        metadata: {
-          is_privileged_user: true,
-        },
+        category_3_score: expect.any(Number),
+        category_3_count: 1,
+        is_privileged_user: true,
+        privileged_user_modifier: 2,
       });
     });
   });

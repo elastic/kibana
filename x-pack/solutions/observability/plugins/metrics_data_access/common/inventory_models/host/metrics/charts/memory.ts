@@ -10,9 +10,9 @@ import type { LensConfigWithId } from '../../../types';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
-  DEFAULT_LEGEND_STATS,
   MEMORY_USAGE_LABEL,
 } from '../../../shared/charts/constants';
 import type { FormulasCatalog } from '../../../shared/metrics/types';
@@ -60,10 +60,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -78,20 +75,9 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
         xAxis: '@timestamp',
         yAxis: [formulas.get('memoryUsage')],
       },
-      {
-        type: 'reference',
-        yAxis: [
-          {
-            value: '1',
-          },
-        ],
-      },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_HIDDEN_LEGEND,
     ...DEFAULT_XY_YBOUNDS,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
@@ -109,10 +95,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    legend: {
-      ...DEFAULT_XY_LEGEND.legend,
-      legendStats: DEFAULT_LEGEND_STATS,
-    },
+    ...DEFAULT_XY_HIDDEN_LEGEND,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 

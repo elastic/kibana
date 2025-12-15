@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/exploratory-view-plugin",
   "owner": [
-    "@elastic/actionable-obs-team"
+    "@elastic/obs-ux-management-team"
   ],
   "group": "observability",
   "visibility": "private",

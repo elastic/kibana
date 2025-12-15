@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * AUTO-GENERATED FILE - DO NOT EDIT
+ *
+ * Source: elasticsearch-specification repository, operations: cat-thread-pool, cat-thread-pool-1
+ *
+ * To regenerate: node scripts/generate_workflow_es_contracts.js
+ */
+
+import { z } from '@kbn/zod/v4';
+
+import {
+  cat_thread_pool1_request,
+  cat_thread_pool1_response,
+  cat_thread_pool_request,
+  cat_thread_pool_response,
+} from './schemas/es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
+
+// export contract
+export const CAT_THREAD_POOL_CONTRACT: InternalConnectorContract = {
+  type: 'elasticsearch.cat.thread_pool',
+  summary: `Get thread pool statistics`,
+  description: `Get thread pool statistics.
+
+Get thread pool statistics for each node in a cluster.
+Returned information includes all built-in thread pools and custom thread pools.
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool`,
+  methods: ['GET'],
+  patterns: ['_cat/thread_pool', '_cat/thread_pool/{thread_pool_patterns}'],
+  documentation:
+    'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool',
+  parameterTypes: {
+    headerParams: [],
+    pathParams: ['thread_pool_patterns'],
+    urlParams: ['h', 's', 'local', 'master_timeout'],
+    bodyParams: [],
+  },
+  paramsSchema: z.union([
+    z.object({
+      ...getShapeAt(cat_thread_pool_request, 'body'),
+      ...getShapeAt(cat_thread_pool_request, 'path'),
+      ...getShapeAt(cat_thread_pool_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_thread_pool1_request, 'body'),
+      ...getShapeAt(cat_thread_pool1_request, 'path'),
+      ...getShapeAt(cat_thread_pool1_request, 'query'),
+    }),
+  ]),
+  outputSchema: z.union([cat_thread_pool_response, cat_thread_pool1_response]),
+};

@@ -87,57 +87,46 @@ describe('buildKibanaRequestFromAction', () => {
 
       it('should handle space prefix with path parameters', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.getCaseDefaultSpace',
+          'kibana.get_actions_connector_id',
           {
-            caseId: 'test-case-123',
+            id: 'test-connector-123',
           },
           'security-space'
         );
 
-        expect(result.path).toBe('/s/security-space/api/cases/test-case-123');
+        expect(result.path).toBe('/s/security-space/api/actions/connector/test-connector-123');
       });
     });
 
     describe('with different API endpoints', () => {
-      it('should add space prefix to alerting endpoints using raw API', () => {
+      it('should add space prefix to alerting endpoints', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.request',
-          {
-            method: 'GET',
-            path: '/api/alerting/_health',
-          },
+          'kibana.getAlertingHealth',
+          {},
           'observability'
         );
 
-        // Raw API format should not be modified by space logic
-        expect(result.path).toBe('/api/alerting/_health');
+        expect(result.path).toBe('/s/observability/api/alerting/_health');
       });
 
-      it('should add space prefix to data views endpoints using raw API', () => {
+      it('should add space prefix to data views endpoints', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.request',
-          {
-            method: 'GET',
-            path: '/api/data_views',
-          },
+          'kibana.getAllDataViewsDefault',
+          {},
           'analytics'
         );
 
-        // Raw API format should not be modified by space logic
-        expect(result.path).toBe('/api/data_views');
+        expect(result.path).toBe('/s/analytics/api/data_views');
       });
 
-      it('should add space prefix to alert management endpoints', () => {
+      it('should add space prefix to cases endpoints', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.SetAlertsStatus',
-          {
-            status: 'acknowledged',
-            ids: ['alert1', 'alert2'],
-          },
+          'kibana.findCasesDefaultSpace',
+          { page: 1 },
           'security-prod'
         );
 
-        expect(result.path).toBe('/s/security-prod/api/detection_engine/signals/status');
+        expect(result.path).toBe('/s/security-prod/api/cases/_find');
       });
     });
   });
@@ -206,27 +195,25 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should handle query parameters', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+        'kibana.findCasesDefaultSpace',
         {
-          caseId: 'test-case-id',
-          includeComments: true,
+          page: 1,
+          perPage: 10,
+          sortField: 'createdAt',
         },
         'cases-space'
       );
 
-      expect(result.path).toBe('/s/cases-space/api/cases/test-case-id');
+      expect(result.path).toBe('/s/cases-space/api/cases/_find');
       expect(result.query).toBeDefined();
-      expect(result.query).toHaveProperty('includeComments');
+      expect(result.query).toHaveProperty('page');
+      expect(result.query).toHaveProperty('perPage');
     });
 
     it('should handle requests with no body', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
-        { caseId: 'test-case' },
-        'monitoring'
-      );
+      const result = buildKibanaRequestFromAction('kibana.getAlertingHealth', {}, 'monitoring');
 
-      expect(result.path).toBe('/s/monitoring/api/cases/test-case');
+      expect(result.path).toBe('/s/monitoring/api/alerting/_health');
       expect(result.method).toBe('GET');
       expect(result.body).toBeUndefined();
     });
@@ -249,16 +236,16 @@ describe('buildKibanaRequestFromAction', () => {
       expect(result.path).not.toContain('/s/');
     });
 
-    it('should handle path parameters with space prefix', () => {
+    it('should handle multiple path parameters with space prefix', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+        'kibana.get_actions_connector_id',
         {
-          caseId: 'case-123',
+          id: 'connector-123',
         },
         'alerting-space'
       );
 
-      expect(result.path).toBe('/s/alerting-space/api/cases/case-123');
+      expect(result.path).toBe('/s/alerting-space/api/actions/connector/connector-123');
     });
 
     it('should throw error for unknown action type', () => {
@@ -285,25 +272,22 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should use GET method for retrieval operations', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
-        { caseId: 'test-id' },
+        'kibana.get_actions_connector_id',
+        { id: 'test-id' },
         'test-space'
       );
 
       expect(result.method).toBe('GET');
     });
 
-    it('should use POST method for update operations', () => {
+    it('should use DELETE method for delete operations', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.SetAlertsStatus',
-        {
-          status: 'acknowledged',
-          signal_ids: ['alert-1'],
-        },
+        'kibana.delete_actions_connector_id',
+        { id: 'test-id' },
         'test-space'
       );
 
-      expect(result.method).toBe('POST');
+      expect(result.method).toBe('DELETE');
     });
   });
 
@@ -330,42 +314,40 @@ describe('buildKibanaRequestFromAction', () => {
       });
     });
 
-    it('should handle alert status updates in observability space', () => {
+    it('should handle alert rule creation in observability space', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.SetAlertsStatus',
+        'kibana.post_alerting_rule_id',
         {
-          status: 'closed',
-          signal_ids: ['cpu-threshold-alert-1', 'cpu-threshold-alert-2'],
-          reason: 'Alert resolved after investigation',
+          id: 'cpu-threshold-rule',
+          name: 'CPU Threshold Alert',
+          params: { threshold: 80 },
         },
         'observability'
       );
 
       expect(result.method).toBe('POST');
-      expect(result.path).toBe('/s/observability/api/detection_engine/signals/status');
+      expect(result.path).toBe('/s/observability/api/alerting/rule/cpu-threshold-rule');
       expect(result.body).toMatchObject({
-        status: 'closed',
-        signal_ids: ['cpu-threshold-alert-1', 'cpu-threshold-alert-2'],
-        reason: 'Alert resolved after investigation',
+        name: 'CPU Threshold Alert',
+        params: { threshold: 80 },
       });
     });
 
-    it('should handle case comment operations in analytics space', () => {
+    it('should handle data view operations in analytics space', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.addCaseCommentDefaultSpace',
+        'kibana.createDataViewDefaultw',
         {
-          caseId: 'analytics-case-1',
-          comment: 'Adding analysis results to the case',
-          type: 'user',
+          name: 'logs-*',
+          title: 'Logs Index Pattern',
         },
         'analytics'
       );
 
       expect(result.method).toBe('POST');
-      expect(result.path).toBe('/s/analytics/api/cases/analytics-case-1/comments');
+      expect(result.path).toBe('/s/analytics/api/data_views/data_view');
       expect(result.body).toMatchObject({
-        comment: 'Adding analysis results to the case',
-        type: 'user',
+        name: 'logs-*',
+        title: 'Logs Index Pattern',
       });
     });
   });

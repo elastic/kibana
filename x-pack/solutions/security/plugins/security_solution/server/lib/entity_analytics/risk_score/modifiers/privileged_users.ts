@@ -15,10 +15,18 @@ import type { Logger } from '@kbn/core/server';
 
 import type { RiskScoreBucket } from '../../types';
 
+import { max10DecimalPlaces } from '../helpers';
+import { bayesianUpdate } from '../../asset_criticality/helpers';
 import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/privileged_users_crud';
 
 import type { ExperimentalFeatures } from '../../../../../common';
-import type { Modifier } from './types';
+
+export interface PrivmonRiskFields {
+  category_3_score: number;
+  category_3_count: number;
+  is_privileged_user?: boolean;
+  privileged_user_modifier?: number;
+}
 
 interface ApplyCriticalityModifierParams {
   page: {
@@ -38,21 +46,25 @@ interface ApplyCriticalityModifierParams {
   globalWeight?: number;
 }
 
+// TODO: Tune modifier value
 // QUESTION: This should take labels/sources/roles into account?
-export const PRIVILEGED_USER_MODIFIER = 1.5;
+const PRIVILEGED_USER_MODIFIER = 2;
 
 export const applyPrivmonModifier = async ({
   page: { buckets, identifierField, bounds },
   deps,
   globalWeight,
   experimentalFeatures,
-}: ApplyCriticalityModifierParams) => {
+}: ApplyCriticalityModifierParams): Promise<PrivmonRiskFields[]> => {
   if (buckets.length === 0) {
     return [];
   }
 
   if (!experimentalFeatures.enableRiskScorePrivmonModifier) {
-    return [];
+    return buckets.map(() => ({
+      category_3_score: 0,
+      category_3_count: 0,
+    }));
   }
 
   const lower = bounds?.lower ? `${identifierField} > ${bounds.lower}` : undefined;
@@ -74,36 +86,40 @@ export const applyPrivmonModifier = async ({
       ({ user }) => user?.name === bucket.key[identifierField] && user?.is_privileged
     );
 
-    return buildModifier(isPrivilegedUser, globalWeight);
+    return calculateScoreAndContributions(
+      bucket.top_inputs.risk_details.value.normalized_score,
+      isPrivilegedUser,
+      globalWeight
+    );
   });
 };
 
-const buildModifier = (
+const calculateScoreAndContributions = (
+  normalizedBaseScore: number,
   isPrivilegedUser: boolean,
   globalWeight?: number
-): Modifier<'watchlist'> | undefined => {
+): PrivmonRiskFields => {
   if (!isPrivilegedUser) {
-    return;
+    return {
+      category_3_score: 0,
+      category_3_count: 0,
+    };
   }
 
-  const weightedModifier =
-    globalWeight !== undefined ? PRIVILEGED_USER_MODIFIER * globalWeight : PRIVILEGED_USER_MODIFIER;
-  // const weightedNormalizedScore =
-  //   globalWeight !== undefined ? normalizedBaseScore * globalWeight : normalizedBaseScore;
+  const weightedNormalizedScore =
+    globalWeight !== undefined ? normalizedBaseScore * globalWeight : normalizedBaseScore;
 
-  // const updatedNormalizedScore = bayesianUpdate({
-  //   modifier: PRIVILEGED_USER_MODIFIER,
-  //   score: weightedNormalizedScore,
-  // });
+  const updatedNormalizedScore = bayesianUpdate({
+    modifier: PRIVILEGED_USER_MODIFIER,
+    score: weightedNormalizedScore,
+  });
 
-  // const contribution = updatedNormalizedScore - weightedNormalizedScore;
+  const contribution = updatedNormalizedScore - weightedNormalizedScore;
 
   return {
-    type: 'watchlist',
-    subtype: 'privmon',
-    modifier_value: weightedModifier,
-    metadata: {
-      is_privileged_user: true,
-    },
+    category_3_score: max10DecimalPlaces(contribution),
+    category_3_count: 1, // modifier exists, so count as 1
+    is_privileged_user: true,
+    privileged_user_modifier: PRIVILEGED_USER_MODIFIER,
   };
 };

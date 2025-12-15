@@ -20,7 +20,7 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_mark
 import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
-import { useAgentBuilderAvailability } from '../../../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAttackDiscoveryAttachment } from '../../../use_attack_discovery_attachment';
 
@@ -81,7 +81,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const filters = useMemo(() => buildAlertsKqlFilter('_id', originalAlertIds), [originalAlertIds]);
 
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
 
@@ -127,7 +127,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
-          {isAgentChatExperienceEnabled ? (
+          {isAgentBuilderEnabled ? (
             <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
           ) : (
             <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />

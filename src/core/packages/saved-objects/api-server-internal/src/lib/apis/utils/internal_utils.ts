@@ -16,19 +16,13 @@ import {
   type SavedObjectsRawDocSource,
   type SavedObject,
   type SavedObjectsRawDocParseOptions,
-  type SavedObjectAccessControl,
+  type DecoratedError,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
-
-export interface GetBulkOperationErrorRawResponse {
-  status: number;
-  error: { type: string; reason?: string | null; index: string };
-  // Other fields are present on a bulk operation result but they are irrelevant for this function
-}
 
 /**
  * Checks the raw response of a bulk operation and returns an error if necessary.
@@ -42,7 +36,11 @@ export interface GetBulkOperationErrorRawResponse {
 export function getBulkOperationError(
   type: string,
   id: string,
-  rawResponse: GetBulkOperationErrorRawResponse
+  rawResponse: {
+    status: number;
+    error?: { type: string; reason?: string | null; index: string };
+    // Other fields are present on a bulk operation result but they are irrelevant for this function
+  }
 ): Payload | undefined {
   const { status, error } = rawResponse;
   if (error) {
@@ -117,7 +115,6 @@ export function getSavedObjectFromSource<T>(
     coreMigrationVersion,
     typeMigrationVersion,
     managed,
-    accessControl,
     migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
       ? { [type]: typeMigrationVersion }
       : undefined,
@@ -146,7 +143,6 @@ export function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     managed,
-    accessControl,
   };
 }
 
@@ -290,29 +286,11 @@ export function getSavedObjectNamespaces(
   return [SavedObjectsUtils.namespaceIdToString(namespace)];
 }
 
+/**
+ * Extracts the contents of a decorated error to return the attributes for bulk operations.
+ */
+export const errorContent = (error: DecoratedError) => error.output.payload;
+
 export function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
-}
-
-export function isMgetError(
-  doc?: estypes.MgetResponseItem<unknown>
-): doc is estypes.MgetMultiGetError {
-  return Boolean(doc && 'error' in doc);
-}
-
-export function setAccessControl({
-  typeSupportsAccessControl,
-  createdBy,
-  accessMode,
-}: {
-  typeSupportsAccessControl: boolean;
-  createdBy?: string;
-  accessMode?: SavedObjectAccessControl['accessMode'];
-}) {
-  return typeSupportsAccessControl && createdBy
-    ? {
-        owner: createdBy,
-        accessMode: accessMode ?? 'default',
-      }
-    : undefined;
 }

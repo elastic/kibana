@@ -28,7 +28,5 @@
     "@kbn/cloud-plugin",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
-    "@kbn/management-settings-ids",
-    "@kbn/ai-assistant-common",
   ]
 }

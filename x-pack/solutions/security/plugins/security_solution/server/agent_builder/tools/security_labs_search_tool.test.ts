@@ -31,7 +31,7 @@ describe('securityLabsSearchTool', () => {
   const mockEvents = {
     reportProgress: jest.fn(),
   };
-  const tool = securityLabsSearchTool(mockCore, mockLogger);
+  const tool = securityLabsSearchTool(mockCore);
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -24,8 +24,8 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAskAiAssistant } from '../tabs/risk_inputs/use_ask_ai_assistant';
@@ -48,7 +48,6 @@ interface EntityHighlightsSettingsProps {
   } | null;
   closePopover: () => void;
   openPopover: () => void;
-  isAssistantVisible: boolean;
   isLoading: boolean;
   isPopoverOpen: boolean;
 }
@@ -65,7 +64,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   isPopoverOpen,
   entityType,
   entityIdentifier,
-  isAssistantVisible,
+
   assistantResult,
 }) => {
   const anonymizedEntityIdentifier = getAnonymizedEntityIdentifier(
@@ -99,15 +98,14 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     replacements: assistantResult?.replacements,
   });
 
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
   const entityAttachment = useMemo(
     () => ({
       attachmentType: SecurityAgentBuilderAttachments.entity,
       attachmentData: {
         identifierType: entityType,
         identifier: entityIdentifier,
-        attachmentLabel: `${entityType}: ${entityIdentifier}`,
+        attachmentLabel: entityIdentifier,
       },
       attachmentPrompt: ENTITY_PROMPT,
     }),
@@ -181,28 +179,26 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
             <NewAgentBuilderAttachment onClick={onAgentBuildAttachmentClick} size="s" />
           </EuiContextMenuItem>
         ) : (
-          isAssistantVisible && (
-            <EuiContextMenuItem
-              aria-label={i18n.translate(
-                'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-                {
-                  defaultMessage: 'Ask AI Assistant',
-                }
-              )}
-              key={'ask-ai-assistant'}
-              onClick={() => {
-                showAssistantOverlay();
-                closePopover();
-              }}
-              icon={<AssistantIcon />}
-              disabled={isLoading}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
-                defaultMessage="Ask AI Assistant"
-              />
-            </EuiContextMenuItem>
-          )
+          <EuiContextMenuItem
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+              {
+                defaultMessage: 'Ask AI Assistant',
+              }
+            )}
+            key={'ask-ai-assistant'}
+            onClick={() => {
+              showAssistantOverlay();
+              closePopover();
+            }}
+            icon={<AssistantIcon />}
+            disabled={isLoading}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
+              defaultMessage="Ask AI Assistant"
+            />
+          </EuiContextMenuItem>
         )}
 
         <EuiContextMenuItem
@@ -230,7 +226,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       selectedConversationHasAnonymizedValues,
       isAgentBuilderEnabled,
       onAgentBuildAttachmentClick,
-      isAssistantVisible,
       setConnectorId,
       connectorId,
       showAssistantOverlay,

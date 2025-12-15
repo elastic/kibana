@@ -18,7 +18,6 @@ import {
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/onechat-common';
-import { getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,
   AgentDeleteRequest,
@@ -57,9 +56,14 @@ export const createClient = async ({
   toolsService: ToolsServiceStart;
   logger: Logger;
 }): Promise<AgentClient> => {
-  const user = getUserFromRequest(request, security);
+  const authUser = security.authc.getCurrentUser(request);
+  if (!authUser) {
+    throw new Error('No user bound to the provided request');
+  }
+
   const esClient = elasticsearch.client.asScoped(request).asInternalUser;
   const storage = createStorage({ logger, esClient });
+  const user = { id: authUser.profile_uid!, username: authUser.username };
 
   return new AgentClientImpl({ storage, user, request, space, toolsService });
 };

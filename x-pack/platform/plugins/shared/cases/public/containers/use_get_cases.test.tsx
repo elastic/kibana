@@ -188,6 +188,7 @@ describe('useGetCases', () => {
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: 'test #123',
+        searchFields: ['title', 'description', 'incremental_id.text'],
         owner: ['securitySolution'],
       },
       queryParams: DEFAULT_QUERY_PARAMS,

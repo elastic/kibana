@@ -8,7 +8,6 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 
 // 400 - badRequest
 const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
@@ -44,11 +43,6 @@ export interface DecoratedError extends Boom.Boom {
   /** the 'SavedObjectsClientErrorCode' symbol */
   [code]?: string;
 }
-
-/**
- * Extracts the contents of a decorated error to return the attributes for bulk operations.
- */
-export const errorContent = (error: DecoratedError) => error.output.payload;
 
 /**
  * Error result for the internal bulk resolve method.
@@ -95,13 +89,6 @@ function isSavedObjectsClientError(error: any): error is DecoratedError {
   return Boolean(error && error[code]);
 }
 
-/** Type guard used in the repository. */
-export function isBulkResolveError<T>(
-  result: SavedObjectsResolveResponse<T> | BulkResolveError
-): result is BulkResolveError {
-  return !!(result as BulkResolveError).error;
-}
-
 /**
  * Decorates an bad request error to add information or additional explanation of an error to
  * provide more context. Bad requests come in a few flavors: unsupported type, invalid version,
@@ -125,18 +112,6 @@ export class SavedObjectsErrorHelpers {
    */
   public static isSavedObjectsClientError(error: any): error is DecoratedError {
     return isSavedObjectsClientError(error);
-  }
-
-  /**
-   * Determines if an error is a saved objects bulk resolve error
-   * @public
-   * @param result the resolve respoonse to check
-   * @returns boolean - true if result is a saved objects bulk resolve error
-   */
-  public static isBulkResolveError<T>(
-    result: SavedObjectsResolveResponse<T> | BulkResolveError
-  ): result is BulkResolveError {
-    return isBulkResolveError(result);
   }
 
   /**

@@ -6,9 +6,6 @@
  */
 
 import * as Rx from 'rxjs';
-import { firstValueFrom } from 'rxjs';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { securityLink } from '@kbn/security-solution-navigation/links';
@@ -18,16 +15,7 @@ import { createNavigationTree } from './navigation_tree';
 
 export const registerSolutionNavigation = async (services: Services) => {
   const { securitySolution, navigation } = services;
-
-  const chatExperience$ = services.settings.client.get$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
-
-  // Get initial chat experience for setting initial navigation tree
-  const initialChatExperience = await firstValueFrom(chatExperience$);
-
-  const navigationTree = createNavigationTree(services, initialChatExperience);
+  const navigationTree = createNavigationTree(services);
 
   navigation.isSolutionNavEnabled$.subscribe((isSolutionNavigationEnabled) => {
     if (isSolutionNavigationEnabled) {

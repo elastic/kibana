@@ -15,7 +15,6 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
-  PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
@@ -95,7 +94,6 @@ export type LensApi = Simplify<
     PublishesViewMode &
     // Let the container know the saved object id
     PublishesSavedObjectId &
-    PublishesProjectRoutingOverrides &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &

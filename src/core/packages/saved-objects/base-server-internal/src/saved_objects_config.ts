@@ -82,7 +82,6 @@ const soSchema = schema.object({
     schema.boolean({ defaultValue: true }),
     schema.boolean({ defaultValue: false })
   ),
-  enableAccessControl: schema.boolean({ defaultValue: false }),
 });
 
 export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
@@ -98,7 +97,6 @@ export class SavedObjectConfig {
   /* @internal depend on env: see https://github.com/elastic/dev/issues/2200 */
   public allowHttpApiAccess: boolean;
   public migration: SavedObjectsMigrationConfigType;
-  public enableAccessControl: boolean;
 
   constructor(
     rawConfig: SavedObjectsConfigType,
@@ -108,6 +106,5 @@ export class SavedObjectConfig {
     this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
     this.allowHttpApiAccess = rawConfig.allowHttpApiAccess;
-    this.enableAccessControl = rawConfig.enableAccessControl;
   }
 }

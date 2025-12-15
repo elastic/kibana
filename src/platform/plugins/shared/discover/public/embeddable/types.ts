@@ -18,7 +18,6 @@ import type {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDescription,
-  PublishesProjectRoutingOverrides,
   PublishesSavedObjectId,
   PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
@@ -90,7 +89,6 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
   PublishesWritableSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
-  PublishesProjectRoutingOverrides &
   HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &

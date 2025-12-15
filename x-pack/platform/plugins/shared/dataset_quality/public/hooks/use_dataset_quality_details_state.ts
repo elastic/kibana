@@ -29,7 +29,6 @@ export const useDatasetQualityDetailsState = () => {
     expandedQualityIssue,
     view,
     streamDefinition,
-    streamsUrls,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -227,6 +226,5 @@ export const useDatasetQualityDetailsState = () => {
     customRetentionPeriod,
     canUserManageFailureStore,
     streamDefinition,
-    streamsUrls,
   };
 };

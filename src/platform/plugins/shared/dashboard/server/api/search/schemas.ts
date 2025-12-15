@@ -9,7 +9,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { accessControlSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export const searchRequestBodySchema = schema.object({
@@ -52,7 +51,6 @@ export const searchResponseBodySchema = schema.object({
         tags: schema.maybe(schema.arrayOf(schema.string())),
         time_range: schema.maybe(timeRangeSchema),
         title: schema.string(),
-        access_control: accessControlSchema,
       }),
       meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
     })

@@ -6,18 +6,13 @@
  */
 
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
-import type { Logger } from '@kbn/logging';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-
-import { createSecurityAgent } from './security_agent';
+import { createEntityAgent } from './entity_agent';
+import { createAlertsAgent } from './alerts_agent';
 
 /**
  * Registers all security agent builder tools with the onechat plugin
  */
-export const registerAgents = async (
-  onechat: OnechatPluginSetup,
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
-) => {
-  onechat.agents.register(createSecurityAgent(core, logger));
+export const registerAgents = async (onechat: OnechatPluginSetup) => {
+  onechat.agents.register(createAlertsAgent());
+  onechat.agents.register(createEntityAgent());
 };

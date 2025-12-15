@@ -167,7 +167,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           ...searchParams,
         });
         const wasDeleted = deletionRecords.total > 0;
-        if (wasDeleted && !preconfiguredAgentPolicy.is_managed) {
+        if (wasDeleted) {
           return { created: false, deleted: preconfigurationId };
         }
       } else if (

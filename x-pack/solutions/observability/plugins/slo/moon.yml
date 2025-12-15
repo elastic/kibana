@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/slo-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
+  defaultOwner: '@elastic/obs-ux-management-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/slo-plugin'
   description: Moon project for @kbn/slo-plugin
   channel: ''
-  owner: '@elastic/actionable-obs-team'
+  owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/slo
 dependsOn:

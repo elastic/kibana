@@ -13,7 +13,15 @@
           "\nHook to manage tour queue state for a specific tour.\nAutomatically registers the tour, subscribes to queue changes,\nand handles cleanup on unmount.\n"
         ],
         "signature": [
-          "(tourId: \"siemMigrationSetupTour\") => ",
+          "(tourId: ",
+          {
+            "pluginId": "@kbn/tour-queue",
+            "scope": "public",
+            "docId": "kibKbnTourQueuePluginApi",
+            "section": "def-public.TourId",
+            "text": "TourId"
+          },
+          ") => ",
           {
             "pluginId": "@kbn/tour-queue",
             "scope": "public",
@@ -29,14 +37,20 @@
           {
             "parentPluginId": "@kbn/tour-queue",
             "id": "def-public.useTourQueue.$1",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "tourId",
             "description": [
               "- The ID of the tour. Must be a valid ID from {@link TOURS }"
             ],
             "signature": [
-              "\"siemMigrationSetupTour\""
+              {
+                "pluginId": "@kbn/tour-queue",
+                "scope": "public",
+                "docId": "kibKbnTourQueuePluginApi",
+                "section": "def-public.TourId",
+                "text": "TourId"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/hooks/use_tour_queue.ts",
             "deprecated": false,
@@ -199,7 +213,7 @@
           "\nUnion type of all available tour IDs"
         ],
         "signature": [
-          "\"siemMigrationSetupTour\""
+          "\"solutionNavigationTour\" | \"siemMigrationSetupTour\""
         ],
         "path": "src/platform/packages/shared/kbn-tour-queue/index.ts",
         "deprecated": false,
@@ -218,7 +232,7 @@
           "\nValid tour IDs for registering tours in the queue.\nTours are shown in order based on their registry value."
         ],
         "signature": [
-          "{ readonly SECURITY_SIEM_MIGRATION: \"siemMigrationSetupTour\"; }"
+          "{ readonly NAVIGATION: \"solutionNavigationTour\"; readonly SECURITY_SIEM_MIGRATION: \"siemMigrationSetupTour\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-tour-queue/index.ts",
         "deprecated": false,

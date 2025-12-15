@@ -41,7 +41,6 @@ describe('EntityHighlightsSettings', () => {
     openPopover: mockOpenPopover,
     isLoading: false,
     isPopoverOpen: true,
-    isAssistantVisible: true,
   };
 
   beforeEach(() => {

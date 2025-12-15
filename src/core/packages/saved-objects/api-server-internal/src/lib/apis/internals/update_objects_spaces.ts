@@ -13,16 +13,11 @@ import { intersection } from 'lodash';
 
 import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import {
-  isLeft,
-  isRight,
-  left,
-  right,
-  type Either,
-  type SavedObjectsUpdateObjectsSpacesObject,
-  type SavedObjectsUpdateObjectsSpacesOptions,
-  type SavedObjectsUpdateObjectsSpacesResponse,
-  type SavedObjectsUpdateObjectsSpacesResponseObject,
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObject,
@@ -39,6 +34,11 @@ import {
   getBulkOperationError,
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
+  type Either,
+  isLeft,
+  isRight,
+  left,
+  right,
 } from '../utils';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
 import type { RepositoryEsClient } from '../../repository_es_client';

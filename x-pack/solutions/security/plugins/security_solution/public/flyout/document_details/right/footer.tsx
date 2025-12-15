@@ -19,7 +19,7 @@ import { useDocumentDetailsContext } from '../shared/context';
 import { useAssistant } from './hooks/use_assistant';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { TakeActionButton } from '../shared/components/take_action_button';
-import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../../assistant/helpers';
@@ -53,7 +53,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
   const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
@@ -75,18 +75,18 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {isAgentChatExperienceEnabled ? (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
-            ) : (
-              showAssistant && (
+          {showAssistant && (
+            <EuiFlexItem grow={false}>
+              {isAgentBuilderEnabled ? (
+                <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              ) : (
                 <NewChatByTitle
                   showAssistantOverlay={showAssistantOverlay}
                   text={ASK_AI_ASSISTANT}
                 />
-              )
-            )}
-          </EuiFlexItem>
+              )}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <TakeActionButton />
           </EuiFlexItem>

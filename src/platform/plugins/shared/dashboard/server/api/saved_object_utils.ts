@@ -56,12 +56,6 @@ export function getDashboardCRUResponseBody(
     id: savedObject.id,
     data: {
       ...dashboardState,
-      ...(savedObject?.accessControl && {
-        access_control: {
-          access_mode: savedObject.accessControl.accessMode,
-          owner: savedObject.accessControl.owner,
-        },
-      }),
       ...(references.length && { references }),
     },
     meta: getDashboardMeta(savedObject, operation),

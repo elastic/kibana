@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server/tools';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
@@ -125,8 +123,7 @@ const getAlertsById = async ({
 };
 
 export const entityRiskScoreTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
+  core: CoreSetup
 ): BuiltinToolDefinition<typeof entityRiskScoreSchema> => {
   return {
     id: SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
@@ -135,28 +132,24 @@ export const entityRiskScoreTool = (
     schema: entityRiskScoreSchema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
+      handler: async ({ spaceId }: ToolAvailabilityContext) => {
         try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status === 'available') {
-            const [coreStart] = await core.getStartServices();
-            const esClient = coreStart.elasticsearch.client.asInternalUser;
-            const riskIndex = getRiskIndex(spaceId, true);
+          const [coreStart] = await core.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const riskIndex = getRiskIndex(spaceId, true);
 
-            const indexExists = await esClient.indices.exists({
-              index: riskIndex,
-            });
+          const indexExists = await esClient.indices.exists({
+            index: riskIndex,
+          });
 
-            if (indexExists) {
-              return { status: 'available' };
-            }
-
-            return {
-              status: 'unavailable',
-              reason: 'Risk score index does not exist for this space',
-            };
+          if (indexExists) {
+            return { status: 'available' };
           }
-          return availability;
+
+          return {
+            status: 'unavailable',
+            reason: 'Risk score index does not exist for this space',
+          };
         } catch (error) {
           return {
             status: 'unavailable',
@@ -167,7 +160,7 @@ export const entityRiskScoreTool = (
         }
       },
     },
-    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient }) => {
+    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient, logger }) => {
       const spaceId = getSpaceIdFromRequest(request);
       const alertsIndexPattern = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
       const entityType = identifierType as EntityType;
@@ -226,7 +219,12 @@ export const entityRiskScoreTool = (
                       ...(score.criticality_level !== undefined && {
                         criticality_level: score.criticality_level,
                       }),
-                      ...(score.modifiers && { modifiers: score.modifiers ?? [] }),
+                      ...(score.is_privileged_user !== undefined && {
+                        is_privileged_user: score.is_privileged_user,
+                      }),
+                      ...(score.privileged_user_modifier !== undefined && {
+                        privileged_user_modifier: score.privileged_user_modifier,
+                      }),
                     };
                   }),
                 },
@@ -298,7 +296,12 @@ export const entityRiskScoreTool = (
           ...(latestRiskScore.criticality_level !== undefined && {
             criticality_level: latestRiskScore.criticality_level,
           }),
-          ...(latestRiskScore.modifiers && { modifiers: latestRiskScore.modifiers ?? [] }),
+          ...(latestRiskScore.is_privileged_user !== undefined && {
+            is_privileged_user: latestRiskScore.is_privileged_user,
+          }),
+          ...(latestRiskScore.privileged_user_modifier !== undefined && {
+            privileged_user_modifier: latestRiskScore.privileged_user_modifier,
+          }),
         };
 
         return {

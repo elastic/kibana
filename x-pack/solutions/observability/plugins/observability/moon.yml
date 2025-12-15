@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/observability-ui'
+  defaultOwner: '@elastic/obs-ux-management-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/observability-plugin'
   description: Moon project for @kbn/observability-plugin
   channel: ''
-  owner: '@elastic/observability-ui'
+  owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/observability
 dependsOn:

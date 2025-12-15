@@ -10,8 +10,6 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { NewAgentBuilderAttachment } from './new_agent_builder_attachment';
 import * as i18n from './translations';
-import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
-jest.mock('../hooks/use_agent_builder_availability');
 
 describe('NewAgentBuilderAttachment', () => {
   const defaultProps = {
@@ -20,11 +18,6 @@ describe('NewAgentBuilderAttachment', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
-      isAgentBuilderEnabled: true,
-      hasAgentBuilderPrivilege: true,
-      isAgentChatExperienceEnabled: true,
-    });
   });
 
   it('renders with default props', () => {

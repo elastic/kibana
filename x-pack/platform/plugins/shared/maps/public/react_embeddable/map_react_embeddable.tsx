@@ -44,7 +44,6 @@ import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
 import { isMapRendererApi } from './map_renderer/types';
 import type { MapByReferenceState, MapEmbeddableState } from '../../common';
-import { initializeProjectRoutingManager } from './project_routing_manager';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -92,7 +91,6 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       savedMap,
       uuid,
     });
-    const projectRoutingManager = await initializeProjectRoutingManager(savedMap);
 
     function getLatestState() {
       return {
@@ -184,7 +182,6 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
         serializeByValue
       ),
       ...initializeDataViews(savedMap.getStore()),
-      ...projectRoutingManager.api,
       serializeState,
       supportedTriggers: () => {
         return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];

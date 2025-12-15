@@ -11,12 +11,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ApplyEntityEngineDataviewIndicesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const applyDataViewIndicesEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  telemetry: ITelemetryEventsSender,
   logger: Logger
 ) => {
   router.versioned
@@ -39,7 +36,7 @@ export const applyDataViewIndicesEntityEngineRoute = (
 
       async (
         context,
-        request,
+        _,
         response
       ): Promise<IKibanaResponse<ApplyEntityEngineDataviewIndicesResponse>> => {
         const siemResponse = buildSiemResponse(response);
@@ -65,9 +62,6 @@ export const applyDataViewIndicesEntityEngineRoute = (
           await apiKeyManager.generate();
 
           if (errors.length === 0) {
-            telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-              endpoint: request.route.path,
-            });
             return response.ok({
               body: {
                 success: true,
@@ -75,10 +69,6 @@ export const applyDataViewIndicesEntityEngineRoute = (
               },
             });
           } else {
-            telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-              endpoint: request.route.path,
-              error: errorMessages.join('; '),
-            });
             return response.multiStatus({
               body: {
                 success: false,
@@ -90,10 +80,6 @@ export const applyDataViewIndicesEntityEngineRoute = (
         } catch (e) {
           logger.error(`Error in ApplyEntityEngineDataViewIndices: ${e.message}`);
           const error = transformError(e);
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-            error: error.message,
-          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

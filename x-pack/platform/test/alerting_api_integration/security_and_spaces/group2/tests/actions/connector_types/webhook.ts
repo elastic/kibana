@@ -72,12 +72,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
-    objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
-
     return createdAction.id;
   }
 
-  describe('webhook action', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240923
+  describe.skip('webhook action', () => {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
@@ -104,9 +103,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       );
     });
 
-    afterEach(async () => {
-      await objectRemover.removeAll();
-    });
+    afterEach(() => objectRemover.removeAll());
 
     it('should return 200 when creating a webhook connector successfully with default method', async () => {
       const { body: createdAction } = await supertest
@@ -307,6 +304,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'post' },
         kibanaURL
       );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -343,6 +341,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'put' },
         kibanaURL
       );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -383,6 +382,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'get' },
         kibanaURL
       );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -399,6 +399,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'delete' },
         kibanaURL
       );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -686,9 +687,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // waits enough for the token to be expired plus some buffer
+        // waits enough for the token to be expired
         await new Promise((resolve) =>
-          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000)
+          setTimeout(() => resolve(true), oauth2Server.getTokenExpirationTime() * 1000)
         );
 
         // this second call should trigger a second call to the auth server because

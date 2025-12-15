@@ -52,12 +52,6 @@ export async function search(
           ...(description && { description }),
           ...(tags && { tags }),
           ...(time_range && { time_range }),
-          ...(so?.accessControl && {
-            access_control: {
-              owner: so.accessControl.owner,
-              access_mode: so.accessControl.accessMode,
-            },
-          }),
           title: title ?? '',
         },
         meta: getDashboardMeta(so, 'search'),

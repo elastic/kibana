@@ -63,11 +63,6 @@ export interface FieldLimit {
   error?: boolean;
 }
 
-export interface StreamsUrls {
-  processingUrl?: string;
-  schemaUrl?: string;
-}
-
 export interface WithDefaultControllerState {
   dataStream: string;
   qualityIssues: QualityIssuesTableConfig;
@@ -89,7 +84,6 @@ export interface WithDefaultControllerState {
   fieldLimit?: FieldLimit;
   view: DatasetQualityView;
   streamDefinition?: Streams.ingest.all.GetResponse;
-  streamsUrls?: StreamsUrls;
 }
 
 export interface WithDataStreamDetails {
@@ -166,7 +160,6 @@ export type DefaultDatasetQualityDetailsContext = Pick<
   | 'qualityIssuesChart'
   | 'view'
   | 'streamDefinition'
-  | 'streamsUrls'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =

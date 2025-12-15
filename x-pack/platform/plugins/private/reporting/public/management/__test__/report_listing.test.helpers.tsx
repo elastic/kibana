@@ -56,7 +56,6 @@ export const mockConfig: ClientConfigType = {
       duration: '10m',
       size: 500,
     },
-    maxRows: 10000,
   },
   poll: {
     jobsRefresh: {

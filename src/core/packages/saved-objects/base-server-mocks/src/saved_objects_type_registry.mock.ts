@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { type SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { lazyObject } from '@kbn/lazy-object';
-import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 
-const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => {
+const createRegistryMock = (): jest.Mocked<
+  ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
+> => {
   const mock = lazyObject({
     registerType: jest.fn(),
     getLegacyTypes: jest.fn().mockReturnValue([]),
@@ -27,33 +30,10 @@ const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => 
     isShareable: jest.fn().mockImplementation((type: string) => type === 'shared'),
     isHidden: jest.fn().mockReturnValue(false),
     isHiddenFromHttpApis: jest.fn(),
-    getIndex: jest.fn(),
-    isImportableAndExportable: jest.fn(),
-    getNameAttribute: jest.fn(),
-    supportsAccessControl: jest.fn(),
-    isAccessControlEnabled: jest.fn(),
-    setAccessControlEnabled: jest.fn(),
+    getIndex: jest.fn().mockReturnValue('.kibana-test'),
+    isImportableAndExportable: jest.fn().mockReturnValue(true),
+    getNameAttribute: jest.fn().mockReturnValue(undefined),
   });
-
-  mock.getVisibleTypes.mockReturnValue([]);
-  mock.getAllTypes.mockReturnValue([]);
-  mock.getLegacyTypes.mockReturnValue([]);
-  mock.getImportableAndExportableTypes.mockReturnValue([]);
-  mock.getIndex.mockReturnValue('.kibana-test');
-  mock.getIndex.mockReturnValue('.kibana-test');
-  mock.isHidden.mockReturnValue(false);
-  mock.isHiddenFromHttpApis.mockReturnValue(false);
-  mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
-  mock.isSingleNamespace.mockImplementation(
-    (type: string) => type !== 'global' && type !== 'shared'
-  );
-  mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
-  mock.isShareable.mockImplementation((type: string) => type === 'shared');
-  mock.isImportableAndExportable.mockReturnValue(true);
-  mock.getVisibleToHttpApisTypes.mockReturnValue(false);
-  mock.getNameAttribute.mockReturnValue(undefined);
-  mock.supportsAccessControl.mockReturnValue(false);
-  mock.isAccessControlEnabled.mockReturnValue(true);
 
   return mock;
 };

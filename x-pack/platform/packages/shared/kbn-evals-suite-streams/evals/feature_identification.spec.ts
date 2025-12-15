@@ -307,9 +307,9 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           kind: 'LLM',
           evaluate: async ({ input, output, expected, metadata }) => {
             const result = await evaluators.criteria(expected.criteria).evaluate({
-              input: input.stream,
+              input,
               expected,
-              output: output.features,
+              output,
               metadata,
             });
 

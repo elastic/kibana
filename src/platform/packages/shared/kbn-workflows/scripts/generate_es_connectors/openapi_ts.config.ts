@@ -27,38 +27,30 @@ const preprocessedOpenApiSpec = [
   createRemoveServerDefaults(ES_SPEC_SCHEMA_PATH),
 ].reduce((acc, fn) => fn(acc), openApiSpec);
 
-function buildConfig({ include }: { include: string[] }): UserConfig {
-  return {
-    // @ts-expect-error - for some reason openapi-ts doesn't accept OpenAPIV3.Document
-    input: preprocessedOpenApiSpec,
-    output: {
-      path: OPENAPI_TS_OUTPUT_FOLDER_PATH,
-      fileName: OPENAPI_TS_OUTPUT_FILENAME,
-    },
-    parser: {
-      filters: {
-        operations: {
-          include: include || [],
-        },
+const config: UserConfig = {
+  // @ts-expect-error - for some reason openapi-ts doesn't accept OpenAPIV3.Document
+  input: preprocessedOpenApiSpec,
+  output: {
+    path: OPENAPI_TS_OUTPUT_FOLDER_PATH,
+    fileName: OPENAPI_TS_OUTPUT_FILENAME,
+  },
+  plugins: [
+    {
+      name: 'zod',
+      case: 'snake_case',
+      requests: {
+        name: '{{name}}_request',
       },
-    },
-    plugins: [
-      {
-        name: 'zod',
-        case: 'snake_case',
-        requests: {
-          name: '{{name}}_request',
-        },
-        responses: {
-          name: '{{name}}_response',
-        },
-        definitions: {
-          name: '{{name}}',
-        },
-        metadata: true,
-        compatibilityVersion: 4,
+      responses: {
+        name: '{{name}}_response',
       },
-    ],
-  };
-}
-export default buildConfig;
+      definitions: {
+        name: '{{name}}',
+      },
+      metadata: true,
+      compatibilityVersion: 4,
+    },
+  ],
+};
+
+export default config;

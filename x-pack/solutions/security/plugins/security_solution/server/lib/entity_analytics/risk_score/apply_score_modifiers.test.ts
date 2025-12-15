@@ -20,12 +20,8 @@ import { applyCriticalityModifier } from './modifiers/asset_criticality';
 import { applyPrivmonModifier } from './modifiers/privileged_users';
 
 import { allowedExperimentalValues } from '../../../../common';
-import type { Modifier } from './modifiers/types';
 
-jest.mock('./modifiers/asset_criticality', () => ({
-  ...jest.requireActual('./modifiers/asset_criticality'),
-  applyCriticalityModifier: jest.fn(),
-}));
+jest.mock('./modifiers/asset_criticality');
 jest.mock('./modifiers/privileged_users');
 
 const experimentalFeatures = { ...allowedExperimentalValues, enableRiskScorePrivmonModifier: true };
@@ -96,51 +92,21 @@ describe('applyScoreModifiers', () => {
     beforeEach(() => {
       mockApplyCriticalityModifier.mockResolvedValue([
         {
-          type: 'asset_criticality',
-          modifier_value: 1.5,
-          metadata: {
-            criticality_level: 'high_impact',
-          },
+          category_2_score: 10,
+          category_2_count: 1,
+          criticality_level: 'high_impact',
+          criticality_modifier: 1.5,
         },
       ]);
 
       mockApplyPrivmonModifier.mockResolvedValue([
         {
-          type: 'watchlist',
-          subtype: 'privmon',
-          modifier_value: 1.5,
-          metadata: {
-            is_privileged_user: true,
-          },
+          category_3_score: 5,
+          category_3_count: 1,
+          is_privileged_user: true,
+          privileged_user_modifier: 2,
         },
       ]);
-    });
-
-    it('should include legacy cat2 fields and new modifiers array when both modifiers apply', async () => {
-      const result = await applyScoreModifiers({
-        now: '2023-01-01T00:00:00.000Z',
-        identifierType: EntityType.host,
-        deps: {
-          assetCriticalityService,
-          privmonUserCrudService,
-          logger,
-        },
-        experimentalFeatures,
-        page: mockPage,
-      });
-
-      expect(result).toHaveLength(1);
-      // Verify legacy cat2 fields are present
-      expect(result[0]).toHaveProperty('category_2_score');
-      expect(result[0]).toHaveProperty('category_2_count');
-      expect(result[0]).toHaveProperty('criticality_level');
-      expect(result[0]).toHaveProperty('criticality_modifier');
-      // Verify new modifiers array is present
-      expect(result[0]).toHaveProperty('modifiers');
-      expect(Array.isArray(result[0].modifiers)).toBe(true);
-      expect(result[0].modifiers).toHaveLength(2);
-      expect(result[0].modifiers?.[0].type).toBe('asset_criticality');
-      expect(result[0].modifiers?.[1].type).toBe('watchlist');
     });
 
     it('should apply both criticality and privmon modifiers', async () => {
@@ -177,27 +143,15 @@ describe('applyScoreModifiers', () => {
       expect(result[0]).toMatchObject({
         id_field: 'host.name',
         id_value: 'test-host',
-        category_2_score: 6.0483870968,
+        category_2_score: 10,
         category_2_count: 1,
         criticality_level: 'high_impact',
         criticality_modifier: 1.5,
-        modifiers: [
-          {
-            type: 'asset_criticality',
-            modifier_value: 1.5,
-            contribution: 6.0483870968,
-            metadata: { criticality_level: 'high_impact' },
-          },
-          {
-            type: 'watchlist',
-            subtype: 'privmon',
-            modifier_value: 1.5,
-            contribution: 6.0483870968,
-            metadata: { is_privileged_user: true },
-          },
-        ],
-
-        calculated_score_norm: 87.0967741935, // 75 + 6.0483870968 + 6.0483870968
+        category_3_score: 5,
+        category_3_count: 1,
+        is_privileged_user: true,
+        privileged_user_modifier: 2,
+        calculated_score_norm: 90, // 75 + 10 + 5
       });
     });
 
@@ -232,15 +186,19 @@ describe('applyScoreModifiers', () => {
     beforeEach(() => {
       mockApplyCriticalityModifier.mockResolvedValue([
         {
-          type: 'asset_criticality',
-          modifier_value: 2,
-          metadata: {
-            criticality_level: 'extreme_impact',
-          },
+          category_2_score: 15,
+          category_2_count: 1,
+          criticality_level: 'extreme_impact',
+          criticality_modifier: 2,
         },
       ]);
 
-      mockApplyPrivmonModifier.mockResolvedValue([undefined]);
+      mockApplyPrivmonModifier.mockResolvedValue([
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+      ]);
     });
 
     it('should apply only criticality modifier', async () => {
@@ -261,37 +219,33 @@ describe('applyScoreModifiers', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        id_field: 'host.name',
-        id_value: 'test-host',
-        category_2_score: 10.7142857143,
+        category_2_score: 15,
         category_2_count: 1,
         criticality_level: 'extreme_impact',
         criticality_modifier: 2,
-        modifiers: [
-          {
-            type: 'asset_criticality',
-            modifier_value: 2,
-            contribution: 10.7142857143,
-            metadata: { criticality_level: 'extreme_impact' },
-          },
-        ],
-        calculated_score_norm: 85.7142857143, // 75 + 10.7142857143
+        category_3_score: 0,
+        category_3_count: 0,
+        calculated_score_norm: 90, // 75 + 15 + 0
       });
+      expect(result[0].privileged_user_modifier).toBeUndefined();
     });
   });
 
   describe('when only privmon modifier applies', () => {
     beforeEach(() => {
-      mockApplyCriticalityModifier.mockResolvedValue([undefined]);
+      mockApplyCriticalityModifier.mockResolvedValue([
+        {
+          category_2_score: 0,
+          category_2_count: 0,
+        },
+      ]);
 
       mockApplyPrivmonModifier.mockResolvedValue([
         {
-          type: 'watchlist',
-          subtype: 'privmon',
-          modifier_value: 1.5,
-          metadata: {
-            is_privileged_user: true,
-          },
+          category_3_score: 10,
+          category_3_count: 1,
+          is_privileged_user: true,
+          privileged_user_modifier: 2,
         },
       ]);
     });
@@ -314,20 +268,13 @@ describe('applyScoreModifiers', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        id_field: 'host.name',
-        id_value: 'test-host',
         category_2_score: 0,
         category_2_count: 0,
-        modifiers: [
-          {
-            type: 'watchlist',
-            subtype: 'privmon',
-            modifier_value: 1.5,
-            contribution: 6.8181818182,
-            metadata: { is_privileged_user: true },
-          },
-        ],
-        calculated_score_norm: 81.8181818182, // 75 + 6.8181818182
+        category_3_score: 10,
+        category_3_count: 1,
+        is_privileged_user: true,
+        privileged_user_modifier: 2,
+        calculated_score_norm: 85, // 75 + 0 + 10
       });
       expect(result[0].criticality_level).toBeUndefined();
       expect(result[0].criticality_modifier).toBeUndefined();
@@ -336,9 +283,19 @@ describe('applyScoreModifiers', () => {
 
   describe('when no modifiers apply', () => {
     beforeEach(() => {
-      mockApplyCriticalityModifier.mockResolvedValue([undefined]);
+      mockApplyCriticalityModifier.mockResolvedValue([
+        {
+          category_2_score: 0,
+          category_2_count: 0,
+        },
+      ]);
 
-      mockApplyPrivmonModifier.mockResolvedValue([undefined]);
+      mockApplyPrivmonModifier.mockResolvedValue([
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
+      ]);
     });
 
     it('should return scores without modifiers', async () => {
@@ -359,15 +316,15 @@ describe('applyScoreModifiers', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        id_field: 'host.name',
-        id_value: 'test-host',
         category_2_score: 0,
         category_2_count: 0,
-        calculated_score_norm: 75, // 75 + 0 (base score only)
-        modifiers: [],
+        category_3_score: 0,
+        category_3_count: 0,
+        calculated_score_norm: 75, // 75 + 0 + 0 (base score only)
       });
       expect(result[0].criticality_level).toBeUndefined();
       expect(result[0].criticality_modifier).toBeUndefined();
+      expect(result[0].privileged_user_modifier).toBeUndefined();
     });
   });
 
@@ -393,25 +350,28 @@ describe('applyScoreModifiers', () => {
     beforeEach(() => {
       mockApplyCriticalityModifier.mockResolvedValue([
         {
-          type: 'asset_criticality',
-          modifier_value: 1.5,
-          metadata: {
-            criticality_level: 'high_impact',
-          },
+          category_2_score: 10,
+          category_2_count: 1,
+          criticality_level: 'high_impact',
+          criticality_modifier: 1.5,
         },
-        undefined,
+        {
+          category_2_score: 0,
+          category_2_count: 0,
+        },
       ]);
 
       mockApplyPrivmonModifier.mockResolvedValue([
         {
-          type: 'watchlist',
-          subtype: 'privmon',
-          modifier_value: 1.5,
-          metadata: {
-            is_privileged_user: true,
-          },
+          category_3_score: 5,
+          category_3_count: 1,
+          is_privileged_user: true,
+          privileged_user_modifier: 2,
         },
-        undefined,
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+        },
       ]);
     });
 
@@ -438,38 +398,18 @@ describe('applyScoreModifiers', () => {
       // First bucket - both modifiers
       expect(result[0]).toMatchObject({
         id_value: 'test-host',
-        category_2_score: 6.0483870968,
-        category_2_count: 1,
-        criticality_level: 'high_impact',
-        criticality_modifier: 1.5,
-        modifiers: [
-          {
-            type: 'asset_criticality',
-            modifier_value: 1.5,
-            contribution: 6.0483870968,
-            metadata: { criticality_level: 'high_impact' },
-          },
-          {
-            type: 'watchlist',
-            subtype: 'privmon',
-            modifier_value: 1.5,
-            contribution: 6.0483870968,
-            metadata: { is_privileged_user: true },
-          },
-        ],
-        calculated_score_norm: 87.0967741935, // 75 + 6.0483870968 + 6.0483870968
+        category_2_score: 10,
+        category_3_score: 5,
+        calculated_score_norm: 90, // 75 + 10 + 5
       });
 
       // Second bucket - no modifiers
       expect(result[1]).toMatchObject({
         id_value: 'test-host-2',
         category_2_score: 0,
-        category_2_count: 0,
-        modifiers: [],
-        calculated_score_norm: 50, // 50 + 0 (base score only)
+        category_3_score: 0,
+        calculated_score_norm: 50, // 50 + 0 + 0
       });
-      expect(result[1].criticality_level).toBeUndefined();
-      expect(result[1].criticality_modifier).toBeUndefined();
     });
   });
 
@@ -496,9 +436,20 @@ describe('applyScoreModifiers', () => {
     };
 
     beforeEach(() => {
-      mockApplyCriticalityModifier.mockResolvedValue([undefined]);
+      mockApplyCriticalityModifier.mockResolvedValue([
+        {
+          category_2_score: 0,
+          category_2_count: 0,
+        },
+      ]);
 
-      mockApplyPrivmonModifier.mockResolvedValue([undefined]);
+      mockApplyPrivmonModifier.mockResolvedValue([
+        {
+          category_3_score: 0,
+          category_3_count: 0,
+          is_privileged_user: false,
+        },
+      ]);
     });
 
     it('should use "RULE_NOT_FOUND" when rule_name is missing', async () => {
@@ -557,8 +508,17 @@ describe('riskScoreDocFactory', () => {
 
   it('should normalize category_1_score by RIEMANN_ZETA_VALUE', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
+    const criticalityFields = {
+      category_2_score: 0,
+      category_2_count: 0,
+    };
+    const privmonFields = {
+      category_3_score: 0,
+      category_3_count: 0,
+      is_privileged_user: false,
+    };
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, criticalityFields, privmonFields);
 
     // 259.24 / 2.5924 = 100 (approximately)
     expect(result.category_1_score).toBeCloseTo(100, 0);
@@ -567,59 +527,75 @@ describe('riskScoreDocFactory', () => {
   it('should apply global weight to calculated_score', () => {
     const globalWeight = 0.8;
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight });
+    const criticalityFields = {
+      category_2_score: 0,
+      category_2_count: 0,
+    };
+    const privmonFields = {
+      category_3_score: 0,
+      category_3_count: 0,
+      is_privileged_user: false,
+    };
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, criticalityFields, privmonFields);
+
     expect(result.calculated_score).toBe(56); // 70 * 0.8
   });
 
   it('should not apply global weight when undefined', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
+    const criticalityFields = {
+      category_2_score: 0,
+      category_2_count: 0,
+    };
+    const privmonFields = {
+      category_3_score: 0,
+      category_3_count: 0,
+      is_privileged_user: false,
+    };
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, criticalityFields, privmonFields);
+
     expect(result.calculated_score).toBe(70); // original score
   });
 
   it('should calculate total score with all modifiers', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
-    const criticalityFields: Modifier<'asset_criticality'> = {
-      type: 'asset_criticality',
-      modifier_value: 1.5,
-      metadata: {
-        criticality_level: 'high_impact',
-      },
-      // category_2_score: 10,
+    const criticalityFields = {
+      category_2_score: 10,
+      category_2_count: 1,
+      criticality_level: 'high_impact' as const,
+      criticality_modifier: 1.5,
     };
-    const privmonFields: Modifier<'watchlist'> = {
-      type: 'watchlist',
-      subtype: 'privmon',
-      modifier_value: 1.5,
-      metadata: {
-        is_privileged_user: true,
-      },
+    const privmonFields = {
+      category_3_score: 5,
+      category_3_count: 1,
+      is_privileged_user: true,
+      privileged_user_modifier: 2,
     };
 
     const result = factory(mockBucket, criticalityFields, privmonFields);
 
-    expect(result.calculated_score_norm).toBe(80.6896551724); // 65 + contributions from both modifiers
-
-    const criticality = result.modifiers?.find((mod) => mod.type === 'asset_criticality');
-    expect(criticality).toBeDefined();
-    expect(result.category_2_score).toBe(7.8448275862); // legacy field
-    expect(criticality?.contribution).toBe(7.8448275862);
-    expect(criticality?.metadata?.criticality_level).toBe('high_impact');
-
-    const privmon = result.modifiers?.find(
-      (mod) => mod.type === 'watchlist' && mod.subtype === 'privmon'
-    );
-    expect(privmon).toBeDefined();
-    expect(privmon?.contribution).toBe(7.8448275862);
-    expect(privmon?.metadata?.is_privileged_user).toBe(true);
+    expect(result.calculated_score_norm).toBe(80); // 65 + 10 + 5
+    expect(result.category_2_score).toBe(10);
+    expect(result.category_3_score).toBe(5);
+    expect(result.criticality_level).toBe('high_impact');
+    expect(result.is_privileged_user).toBe(true);
   });
 
   it('should include all risk inputs with proper formatting', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
+    const criticalityFields = {
+      category_2_score: 0,
+      category_2_count: 0,
+    };
+    const privmonFields = {
+      category_3_score: 0,
+      category_3_count: 0,
+      is_privileged_user: false,
+    };
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, criticalityFields, privmonFields);
 
     expect(result.inputs).toEqual([
       {
@@ -636,8 +612,17 @@ describe('riskScoreDocFactory', () => {
 
   it('should set correct identifier fields', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
+    const criticalityFields = {
+      category_2_score: 0,
+      category_2_count: 0,
+    };
+    const privmonFields = {
+      category_3_score: 0,
+      category_3_count: 0,
+      is_privileged_user: false,
+    };
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, criticalityFields, privmonFields);
 
     expect(result['@timestamp']).toBe(now);
     expect(result.id_field).toBe('user.name');
@@ -646,8 +631,17 @@ describe('riskScoreDocFactory', () => {
 
   it('should include notes from risk details', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
+    const criticalityFields = {
+      category_2_score: 0,
+      category_2_count: 0,
+    };
+    const privmonFields = {
+      category_3_score: 0,
+      category_3_count: 0,
+      is_privileged_user: false,
+    };
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, criticalityFields, privmonFields);
 
     expect(result.notes).toEqual(['Test note']);
   });

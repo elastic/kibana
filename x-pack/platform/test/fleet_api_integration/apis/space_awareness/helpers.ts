@@ -131,35 +131,27 @@ export async function cleanFleetActionIndices(esClient: Client) {
   }
 }
 
-export async function createFleetAgent(
-  esClient: Client,
-  agentPolicyId: string,
-  spaceId?: string,
-  data?: Partial<FleetServerAgent>
-) {
+export async function createFleetAgent(esClient: Client, agentPolicyId: string, spaceId?: string) {
   const agentResponse = await esClient.index({
     index: '.fleet-agents',
     refresh: true,
-    document: Object.assign(
-      {
-        access_api_key_id: 'api-key-3',
-        active: true,
-        policy_id: agentPolicyId,
-        policy_revision_idx: 1,
-        last_checkin_status: 'online',
-        type: 'PERMANENT',
-        local_metadata: {
-          host: { hostname: 'host123' },
-          elastic: { agent: { version: '8.15.0' } },
-        },
-        user_provided_metadata: {},
-        enrolled_at: new Date().toISOString(),
-        last_checkin: new Date().toISOString(),
-        tags: ['tag1'],
-        namespaces: spaceId ? [spaceId] : undefined,
+    document: {
+      access_api_key_id: 'api-key-3',
+      active: true,
+      policy_id: agentPolicyId,
+      policy_revision_idx: 1,
+      last_checkin_status: 'online',
+      type: 'PERMANENT',
+      local_metadata: {
+        host: { hostname: 'host123' },
+        elastic: { agent: { version: '8.15.0' } },
       },
-      data ?? {}
-    ),
+      user_provided_metadata: {},
+      enrolled_at: new Date().toISOString(),
+      last_checkin: new Date().toISOString(),
+      tags: ['tag1'],
+      namespaces: spaceId ? [spaceId] : undefined,
+    },
   });
 
   return agentResponse._id;

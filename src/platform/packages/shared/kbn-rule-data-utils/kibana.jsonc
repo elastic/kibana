@@ -4,7 +4,7 @@
   "owner": [
     "@elastic/security-detections-response",
     "@elastic/response-ops",
-    "@elastic/actionable-obs-team"
+    "@elastic/obs-ux-management-team"
   ],
   "group": "platform",
   "visibility": "shared"

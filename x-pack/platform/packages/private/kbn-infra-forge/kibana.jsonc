@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/infra-forge",
   "owner": [
-    "@elastic/actionable-obs-team",
+    "@elastic/obs-ux-management-team",
   ],
   "group": "platform",
   "visibility": "private"

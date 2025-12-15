@@ -100,9 +100,7 @@
     "@kbn/connector-schemas",
     "@kbn/react-query",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/management-settings-ids",
-    "@kbn/onechat-plugin",
-    "@kbn/ai-assistant-common"
+    "@kbn/management-settings-ids"
   ],
   "exclude": [
     "target/**/*",

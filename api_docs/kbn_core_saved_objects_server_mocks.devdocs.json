@@ -194,8 +194,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectTypeRegistryInternal",
-              ">"
+              "ISavedObjectTypeRegistry",
+              " & Pick<",
+              "SavedObjectTypeRegistry",
+              ", \"registerType\">>"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,

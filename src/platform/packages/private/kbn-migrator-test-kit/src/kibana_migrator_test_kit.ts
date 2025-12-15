@@ -26,7 +26,6 @@ import {
   type IKibanaMigrator,
   type MigrationResult,
   type IndexTypesMap,
-  type ISavedObjectTypeRegistryInternal,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -287,7 +286,7 @@ interface GetMigratorParams {
   configService: ConfigService;
   client: ElasticsearchClient;
   kibanaIndex: string;
-  typeRegistry: ISavedObjectTypeRegistryInternal;
+  typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;

@@ -45,7 +45,6 @@ import {
 } from '../../../entities/workflows/store';
 import {
   selectEditorYaml,
-  selectExecution,
   selectHasChanges,
   selectIsExecutionsTab,
   selectIsSavingYaml,
@@ -62,8 +61,6 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
-import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
-import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
@@ -168,18 +165,6 @@ export const WorkflowYAMLEditor = ({
   const stepExecutions = useSelector(selectStepExecutions);
   const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
   stepExecutionsRef.current = stepExecutions;
-
-  const execution = useSelector(selectExecution);
-  const executionContextRef = useRef<ExecutionContext | null>(null);
-
-  // Build execution context when step executions are available
-  useEffect(() => {
-    if (isExecutionYaml && stepExecutions) {
-      executionContextRef.current = buildExecutionContext(stepExecutions, execution?.context);
-    } else {
-      executionContextRef.current = null;
-    }
-  }, [isExecutionYaml, stepExecutions, execution?.context]);
 
   // Ref to track saving state for keyboard handlers
   const isSavingRef = useRef<boolean>(false);
@@ -346,10 +331,9 @@ export const WorkflowYAMLEditor = ({
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 
-        // Create unified providers with template expression support
+        // Create unified providers
         const providerConfig = {
           getYamlDocument: () => yamlDocumentRef.current || null,
-          getExecutionContext: () => executionContextRef.current,
           options: {
             http,
             notifications,
@@ -358,7 +342,7 @@ export const WorkflowYAMLEditor = ({
           },
         };
 
-        // Register the unified hover provider for API documentation and template expressions
+        // Register the unified hover provider for API documentation and other content
         const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
       }

@@ -130,10 +130,7 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
   return (
     <>
       {isTooltipShown && (
-        <div
-          ref={setTooltipRef}
-          {...getTooltipProps({ className: 'tooltip-container', style: { zIndex: 1000 } })}
-        >
+        <div ref={setTooltipRef} {...getTooltipProps({ className: 'tooltip-container' })}>
           <FormattedTooltip tooltipData={tooltipData} />
         </div>
       )}

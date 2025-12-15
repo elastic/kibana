@@ -10,8 +10,7 @@ import { formulas } from '../formulas';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
-  DEFAULT_XY_LEGEND,
-  DEFAULT_LEGEND_STATS,
+  DEFAULT_XY_HIDDEN_LEGEND,
 } from '../../../shared/charts/constants';
 
 const logRate: LensConfigWithId = {
@@ -25,20 +24,9 @@ const logRate: LensConfigWithId = {
       xAxis: '@timestamp',
       yAxis: [formulas.logRate],
     },
-    {
-      type: 'reference',
-      yAxis: [
-        {
-          value: '1',
-        },
-      ],
-    },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  legend: {
-    ...DEFAULT_XY_LEGEND.legend,
-    legendStats: DEFAULT_LEGEND_STATS,
-  },
+  ...DEFAULT_XY_HIDDEN_LEGEND,
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 

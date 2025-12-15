@@ -72,9 +72,6 @@ interface ManagedFlyoutProps {
   >['objectTypeMeta'];
   onSave?: () => Promise<void>;
   isSaving?: boolean;
-  sharingData: {
-    [key: string]: unknown;
-  };
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -128,7 +125,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-export function ManagedFlyout({
+function ManagedFlyout({
   exportIntegration,
   intl,
   isDirty,
@@ -139,20 +136,9 @@ export function ManagedFlyout({
   shareObjectTypeAlias,
   onSave,
   isSaving,
-  sharingData,
 }: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
-
-  const totalHitsSizeWarning = useMemo(() => {
-    if (exportIntegration.config.renderTotalHitsSizeWarning) {
-      const totalHits: number = (sharingData.totalHits as number) || 0;
-      const warning = exportIntegration.config.renderTotalHitsSizeWarning(totalHits);
-      return warning ? <EuiFlexItem>{warning}</EuiFlexItem> : null;
-    }
-    return null;
-  }, [exportIntegration.config, sharingData.totalHits]);
-
   const getReport = useCallback(async () => {
     try {
       setIsCreatingExport(true);
@@ -185,7 +171,7 @@ export function ManagedFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody">
+      <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <Fragment>
             {exportIntegration.config.renderLayoutOptionSwitch && (
@@ -252,7 +238,6 @@ export function ManagedFlyout({
               </EuiFlexItem>
             )}
           </Fragment>
-          <Fragment>{publicAPIEnabled && totalHitsSizeWarning}</Fragment>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -295,7 +280,6 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectType,
     objectTypeAlias,
     objectTypeMeta,
-    sharingData,
   } = useShareTypeContext('integration', 'export');
   const { shareMenuItems: exportDerivatives } = useShareTypeContext(
     'integration',
@@ -470,7 +454,6 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               onCloseFlyout={flyoutOnCloseHandler}
               onSave={onSave}
               isSaving={isSaving}
-              sharingData={sharingData}
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({

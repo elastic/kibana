@@ -81,7 +81,6 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/workflows-management-plugin'
-  - '@kbn/workflows-extensions'
   - '@kbn/spaces-plugin'
   - '@kbn/doc-links'
   - '@kbn/ui-actions-plugin'

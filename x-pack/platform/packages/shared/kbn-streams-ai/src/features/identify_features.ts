@@ -20,6 +20,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { createIdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
+import { generateStreamDescription } from '../description/generate_description';
 import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
@@ -140,29 +141,53 @@ export async function identifySystemFeatures({
     })
   );
 
-  const systems = response.toolCalls.flatMap((toolCall) =>
-    toolCall.function.arguments.systems.map((args) => {
-      const feature = {
-        ...args,
-        filter: args.filter as Condition,
-        type: 'system' as const,
-      };
-      return { ...feature, description: '' };
-    })
+  logger.trace('Generating descriptions for identified system features');
+  let tokensUsed: ChatCompletionTokenCount = {
+    prompt: 0,
+    completion: 0,
+    total: 0,
+    cached: 0,
+  };
+  const systems: SystemFeature[] = await withSpan('generate_system_feature_descriptions', () =>
+    Promise.all(
+      response.toolCalls
+        .flatMap((toolCall) =>
+          toolCall.function.arguments.systems.map((args) => {
+            const feature = {
+              ...args,
+              filter: args.filter as Condition,
+              type: 'system' as const,
+            };
+            return feature;
+          })
+        )
+        .map(async (feature) => {
+          const { description, tokensUsed: descriptionTokensUsed } =
+            await generateStreamDescription({
+              stream,
+              start,
+              end,
+              esClient,
+              inferenceClient,
+              feature: { ...feature, description: '' },
+              signal,
+              logger,
+            });
+
+          tokensUsed = sumTokens(tokensUsed, descriptionTokensUsed);
+
+          return {
+            ...feature,
+            description,
+          };
+        })
+    )
   );
 
   logger.debug(`Identified ${systems.length} system features for stream ${stream.name}`);
 
   return {
     features: systems,
-    tokensUsed: sumTokens(
-      {
-        prompt: 0,
-        completion: 0,
-        total: 0,
-        cached: 0,
-      },
-      response.tokens
-    ),
+    tokensUsed: sumTokens(tokensUsed, response.tokens),
   };
 }

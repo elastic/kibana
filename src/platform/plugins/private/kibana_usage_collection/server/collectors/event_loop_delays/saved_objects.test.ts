@@ -64,13 +64,13 @@ describe('deleteHistogramSavedObjects', () => {
       Array [
         Array [
           Object {
-            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-3d\\"",
+            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-3d/d\\"",
             "type": "event_loop_delays_daily",
           },
         ],
         Array [
           Object {
-            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-20d\\"",
+            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-20d/d\\"",
             "type": "event_loop_delays_daily",
           },
         ],

@@ -56,7 +56,6 @@ interface Dependencies {
 export class CsvGenerator {
   private csvContainsFormulas = false;
   private maxSizeReached = false;
-  private maxRowsReached = false;
   private csvRowCount = 0;
 
   constructor(
@@ -68,7 +67,6 @@ export class CsvGenerator {
     private cancellationToken: CancellationToken,
     private logger: Logger,
     private stream: Writable,
-    private isServerless: boolean = false,
     private jobId: string
   ) {}
   /*
@@ -308,7 +306,7 @@ export class CsvGenerator {
       }
     }
 
-    const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
+    const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;
     const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
@@ -370,9 +368,7 @@ export class CsvGenerator {
           break;
         }
 
-        // override the scroll size if the maxRows limit is smaller
-        const size = Math.min(settings.scroll.size, maxRows);
-        searchSource.setField('size', size);
+        searchSource.setField('size', settings.scroll.size);
 
         let results: estypes.SearchResponse<unknown> | undefined;
         try {
@@ -439,20 +435,6 @@ export class CsvGenerator {
 
         // update iterator
         currentRecord += table.rows.length;
-
-        // stop generating the report if the
-        // current number of rows is >= the max row limit
-        if (currentRecord >= maxRows - 1) {
-          this.logger.warn(
-            `Your requested export includes ${totalRecords} rows, which has exceeded the recommended row limit (${maxRows}).${
-              this.isServerless
-                ? ''
-                : ' This limit can be configured in kibana.yml, but increasing it may impact performance.'
-            }`
-          );
-          this.maxRowsReached = true;
-          break;
-        }
       } while (totalRecords != null && currentRecord < totalRecords - 1);
 
       // Add warnings to be logged
@@ -482,15 +464,7 @@ export class CsvGenerator {
 
     logger.info(`Finished generating. Row count: ${this.csvRowCount}.`, { tags: [this.jobId] });
 
-    if (this.maxRowsReached) {
-      warnings.push(
-        i18nTexts.csvMaxRowsWarning({
-          isServerless: this.isServerless,
-          maxRows,
-          expected: totalRecords ?? 0,
-        })
-      );
-    } else if (!this.maxSizeReached && !this.maxRowsReached && this.csvRowCount !== totalRecords) {
+    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       logger.warn(
         `ES scroll returned ` +
           `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   SearchAILakeConfigurationsSettingsManagement,
   CONVERSATIONS_TAB,
@@ -16,7 +16,6 @@ import { useSearchParams } from 'react-router-dom-v5-compat';
 import { SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 
 export const AISettings: React.FC = () => {
   const { navigateTo } = useNavigation();
@@ -30,7 +29,6 @@ export const AISettings: React.FC = () => {
     data: { dataViews },
   } = useKibana().services;
   const spaceId = useSpaceId();
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const onTabChange = useCallback(
     (tab: string) => {
       navigateTo({
@@ -46,21 +44,9 @@ export const AISettings: React.FC = () => {
     () => (searchParams.get('tab') as ManagementSettingsTabs) ?? CONVERSATIONS_TAB,
     [searchParams]
   );
-
-  useEffect(() => {
-    if (!securityAIAssistantEnabled) {
-      navigateToApp('home');
-    } else if (isAgentChatExperienceEnabled) {
-      navigateTo({
-        deepLinkId: SecurityPageName.configurationsIntegrations,
-      });
-    }
-  }, [securityAIAssistantEnabled, isAgentChatExperienceEnabled, navigateToApp, navigateTo]);
-
-  if (!securityAIAssistantEnabled || isAgentChatExperienceEnabled) {
-    return null;
+  if (!securityAIAssistantEnabled) {
+    navigateToApp('home');
   }
-
   return spaceId ? (
     <AssistantSpaceIdProvider spaceId={spaceId}>
       <SearchAILakeConfigurationsSettingsManagement

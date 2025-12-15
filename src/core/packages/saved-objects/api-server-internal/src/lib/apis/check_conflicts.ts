@@ -10,18 +10,22 @@
 import type { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRawDocSource, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsCheckConflictsResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { Either } from './utils';
 import {
-  type SavedObjectsCheckConflictsObject,
-  type SavedObjectsBaseOptions,
-  type SavedObjectsCheckConflictsResponse,
-  type Either,
+  errorContent,
   left,
   right,
-  isRight,
   isLeft,
-} from '@kbn/core-saved-objects-api-server';
-import { isMgetDoc, rawDocExistsInNamespace } from './utils';
+  isRight,
+  isMgetDoc,
+  rawDocExistsInNamespace,
+} from './utils';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformCheckConflictsParams<T = unknown> {
@@ -95,7 +99,6 @@ export const performCheckConflicts = async <T>(
 
   const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
   expectedBulkGetResults.forEach((expectedResult) => {
-    // Unsupported type
     if (isLeft(expectedResult)) {
       errors.push(expectedResult.value as any);
       return;

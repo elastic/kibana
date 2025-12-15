@@ -21,14 +21,8 @@ import {
   EntityNotFoundError,
 } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
-import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
-import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 
-export const deleteEntity = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  telemetry: ITelemetryEventsSender,
-  logger: Logger
-) => {
+export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .delete({
       access: 'public',
@@ -62,19 +56,13 @@ export const deleteEntity = (
           await secSol
             .getEntityStoreCrudClient()
             .deleteEntity(request.params.entityType, request.body);
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-          });
+
           return response.ok({
             body: {
               deleted: true,
             },
           });
         } catch (error) {
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-            error: (error as Error).message,
-          });
           if (
             error instanceof EngineNotRunningError ||
             error instanceof CapabilityNotEnabledError

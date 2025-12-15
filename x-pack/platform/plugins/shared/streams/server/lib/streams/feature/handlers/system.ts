@@ -8,9 +8,8 @@
 import type { SystemFeature } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
-import { generateStreamDescription, identifySystemFeatures, sumTokens } from '@kbn/streams-ai';
+import { identifySystemFeatures } from '@kbn/streams-ai';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import { withSpan } from '@kbn/apm-utils';
 import { FeatureTypeHandler } from '../feature_type_handler';
 import type { StoredFeature } from '../stored_feature';
 import {
@@ -45,35 +44,10 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
     };
   }
 
-  async identifyFeatures(
+  identifyFeatures(
     options: IdentifyFeaturesOptions
   ): Promise<{ features: SystemFeature[]; tokensUsed: ChatCompletionTokenCount }> {
-    const result = await identifySystemFeatures({ ...options, dropUnmapped: true });
-
-    options.logger.trace('Generating descriptions for identified system features');
-
-    let totalTokensUsed: ChatCompletionTokenCount = result.tokensUsed;
-    const systemsWithDescription = await withSpan('generate_system_feature_descriptions', () =>
-      Promise.all(
-        result.features.map(async (system) => {
-          const { description, tokensUsed } = await generateStreamDescription({
-            stream: options.stream,
-            feature: system,
-            start: options.start,
-            end: options.end,
-            esClient: options.esClient,
-            inferenceClient: options.inferenceClient,
-            signal: options.signal,
-            logger: options.logger,
-          });
-
-          totalTokensUsed = sumTokens(totalTokensUsed, tokensUsed);
-          return { ...system, description };
-        })
-      )
-    );
-
-    return { features: systemsWithDescription, tokensUsed: totalTokensUsed };
+    return identifySystemFeatures({ ...options, dropUnmapped: true });
   }
 
   getFeatureUuid(streamName: string, featureName: string): string {

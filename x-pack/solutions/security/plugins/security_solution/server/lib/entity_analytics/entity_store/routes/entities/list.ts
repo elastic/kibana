@@ -25,16 +25,10 @@ import type { ListEntitiesResponse } from '../../../../../../common/api/entity_a
 import { ListEntitiesRequestQuery } from '../../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { APP_ID } from '../../../../../../common';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
-import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
-import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
-export const listEntitiesRoute = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  telemetry: ITelemetryEventsSender,
-  logger: Logger
-) => {
+export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .get({
       access: 'public',
@@ -79,9 +73,6 @@ export const listEntitiesRoute = (
             sortOrder,
           });
 
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-          });
           return response.ok({
             body: {
               records,
@@ -94,10 +85,6 @@ export const listEntitiesRoute = (
         } catch (e) {
           logger.error(e);
           const error = transformError(e);
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-            error: error.message,
-          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

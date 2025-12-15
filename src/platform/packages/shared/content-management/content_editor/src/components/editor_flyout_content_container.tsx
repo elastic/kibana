@@ -20,6 +20,7 @@ type CommonProps = Pick<
   | 'readonlyReason'
   | 'services'
   | 'onSave'
+  | 'onCancel'
   | 'entityName'
   | 'customValidators'
   | 'appendRows'

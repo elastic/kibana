@@ -33,7 +33,6 @@ describe('ExecutionContextService', () => {
             name: 'name-a',
             id: 'id-a',
             description: 'description-a',
-            space: 'awesome-space',
           });
           await timer(500);
           return service.get();
@@ -61,7 +60,6 @@ describe('ExecutionContextService', () => {
             id: 'id-a',
             description: 'description-a',
             child: undefined,
-            space: 'awesome-space',
           },
 
           {

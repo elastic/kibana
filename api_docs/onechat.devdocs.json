@@ -43,23 +43,7 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "onechat",
-        "id": "def-public.ONECHAT_FEATURE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "ONECHAT_FEATURE_ID",
-        "description": [],
-        "signature": [
-          "\"agentBuilder\""
-        ],
-        "path": "x-pack/platform/plugins/shared/onechat/common/features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "onechat",

@@ -4,7 +4,7 @@
   "owner": [
     "@elastic/appex-sharedux",
     "@elastic/kibana-management",
-    "@elastic/obs-presentation-team"
+    "@elastic/obs-ux-management-team"
   ],
   "group": "platform",
   "visibility": "shared"

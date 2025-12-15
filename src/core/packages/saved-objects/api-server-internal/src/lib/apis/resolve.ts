@@ -11,9 +11,8 @@ import type {
   SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { ApiExecutionContext } from './types';
-import { internalBulkResolve } from './internals/internal_bulk_resolve';
+import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
 import { incrementCounterInternal } from './internals/increment_counter_internal';
 
 export interface PerformCreateParams<T = unknown> {
@@ -42,7 +41,7 @@ export const performResolve = async <T>(
   );
 
   const [result] = bulkResults;
-  if (SavedObjectsErrorHelpers.isBulkResolveError(result)) {
+  if (isBulkResolveError(result)) {
     throw result.error;
   }
   return result;

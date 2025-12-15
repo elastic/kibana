@@ -16,10 +16,14 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { Services } from '../services';
 import type { Item } from '../types';
@@ -33,6 +37,9 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
     values: {
       entityName,
     },
+  }),
+  cancelButtonLabel: i18n.translate('contentManagement.contentEditor.cancelButtonLabel', {
+    defaultMessage: 'Cancel',
   }),
 });
 
@@ -49,6 +56,7 @@ export interface Props {
     tags: string[];
   }) => Promise<void>;
   customValidators?: CustomValidators;
+  onCancel: () => void;
   appendRows?: React.ReactNode;
 }
 
@@ -61,9 +69,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   readonlyReason,
   services: { TagSelector, TagList, notifyError },
   onSave,
+  onCancel,
   customValidators,
   appendRows,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
@@ -118,6 +128,14 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
     setIsSubmitted(true);
   }, [onSave, item.id, form, notifyError, entityName]);
 
+  const onClickCancel = useCallback(() => {
+    onCancel();
+  }, [onCancel]);
+
+  const iconCSS = css`
+    margin-right: ${euiTheme.size.m};
+  `;
+
   const title = capitalize(
     i18n.translate('contentManagement.contentEditor.flyoutTitle', {
       defaultMessage: '{entityName} details',
@@ -132,10 +150,12 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>
+            <EuiIcon type="info" css={iconCSS} size="l" />
             <span>{title}</span>
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
+
       <EuiFlyoutBody>
         <MetadataForm
           form={{ ...form, isSubmitted }}
@@ -153,23 +173,37 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           {appendRows}
         </MetadataForm>
       </EuiFlyoutBody>
+
       <EuiFlyoutFooter>
-        {isReadonly === false && (
-          <EuiFlexGroup justifyContent="flexEnd">
+        <>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={onClickSave}
-                data-test-subj="saveButton"
-                fill
-                disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
-                isLoading={isSubmitting}
+              <EuiButtonEmpty
+                iconType="cross"
+                flush="left"
+                onClick={onClickCancel}
+                data-test-subj="closeFlyoutButton"
               >
-                {i18nTexts.saveButtonLabel}
-              </EuiButton>
+                {i18nTexts.cancelButtonLabel}
+              </EuiButtonEmpty>
             </EuiFlexItem>
+
+            {isReadonly === false && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={onClickSave}
+                  data-test-subj="saveButton"
+                  fill
+                  disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
+                  isLoading={isSubmitting}
+                >
+                  {i18nTexts.saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-        )}
+        </>
       </EuiFlyoutFooter>
     </>
   );

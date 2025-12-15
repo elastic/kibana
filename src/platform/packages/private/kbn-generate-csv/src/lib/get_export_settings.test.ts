@@ -39,7 +39,6 @@ describe('getExportSettings', () => {
       scroll: { size: 500, duration: '30s', strategy: 'pit' },
       useByteOrderMarkEncoding: false,
       maxConcurrentShardRequests: 5,
-      maxRows: 100,
     };
 
     taskInstanceFields = { startedAt: null, retryAt: null };
@@ -73,7 +72,6 @@ describe('getExportSettings', () => {
         "escapeValue": [Function],
         "includeFrozen": false,
         "maxConcurrentShardRequests": 5,
-        "maxRows": 100,
         "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": [Function],

@@ -36,7 +36,6 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
   const defaultAssistantAvailability: AssistantAvailability = {
     hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
-    hasAgentBuilderPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
     hasUpdateAIAssistantAnonymization: true,

@@ -19,7 +19,6 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
   SavedObject,
-  AccessControlImportTransformsFactory,
 } from '@kbn/core-saved-objects-server';
 import {
   collectSavedObjects,
@@ -66,8 +65,6 @@ export interface ResolveSavedObjectsImportErrorsOptions {
    * This property allows plugin authors to implement read-only UI's
    */
   managed?: boolean;
-  /** The factory function for creating the access control import transforms */
-  createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
 }
 
 /**
@@ -87,7 +84,6 @@ export async function resolveSavedObjectsImportErrors({
   createNewCopies,
   compatibilityMode,
   managed,
-  createAccessControlImportTransforms,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -104,8 +100,6 @@ export async function resolveSavedObjectsImportErrors({
     filter,
     supportedTypes,
     managed,
-    typeRegistry,
-    createAccessControlImportTransforms,
   });
   // Map of all IDs for objects that we are attempting to import, and any references that are not included in the read stream;
   // each value is empty by default

@@ -9,27 +9,12 @@
 
 import React, { Fragment, useCallback } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
-import { AccessModeContainer } from '@kbn/content-management-access-control-public';
-import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
-import { getAccessControlClient } from '../../services/access_control_service';
-import {
-  coreServices,
-  savedObjectsTaggingService,
-  spacesService,
-} from '../../services/kibana_services';
+import { savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
 interface DashboardSaveModalProps {
@@ -41,7 +26,6 @@ interface DashboardSaveModalProps {
     newTimeRestore,
     newProjectRoutingRestore,
     isTitleDuplicateConfirmed,
-    newAccessMode,
     onTitleDuplicate,
   }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
@@ -54,8 +38,6 @@ interface DashboardSaveModalProps {
   showStoreTimeOnSave?: boolean;
   showStoreProjectRoutingOnSave?: boolean;
   customModalTitle?: string;
-  accessControl?: Partial<SavedObjectAccessControl>;
-  isDuplicateAction?: boolean;
 }
 
 type SaveDashboardHandler = (args: {
@@ -78,16 +60,11 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   title,
   timeRestore,
   projectRoutingRestore,
-  accessControl,
-  isDuplicateAction,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
   const [persistSelectedProjectRouting, setPersistSelectedProjectRouting] =
     React.useState(projectRoutingRestore);
-  const [selectedAccessMode, setSelectedAccessMode] = React.useState(
-    accessControl?.accessMode ?? 'default'
-  );
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
     async ({
@@ -106,15 +83,8 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         newTags: selectedTags,
-        newAccessMode: selectedAccessMode,
       }),
-    [
-      onSave,
-      persistSelectedTimeInterval,
-      persistSelectedProjectRouting,
-      selectedTags,
-      selectedAccessMode,
-    ]
+    [onSave, persistSelectedTimeInterval, persistSelectedProjectRouting, selectedTags]
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
@@ -196,19 +166,6 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
-        {!isDuplicateAction && (
-          <>
-            <EuiSpacer size="l" />
-            <AccessModeContainer
-              accessControl={accessControl}
-              onChangeAccessMode={setSelectedAccessMode}
-              getActiveSpace={spacesService?.getActiveSpace}
-              getCurrentUser={coreServices.userProfile.getCurrent}
-              accessControlClient={getAccessControlClient()}
-              contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
-            />
-          </>
-        )}
       </Fragment>
     );
   }, [
@@ -217,8 +174,6 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
     selectedTags,
     showStoreTimeOnSave,
     showStoreProjectRoutingOnSave,
-    accessControl,
-    isDuplicateAction,
   ]);
 
   return (

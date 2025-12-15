@@ -80,7 +80,7 @@ function createGetFromFields(fetchFields: (query: string) => Promise<ESQLFieldWi
 }
 // Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
-  const metadata = await getEcsMetadata(resourceRetriever);
+  const metadata = await getEcsMetadata();
   const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
   const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
   return fieldsWithMetadata;

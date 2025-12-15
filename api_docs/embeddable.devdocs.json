@@ -2315,15 +2315,7 @@
             "\nRegister legacyURLTransform for an embeddable type.\nLegacyURLTransform is used to convert StoredEmbeddableState from URL into EmbeddableState."
           ],
           "signature": [
-            "(type: string, getTransformOut: () => Promise<((storedState: object, panelReferences?: ",
-            {
-              "pluginId": "@kbn/content-management-utils",
-              "scope": "server",
-              "docId": "kibKbnContentManagementUtilsPluginApi",
-              "section": "def-server.Reference",
-              "text": "Reference"
-            },
-            "[] | undefined, containerReferences?: ",
+            "(type: string, getTransformOut: () => Promise<((storedState: object, references?: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -2360,15 +2352,7 @@
               "label": "getTransformOut",
               "description": [],
               "signature": [
-                "() => Promise<((storedState: object, panelReferences?: ",
-                {
-                  "pluginId": "@kbn/content-management-utils",
-                  "scope": "server",
-                  "docId": "kibKbnContentManagementUtilsPluginApi",
-                  "section": "def-server.Reference",
-                  "text": "Reference"
-                },
-                "[] | undefined, containerReferences?: ",
+                "() => Promise<((storedState: object, references?: ",
                 {
                   "pluginId": "@kbn/content-management-utils",
                   "scope": "server",
@@ -2639,15 +2623,7 @@
           "label": "getLegacyURLTransform",
           "description": [],
           "signature": [
-            "(type: string) => Promise<((storedState: object, panelReferences?: ",
-            {
-              "pluginId": "@kbn/content-management-utils",
-              "scope": "server",
-              "docId": "kibKbnContentManagementUtilsPluginApi",
-              "section": "def-server.Reference",
-              "text": "Reference"
-            },
-            "[] | undefined, containerReferences?: ",
+            "(type: string) => Promise<((storedState: object, references?: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -3404,15 +3380,7 @@
         "label": "EmbeddableTransforms",
         "description": [],
         "signature": [
-          "{ transformOutInjectsReferences?: boolean | undefined; transformOut?: ((storedState: StoredEmbeddableState, panelReferences?: ",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[] | undefined, containerReferences?: ",
+          "{ transformOutInjectsReferences?: boolean | undefined; transformOut?: ((storedState: StoredEmbeddableState, references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

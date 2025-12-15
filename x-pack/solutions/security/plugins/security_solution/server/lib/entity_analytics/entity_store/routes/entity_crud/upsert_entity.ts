@@ -21,14 +21,8 @@ import {
   DocumentVersionConflictError,
 } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
-import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
-import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
-export const upsertEntity = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  telemetry: ITelemetryEventsSender,
-  logger: Logger
-) => {
+export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .put({
       access: 'public',
@@ -63,15 +57,8 @@ export const upsertEntity = (
             .getEntityStoreCrudClient()
             .upsertEntity(request.params.entityType, request.body, request.query.force);
 
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-          });
           return response.ok();
         } catch (error) {
-          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
-            endpoint: request.route.path,
-            error: (error as Error).message,
-          });
           if (
             error instanceof EngineNotRunningError ||
             error instanceof CapabilityNotEnabledError

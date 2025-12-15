@@ -14,7 +14,6 @@ import React, {
   type ComponentProps,
   type FC,
   type ReactElement,
-  type ReactNode,
 } from 'react';
 import { Global } from '@emotion/react';
 import {
@@ -65,7 +64,6 @@ export interface ITabbedModalInner
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;
-  aboveTabsContent?: ReactNode;
   'data-test-subj'?: string;
 }
 
@@ -74,7 +72,6 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   modalTitle,
   modalWidth,
   anchorElement,
-  aboveTabsContent: AboveTabsContent,
   outsideClickCloses,
   ...props
 }) => {
@@ -154,9 +151,6 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
         <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {AboveTabsContent && (
-          <div data-test-subj="tabbedModal-above-tabs-content">{AboveTabsContent}</div>
-        )}
         <Fragment>{renderTabs()}</Fragment>
         <EuiSpacer size="m" />
         <div css={{ display: 'contents' }} data-test-subj={`tabbedModal-${selectedTabId}-content`}>

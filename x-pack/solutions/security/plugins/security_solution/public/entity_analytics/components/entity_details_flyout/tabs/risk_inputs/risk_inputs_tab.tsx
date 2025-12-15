@@ -12,7 +12,6 @@ import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
-import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
@@ -247,28 +246,17 @@ const ContextsSection = <T extends EntityType>({
       return undefined;
     }
 
-    const privmon = riskScore[entityType].risk.modifiers?.find(
-      (mod) => mod.type === 'watchlist' && mod.subtype === 'privmon'
-    );
-    const criticality = riskScore[entityType].risk.modifiers?.find(
-      (mod) => mod.type === 'asset_criticality'
-    );
-
     return {
       criticality: {
-        level: isPrivmonEnabled
-          ? (criticality?.metadata?.criticality_level as CriticalityLevel)
-          : riskScore[entityType].risk.criticality_level,
-        contribution: isPrivmonEnabled
-          ? criticality?.contribution
-          : riskScore[entityType].risk.category_2_score,
+        level: riskScore[entityType].risk.criticality_level,
+        contribution: riskScore[entityType].risk.category_2_score,
       },
       privmon: {
-        isPrivileged: privmon ? privmon.metadata?.is_privileged_user : false,
-        contribution: privmon?.contribution ?? 0,
+        isPrivileged: riskScore[entityType].risk.is_privileged_user,
+        contribution: riskScore[entityType].risk.category_3_score,
       },
     };
-  }, [entityType, riskScore, isPrivmonEnabled]);
+  }, [entityType, riskScore]);
 
   if (loading || contributions === undefined) {
     return null;

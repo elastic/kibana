@@ -183,7 +183,6 @@ export type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnexpectedAccessControlMetadataError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,

@@ -29,7 +29,6 @@ export interface ClientConfigType {
       duration: string;
       size: number;
     };
-    maxRows: number;
   };
   poll: {
     jobsRefresh: {

@@ -45,7 +45,6 @@ import type {
   InvokeAIRawActionResponse,
 } from '@kbn/connector-schemas/gemini';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { validateGeminiSecrets } from './validators';
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {
@@ -200,8 +199,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   /** Retrieve access token based on the GCP service account credential json file */
   private async getAccessToken(): Promise<string | null> {
     // Validate the service account credentials JSON file input
-    validateGeminiSecrets(this.secrets);
-
     let credentialsJson;
     try {
       credentialsJson = JSON.parse(this.secrets.credentialsJson);

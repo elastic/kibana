@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardState } from '../../../common';
 
 export interface DashboardSaveOptions {
@@ -18,7 +17,6 @@ export interface DashboardSaveOptions {
   newDescription: string;
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
-  newAccessMode?: SavedObjectAccessControl['accessMode'];
   newProjectRoutingRestore: boolean;
   onTitleDuplicate: () => void;
   isTitleDuplicateConfirmed: boolean;
@@ -32,7 +30,6 @@ export interface SaveDashboardProps {
   saveOptions: SavedDashboardSaveOpts;
   searchSourceReferences?: Reference[];
   lastSavedId?: string;
-  accessMode?: SavedObjectAccessControl['accessMode'];
 }
 
 export interface SaveDashboardReturn {

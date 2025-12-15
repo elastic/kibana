@@ -35,8 +35,6 @@ export type {
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   CreatedObject,
-  AccessControlImportTransforms,
-  AccessControlImportTransformsFactory,
 } from './src/import';
 export type {
   SavedObjectsTypeMappingDefinition,
@@ -88,8 +86,6 @@ export type {
   EncryptedObjectDescriptor,
 } from './src/extensions/encryption';
 export type {
-  AuthorizeObject,
-  AuthorizationResult,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -115,8 +111,6 @@ export type {
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
   WithAuditName,
-  AuthorizeChangeAccessControlParams,
-  SetAccessControlToWriteParams,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
@@ -127,7 +121,6 @@ export {
 } from './src/extensions/extensions';
 export {
   SavedObjectsErrorHelpers,
-  errorContent,
   type DecoratedError,
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';
@@ -161,7 +154,6 @@ export type {
 // We re-export the SavedObject types here for convenience.
 export type {
   SavedObject,
-  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

@@ -14,15 +14,13 @@ import { checkLicense } from '../../..';
 export const reportingCsvExportShareIntegration = ({
   apiClient,
   startServices$,
-  csvConfig,
-  isServerless,
 }: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
   return {
     id: 'csvReports',
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
       const { getShareMenuItems } = await import('./csv_export_config');
-      return getShareMenuItems({ apiClient, startServices$, csvConfig, isServerless })(...args);
+      return getShareMenuItems({ apiClient, startServices$ })(...args);
     },
     prerequisiteCheck: ({ license, capabilities }) => {
       if (!license) {

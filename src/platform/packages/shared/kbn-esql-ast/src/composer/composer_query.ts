@@ -44,7 +44,7 @@ import {
 } from '../ast/is';
 import { replaceProperties } from '../walker/helpers';
 import { resolveItem } from '../visitor/utils';
-import { printAst } from '../shared/debug';
+import { printAst } from '../debug';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;

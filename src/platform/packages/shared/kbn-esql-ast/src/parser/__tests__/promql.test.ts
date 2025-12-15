@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { printAst } from '../../shared/debug/print_ast';
+import { printAst } from '../../debug/print_ast';
 import type { ESQLCommand, ESQLMap, ESQLMapEntry, ESQLParens } from '../../types';
 import { Walker } from '../../walker';
 

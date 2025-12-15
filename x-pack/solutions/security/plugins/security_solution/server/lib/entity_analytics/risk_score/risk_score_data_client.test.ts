@@ -251,26 +251,6 @@ const assertIndex = (namespace: string) => {
                   category_1_score: {
                     type: 'float',
                   },
-                  modifiers: {
-                    properties: {
-                      contribution: {
-                        type: 'float',
-                      },
-                      metadata: {
-                        type: 'flattened',
-                      },
-                      modifier_value: {
-                        type: 'float',
-                      },
-                      subtype: {
-                        type: 'keyword',
-                      },
-                      type: {
-                        type: 'keyword',
-                      },
-                    },
-                    type: 'object',
-                  },
                   id_field: {
                     type: 'keyword',
                   },
@@ -330,26 +310,6 @@ const assertIndex = (namespace: string) => {
                   category_1_score: {
                     type: 'float',
                   },
-                  modifiers: {
-                    properties: {
-                      contribution: {
-                        type: 'float',
-                      },
-                      metadata: {
-                        type: 'flattened',
-                      },
-                      modifier_value: {
-                        type: 'float',
-                      },
-                      subtype: {
-                        type: 'keyword',
-                      },
-                      type: {
-                        type: 'keyword',
-                      },
-                    },
-                    type: 'object',
-                  },
                   id_field: {
                     type: 'keyword',
                   },
@@ -408,26 +368,6 @@ const assertIndex = (namespace: string) => {
                   },
                   category_1_score: {
                     type: 'float',
-                  },
-                  modifiers: {
-                    properties: {
-                      contribution: {
-                        type: 'float',
-                      },
-                      metadata: {
-                        type: 'flattened',
-                      },
-                      modifier_value: {
-                        type: 'float',
-                      },
-                      subtype: {
-                        type: 'keyword',
-                      },
-                      type: {
-                        type: 'keyword',
-                      },
-                    },
-                    type: 'object',
                   },
                   id_field: {
                     type: 'keyword',

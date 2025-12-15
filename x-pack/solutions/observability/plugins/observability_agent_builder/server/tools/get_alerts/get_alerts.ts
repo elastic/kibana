@@ -25,7 +25,6 @@ import { getRelevantAlertFields } from './get_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
 export const OBSERVABILITY_GET_ALERTS_TOOL_ID = 'observability.get_alerts';
 
@@ -110,31 +109,19 @@ export function createGetAlertsTool({
         includeRecovered,
         query,
       },
-      { request }
+      handlerinfo
     ) => {
       try {
         const [coreStart, pluginStart] = await core.getStartServices();
-        const { inference, ruleRegistry } = pluginStart;
-
-        const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-
-        const connectorId = await getDefaultConnectorId({
-          coreStart,
-          inference,
-          request,
-          logger,
-        });
-
-        const boundInferenceClient = inference.getClient({
-          request,
-          bindTo: { connectorId },
-        });
+        const alertsClient = await pluginStart.ruleRegistry.getRacClientWithRequest(
+          handlerinfo.request
+        );
 
         const selectedFields = await getRelevantAlertFields({
           coreStart,
           pluginStart,
-          request,
-          inferenceClient: boundInferenceClient,
+          request: handlerinfo.request,
+          modelProvider: handlerinfo.modelProvider,
           logger,
           query,
         });

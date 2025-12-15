@@ -183,54 +183,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.appendLimitToQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "appendLimitToQuery",
-        "description": [],
-        "signature": [
-          "(queryString: string, limit: number) => string"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_limit.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.appendLimitToQuery.$1",
-            "type": "string",
-            "tags": [],
-            "label": "queryString",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_limit.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.appendLimitToQuery.$2",
-            "type": "number",
-            "tags": [],
-            "label": "limit",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_limit.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.appendStatsByToQuery",
         "type": "Function",
         "tags": [],
@@ -239,7 +191,7 @@
         "signature": [
           "(queryString: string, column: string) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_stats_by.ts",
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -253,7 +205,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_stats_by.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -268,7 +220,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_stats_by.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -283,13 +235,11 @@
         "type": "Function",
         "tags": [],
         "label": "appendToESQLQuery",
-        "description": [
-          "\nAppend in a new line the appended text to take care of the case where the user adds a comment at the end of the query.\nIn these cases a base query such as \"from index // comment\" will result in errors or wrong data if we don't append in a new line"
-        ],
+        "description": [],
         "signature": [
           "(baseESQLQuery: string, appendedText: string) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/utils.ts",
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -303,7 +253,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/utils.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -318,7 +268,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/utils.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -333,15 +283,11 @@
         "type": "Function",
         "tags": [],
         "label": "appendWhereClauseToESQLQuery",
-        "description": [
-          "\nAppends a WHERE clause to an existing ES|QL query string."
-        ],
+        "description": [],
         "signature": [
-          "(baseESQLQuery: string, field: string, value: unknown, operation: ",
-          "SupportedOperation",
-          ", fieldType: string | undefined) => string | undefined"
+          "(baseESQLQuery: string, field: string, value: unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType: string | undefined) => string | undefined"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -351,13 +297,11 @@
             "type": "string",
             "tags": [],
             "label": "baseESQLQuery",
-            "description": [
-              "the base ES|QL query to append the WHERE clause to."
-            ],
+            "description": [],
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -368,13 +312,11 @@
             "type": "string",
             "tags": [],
             "label": "field",
-            "description": [
-              "the field to filter on."
-            ],
+            "description": [],
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -385,13 +327,11 @@
             "type": "Unknown",
             "tags": [],
             "label": "value",
-            "description": [
-              "the value to filter by."
-            ],
+            "description": [],
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -402,13 +342,11 @@
             "type": "CompoundType",
             "tags": [],
             "label": "operation",
-            "description": [
-              "the operation to perform ('+', '-', 'is_not_null', 'is_null')."
-            ],
+            "description": [],
             "signature": [
-              "SupportedOperation"
+              "\"+\" | \"-\" | \"is_not_null\" | \"is_null\""
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -419,21 +357,17 @@
             "type": "string",
             "tags": [],
             "label": "fieldType",
-            "description": [
-              "the type of the field being filtered (optional)."
-            ],
+            "description": [],
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "the modified ES|QL query string with the appended WHERE clause, or undefined if no changes were made."
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2787,45 +2721,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.getProjectRoutingFromEsqlQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "getProjectRoutingFromEsqlQuery",
-        "description": [
-          "\nExtracts the project routing value from an ES|QL query string.\n"
-        ],
-        "signature": [
-          "(queryString: string) => string | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/set_instructions_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.getProjectRoutingFromEsqlQuery.$1",
-            "type": "string",
-            "tags": [],
-            "label": "queryString",
-            "description": [
-              "- The ES|QL query string to parse"
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/set_instructions_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "The project routing value if found, undefined otherwise"
-        ],
         "initialIsOpen": false
       },
       {

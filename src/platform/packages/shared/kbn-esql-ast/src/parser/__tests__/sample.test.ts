@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '../core/parser';
+import { Parser } from '../parser';
 
 describe('SAMPLE', () => {
   test('correctly formatted', () => {

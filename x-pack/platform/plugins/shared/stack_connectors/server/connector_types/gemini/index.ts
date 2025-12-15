@@ -27,7 +27,6 @@ import {
 } from '@kbn/connector-schemas/gemini';
 import { GeminiConnector } from './gemini';
 import { renderParameterTemplates } from './render';
-import { validateGeminiSecrets } from './validators';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: CONNECTOR_ID,
@@ -37,10 +36,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     config: ConfigSchema,
     secrets: SecretsSchema,
   },
-  validators: [
-    { type: ValidatorType.CONFIG, validator: configValidator },
-    { type: ValidatorType.SECRETS, validator: secretsValidator },
-  ],
+  validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForSearchPlaygroundConnectorFeatureId,
@@ -61,22 +57,6 @@ export const configValidator = (configObject: Config, validatorServices: Validat
     throw new Error(
       i18n.translate('xpack.stackConnectors.gemini.configurationErrorApiProvider', {
         defaultMessage: 'Error configuring Google Gemini action: {err}',
-        values: {
-          err: err.toString(),
-        },
-      })
-    );
-  }
-};
-
-export const secretsValidator = (secrets: Secrets, validatorServices: ValidatorServices) => {
-  try {
-    validateGeminiSecrets(secrets);
-    return secrets;
-  } catch (err) {
-    throw new Error(
-      i18n.translate('xpack.stackConnectors.gemini.configurationErrorSecrets', {
-        defaultMessage: 'Error configuring Google Gemini secrets: {err}',
         values: {
           err: err.toString(),
         },

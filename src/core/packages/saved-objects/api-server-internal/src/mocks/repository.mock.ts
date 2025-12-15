@@ -36,8 +36,6 @@ const createRepositoryMock = () => {
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
     asScopedToNamespace: jest.fn().mockImplementation(createRepositoryMock),
-    changeOwnership: jest.fn(),
-    changeAccessMode: jest.fn(),
   };
 
   return mock;

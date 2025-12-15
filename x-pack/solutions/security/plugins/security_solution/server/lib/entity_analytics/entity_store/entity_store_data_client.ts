@@ -74,8 +74,6 @@ import {
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import {
   startEntityStoreFieldRetentionEnrichTask,
-  startEntityStoreHealthTask,
-  removeEntityStoreHealthTask,
   removeEntityStoreFieldRetentionEnrichTask,
   getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
   removeEntityStoreDataViewRefreshTask,
@@ -103,7 +101,6 @@ import {
   createEntityResetIndex,
   deleteEntityResetIndex,
   getEntityResetIndexStatus,
-  getEntitySnapshotIndexStatus,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
@@ -119,7 +116,6 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import type { EntityRecord, EntityStoreConfig } from './types';
 import {
   ENTITY_ENGINE_INITIALIZATION_EVENT,
-  ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
@@ -275,11 +271,6 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
-          ...(await getEntitySnapshotIndexStatus({
-            entityType: type,
-            esClient: this.esClient,
-            namespace,
-          })),
           getEntityUpdatesDataStreamStatus(type, this.esClient, namespace),
           ...(await getEntityILMPolicyStatuses({
             esClient: this.esClient,
@@ -566,17 +557,7 @@ export class EntityStoreDataClient {
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
-        namespace,
-        entityType,
       });
-
-      // this task will report Entity Store state as telemetry events
-      await startEntityStoreHealthTask({
-        namespace,
-        logger,
-        taskManager,
-      });
-      this.log(`debug`, entityType, `Started entity store health task`);
 
       return updated;
     } catch (err) {
@@ -741,7 +722,6 @@ export class EntityStoreDataClient {
   ) {
     const { namespace, logger, appClient, dataViewsService, config } = this.options;
     const { deleteData, deleteEngine } = options;
-    const deletionStartTime = moment.utc().toISOString();
 
     const descriptor = await this.engineClient.maybeGet(entityType);
     const defaultIndexPatterns = await buildIndexPatternsByEngine(
@@ -846,11 +826,6 @@ export class EntityStoreDataClient {
           logger,
           taskManager,
         });
-        await removeEntityStoreHealthTask({
-          namespace,
-          logger,
-          taskManager,
-        });
         this.log(
           'debug',
           entityType,
@@ -858,16 +833,7 @@ export class EntityStoreDataClient {
         );
       }
 
-      const deletionEndTime = moment.utc().toISOString();
-      const duration = moment(deletionEndTime).diff(moment(deletionStartTime), 'seconds');
-      logger.info(
-        `[Entity Store] In namespace ${namespace}: Deleted store for ${entityType} in ${duration} seconds`
-      );
-      this.options.telemetry?.reportEvent(ENTITY_ENGINE_DELETION_EVENT.eventType, {
-        duration,
-        namespace,
-        entityType,
-      });
+      logger.info(`[Entity Store] In namespace ${namespace}: Deleted store for ${entityType}`);
       return { deleted: true };
     } catch (err) {
       this.log(`error`, entityType, `Error deleting entity store: ${err.message}`);

@@ -175,7 +175,6 @@ export function useQualityIssues() {
     // 1st check if it's a field limit issue
     if (degradedFieldAnalysis.isFieldLimitIssue) {
       return {
-        isFieldLimitIssue: true,
         potentialCause: degradedFieldCauseFieldLimitExceeded,
         tooltipContent: degradedFieldCauseFieldLimitExceededTooltip,
         shouldDisplayIgnoredValuesAndLimit: false,
@@ -192,7 +191,6 @@ export function useQualityIssues() {
       );
       if (isAnyValueExceedingIgnoreAbove) {
         return {
-          isFieldCharacterLimitIssue: true,
           potentialCause: degradedFieldCauseFieldIgnored,
           tooltipContent: degradedFieldCauseFieldIgnoredTooltip,
           shouldDisplayIgnoredValuesAndLimit: true,
@@ -203,7 +201,6 @@ export function useQualityIssues() {
 
     // 3rd check if its a ignore_malformed issue. There is no check, at the moment.
     return {
-      isFieldMalformedIssue: true,
       potentialCause: degradedFieldCauseFieldMalformed,
       tooltipContent: degradedFieldCauseFieldMalformedTooltip,
       shouldDisplayIgnoredValuesAndLimit: false,

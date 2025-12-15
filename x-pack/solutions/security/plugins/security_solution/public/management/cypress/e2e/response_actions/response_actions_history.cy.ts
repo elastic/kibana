@@ -10,8 +10,7 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-// Failing: See https://github.com/elastic/kibana/issues/230804
-describe.skip(
+describe(
   'Response actions history page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

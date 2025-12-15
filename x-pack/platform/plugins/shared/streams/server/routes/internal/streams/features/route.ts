@@ -17,9 +17,10 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
+import { generateStreamDescription } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
+import { sumTokens } from '@kbn/streams-ai/src/helpers/sum_tokens';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/promps_config_service';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';

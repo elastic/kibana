@@ -7,9 +7,10 @@
 
 import type { Feature } from '@kbn/streams-schema';
 import { describeDataset } from '@kbn/ai-tools';
-import { sumTokens, type IdentifyFeaturesOptions } from '@kbn/streams-ai';
+import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { withSpan } from '@kbn/apm-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import { sumTokens } from '@kbn/streams-ai/src/helpers/sum_tokens';
 import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
 import { SystemFeatureHandler } from './handlers/system';
@@ -81,7 +82,10 @@ export class FeatureTypeRegistry {
     for (const handler of this.handlers.values()) {
       options.logger.trace(`Identifying features of type ${handler.type}`);
       const result = await withSpan(`identify_${handler.type}_features`, () =>
-        handler.identifyFeatures({ ...options, analysis })
+        handler.identifyFeatures({
+          ...options,
+          analysis,
+        })
       );
 
       features.push(...result.features);

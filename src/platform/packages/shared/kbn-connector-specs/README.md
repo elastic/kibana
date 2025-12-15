@@ -4,7 +4,7 @@ A TypeScript-based specification framework for defining Kibana connectors using 
 
 ## Overview
 
-The `@kbn/connector-specs` package provides a simplified, declarative way to define connectors for Kibana's Stack Connectors system. Instead of manually registering connectors across multiple files, you define a connector spec in `src/specs/<connector>/<connector>.ts`, and it will be automatically picked up and registered once exported from `src/all_specs.ts`.
+The `@kbn/connector-specs` package provides a simplified, declarative way to define connectors for Kibana's Stack Connectors system. Instead of manually registering connectors across multiple files, you can define a complete connector specification in a single TypeScript file, and it will be automatically picked up and registered.
 
 ### Key Features
 
@@ -15,35 +15,14 @@ The `@kbn/connector-specs` package provides a simplified, declarative way to def
 - **Standard Auth Patterns**: Reusable authentication schemas (Basic, Bearer, Headers)
 - **Policy-Based Configuration**: Built-in support for rate limiting, retry policies, pagination, and more
 
-## Quick Start (Recommended): Generate a New Connector Spec
+## The 1.5 Files Approach
 
-Use the generator to create the folder structure and wire everything up:
+This package implements a **1.5 files approach** for defining connectors:
 
-```bash
-node scripts/generate connector my_connector --id ".myConnector" --owner "@elastic/<team-name>"
-```
-
-This will:
-- Create `src/specs/my_connector/my_connector.ts` (spec scaffold)
-- Create `src/specs/my_connector/icon/index.tsx` (placeholder icon component)
-- Update `src/all_specs.ts`
-- Update `src/connector_icons_map.ts`
-- Append a CODEOWNERS rule for the new folder
-
-### Connector ID constraints
-
-- Must start with `.`
-- Allowed characters: `A-Z`, `a-z`, `0-9`, `.`, `_`, `-`
-- Max length: **64**
-
-## The “1.5 Files” Approach (Manual)
-
-This package still follows a **1.5 files approach** for defining connectors:
-
-1. **1 folder**: Create a connector folder (e.g., `src/specs/my_connector/`) containing `my_connector.ts`
+1. **1 file**: Create a single TypeScript file (e.g., `src/specs/my_connector.ts`) that exports a `SingleFileConnectorDefinition`
 2. **0.5 file**: Add a single export line to `src/all_specs.ts`:
    ```typescript
-   export * from './specs/my_connector/my_connector';
+   export * from './specs/my_connector';
    ```
 
 That's it! Once exported from `all_specs.ts`, the connector spec is automatically discovered and registered to the actions registry during plugin initialization.
@@ -61,14 +40,15 @@ The `createConnectorTypeFromSpec()` function converts the `SingleFileConnectorDe
 
 ### Creating a New Connector
 
-1. **Create the spec file** in `src/specs/<connector>/<connector>.ts`:
+1. **Create the spec file** in `src/specs/`:
 
 ```typescript
-// src/specs/my_connector/my_connector.ts
+// src/specs/my_connector.ts
 import { z } from '@kbn/zod';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { SingleFileConnectorDefinition } from '../connector_spec';
+import { BearerAuthSchema, UISchemas } from '../connector_spec';
 
-export const MyConnector: ConnectorSpec = {
+export const MyConnector: SingleFileConnectorDefinition = {
   metadata: {
     id: '.my_connector',
     displayName: 'My Connector',
@@ -116,7 +96,7 @@ export const MyConnector: ConnectorSpec = {
 
 ```typescript
 // src/all_specs.ts
-export * from './specs/my_connector/my_connector';
+export * from './specs/my_connector';
 ```
 
 3. **Done!** The connector will automatically appear in the Kibana UI.
@@ -144,8 +124,8 @@ UI metadata extension system that enables:
 #### `specs/`
 Directory containing actual connector implementations
 
-#### `specs/<connector>/icon/`
-Directory containing per-connector icon components (and optional assets)
+#### `icons/`
+Directory containing custom icon components
 
 ### Design Principles
 
@@ -413,15 +393,15 @@ metadata: {
 
 For custom icons (logos, branded images, etc.), use lazy-loaded React components. This approach keeps custom icon assets out of the main bundle and loads them on-demand. To use lazy icons:
 
-1. **Create an icon component** in `src/specs/{connector_folder}/icon/`:
+1. **Create an icon component** in `src/icons/{connector_id}/`:
 
 **Option A: Using EuiIcon with an image file**
 
 ```typescript
-// src/specs/my_connector/icon/index.tsx
+// src/icons/my_connector/index.tsx
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import type { ConnectorIconProps } from '../../../types';
+import type { ConnectorIconProps } from '../../types';
 import myIcon from './my_connector.png'; // or .jpg, .svg
 
 export default (props: ConnectorIconProps) => {
@@ -459,7 +439,7 @@ export const ConnectorIconsMap: Map<
   // ... existing icons ...
   [
     '.my_connector',
-    lazy(() => import(/* webpackChunkName: "connectorIconMyConnector" */ './specs/my_connector/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconMyConnector" */ './icons/my_connector')),
   ],
 ]);
 ```
@@ -510,29 +490,27 @@ import type {
 
 When adding a new connector:
 
-1. Create the connector folder in `src/specs/<connector>/` with `<connector>.ts`
+1. Create the spec file in `src/specs/`
 2. Export it from `src/all_specs.ts`
 3. (Optional) Add an icon:
    - For simple cases: Use a built-in EUI icon by setting `metadata.icon` to an EUI icon name (e.g., `'globe'`, `'addDataApp'`)
-   - For custom branding: Create a lazy icon component in `src/specs/<connector>/icon/` and register it in `src/connector_icons_map.ts`
+   - For custom branding: Create a lazy icon component in `src/icons/{connector_id}/` and register it in `src/connector_icons_map.ts`
 4. Follow the existing patterns for consistency
 5. Include proper TypeScript types
 6. Add appropriate UI metadata for better UX
-7. Consider adding a test file (`src/specs/{connector}.test.ts`) to validate your action handlers. See existing connector tests for examples.
-8. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files!
 
 ### Adding a Lazy Icon
 
 When creating a new connector with a lazy icon:
 
 1. Create the icon component file(s):
-   - For simple SVGs: `src/specs/{connector_folder}/icon/index.tsx`
-   - For icons with assets: `src/specs/{connector_folder}/icon/index.tsx` and asset files
+   - For simple SVGs: `src/icons/{connector_id}.tsx`
+   - For icons with assets: `src/icons/{connector_id}/index.tsx` and asset files
 2. Register in `src/connector_icons_map.ts`:
    ```typescript
    [
      '.your_connector_id',
-     lazy(() => import(/* webpackChunkName: "connectorIconYourConnector" */ './specs/your_connector_folder/icon')),
+     lazy(() => import(/* webpackChunkName: "connectorIconYourConnector" */ './icons/your_icon_component')),
    ],
    ```
 3. Ensure `metadata.id` in your spec matches the key in the map (including the leading dot)
