@@ -119,7 +119,7 @@ export const treemapStateSchemaNoESQL = schema.object(
       {
         minSize: 1,
         meta: {
-          description: 'Array of metric configurations: minimum 1 (recommended), .',
+          description: 'Array of metric configurations: minimum 1 (recommended).',
         },
       }
     ),
