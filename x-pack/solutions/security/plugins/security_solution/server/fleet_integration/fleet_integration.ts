@@ -174,7 +174,7 @@ export const getPackagePolicyCreateCallback = (
 
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
-      async () => {
+      (async () => {
         // In this callback we are handling an HTTP request to the fleet plugin. Since we use
         // code from the security_solution plugin to handle it (installPrepackagedRules),
         // we need to build the context that is native to security_solution and pass it there.
@@ -202,7 +202,7 @@ export const getPackagePolicyCreateCallback = (
             `Server setting 'disableEndpointRuleAutoInstall' is 'true' - skipping the install of Endpoint Security prebuilt rule`
           );
         }
-      },
+      })(),
 
       // create the Artifact Manifest for this policy
       createPolicyArtifactManifest(logger, manifestManager),
