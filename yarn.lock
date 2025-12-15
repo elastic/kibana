@@ -4531,6 +4531,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/access-control-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""
@@ -5007,6 +5011,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-access-control-server@link:src/platform/packages/shared/content-management/access_control/access_control_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""
@@ -5216,10 +5228,6 @@
   uid ""
 
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-navigation-tour@link:src/core/packages/chrome/navigation-tour":
   version "0.0.0"
   uid ""
 
@@ -25616,10 +25624,10 @@ lru-cache@^10.2.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.4.3.tgz#410fc8a17b70e598013df257c2446b7f3383f119"
   integrity sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==
 
-lru-cache@^11.0.0, lru-cache@^11.1.0, lru-cache@^11.2.2:
-  version "11.2.2"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.2.2.tgz#40fd37edffcfae4b2940379c0722dc6eeaa75f24"
-  integrity sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg==
+lru-cache@^11.0.0, lru-cache@^11.1.0, lru-cache@^11.2.4:
+  version "11.2.4"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.2.4.tgz#ecb523ebb0e6f4d837c807ad1abaea8e0619770d"
+  integrity sha512-B5Y16Jr9LB9dHVkh6ZevG+vAbOsNOYCX+sXvFWFu7B3Iz5mijW3zdbMyhsh8ANd2mSWBYdJgnqi+mL7/LrOPYg==
 
 lru-cache@^4.1.5:
   version "4.1.5"
