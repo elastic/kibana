@@ -11,6 +11,7 @@ import { ToolType } from '@kbn/onechat-common';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 import { useKibana } from '../use_kibana';
+import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const useToolTypes = () => {
   const { toolsService } = useOnechatServices();
@@ -29,7 +30,7 @@ export const useToolTypes = () => {
   );
 
   const mcpEnabled = useMemo(
-    () => settings.client.get('mcp:ui:enabled', false),
+    () => settings.client.get(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false),
     [settings]
   );
 
