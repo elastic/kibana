@@ -35,6 +35,9 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/observability-nav-icons'
   - '@kbn/deeplinks-management'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/management-settings-ids'
+  - '@kbn/ai-insights'
 tags:
   - plugin
   - prod
