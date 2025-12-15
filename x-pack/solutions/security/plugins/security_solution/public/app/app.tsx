@@ -18,6 +18,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { THREAT_HUNTING_AGENT } from '../agent_builder/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { APP_NAME } from '../../common/constants';
@@ -109,6 +110,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
     if (services.onechat?.setConversationFlyoutActiveConfig) {
       services.onechat.setConversationFlyoutActiveConfig({
         sessionTag: 'security',
+        agentId: THREAT_HUNTING_AGENT,
         newConversation: false,
       });
     }

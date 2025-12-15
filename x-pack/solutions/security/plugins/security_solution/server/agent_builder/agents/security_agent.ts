@@ -45,7 +45,7 @@ export const createSecurityAgent = (
   return {
     id: SECURITY_AGENT_ID,
     avatar_icon: 'logoSecurity',
-    name: 'Security Agent',
+    name: 'Threat Hunting Agent',
     description:
       'Agent specialized in security alert analysis tasks, including alert investigation and security documentation.',
     labels: ['security'],
