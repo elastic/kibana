@@ -47,10 +47,7 @@ export class ServerlessObservabilityPlugin
   ): ServerlessObservabilityPublicStart {
     const { serverless, management, security } = setupDeps;
 
-    const chatExperience$ = core.settings.client.get$<AIChatExperience>(
-      AI_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    );
+    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),

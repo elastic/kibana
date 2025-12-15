@@ -8,11 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import {
-  AIAssistantType,
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-} from '@kbn/ai-assistant-management-plugin/public';
+import { PREFERRED_CHAT_EXPERIENCE_SETTING_KEY } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from './use_kibana';
 import { useIsAgentBuilderEnabled } from './use_is_agent_builder_enabled';
 
@@ -109,7 +105,7 @@ export const useAgentBuilderOptIn = ({
     try {
       await Promise.all([
         settings.client.set(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, AIChatExperience.Agent),
-        settings.client.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default),
+        // settings.client.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default),
       ]);
 
       if (navigateFromConversationApp) {

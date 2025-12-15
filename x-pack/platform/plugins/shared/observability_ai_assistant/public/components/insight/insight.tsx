@@ -358,10 +358,7 @@ export function Insight({
     },
   } = useKibana();
 
-  const [chatExperience] = useUiSetting$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   const license = useObservable<ILicense | null>(licensing.license$);

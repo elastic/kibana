@@ -23,6 +23,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { firstValueFrom } from 'rxjs';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -79,13 +80,14 @@ export class ObservabilityAIAssistantAppPlugin
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-        // Restrict access when the chat experience is set to Agent
-        const chatExperience = coreStart.settings.client.get<AIChatExperience>(
+        const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
           AI_CHAT_EXPERIENCE_TYPE,
           AIChatExperience.Classic
         );
 
-        if (chatExperience === AIChatExperience.Agent) {
+        // Restrict access when the chat experience is set to Agent (reactive while mounted)
+        const initialChatExperience = await firstValueFrom(chatExperience$);
+        if (initialChatExperience === AIChatExperience.Agent) {
           coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
           return () => {};
         }
@@ -102,7 +104,14 @@ export class ObservabilityAIAssistantAppPlugin
           appMountParameters.element
         );
 
+        const subscription = chatExperience$.subscribe((chatExperience) => {
+          if (chatExperience === AIChatExperience.Agent) {
+            coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
+          }
+        });
+
         return () => {
+          subscription.unsubscribe();
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
         };
       },

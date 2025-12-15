@@ -24,10 +24,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
     services: { onechat, http },
   } = useKibana();
 
-  const [chatExperience] = useUiSetting$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   const { getLicense } = useLicense();

@@ -31,10 +31,7 @@ export interface UseIsAgentBuilderEnabledResult {
 }
 
 export const useIsAgentBuilderEnabled = (): UseIsAgentBuilderEnabledResult => {
-  const [chatExperience] = useUiSetting$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
   const {
     application: { capabilities },

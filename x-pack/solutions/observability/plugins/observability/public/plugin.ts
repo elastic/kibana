@@ -384,10 +384,8 @@ export class Plugin
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
-              const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
-                AI_CHAT_EXPERIENCE_TYPE,
-                AIChatExperience.Classic
-              );
+              const chatExperience$ =
+                coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
               return chatExperience$.pipe(
                 map((chatExperience) => {

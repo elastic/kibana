@@ -16,7 +16,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
+import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { StartDependencies, AIAssistantManagementSelectionPluginPublicStart } from '../plugin';
 import { aIAssistantManagementSelectionRouter } from '../routes/config';
@@ -61,10 +61,8 @@ export const mountManagementSection = async ({
               kibanaBranch,
               buildFlavor,
               securityAIAssistantEnabled,
-              chatExperience$: coreStart.settings.client.get$<AIChatExperience>(
-                AI_CHAT_EXPERIENCE_TYPE,
-                AIChatExperience.Classic
-              ),
+              chatExperience$:
+                coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
             }}
           >
             <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>

@@ -614,10 +614,7 @@ export const createDefinition = (
   homePage: 'observabilityOnboarding',
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
-    coreStart.settings.client.get$<AIChatExperience>(
-      AI_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    ),
+    coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
   ]).pipe(
     map(([{ status }, chatExperience]) =>
       createNavTree({

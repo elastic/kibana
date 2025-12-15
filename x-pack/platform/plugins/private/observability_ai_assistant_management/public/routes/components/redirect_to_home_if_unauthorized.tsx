@@ -26,13 +26,10 @@ export function RedirectToHomeIfUnauthorized({
   } = coreStart;
 
   const chatExperience$ = useMemo(
-    () => settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic),
+    () => settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
     [settings.client]
   );
-  const chatExperience = useObservable(
-    chatExperience$,
-    settings.client.get(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
-  );
+  const chatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
 
   const allowed =
     (capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false) &&

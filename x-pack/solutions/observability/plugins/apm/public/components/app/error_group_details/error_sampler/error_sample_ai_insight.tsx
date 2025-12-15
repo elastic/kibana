@@ -33,10 +33,7 @@ type ErrorSampleDetails =
 export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'>) {
   const { onechat, core } = useApmPluginContext();
 
-  const [chatExperience] = useUiSetting$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   const observabilityAgentBuilderApiClient = createRepositoryClient<
