@@ -267,7 +267,7 @@ export const DataCoveragePanel: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.siemReadiness.coverage.dataCoverage.warningDescription"
-                  defaultMessage="Some log categories are missing integrations, limiting your visibility and detection coverage. Create a case to install the missing {count, plural, one {integration} other {integrations}} or view missing integrations to restore full visibility. Learn more about installing integrations in our {docs}."
+                  defaultMessage="Some log categories are missing integrations, limiting your visibility and detection coverage. Create a case to install the missing integrations for {count, plural, one {# category} other {# categories}} or view missing integrations to restore full visibility. Learn more about installing integrations in our {docs}."
                   values={{
                     count: missingCategoriesCount,
                     docs: (
