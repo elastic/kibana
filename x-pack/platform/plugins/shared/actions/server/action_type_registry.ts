@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -265,6 +266,7 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
         isSystemActionType: !!actionType.isSystemActionType,
+        source: actionType.source || ACTION_TYPE_SOURCES.stack,
         subFeature: actionType.subFeature,
         ...(exposeValidation === true
           ? {

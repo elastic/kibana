@@ -3461,6 +3461,14 @@
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
               },
@@ -3881,6 +3889,14 @@
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
+              },
+              {
                 "plugin": "contentConnectors",
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
@@ -4107,6 +4123,22 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -5621,6 +5653,18 @@
                 "path": "src/core/packages/rendering/server-internal/src/bootstrap/register_bootstrap_route.test.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
+              },
+              {
+                "plugin": "interactiveSetup",
+                "path": "src/platform/plugins/private/interactive_setup/server/routes/status.test.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/test/helpers/router_mock.ts"
               },
@@ -5735,10 +5779,6 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/spaces/share_saved_object_permissions.test.ts"
-              },
-              {
-                "plugin": "interactiveSetup",
-                "path": "src/platform/plugins/private/interactive_setup/server/routes/status.test.ts"
               }
             ],
             "returnComment": [],
@@ -6401,8 +6441,8 @@
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -6415,6 +6455,10 @@
               {
                 "plugin": "console",
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -6729,6 +6773,10 @@
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/conversations.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
+              },
+              {
                 "plugin": "contentConnectors",
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
@@ -6955,6 +7003,22 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8361,6 +8425,10 @@
                 "path": "src/core/packages/capabilities/server-internal/src/capabilities_service.test.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.test.ts"
+              },
+              {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/routes/key_rotation.test.ts"
               },
@@ -8761,6 +8829,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/put_update_workflow.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
+              },
+              {
                 "plugin": "contentConnectors",
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
@@ -8815,6 +8887,18 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/hidden_saved_object_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8943,6 +9027,10 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -9569,6 +9657,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflows_bulk.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
+              },
+              {
                 "plugin": "contentConnectors",
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
@@ -9587,6 +9679,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -9695,6 +9791,10 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -15254,10 +15354,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/list_scripts.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
-              },
-              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/security_ai_prompts/find_prompts.ts"
               },
@@ -15332,6 +15428,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17848,6 +17948,10 @@
               {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",

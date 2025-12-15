@@ -34,10 +34,10 @@ run_check() {
 }
 
 retry 5 15 run_check
+# Bundle hand written specs
+.buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
+.buildkite/scripts/steps/openapi_bundling/final_merge.sh
 
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 
-check_for_changed_files "$cmd" true
-
-.buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
-.buildkite/scripts/steps/openapi_bundling/final_merge.sh
+check_for_changed_files "capture_oas_snapshot.sh" true

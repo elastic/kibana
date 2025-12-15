@@ -124,6 +124,7 @@
     "@kbn/react-query",
     "@kbn/deeplinks-analytics",
     "@kbn/esql-composer",
+    "@kbn/fleet-plugin",
   ],
   "exclude": ["target/**/*"]
 }
