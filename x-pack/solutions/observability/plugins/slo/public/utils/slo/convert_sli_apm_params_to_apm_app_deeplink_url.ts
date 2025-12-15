@@ -54,13 +54,28 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     kueryParams.push(filter);
   }
 
-  if (groupBy !== ALL_VALUE && 'instanceId' in slo && slo.instanceId !== ALL_VALUE) {
-    kueryParams.push(`${groupBy} : "${slo.instanceId}"`);
+  const groupByFields = [groupBy].flat().filter((field) => field && field !== ALL_VALUE);
+  const hasInstanceId = 'instanceId' in slo && slo.instanceId !== ALL_VALUE;
+  const instanceIdValues = hasInstanceId ? slo.instanceId.split(',') : [];
+
+  const serviceNameIndex = groupByFields.indexOf('service.name');
+  const isGroupedByServiceName = serviceNameIndex !== -1;
+
+  // Add kuery filters for each groupBy field
+  if (hasInstanceId && groupByFields.length === instanceIdValues.length) {
+    groupByFields.forEach((field, index) => {
+      if (field !== 'service.name') {
+        kueryParams.push(`${field} : "${instanceIdValues[index]}"`);
+      }
+    });
   }
 
   if (kueryParams.length > 0) {
     qs.append('kuery', kueryParams.join(' and '));
   }
 
-  return `/app/apm/services/${service}/overview?${qs.toString()}`;
+  const serviceName =
+    isGroupedByServiceName && hasInstanceId ? instanceIdValues[serviceNameIndex] : service;
+
+  return `/app/apm/services/${serviceName}/overview?${qs.toString()}`;
 }
