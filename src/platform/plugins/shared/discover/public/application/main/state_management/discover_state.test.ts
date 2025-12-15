@@ -495,6 +495,7 @@ describe('Discover state', () => {
                 "headerRowHeight": undefined,
                 "hideAggregatedPreview": undefined,
                 "hideChart": undefined,
+                "interval": "auto",
                 "refreshInterval": undefined,
                 "rowHeight": undefined,
                 "rowsPerPage": undefined,
