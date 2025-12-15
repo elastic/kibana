@@ -723,8 +723,8 @@ export class ComposerQuery {
    * // Result: ... | LOOKUP JOIN other_index ON user.id | ...
    *
    * // Join using a qualified column
-   * query.lookup_join('other_index', [['usersIndex'], ['id']]);
-   * // Result: ... | LOOKUP JOIN other_index ON [user].[id] | ...
+   * query.lookup_join('other_index', ['usersIndex', ['id']]);
+   * // Result: ... | LOOKUP JOIN other_index ON [usersIndex].[id] | ...
    * ```
    *
    * @param lookupIndex The name of the index to join with.
