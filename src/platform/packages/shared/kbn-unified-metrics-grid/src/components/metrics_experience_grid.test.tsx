@@ -13,7 +13,6 @@ import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 import type {
-  ChartSectionProps,
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
@@ -24,6 +23,7 @@ import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/comm
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
+import type { UnifiedMetricsGridProps } from '../types';
 
 jest.mock('../context/metrics_experience_state_provider');
 jest.mock('../hooks');
@@ -87,7 +87,7 @@ const allFields: MetricField[] = [
 describe('MetricsExperienceGrid', () => {
   let fetch$: UnifiedHistogramFetch$;
   let fetchParams: UnifiedHistogramFetchParams;
-  let defaultProps: ChartSectionProps;
+  let defaultProps: UnifiedMetricsGridProps;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -108,6 +108,10 @@ describe('MetricsExperienceGrid', () => {
       chartToolbarCss: { name: '', styles: '' },
       histogramCss: { name: '', styles: '' },
       fetchParams,
+      actions: {
+        openInNewTab: jest.fn(),
+        updateESQLQuery: jest.fn(),
+      },
       services: {
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
       } as unknown as UnifiedHistogramServices,

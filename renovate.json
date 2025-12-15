@@ -2389,7 +2389,8 @@
     {
       "groupName": "search-ui ai dependency",
       "matchDepNames": [
-        "ai"
+        "ai",
+        "@ai-sdk/langchain"
       ],
       "reviewers": [
         "team:search-kibana"
@@ -3660,7 +3661,7 @@
     },
     {
       "groupName": "CodeQL",
-      "matchDepNames": [
+      "matchPackageNames": [
         "github/codeql-action/analyze",
         "github/codeql-action/init"
       ],
@@ -4693,18 +4694,20 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "Security Engineering Productivity",
+      "groupName": "dotenv",
       "matchDepNames": [
         "dotenv"
       ],
       "reviewers": [
-        "team:security-engineering-productivity"
+        "team:obs-onboarding-team",
+        "team:appex-qa"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team: Sec Eng Productivity",
+        "Team:obs-onboarding",
+        "Team:QA",
         "release_note:skip",
         "backport:all-open"
       ],
