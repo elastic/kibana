@@ -10,7 +10,12 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import { SOContentStorage, searchArgsToSOFindOptionsDefault } from './saved_object_content_storage';
+import {
+  SOContentStorage,
+  searchArgsToSOFindOptionsDefault,
+  buildCreatedByFilter,
+  buildFavoritesFilter,
+} from './saved_object_content_storage';
 import type { ContentManagementCrudTypes } from './types';
 
 import { schema } from '@kbn/config-schema';
@@ -741,5 +746,226 @@ describe('searchArgsToSOFindOptionsDefault', () => {
 
       expect(result.fields).toEqual(['id', 'name']);
     });
+  });
+
+  describe('createdBy filter mapping', () => {
+    test('should add filter when createdBy.included is provided', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          createdBy: { included: ['user-a'] },
+        },
+      });
+
+      expect(result.filter).toBe('dashboard.created_by:"user-a"');
+    });
+
+    test('should add OR filter when multiple users are included', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          createdBy: { included: ['user-a', 'user-b'] },
+        },
+      });
+
+      expect(result.filter).toBe(
+        '(dashboard.created_by:"user-a" OR dashboard.created_by:"user-b")'
+      );
+    });
+
+    test('should add exclude filter when createdBy.excluded is provided', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          createdBy: { excluded: ['user-x'] },
+        },
+      });
+
+      expect(result.filter).toBe('NOT dashboard.created_by:"user-x"');
+    });
+
+    test('should add filter for items with no creator when includeNoCreator is true', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          createdBy: { includeNoCreator: true },
+        },
+      });
+
+      expect(result.filter).toBe('NOT dashboard.created_by:*');
+    });
+
+    test('should combine include and exclude filters', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          createdBy: {
+            included: ['user-a'],
+            excluded: ['user-x'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe(
+        'dashboard.created_by:"user-a" AND NOT dashboard.created_by:"user-x"'
+      );
+    });
+  });
+
+  describe('favorites filter mapping', () => {
+    test('should add filter when favorites.only is true with IDs', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          favorites: {
+            only: true,
+            ids: ['id-1'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe('dashboard.id:"id-1"');
+    });
+
+    test('should add OR filter for multiple favorite IDs', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          favorites: {
+            only: true,
+            ids: ['id-1', 'id-2', 'id-3'],
+          },
+        },
+      });
+
+      expect(result.filter).toBe(
+        '(dashboard.id:"id-1" OR dashboard.id:"id-2" OR dashboard.id:"id-3")'
+      );
+    });
+
+    test('should return empty-matching filter when favorites.only is true but no IDs', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          favorites: {
+            only: true,
+            ids: [],
+          },
+        },
+      });
+
+      // This filter should match nothing.
+      expect(result.filter).toBe('dashboard.id:""');
+    });
+
+    test('should not add filter when favorites.only is false', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          favorites: {
+            only: false,
+            ids: ['id-1'],
+          },
+        },
+      });
+
+      expect(result.filter).toBeUndefined();
+    });
+  });
+
+  describe('combined filters', () => {
+    test('should combine createdBy and favorites filters', () => {
+      const result = searchArgsToSOFindOptionsDefault({
+        contentTypeId: 'dashboard',
+        query: {
+          createdBy: { included: ['user-a'] },
+          favorites: { only: true, ids: ['id-1'] },
+        },
+      });
+
+      expect(result.filter).toBe('(dashboard.created_by:"user-a") AND (dashboard.id:"id-1")');
+    });
+  });
+});
+
+describe('buildCreatedByFilter', () => {
+  const soType = 'dashboard';
+
+  test('should return undefined when createdBy is undefined', () => {
+    const result = buildCreatedByFilter(undefined, soType);
+    expect(result).toBeUndefined();
+  });
+
+  test('should return undefined when createdBy is empty object', () => {
+    const result = buildCreatedByFilter({}, soType);
+    expect(result).toBeUndefined();
+  });
+
+  test('should build filter for single included user', () => {
+    const result = buildCreatedByFilter({ included: ['user-a'] }, soType);
+    expect(result).toBe('dashboard.created_by:"user-a"');
+  });
+
+  test('should build OR filter for multiple included users', () => {
+    const result = buildCreatedByFilter({ included: ['user-a', 'user-b'] }, soType);
+    expect(result).toBe('(dashboard.created_by:"user-a" OR dashboard.created_by:"user-b")');
+  });
+
+  test('should build NOT filter for excluded users', () => {
+    const result = buildCreatedByFilter({ excluded: ['user-x', 'user-y'] }, soType);
+    expect(result).toBe('NOT dashboard.created_by:"user-x" AND NOT dashboard.created_by:"user-y"');
+  });
+
+  test('should build filter for includeNoCreator (null user)', () => {
+    const result = buildCreatedByFilter({ includeNoCreator: true }, soType);
+    expect(result).toBe('NOT dashboard.created_by:*');
+  });
+
+  test('should combine all filter types', () => {
+    const result = buildCreatedByFilter(
+      {
+        included: ['user-a'],
+        excluded: ['user-x'],
+        includeNoCreator: true,
+      },
+      soType
+    );
+    expect(result).toBe(
+      'dashboard.created_by:"user-a" AND NOT dashboard.created_by:"user-x" AND NOT dashboard.created_by:*'
+    );
+  });
+});
+
+describe('buildFavoritesFilter', () => {
+  const soType = 'dashboard';
+
+  test('should return undefined when favorites is undefined', () => {
+    const result = buildFavoritesFilter(undefined, soType);
+    expect(result).toBeUndefined();
+  });
+
+  test('should return undefined when favorites.only is false', () => {
+    const result = buildFavoritesFilter({ only: false, ids: ['id-1'] }, soType);
+    expect(result).toBeUndefined();
+  });
+
+  test('should return empty-matching filter when favorites.only is true but no IDs', () => {
+    const result = buildFavoritesFilter({ only: true, ids: [] }, soType);
+    expect(result).toBe('dashboard.id:""');
+  });
+
+  test('should return empty-matching filter when favorites.only is true but IDs undefined', () => {
+    const result = buildFavoritesFilter({ only: true }, soType);
+    expect(result).toBe('dashboard.id:""');
+  });
+
+  test('should build filter for single favorite ID', () => {
+    const result = buildFavoritesFilter({ only: true, ids: ['id-1'] }, soType);
+    expect(result).toBe('dashboard.id:"id-1"');
+  });
+
+  test('should build OR filter for multiple favorite IDs', () => {
+    const result = buildFavoritesFilter({ only: true, ids: ['id-1', 'id-2'] }, soType);
+    expect(result).toBe('(dashboard.id:"id-1" OR dashboard.id:"id-2")');
   });
 });

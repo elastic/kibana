@@ -41,10 +41,102 @@ export interface SearchArgsToSOFindOptionsOptionsDefault {
   searchFields?: string[];
 }
 
+/**
+ * Builds a KQL filter string for createdBy filtering.
+ *
+ * @param createdBy - The createdBy filter configuration from the search query.
+ * @param savedObjectType - The saved object type to use in the filter path.
+ * @returns A KQL filter string or `undefined` if no filter is needed.
+ */
+export const buildCreatedByFilter = (
+  createdBy: SearchQuery['createdBy'],
+  savedObjectType: string
+): string | undefined => {
+  if (!createdBy) return undefined;
+
+  const conditions: string[] = [];
+
+  // Include specific users.
+  if (createdBy.included?.length) {
+    const userConditions = createdBy.included.map(
+      (uid) => `${savedObjectType}.created_by:"${uid}"`
+    );
+    if (userConditions.length === 1) {
+      conditions.push(userConditions[0]);
+    } else {
+      conditions.push(`(${userConditions.join(' OR ')})`);
+    }
+  }
+
+  // Exclude specific users.
+  if (createdBy.excluded?.length) {
+    const excludeConditions = createdBy.excluded.map(
+      (uid) => `NOT ${savedObjectType}.created_by:"${uid}"`
+    );
+    conditions.push(...excludeConditions);
+  }
+
+  // Include items with no creator.
+  if (createdBy.includeNoCreator) {
+    conditions.push(`NOT ${savedObjectType}.created_by:*`);
+  }
+
+  if (conditions.length === 0) return undefined;
+  return conditions.join(' AND ');
+};
+
+/**
+ * Builds a KQL filter for favorites filtering using IDs.
+ *
+ * Note: The SavedObjects API doesn't have a native way to filter by a list of IDs
+ * in a single find() call, so we build a KQL filter instead.
+ *
+ * @param favorites - The favorites filter configuration from the search query.
+ * @param savedObjectType - The saved object type to use in the filter path.
+ * @returns A KQL filter string or `undefined` if no filter is needed.
+ */
+export const buildFavoritesFilter = (
+  favorites: SearchQuery['favorites'],
+  savedObjectType: string
+): string | undefined => {
+  if (!favorites?.only) return undefined;
+
+  if (!favorites.ids?.length) {
+    // If favorites.only is true but no IDs provided, return a filter that matches nothing.
+    // We use a negative match for all IDs which effectively returns an empty result.
+    return `${savedObjectType}.id:""`;
+  }
+
+  // Build an OR filter for all favorite IDs.
+  const idConditions = favorites.ids.map((id) => `${savedObjectType}.id:"${id}"`);
+  if (idConditions.length === 1) {
+    return idConditions[0];
+  }
+  return `(${idConditions.join(' OR ')})`;
+};
+
+/**
+ * Combines multiple KQL filter strings with AND logic.
+ *
+ * @param filters - Array of filter strings (undefined values are ignored).
+ * @returns Combined filter string or `undefined` if no filters.
+ */
+const combineFilters = (...filters: Array<string | undefined>): string | undefined => {
+  const validFilters = filters.filter((f): f is string => !!f);
+  if (validFilters.length === 0) return undefined;
+  if (validFilters.length === 1) return validFilters[0];
+  return validFilters.map((f) => `(${f})`).join(' AND ');
+};
+
 export const searchArgsToSOFindOptionsDefault = <T extends string>(
   params: SearchIn<T, SearchArgsToSOFindOptionsOptionsDefault>
 ): SavedObjectsFindOptions => {
   const { query, contentTypeId, options } = params;
+
+  // Build optional KQL filters.
+  const createdByKqlFilter = buildCreatedByFilter(query.createdBy, contentTypeId);
+  const favoritesKqlFilter = buildFavoritesFilter(query.favorites, contentTypeId);
+  const combinedFilter = combineFilters(createdByKqlFilter, favoritesKqlFilter);
 
   return {
     type: contentTypeId,
@@ -55,11 +147,13 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
     searchFields: options?.searchFields ?? ['description', 'title'],
     fields: options?.fields ?? ['description', 'title'],
     ...tagsToFindOptions(query.tags),
-    // Server-side sorting support
+    // Server-side sorting support.
     ...(query.sort && {
       sortField: query.sort.field,
       sortOrder: query.sort.direction,
     }),
+    // Server-side filtering support.
+    ...(combinedFilter && { filter: combinedFilter }),
   };
 };
 
