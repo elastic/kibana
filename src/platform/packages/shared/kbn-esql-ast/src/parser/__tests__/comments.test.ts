@@ -10,7 +10,7 @@
 import { parse } from '..';
 import { EsqlQuery } from '../../query';
 import type { ESQLAstItem, ESQLAstRerankCommand, ESQLCommandOption, ESQLMap } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('Comments', () => {
   describe('can attach "top" comment(s)', () => {
