@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-export async function expectToReject<T extends Error>(fn: () => Promise<any>): Promise<T> {
-  let res: any;
-  try {
-    res = await fn();
-  } catch (e) {
-    return e;
-  }
-
-  throw new Error(`expectToReject resolved: "${JSON.stringify(res)}"`);
-}
+export { runInvalidate } from './run_invalidate';
