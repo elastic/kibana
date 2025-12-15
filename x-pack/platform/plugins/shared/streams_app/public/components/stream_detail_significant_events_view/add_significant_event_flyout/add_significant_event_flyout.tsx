@@ -57,6 +57,8 @@ interface Props {
   query?: StreamQueryKql;
   initialFlow?: Flow;
   initialSelectedFeatures: Feature[];
+  generateAutomatically: boolean;
+  onFeatureIdentificationClick: () => void;
 }
 
 export function AddSignificantEventFlyout({
@@ -67,6 +69,8 @@ export function AddSignificantEventFlyout({
   initialFlow = undefined,
   initialSelectedFeatures,
   features,
+  generateAutomatically,
+  onFeatureIdentificationClick,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -223,7 +227,7 @@ export function AddSignificantEventFlyout({
   ]);
 
   useEffect(() => {
-    if (initialFlow === 'ai' && (initialSelectedFeatures ?? []).length > 0) {
+    if (initialFlow === 'ai' && generateAutomatically) {
       generateQueries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -296,7 +300,8 @@ export function AddSignificantEventFlyout({
                     selectedFeatures={selectedFeatures}
                     onFeaturesChange={setSelectedFeatures}
                     onGenerateSuggestionsClick={generateQueries}
-                    onFeatureIdentificationClick={() => {}}
+                    onFeatureIdentificationClick={onFeatureIdentificationClick}
+                    isLoadingGeneration={isGenerating}
                   />
                 )}
               </EuiPanel>

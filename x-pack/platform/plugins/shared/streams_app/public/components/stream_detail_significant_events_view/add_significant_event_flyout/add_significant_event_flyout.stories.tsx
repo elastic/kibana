@@ -36,7 +36,9 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
 export const Default: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      generateAutomatically={false}
       definition={logsStreamDefinition}
+      initialSelectedFeatures={[]}
       onClose={() => {}}
       onSave={async (queries) => {}}
       features={[
@@ -57,6 +59,8 @@ export const Default: StoryFn<{}> = () => {
 export const Edit: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      generateAutomatically={false}
+      initialSelectedFeatures={[]}
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}

@@ -26,6 +26,8 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   features,
   refresh,
+  generateAutomatically,
+  onFeatureIdentificationClick,
 }: {
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
@@ -37,6 +39,8 @@ export const EditSignificantEventFlyout = ({
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  generateAutomatically: boolean;
+  onFeatureIdentificationClick: () => void;
 }) => {
   const {
     core: { notifications },
@@ -54,6 +58,8 @@ export const EditSignificantEventFlyout = ({
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
+      generateAutomatically={generateAutomatically}
+      onFeatureIdentificationClick={onFeatureIdentificationClick}
       definition={definition.stream}
       query={queryToEdit}
       onSave={async (data: SaveData) => {

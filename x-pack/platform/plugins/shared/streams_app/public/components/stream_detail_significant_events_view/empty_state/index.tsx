@@ -63,6 +63,7 @@ export function EmptyState({
               onGenerateSuggestionsClick={onGenerateSuggestionsClick}
               onFeatureIdentificationClick={onFeatureIdentificationClick}
               onManualEntryClick={onManualEntryClick}
+              isLoadingGeneration={false}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -78,10 +79,12 @@ export function SignificantEventsGenerationPanel({
   onGenerateSuggestionsClick,
   onFeatureIdentificationClick,
   onManualEntryClick,
+  isLoadingGeneration,
 }: FeatureSelectorProps & {
   onFeatureIdentificationClick: () => void;
   onManualEntryClick?: () => void;
   onGenerateSuggestionsClick: () => void;
+  isLoadingGeneration: boolean;
 }) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -129,6 +132,7 @@ export function SignificantEventsGenerationPanel({
             <ConnectorListButton
               buttonProps={{
                 iconType: 'sparkles',
+                isLoading: isLoadingGeneration,
                 onClick: () => onGenerateSuggestionsClick(),
                 'data-test-subj': 'significant_events_generate_suggestions_button',
                 children: i18n.translate(
@@ -173,6 +177,7 @@ export function SignificantEventsGenerationPanel({
                     buttonProps={{
                       iconType: 'sparkles',
                       onClick: onFeatureIdentificationClick,
+                      isDisabled: isLoadingGeneration,
                       'data-test-subj': 'significant_events_identify_features_button',
                       children: i18n.translate(
                         'xpack.streams.significantEvents.noFeatures.featureIdentificationButtonLabel',

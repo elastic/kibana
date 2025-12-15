@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
@@ -71,6 +71,25 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [dateRange, setDateRange] = useState<TimeRange | undefined>(undefined);
   const [query, setQuery] = useState<string>('');
 
+  const identifyFeaturesCallback = useCallback(() => {
+    setIsFeatureDetectionLoading(true);
+    setIsFeatureDetectionFlyoutOpen(true);
+
+    identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
+      .then((data) => {
+        setDetectedFeatures(data.features);
+      })
+      .finally(() => {
+        setIsFeatureDetectionLoading(false);
+      });
+  }, [
+    identifyFeatures,
+    aiFeatures?.genAiConnectors.selectedConnector,
+    setIsFeatureDetectionLoading,
+    setIsFeatureDetectionFlyoutOpen,
+    setDetectedFeatures,
+  ]);
+
   const { significantEvents, combinedQuery } = useFilteredSigEvents(
     significantEventsFetchState.value ?? [],
     query
@@ -120,7 +139,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   ) : null;
 
-  const editFlyout = (
+  const editFlyout = (generateAutomatically: boolean) => (
     <EditSignificantEventFlyout
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
@@ -132,6 +151,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       selectedFeatures={selectedFeatures}
       setSelectedFeatures={setSelectedFeatures}
       features={features}
+      generateAutomatically={generateAutomatically}
+      onFeatureIdentificationClick={identifyFeaturesCallback}
     />
   );
 
@@ -146,18 +167,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           features={features}
           selectedFeatures={selectedFeatures}
           onFeaturesChange={setSelectedFeatures}
-          onFeatureIdentificationClick={() => {
-            setIsFeatureDetectionLoading(true);
-            setIsFeatureDetectionFlyoutOpen(true);
-
-            identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
-              .then((data) => {
-                setDetectedFeatures(data.features);
-              })
-              .finally(() => {
-                setIsFeatureDetectionLoading(false);
-              });
-          }}
+          onFeatureIdentificationClick={identifyFeaturesCallback}
           onManualEntryClick={() => {
             setQueryToEdit(undefined);
             setInitialFlow('manual');
@@ -169,7 +179,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           }}
         />
         {featureDetectionFlyout}
-        {editFlyout}
+        {editFlyout(true)}
       </>
     );
   }
@@ -254,7 +264,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout}
+      {editFlyout(false)}
     </>
   );
 }
