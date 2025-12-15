@@ -32,6 +32,10 @@ import {
   createGetLogCategoriesTool,
 } from './get_log_categories/get_log_categories';
 import {
+  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+  createGetCorrelatedLogsTool,
+} from './get_correlated_logs/get_correlated_logs';
+import {
   createGetServicesTool,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
 } from './get_services/get_services';
@@ -54,6 +58,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
+  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 ];
@@ -82,6 +87,7 @@ export async function registerTools({
     createGetLogCategoriesTool({ core, logger }),
     createGetServicesTool({ core, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
+    createGetCorrelatedLogsTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {

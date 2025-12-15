@@ -12,3 +12,4 @@ export { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from './run_log_rate_anal
 export { OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID } from './get_anomaly_detection_jobs/get_anomaly_detection_jobs';
 export { OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/get_services';
 export { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from './get_downstream_dependencies/get_downstream_dependencies';
+export { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from './get_correlated_logs/get_correlated_logs';
