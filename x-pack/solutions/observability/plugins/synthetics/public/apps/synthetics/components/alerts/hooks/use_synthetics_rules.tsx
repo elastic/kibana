@@ -57,7 +57,9 @@ export const useSyntheticsRules = (isOpen: boolean) => {
 
   // Fetch or create default rules when popover opens
   useEffect(() => {
-    if (isOpen && hasMonitors && defaultRulesEnabled && !loading && rulesLoaded === null) {
+    const shouldGetOrCreateAlerts =
+      isOpen && hasMonitors && defaultRulesEnabled && !loading && rulesLoaded === null;
+    if (shouldGetOrCreateAlerts) {
       getOrCreateAlerts();
     }
   }, [isOpen, hasMonitors, defaultRulesEnabled, loading, rulesLoaded, getOrCreateAlerts]);
