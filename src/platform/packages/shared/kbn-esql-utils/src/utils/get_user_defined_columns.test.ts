@@ -131,6 +131,24 @@ describe('getUserDefinedColumns', () => {
         1: ['firstWord'],
       });
     });
+
+    it('identifies columns from CHANGE POINT command', async () => {
+      const query = 'FROM logs* | CHANGE_POINT count ON field1';
+      const result = await getUserDefinedColumns(query);
+
+      expect(result).toEqual({
+        1: ['type', 'pvalue'],
+      });
+    });
+
+    it('identifies columns from CHANGE POINT command with AS', async () => {
+      const query = 'FROM logs* | CHANGE_POINT count ON field1 AS changePointType, pValue';
+      const result = await getUserDefinedColumns(query);
+
+      expect(result).toEqual({
+        1: ['changePointType', 'pValue'],
+      });
+    });
   });
 
   describe('Multiple commands', () => {

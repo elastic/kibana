@@ -55,6 +55,8 @@ export async function getUserDefinedColumns(query: string): Promise<UserDefinedC
  * Extracts user-defined columns from a single command by looking for:
  * 1. Assignment operators (=) - creates new columns
  * 2. Rename operators (AS) - creates aliases
+ * 3. Function calls that automatically create columns (e.g., STATS count())
+ * 4. Columns that are being added by ES (e.g. in dissect command)
  */
 async function getUserDefinedColumnsFromCommand(
   command: ESQLCommand,
@@ -75,7 +77,6 @@ async function getUserDefinedColumnsFromCommand(
     else if (isFunctionExpression(arg) && arg.name === 'as') {
       if (arg.args.length >= 2 && isColumn(arg.args[0]) && isColumn(arg.args[1])) {
         const newNameCol = arg.args[1] as ESQLColumn;
-
         userDefinedColumns.push(newNameCol.name);
       }
     }
@@ -92,12 +93,22 @@ async function getUserDefinedColumnsFromCommand(
 
     // Handle option arguments (like BY clauses) that can contain assignments
     else if (isProperNode(arg) && isOptionNode(arg)) {
-      arg.args.forEach((optionArg) => {
-        if (isColumn(optionArg)) {
-          columnsInOptions.add(optionArg.name);
-        }
-      });
-      await Promise.all(arg.args.map(processArgument));
+      // Special case: AS option creates new column names (like in CHANGE_POINT)
+      if (arg.name === 'as') {
+        arg.args.forEach((optionArg) => {
+          if (isColumn(optionArg)) {
+            userDefinedColumns.push(optionArg.name);
+          }
+        });
+      } else {
+        // For other options (like BY clauses), collect column names for filtering
+        arg.args.forEach((optionArg) => {
+          if (isColumn(optionArg)) {
+            columnsInOptions.add(optionArg.name);
+          }
+        });
+        await Promise.all(arg.args.map(processArgument));
+      }
     }
   };
 
