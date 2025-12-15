@@ -160,7 +160,6 @@ const generateSignificantEventsRoute = createServerRoute({
     path: z.object({ name: z.string() }),
     query: z.object({
       connectorId: z.string(),
-      currentDate: dateFromString.optional(),
       from: dateFromString,
       to: dateFromString,
       sampleDocsSize: z
