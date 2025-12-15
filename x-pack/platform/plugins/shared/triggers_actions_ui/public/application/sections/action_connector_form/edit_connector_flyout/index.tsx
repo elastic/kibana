@@ -39,6 +39,7 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { TestConnectorForm } from '../test_connector_form';
 import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
+import { useOAuthAuthorize } from '../../../hooks/use_oauth_authorize';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 
@@ -71,6 +72,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const {
     docLinks,
     application: { capabilities },
+    notifications: { toasts },
   } = useKibana().services;
 
   const isMounted = useRef(false);
@@ -116,6 +118,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  const { authorize, isAuthorizing } = useOAuthAuthorize();
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
@@ -223,6 +226,36 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     updateConnector,
     onFormModifiedChange,
   ]);
+
+  const handleAuthorize = useCallback(async () => {
+    if (!connector) return;
+
+    try {
+      await authorize(connector.id);
+
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.authorizeSuccessTitle',
+          { defaultMessage: 'Authorization window opened' }
+        ),
+        text: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.authorizeSuccessText',
+          {
+            defaultMessage:
+              'Complete the authorization in the new window, then test your connector.',
+          }
+        ),
+      });
+    } catch (error) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.authorizeErrorTitle',
+          { defaultMessage: 'Failed to start authorization' }
+        ),
+        text: error.message,
+      });
+    }
+  }, [connector, authorize, toasts]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -363,6 +396,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           disabled={disabled}
           showButtons={showButtons}
           onClickSave={onClickSave}
+          connector={connector}
+          onAuthorize={handleAuthorize}
+          isAuthorizing={isAuthorizing}
         />
       </EuiFlyout>
       {showConfirmModal && (

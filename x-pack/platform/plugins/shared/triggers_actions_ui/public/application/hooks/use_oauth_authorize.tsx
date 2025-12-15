@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useState, useCallback } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { oauthAuthorize } from '../lib/action_connector_api/oauth_authorize';
+
+export function useOAuthAuthorize() {
+  const { http } = useKibana().services;
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
+
+  const authorize = useCallback(
+    async (connectorId: string) => {
+      setIsAuthorizing(true);
+      try {
+        const { authorizationUrl } = await oauthAuthorize({
+          http: http!,
+          connectorId,
+        });
+
+        // Open authorization URL in new tab
+        window.open(authorizationUrl, '_blank', 'noopener,noreferrer');
+
+        return true;
+      } catch (error) {
+        throw error;
+      } finally {
+        setIsAuthorizing(false);
+      }
+    },
+    [http]
+  );
+
+  return {
+    authorize,
+    isAuthorizing,
+  };
+}

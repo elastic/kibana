@@ -298,4 +298,136 @@ export class ConnectorTokenClient {
       });
     }
   }
+
+  /**
+   * Create new token with refresh token support
+   */
+  public async createWithRefreshToken({
+    connectorId,
+    accessToken,
+    refreshToken,
+    expiresAtMillis,
+    refreshTokenExpiresAtMillis,
+    tokenType,
+  }: {
+    connectorId: string;
+    accessToken: string;
+    refreshToken?: string;
+    expiresAtMillis: string;
+    refreshTokenExpiresAtMillis?: string;
+    tokenType?: string;
+  }): Promise<ConnectorToken> {
+    const id = SavedObjectsUtils.generateId();
+    const createTime = Date.now();
+
+    try {
+      const result = await this.unsecuredSavedObjectsClient.create(
+        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        omitBy(
+          {
+            connectorId,
+            token: accessToken,
+            refreshToken,
+            expiresAt: expiresAtMillis,
+            refreshTokenExpiresAt: refreshTokenExpiresAtMillis,
+            tokenType: tokenType ?? 'access_token',
+            createdAt: new Date(createTime).toISOString(),
+            updatedAt: new Date(createTime).toISOString(),
+          },
+          isUndefined
+        ),
+        { id }
+      );
+
+      return result.attributes as ConnectorToken;
+    } catch (err) {
+      this.logger.error(
+        `Failed to create connector_token with refresh token for connectorId "${connectorId}". Error: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  /**
+   * Update token with refresh token
+   */
+  public async updateWithRefreshToken({
+    id,
+    token,
+    refreshToken,
+    expiresAtMillis,
+    refreshTokenExpiresAtMillis,
+    tokenType,
+  }: {
+    id: string;
+    token: string;
+    refreshToken?: string;
+    expiresAtMillis: string;
+    refreshTokenExpiresAtMillis?: string;
+    tokenType?: string;
+  }): Promise<ConnectorToken | null> {
+    const { attributes, references, version } =
+      await this.unsecuredSavedObjectsClient.get<ConnectorToken>(
+        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        id
+      );
+    const updateTime = Date.now();
+
+    try {
+      const updateOperation = () => {
+        return this.unsecuredSavedObjectsClient.create<ConnectorToken>(
+          CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+          omitBy(
+            {
+              ...attributes,
+              token,
+              refreshToken: refreshToken ?? attributes.refreshToken,
+              expiresAt: expiresAtMillis,
+              refreshTokenExpiresAt:
+                refreshTokenExpiresAtMillis ?? attributes.refreshTokenExpiresAt,
+              tokenType: tokenType ?? 'access_token',
+              updatedAt: new Date(updateTime).toISOString(),
+            },
+            isUndefined
+          ),
+          omitBy(
+            {
+              id,
+              overwrite: true,
+              references,
+              version,
+            },
+            isUndefined
+          )
+        );
+      };
+
+      const result = await retryIfConflicts(
+        this.logger,
+        `accessToken.updateWithRefreshToken('${id}')`,
+        updateOperation,
+        MAX_RETRY_ATTEMPTS
+      );
+
+      return result.attributes as ConnectorToken;
+    } catch (err) {
+      this.logger.error(
+        `Failed to update connector_token with refresh token for id "${id}". Error: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  /**
+   * Get refresh token for a connector
+   */
+  public async getRefreshToken({ connectorId }: { connectorId: string }): Promise<string | null> {
+    const { connectorToken } = await this.get({ connectorId, tokenType: 'access_token' });
+
+    if (!connectorToken?.refreshToken) {
+      return null;
+    }
+
+    return connectorToken.refreshToken;
+  }
 }

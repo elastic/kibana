@@ -7,13 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const rawConnectorTokenSchema = schema.object({
-  createdAt: schema.string(),
+export const rawOAuthStateSchema = schema.object({
+  state: schema.string(),
+  codeVerifier: schema.string(),
   connectorId: schema.string(),
+  redirectUri: schema.string(),
+  authorizationUrl: schema.string(),
+  scope: schema.maybe(schema.string()),
+  createdAt: schema.string(),
   expiresAt: schema.string(),
-  token: schema.string(),
-  tokenType: schema.string(),
-  updatedAt: schema.string(),
-  refreshToken: schema.maybe(schema.string()),
-  refreshTokenExpiresAt: schema.maybe(schema.string()),
+  createdBy: schema.maybe(schema.string()),
 });

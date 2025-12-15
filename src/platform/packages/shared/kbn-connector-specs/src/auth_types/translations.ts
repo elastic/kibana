@@ -117,6 +117,20 @@ export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const OAUTH_AUTHORIZATION_CODE_LABEL = i18n.translate(
+  'connectorSpecs.oauthAuthorizationCode.label',
+  {
+    defaultMessage: 'OAuth2 Authorization Code',
+  }
+);
+
+export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
+  'connectorSpecs.oauthAuthorizationUrl.label',
+  {
+    defaultMessage: 'Authorization URL',
+  }
+);
+
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });

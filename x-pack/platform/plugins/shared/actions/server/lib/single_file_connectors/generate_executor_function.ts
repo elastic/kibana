@@ -79,6 +79,12 @@ export const generateExecutorFunction = ({
       return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
       logger.error(`error on ${connectorId} event: ${error}`);
-      return errorResultUnexpectedError(connectorId);
+      // Preserve the original error message if available, especially for OAuth 401 errors
+      const errorMessage = error.message || 'error calling connector, unexpected error';
+      return {
+        status: 'error',
+        message: errorMessage,
+        actionId: connectorId,
+      };
     }
   };

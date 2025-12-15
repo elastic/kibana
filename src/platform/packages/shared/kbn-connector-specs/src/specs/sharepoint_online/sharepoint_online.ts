@@ -11,6 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
+/**
+ * SharePoint Online connector using OAuth2 Authorization Code flow with Microsoft Identity Platform.
+ */
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepointOnline',
@@ -25,23 +28,18 @@ export const SharepointOnline: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
+        type: 'oauth_authorization_code',
         defaults: {
-          scope: 'https://graph.microsoft.com/.default',
+          authorizationUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
           tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+          scope: 'https://graph.microsoft.com/.default offline_access',
         },
       },
     ],
   },
 
-  schema: z.object({
-    region: z
-      .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
-      .meta({ label: 'Region' })
-      .describe(
-        'Geographic region for search queries (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
-      ),
-  }),
+  // No additional configuration needed beyond OAuth credentials
+  schema: z.object({}),
 
   actions: {
     // https://learn.microsoft.com/en-us/graph/api/search-query
@@ -64,8 +62,6 @@ export const SharepointOnline: ConnectorSpec = {
           size?: number;
         };
 
-        const config = ctx.config as { region: string };
-
         const searchRequest = {
           requests: [
             {
@@ -73,7 +69,6 @@ export const SharepointOnline: ConnectorSpec = {
               query: {
                 queryString: typedInput.query,
               },
-              region: config.region,
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },
