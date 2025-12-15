@@ -29,7 +29,6 @@ export interface RoundInput {
   attachments?: Attachment[];
   /**
    * References to versioned conversation-level attachments.
-   * NEW: Preferred way to reference attachments.
    */
   attachment_refs?: AttachmentVersionRef[];
 }
@@ -49,7 +48,6 @@ export interface RawRoundInput {
   attachments?: AttachmentInput[];
   /**
    * References to versioned conversation-level attachments.
-   * NEW: Preferred way to reference attachments.
    */
   attachment_refs?: AttachmentVersionRef[];
 }
@@ -220,7 +218,6 @@ export interface Conversation {
   rounds: ConversationRound[];
   /**
    * Conversation-level versioned attachments.
-   * NEW: Optional for backward compatibility during migration.
    * These attachments are shared across all rounds and can be referenced via attachment_refs.
    */
   attachments?: VersionedAttachment[];

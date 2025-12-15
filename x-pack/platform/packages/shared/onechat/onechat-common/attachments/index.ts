@@ -23,7 +23,6 @@ export {
   type EsqlAttachmentData,
 } from './attachment_types';
 
-// Versioned attachment types and utilities
 export type {
   VersionedAttachment,
   AttachmentVersion,

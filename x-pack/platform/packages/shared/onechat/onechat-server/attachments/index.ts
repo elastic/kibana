@@ -22,7 +22,6 @@ export type {
 } from './tools';
 export type {
   AttachmentStateManager,
-  AttachmentAddInput,
   AttachmentUpdateInput,
   ResolvedAttachmentRef,
 } from './attachment_state_manager';

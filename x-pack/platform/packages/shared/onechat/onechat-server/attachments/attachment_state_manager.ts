@@ -11,6 +11,7 @@ import type {
   AttachmentVersion,
   AttachmentVersionRef,
   AttachmentDiff,
+  VersionedAttachmentInput,
 } from '@kbn/onechat-common/attachments';
 import {
   hashContent,
@@ -19,22 +20,6 @@ import {
   getVersion,
   isAttachmentActive,
 } from '@kbn/onechat-common/attachments';
-
-/**
- * Input for adding a new attachment.
- */
-export interface AttachmentAddInput {
-  /** Optional ID (will be generated if not provided) */
-  id?: string;
-  /** Type of the attachment */
-  type: string;
-  /** The attachment data */
-  data: unknown;
-  /** Human-readable description */
-  description?: string;
-  /** Whether the attachment should be hidden from the user */
-  hidden?: boolean;
-}
 
 /**
  * Input for updating an existing attachment.
@@ -83,7 +68,7 @@ export interface AttachmentStateManager {
 
   // Write operations
   /** Add a new attachment */
-  add(input: AttachmentAddInput): VersionedAttachment;
+  add(input: VersionedAttachmentInput): VersionedAttachment;
   /** Update an existing attachment (creates new version if content changed) */
   update(id: string, input: AttachmentUpdateInput): VersionedAttachment | undefined;
   /** Soft delete an attachment (sets active=false) */
@@ -122,8 +107,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       this.attachments.set(attachment.id, structuredClone(attachment));
     }
   }
-
-  // Read operations
 
   get(id: string): VersionedAttachment | undefined {
     return this.attachments.get(id);
@@ -166,28 +149,22 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return undefined;
     }
 
-    // Determine change type based on version progression
     let changeType: AttachmentDiff['change_type'];
     let summary: string;
     const changedFields: string[] = [];
 
     if (fromVersion === 0 || !fromVer) {
-      // Creating from nothing
       changeType = 'create';
       summary = `Created attachment "${attachment.description || attachment.id}"`;
     } else if (attachment.active === false && fromVersion < toVersion) {
-      // Was active, now deleted
       changeType = 'delete';
       summary = `Deleted attachment "${attachment.description || attachment.id}"`;
     } else if (attachment.active !== false && fromVersion < toVersion) {
-      // Check if this is a restore (previous version was from when it was deleted)
-      // For simplicity, we'll check if content hash changed
       if (fromVer.content_hash !== toVer.content_hash) {
         changeType = 'update';
         summary = `Updated attachment "${attachment.description || attachment.id}"`;
         changedFields.push('data');
       } else {
-        // Content same, might be restore or metadata change
         changeType = 'restore';
         summary = `Restored attachment "${attachment.description || attachment.id}"`;
       }
@@ -206,9 +183,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     };
   }
 
-  // Write operations
-
-  add(input: AttachmentAddInput): VersionedAttachment {
+  add(input: VersionedAttachmentInput): VersionedAttachment {
     const id = input.id || uuidv4();
     const now = new Date().toISOString();
     const contentHash = hashContent(input.data);
@@ -244,7 +219,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return undefined;
     }
 
-    // Update metadata if provided (doesn't require new version)
     if (input.description !== undefined) {
       attachment.description = input.description;
       this.dirty = true;
@@ -254,7 +228,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       this.dirty = true;
     }
 
-    // If data is provided, check if we need a new version
     if (input.data !== undefined) {
       const newHash = hashContent(input.data);
       const currentVersion = getLatestVersion(attachment);
@@ -288,7 +261,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return false;
     }
 
-    // Already deleted
     if (attachment.active === false) {
       return false;
     }
@@ -304,7 +276,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return false;
     }
 
-    // Already active
     if (attachment.active !== false) {
       return false;
     }
@@ -334,8 +305,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     this.dirty = true;
     return true;
   }
-
-  // Utility methods
 
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[] {
     const results: ResolvedAttachmentRef[] = [];
