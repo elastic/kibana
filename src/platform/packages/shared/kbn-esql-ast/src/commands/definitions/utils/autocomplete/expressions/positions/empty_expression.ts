@@ -8,7 +8,7 @@
  */
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
-import { uniq } from 'lodash';
+import { isEqual, uniq, uniqWith } from 'lodash';
 import { matchesSpecialFunction } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import type { ExpressionContext } from '../types';
@@ -385,9 +385,11 @@ async function buildSuggestionsFromHints(
   paramDefinitions: FunctionParameter[],
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
-  const hints: ParameterHint[] = paramDefinitions
-    .filter((param) => param.hint !== undefined)
-    .map((param) => param.hint!);
+  // Keep the hints that are unique by entityType + constraints
+  const hints: ParameterHint[] = uniqWith(
+    paramDefinitions.filter((param) => param.hint !== undefined).map((param) => param.hint!),
+    (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
+  );
 
   if (hints.length > 0) {
     return (
