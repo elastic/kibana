@@ -854,7 +854,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         client,
         repository,
         {
-          type: [type, NAMESPACE_AGNOSTIC_TYPE],
+          type: [type, NAMESPACE_AGNOSTIC_TYPE, HIDDEN_TYPE],
           namespaces: [namespace, 'ns-1'],
         }, // include multiple types and spaces
         namespace
@@ -872,7 +872,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
     });
 
-    test(`returns empty authorization map for fully authorized if the authorized types are not part of the query`, async () => {
+    test(`passes an empty type map to the query when fully authorized but no types are authorized for find or are hidden`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
@@ -880,7 +880,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         client,
         repository,
         {
-          type: [type, NAMESPACE_AGNOSTIC_TYPE],
+          type: [type, NAMESPACE_AGNOSTIC_TYPE, HIDDEN_TYPE],
           namespaces: [namespace, 'ns-1'],
         }, // include multiple types and spaces
         namespace
