@@ -20,8 +20,7 @@ import {
   EuiMarkdownEditor,
   EuiSpacer,
   EuiTitle,
-  EuiPanel,
-  EuiHorizontalRule
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -73,7 +72,7 @@ export const StreamFeatureDetailsFlyout = ({
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <div>          
+        <div>
           <EuiTitle size="xxs">
             <h3>
               {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
