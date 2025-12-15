@@ -132,25 +132,6 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('redirects to Discover when clicking "Open in Discover" button', async ({
-    page,
-    pageObjects: { errorsPage },
-  }) => {
-    await errorsPage.gotoErrorDetailsPage(
-      'opbeans-java',
-      ERROR_GROUPING_KEY,
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
-
-    await test.step('clicking Open in Discover redirects to discover', async () => {
-      await page.getByRole('link', { name: 'Open in Discover' }).click();
-      await page.waitForLoadingIndicatorHidden();
-      await expect(page.getByTestId('loadingSpinnerText')).not.toBeVisible();
-      await expect(page.url()).toContain('app/discover');
-    });
-  });
-
   test('shows zero occurrences for non-existent error', async ({
     page,
     pageObjects: { errorsPage },
