@@ -118,7 +118,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationActions.invalidateConversation();
       messageControllerRef.current = null;
       setAgentReasoning(null);
-      setIsResponseLoading(false);
+      if (isResponseLoading) {
+        setIsResponseLoading(false);
+      }
     },
     onSuccess: () => {
       removePendingMessage();
