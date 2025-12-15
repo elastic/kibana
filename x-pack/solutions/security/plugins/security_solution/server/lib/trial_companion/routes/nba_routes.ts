@@ -40,17 +40,7 @@ const NBARouteSchema = {
 
 type NBASeenRouteRequestBody = TypeOf<typeof NBARouteSchema.body>;
 
-const notFound: RequestHandler<never, never, never, SecuritySolutionRequestHandlerContext> = async (
-  context,
-  request,
-  response
-) => {
-  return response.notFound({
-    body: 'disabled',
-  });
-};
-
-export const registerGetNBARoute = ({ router, logger, enabled }: TrialCompanionRoutesDeps) => {
+export const registerGetNBARoute = ({ router, logger, _enabled }: TrialCompanionRoutesDeps) => {
   router.versioned
     .get({
       path: TRIAL_COMPANION_NBA_URL,
@@ -70,11 +60,15 @@ export const registerGetNBARoute = ({ router, logger, enabled }: TrialCompanionR
         version: '1',
         validate: false,
       },
-      enabled ? getCurrentNBAForUser(logger) : notFound
+      getCurrentNBAForUser(logger)
     );
 };
 
-export const registerPostNBASeenRoute = ({ router, logger, enabled }: TrialCompanionRoutesDeps) => {
+export const registerPostNBASeenRoute = ({
+  router,
+  logger,
+  _enabled,
+}: TrialCompanionRoutesDeps) => {
   router.versioned
     .post({
       path: TRIAL_COMPANION_NBA_URL,
@@ -96,7 +90,7 @@ export const registerPostNBASeenRoute = ({ router, logger, enabled }: TrialCompa
           request: NBARouteSchema,
         },
       },
-      enabled ? postNBAUserSeen(logger) : notFound
+      postNBAUserSeen(logger)
     );
 };
 
