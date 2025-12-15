@@ -393,8 +393,7 @@ export const getKibanaRoleSchema = (
           }
         }
       },
-    },
-    { maxSize: 100 }
+    }
   );
 
 export type ElasticsearchPrivilegesType = TypeOf<typeof elasticsearchRoleSchema>;
