@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
+import { esqlFunctionNames } from '@kbn/esql-ast/src/commands/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import {

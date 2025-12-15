@@ -14,9 +14,9 @@ import type {
   EditorError,
 } from '@kbn/esql-ast';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
-import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { getFunctionSignatures } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/scalar_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/aggregation_functions';
 import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
 import { join } from 'path';
