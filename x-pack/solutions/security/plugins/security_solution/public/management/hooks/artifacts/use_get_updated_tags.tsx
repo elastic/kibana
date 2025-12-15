@@ -25,10 +25,7 @@ interface TagUpdateOperation<TagFilters> {
   newTags: string[];
 }
 
-type GetTagsUpdatedBy<TagFilters> = (
-  tagType: keyof TagFilters,
-  newTags: string[]
-) => string[];
+type GetTagsUpdatedBy<TagFilters> = (tagType: keyof TagFilters, newTags: string[]) => string[];
 
 type GetMultipleTagsUpdatedBy<TagFilters> = (
   updates: Array<TagUpdateOperation<TagFilters>>
