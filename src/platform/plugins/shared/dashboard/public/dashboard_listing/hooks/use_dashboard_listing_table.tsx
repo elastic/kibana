@@ -13,6 +13,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
@@ -41,7 +42,6 @@ import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import {
   TAB_IDS,
   type TabId,
-  type DashboardListingUserContent,
   type DashboardVisualizationUserContent,
   type DashboardSavedObjectUserContent,
 } from '../types';
@@ -60,13 +60,13 @@ import {
   getVisualizationListingEmptyPrompt,
 } from '../utils/visualization_listing_helpers';
 
-type GetDetailViewLink = TableListViewTableProps<DashboardListingUserContent>['getDetailViewLink'];
+type GetDetailViewLink = TableListViewTableProps<UserContentCommonSchema>['getDetailViewLink'];
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 type DashboardListingViewTableProps = Omit<
-  TableListViewTableProps<DashboardListingUserContent>,
+  TableListViewTableProps<UserContentCommonSchema>,
   'tableCaption' | 'onFetchSuccess' | 'setPageDataTestSubject'
 > & { title: string };
 
@@ -128,10 +128,6 @@ export const useDashboardListingTable = ({
       switch (contentType) {
         case TAB_IDS.VISUALIZATIONS:
           closeNewVisModal.current = visualizationsService.showNewVisModal();
-          return;
-
-        case TAB_IDS.ANNOTATIONS:
-          coreServices.application.navigateToApp('lens', { path: '#/' });
           return;
 
         case TAB_IDS.DASHBOARDS:
@@ -219,12 +215,12 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    (item: DashboardListingUserContent) => editDashboardListingItem(item, goToDashboard),
+    (item: UserContentCommonSchema) => editDashboardListingItem(item, goToDashboard),
     [goToDashboard]
   );
 
   const getDetailViewLink = useCallback<NonNullable<GetDetailViewLink>>(
-    (entity: DashboardListingUserContent) => {
+    (entity: UserContentCommonSchema) => {
       if (entity.type !== 'dashboard') {
         return undefined;
       }
@@ -235,7 +231,7 @@ export const useDashboardListingTable = ({
     [getDashboardUrl]
   );
 
-  const getOnClickTitle = useCallback((item: DashboardListingUserContent) => {
+  const getOnClickTitle = useCallback((item: UserContentCommonSchema) => {
     const { id, type } = item;
 
     // Dashboards: let the link handle it (no onClick needed)
@@ -267,7 +263,7 @@ export const useDashboardListingTable = ({
     return () => navigateToVisualization(embeddableService.getStateTransfer(), id!);
   }, []);
 
-  const rowItemActions = useCallback((item: DashboardListingUserContent) => {
+  const rowItemActions = useCallback((item: UserContentCommonSchema) => {
     const { showWriteControls } = getDashboardCapabilities();
     const { managed, type } = item;
     const isReadOnlyVisualization =
@@ -302,23 +298,31 @@ export const useDashboardListingTable = ({
 
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
+
+    const getContentEditor = () => {
+      if (contentTypeFilter === TAB_IDS.DASHBOARDS) {
+        return {
+          isReadonly: !showWriteControls,
+          onSave: updateItemMeta,
+          customValidators: contentEditorValidators,
+        };
+      }
+
+      // For visualizations and other content types, enable read-only content editor
+      // This allows the info icon to show but prevents editing
+      return {
+        enabled: true,
+        isReadonly: true,
+      };
+    };
+
     return {
-      contentEditor:
-        contentTypeFilter === TAB_IDS.DASHBOARDS
-          ? {
-              isReadonly: !showWriteControls,
-              onSave: updateItemMeta,
-              customValidators: contentEditorValidators,
-            }
-          : {
-              enabled: false,
-            },
+      contentEditor: getContentEditor(),
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
       emptyPrompt:
-        contentTypeFilter === TAB_IDS.VISUALIZATIONS ||
-        contentTypeFilter === TAB_IDS.ANNOTATIONS ? (
+        contentTypeFilter === TAB_IDS.VISUALIZATIONS ? (
           getVisualizationListingEmptyPrompt(createItem)
         ) : (
           <DashboardListingEmptyPrompt
@@ -347,7 +351,7 @@ export const useDashboardListingTable = ({
       recentlyAccessed: getDashboardRecentlyAccessedService(),
       customTableColumn:
         contentTypeFilter === TAB_IDS.VISUALIZATIONS
-          ? (getVisualizationListingColumn() as EuiBasicTableColumn<DashboardListingUserContent>)
+          ? (getVisualizationListingColumn() as EuiBasicTableColumn<UserContentCommonSchema>)
           : undefined,
       rowItemActions: (item) => {
         const isDisabled = () => {

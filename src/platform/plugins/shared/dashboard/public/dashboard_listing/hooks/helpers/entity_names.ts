@@ -28,15 +28,6 @@ export const getEntityNames = (contentTypeFilter?: TabId): EntityNames => {
         }),
       };
 
-    case TAB_IDS.ANNOTATIONS:
-      return {
-        entityName: i18n.translate('dashboard.listing.table.annotationEntityName', {
-          defaultMessage: 'annotation group',
-        }),
-        entityNamePlural: i18n.translate('dashboard.listing.table.annotationEntityNamePlural', {
-          defaultMessage: 'annotation groups',
-        }),
-      };
     default:
       return {
         entityName: dashboardListingTableStrings.getEntityName(),

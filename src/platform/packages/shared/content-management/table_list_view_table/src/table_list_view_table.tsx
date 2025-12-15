@@ -734,9 +734,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   }, [
     titleColumnName,
     customTableColumn,
+    hasUpdatedAtMetadata,
     hasCreatedByMetadata,
     createdByEnabled,
-    hasUpdatedAtMetadata,
     editItem,
     contentEditor.enabled,
     listingId,

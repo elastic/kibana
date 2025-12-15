@@ -19,7 +19,6 @@ export type { VisualizationListItem, VisualizationStage };
 export const TAB_IDS = {
   DASHBOARDS: 'dashboards',
   VISUALIZATIONS: 'visualizations',
-  ANNOTATIONS: 'annotations',
 } as const;
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
@@ -32,25 +31,24 @@ export type DashboardListingProps = PropsWithChildren<{
   listingViewRegistry: DashboardListingViewRegistry;
 }>;
 
-interface DashboardListingItemBase extends UserContentCommonSchema {
+// Dashboard's own content type
+export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  type: 'dashboard';
   managed?: boolean;
   attributes: {
     title: string;
     description?: string;
-  };
-}
-
-export interface DashboardSavedObjectUserContent extends DashboardListingItemBase {
-  type: 'dashboard';
-  attributes: DashboardListingItemBase['attributes'] & {
     timeRestore: boolean;
   };
   canManageAccessControl?: boolean;
   accessMode?: SavedObjectAccessControl['accessMode'];
 }
 
-export interface DashboardVisualizationUserContent extends DashboardListingItemBase {
+// TEMPORARY: Type for visualizations (hard-coded tab, should be moved to registry)
+// TODO: Remove once visualizations tab is fully registered via listingViewRegistry
+export interface DashboardVisualizationUserContent extends UserContentCommonSchema {
   type: string;
+  managed?: boolean;
   icon: string;
   savedObjectType: string;
   title: string;
@@ -59,22 +57,10 @@ export interface DashboardVisualizationUserContent extends DashboardListingItemB
   stage?: VisualizationStage;
   error?: string;
   editor?: VisualizationListItem['editor'];
-  attributes: DashboardListingItemBase['attributes'] & {
+  attributes: {
+    title: string;
+    description?: string;
     visType?: string;
     readOnly?: boolean;
   };
 }
-
-export interface DashboardAnnotationGroupUserContent extends DashboardListingItemBase {
-  type: 'event-annotation-group';
-  attributes: DashboardListingItemBase['attributes'] & {
-    timeRestore: false;
-    indexPatternId?: string;
-    dataViewSpec?: { id?: string; name?: string };
-  };
-}
-
-export type DashboardListingUserContent =
-  | DashboardSavedObjectUserContent
-  | DashboardVisualizationUserContent
-  | DashboardAnnotationGroupUserContent;

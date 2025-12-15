@@ -23,7 +23,8 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardListingUserContent } from './types';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { DashboardListingProps } from './types';
 
 export const DashboardListingTable = ({
   disableCreateDashboardButton,
@@ -69,7 +70,7 @@ export const DashboardListingTable = ({
             unsavedDashboardIds={unsavedDashboardIds}
             refreshUnsavedDashboards={refreshUnsavedDashboards}
           />
-          <TableListViewTable<DashboardListingUserContent>
+          <TableListViewTable<UserContentCommonSchema>
             tableCaption={tableCaption}
             {...tableListViewTable}
             onFetchSuccess={() => {}}

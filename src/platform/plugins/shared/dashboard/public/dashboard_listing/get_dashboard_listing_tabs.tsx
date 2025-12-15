@@ -31,7 +31,8 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { TAB_IDS, type DashboardListingProps, type DashboardListingUserContent } from './types';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { TAB_IDS, type DashboardListingProps } from './types';
 
 type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
@@ -43,7 +44,7 @@ type GetDashboardListingTabsParams = Pick<
 >;
 
 type TabContentProps = Omit<GetDashboardListingTabsParams, 'listingViewRegistry'> & {
-  parentProps: TableListTabParentProps<DashboardListingUserContent>;
+  parentProps: TableListTabParentProps<UserContentCommonSchema>;
 };
 
 const getBaseKibanaProviderProps = () => ({
@@ -92,7 +93,7 @@ const DashboardsTabContent = ({
         unsavedDashboardIds={unsavedDashboardIds}
         refreshUnsavedDashboards={refreshUnsavedDashboards}
       />
-      <TableListViewTable<DashboardListingUserContent>
+      <TableListViewTable<UserContentCommonSchema>
         tableCaption={tableListViewTableProps.title}
         {...tableListViewTableProps}
         {...parentProps}
@@ -133,7 +134,7 @@ const VisualizationsTabContent = ({
           }
         `}
       >
-        <TableListViewTable<DashboardListingUserContent>
+        <TableListViewTable<UserContentCommonSchema>
           tableCaption={tableListViewTableProps.title}
           {...tableListViewTableProps}
           {...parentProps}
@@ -149,7 +150,7 @@ export const getDashboardListingTabs = ({
   useSessionStorageIntegration,
   initialFilter,
   listingViewRegistry,
-}: GetDashboardListingTabsParams): TableListTab<DashboardListingUserContent>[] => {
+}: GetDashboardListingTabsParams): TableListTab<UserContentCommonSchema>[] => {
   const commonProps = {
     goToDashboard,
     getDashboardUrl,
@@ -157,7 +158,7 @@ export const getDashboardListingTabs = ({
     initialFilter,
   };
 
-  const dashboardsTab: TableListTab<DashboardListingUserContent> = {
+  const dashboardsTab: TableListTab<UserContentCommonSchema> = {
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
       defaultMessage: 'Dashboards',
     }),
@@ -167,7 +168,7 @@ export const getDashboardListingTabs = ({
     ),
   };
 
-  const visualizationsTab: TableListTab<DashboardListingUserContent> = {
+  const visualizationsTab: TableListTab<UserContentCommonSchema> = {
     title: i18n.translate('dashboard.listing.tabs.visualizations.title', {
       defaultMessage: 'Visualizations',
     }),
