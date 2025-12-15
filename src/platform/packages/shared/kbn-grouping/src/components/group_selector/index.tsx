@@ -29,9 +29,8 @@ import { NONE_GROUP_KEY } from '../types';
  * @param enforcedGroups - Array of enforced group keys
  * @returns True if the group is enforced, false otherwise
  */
-const isEnforcedGroup = (groupKey: string, enforcedGroups?: string[]): boolean => {
-  return enforcedGroups?.includes(groupKey) ?? false;
-};
+const isEnforcedGroup = (groupKey?: string, enforcedGroups?: string[]) =>
+  Boolean(groupKey && enforcedGroups?.includes(groupKey));
 
 /**
  * Checks if 'none' option should be disabled
@@ -46,7 +45,7 @@ const shouldDisableNone = ({
 }: {
   enforcedGroups?: string[];
   selectedGroups: string[];
-}): boolean => {
+}) => {
   if (!enforcedGroups || enforcedGroups.length === 0) {
     return false;
   }
@@ -105,7 +104,7 @@ const GroupSelectorComponent = ({
       // If the group is enforced, always disable it to prevent deselection (takes precedence)
       // Note: Validation prevents enforced groups when maxGroupingLevels === 1, so this check
       // will never conflict with toggle mode
-      if (key && isEnforcedGroup(key, enforcedGroups)) {
+      if (isEnforcedGroup(key, enforcedGroups)) {
         return true;
       }
 
