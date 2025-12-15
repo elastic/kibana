@@ -10,7 +10,17 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "maintenanceWindows"],
-    "requiredPlugins": ["features", "licensing", "taskManager", "navigation"],
+    "requiredPlugins": [
+      "data",
+      "features",
+      "licensing",
+      "taskManager",
+      "management",
+      "kibanaReact",
+      "esUiShared",
+      "kibanaUtils",
+      "unifiedSearch"
+    ],
     "extraPublicDirs": ["common"]
   }
 }

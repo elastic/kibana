@@ -11,3 +11,10 @@ import { MaintenanceWindowsPublicPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MaintenanceWindowsPublicPlugin(initializerContext);
 };
+
+export type {
+  MaintenanceWindowsPublicSetupDependencies,
+  MaintenanceWindowsPublicStartDependencies,
+} from './types';
+
+export { MaintenanceWindowsPublicPlugin as Plugin };
