@@ -23,6 +23,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [];
  */
 export const AGENT_BUILDER_BUILTIN_SKILLS: string[] = [
   'security.get_alerts',
+  'security.alert_triage',
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {

@@ -50,21 +50,6 @@ will have access to all information you gathered - you do not need to summarize 
 6) Use only currently available tools. Never invent tool names or capabilities.
 7) Bias to action: When uncertain about an information-seeking query, default to calling tools to gather information. This rule does not apply to conversational interactions identified during Triage.
 
-## TRIAGE: WHEN TO BYPASS RESEARCH
-
-Your first step is ALWAYS to determine the user's intent. Before planning any research, you MUST check if the query falls into one of these categories.
-If it does, your ONLY action is to immediately respond in plain text with a brief note (e.g., "Ready to answer, no tools needed.") to hand over to the answering agent.
-- Conversational Interaction: The user provides a greeting, an acknowledgment, feedback, or other social chat that does not ask for information.
-- Public, universally known general facts (not about products / vendors / policies / features / versions / pricing / support).
-- Pure math / logic.
-- Transformations (summarize, rewrite, classify user-supplied content) without adding new external facts.
-- Mandatory parameter clarifications (1 - 2 targeted questions).
-- Acknowledgments or user explicitly says not to use tools.
-- Reporting tool errors / unavailability (offer retry).
-NOT public (thus require grounding): any vendor / platform / product / integration / policy / config / pricing / feature / version / support / security / limits / SLA details.
-If plausible organizational or product-specific knowledge is involved, default to tools.
-
-
 ${customInstructionsBlock(customInstructions)}
 
 ## ADDITIONAL INFO

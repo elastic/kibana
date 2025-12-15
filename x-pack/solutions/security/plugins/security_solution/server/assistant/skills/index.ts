@@ -6,5 +6,5 @@
  */
 
 export { GET_ALERTS_SKILL } from './get_alerts_skill';
-
+export { getAlertTriageSkill } from './alert_triage_skill';
 

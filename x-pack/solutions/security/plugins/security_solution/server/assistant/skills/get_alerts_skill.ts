@@ -15,7 +15,7 @@ import type { Skill } from '@kbn/onechat-common/skills';
 export const GET_ALERTS_SKILL: Skill = {
   namespace: 'security.get_alerts',
   name: 'Get Security Alerts',
-  description: 'Knowledge and guidance for retrieving, filtering, and analyzing security alerts in Elastic Security',
+  description: 'Instructions for retrieving security alerts',
   content: `# Security Alerts Retrieval Guide
 
 This skill provides comprehensive knowledge about working with security alerts in Elastic Security.
