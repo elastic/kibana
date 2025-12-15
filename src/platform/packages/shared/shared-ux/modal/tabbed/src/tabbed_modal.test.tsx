@@ -117,5 +117,34 @@ describe('TabbedModal', () => {
 
       expect(mockedHandlerFn).toHaveBeenCalled();
     });
+
+    it('renders AboveTabsContent when provided', () => {
+      const tabDefinition = getTabDefinition(mockedHandlerFn);
+
+      render(
+        <TabbedModal
+          tabs={[tabDefinition, { ...tabDefinition, id: 'anotherTab', name: 'another tab' }]}
+          defaultSelectedTabId="logUserInput"
+          onClose={modalOnCloseHandler}
+          aboveTabsContent={<div>Content</div>}
+        />
+      );
+
+      expect(screen.getByTestId('tabbedModal-above-tabs-content')).toBeInTheDocument();
+    });
+
+    it('does not render AboveTabsContent when not provided', () => {
+      const tabDefinition = getTabDefinition(mockedHandlerFn);
+
+      render(
+        <TabbedModal
+          tabs={[tabDefinition, { ...tabDefinition, id: 'anotherTab', name: 'another tab' }]}
+          defaultSelectedTabId="logUserInput"
+          onClose={modalOnCloseHandler}
+        />
+      );
+
+      expect(screen.queryByTestId('tabbedModal-above-tabs-content')).not.toBeInTheDocument();
+    });
   });
 });
