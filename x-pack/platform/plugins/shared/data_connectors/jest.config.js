@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export function maybe<T>(value: T): T | null | undefined {
-  return value;
-}
+/** @type {import('@jest/types').Config.InitialOptions} */
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/data_connectors'],
+};

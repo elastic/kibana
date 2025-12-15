@@ -47,9 +47,11 @@ const icon = 'logoObservability';
 function createNavTree({
   streamsAvailable,
   showAiAssistant,
+  isCloudEnabled,
 }: {
   streamsAvailable?: boolean;
-  showAiAssistant: boolean;
+  showAiAssistant?: boolean;
+  isCloudEnabled?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -480,6 +482,15 @@ function createNavTree({
                 }),
                 breadcrumbStatus: 'hidden',
               },
+              // Only show Cloud Connect in on-prem deployments (not cloud)
+              ...(isCloudEnabled
+                ? []
+                : [
+                    {
+                      id: 'cloud_connect' as const,
+                      link: 'cloud_connect' as const,
+                    },
+                  ]),
               { link: 'monitoring' },
             ],
           },
@@ -620,6 +631,7 @@ export const createDefinition = (
       createNavTree({
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
+        isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
       })
     )
   ),

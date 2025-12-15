@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { configs } from '../configs';
-
-export default configs.cloud;
+export const PAGE_SIZE = 100;
