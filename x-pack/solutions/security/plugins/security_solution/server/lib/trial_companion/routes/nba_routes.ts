@@ -40,7 +40,7 @@ const NBARouteSchema = {
 
 type NBASeenRouteRequestBody = TypeOf<typeof NBARouteSchema.body>;
 
-export const registerGetNBARoute = ({ router, logger, _enabled }: TrialCompanionRoutesDeps) => {
+export const registerGetNBARoute = ({ router, logger }: TrialCompanionRoutesDeps) => {
   router.versioned
     .get({
       path: TRIAL_COMPANION_NBA_URL,
@@ -64,11 +64,7 @@ export const registerGetNBARoute = ({ router, logger, _enabled }: TrialCompanion
     );
 };
 
-export const registerPostNBASeenRoute = ({
-  router,
-  logger,
-  _enabled,
-}: TrialCompanionRoutesDeps) => {
+export const registerPostNBASeenRoute = ({ router, logger }: TrialCompanionRoutesDeps) => {
   router.versioned
     .post({
       path: TRIAL_COMPANION_NBA_URL,
