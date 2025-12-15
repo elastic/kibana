@@ -18,6 +18,8 @@ import {
   first,
   map,
   skip,
+  switchMap,
+  type Subject,
 } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
@@ -31,7 +33,8 @@ import type { initializeUnifiedSearchManager } from './unified_search_manager';
 export const initializeFiltersManager = (
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>,
   layoutManager: ReturnType<typeof initializeLayoutManager>,
-  settingsManager: ReturnType<typeof initializeSettingsManager>
+  settingsManager: ReturnType<typeof initializeSettingsManager>,
+  forcePublish$: Subject<void>
 ) => {
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
@@ -104,6 +107,19 @@ export const initializeFiltersManager = (
     });
   }
 
+  /** when auto-apply is `false` and the dashboard is reset, wait for new filters to be updated and publish them */
+  const forcePublishSubscription = forcePublish$
+    .pipe(
+      switchMap(async () => {
+        await new Promise((resolve) => {
+          unpublishedChildFilters$.pipe(skip(1), first()).subscribe(resolve);
+        });
+      })
+    )
+    .subscribe(() => {
+      publishFilters();
+    });
+
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   filterManagerSubscription.add(
     publishedChildFilters$
@@ -129,6 +145,7 @@ export const initializeFiltersManager = (
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();
       filterManagerSubscription.unsubscribe();
+      forcePublishSubscription.unsubscribe();
     },
   };
 };

@@ -14,12 +14,22 @@ import type { PublishesESQLVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable, type ESQLControlVariable } from '@kbn/esql-types';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatestWith, filter, first, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatestWith,
+  distinctUntilChanged,
+  filter,
+  first,
+  skip,
+  type Subject,
+  switchMap,
+} from 'rxjs';
 import type { initializeSettingsManager } from './settings_manager';
 
 export const initializeESQLVariablesManager = (
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>,
-  settingsManager: ReturnType<typeof initializeSettingsManager>
+  settingsManager: ReturnType<typeof initializeSettingsManager>,
+  forcePublish$: Subject<void>
 ) => {
   const publishedEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
   const unpublishedEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
@@ -27,9 +37,11 @@ export const initializeESQLVariablesManager = (
   const childrenESQLVariablesSubscription = combineCompatibleChildrenApis<
     PublishesESQLVariable,
     ESQLControlVariable[]
-  >({ children$ }, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
-    unpublishedEsqlVariables$.next(newESQLVariables);
-  });
+  >({ children$ }, 'esqlVariable$', apiPublishesESQLVariable, [])
+    .pipe(distinctUntilChanged(deepEqual))
+    .subscribe((newESQLVariables) => {
+      unpublishedEsqlVariables$.next(newESQLVariables);
+    });
 
   const publishVariables = () => {
     const published = publishedEsqlVariables$.getValue();
@@ -56,6 +68,19 @@ export const initializeESQLVariablesManager = (
     });
   }
 
+  /** when auto-apply is `false` and the dashboard is reset, wait for new filters to be updated and publish them */
+  const forcePublishSubscription = forcePublish$
+    .pipe(
+      switchMap(async () => {
+        await new Promise((resolve) => {
+          unpublishedEsqlVariables$.pipe(first()).subscribe(resolve);
+        });
+      })
+    )
+    .subscribe(() => {
+      publishVariables();
+    });
+
   return {
     api: {
       publishedEsqlVariables$,
@@ -65,6 +90,7 @@ export const initializeESQLVariablesManager = (
     cleanup: () => {
       childrenESQLVariablesSubscription.unsubscribe();
       autoPublishFiltersSubscription.unsubscribe();
+      forcePublishSubscription.unsubscribe();
     },
   };
 };
