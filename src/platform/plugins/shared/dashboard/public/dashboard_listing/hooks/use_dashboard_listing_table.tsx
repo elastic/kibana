@@ -12,6 +12,7 @@ import { useLocation } from 'react-router-dom';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import type { GetResult } from '@kbn/content-management-plugin/common';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ViewMode } from '@kbn/presentation-publishing';
@@ -28,6 +29,8 @@ import {
   coreServices,
   embeddableService,
   visualizationsService,
+  contentManagementService,
+  savedObjectsTaggingService,
 } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
@@ -58,6 +61,13 @@ type GetDetailViewLink = TableListViewTableProps<DashboardListingUserContent>['g
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
+
+interface SavedObjectWithReferences {
+  id: string;
+  type: string;
+  attributes: Record<string, unknown>;
+  references: Reference[];
+}
 
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardListingUserContent>,
@@ -109,8 +119,8 @@ export const useDashboardListingTable = ({
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  // Store close function for new visualization modal (to close on navigation)
   const closeNewVisModal = useRef(() => {});
+  const currentListingItems = useRef<DashboardListingUserContent[]>([]);
   const { pathname } = useLocation();
 
   const createItem = useCallback(
@@ -162,6 +172,52 @@ export const useDashboardListingTable = ({
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
     [dashboardBackupService]
+  );
+
+  const updateVisualizationMeta = useCallback(
+    async (args: { id: string; title: string; description?: string; tags: string[] }) => {
+      const content = currentListingItems.current?.find(({ id }) => id === args.id);
+
+      if (content && content.type !== 'dashboard') {
+        const visItem = content as DashboardVisualizationUserContent;
+        try {
+          const result = await contentManagementService.client.get<
+            { contentTypeId: string; id: string },
+            GetResult<SavedObjectWithReferences>
+          >({
+            contentTypeId: visItem.savedObjectType,
+            id: visItem.id,
+          });
+
+          if (result?.item) {
+            let references = result.item.references || [];
+            const savedObjectsTagging = savedObjectsTaggingService?.getTaggingApi?.();
+            if (savedObjectsTagging) {
+              references = savedObjectsTagging.ui.updateTagsReferences(references, args.tags || []);
+            }
+
+            // Update the visualization with new attributes
+            await contentManagementService.client.update({
+              contentTypeId: visItem.savedObjectType,
+              id: visItem.id,
+              data: {
+                ...result.item.attributes,
+                title: args.title,
+                description: args.description ?? '',
+              },
+              options: {
+                references,
+              },
+            });
+          }
+        } catch (error) {
+          coreServices.notifications.toasts.addError(error, {
+            title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
+          });
+        }
+      }
+    },
+    []
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -256,15 +312,24 @@ export const useDashboardListingTable = ({
   }, []);
 
   const findItems = useCallback(
-    (
+    async (
       searchTerm: string,
       options?: { references?: Reference[]; referencesToExclude?: Reference[] }
-    ) => findDashboardListingItems(searchTerm, contentTypeFilter ?? TAB_IDS.DASHBOARDS, options),
+    ) => {
+      const results = await findDashboardListingItems(
+        searchTerm,
+        contentTypeFilter ?? TAB_IDS.DASHBOARDS,
+        options
+      );
+      currentListingItems.current = results.hits;
+      return results;
+    },
     [contentTypeFilter]
   );
 
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
+    const visualizeCapabilities = coreServices.application.capabilities.visualize_v2;
 
     const getContentEditor = () => {
       if (contentTypeFilter === TAB_IDS.DASHBOARDS) {
@@ -274,12 +339,11 @@ export const useDashboardListingTable = ({
           customValidators: contentEditorValidators,
         };
       }
-
-      // For visualizations and other content types, enable read-only content editor
-      // This allows the info icon to show but prevents editing
+      // This allows editing for visualizations unless the user lacks save permissions
       return {
         enabled: true,
-        isReadonly: true,
+        isReadonly: !visualizeCapabilities?.save,
+        onSave: updateVisualizationMeta,
       };
     };
 
@@ -396,6 +460,7 @@ export const useDashboardListingTable = ({
     title,
     unsavedDashboardIds,
     updateItemMeta,
+    updateVisualizationMeta,
     urlStateEnabled,
     useSessionStorageIntegration,
   ]);
