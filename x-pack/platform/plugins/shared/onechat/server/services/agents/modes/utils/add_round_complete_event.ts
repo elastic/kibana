@@ -8,8 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
 import { map, merge, share, toArray } from 'rxjs';
-import {
-  ChatAgentEvent,
+import type {
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
@@ -20,8 +19,8 @@ import {
   ToolCallStep,
   ToolProgressEvent,
   ToolResultEvent,
-  isToolCallStep,
 } from '@kbn/onechat-common';
+import { isToolCallStep } from '@kbn/onechat-common';
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -37,8 +36,9 @@ import {
 import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
 import type { ModelProvider, ModelProviderStats } from '@kbn/onechat-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
+import type { ConvertedEvents } from '../default/convert_graph_events';
 
-type SourceEvents = ChatAgentEvent;
+type SourceEvents = ConvertedEvents;
 
 type StepEvents = ReasoningEvent | ToolCallEvent;
 

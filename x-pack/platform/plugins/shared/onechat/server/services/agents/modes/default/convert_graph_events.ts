@@ -11,18 +11,8 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import {
-  MessageChunkEvent,
-  MessageCompleteEvent,
-  ThinkingCompleteEvent,
-  ToolCallEvent,
-  BrowserToolCallEvent,
-  ToolResultEvent,
-  PromptRequestEvent,
-  ReasoningEvent,
-  ConversationRound,
-  isToolCallStep,
-} from '@kbn/onechat-common/chat';
+import type { ToolResultEvent, ConversationRound, ChatAgentEvent } from '@kbn/onechat-common/chat';
+import { isToolCallStep } from '@kbn/onechat-common/chat';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
   matchGraphName,
@@ -53,16 +43,10 @@ import {
   isToolPromptAction,
 } from './actions';
 import type { ToolCallResult } from './actions';
+import type { InternalEvent } from './events';
+import { createFinalStateEvent } from './events';
 
-export type ConvertedEvents =
-  | MessageChunkEvent
-  | MessageCompleteEvent
-  | ThinkingCompleteEvent
-  | ToolCallEvent
-  | PromptRequestEvent
-  | BrowserToolCallEvent
-  | ToolResultEvent
-  | ReasoningEvent;
+export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 
 export const convertGraphEvents = ({
   graphName,
@@ -217,6 +201,11 @@ export const convertGraphEvents = ({
               })
             );
           }
+        }
+
+        if (matchEvent(event, 'on_chain_end') && matchName(event, graphName)) {
+          const finalState = event.data.output as StateType;
+          return of(createFinalStateEvent(finalState));
         }
 
         return EMPTY;

@@ -18,6 +18,7 @@ import {
   prepareConversation,
   selectTools,
   getPendingRound,
+  evictInternalEvents,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -166,6 +167,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({ userInput: processedInput, pendingRound, startTime, modelProvider }),
+    evictInternalEvents(),
     shareReplay()
   );
 
