@@ -8,9 +8,50 @@
 import {
   AWS_INPUT_TEST_SUBJECTS,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AZURE_INPUT_FIELDS_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
 
 import { expect, spaceTest } from '@kbn/scout-security';
+import type { CreateAgentlessPolicyRequest } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
+
+// Use the Fleet plugin's typed request body
+type AgentlessPolicyRequestBody = CreateAgentlessPolicyRequest['body'];
+
+/**
+ * Creates a mock agentless policy response for testing.
+ */
+function createMockAgentlessPolicyResponse(requestBody: AgentlessPolicyRequestBody) {
+  const mockPolicyId = `mock-policy-${Date.now()}`;
+  const mockAgentPolicyId = `mock-agent-policy-${Date.now()}`;
+  const mockConnectorId = `mock-connector-${Date.now()}`;
+
+  // Convert legacy inputs format to array format for the response
+  const inputsArray = Object.entries(requestBody.inputs).map(([type, input]) => ({
+    type,
+    enabled: input.enabled,
+    streams: Object.entries(input.streams).map(([streamKey, stream]) => ({
+      enabled: stream.enabled,
+      data_stream: { type: 'logs', dataset: streamKey },
+      vars: stream.vars,
+    })),
+  }));
+
+  return {
+    item: {
+      id: mockPolicyId,
+      name: requestBody.name,
+      namespace: requestBody.namespace || 'default',
+      package: requestBody.package,
+      inputs: inputsArray,
+      policy_id: mockAgentPolicyId,
+      policy_ids: [mockAgentPolicyId],
+      supports_agentless: true,
+      supports_cloud_connector: !!requestBody.cloud_connector?.enabled,
+      cloud_connector_id: requestBody.cloud_connector?.enabled ? mockConnectorId : undefined,
+    },
+  };
+}
 
 spaceTest.describe(
   'Cloud Connectors - Switch Setup Technology',
@@ -27,8 +68,26 @@ spaceTest.describe(
 
     spaceTest(
       'AWS CSPM - Switch FROM cloud connectors to direct access keys',
-      async ({ pageObjects, apiServices, page }) => {
+      async ({ pageObjects, page }) => {
         const integrationName = `aws-cspm-direct-${Date.now()}`;
+        let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
+
+        // Set up route interception for agentless policies API
+        // Use regex to match URL with query parameters and space prefixes
+        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
+
+            // Return mock response
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody)),
+            });
+          } else {
+            await route.continue();
+          }
+        });
 
         await pageObjects.cspmIntegrationPage.navigate();
         await pageObjects.cspmIntegrationPage.selectProvider('aws');
@@ -50,150 +109,254 @@ spaceTest.describe(
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
         await pageObjects.cspmIntegrationPage.saveIntegration();
 
-        // Direct access keys is still agentless, so expect agentless enrollment flyout
-        await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeVisible({
-          timeout: 60000,
-        });
+        // Wait for the request to be captured by polling
+        await expect
+          .poll(() => capturedRequestBody, {
+            message: 'Waiting for agentless policy request to be captured',
+            timeout: 30000,
+          })
+          .not.toBeNull();
 
-        // Close the flyout
-        await page.getByTestId('euiFlyoutCloseButton').click();
-        await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeHidden();
+        // Verify the request was captured
+        expect(capturedRequestBody).not.toBeNull();
 
-        // Click the integration link to navigate to edit page
-        const integrationLinks = await page.getByTestId('agentlessIntegrationNameLink').all();
-        await integrationLinks[0].click();
+        // Verify request details
+        expect(capturedRequestBody!.name).toBe(integrationName);
 
-        // Wait for navigation and extract policy ID from URL
-        await page.waitForURL(/edit-integration/);
-        const policyIdMatch = page.url().match(/edit-integration\/([^/?]+)/);
-        expect(policyIdMatch).toBeTruthy();
-        const policyId = policyIdMatch![1];
+        // Validate AWS stream input vars: supports_cloud_connectors should NOT be present or true
+        expect(capturedRequestBody!.inputs).toBeDefined();
+        const awsInputKey = Object.keys(capturedRequestBody!.inputs!).find((key) =>
+          key.includes('cis_aws')
+        );
+        expect(awsInputKey).toBeDefined();
 
-        // Validate NO cloud connector attributes
-        const policy = await apiServices.cloudConnectorApi.getPackagePolicy(policyId);
-        expect(policy.supports_cloud_connector).toBeFalsy();
-        expect(policy.cloud_connector_id).toBeFalsy();
+        const awsInput = capturedRequestBody!.inputs![awsInputKey!];
+        const findingsStream = awsInput.streams['cloud_security_posture.findings'];
+        expect(findingsStream).toBeDefined();
+        expect(findingsStream.vars).toBeDefined();
 
-        // Validate stream var does NOT include supports_cloud_connector
-        const streamVars = policy.inputs[0].streams[0].vars;
-        expect(streamVars.supports_cloud_connector).toBeUndefined();
-      }
-    );
+        // supports_cloud_connectors should NOT exist or be true in vars
+        expect(
+          findingsStream.vars &&
+            Object.prototype.hasOwnProperty.call(findingsStream.vars, 'supports_cloud_connectors')
+        ).toBe(false);
 
-    // NOTE: Azure doesn't have a credentials selector like AWS to switch between
-    // cloud connectors and ARM template within agentless mode. When cloud connectors
-    // is enabled, the ARM template option is not available. This is by design.
-    // Therefore, we skip the "Switch FROM cloud connectors to ARM template" test for Azure.
+        // Ensure the cloud_connector object itself is not present
+        expect(capturedRequestBody!.cloud_connector).toBeUndefined();
 
-    spaceTest(
-      'AWS CSPM - Switch FROM cloud connectors to agent-based',
-      async ({ pageObjects, apiServices, page }) => {
-        const integrationName = `aws-cspm-agent-${Date.now()}`;
-
-        await pageObjects.cspmIntegrationPage.navigate();
-        await pageObjects.cspmIntegrationPage.selectProvider('aws');
-        await pageObjects.cspmIntegrationPage.selectAccountType('aws', 'organization');
-        await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
-
-        // Cloud connectors is selected by default
-        // Switch setup technology to agent-based
-        await pageObjects.cspmIntegrationPage.selectSetupTechnology('agent-based');
-
-        await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
-
-        // In test environment with mock agentless API, error toast may appear about
-        // missing agent policy. Dismiss it if present before saving.
-        const errorToast = page.getByTestId('globalToastList');
-        // eslint-disable-next-line playwright/no-conditional-in-test
-        if (await errorToast.isVisible({ timeout: 1000 }).catch(() => false)) {
-          await page.getByTestId('toastCloseButton').click();
-          await errorToast.waitFor({ state: 'hidden' });
-        }
-
-        await pageObjects.cspmIntegrationPage.saveIntegration();
-
-        // Agent-based for AWS organization shows the CloudFormation modal
-        await expect(page.getByTestId('postInstallCloudFormationModal')).toBeVisible({
-          timeout: 60000,
-        });
-
-        // Close the modal by clicking "Launch CloudFormation later"
-        await page.getByTestId('confirmCloudFormationModalCancelButton').click();
-        await expect(page.getByTestId('postInstallCloudFormationModal')).toBeHidden();
-
-        // Click on the integration to navigate to edit page
-        await page.getByText(integrationName).click();
-
-        // Wait for navigation to edit page and extract policy ID from URL
-        await page.waitForURL(/edit-integration/);
-        const policyIdMatch = page.url().match(/edit-integration\/([^/?]+)/);
-        expect(policyIdMatch).toBeTruthy();
-        const policyId = policyIdMatch![1];
-
-        // Validate NO cloud connector attributes
-        const policy = await apiServices.cloudConnectorApi.getPackagePolicy(policyId);
-        expect(policy.supports_cloud_connector).toBeFalsy();
-        expect(policy.cloud_connector_id).toBeFalsy();
-
-        // Validate stream var does NOT include supports_cloud_connector
-        const streamVars = policy.inputs[0].streams[0].vars;
-        expect(streamVars.supports_cloud_connector).toBeUndefined();
+        // Key assertion: cloud_connector is NOT present when using direct access keys
+        expect(capturedRequestBody!.cloud_connector).toBeUndefined();
       }
     );
 
     spaceTest(
-      'Azure CSPM - Switch FROM cloud connectors to agent-based',
-      async ({ pageObjects, apiServices, page }) => {
-        const integrationName = `azure-cspm-agent-${Date.now()}`;
+      'Azure CSPM - Switch FROM cloud connectors to service principal with client secret',
+      async ({ pageObjects, page }) => {
+        const integrationName = `azure-cspm-sp-${Date.now()}`;
+        let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
+
+        // Set up route interception for agentless policies API
+        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
+
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody)),
+            });
+          } else {
+            await route.continue();
+          }
+        });
 
         await pageObjects.cspmIntegrationPage.navigate();
         await pageObjects.cspmIntegrationPage.selectProvider('azure');
         await pageObjects.cspmIntegrationPage.selectAccountType('azure', 'organization');
         await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
 
-        // Cloud connectors is selected by default
-        // Switch setup technology to agent-based
+        // Cloud connectors is selected by default, now switch to service principal with client secret
+        const credentialsSelect = page.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+        await credentialsSelect.waitFor({ state: 'visible' });
+        await credentialsSelect.selectOption('service_principal_with_client_secret');
+
+        // Fill service principal credentials
+        await page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID).fill('test-tenant-id');
+        await page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID).fill('test-client-id');
+        await page
+          .getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
+          .fill('test-client-secret');
+
+        await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+        await pageObjects.cspmIntegrationPage.saveIntegration();
+
+        // Wait for the request to be captured by polling
+        await expect
+          .poll(() => capturedRequestBody, {
+            message: 'Waiting for agentless policy request to be captured',
+            timeout: 30000,
+          })
+          .not.toBeNull();
+
+        // Verify the request was captured
+        expect(capturedRequestBody).not.toBeNull();
+        expect(capturedRequestBody!.name).toBe(integrationName);
+
+        // Validate Azure stream input vars
+        expect(capturedRequestBody!.inputs).toBeDefined();
+        const azureInputKey = Object.keys(capturedRequestBody!.inputs!).find((key) =>
+          key.includes('cis_azure')
+        );
+        expect(azureInputKey).toBeDefined();
+
+        const azureInput = capturedRequestBody!.inputs![azureInputKey!];
+        const findingsStream = azureInput.streams['cloud_security_posture.findings'];
+        expect(findingsStream).toBeDefined();
+        expect(findingsStream.vars).toBeDefined();
+
+        // Credential type should be service_principal_with_client_secret
+        expect(findingsStream.vars!['azure.credentials.type']).toBe(
+          'service_principal_with_client_secret'
+        );
+
+        // Key assertion: cloud_connector should NOT be present when using service principal
+        expect(capturedRequestBody!.cloud_connector).toBeUndefined();
+      }
+    );
+
+    spaceTest(
+      'AWS CSPM - Switch FROM cloud connectors to agent-based',
+      async ({ pageObjects, page }) => {
+        const integrationName = `aws-cspm-agent-${Date.now()}`;
+        let agentlessPolicyRequestCaptured = false;
+        let packagePolicyRequestBody: Record<string, unknown> | null = null;
+
+        // Intercept agentless policy API - should NOT be called
+        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            agentlessPolicyRequestCaptured = true;
+          }
+          await route.continue();
+        });
+
+        // Intercept package policy API - this IS the agent-based endpoint
+        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
+          }
+          await route.continue();
+        });
+
+        await pageObjects.cspmIntegrationPage.navigate();
+        await pageObjects.cspmIntegrationPage.selectProvider('aws');
+        await pageObjects.cspmIntegrationPage.selectAccountType('aws', 'organization');
+
+        // Switch setup technology to agent-based (default is agentless with cloud connectors)
         await pageObjects.cspmIntegrationPage.selectSetupTechnology('agent-based');
 
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
-
-        // In test environment with mock agentless API, error toast may appear about
-        // missing agent policy. Dismiss it if present before saving.
-        const azureErrorToast = page.getByTestId('globalToastList');
-        // eslint-disable-next-line playwright/no-conditional-in-test
-        if (await azureErrorToast.isVisible({ timeout: 1000 }).catch(() => false)) {
-          await page.getByTestId('toastCloseButton').click();
-          await azureErrorToast.waitFor({ state: 'hidden' });
-        }
-
         await pageObjects.cspmIntegrationPage.saveIntegration();
 
-        // Agent-based for Azure organization shows the ARM Template modal
-        await expect(page.getByTestId('postInstallAzureArmTemplateModal')).toBeVisible({
-          timeout: 60000,
+        // Wait for the package policy request to be captured
+        await expect
+          .poll(() => packagePolicyRequestBody, {
+            message: 'Waiting for package policy request to be captured',
+            timeout: 30000,
+          })
+          .not.toBeNull();
+
+        expect(agentlessPolicyRequestCaptured).toBe(false);
+        expect(packagePolicyRequestBody).not.toBeNull();
+
+        // Policy root should NOT have cloud_connector
+        expect(packagePolicyRequestBody!.cloud_connector).toBeUndefined();
+
+        // Policy root should NOT have supports_cloud_connectors
+        expect(packagePolicyRequestBody!.supports_cloud_connectors).toBeUndefined();
+
+        // Policy should NOT have supports_agentless: true
+        expect(packagePolicyRequestBody!.supports_agentless).not.toBe(true);
+
+        // Validate stream vars do NOT have aws.supports_cloud_connectors set to true
+        const inputs = packagePolicyRequestBody!.inputs as Array<{
+          type: string;
+          streams?: Array<{ vars?: Record<string, unknown> }>;
+        }>;
+        const awsInput = inputs?.find((input) => input.type?.includes('cis_aws'));
+        // Collect all aws.supports_cloud_connectors values from streams (should all be falsy or undefined)
+        const awsSupportsCloudConnectorsValues = (awsInput?.streams ?? []).map(
+          (stream) => stream.vars?.['aws.supports_cloud_connectors']
+        );
+        // None of the values should be true
+        expect(awsSupportsCloudConnectorsValues.every((val) => val !== true)).toBe(true);
+      }
+    );
+
+    spaceTest(
+      'Azure CSPM - Switch FROM cloud connectors to agent-based',
+      async ({ pageObjects, page }) => {
+        const integrationName = `azure-cspm-agent-${Date.now()}`;
+        let agentlessPolicyRequestCaptured = false;
+        let packagePolicyRequestBody: Record<string, unknown> | null = null;
+
+        // Intercept agentless policy API - should NOT be called
+        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            agentlessPolicyRequestCaptured = true;
+          }
+          await route.continue();
         });
 
-        // Close the modal by clicking "Add ARM Template later"
-        await page.getByTestId('confirmAzureArmTemplateModalCancelButton').click();
-        await expect(page.getByTestId('postInstallAzureArmTemplateModal')).toBeHidden();
+        // Intercept package policy API - this IS the agent-based endpoint
+        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
+          }
+          await route.continue();
+        });
 
-        // Click on the integration to navigate to edit page
-        await page.getByText(integrationName).click();
+        await pageObjects.cspmIntegrationPage.navigate();
+        await pageObjects.cspmIntegrationPage.selectProvider('azure');
+        await pageObjects.cspmIntegrationPage.selectAccountType('azure', 'organization');
 
-        // Wait for navigation to edit page and extract policy ID from URL
-        await page.waitForURL(/edit-integration/);
-        const policyIdMatch = page.url().match(/edit-integration\/([^/?]+)/);
-        expect(policyIdMatch).toBeTruthy();
-        const policyId = policyIdMatch![1];
+        // Switch setup technology to agent-based (default is agentless with cloud connectors)
+        await pageObjects.cspmIntegrationPage.selectSetupTechnology('agent-based');
 
-        // Validate NO cloud connector attributes
-        const policy = await apiServices.cloudConnectorApi.getPackagePolicy(policyId);
-        expect(policy.supports_cloud_connector).toBeFalsy();
-        expect(policy.cloud_connector_id).toBeFalsy();
+        await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+        await pageObjects.cspmIntegrationPage.saveIntegration();
 
-        // Validate stream var does NOT include supports_cloud_connector
-        const streamVars = policy.inputs[0].streams[0].vars;
-        expect(streamVars.supports_cloud_connector).toBeUndefined();
+        // Wait for the package policy request to be captured
+        await expect
+          .poll(() => packagePolicyRequestBody, {
+            message: 'Waiting for package policy request to be captured',
+            timeout: 30000,
+          })
+          .not.toBeNull();
+
+        expect(agentlessPolicyRequestCaptured).toBe(false);
+        expect(packagePolicyRequestBody).not.toBeNull();
+
+        // Policy root should NOT have cloud_connector
+        expect(packagePolicyRequestBody!.cloud_connector).toBeUndefined();
+
+        // Policy root should NOT have supports_cloud_connectors
+        expect(packagePolicyRequestBody!.supports_cloud_connectors).toBeUndefined();
+
+        // Policy should NOT have supports_agentless: true
+        expect(packagePolicyRequestBody!.supports_agentless).not.toBe(true);
+
+        // Validate stream vars do NOT have azure.supports_cloud_connectors set to true
+        const inputs = packagePolicyRequestBody!.inputs as Array<{
+          type: string;
+          streams?: Array<{ vars?: Record<string, unknown> }>;
+        }>;
+        const azureInput = inputs?.find((input) => input.type?.includes('cis_azure'));
+        // Collect all azure.supports_cloud_connectors values from streams (should all be falsy or undefined)
+        const azureSupportsCloudConnectorsValues = (azureInput?.streams ?? []).map(
+          (stream) => stream.vars?.['azure.supports_cloud_connectors']
+        );
+        // None of the values should be true
+        expect(azureSupportsCloudConnectorsValues.every((val) => val !== true)).toBe(true);
       }
     );
   }

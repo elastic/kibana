@@ -2,17 +2,23 @@
 
 ## Overview
 
-These Scout tests validate Cloud Security Posture Management (CSPM) agentless integrations using a **declaratively configured mock Agentless API server**.
+These Scout tests validate Cloud Security Posture Management (CSPM) agentless integrations using **Playwright's route interception** to capture and validate API request shapes.
 
-## ✅ What's New: Declarative Auxiliary Servers
+## Approach: Request Shape Testing
 
-Scout now supports **auxiliary servers** declared in configs! The mock Agentless API server is automatically started and stopped by Scout - no manual terminal management needed.
+Instead of running a mock server, tests use Playwright's `page.route()` to:
+
+1. Intercept requests to the Fleet Agentless Policy API
+2. Validate the request payload shape and content
+3. Return mock responses to complete the UI flow
+
+This approach focuses on testing that the UI sends correctly shaped requests.
 
 ---
 
 ## Quick Start
 
-### Run Tests (Single Command!)
+### Run Tests
 
 ```bash
 node scripts/scout.js run-tests \
@@ -22,142 +28,124 @@ node scripts/scout.js run-tests \
   --testTarget=local
 ```
 
-**That's it!** Scout automatically:
+Scout automatically:
 
 1. Starts Elasticsearch
-2. Starts Kibana (configured to use mock API)
-3. **Starts mock-agentless-api on port 8089**
-4. Runs tests
-5. **Stops mock-agentless-api**
-6. Stops Kibana and Elasticsearch
+2. Starts Kibana (configured for agentless)
+3. Runs Playwright tests
+4. Stops Kibana and Elasticsearch
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────┐
-│  Playwright │
-│   Tests     │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐      HTTP       ┌──────────────────┐
-│   Kibana    │ ───────────────► │  Mock Agentless  │
-│   Server    │  (port 8089)     │   API Server     │
-└─────────────┘                  └──────────────────┘
-       │                          (Scout-managed)
-       ▼
-┌─────────────┐
-│Elasticsearch│
-└─────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    Playwright Test                       │
+│                                                          │
+│  1. Setup: page.route() captures request data            │
+│  2. Action: UI interactions trigger API call             │
+│  3. Wait: poll() until request captured                  │
+│  4. Assert: Validate request shape in main test body     │
+│                                                          │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │  Route Handler (capture only, no assertions)    │    │
+│  │  • Capture request body                          │    │
+│  │  • Return mock response                          │    │
+│  └─────────────────────────────────────────────────┘    │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│                     Kibana UI                            │
+│                                                          │
+│  form.tsx → sendCreateAgentlessPolicy()                  │
+│             ↓                                            │
+│  POST /api/fleet/agentless_policies                      │
+│             ↓                                            │
+│  Request intercepted by Playwright                       │
+└─────────────────────────────────────────────────────────┘
 ```
-
-- **Playwright**: Controls browser, interacts with Kibana UI
-- **Kibana**: Makes API calls to mock Agentless API
-- **Mock Server**: Automatically started by Scout from config
-- **Tests**: Validate cloud connector functionality
 
 ---
 
 ## How It Works
 
-### 1. Mock Server Implementation
+### Route Interception Pattern
 
-**File:** `helpers/mock_agentless_api.ts`
-
-```typescript
-export const setupMockAgentlessServer = () => {
-  return http.createServer((req, res) => {
-    // Handle POST /api/v1/ess/deployments
-    if (req.method === 'POST' && req.url === '/api/v1/ess/deployments') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ code: 'SUCCESS', error: null }));
-      return;
-    }
-    // ... more handlers
-  });
-};
-```
-
-### 2. Scout Config Declaration
-
-**File:** `src/platform/packages/shared/kbn-scout/src/servers/configs/custom/cspm_agentless/stateful/stateful.config.ts`
+Tests intercept the agentless policy API, capture request data, and validate shapes in the main test body:
 
 ```typescript
-// Mock server logic inlined in config to avoid import issues
-const setupMockAgentlessServer = () => {
-  return http.createServer((req, res) => {
-    if (req.method === 'POST' && req.url === '/api/v1/ess/deployments') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ code: 'SUCCESS', error: null }));
-      return;
-    }
-    // ... more handlers
-  });
-};
+let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
-export const servers: ScoutServerConfig = {
-  ...defaultConfig,
-
-  // Declare auxiliary server - Scout handles lifecycle
-  auxiliaryServers: [
-    {
-      name: 'mock-agentless-api',
-      port: 8089,
-      createServer: setupMockAgentlessServer,
-    },
-  ],
-
-  kbnTestServer: {
-    serverArgs: [
-      '--xpack.fleet.agentless.enabled=true',
-      '--xpack.fleet.agentless.api.url=http://localhost:8089', // Points to mock
-      // ... more config
-    ],
-  },
-};
-```
-
-### 3. Tests (No Setup Needed!)
-
-**File:** `parallel_tests/cloud_connectors/create_cloud_connector.spec.ts`
-
-```typescript
-import { expect, spaceTest } from '@kbn/scout-security';
-
-spaceTest.describe('Cloud Connectors', { tag: ['@ess'] }, () => {
-  // No beforeAll/afterAll needed!
-  // Mock server automatically running via Scout
-
-  spaceTest('create AWS CSPM integration', async ({ page, pageObjects }) => {
-    // Test code - Kibana calls hit mock server on port 8089
-  });
+// Route handler ONLY captures data - no assertions here (avoids conditional expect)
+await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+  if (request.method() === 'POST') {
+    capturedRequestBody = request.postDataJSON();
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ item: { id: 'mock-policy-id', ...capturedRequestBody } }),
+    });
+  } else {
+    await route.continue();
+  }
 });
+
+// ... UI interactions ...
+await pageObjects.cspmIntegrationPage.saveIntegration();
+
+// Wait for request to be captured
+await expect.poll(() => capturedRequestBody, { timeout: 30000 }).not.toBeNull();
+
+// ALL assertions in main test body (not inside route handler)
+expect(capturedRequestBody).not.toBeNull();
+validateAgentlessPolicyRequestShape(capturedRequestBody!);
+expect(capturedRequestBody!.cloud_connector).toBeDefined();
+expect(capturedRequestBody!.cloud_connector!.enabled).toBe(true);
 ```
 
----
+> **Note:** Assertions are placed outside the route handler to avoid ESLint's "Avoid calling `expect` conditionally" error.
 
-## Expected Output
+### Expected Request Shape
 
-When running `node scripts/scout.js run-tests ...`:
+From `form.tsx` (lines 164-196), the agentless policy request uses the **legacy format** (with `?format=legacy` query param):
 
+```typescript
+interface AgentlessPolicyRequestBody {
+  package: {
+    name: string; // e.g., 'cloud_security_posture'
+    version: string;
+  };
+  name: string; // Integration name
+  description?: string;
+  namespace: string;
+  // Legacy format: inputs is an OBJECT keyed by input type (not an array)
+  inputs: Record<
+    string,
+    {
+      enabled: boolean;
+      vars?: Record<string, unknown>;
+      streams: Record<
+        string,
+        {
+          enabled: boolean;
+          vars?: Record<string, unknown>;
+        }
+      >;
+    }
+  >;
+  vars?: Record<string, unknown>;
+  // Cloud connector fields (when cloud connectors enabled)
+  cloud_connector?: {
+    enabled: boolean;
+    cloud_connector_id?: string; // Present when reusing existing
+    name?: string; // Present when creating new
+  };
+}
 ```
-Starting 1 auxiliary server(s)...
-[mock-agentless-api] Starting on port 8089...
-[mock-agentless-api] Started successfully on http://localhost:8089
 
-Elasticsearch and Kibana are ready for functional testing.
-Auxiliary servers: mock-agentless-api
-
-[Mock Agentless API] POST /api/v1/ess/deployments
-[Mock Agentless API] ✅ Handling POST /api/v1/ess/deployments
-
-... tests run ...
-
-Stopping auxiliary servers...
-[mock-agentless-api] Stopped successfully
-```
+> **Note:** Use regex pattern `/\/api\/fleet\/agentless_policies/` to match URLs with space prefixes and query parameters.
 
 ---
 
@@ -166,10 +154,6 @@ Stopping auxiliary servers...
 ```
 x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/
 ├── README.md                          ← This file
-├── PROPOSAL_AUXILIARY_SERVERS.md      ← Full proposal document
-├── IMPLEMENTATION_GUIDE.md            ← Implementation details
-├── helpers/
-│   └── mock_agentless_api.ts         ← Mock HTTP server implementation
 ├── parallel.playwright.config.ts      ← Playwright config
 └── parallel_tests/
     └── cloud_connectors/
@@ -180,150 +164,78 @@ x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/
 Scout Config:
 src/platform/packages/shared/kbn-scout/src/servers/configs/custom/cspm_agentless/
 └── stateful/
-    └── stateful.config.ts             ← Declares auxiliary server
+    └── stateful.config.ts             ← Kibana config for agentless
 ```
-
----
-
-## Benefits
-
-### Before (Manual)
-
-```bash
-# Terminal 1: Start mock server manually
-node mock_server.js
-
-# Terminal 2: Run tests
-node scripts/scout.js run-tests ...
-
-# Don't forget to stop mock server!
-```
-
-### After (Automatic)
-
-```bash
-# Single command, single terminal
-node scripts/scout.js run-tests --stateful --config-dir=cspm_agentless ...
-```
-
-### Advantages
-
-- ✅ **No manual steps**: Scout manages everything
-- ✅ **Automatic cleanup**: No orphaned processes
-- ✅ **Works in CI**: No orchestration scripts needed
-- ✅ **Consistent**: Same command everywhere
-
----
-
-## Troubleshooting
-
-### Port Already in Use
-
-**Symptom:**
-
-```
-[mock-agentless-api] Port 8089 is already in use
-```
-
-**Solution:**
-
-```bash
-lsof -ti:8089 | xargs kill -9
-```
-
-### Mock Server Not Starting
-
-**Check:**
-
-1. Does `setupMockAgentlessServer` exist and export correctly?
-2. Are there TypeScript compilation errors?
-
-**Debug:**
-
-```bash
-# Verify mock server file exists
-ls helpers/mock_agentless_api.ts
-
-# Check config imports it
-grep "setupMockAgentlessServer" src/platform/packages/shared/kbn-scout/src/servers/configs/custom/cspm_agentless/stateful/stateful.config.ts
-```
-
-### Kibana Not Connecting
-
-**Symptom:**
-
-```
-ECONNREFUSED http://localhost:5620
-```
-
-**Solution:** Use `run-tests` (not `start-server`):
-
-```bash
-node scripts/scout.js run-tests \
-  --stateful \
-  --config-dir=cspm_agentless
-```
-
-### Tests Failing
-
-**Verify mock server responds:**
-
-```bash
-curl http://localhost:8089/api/v1/ess/deployments
-```
-
-Should return `{"error":"Not found"}` (404 is fine - means server is running)
 
 ---
 
 ## Test Coverage
 
-These tests validate:
+These tests validate request shapes for:
 
-- ✅ Creating cloud connectors for AWS and Azure
-- ✅ Reusing existing cloud connectors across integrations
-- ✅ Switching between agent-based and agentless setup
-- ✅ Package policy attributes with cloud connector metadata
-- ✅ Integration with Fleet's agentless API
+- **Creating cloud connectors**: New connector with AWS/Azure credentials
+- **Reusing cloud connectors**: Existing connector ID passed instead of name
+- **Switching credential types**: Switch from cloud connectors to direct access keys (AWS) or service principal (Azure)
+- **Agent-based mode**: Validates no agentless API calls and no cloud connector fields
+
+### Key Assertions
+
+| Scenario                | API Endpoint                    | Key Assertions                                                                                                                                            |
+| ----------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New AWS connector       | `/api/fleet/agentless_policies` | `cloud_connector.enabled === true`, `cloud_connector.name` defined                                                                                        |
+| Reuse AWS connector     | `/api/fleet/agentless_policies` | `cloud_connector.cloud_connector_id` defined, `cloud_connector.name` undefined                                                                            |
+| AWS direct access keys  | `/api/fleet/agentless_policies` | `cloud_connector` undefined, `aws.supports_cloud_connectors` not in stream vars                                                                           |
+| Azure service principal | `/api/fleet/agentless_policies` | `cloud_connector` undefined, `azure.credentials.type === 'service_principal_with_client_secret'`                                                          |
+| AWS agent-based         | `/api/fleet/package_policies`   | No POST to agentless API, `cloud_connector` undefined, `supports_cloud_connectors` undefined, `aws.supports_cloud_connectors` not `true` in stream vars   |
+| Azure agent-based       | `/api/fleet/package_policies`   | No POST to agentless API, `cloud_connector` undefined, `supports_cloud_connectors` undefined, `azure.supports_cloud_connectors` not `true` in stream vars |
+
+### Stream Var Keys for Cloud Connectors
+
+| Provider | Stream Var Key                    | Description                                                                        |
+| -------- | --------------------------------- | ---------------------------------------------------------------------------------- |
+| AWS      | `aws.supports_cloud_connectors`   | Boolean flag for cloud connector support                                           |
+| AWS      | `aws.credentials.type`            | Credential type (e.g., `cloud_connectors`, `direct_access_keys`)                   |
+| AWS      | `aws.credentials.external_id`     | External ID for assume role                                                        |
+| Azure    | `azure.supports_cloud_connectors` | Boolean flag for cloud connector support                                           |
+| Azure    | `azure.credentials.type`          | Credential type (e.g., `cloud_connectors`, `service_principal_with_client_secret`) |
+| Azure    | `azure.credentials.tenant_id`     | Azure tenant ID                                                                    |
+| Azure    | `azure.credentials.client_id`     | Azure client ID                                                                    |
 
 ---
 
-## CI/CD Integration
+## Benefits
 
-No special setup needed! Same command works:
+- **No external dependencies**: No mock servers to manage
+- **Fast execution**: In-browser interception
+- **Clear validation**: Request shape assertions are explicit
+- **Works in CI**: No port management needed
+- **Linter-friendly**: Assertions in main test body avoid conditional `expect` errors
 
-```yaml
-- name: Run CSPM Agentless Tests
-  run: |
-    node scripts/scout.js run-tests \
-      --stateful \
-      --config-dir=cspm_agentless \
-      --config x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/parallel.playwright.config.ts
+---
+
+## Troubleshooting
+
+### Request Not Intercepted
+
+**Check:** Route pattern matches the actual request URL
+
+```typescript
+// Debug: Log all requests
+await page.on('request', (req) => console.log(req.url()));
 ```
 
-Scout handles server lifecycle automatically.
+### Validation Failing
+
+**Check:** The request body structure may have changed
+
+1. Enable debug logging in Kibana
+2. Check the actual request payload in browser dev tools
+3. Update validation assertions accordingly
 
 ---
 
 ## Related Documentation
 
-- [Implementation Guide](./IMPLEMENTATION_GUIDE.md) - Technical details
-- [Proposal](./PROPOSAL_AUXILIARY_SERVERS.md) - Full feature proposal
 - [Scout Documentation](../../../../../../../../../src/platform/packages/shared/kbn-scout/README.md)
-- [Playwright Documentation](https://playwright.dev)
-
----
-
-## For Other Teams
-
-Want to mock external APIs in your Scout tests? This pattern is now available!
-
-See [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) for how to use auxiliary servers in your plugin.
-
-**Summary:**
-
-1. Create mock server in `<your-plugin>/test/scout/ui/helpers/`
-2. Declare in Scout config at `configs/custom/<your-plugin>/stateful/`
-3. Run tests with `--config-dir=<your-plugin>`
-
-That's it! Scout handles the rest. 🚀
+- [Playwright Route Interception](https://playwright.dev/docs/network#modify-requests)
+- [Fleet Agentless API](x-pack/platform/plugins/shared/fleet/common/constants/routes.ts)

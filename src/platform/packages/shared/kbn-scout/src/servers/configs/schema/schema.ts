@@ -137,17 +137,5 @@ export const schema = Joi.object()
       .default(),
 
     dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
-
-    auxiliaryServers: Joi.array()
-      .items(
-        Joi.object().keys({
-          name: Joi.string().required(),
-          port: Joi.number().required(),
-          startServer: Joi.func().required(),
-          readyPath: Joi.string().optional(),
-          startTimeout: Joi.number().optional(),
-        })
-      )
-      .optional(),
   })
   .default();

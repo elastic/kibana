@@ -6,201 +6,336 @@
  */
 
 import { expect, spaceTest } from '@kbn/scout-security';
+import type { CreateAgentlessPolicyRequest } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
 
-spaceTest.describe('Cloud Connectors - Reuse Existing', { tag: ['@ess', '@svlSecurity'] }, () => {
-  spaceTest.beforeEach(async ({ browserAuth }) => {
-    // Use admin for stateful tests (has all permissions including fleet-cloud-connector)
-    await browserAuth.loginAsAdmin();
-  });
+// Use the Fleet plugin's typed request body
+type AgentlessPolicyRequestBody = CreateAgentlessPolicyRequest['body'];
 
-  spaceTest.afterEach(async ({ apiServices }) => {
-    await apiServices.cloudConnectorApi.deleteAllCloudConnectors();
-  });
+/**
+ * Creates a mock agentless policy response for testing.
+ */
+function createMockAgentlessPolicyResponse(
+  requestBody: AgentlessPolicyRequestBody,
+  connectorId?: string
+) {
+  const mockPolicyId = `mock-policy-${Date.now()}`;
+  const mockAgentPolicyId = `mock-agent-policy-${Date.now()}`;
+  const mockConnectorId = connectorId || `mock-connector-${Date.now()}`;
 
-  spaceTest(
-    'AWS CSPM - Reuse existing cloud connector',
-    async ({ pageObjects, apiServices, page }) => {
-      // Create first integration
-      const firstName = `aws-cspm-cc-1-${Date.now()}`;
-      const roleArn = 'arn:aws:iam::123456789012:role/TestRole';
-      const connectorName = 'test-aws-connector-reuse';
+  // Convert legacy inputs format to array format for the response
+  const inputsArray = Object.entries(requestBody.inputs).map(([type, input]) => ({
+    type,
+    enabled: input.enabled,
+    streams: Object.entries(input.streams).map(([streamKey, stream]) => ({
+      enabled: stream.enabled,
+      data_stream: { type: 'logs', dataset: streamKey },
+      vars: stream.vars,
+    })),
+  }));
 
-      await pageObjects.cspmIntegrationPage.navigate();
-      await pageObjects.cspmIntegrationPage.selectProvider('aws');
-      await pageObjects.cspmIntegrationPage.selectAccountType('aws', 'organization');
-      await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
-      // Cloud connectors is selected by default when agentless + cloud connectors are enabled
-      await pageObjects.cspmIntegrationPage.fillCloudConnectorName(connectorName);
-      await pageObjects.cspmIntegrationPage.fillCloudConnectorRoleArn(roleArn);
-      // External ID is optional - fill if field is present
-      await pageObjects.cspmIntegrationPage.fillAwsCloudConnectorExternalId('test-external-id');
-      await pageObjects.cspmIntegrationPage.fillIntegrationName(firstName);
-      await pageObjects.cspmIntegrationPage.saveIntegration();
+  return {
+    item: {
+      id: mockPolicyId,
+      name: requestBody.name,
+      namespace: requestBody.namespace || 'default',
+      package: requestBody.package,
+      inputs: inputsArray,
+      policy_id: mockAgentPolicyId,
+      policy_ids: [mockAgentPolicyId],
+      supports_agentless: true,
+      supports_cloud_connector: !!requestBody.cloud_connector?.enabled,
+      cloud_connector_id: requestBody.cloud_connector?.enabled ? mockConnectorId : undefined,
+    },
+  };
+}
 
-      // Wait for agentless enrollment flyout (not modal for agentless policies)
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeVisible({
-        timeout: 60000,
-      });
+// Stream and input key constants
+const FINDINGS_STREAM_KEY = 'cloud_security_posture.findings';
+const AWS_INPUT_KEY_PATTERN = 'cis_aws';
+const AZURE_INPUT_KEY_PATTERN = 'cis_azure';
 
-      // Close the flyout
-      await page.getByTestId('euiFlyoutCloseButton').click();
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeHidden();
+// Credential type constants
+const CLOUD_CONNECTORS_CREDENTIAL_TYPE = 'cloud_connectors';
 
-      // Wait for the integration to be fully created and visible in the list
-      await expect(page.getByTestId('agentlessIntegrationNameLink')).toHaveCount(1, {
-        timeout: 30000,
-      });
+// AWS credential var keys
+const AWS_CREDENTIALS_TYPE_KEY = 'aws.credentials.type';
+const AWS_CREDENTIALS_EXTERNAL_ID_KEY = 'aws.credentials.external_id';
 
-      // Get the cloud connector we just created by name (we know the name from fillCloudConnectorName above)
-      const allConnectors = await apiServices.cloudConnectorApi.getAllCloudConnectors();
-      const connector = allConnectors.find((c) => c.name === connectorName);
-      expect(connector).toBeTruthy();
-      const connectorId = connector!.id;
+// Azure credential var keys
+const AZURE_CREDENTIALS_TYPE_KEY = 'azure.credentials.type';
+const AZURE_CREDENTIALS_TENANT_ID_KEY = 'azure.credentials.tenant_id';
+const AZURE_CREDENTIALS_CLIENT_ID_KEY = 'azure.credentials.client_id';
+const AZURE_CREDENTIALS_CONNECTOR_ID_KEY = 'azure_credentials_cloud_connector_id';
 
-      // Create second integration reusing connector
-      const secondName = `aws-cspm-cc-2-${Date.now()}`;
-      await pageObjects.cspmIntegrationPage.navigate();
-      await pageObjects.cspmIntegrationPage.selectProvider('aws');
-      await pageObjects.cspmIntegrationPage.selectAccountType('aws', 'organization');
-      await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
-      // Cloud connectors is selected by default when agentless + cloud connectors are enabled
-      await pageObjects.cspmIntegrationPage.selectExistingCloudConnector('aws', connectorName);
+/**
+ * Creates a mock cloud connector for testing the "reuse existing connector" flow.
+ */
+function createMockCloudConnector(
+  id: string,
+  name: string,
+  cloudProvider: 'aws' | 'azure'
+): Record<string, unknown> {
+  const baseConnector = {
+    id,
+    name,
+    cloudProvider,
+    accountType: 'organization-account',
+    packagePolicyCount: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    namespace: 'default',
+  };
 
-      // In test environment with mock agentless API, error notifications may appear about
-      // missing agent policy enrollment. Dismiss both modal and toast if present.
-      const errorToast = page.getByTestId('globalToastList');
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (await errorToast.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await page.getByTestId('toastCloseButton').click();
-        await errorToast.waitFor({ state: 'hidden' });
+  if (cloudProvider === 'aws') {
+    return {
+      ...baseConnector,
+      vars: {
+        role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/ExistingRole' },
+        external_id: {
+          type: 'password',
+          value: { isSecretRef: true, id: 'secret-ref-id' },
+          frozen: true,
+        },
+      },
+    };
+  } else {
+    return {
+      ...baseConnector,
+      vars: {
+        tenant_id: {
+          type: 'password',
+          value: { isSecretRef: true, id: 'tenant-secret-ref' },
+          frozen: true,
+        },
+        client_id: {
+          type: 'password',
+          value: { isSecretRef: true, id: 'client-secret-ref' },
+          frozen: true,
+        },
+        azure_credentials_cloud_connector_id: { type: 'text', value: 'existing-azure-cred-id' },
+      },
+    };
+  }
+}
+
+/**
+ * These tests validate request shape for REUSING existing cloud connectors.
+ * The tests intercept the cloud connectors API to return mock existing connectors,
+ * then verify the request shape includes cloud_connector_id instead of name.
+ */
+spaceTest.describe(
+  'Cloud Connectors - Reuse Existing Connector',
+  { tag: ['@ess', '@svlSecurity'] },
+  () => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      // Use admin for stateful tests (has all permissions including fleet-cloud-connector)
+      await browserAuth.loginAsAdmin();
+    });
+
+    spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.cloudConnectorApi.deleteAllCloudConnectors();
+    });
+
+    spaceTest(
+      'AWS CSPM - Request includes cloud_connector_id when reusing existing connector',
+      async ({ pageObjects, page }) => {
+        const integrationName = `aws-cspm-reuse-${Date.now()}`;
+        const existingConnectorId = 'existing-aws-connector-id';
+        const existingConnectorName = 'My Existing AWS Connector';
+        let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
+
+        // Intercept cloud connectors API to return mock existing connectors
+        await page.route(/\/api\/fleet\/cloud_connectors/, async (route, request) => {
+          if (request.method() === 'GET') {
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [
+                  createMockCloudConnector(existingConnectorId, existingConnectorName, 'aws'),
+                ],
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        // Intercept agentless policies API to capture the request
+        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(
+                createMockAgentlessPolicyResponse(capturedRequestBody, existingConnectorId)
+              ),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        await pageObjects.cspmIntegrationPage.navigate();
+        await pageObjects.cspmIntegrationPage.selectProvider('aws');
+        await pageObjects.cspmIntegrationPage.selectAccountType('aws', 'organization');
+        await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
+
+        // Select the existing connector (UI should show "Existing Connections" tab with mock data)
+        await pageObjects.cspmIntegrationPage.selectExistingCloudConnector(
+          'aws',
+          existingConnectorName
+        );
+
+        await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+        await pageObjects.cspmIntegrationPage.saveIntegration();
+
+        // Wait for the request to be captured by polling
+        await expect
+          .poll(() => capturedRequestBody, {
+            message: 'Waiting for agentless policy request to be captured',
+            timeout: 30000,
+          })
+          .not.toBeNull();
+
+        // Validate the request was captured with correct shape
+        expect(capturedRequestBody).not.toBeNull();
+        expect(capturedRequestBody!.name).toBe(integrationName);
+
+        // Validate the AWS input and stream vars
+        const awsInputKey = Object.keys(capturedRequestBody!.inputs).find((key) =>
+          key.includes(AWS_INPUT_KEY_PATTERN)
+        );
+        expect(awsInputKey).toBeDefined();
+
+        const awsInput = capturedRequestBody!.inputs[awsInputKey!];
+        const findingsStream = awsInput.streams[FINDINGS_STREAM_KEY];
+        expect(findingsStream).toBeDefined();
+        expect(findingsStream.vars).toBeDefined();
+        expect(findingsStream.vars![AWS_CREDENTIALS_TYPE_KEY]).toBe(
+          CLOUD_CONNECTORS_CREDENTIAL_TYPE
+        );
+        expect(findingsStream.vars!.role_arn).toBe('arn:aws:iam::123456789012:role/ExistingRole');
+        // External ID is a secret reference object when reusing existing connector
+        expect(findingsStream.vars![AWS_CREDENTIALS_EXTERNAL_ID_KEY]).toStrictEqual({
+          isSecretRef: true,
+          id: 'secret-ref-id',
+        });
+
+        // Key assertion: When REUSING an existing connector:
+        // - cloud_connector.cloud_connector_id should be the existing connector's ID
+        // - cloud_connector.name should NOT be present (we're not creating a new one)
+        expect(capturedRequestBody!.cloud_connector).toBeDefined();
+        expect(capturedRequestBody!.cloud_connector!.enabled).toBe(true);
+        expect(capturedRequestBody!.cloud_connector!.cloud_connector_id).toBe(existingConnectorId);
+        expect(capturedRequestBody!.cloud_connector!.name).toBeUndefined();
       }
+    );
 
-      await pageObjects.cspmIntegrationPage.fillIntegrationName(secondName);
-      await pageObjects.cspmIntegrationPage.saveIntegration();
+    spaceTest(
+      'Azure CSPM - Request includes cloud_connector_id when reusing existing connector',
+      async ({ pageObjects, page }) => {
+        const integrationName = `azure-cspm-reuse-${Date.now()}`;
+        const existingConnectorId = 'existing-azure-connector-id';
+        const existingConnectorName = 'My Existing Azure Connector';
+        let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
-      // Wait for agentless enrollment flyout (not modal for agentless policies)
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeVisible({
-        timeout: 60000,
-      });
+        // Intercept cloud connectors API to return mock existing connectors
+        await page.route(/\/api\/fleet\/cloud_connectors/, async (route, request) => {
+          if (request.method() === 'GET') {
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [
+                  createMockCloudConnector(existingConnectorId, existingConnectorName, 'azure'),
+                ],
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
 
-      // Close the flyout and navigate to integration edit page
-      await page.getByTestId('euiFlyoutCloseButton').click();
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeHidden();
+        // Intercept agentless policies API to capture the request
+        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(
+                createMockAgentlessPolicyResponse(capturedRequestBody, existingConnectorId)
+              ),
+            });
+          } else {
+            await route.continue();
+          }
+        });
 
-      // Get the second integration's policy ID from the list
-      // There should now be 2 integrations listed, both using the same connector
-      await expect(page.getByTestId('agentlessIntegrationNameLink')).toHaveCount(2);
-      const integrationLinks = await page.getByTestId('agentlessIntegrationNameLink').all();
+        await pageObjects.cspmIntegrationPage.navigate();
+        await pageObjects.cspmIntegrationPage.selectProvider('azure');
+        await pageObjects.cspmIntegrationPage.selectAccountType('azure', 'organization');
+        await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
 
-      // Click the second integration to get its policy ID
-      await integrationLinks[1].click();
-      const secondPolicyIdMatch = page.url().match(/edit-integration\/([^/?]+)/);
-      expect(secondPolicyIdMatch).toBeTruthy();
-      const secondPolicyId = secondPolicyIdMatch![1];
+        // Select the existing connector (UI should show "Existing Connections" tab with mock data)
+        await pageObjects.cspmIntegrationPage.selectExistingCloudConnector(
+          'azure',
+          existingConnectorName
+        );
 
-      // Validate both policies share same connector
-      const secondPolicy = await apiServices.cloudConnectorApi.getPackagePolicy(secondPolicyId);
-      expect(secondPolicy.cloud_connector_id).toBe(connectorId);
-      expect(secondPolicy.supports_cloud_connector).toBe(true);
+        await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+        await pageObjects.cspmIntegrationPage.saveIntegration();
 
-      // Validate stream vars from enabled input
-      const secondEnabledInput = secondPolicy.inputs.find((input: any) => input.enabled);
-      expect(secondEnabledInput).toBeTruthy();
-      const secondStreamVars = secondEnabledInput.streams[0].vars;
-      expect(secondStreamVars['aws.supports_cloud_connectors'].value).toBe(true);
-    }
-  );
+        // Wait for the request to be captured by polling
+        await expect
+          .poll(() => capturedRequestBody, {
+            message: 'Waiting for agentless policy request to be captured',
+            timeout: 30000,
+          })
+          .not.toBeNull();
 
-  spaceTest(
-    'Azure CSPM - Reuse existing cloud connector',
-    async ({ pageObjects, apiServices, page }) => {
-      // Create first integration
-      const firstName = `azure-cspm-cc-1-${Date.now()}`;
-      const tenantId = 'test-tenant-id';
-      const clientId = 'test-client-id';
-      const credentialsId = 'test-credentials-id';
-      const connectorName = 'test-azure-connector-reuse';
+        // Validate the request was captured with correct shape
+        expect(capturedRequestBody).not.toBeNull();
+        expect(capturedRequestBody!.name).toBe(integrationName);
 
-      await pageObjects.cspmIntegrationPage.navigate();
-      await pageObjects.cspmIntegrationPage.selectProvider('azure');
-      await pageObjects.cspmIntegrationPage.selectAccountType('azure', 'organization');
-      await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
-      // Cloud connectors is selected by default when agentless + cloud connectors are enabled
-      await pageObjects.cspmIntegrationPage.fillCloudConnectorName(connectorName);
-      await pageObjects.cspmIntegrationPage.fillAzureCloudConnectorDetails(
-        tenantId,
-        clientId,
-        credentialsId
-      );
-      await pageObjects.cspmIntegrationPage.fillIntegrationName(firstName);
-      await pageObjects.cspmIntegrationPage.saveIntegration();
+        // Validate the Azure input and stream vars
+        const azureInputKey = Object.keys(capturedRequestBody!.inputs).find((key) =>
+          key.includes(AZURE_INPUT_KEY_PATTERN)
+        );
+        expect(azureInputKey).toBeDefined();
 
-      // Wait for agentless enrollment flyout (not modal for agentless policies)
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeVisible({ timeout: 60000 });
+        const azureInput = capturedRequestBody!.inputs[azureInputKey!];
+        const findingsStream = azureInput.streams[FINDINGS_STREAM_KEY];
+        expect(findingsStream).toBeDefined();
+        expect(findingsStream.vars).toBeDefined();
+        expect(findingsStream.vars![AZURE_CREDENTIALS_TYPE_KEY]).toBe(
+          CLOUD_CONNECTORS_CREDENTIAL_TYPE
+        );
 
-      // Close the flyout
-      await page.getByTestId('euiFlyoutCloseButton').click();
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeHidden();
+        // Tenant ID and Client ID are secret references when reusing existing connector
+        expect(findingsStream.vars![AZURE_CREDENTIALS_TENANT_ID_KEY]).toStrictEqual({
+          isSecretRef: true,
+          id: 'tenant-secret-ref',
+        });
+        expect(findingsStream.vars![AZURE_CREDENTIALS_CLIENT_ID_KEY]).toStrictEqual({
+          isSecretRef: true,
+          id: 'client-secret-ref',
+        });
+        expect(findingsStream.vars).toHaveProperty(
+          AZURE_CREDENTIALS_CONNECTOR_ID_KEY,
+          'existing-azure-cred-id'
+        );
 
-      // Wait for the integration to be fully created and visible in the list
-      await expect(page.getByTestId('agentlessIntegrationNameLink')).toHaveCount(1, {
-        timeout: 30000,
-      });
-
-      // Get the cloud connector we just created by name
-      const allConnectors = await apiServices.cloudConnectorApi.getAllCloudConnectors();
-      const connector = allConnectors.find((c) => c.name === connectorName);
-      expect(connector).toBeTruthy();
-      const connectorId = connector!.id;
-
-      // Create second integration reusing connector
-      const secondName = `azure-cspm-cc-2-${Date.now()}`;
-      await pageObjects.cspmIntegrationPage.navigate();
-      await pageObjects.cspmIntegrationPage.selectProvider('azure');
-      await pageObjects.cspmIntegrationPage.selectAccountType('azure', 'organization');
-      await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
-      // Cloud connectors is selected by default when agentless + cloud connectors are enabled
-      await pageObjects.cspmIntegrationPage.selectExistingCloudConnector('azure', connectorName);
-
-      // In test environment with mock agentless API, error notifications may appear about
-      // missing agent policy enrollment. Dismiss both modal and toast if present.
-      const azureErrorToast = page.getByTestId('globalToastList');
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (await azureErrorToast.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await page.getByTestId('toastCloseButton').click();
-        await azureErrorToast.waitFor({ state: 'hidden' });
+        // Key assertion: When REUSING an existing connector:
+        // - cloud_connector.cloud_connector_id should be the existing connector's ID
+        // - cloud_connector.name should NOT be present (we're not creating a new one)
+        expect(capturedRequestBody!.cloud_connector).toBeDefined();
+        expect(capturedRequestBody!.cloud_connector!.enabled).toBe(true);
+        expect(capturedRequestBody!.cloud_connector!.cloud_connector_id).toBe(existingConnectorId);
+        expect(capturedRequestBody!.cloud_connector!.name).toBeUndefined();
       }
-
-      await pageObjects.cspmIntegrationPage.fillIntegrationName(secondName);
-      await pageObjects.cspmIntegrationPage.saveIntegration();
-
-      // Wait for agentless enrollment flyout (not modal for agentless policies)
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeVisible({ timeout: 60000 });
-
-      // Close the flyout and navigate to integration edit page
-      await page.getByTestId('euiFlyoutCloseButton').click();
-      await expect(page.getByTestId('agentlessEnrollmentFlyout')).toBeHidden();
-
-      // Click the second integration link to navigate to edit page
-      const secondIntegrationLinks = await page.getByTestId('agentlessIntegrationNameLink').all();
-      await secondIntegrationLinks[1].click();
-
-      // Wait for navigation and extract policy ID from URL
-      await page.waitForURL(/edit-integration/);
-      const secondPolicyIdMatch = page.url().match(/edit-integration\/([^/?]+)/);
-      expect(secondPolicyIdMatch).toBeTruthy();
-      const secondPolicyId = secondPolicyIdMatch![1];
-
-      // Validate both policies share same connector
-      const secondPolicy = await apiServices.cloudConnectorApi.getPackagePolicy(secondPolicyId);
-      expect(secondPolicy.cloud_connector_id).toBe(connectorId);
-      expect(secondPolicy.supports_cloud_connector).toBe(true);
-
-      // Validate stream vars from enabled input
-      const secondEnabledInput = secondPolicy.inputs.find((input: any) => input.enabled);
-      expect(secondEnabledInput).toBeTruthy();
-      const secondStreamVars = secondEnabledInput.streams[0].vars;
-      expect(secondStreamVars['azure.supports_cloud_connectors'].value).toBe(true);
-    }
-  );
-});
+    );
+  }
+);

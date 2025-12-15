@@ -17,7 +17,6 @@ import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
-import { startAuxiliaryServers } from './auxiliary';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -37,13 +36,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       esFrom: options.esFrom,
       logsDir: options.logsDir,
     });
-
-    // Start auxiliary servers BEFORE Kibana if configured
-    // This ensures external services are available when Kibana starts
-    const auxiliaryServers = config.get('auxiliaryServers');
-    const shutdownAuxiliary = auxiliaryServers
-      ? await startAuxiliaryServers(auxiliaryServers, log)
-      : undefined;
 
     await runKibanaServer({
       procs,
@@ -65,22 +57,12 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          ${
-            auxiliaryServers
-              ? `Auxiliary servers: ${auxiliaryServers.map((s) => s.name).join(', ')}`
-              : ''
-          }
           Use 'npx playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
         '\n\n'
     );
 
     await procs.waitForAllToStop();
-
-    // Stop auxiliary servers before shutting down ES
-    if (shutdownAuxiliary) {
-      await shutdownAuxiliary();
-    }
 
     await shutdownEs();
   });
