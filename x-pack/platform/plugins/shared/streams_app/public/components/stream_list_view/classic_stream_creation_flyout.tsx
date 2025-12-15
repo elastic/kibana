@@ -129,7 +129,8 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         core.notifications.toasts.addError(error as Error, {
           title: `Failed to validate classic stream "${streamName}"`,
         });
-        return { errorType: null };
+        // Re-throw the error to be handled by the caller (useStreamValidation) - it will be caught and dispatched as an ABORT_VALIDATION action.
+        throw error;
       }
     },
     [streamsRepositoryClient, signal, core.notifications.toasts]
