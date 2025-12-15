@@ -57,6 +57,7 @@ import {
   AgentlessAgentCreateOverProvisionnedError,
   FleetErrorWithStatusCode,
   PackageRollbackError,
+  PackageRuleAssetsHaveNoDataError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -142,6 +143,10 @@ const getHTTPResponseCode = (error: FleetError): number => {
   // Unsupported Media Type
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415;
+  }
+  // Unprocessable Entity
+  if (error instanceof PackageRuleAssetsHaveNoDataError) {
+    return 422;
   }
   // Too many requests
   if (error instanceof FleetTooManyRequestsError) {

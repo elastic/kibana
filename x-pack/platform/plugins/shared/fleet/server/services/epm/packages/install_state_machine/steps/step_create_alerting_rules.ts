@@ -33,6 +33,11 @@ function getRuleId({
   return `fleet-${spaceId ? spaceId : DEFAULT_SPACE_ID}-${pkgName}-${templateId}`;
 }
 
+interface CreateAlertingRuleFromTemplateResult {
+  assetRef: KibanaAssetReference;
+  error?: Error;
+}
+
 export async function createAlertingRuleFromTemplate(
   deps: {
     rulesClient?: RulesClientApi;
@@ -44,7 +49,7 @@ export async function createAlertingRuleFromTemplate(
     spaceId?: string;
     pkgName: string;
   }
-): Promise<KibanaAssetReference> {
+): Promise<CreateAlertingRuleFromTemplateResult> {
   const { rulesClient, esClient, logger } = deps;
   const { pkgName, alertTemplateArchiveAsset, spaceId } = params;
   const ruleId = getRuleId({ pkgName, templateId: alertTemplateArchiveAsset.id, spaceId });
@@ -74,9 +79,11 @@ export async function createAlertingRuleFromTemplate(
     // Already created
     if (rule) {
       return {
-        id: ruleId,
-        type: KibanaSavedObjectType.alert,
-        deferred: false,
+        assetRef: {
+          id: ruleId,
+          type: KibanaSavedObjectType.alert,
+          deferred: false,
+        },
       };
     }
 
@@ -93,10 +100,14 @@ export async function createAlertingRuleFromTemplate(
         logger.debug(
           `Rule: ${ruleId} failed validation for package ${pkgName}, installation will be deferred`
         );
+
         return {
-          id: ruleId,
-          type: KibanaSavedObjectType.alert,
-          deferred: true,
+          assetRef: {
+            id: ruleId,
+            type: KibanaSavedObjectType.alert,
+            deferred: true,
+          },
+          error: validationResult.error,
         };
       }
     }
@@ -114,17 +125,22 @@ export async function createAlertingRuleFromTemplate(
     });
 
     return {
-      id: ruleId,
-      type: KibanaSavedObjectType.alert,
-      deferred: false,
+      assetRef: {
+        id: ruleId,
+        type: KibanaSavedObjectType.alert,
+        deferred: false,
+      },
     };
   } catch (e) {
     logger.error(`Error creating rule: ${ruleId} for package ${pkgName}`, { error: e });
 
     return {
-      id: ruleId,
-      type: KibanaSavedObjectType.alert,
-      deferred: true,
+      assetRef: {
+        id: ruleId,
+        type: KibanaSavedObjectType.alert,
+        deferred: true,
+      },
+      error: e,
     };
   }
 }
@@ -138,9 +154,11 @@ export async function stepCreateAlertingRules(
   const { logger, savedObjectsClient, packageInstallContext, authorizationHeader, spaceId } =
     context;
 
+  const assetResults: CreateAlertingRuleFromTemplateResult[] = [];
+
   if (!authorizationHeader) {
     logger.debug('No authorization header provided, skipping alerting rule creation step');
-    return;
+    return assetResults;
   }
 
   // User scoped ES client is required to ensure the ESQL that is validated is authorized to the indexes used
@@ -152,9 +170,8 @@ export async function stepCreateAlertingRules(
   const { name: pkgName } = packageInfo;
 
   if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
-    return;
+    return assetResults;
   }
-
   await withPackageSpan('Install elastic agent rules', async () => {
     const rulesClient = context.authorizationHeader
       ? await appContextService
@@ -175,22 +192,29 @@ export async function stepCreateAlertingRules(
       (path) => path.match(/\/alerting_rule_template\//) !== null
     );
 
-    const assetRefs: KibanaAssetReference[] = [];
     await pMap(
       alertTemplateAssets,
       async (alertTemplate) => {
-        const ref = await createAlertingRuleFromTemplate(
+        const result = await createAlertingRuleFromTemplate(
           { rulesClient, esClient: userEsClient, logger },
           { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
         );
 
-        assetRefs.push(ref);
+        assetResults.push(result);
       },
       { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
 
-    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
+    await saveKibanaAssetsRefs(
+      savedObjectsClient,
+      pkgName,
+      assetResults.map((r) => r.assetRef),
+      false,
+      true
+    );
   });
+
+  return assetResults;
 }
 
 async function validateEsqlQuery(esClient: ElasticsearchClient, esql: string) {
