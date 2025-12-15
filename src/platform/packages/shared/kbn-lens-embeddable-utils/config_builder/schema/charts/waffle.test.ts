@@ -290,7 +290,7 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /only a single non-collapsed breakdown dimension is allowed/i
+          /Only a single non-collapsed breakdown dimension is allowed/i
         );
       });
 
@@ -313,7 +313,7 @@ describe('Waffle Schema', () => {
         expect(() => waffleStateSchema.validate(input)).not.toThrow();
       });
 
-      it('allows multiple metrics with single non-collapsed breakdown', () => {
+      it('throws with multiple metrics and a single non-collapsed breakdown', () => {
         const input: WaffleState = {
           ...baseWaffleConfig,
           metrics: [
@@ -336,10 +336,10 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleStateSchema.validate(input)).not.toThrow();
+        expect(() => waffleStateSchema.validate(input)).toThrow();
       });
 
-      it('allows multiple metrics with multiple collapsed breakdowns and one non-collapsed', () => {
+      it('allows multiple metrics with multiple collapsed breakdowns', () => {
         const input: WaffleState = {
           ...baseWaffleConfig,
           metrics: [
@@ -368,48 +368,10 @@ describe('Waffle Schema', () => {
               include_empty_rows: true,
               collapse_by: 'avg',
             },
-            {
-              operation: 'terms',
-              fields: ['category'],
-              size: 5,
-            },
           ],
         };
 
         expect(() => waffleStateSchema.validate(input)).not.toThrow();
-      });
-
-      it('throws when multiple metrics have multiple non-collapsed breakdowns', () => {
-        const input: WaffleState = {
-          ...baseWaffleConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: false,
-            },
-            {
-              operation: 'sum',
-              field: 'sales',
-              empty_as_null: false,
-            },
-          ],
-          group_by: [
-            {
-              operation: 'terms',
-              fields: ['category'],
-              size: 5,
-            },
-            {
-              operation: 'terms',
-              fields: ['region'],
-              size: 5,
-            },
-          ],
-        };
-
-        expect(() => waffleStateSchema.validate(input)).toThrow(
-          /only a single non-collapsed breakdown dimension is allowed/i
-        );
       });
 
       it('throws when multiple metrics have one collapsed and multiple non-collapsed breakdowns', () => {
@@ -449,7 +411,7 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /only a single non-collapsed breakdown dimension is allowed/i
+          /only collapsed breakdown dimensions are allowed/i
         );
       });
     });

@@ -83,8 +83,8 @@ function validateGroupings({
   group_by?: Array<{ collapse_by?: string }>;
 }) {
   if (metrics.length > 1) {
-    if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
-      return 'When multiple metrics are defined, only a single non-collapsed breakdown dimension is allowed.';
+    if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 0) {
+      return 'When multiple metrics are defined, only collapsed breakdown dimensions are allowed.';
     }
   }
   if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
