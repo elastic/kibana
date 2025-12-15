@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isUndefined, omitBy } from 'lodash';
 import type {
   Logger,
   SavedObjectsClientContract,
@@ -48,7 +49,7 @@ export class PromptsConfigService {
       {
         ...defaultsPrompts,
         ...existing,
-        ...Object.fromEntries(Object.entries(attributes).filter(([, value]) => Boolean(value))),
+        ...omitBy(attributes, isUndefined),
       },
       {
         ...(options ?? {}),
