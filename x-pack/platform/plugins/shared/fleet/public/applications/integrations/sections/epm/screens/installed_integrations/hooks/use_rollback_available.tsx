@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+
 import { useGetBulkRollbackAvailableCheck, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
@@ -39,13 +41,16 @@ export const useRollbackAvailablePackages = (
 ): Record<string, boolean> => {
   const licenseService = useLicense();
   const rollbackAvailablePackages = useGetBulkRollbackAvailableCheck();
-  const isRollbackAvailablePackages: Record<string, boolean> = {};
-  items.forEach((item) => {
-    isRollbackAvailablePackages[item.name] = checkRollbackAvailability(
-      item,
-      licenseService,
-      rollbackAvailablePackages[item.name]?.isAvailable ?? false
-    );
-  });
-  return isRollbackAvailablePackages;
+
+  return useMemo(() => {
+    const isRollbackAvailablePackages: Record<string, boolean> = {};
+    items.forEach((item) => {
+      isRollbackAvailablePackages[item.name] = checkRollbackAvailability(
+        item,
+        licenseService,
+        rollbackAvailablePackages[item.name]?.isAvailable ?? false
+      );
+    });
+    return isRollbackAvailablePackages;
+  }, [items, licenseService, rollbackAvailablePackages]);
 };
