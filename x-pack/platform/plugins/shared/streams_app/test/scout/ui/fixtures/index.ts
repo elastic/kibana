@@ -43,12 +43,21 @@ interface CustomApiServicesTypes extends BaseApiServicesTypes {
 // Export the typed fixture type for use in tests
 export type TypedApiServicesFixture = ApiServicesFixture<CustomApiServicesTypes>;
 
+// Helper type to extract the stream definition type
+export type StreamDefinition = IngestStream.all.GetResponse;
+
 export interface StreamsTestFixtures extends ScoutTestFixtures {
   pageObjects: StreamsPageObjects;
 }
 
+// Define worker fixtures with typed apiServices
+// Export this so TypeScript can properly infer types in test files
+export interface StreamsWorkerFixtures extends Omit<ScoutWorkerFixtures, 'apiServices'> {
+  apiServices: ApiServicesFixture<CustomApiServicesTypes>;
+}
+
 export const test = baseTest
-  .extend({
+  .extend<StreamsTestFixtures, StreamsWorkerFixtures>({
     // Extend apiServices to provide typed StreamsApiService
     apiServices: async ({ apiServices }, use) => {
       // Create a typed wrapper that provides properly typed methods
@@ -57,7 +66,9 @@ export const test = baseTest
         streams: {
           ...apiServices.streams,
           // Override getStreamDefinition to return the correct type
-          getStreamDefinition: async (streamName: string) => {
+          getStreamDefinition: async (
+            streamName: string
+          ): Promise<IngestStream.all.GetResponse> => {
             const result = await apiServices.streams.getStreamDefinition(streamName);
             return result as IngestStream.all.GetResponse;
           },
@@ -65,10 +76,11 @@ export const test = baseTest
       } as ApiServicesFixture<CustomApiServicesTypes>;
 
       // Use 'as any' to bypass Playwright's strict type checking for generic fixture types
+      // The type is properly declared in StreamsWorkerFixtures above
       await (use as any)(typedApiServices);
     },
   })
-  .extend<StreamsTestFixtures, ScoutWorkerFixtures>({
+  .extend<StreamsTestFixtures, StreamsWorkerFixtures>({
     pageObjects: async (
       {
         pageObjects,
