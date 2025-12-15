@@ -14,6 +14,7 @@ describe('fromEs', () => {
   it('converts a healthy document to ToolHealthState', () => {
     const document: ToolHealthDocument = {
       _id: 'default:my-tool',
+      _index: '.chat-tool-health',
       _source: {
         tool_id: 'my-tool',
         space: 'default',
@@ -39,6 +40,7 @@ describe('fromEs', () => {
   it('converts a failed document with error message', () => {
     const document: ToolHealthDocument = {
       _id: 'default:mcp-github-tool',
+      _index: '.chat-tool-health',
       _source: {
         tool_id: 'mcp-github-tool',
         space: 'default',
@@ -64,6 +66,7 @@ describe('fromEs', () => {
   it('handles unknown status', () => {
     const document: ToolHealthDocument = {
       _id: 'default:new-tool',
+      _index: '.chat-tool-health',
       _source: {
         tool_id: 'new-tool',
         space: 'default',

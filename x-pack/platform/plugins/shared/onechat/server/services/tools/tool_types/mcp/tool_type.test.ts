@@ -195,7 +195,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -242,7 +241,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -274,7 +272,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -305,7 +302,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         const testError = new Error('Connection timeout');
@@ -338,7 +334,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActions.getActionsClientWithRequest.mockRejectedValue('string error');
@@ -369,7 +364,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -398,7 +392,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -416,7 +409,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -437,7 +429,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         mockActionsClient.execute.mockResolvedValue({
@@ -462,7 +453,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         const result = dynamicProps.getLlmDescription!({
@@ -484,7 +474,6 @@ describe('MCP tool_type', () => {
         const dynamicProps = await toolType.getDynamicProps(customConfig, {
           request: mockRequest,
           spaceId: 'default',
-          actions: mockActions,
         });
 
         const result = dynamicProps.getLlmDescription!({
