@@ -48,7 +48,6 @@ describe('ES Config Route', () => {
         specDefinitionService: new SpecDefinitionsService(),
       },
       lib: { handleEsError },
-      kibanaVersion: new SemVer(MAJOR_VERSION),
     };
 
     registerEsConfigRoute(routeDeps);
