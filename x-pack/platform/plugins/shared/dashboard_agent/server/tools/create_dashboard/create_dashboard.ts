@@ -67,7 +67,10 @@ This tool will:
     ) => {
       try {
         const coreContext = {
-          savedObjects: { client: savedObjects.getScopedClient(request) },
+          savedObjects: {
+            client: savedObjects.getScopedClient(request),
+            typeRegistry: savedObjects.getTypeRegistry(),
+          },
         };
 
         // Create a minimal request handler context
