@@ -911,8 +911,7 @@ const chunkDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: [
-    'FROM books\n| EVAL chunks = CHUNK(description)',
-    'FROM books\n| EVAL chunks = CHUNK(description, {"strategy": "sentence", "max_chunk_size": 20, "sentence_overlap": 0})',
+    'ROW result = CHUNK("It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief.", {"strategy": "word", "max_chunk_size": 10, "overlap": 1})\n| MV_EXPAND result',
   ],
 };
 
@@ -2380,6 +2379,24 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date_nanos',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Expression to evaluate.',
+        },
+        {
+          name: 'rest',
+          type: 'exponential_histogram',
+          optional: true,
+          description: 'Other expression to evaluate.',
+        },
+      ],
+      returnType: 'exponential_histogram',
       minParams: 1,
     },
     {
@@ -16598,8 +16615,8 @@ const textEmbeddingDefinition: FunctionDefinition = {
   ],
   examples: [
     'ROW input="Who is Victor Hugo?"\n| EVAL embedding = TEXT_EMBEDDING("Who is Victor Hugo?", "test_dense_inference")',
-    'FROM semantic_text METADATA _score\n| EVAL query_embedding = TEXT_EMBEDDING("be excellent to each other", "test_dense_inference")\n| WHERE KNN(semantic_text_dense_field, query_embedding)',
-    'FROM semantic_text METADATA _score\n| WHERE KNN(semantic_text_dense_field, TEXT_EMBEDDING("be excellent to each other", "test_dense_inference"))',
+    'FROM dense_vector_text METADATA _score\n| EVAL query_embedding = TEXT_EMBEDDING("be excellent to each other", "test_dense_inference")\n| WHERE KNN(text_embedding_field, query_embedding)',
+    'FROM dense_vector_text METADATA _score\n| WHERE KNN(text_embedding_field, TEXT_EMBEDDING("be excellent to each other", "test_dense_inference"))',
   ],
 };
 
@@ -18102,6 +18119,63 @@ const toIntegerDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'integer',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'unsigned_long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'long',
           optional: false,
           description:
@@ -18118,6 +18192,63 @@ const toIntegerDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'integer',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'unsigned_long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
         },
       ],
       returnType: 'integer',
@@ -18148,7 +18279,11 @@ const toIntegerDefinition: FunctionDefinition = {
     Location.RERANK,
     Location.JOIN,
   ],
-  examples: ['ROW long = [5013792, 2147483647, 501379200000]\n| EVAL int = TO_INTEGER(long)'],
+  examples: [
+    'ROW long = [5013792, 2147483647, 501379200000]\n| EVAL int = TO_INTEGER(long)',
+    'ROW str1 = "0x32", str2 = "31"\n| EVAL int1 = TO_INTEGER(str1, 16), int2 = TO_INTEGER(str2, 13)\n| KEEP str1, int1, str2, int2',
+    'ROW str1 = "Kona"\n| EVAL int1 = TO_INTEGER(str1, 27), fail1 = TO_INTEGER(str1, 10)',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -18224,7 +18359,7 @@ const toLongDefinition: FunctionDefinition = {
   name: 'to_long',
   description: i18n.translate('kbn-esql-ast.esql.definitions.to_long', {
     defaultMessage:
-      'Converts an input value to a long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to long.\nBoolean `true` will be converted to long `1`, `false` to `0`.',
+      'Converts the input value to a long.\nIf the input parameter is of a date type, its value will be interpreted as milliseconds\nsince the Unix epoch, converted to long.\nBoolean `true` will be converted to long `1`, `false` to `0`.',
   }),
   preview: false,
   alias: undefined,
@@ -18365,6 +18500,63 @@ const toLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'integer',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'unsigned_long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'long',
           optional: false,
           description:
@@ -18381,6 +18573,63 @@ const toLongDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'integer',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+        {
+          name: 'base',
+          type: 'unsigned_long',
+          optional: true,
+          description:
+            '(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.',
         },
       ],
       returnType: 'long',
@@ -18413,6 +18662,8 @@ const toLongDefinition: FunctionDefinition = {
   ],
   examples: [
     'ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"\n| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)',
+    'ROW str1 = "0x32", str2 = "31"\n| EVAL long1 = TO_LONG(str1, 16), long2 = TO_LONG(str2, 13)\n| KEEP str1, long1, str2, long2',
+    'ROW str1 = "Hazelnut"\n| EVAL long1 = TO_LONG(str1, 36), fail1 = TO_LONG(str1, 10)',
   ],
 };
 
@@ -18644,6 +18895,18 @@ const toStringDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
           optional: false,
           description:
             'Input value. The input can be a single- or multi-valued column or an expression.',
@@ -19112,6 +19375,72 @@ const toVersionDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: ['ROW v = TO_VERSION("1.2.3")'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const topSnippetsDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'top_snippets',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.top_snippets', {
+    defaultMessage:
+      'Use `TOP_SNIPPETS` to extract the best snippets for a given query string from a text field.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'FROM books\n| WHERE MATCH(title, "Return")\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -19909,6 +20238,7 @@ export const scalarFunctionDefinitions = [
   toUnsignedLongDefinition,
   toUpperDefinition,
   toVersionDefinition,
+  topSnippetsDefinition,
   trangeDefinition,
   trimDefinition,
   urlDecodeDefinition,
