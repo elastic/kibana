@@ -191,7 +191,7 @@ Burn Rate = Error Rate / Error Budget
 ### SLO States
 
 - **HEALTHY**: Meeting objective
-- **DEGRADING**: Warning state
+- **DEGRADING**: Currently under objective for calendar aligned SLO
 - **VIOLATED**: Below objective
 
 ### Burn Rate
@@ -373,16 +373,6 @@ This prevents alert fatigue from short spikes while catching sustained issues.
 
 ## 🏛️ SLO Architecture in Kibana
 
-### Plugin Location
-
-```
-x-pack/solutions/observability/plugins/slo/
-├── common/           # Shared types and constants
-├── public/           # UI components and client logic
-├── server/           # API routes and services
-└── docs/             # OpenAPI specifications
-```
-
 ### Data Flow
 
 ```
@@ -518,6 +508,7 @@ x-pack/solutions/observability/plugins/slo/
 1. Check transform status
 2. Increase `syncDelay` setting
 3. Restart transform: `POST _transform/<transform-id>/_start`
+4. Use `syncField` with `event.ingested` (recommended): If your source data includes an `event.ingested` field, configure the transform to use it instead of the source timestamp field.
 
 ### Incorrect SLI Values
 
@@ -539,9 +530,9 @@ x-pack/solutions/observability/plugins/slo/
 
 **Fix**:
 
-- Reduce groupBy cardinality
-- Use sampling if needed
-- Consider separate SLOs instead of grouping
+- Reduce groupBy cardinality: Group by less granular field (e.g., `service.name` instead of `host.id`)
+- Add filters to reduce scope: Only track production environments (`env: production`), specific regions, or critical services
+- Consider separate SLOs instead of grouping: Create individual SLOs for key services/endpoints rather than one grouped SLO
 
 ---
 
