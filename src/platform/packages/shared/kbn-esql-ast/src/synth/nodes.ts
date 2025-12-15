@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder } from '../builder';
+import { Builder } from '../ast/builder';
 import type {
   ESQLColumn,
   ESQLDecimalLiteral,

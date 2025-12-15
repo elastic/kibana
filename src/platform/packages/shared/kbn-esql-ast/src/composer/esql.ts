@@ -24,6 +24,7 @@ import type {
 } from './types';
 import type { ESQLSource } from '../types';
 import { isSource } from '../ast/is';
+import { Builder } from '../ast/builder';
 
 const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQueryTagHole[]) => {
   const tagOrGeneratorWithParams = (initialParamValues?: Record<string, unknown>) =>
