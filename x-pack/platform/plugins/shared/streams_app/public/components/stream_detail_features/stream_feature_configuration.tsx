@@ -7,13 +7,14 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams, Feature } from '@kbn/streams-schema';
-import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
-import { useAIFeatures } from '../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { StreamFeaturesFlyout } from './stream_features/stream_features_flyout';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
+import { ConnectorListButton } from '../connector_list_button/connector_list_button';
 
 interface StreamConfigurationProps {
   definition: Streams.all.Definition;
@@ -58,34 +59,34 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
             right={
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="m"
-                    disabled={!aiFeatures?.genAiConnectors.selectedConnector}
-                    iconType="sparkles"
-                    onClick={() => {
-                      setIsLoading(true);
-                      setIsFlyoutVisible(!isFlyoutVisible);
-                      identifyFeatures(
-                        aiFeatures?.genAiConnectors.selectedConnector!,
-                        'now',
-                        'now-24h'
-                      )
-                        .then((data) => {
-                          setFeatures(data.features);
-                        })
-                        .finally(() => {
-                          setIsLoading(false);
-                        });
+                  <ConnectorListButton
+                    buttonProps={{
+                      size: 'm',
+                      iconType: 'sparkles',
+                      onClick: () => {
+                        setIsLoading(true);
+                        setIsFlyoutVisible(!isFlyoutVisible);
+                        identifyFeatures(
+                          aiFeatures?.genAiConnectors.selectedConnector!,
+                          'now',
+                          'now-24h'
+                        )
+                          .then((data) => {
+                            setFeatures(data.features);
+                          })
+                          .finally(() => {
+                            setIsLoading(false);
+                          });
+                      },
+                      'data-test-subj': 'feature_identification_identify_features_button',
+                      children: i18n.translate(
+                        'xpack.streams.streamDetailView.featureIdentificationButtonLabel',
+                        {
+                          defaultMessage: 'Identify features',
+                        }
+                      ),
                     }}
-                    data-test-subj="feature_identification_identify_features_button"
-                  >
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.featureIdentificationButtonLabel',
-                      {
-                        defaultMessage: 'Identify features',
-                      }
-                    )}
-                  </EuiButton>
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }

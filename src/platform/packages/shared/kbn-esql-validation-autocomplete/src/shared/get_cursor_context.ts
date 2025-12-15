@@ -8,8 +8,8 @@
  */
 
 import { Walker, within } from '@kbn/esql-ast';
-import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
-import { findAstPosition } from '@kbn/esql-ast/src/definitions/utils/ast';
+import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { findAstPosition } from '@kbn/esql-ast/src/commands/definitions/utils/ast';
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast/src/types';
 import { findSubquery } from './subqueries_helpers';
 
