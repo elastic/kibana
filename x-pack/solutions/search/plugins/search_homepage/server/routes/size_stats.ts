@@ -10,10 +10,11 @@ import type { Logger } from '@kbn/logging';
 import { GET_STATS_ROUTE } from '../../common/routes';
 import type { RouterContextData, StatsResponse } from '../types';
 import { fetchSizeStats } from '../lib/size_stats';
+import { errorHandler } from '../utils/error_handler';
 
 export const registerStatsRoutes = (
   router: IRouter,
-  _logger: Logger,
+  logger: Logger,
   { isServerless }: RouterContextData
 ): void => {
   router.get<unknown, unknown, StatsResponse>(
@@ -30,7 +31,7 @@ export const registerStatsRoutes = (
         access: 'internal',
       },
     },
-    async (context, _request, response) => {
+    errorHandler(logger)(async (context, _request, response) => {
       const client = (await context.core).elasticsearch.client;
 
       const stats = await fetchSizeStats(client, isServerless);
@@ -38,6 +39,6 @@ export const registerStatsRoutes = (
         headers: { 'content-type': 'application/json' },
         body: stats,
       });
-    }
+    })
   );
 };
