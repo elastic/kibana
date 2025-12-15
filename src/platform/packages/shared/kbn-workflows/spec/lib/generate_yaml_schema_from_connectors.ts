@@ -22,6 +22,18 @@ import {
   WorkflowSchema,
 } from '../schema';
 
+/**
+ * Backward compatibility: Map old type names to new cleaner type names.
+ * These aliases are accepted in schema validation but not shown in autocomplete.
+ * The key is the old type name, the value is the new type name.
+ */
+const KIBANA_TYPE_ALIASES: Record<string, string> = {
+  'kibana.createCaseDefaultSpace': 'kibana.createCase',
+  'kibana.getCaseDefaultSpace': 'kibana.getCase',
+  'kibana.updateCaseDefaultSpace': 'kibana.updateCase',
+  'kibana.addCaseCommentDefaultSpace': 'kibana.addCaseComment',
+};
+
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
   // Leaving this function in case we'd to change behaviour in future.
@@ -68,6 +80,10 @@ function createRecursiveStepSchema(
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
+    // Generate alias schemas for backward compatibility
+    // These allow old type names to still validate, but they won't appear in autocomplete
+    const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
+
     // Return discriminated union with all step types
     // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
@@ -78,6 +94,7 @@ function createRecursiveStepSchema(
       WaitStepSchema,
       httpSchema,
       ...connectorSchemas,
+      ...aliasSchemas,
     ]);
   });
 
@@ -97,4 +114,36 @@ function generateStepSchemaForConnector(
     with: connector.paramsSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
+}
+
+/**
+ * Generate schemas for backward-compatible type aliases.
+ * These schemas use the old type names but reference the same connector definition.
+ * They are included in validation but not shown in autocomplete suggestions.
+ */
+function generateAliasSchemas(
+  connectors: ConnectorContractUnion[],
+  stepSchema: z.ZodType,
+  loose: boolean = false
+): ReturnType<typeof generateStepSchemaForConnector>[] {
+  const aliasSchemas: ReturnType<typeof generateStepSchemaForConnector>[] = [];
+
+  for (const [oldType, newType] of Object.entries(KIBANA_TYPE_ALIASES)) {
+    // Find the connector with the new type name
+    const connector = connectors.find((c) => c.type === newType);
+    if (connector) {
+      // Create a schema with the old type name but same params/output
+      aliasSchemas.push(
+        BaseConnectorStepSchema.extend({
+          // Mark as deprecated in description so it's clear this is a legacy alias
+          type: z.literal(oldType).describe(`Deprecated: Use ${newType} instead`),
+          'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
+          with: connector.paramsSchema,
+          'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+        })
+      );
+    }
+  }
+
+  return aliasSchemas;
 }

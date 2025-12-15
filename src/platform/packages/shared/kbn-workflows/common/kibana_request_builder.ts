@@ -12,6 +12,17 @@ import { getKibanaConnectors } from '../spec/kibana';
 // Lazy import to avoid bundling large generated file in main plugin bundle
 
 /**
+ * Backward compatibility: Map old type names to new cleaner type names.
+ * This allows existing workflows using the old names to continue working.
+ */
+const KIBANA_TYPE_ALIASES: Record<string, string> = {
+  'kibana.createCaseDefaultSpace': 'kibana.createCase',
+  'kibana.getCaseDefaultSpace': 'kibana.getCase',
+  'kibana.updateCaseDefaultSpace': 'kibana.updateCase',
+  'kibana.addCaseCommentDefaultSpace': 'kibana.addCaseComment',
+};
+
+/**
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
@@ -60,9 +71,12 @@ export function buildKibanaRequestFromAction(
   // Lazy load the generated connectors to avoid main bundle bloat
   const kibanaConnectors = getKibanaConnectors();
 
+  // Resolve alias if the action type uses an old name (backward compatibility)
+  const resolvedActionType = KIBANA_TYPE_ALIASES[actionType] ?? actionType;
+
   // Find the connector definition for this action type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const connector = kibanaConnectors.find((c: any) => c.type === actionType);
+  const connector = kibanaConnectors.find((c: any) => c.type === resolvedActionType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)
