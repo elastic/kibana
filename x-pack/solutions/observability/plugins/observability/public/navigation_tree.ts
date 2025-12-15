@@ -36,7 +36,13 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
-function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
+function createNavTree({
+  streamsAvailable,
+  isCloudEnabled,
+}: {
+  streamsAvailable?: boolean;
+  isCloudEnabled?: boolean;
+}) {
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -456,6 +462,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 }),
                 breadcrumbStatus: 'hidden',
               },
+              // Only show Cloud Connect in on-prem deployments (not cloud)
+              ...(isCloudEnabled
+                ? []
+                : [
+                    {
+                      id: 'cloud_connect' as const,
+                      link: 'cloud_connect' as const,
+                    },
+                  ]),
               { link: 'monitoring' },
             ],
           },
@@ -589,6 +604,13 @@ export const createDefinition = (
   homePage: 'observabilityOnboarding',
   navigationTree$: (
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const })
-  ).pipe(map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))),
+  ).pipe(
+    map(({ status }) =>
+      createNavTree({
+        streamsAvailable: status === 'enabled',
+        isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+      })
+    )
+  ),
   dataTestSubj: 'observabilitySideNav',
 });
