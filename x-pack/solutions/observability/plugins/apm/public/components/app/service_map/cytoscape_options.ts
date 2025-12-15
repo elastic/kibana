@@ -161,8 +161,6 @@ const getStyle = (euiTheme: EuiThemeComputed): cytoscape.StylesheetJson => {
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
         // The DefinitelyTyped definitions don't specify this property since it's
         // fairly new.
-        //
-        // @ts-expect-error
         'target-distance-from-node': isIE11 ? undefined : euiTheme.size.xs,
         width: 1,
         'source-arrow-shape': 'none',
