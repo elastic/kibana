@@ -11,16 +11,17 @@ import type { RootSchema } from '@kbn/core/public';
 /**
  * Event type constants for Agent Builder telemetry events.
  */
+const TELEMETRY_PREFIX = 'Agent Builder';
 export const AGENT_BUILDER_EVENT_TYPES = {
-  OptInStepReached: 'Agent Builder Opt-In Step Reached',
-  OptInConfirmationShown: 'Agent Builder Opt-In Confirmation Shown',
-  OptInConfirmed: 'Agent Builder Opt-In Confirmed',
-  OptInCancelled: 'Agent Builder Opt-In Cancelled',
-  OptOut: 'Agent Builder Opt-Out',
-  AddToChatClicked: 'Add to Chat Clicked',
-  MessageSent: 'Agent Builder Message Sent',
-  MessageReceived: 'Agent Builder Message Received',
-  AgentBuilderError: 'Agent Builder Error',
+  OptInStepReached: `${TELEMETRY_PREFIX} Opt-In Step Reached`,
+  OptInConfirmationShown: `${TELEMETRY_PREFIX} Opt-In Confirmation Shown`,
+  OptInConfirmed: `${TELEMETRY_PREFIX} Opt-In Confirmed`,
+  OptInCancelled: `${TELEMETRY_PREFIX} Opt-In Cancelled`,
+  OptOut: `${TELEMETRY_PREFIX} Opt-Out`,
+  AddToChatClicked: `${TELEMETRY_PREFIX} Add to Chat Clicked`,
+  MessageSent: `${TELEMETRY_PREFIX} Message Sent`,
+  MessageReceived: `${TELEMETRY_PREFIX} Message Received`,
+  AgentBuilderError: `${TELEMETRY_PREFIX} Error`,
 } as const;
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
