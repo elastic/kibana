@@ -45,17 +45,17 @@ const TITLE_CASE_GLOSSARY = [
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));
 
 /**
- * Formats labels with special casing rules from the glossary.
+ * Converts a string to sentence case.
  * For glossary terms, applies the exact formatting from the glossary.
  * For non-glossary terms, capitalizes only the first letter.
  *
  * @param label - The label string to format
  * @returns formatted label string
  * @example
- * formatLabel('machine learning') // 'Machine Learning' - Glossary term
- * formatLabel('settings') // 'Settings' - First letter capitalized
+ * toSentenceCase('machine learning') // 'Machine Learning' - Glossary term
+ * toSentenceCase('settings') // 'Settings' - First letter capitalized
  */
-export function formatLabel(label: string): string {
+export function toSentenceCase(label: string): string {
   if (!label || typeof label !== 'string') {
     return label;
   }

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { formatLabel } from './src/format_label';
+export { toSentenceCase } from './src/to_sentence_case';

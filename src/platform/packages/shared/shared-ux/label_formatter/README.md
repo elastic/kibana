@@ -1,17 +1,17 @@
 # @kbn/shared-ux-label-formatter
 
-A utility for formatting labels with consistent capitalization rules across Kibana.
+A utility for formatting labels with consistent rules across Kibana.
 
 ## Usage
 
 ```typescript
-import { formatLabel } from '@kbn/shared-ux-label-formatter';
+import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
 // Glossary terms get exact formatting
-formatLabel('machine learning'); // 'Machine Learning'
+toSentenceCase('machine learning'); // 'Machine Learning'
 
 // Non-glossary terms get first-letter capitalized
-formatLabel('settings'); // 'Settings'
+toSentenceCase('settings'); // 'Settings'
 ```
 
 ## Features
