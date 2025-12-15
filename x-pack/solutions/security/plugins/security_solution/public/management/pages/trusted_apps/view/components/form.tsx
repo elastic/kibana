@@ -458,11 +458,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           // set is process descendants state true if wasSelected before
         } else {
           setLastAdvancedFormConditions(item.entries);
-          if (isProcessDescendantsSelected) {
-            setWasProcessDescendantsSelected(true);
-          } else {
-            setWasProcessDescendantsSelected(false);
-          }
+          setWasprocessDescendantsSelected(isProcessDescendantsSelected);
         }
 
         const nextItem: ArtifactFormComponentProps['item'] = {
