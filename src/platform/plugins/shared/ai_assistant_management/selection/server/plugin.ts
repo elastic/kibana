@@ -89,10 +89,13 @@ export class AIAssistantManagementSelectionPlugin
           getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
             if (request) {
               try {
-                const [, startServices] = await core.getStartServices();
-                const spaces = startServices.spaces;
-                if (spaces) {
-                  const activeSpace = await spaces.spacesService.getActiveSpace(request);
+                const [coreStart, startServices] = await core.getStartServices();
+                // Avoid security exceptions before login
+                const user = coreStart.security.authc.getCurrentUser(request);
+                if (startServices.spaces && user) {
+                  const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
+                    request
+                  );
                   if (activeSpace?.solution === 'es') {
                     return AIChatExperience.Agent;
                   }

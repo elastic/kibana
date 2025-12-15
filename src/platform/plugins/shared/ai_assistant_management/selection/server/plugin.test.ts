@@ -48,11 +48,21 @@ describe('plugin', () => {
 
   const setupPlugin = (
     plugin: AIAssistantManagementSelectionPlugin,
-    options: { spaces?: ReturnType<typeof spacesMock.createStart> } = {}
+    options: {
+      spaces?: ReturnType<typeof spacesMock.createStart>;
+      coreStart?: Partial<{ security: { authc: { getCurrentUser: jest.Mock } } }>;
+    } = {}
   ) => {
     const coreSetup = coreMock.createSetup();
     const spaces = options.spaces ?? spacesMock.createStart();
-    coreSetup.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
+    const coreStart = options.coreStart ?? {
+      security: {
+        authc: {
+          getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user' }),
+        },
+      },
+    };
+    coreSetup.getStartServices.mockResolvedValue([coreStart as any, { spaces }, {} as any]);
 
     const setupDeps = {
       management: {
