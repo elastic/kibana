@@ -72,7 +72,6 @@ describe('processMathProcessor', () => {
       expect(result).toEqual({
         script: {
           lang: 'painless',
-          // Uses flat key assignment to be consistent with $() reading
           source:
             "ctx['attributes.total'] = ($('attributes.price', null) * $('attributes.quantity', null));",
           description: 'Math processor: attributes.price * attributes.quantity',
@@ -87,112 +86,14 @@ describe('processMathProcessor', () => {
         to: 'order.item.total',
       };
       const result = processMathProcessor(processor);
-      // Uses flat key for target to be consistent with $() flexible access
       expect((result.script as Record<string, unknown>).source).toBe(
         "ctx['order.item.total'] = ($('order.item.price', null) * $('order.item.qty', null));"
       );
     });
-
-    it('should not add initialization for non-nested target field', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'price * quantity',
-        to: 'total',
-      };
-      const result = processMathProcessor(processor);
-      // Flat key assignment - no parent initialization needed
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['total'] = ($('price', null) * $('quantity', null));"
-      );
-    });
   });
 
-  describe('math functions', () => {
-    it('should transpile abs()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'abs(value)',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['result'] = Math.abs($('value', null));"
-      );
-    });
-
-    it('should transpile sqrt()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(variance)',
-        to: 'std_dev',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['std_dev'] = Math.sqrt($('variance', null));"
-      );
-    });
-
-    it('should transpile pow()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'pow(base, 2)',
-        to: 'squared',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['squared'] = Math.pow($('base', null), 2);"
-      );
-    });
-
-    it('should transpile ceil()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'ceil(price)',
-        to: 'rounded_up',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded_up'] = Math.ceil($('price', null));"
-      );
-    });
-
-    it('should transpile floor()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'floor(price)',
-        to: 'rounded_down',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded_down'] = Math.floor($('price', null));"
-      );
-    });
-
-    it('should transpile round() with single arg', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'round(price)',
-        to: 'rounded',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded'] = Math.round($('price', null));"
-      );
-    });
-
-    it('should transpile round() with decimal places', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'round(price, 2)',
-        to: 'rounded',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['rounded'] = (Math.round($('price', null) * Math.pow(10, 2)) / Math.pow(10, 2));"
-      );
-    });
-
-    it('should transpile log() with single arg (natural log)', () => {
+  describe('log function', () => {
+    it('should transpile log() (natural log)', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'log(value)',
@@ -204,172 +105,27 @@ describe('processMathProcessor', () => {
       );
     });
 
-    it('should transpile log() with base (change of base formula)', () => {
+    it('should transpile log with literal', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'log(value, 10)',
-        to: 'log10_value',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['log10_value'] = (Math.log($('value', null)) / Math.log(10));"
-      );
-    });
-
-    it('should transpile trig functions', () => {
-      const functions = ['sin', 'cos', 'tan'];
-      for (const fn of functions) {
-        const processor: MathProcessor = {
-          action: 'math',
-          expression: `${fn}(angle)`,
-          to: 'result',
-        };
-        const result = processMathProcessor(processor);
-        expect((result.script as Record<string, unknown>).source).toBe(
-          `ctx['result'] = Math.${fn}($('angle', null));`
-        );
-      }
-    });
-
-    it('should transpile inverse trig functions', () => {
-      const functions = ['asin', 'acos', 'atan'];
-      for (const fn of functions) {
-        const processor: MathProcessor = {
-          action: 'math',
-          expression: `${fn}(ratio)`,
-          to: 'angle',
-        };
-        const result = processMathProcessor(processor);
-        expect((result.script as Record<string, unknown>).source).toBe(
-          `ctx['angle'] = Math.${fn}($('ratio', null));`
-        );
-      }
-    });
-
-    it('should transpile atan_two()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'atan_two(y, x)',
-        to: 'heading',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['heading'] = Math.atan2($('y', null), $('x', null));"
-      );
-    });
-
-    it('should transpile hyperbolic functions', () => {
-      const functions = ['sinh', 'cosh', 'tanh'];
-      for (const fn of functions) {
-        const processor: MathProcessor = {
-          action: 'math',
-          expression: `${fn}(x)`,
-          to: 'result',
-        };
-        const result = processMathProcessor(processor);
-        expect((result.script as Record<string, unknown>).source).toBe(
-          `ctx['result'] = Math.${fn}($('x', null));`
-        );
-      }
-    });
-
-    it('should transpile signum()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'signum(delta)',
-        to: 'sign',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['sign'] = Math.signum($('delta', null));"
-      );
-    });
-
-    it('should transpile log_ten()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'log_ten(bytes)',
-        to: 'magnitude',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['magnitude'] = Math.log10($('bytes', null));"
-      );
-    });
-
-    it('should transpile hypot()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'hypot(x, y)',
-        to: 'distance',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['distance'] = Math.hypot($('x', null), $('y', null));"
-      );
-    });
-
-    it('should transpile exp()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'exp(x)',
+        expression: 'log(100)',
         to: 'result',
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['result'] = Math.exp($('x', null));"
+        "ctx['result'] = Math.log(100);"
       );
     });
 
-    it('should transpile cbrt()', () => {
+    it('should transpile log with expression', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'cbrt(volume)',
-        to: 'side',
+        expression: 'log(a * b)',
+        to: 'result',
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['side'] = Math.cbrt($('volume', null));"
-      );
-    });
-  });
-
-  describe('constants', () => {
-    it('should transpile pi()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'radius * 2 * pi()',
-        to: 'circumference',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['circumference'] = (($('radius', null) * 2) * Math.PI);"
-      );
-    });
-
-    it('should transpile tau()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'radius * tau()',
-        to: 'circumference',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['circumference'] = ($('radius', null) * (2 * Math.PI));"
-      );
-    });
-  });
-
-  describe('binary operators from registry', () => {
-    it('should transpile mod()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'mod(total, 10)',
-        to: 'remainder',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['remainder'] = ($('total', null) % 10);"
+        "ctx['result'] = Math.log(($('a', null) * $('b', null)));"
       );
     });
   });
@@ -460,43 +216,17 @@ describe('processMathProcessor', () => {
     });
   });
 
-  describe('nested expressions', () => {
-    it('should handle nested functions', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(pow(a, 2) + pow(b, 2))',
-        to: 'hypotenuse',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['hypotenuse'] = Math.sqrt((Math.pow($('a', null), 2) + Math.pow($('b', null), 2)));"
-      );
-    });
-
-    it('should handle deeply nested expressions', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'ceil(abs(floor(x)))',
-        to: 'result',
-      };
-      const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['result'] = Math.ceil(Math.abs(Math.floor($('x', null))));"
-      );
-    });
-  });
-
   describe('ignore_missing handling', () => {
     it('should generate null checks for single field', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'abs(value)',
+        expression: 'value * 2',
         to: 'result',
         ignore_missing: true,
       };
       const result = processMathProcessor(processor);
       expect((result.script as Record<string, unknown>).source).toBe(
-        "if ($('value', null) != null) { ctx['result'] = Math.abs($('value', null)); }"
+        "if ($('value', null) != null) { ctx['result'] = ($('value', null) * 2); }"
       );
     });
 
@@ -538,25 +268,10 @@ describe('processMathProcessor', () => {
         "ctx['total'] = ($('price', null) * $('quantity', null));"
       );
     });
-
-    it('should handle expressions with no fields (constants only)', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'pi() * 2',
-        to: 'tau_value',
-        ignore_missing: true,
-      };
-      const result = processMathProcessor(processor);
-      // No null checks needed - no fields
-      expect((result.script as Record<string, unknown>).source).toBe(
-        "ctx['tau_value'] = (Math.PI * 2);"
-      );
-    });
   });
 
   describe('if condition handling', () => {
     it('should add if parameter when provided (compiled from where condition)', () => {
-      // Simulate how conversions.ts compiles 'where' to 'if' before calling processMathProcessor
       const whereCondition = { field: 'active', eq: true };
       const compiledIf = conditionToPainless(whereCondition);
 
@@ -607,20 +322,90 @@ describe('processMathProcessor', () => {
     });
   });
 
-  describe('validation errors', () => {
-    // Invalid expressions generate a Painless script that throws at runtime,
-    // allowing simulation to run and capture errors like other processor errors.
-    it('should generate error-throwing script for rejected functions', () => {
+  describe('validation errors for rejected functions', () => {
+    it('should generate error-throwing script for abs()', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'mean(a, b, c)',
-        to: 'average',
+        expression: 'abs(value)',
+        to: 'result',
       };
       const result = processMathProcessor(processor);
       const source = (result.script as Record<string, unknown>).source as string;
       expect(source).toContain('throw new IllegalArgumentException("');
-      expect(source).toContain('mean');
-      expect(source).toContain('is not supported');
+      expect(source).toContain('abs');
+      expect(source).toContain('not supported');
+    });
+
+    it('should generate error-throwing script for sqrt()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'sqrt(value)',
+        to: 'result',
+      };
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('sqrt');
+    });
+
+    it('should generate error-throwing script for pow()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'pow(base, 2)',
+        to: 'result',
+      };
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('pow');
+    });
+
+    it('should generate error-throwing script for trigonometric functions', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'sin(angle)',
+        to: 'result',
+      };
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('sin');
+    });
+
+    it('should generate error-throwing script for constants', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'pi()',
+        to: 'result',
+      };
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('pi');
+    });
+
+    it('should generate error-throwing script for mod()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'mod(a, 10)',
+        to: 'result',
+      };
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('mod');
+    });
+
+    it('should generate error-throwing script for round()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'round(price)',
+        to: 'result',
+      };
+      const result = processMathProcessor(processor);
+      const source = (result.script as Record<string, unknown>).source as string;
+      expect(source).toContain('throw new IllegalArgumentException("');
+      expect(source).toContain('round');
     });
 
     it('should generate error-throwing script for unknown functions', () => {

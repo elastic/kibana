@@ -143,33 +143,33 @@ apiTest.describe('Streamlang to ES|QL - Math Processor', { tag: ['@ess', '@svlOb
     );
   });
 
-  // === Custom Behaviors: mod and neq ===
-  apiTest('should compute mod (modulus) operation', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-mod';
+  // === Log Function ===
+  apiTest('should compute log (natural log)', async ({ testBed, esql }) => {
+    const indexName = 'stream-e2e-test-math-log';
 
     const streamlangDSL: StreamlangDSL = {
       steps: [
         {
           action: 'math',
-          expression: 'mod(value, 3)',
-          to: 'remainder',
+          expression: 'log(value)',
+          to: 'result',
         } as MathProcessor,
       ],
     };
 
     const { query } = transpile(streamlangDSL);
 
-    const docs = [{ value: 10 }];
+    // log(e) = 1, using e ≈ 2.718281828459045
+    const docs = [{ value: 2.718281828459045 }];
     await testBed.ingest(indexName, docs);
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        remainder: 1,
-      })
-    );
+    // Allow small floating-point tolerance
+    const result = esqlResult.documents[0].result as number;
+    expect(result).toBeCloseTo(1, 5);
   });
 
+  // === Comparison Operators ===
   apiTest('should compute neq (not equal) comparison', async ({ testBed, esql }) => {
     const indexName = 'stream-e2e-test-math-neq';
 
@@ -204,191 +204,6 @@ apiTest.describe('Streamlang to ES|QL - Math Processor', { tag: ['@ess', '@svlOb
     );
   });
 
-  // === Math Functions ===
-  apiTest('should compute abs function', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-abs';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'abs(value)',
-          to: 'absolute',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    const docs = [{ value: -42 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        absolute: 42,
-      })
-    );
-  });
-
-  apiTest('should compute sqrt function', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-sqrt';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'sqrt(value)',
-          to: 'root',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    const docs = [{ value: 144 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        root: 12,
-      })
-    );
-  });
-
-  apiTest('should compute pow function', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-pow';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'pow(base, exponent)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    const docs = [{ base: 2, exponent: 3 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        result: 8,
-      })
-    );
-  });
-
-  // === Variable Arity Functions ===
-  apiTest('should compute round with 1 argument', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-round-1arg';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'round(value)',
-          to: 'rounded',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    const docs = [{ value: 3.7 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        rounded: 4,
-      })
-    );
-  });
-
-  apiTest('should compute round with 2 arguments (decimal places)', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-round-2arg';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'round(value, 2)',
-          to: 'rounded',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    const docs = [{ value: 3.14159 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        rounded: 3.14,
-      })
-    );
-  });
-
-  apiTest('should compute log with 1 argument (natural log)', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-log-1arg';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'log(value)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    // log(e) = 1, using e ≈ 2.718281828459045
-    const docs = [{ value: 2.718281828459045 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    // Allow small floating-point tolerance
-    const result = esqlResult.documents[0].result as number;
-    expect(result).toBeCloseTo(1, 5);
-  });
-
-  apiTest('should compute log with 2 arguments (custom base)', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-log-2arg';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'log(value, 2)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    // log base 2 of 8 = 3
-    const docs = [{ value: 8 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        result: 3,
-      })
-    );
-  });
-
-  // === Comparison Operators ===
   apiTest('should compute gt (greater than) comparison', async ({ testBed, esql }) => {
     const indexName = 'stream-e2e-test-math-gt';
 
@@ -471,53 +286,6 @@ apiTest.describe('Streamlang to ES|QL - Math Processor', { tag: ['@ess', '@svlOb
 
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ equal: true }));
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(expect.objectContaining({ equal: false }));
-  });
-
-  // === Constants ===
-  apiTest('should use pi constant in expressions', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-pi';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'pi() * radius * radius',
-          to: 'area',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    const docs = [{ radius: 1 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    const area = esqlResult.documents[0].area as number;
-    expect(area).toBeCloseTo(Math.PI, 5);
-  });
-
-  apiTest('should use e constant in expressions', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-math-e';
-
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'e()',
-          to: 'euler',
-        } as MathProcessor,
-      ],
-    };
-
-    const { query } = transpile(streamlangDSL);
-
-    const docs = [{ dummy: 1 }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-
-    const euler = esqlResult.documents[0].euler as number;
-    expect(euler).toBeCloseTo(Math.E, 5);
   });
 
   // === Where Condition ===
@@ -606,8 +374,92 @@ apiTest.describe('Streamlang to ES|QL - Math Processor', { tag: ['@ess', '@svlOb
     }
   );
 
-  // === Validation Errors ===
-  apiTest('should throw error for unsupported function', async () => {
+  // === Validation Errors for Rejected Functions ===
+  apiTest('should throw error for abs()', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'math',
+          expression: 'abs(value)',
+          to: 'result',
+        } as MathProcessor,
+      ],
+    };
+
+    expect(() => transpile(streamlangDSL)).toThrow(/Function 'abs' is not supported/);
+  });
+
+  apiTest('should throw error for sqrt()', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'math',
+          expression: 'sqrt(value)',
+          to: 'result',
+        } as MathProcessor,
+      ],
+    };
+
+    expect(() => transpile(streamlangDSL)).toThrow(/Function 'sqrt' is not supported/);
+  });
+
+  apiTest('should throw error for pow()', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'math',
+          expression: 'pow(base, 2)',
+          to: 'result',
+        } as MathProcessor,
+      ],
+    };
+
+    expect(() => transpile(streamlangDSL)).toThrow(/Function 'pow' is not supported/);
+  });
+
+  apiTest('should throw error for mod()', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'math',
+          expression: 'mod(value, 3)',
+          to: 'result',
+        } as MathProcessor,
+      ],
+    };
+
+    expect(() => transpile(streamlangDSL)).toThrow(/Function 'mod' is not supported/);
+  });
+
+  apiTest('should throw error for pi()', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'math',
+          expression: 'pi()',
+          to: 'result',
+        } as MathProcessor,
+      ],
+    };
+
+    expect(() => transpile(streamlangDSL)).toThrow(/Function 'pi' is not supported/);
+  });
+
+  apiTest('should throw error for round()', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'math',
+          expression: 'round(value)',
+          to: 'result',
+        } as MathProcessor,
+      ],
+    };
+
+    expect(() => transpile(streamlangDSL)).toThrow(/Function 'round' is not supported/);
+  });
+
+  apiTest('should throw error for mean()', async () => {
     const streamlangDSL: StreamlangDSL = {
       steps: [
         {

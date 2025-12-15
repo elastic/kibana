@@ -10,30 +10,17 @@
  * Maps TinyMath function names to their ES|QL and Painless equivalents.
  */
 export interface FunctionDefinition {
-  /** ES|QL function name or operator (e.g., 'ABS', '+', '%') */
+  /** ES|QL function name or operator (e.g., 'LOG', '<', '==') */
   esql: string;
-  /** Painless equivalent (e.g., 'Math.abs', '+', '%') */
+  /** Painless equivalent (e.g., 'Math.log', '<', '==') */
   painless: string;
+  /** Number of expected arguments */
+  arity: number;
   /**
-   * Number of expected arguments:
-   * - number: exact count required
-   * - [min, max]: range of allowed arguments
-   */
-  arity: number | [number, number];
-  /**
-   * If true, the function is a binary operator (e.g., mod -> %, lt -> <)
-   * and should be rendered as infix: `a % b` instead of `MOD(a, b)`
+   * If true, the function is a binary operator (e.g., lt -> <)
+   * and should be rendered as infix: `a < b` instead of `LT(a, b)`
    */
   isBinaryOp?: boolean;
-  /**
-   * Argument transformation for ES|QL:
-   * - 'swap': Swap argument order (for log(value, base) -> LOG(base, value))
-   */
-  esqlArgOrder?: 'swap';
-  /**
-   * If true, this is a constant (0-arity function like pi())
-   */
-  isConstant?: boolean;
 }
 
 /**
@@ -43,52 +30,15 @@ export interface FunctionDefinition {
  * 1. Validation: Only functions in this registry are allowed
  * 2. Transpilation: Maps TinyMath AST to target language syntax
  *
- * NAMING: TinyMath grammar allows [a-zA-Z_-]+ for function names (no digits).
- * For ES|QL functions with digits (like LOG10), we use underscore naming:
- * - log_ten → LOG10, atan_two → ATAN2
+ * Note: The function set is intentionally minimal to ensure compatibility
+ * across all transpilation targets (ES|QL, Painless, and future OTTL support).
  *
  * Binary operators (add, subtract, multiply, divide) are handled separately
  * in the transpilers as they are the core TinyMath operators.
  */
 export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
-  // Single-argument math functions
-  abs: { esql: 'ABS', painless: 'Math.abs', arity: 1 },
-  sqrt: { esql: 'SQRT', painless: 'Math.sqrt', arity: 1 },
-  cbrt: { esql: 'CBRT', painless: 'Math.cbrt', arity: 1 },
-  ceil: { esql: 'CEIL', painless: 'Math.ceil', arity: 1 },
-  floor: { esql: 'FLOOR', painless: 'Math.floor', arity: 1 },
-  exp: { esql: 'EXP', painless: 'Math.exp', arity: 1 },
-  signum: { esql: 'SIGNUM', painless: 'Math.signum', arity: 1 },
-
-  // Trigonometric functions
-  sin: { esql: 'SIN', painless: 'Math.sin', arity: 1 },
-  cos: { esql: 'COS', painless: 'Math.cos', arity: 1 },
-  tan: { esql: 'TAN', painless: 'Math.tan', arity: 1 },
-
-  // Inverse trigonometric functions
-  asin: { esql: 'ASIN', painless: 'Math.asin', arity: 1 },
-  acos: { esql: 'ACOS', painless: 'Math.acos', arity: 1 },
-  atan: { esql: 'ATAN', painless: 'Math.atan', arity: 1 },
-  atan_two: { esql: 'ATAN2', painless: 'Math.atan2', arity: 2 }, // atan2(y, x)
-
-  // Hyperbolic functions
-  sinh: { esql: 'SINH', painless: 'Math.sinh', arity: 1 },
-  cosh: { esql: 'COSH', painless: 'Math.cosh', arity: 1 },
-  tanh: { esql: 'TANH', painless: 'Math.tanh', arity: 1 },
-
-  // Logarithmic functions
-  log: { esql: 'LOG', painless: 'Math.log', arity: [1, 2], esqlArgOrder: 'swap' },
-  log_ten: { esql: 'LOG10', painless: 'Math.log10', arity: 1 },
-
-  // Variable-arity functions
-  round: { esql: 'ROUND', painless: 'Math.round', arity: [1, 2] },
-
-  // Two-argument functions
-  pow: { esql: 'POW', painless: 'Math.pow', arity: 2 },
-  hypot: { esql: 'HYPOT', painless: 'Math.hypot', arity: 2 }, // sqrt(x^2 + y^2)
-
-  // Binary operators (rendered as infix: a op b)
-  mod: { esql: '%', painless: '%', arity: 2, isBinaryOp: true },
+  // Logarithmic function - natural log only
+  log: { esql: 'LOG', painless: 'Math.log', arity: 1 },
 
   // Comparison operators (return boolean)
   // Note: TinyMath natively supports lt, gt, eq, lte, gte but NOT neq
@@ -99,11 +49,6 @@ export const FUNCTION_REGISTRY: Record<string, FunctionDefinition> = {
   neq: { esql: '!=', painless: '!=', arity: 2, isBinaryOp: true },
   lte: { esql: '<=', painless: '<=', arity: 2, isBinaryOp: true },
   gte: { esql: '>=', painless: '>=', arity: 2, isBinaryOp: true },
-
-  // Constants (0-arity functions)
-  pi: { esql: 'PI', painless: 'Math.PI', arity: 0, isConstant: true },
-  e: { esql: 'E', painless: 'Math.E', arity: 0, isConstant: true },
-  tau: { esql: 'TAU', painless: '(2 * Math.PI)', arity: 0, isConstant: true },
 };
 
 /**
@@ -120,9 +65,42 @@ export const BINARY_ARITHMETIC_OPERATORS = {
 /**
  * Map of rejected TinyMath functions with helpful suggestions.
  * These are valid TinyMath functions but are not supported in the math processor
- * because they have no ES|QL equivalent or are array-oriented.
+ * to ensure compatibility across all transpilation targets (OTTL is the limiting factor).
  */
 export const REJECTED_FUNCTIONS: Record<string, string> = {
+  // Mathematical functions - not supported by OTTL
+  abs: 'Function is not supported. Use conditional logic instead: for absolute value, use gt(x, 0) with appropriate branching.',
+  sqrt: 'Function is not supported. Square root operations are not available.',
+  cbrt: 'Function is not supported. Cube root operations are not available.',
+  ceil: 'Function is not supported. Rounding operations are not available.',
+  floor: 'Function is not supported. Rounding operations are not available.',
+  round: 'Function is not supported. Rounding operations are not available.',
+  exp: 'Function is not supported. Exponential operations are not available.',
+  signum: 'Function is not supported. Use comparison functions (gt, lt, eq) instead.',
+  pow: 'Function is not supported. Power/exponentiation operations are not available.',
+  hypot: 'Function is not supported. Hypotenuse calculation is not available.',
+  mod: 'Function is not supported. Modulo operations are not available.',
+
+  // Trigonometric functions - not supported by OTTL
+  sin: 'Trigonometric functions are not supported.',
+  cos: 'Trigonometric functions are not supported.',
+  tan: 'Trigonometric functions are not supported.',
+  asin: 'Trigonometric functions are not supported.',
+  acos: 'Trigonometric functions are not supported.',
+  atan: 'Trigonometric functions are not supported.',
+  atan_two: 'Trigonometric functions are not supported.',
+  sinh: 'Hyperbolic functions are not supported.',
+  cosh: 'Hyperbolic functions are not supported.',
+  tanh: 'Hyperbolic functions are not supported.',
+
+  // Logarithmic variants - only natural log is supported
+  log_ten: 'Only natural logarithm (log) is supported. Base-10 logarithm is not available.',
+
+  // Constants - not supported by OTTL
+  pi: 'Mathematical constants are not supported. Use the literal value 3.14159265359 instead.',
+  e: "Mathematical constants are not supported. Use the literal value 2.71828182846 (Euler's number) instead.",
+  tau: 'Mathematical constants are not supported. Use the literal value 6.28318530718 instead.',
+
   // Array-oriented functions (no ES|QL equivalent for multi-value)
   count: 'Array operations are not supported. This processor works on single values.',
   size: 'Array operations are not supported. This processor works on single values.',
@@ -136,18 +114,17 @@ export const REJECTED_FUNCTIONS: Record<string, string> = {
   mode: 'Statistical aggregation is not supported.',
   sum: "Aggregation is not supported. Use 'add(a, b)' for adding two values.",
   range: 'Statistical aggregation is not supported.',
-  max: "Multi-value aggregation is not supported. For two values, use 'ifelse(gt(a, b), a, b)'.",
-  min: "Multi-value aggregation is not supported. For two values, use 'ifelse(lt(a, b), a, b)'.",
+  max: 'Multi-value aggregation is not supported.',
+  min: 'Multi-value aggregation is not supported.',
 
-  // Functions with workarounds
-  square: "Use 'pow(a, 2)' instead.",
-  cube: "Use 'pow(a, 3)' instead.",
-  fix: "Use 'floor(a)' for positive numbers or 'ceil(a)' for negative numbers.",
-  degtorad: "Use 'a * pi() / 180' instead.",
-  radtodeg: "Use 'a * 180 / pi()' instead.",
-  clamp:
-    "No direct ES|QL equivalent. Use 'ifelse(lt(a, min), min, ifelse(gt(a, max), max, a))' instead.",
-  defaults: 'No ES|QL equivalent. Use the processor-level ignore_missing option instead.',
+  // Functions with no workarounds
+  square: 'Function is not supported. Multiplication (a * a) can be used instead.',
+  cube: 'Function is not supported. Multiplication (a * a * a) can be used instead.',
+  fix: 'Function is not supported. Rounding operations are not available.',
+  degtorad: 'Function is not supported. Trigonometric operations are not available.',
+  radtodeg: 'Function is not supported. Trigonometric operations are not available.',
+  clamp: 'Function is not supported.',
+  defaults: 'Function is not supported. Use the processor-level ignore_missing option instead.',
 
   // Non-deterministic
   random: 'Non-deterministic functions are not supported as behavior differs between targets.',
@@ -202,23 +179,13 @@ export function validateArity(name: string, argCount: number): { valid: boolean;
 
   const { arity } = def;
 
-  if (typeof arity === 'number') {
-    if (argCount !== arity) {
-      return {
-        valid: false,
-        error: `Function '${name}' requires exactly ${arity} argument${
-          arity !== 1 ? 's' : ''
-        }, got ${argCount}.`,
-      };
-    }
-  } else {
-    const [min, max] = arity;
-    if (argCount < min || argCount > max) {
-      return {
-        valid: false,
-        error: `Function '${name}' requires ${min} to ${max} arguments, got ${argCount}.`,
-      };
-    }
+  if (argCount !== arity) {
+    return {
+      valid: false,
+      error: `Function '${name}' requires exactly ${arity} argument${
+        arity !== 1 ? 's' : ''
+      }, got ${argCount}.`,
+    };
   }
 
   return { valid: true };

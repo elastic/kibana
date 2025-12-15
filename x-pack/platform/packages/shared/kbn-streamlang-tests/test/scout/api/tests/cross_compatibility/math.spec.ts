@@ -106,14 +106,14 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     }
   );
 
-  // === Custom Behaviors: mod and neq ===
-  apiTest('should compute mod (modulus) operation consistently', async ({ testBed, esql }) => {
+  // === Log Function ===
+  apiTest('should compute log (natural log) consistently', async ({ testBed, esql }) => {
     const streamlangDSL: StreamlangDSL = {
       steps: [
         {
           action: 'math',
-          expression: 'mod(value, 3)', // mod will be transpiled to % operator for both targets
-          to: 'remainder',
+          expression: 'log(value)',
+          to: 'result',
         } as MathProcessor,
       ],
     };
@@ -121,17 +121,25 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
-    const docs = [{ value: 10 }];
-    await testBed.ingest('ingest-math-mod', docs, processors);
-    const ingestResult = await testBed.getDocsOrdered('ingest-math-mod');
+    // log(e) = 1
+    const docs = [{ value: 2.718281828459045 }];
 
-    await testBed.ingest('esql-math-mod', docs);
-    const esqlResult = await esql.queryOnIndex('esql-math-mod', query);
+    await testBed.ingest('ingest-math-log', docs, processors);
+    const ingestResult = await testBed.getDocsOrdered('ingest-math-log');
 
-    expect(ingestResult[0]).toHaveProperty('remainder', 1);
-    expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ remainder: 1 }));
+    await testBed.ingest('esql-math-log', docs);
+    const esqlResult = await esql.queryOnIndex('esql-math-log', query);
+
+    const ingestValue = (ingestResult[0] as Record<string, unknown>).result as number;
+    const esqlValue = esqlResult.documentsOrdered[0].result as number;
+
+    expect(ingestValue).toBeCloseTo(1, 5);
+    expect(esqlValue).toBeCloseTo(1, 5);
+    // Floating-point precision differs slightly between engines
+    expect(ingestValue).toBeCloseTo(esqlValue, 5);
   });
 
+  // === Comparison Operators ===
   apiTest('should compute neq (not equal) consistently', async ({ testBed, esql }) => {
     const streamlangDSL: StreamlangDSL = {
       steps: [
@@ -166,169 +174,6 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     );
   });
 
-  // === Math Functions ===
-  apiTest('should compute abs function consistently', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'abs(value)',
-          to: 'absolute',
-        } as MathProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ value: -42 }];
-    await testBed.ingest('ingest-math-abs', docs, processors);
-    const ingestResult = await testBed.getDocsOrdered('ingest-math-abs');
-
-    await testBed.ingest('esql-math-abs', docs);
-    const esqlResult = await esql.queryOnIndex('esql-math-abs', query);
-
-    expect(ingestResult[0]).toHaveProperty('absolute', 42);
-    expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ absolute: 42 }));
-  });
-
-  apiTest('should compute sqrt function consistently', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'sqrt(value)',
-          to: 'root',
-        } as MathProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ value: 144 }];
-    await testBed.ingest('ingest-math-sqrt', docs, processors);
-    const ingestResult = await testBed.getDocsOrdered('ingest-math-sqrt');
-
-    await testBed.ingest('esql-math-sqrt', docs);
-    const esqlResult = await esql.queryOnIndex('esql-math-sqrt', query);
-
-    expect(ingestResult[0]).toHaveProperty('root', 12);
-    expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ root: 12 }));
-  });
-
-  apiTest('should compute pow function consistently', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'pow(base, exponent)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ base: 2, exponent: 3 }];
-    await testBed.ingest('ingest-math-pow', docs, processors);
-    const ingestResult = await testBed.getDocsOrdered('ingest-math-pow');
-
-    await testBed.ingest('esql-math-pow', docs);
-    const esqlResult = await esql.queryOnIndex('esql-math-pow', query);
-
-    expect(ingestResult[0]).toHaveProperty('result', 8);
-    expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ result: 8 }));
-  });
-
-  // === Variable Arity Functions ===
-  // The tests test expressions where transpiled order of arguments may differ from tinymath expression
-  apiTest('should compute round with 1 argument consistently', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'round(value)',
-          to: 'rounded',
-        } as MathProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ value: 3.7 }];
-    await testBed.ingest('ingest-math-round-1', docs, processors);
-    const ingestResult = await testBed.getDocsOrdered('ingest-math-round-1');
-
-    await testBed.ingest('esql-math-round-1', docs);
-    const esqlResult = await esql.queryOnIndex('esql-math-round-1', query);
-
-    expect(ingestResult[0]).toHaveProperty('rounded', 4);
-    expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ rounded: 4 }));
-  });
-
-  apiTest(
-    'should compute round with 2 arguments (decimal places) consistently',
-    async ({ testBed, esql }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'round(value, 3)',
-            to: 'rounded',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
-
-      const docs = [{ value: 3.14159 }];
-      await testBed.ingest('ingest-math-round-2', docs, processors);
-      const ingestResult = await testBed.getDocsOrdered('ingest-math-round-2');
-
-      await testBed.ingest('esql-math-round-2', docs);
-      const esqlResult = await esql.queryOnIndex('esql-math-round-2', query);
-
-      expect(ingestResult[0]).toHaveProperty('rounded', 3.142);
-      expect(esqlResult.documentsOrdered[0]).toStrictEqual(
-        expect.objectContaining({ rounded: 3.142 })
-      );
-    }
-  );
-
-  apiTest(
-    'should compute log with 2 arguments (custom base) consistently',
-    async ({ testBed, esql }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'log(value, 2)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
-
-      // log base 2 of 8 = 3
-      const docs = [{ value: 8 }];
-      await testBed.ingest('ingest-math-log-2', docs, processors);
-      const ingestResult = await testBed.getDocsOrdered('ingest-math-log-2');
-
-      await testBed.ingest('esql-math-log-2', docs);
-      const esqlResult = await esql.queryOnIndex('esql-math-log-2', query);
-
-      expect(ingestResult[0]).toHaveProperty('result', 3);
-      expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ result: 3 }));
-    }
-  );
-
-  // === Comparison Operators ===
   apiTest('should compute gt (greater than) consistently', async ({ testBed, esql }) => {
     const streamlangDSL: StreamlangDSL = {
       steps: [
@@ -393,38 +238,6 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(expect.objectContaining({ equal: false }));
   });
 
-  // === Constants ===
-  apiTest('should use pi constant consistently', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'pi() * radius * radius',
-          to: 'area',
-        } as MathProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ radius: 1 }];
-    await testBed.ingest('ingest-math-pi', docs, processors);
-    const ingestResult = await testBed.getDocsOrdered('ingest-math-pi');
-
-    await testBed.ingest('esql-math-pi', docs);
-    const esqlResult = await esql.queryOnIndex('esql-math-pi', query);
-
-    const ingestArea = (ingestResult[0] as Record<string, unknown>).area as number;
-    const esqlArea = esqlResult.documentsOrdered[0].area as number;
-
-    // Both should be approximately PI
-    expect(ingestArea).toBeCloseTo(Math.PI, 5);
-    expect(esqlArea).toBeCloseTo(Math.PI, 5);
-    // And they should match each other
-    expect(ingestArea).toBeCloseTo(esqlArea, 10);
-  });
-
   // === Function Availability ===
   // This test validates that ALL supported math functions are available in both
   // ES|QL and Painless. It serves as a smoke test to catch typos or non-existent functions.
@@ -432,49 +245,17 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     'should validate all supported functions are available in both transpilers',
     async ({ testBed, esql }) => {
       // We test each function with valid inputs to ensure:
-      // 1. The function name is correctly mapped (no typos like ASIIN instead of ASIN)
+      // 1. The function name is correctly mapped (no typos)
       // 2. The function exists in both ES|QL and Painless (Math.xyz)
+      //
+      // Note: The math processor has a minimal function set for OTTL compatibility:
+      // - Arithmetic: +, -, *, /
+      // - Logarithmic: log (natural log only)
+      // - Comparison: eq, neq, lt, lte, gt, gte
       const streamlangDSL: StreamlangDSL = {
         steps: [
-          // Basic math functions
-          { action: 'math', expression: 'abs(val)', to: 'r_abs' } as MathProcessor,
-          { action: 'math', expression: 'ceil(val)', to: 'r_ceil' } as MathProcessor,
-          { action: 'math', expression: 'floor(val)', to: 'r_floor' } as MathProcessor,
-          { action: 'math', expression: 'round(val)', to: 'r_round' } as MathProcessor,
-          { action: 'math', expression: 'sqrt(val)', to: 'r_sqrt' } as MathProcessor,
-          { action: 'math', expression: 'cbrt(val)', to: 'r_cbrt' } as MathProcessor,
-          { action: 'math', expression: 'exp(small)', to: 'r_exp' } as MathProcessor,
+          // Logarithmic function
           { action: 'math', expression: 'log(val)', to: 'r_log' } as MathProcessor,
-          { action: 'math', expression: 'log_ten(val)', to: 'r_log_ten' } as MathProcessor,
-          { action: 'math', expression: 'pow(small, small)', to: 'r_pow' } as MathProcessor,
-          { action: 'math', expression: 'mod(val, small)', to: 'r_mod' } as MathProcessor,
-          { action: 'math', expression: 'signum(val)', to: 'r_signum' } as MathProcessor,
-          { action: 'math', expression: 'hypot(small, small)', to: 'r_hypot' } as MathProcessor,
-
-          // Trigonometric functions
-          { action: 'math', expression: 'sin(small)', to: 'r_sin' } as MathProcessor,
-          { action: 'math', expression: 'cos(small)', to: 'r_cos' } as MathProcessor,
-          { action: 'math', expression: 'tan(small)', to: 'r_tan' } as MathProcessor,
-
-          // Inverse trigonometric functions
-          { action: 'math', expression: 'asin(ratio)', to: 'r_asin' } as MathProcessor,
-          { action: 'math', expression: 'acos(ratio)', to: 'r_acos' } as MathProcessor,
-          { action: 'math', expression: 'atan(small)', to: 'r_atan' } as MathProcessor,
-          {
-            action: 'math',
-            expression: 'atan_two(small, small)',
-            to: 'r_atan_two',
-          } as MathProcessor,
-
-          // Hyperbolic functions
-          { action: 'math', expression: 'sinh(small)', to: 'r_sinh' } as MathProcessor,
-          { action: 'math', expression: 'cosh(small)', to: 'r_cosh' } as MathProcessor,
-          { action: 'math', expression: 'tanh(small)', to: 'r_tanh' } as MathProcessor,
-
-          // Constants
-          { action: 'math', expression: 'pi()', to: 'r_pi' } as MathProcessor,
-          { action: 'math', expression: 'e()', to: 'r_e' } as MathProcessor,
-          { action: 'math', expression: 'tau()', to: 'r_tau' } as MathProcessor,
 
           // Comparison operators (return boolean)
           { action: 'math', expression: 'eq(small, small)', to: 'r_eq' } as MathProcessor,
@@ -483,6 +264,12 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
           { action: 'math', expression: 'lte(small, val)', to: 'r_lte' } as MathProcessor,
           { action: 'math', expression: 'gt(val, small)', to: 'r_gt' } as MathProcessor,
           { action: 'math', expression: 'gte(val, small)', to: 'r_gte' } as MathProcessor,
+
+          // Arithmetic operators
+          { action: 'math', expression: 'val + small', to: 'r_add' } as MathProcessor,
+          { action: 'math', expression: 'val - small', to: 'r_sub' } as MathProcessor,
+          { action: 'math', expression: 'val * small', to: 'r_mul' } as MathProcessor,
+          { action: 'math', expression: 'val / small', to: 'r_div' } as MathProcessor,
         ],
       };
 
@@ -490,10 +277,9 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       const { query } = transpileEsql(streamlangDSL);
 
       // Use values that work for all functions:
-      // - val: 4 (positive, good for sqrt, log, etc.)
-      // - small: 1 (small positive, good for trig, exp)
-      // - ratio: 0.5 (between -1 and 1 for asin/acos)
-      const docs = [{ val: 4, small: 1, ratio: 0.5 }];
+      // - val: 4 (positive, good for log)
+      // - small: 1 (small positive)
+      const docs = [{ val: 4, small: 1 }];
 
       // Test Ingest Pipeline (Painless) - all functions should work
       await testBed.ingest('ingest-all-functions', docs, processors);
@@ -502,11 +288,13 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
 
       // Verify a sample of results to confirm functions executed
       const ingestDoc = ingestResult[0] as Record<string, unknown>;
-      expect(ingestDoc.r_abs).toBe(4);
-      expect(ingestDoc.r_sqrt).toBe(2);
-      expect(ingestDoc.r_signum).toBe(1);
-      expect(ingestDoc.r_pi).toBeCloseTo(Math.PI, 5);
-      expect(ingestDoc.r_tau).toBeCloseTo(2 * Math.PI, 5);
+      expect(ingestDoc.r_log).toBeCloseTo(Math.log(4), 5);
+      expect(ingestDoc.r_eq).toBe(true);
+      expect(ingestDoc.r_neq).toBe(true);
+      expect(ingestDoc.r_lt).toBe(true);
+      expect(ingestDoc.r_gt).toBe(true);
+      expect(ingestDoc.r_add).toBe(5);
+      expect(ingestDoc.r_mul).toBe(4);
 
       // Test ES|QL - all functions should work
       await testBed.ingest('esql-all-functions', docs);
@@ -515,17 +303,48 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
 
       // Verify same sample of results
       const esqlDoc = esqlResult.documentsOrdered[0];
-      expect(esqlDoc.r_abs).toBe(4);
-      expect(esqlDoc.r_sqrt).toBe(2);
-      expect(esqlDoc.r_signum).toBe(1);
-      expect(esqlDoc.r_pi).toBeCloseTo(Math.PI, 5);
-      expect(esqlDoc.r_tau).toBeCloseTo(2 * Math.PI, 5);
+      expect(esqlDoc.r_log).toBeCloseTo(Math.log(4), 5);
+      expect(esqlDoc.r_eq).toBe(true);
+      expect(esqlDoc.r_neq).toBe(true);
+      expect(esqlDoc.r_lt).toBe(true);
+      expect(esqlDoc.r_gt).toBe(true);
+      expect(esqlDoc.r_add).toBe(5);
+      expect(esqlDoc.r_mul).toBe(4);
     }
   );
 
   // === Validation Errors (consistent rejection) ===
   apiTest(
-    'should consistently reject unsupported aggregation functions in both transpilers',
+    'should consistently reject unsupported functions in both transpilers',
+    async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'math',
+            expression: 'abs(value)',
+            to: 'result',
+          } as MathProcessor,
+        ],
+      };
+
+      // Ingest pipeline: generates error-throwing script, error at runtime
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const docs = [{ value: -42 }];
+      const { errors: ingestErrors } = await testBed.ingest(
+        'ingest-math-unsupported',
+        docs,
+        processors
+      );
+      expect(ingestErrors.length).toBeGreaterThan(0);
+      expect(ingestErrors[0].caused_by?.reason).toMatch(/abs.*not supported/i);
+
+      // ES|QL: throws during transpilation
+      expect(() => transpileEsql(streamlangDSL)).toThrow(/abs.*not supported/i);
+    }
+  );
+
+  apiTest(
+    'should consistently reject aggregation functions in both transpilers',
     async ({ testBed }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -541,7 +360,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       const { processors } = transpileIngestPipeline(streamlangDSL);
       const docs = [{ values: 10 }];
       const { errors: ingestErrors } = await testBed.ingest(
-        'ingest-math-unsupported',
+        'ingest-math-mean-error',
         docs,
         processors
       );
@@ -634,24 +453,22 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
   );
 
   apiTest(
-    'INCOMPATIBLE: sqrt of negative - Painless returns "NaN" string, ES|QL returns null',
+    'INCOMPATIBLE: log of zero - Painless returns "-Infinity" string, ES|QL returns null',
     async ({ testBed, esql }) => {
       /**
-       * INCOMPATIBILITY: sqrt of negative number behavior
+       * INCOMPATIBILITY: log of zero behavior
        *
-       * - Painless (Ingest Pipeline): Returns the string "NaN"
-       *   Math.sqrt(-1) in Java returns Double.NaN, which gets serialized as "NaN" string.
+       * - Painless (Ingest Pipeline): Returns the string "-Infinity"
+       *   Math.log(0) in Java returns Double.NEGATIVE_INFINITY, which gets serialized.
        *
        * - ES|QL: Returns null
-       *   ES|QL's SQRT function returns null for invalid inputs (negative numbers).
-       *
-       * This difference stems from how each engine represents undefined mathematical results.
+       *   ES|QL's LOG function returns null for invalid inputs (zero).
        */
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
             action: 'math',
-            expression: 'sqrt(value)',
+            expression: 'log(value)',
             to: 'result',
           } as MathProcessor,
         ],
@@ -660,70 +477,23 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
-      const docs = [{ value: -1 }];
+      const docs = [{ value: 0 }];
 
       // Test Ingest Pipeline (Painless)
-      await testBed.ingest('ingest-math-sqrt-neg', docs, processors);
-      const ingestResult = await testBed.getDocsOrdered('ingest-math-sqrt-neg');
+      await testBed.ingest('ingest-math-log-zero', docs, processors);
+      const ingestResult = await testBed.getDocsOrdered('ingest-math-log-zero');
       const ingestValue = (ingestResult[0] as Record<string, unknown>).result;
 
       // Test ES|QL
-      await testBed.ingest('esql-math-sqrt-neg', docs);
-      const esqlResult = await esql.queryOnIndex('esql-math-sqrt-neg', query);
+      await testBed.ingest('esql-math-log-zero', docs);
+      const esqlResult = await esql.queryOnIndex('esql-math-log-zero', query);
       const esqlValue = esqlResult.documentsOrdered[0].result;
 
-      // Painless: sqrt(-1) returns "NaN" as a string
-      expect(ingestValue).toBe('NaN');
+      // Painless: log(0) returns "-Infinity" as a string
+      expect(ingestValue).toBe('-Infinity');
 
-      // ES|QL: sqrt(-1) returns null
+      // ES|QL: log(0) returns null
       expect(esqlValue).toBeNull();
-    }
-  );
-
-  apiTest(
-    'INCOMPATIBLE: Infinity handling - ES|QL returns null for overflow results',
-    async ({ testBed }) => {
-      /**
-       * INCOMPATIBILITY: Overflow/Infinity handling
-       *
-       * When mathematical operations produce Infinity:
-       *
-       * - Painless (Ingest Pipeline): The script computes Infinity correctly, but when
-       *   Elasticsearch tries to store the result in a float/double field, it rejects
-       *   the document with: "IllegalArgumentException: [float] supports only finite values"
-       *   This causes the entire document ingestion to fail.
-       *
-       * - ES|QL: Computes Infinity correctly during query execution. When materializing
-       *   the result to a typed column, ES|QL gracefully returns null instead of failing.
-       *   The query succeeds but the overflow value is represented as null.
-       *
-       */
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'val * val', // to cause > float max
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-
-      const docs = [{ val: 3e38 }];
-
-      const { errors } = await testBed.ingest('ingest-overflow-infinity', docs, processors);
-      expect(errors).toHaveLength(1);
-      expect(errors[0].caused_by).toStrictEqual(
-        expect.objectContaining({
-          type: 'illegal_argument_exception',
-          reason: '[float] supports only finite values, but got [Infinity]',
-        })
-      );
-
-      // ES|QL: Computes Infinity, returns null gracefully.
-      await testBed.ingest('esql-overflow-infinity', [{ val: 0 }, { val: 1e90 }]);
-      expect(() => transpileEsql(streamlangDSL)).not.toThrow();
     }
   );
 });

@@ -28,7 +28,7 @@ import {
 
 /**
  * ES|QL binary operators supported by the math processor
- * Combines arithmetic (+, -, *, /, %) and comparison (==, !=, <, <=, >, >=) operators
+ * Combines arithmetic (+, -, *, /) and comparison (==, !=, <, <=, >, >=) operators
  * Note: We exclude '=~' (regex match) as it's not used in math expressions
  */
 type ESQLBinaryOperator =
@@ -82,26 +82,14 @@ function convertTinymathToESQL(node: TinymathAST): ESQLAstItem {
     // Check if this function is in the registry
     const funcDef = FUNCTION_REGISTRY[name];
     if (funcDef) {
-      // Handle constants (0-arity functions)
-      if (funcDef.isConstant) {
-        return Builder.expression.func.call(funcDef.esql, []);
-      }
-
-      // Handle binary operators from registry (mod, comparisons)
+      // Handle binary operators from registry (comparisons: lt, gt, eq, neq, lte, gte)
       if (funcDef.isBinaryOp && args.length === 2) {
         const left = convertTinymathToESQL(args[0]);
         const right = convertTinymathToESQL(args[1]);
         return Builder.expression.func.binary(funcDef.esql as ESQLBinaryOperator, [left, right]);
       }
 
-      // Handle functions with argument order swap (e.g., log(value, base) -> LOG(base, value))
-      if (funcDef.esqlArgOrder === 'swap' && args.length === 2) {
-        const convertedArgs = args.map((arg) => convertTinymathToESQL(arg));
-        // Swap the arguments for ES|QL
-        return Builder.expression.func.call(funcDef.esql, [convertedArgs[1], convertedArgs[0]]);
-      }
-
-      // Standard function call
+      // Standard function call (e.g., log)
       const convertedArgs = args.map((arg) => convertTinymathToESQL(arg));
       return Builder.expression.func.call(funcDef.esql, convertedArgs);
     }

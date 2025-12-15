@@ -51,33 +51,14 @@ function convertTinymathToPainless(node: TinymathAST): string {
     // Check if this function is in the registry
     const funcDef = FUNCTION_REGISTRY[name];
     if (funcDef) {
-      // Handle constants (0-arity)
-      if (funcDef.isConstant) {
-        return funcDef.painless;
-      }
-
-      // Handle binary operators from registry (mod, comparisons)
+      // Handle binary operators from registry (comparisons: lt, gt, eq, neq, lte, gte)
       if (funcDef.isBinaryOp && args.length === 2) {
         const left = convertTinymathToPainless(args[0]);
         const right = convertTinymathToPainless(args[1]);
         return `(${left} ${funcDef.painless} ${right})`;
       }
 
-      // Handle round with 2 args specially (Painless has no round(a, decimals))
-      if (name === 'round' && args.length === 2) {
-        const value = convertTinymathToPainless(args[0]);
-        const decimals = convertTinymathToPainless(args[1]);
-        return `(Math.round(${value} * Math.pow(10, ${decimals})) / Math.pow(10, ${decimals}))`;
-      }
-
-      // Handle log with 2 args (change of base formula)
-      if (name === 'log' && args.length === 2) {
-        const value = convertTinymathToPainless(args[0]);
-        const base = convertTinymathToPainless(args[1]);
-        return `(Math.log(${value}) / Math.log(${base}))`;
-      }
-
-      // Standard function call using Math class
+      // Standard function call using Math class (e.g., log)
       const convertedArgs = args.map((arg) => convertTinymathToPainless(arg));
       return `${funcDef.painless}(${convertedArgs.join(', ')})`;
     }

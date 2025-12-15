@@ -28,12 +28,8 @@ export { extractFieldsFromMathExpression, inferMathExpressionReturnType } from '
 // Language definition - single source of truth for the math expression language
 export {
   // Category groups
-  ARITHMETIC_FUNCTIONS,
-  ROUNDING_FUNCTIONS,
-  TRIGONOMETRY_FUNCTIONS,
   LOGARITHMIC_FUNCTIONS,
   COMPARISON_FUNCTIONS,
-  CONSTANT_FUNCTIONS,
   ARITHMETIC_OPERATORS,
   COMPARISON_OPERATORS,
   // Combined lists
@@ -42,7 +38,6 @@ export {
   // Derived sets for validation/type inference
   BOOLEAN_RETURNING_MATH_FUNCTIONS,
   ALL_FUNCTION_NAMES,
-  CONSTANT_FUNCTION_NAMES,
   // Helpers
   getMathFunctionDefinition,
   getMathFunctionsByCategory,
@@ -51,7 +46,6 @@ export {
   getRequiredArgCount,
   getTotalArgCount,
   getFunctionsWithArity,
-  getVariableArityFunctions,
   getBinaryComparisonFunctions,
 } from './language_definition';
 export type {

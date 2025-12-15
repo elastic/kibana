@@ -37,13 +37,14 @@ Expressions are evaluated **per document**. Each document is processed independe
 - Compute throughput (bytes per second):
     \`resource.network.bytes_sent / attributes.elapsed_time\`
 
-- Modulo operation:
-    \`mod(attributes.request_id, 100)\`
 - Boolean comparison (_result is stored as boolean_):
     \`resource.memory.used > resource.memory.limit * 0.9\`
 
-- Complex expression with functions:
-    \`round(sqrt(pow(attributes.x, 2) + pow(attributes.y, 2)), 2)\`
+- Natural logarithm:
+    \`log(attributes.bytes)\`
+
+- Complex arithmetic:
+    \`(attributes.price * attributes.quantity) - attributes.discount\`
 
 
 ### Field References
@@ -55,7 +56,7 @@ Fields are referenced directly by name:
 
 ### Operators
 
-- **Arithmetic:** \`+\`, \`-\`, \`*\`, \`/\`, \`mod(a, b)\`
+- **Arithmetic:** \`+\`, \`-\`, \`*\`, \`/\`
 - **Comparison:** \`>\`, \`>=\`, \`<\`, \`<=\`, \`==\`, \`neq(a, b)\` — returns boolean
 - **Grouping:** Parentheses \`(a + b) * c\`
 `,
@@ -75,17 +76,11 @@ export interface MathLanguageDocumentationSections {
 
 // Section labels
 const sectionLabels = {
-  math: i18n.translate('xpack.streams.math.docs.sectionFunctions', {
+  functions: i18n.translate('xpack.streams.math.docs.sectionFunctions', {
     defaultMessage: 'Functions',
   }),
   comparison: i18n.translate('xpack.streams.math.docs.sectionComparison', {
     defaultMessage: 'Comparison',
-  }),
-  trigonometry: i18n.translate('xpack.streams.math.docs.sectionTrigonometry', {
-    defaultMessage: 'Trigonometry',
-  }),
-  constants: i18n.translate('xpack.streams.math.docs.sectionConstants', {
-    defaultMessage: 'Constants',
   }),
   howItWorks: i18n.translate('xpack.streams.math.docs.sectionHowItWorks', {
     defaultMessage: 'How it works',
@@ -132,8 +127,8 @@ export function getMathExpressionLanguageDocSections(): MathLanguageDocumentatio
       },
       // Subsequent groups: these items ARE rendered in the content pane
       {
-        label: sectionLabels.math,
-        items: getFunctionsByDocSection('math').map((func) => ({
+        label: sectionLabels.functions,
+        items: getFunctionsByDocSection('functions').map((func) => ({
           label: func.name,
           description: { markdownContent: formatFunctionToMarkdown(func) },
         })),
@@ -141,20 +136,6 @@ export function getMathExpressionLanguageDocSections(): MathLanguageDocumentatio
       {
         label: sectionLabels.comparison,
         items: getFunctionsByDocSection('comparison').map((func) => ({
-          label: func.name,
-          description: { markdownContent: formatFunctionToMarkdown(func) },
-        })),
-      },
-      {
-        label: sectionLabels.trigonometry,
-        items: getFunctionsByDocSection('trigonometry').map((func) => ({
-          label: func.name,
-          description: { markdownContent: formatFunctionToMarkdown(func) },
-        })),
-      },
-      {
-        label: sectionLabels.constants,
-        items: getFunctionsByDocSection('constants').map((func) => ({
           label: func.name,
           description: { markdownContent: formatFunctionToMarkdown(func) },
         })),

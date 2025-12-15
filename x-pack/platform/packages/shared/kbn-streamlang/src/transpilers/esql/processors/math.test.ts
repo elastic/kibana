@@ -26,7 +26,6 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // Whole numbers are rendered as integers (no .0 suffix)
       expect(result).toBe('EVAL result = 2 + 2');
     });
 
@@ -37,7 +36,6 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // Whole numbers are rendered as integers (no .0 suffix)
       expect(result).toBe('EVAL result = 10 - 5');
     });
 
@@ -58,7 +56,6 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // Whole numbers are rendered as integers (no .0 suffix)
       expect(result).toBe('EVAL result = 20 / 4');
     });
   });
@@ -93,11 +90,10 @@ describe('convertMathProcessorToESQL', () => {
         to: 'total',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // ES|QL Builder quotes dotted paths with backticks
       expect(result).toBe('EVAL total = `attributes.price` * `attributes.quantity`');
     });
 
-    it('should transpile mixed dotted and simple fields: "attributes.price * quantity + tax"', () => {
+    it('should transpile mixed dotted and simple fields', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'attributes.price * quantity + tax',
@@ -107,7 +103,7 @@ describe('convertMathProcessorToESQL', () => {
       expect(result).toBe('EVAL final_price = `attributes.price` * quantity + tax');
     });
 
-    it('should transpile deeply nested paths: "order.item.price * order.item.qty"', () => {
+    it('should transpile deeply nested paths', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'order.item.price * order.item.qty',
@@ -126,7 +122,6 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // TinyMath parses this with correct precedence (multiplication first)
       expect(result).toBe('EVAL result = a + b * c');
     });
 
@@ -171,7 +166,6 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // Negative whole numbers are rendered as integers
       expect(result).toBe('EVAL result = -5 + a');
     });
 
@@ -212,234 +206,8 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  // Math Functions
-  describe('single-argument functions', () => {
-    it('should transpile abs(): "abs(price - 10)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'abs(price - 10)',
-        to: 'diff',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL diff = ABS(price - 10)');
-    });
-
-    it('should transpile sqrt(): "sqrt(variance)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(variance)',
-        to: 'std_dev',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL std_dev = SQRT(variance)');
-    });
-
-    it('should transpile cbrt(): "cbrt(volume)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'cbrt(volume)',
-        to: 'side',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL side = CBRT(volume)');
-    });
-
-    it('should transpile ceil(): "ceil(price)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'ceil(price)',
-        to: 'rounded_up',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL rounded_up = CEIL(price)');
-    });
-
-    it('should transpile floor(): "floor(price)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'floor(price)',
-        to: 'rounded_down',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL rounded_down = FLOOR(price)');
-    });
-
-    it('should transpile exp(): "exp(rate)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'exp(rate)',
-        to: 'growth_factor',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL growth_factor = EXP(rate)');
-    });
-
-    it('should transpile sin(): "sin(angle)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sin(angle)',
-        to: 'sine_value',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL sine_value = SIN(angle)');
-    });
-
-    it('should transpile cos(): "cos(angle)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'cos(angle)',
-        to: 'cosine_value',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL cosine_value = COS(angle)');
-    });
-
-    it('should transpile tan(): "tan(angle)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'tan(angle)',
-        to: 'tangent_value',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL tangent_value = TAN(angle)');
-    });
-
-    // Inverse trigonometric functions
-    it('should transpile asin(): "asin(ratio)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'asin(ratio)',
-        to: 'angle',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL angle = ASIN(ratio)');
-    });
-
-    it('should transpile acos(): "acos(ratio)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'acos(ratio)',
-        to: 'angle',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL angle = ACOS(ratio)');
-    });
-
-    it('should transpile atan(): "atan(slope)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'atan(slope)',
-        to: 'angle',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL angle = ATAN(slope)');
-    });
-
-    it('should transpile atan_two(): "atan_two(y, x)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'atan_two(delta_y, delta_x)',
-        to: 'heading',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL heading = ATAN2(delta_y, delta_x)');
-    });
-
-    // Hyperbolic functions
-    it('should transpile sinh(): "sinh(x)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sinh(x)',
-        to: 'result',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL result = SINH(x)');
-    });
-
-    it('should transpile cosh(): "cosh(x)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'cosh(x)',
-        to: 'result',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL result = COSH(x)');
-    });
-
-    it('should transpile tanh(): "tanh(x)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'tanh(x)',
-        to: 'result',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL result = TANH(x)');
-    });
-
-    // Additional math functions
-    it('should transpile signum(): "signum(delta)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'signum(delta)',
-        to: 'sign',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL sign = SIGNUM(delta)');
-    });
-
-    it('should transpile log_ten(): "log_ten(bytes)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'log_ten(bytes)',
-        to: 'magnitude',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL magnitude = LOG10(bytes)');
-    });
-
-    it('should transpile hypot(): "hypot(x, y)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'hypot(delta_x, delta_y)',
-        to: 'distance',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL distance = HYPOT(delta_x, delta_y)');
-    });
-
-    it('should transpile tau(): "radius * tau()"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'radius * tau()',
-        to: 'circumference',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL circumference = radius * TAU()');
-    });
-  });
-
-  describe('variable-arity functions', () => {
-    it('should transpile round() with single arg: "round(price)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'round(price)',
-        to: 'rounded',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL rounded = ROUND(price)');
-    });
-
-    it('should transpile round() with two args: "round(price, 2)"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'round(price, 2)',
-        to: 'rounded',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL rounded = ROUND(price, 2)');
-    });
-
-    it('should transpile log() with single arg (natural log): "log(value)"', () => {
+  describe('log function', () => {
+    it('should transpile log() (natural log): "log(value)"', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'log(value)',
@@ -449,39 +217,24 @@ describe('convertMathProcessorToESQL', () => {
       expect(result).toBe('EVAL ln_value = LOG(value)');
     });
 
-    it('should transpile log() with two args and swap: "log(value, base)" -> LOG(base, value)', () => {
+    it('should transpile log with literal: "log(100)"', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'log(value, 10)',
-        to: 'log_base_10',
+        expression: 'log(100)',
+        to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // ES|QL uses LOG(base, value), so args are swapped
-      expect(result).toBe('EVAL log_base_10 = LOG(10, value)');
+      expect(result).toBe('EVAL result = LOG(100)');
     });
-  });
 
-  describe('two-argument functions', () => {
-    it('should transpile pow(): "pow(base, exponent)"', () => {
+    it('should transpile log with expression: "log(a * b)"', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'pow(base, 2)',
-        to: 'squared',
+        expression: 'log(a * b)',
+        to: 'result',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL squared = POW(base, 2)');
-    });
-  });
-
-  describe('binary operators from registry', () => {
-    it('should transpile mod(): "mod(a, b)" -> "a % b"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'mod(total, 10)',
-        to: 'remainder',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL remainder = total % 10');
+      expect(result).toBe('EVAL result = LOG(a * b)');
     });
   });
 
@@ -543,7 +296,6 @@ describe('convertMathProcessorToESQL', () => {
         to: 'passed',
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // Note: BasicPrettyPrinter adds backticks to field names in comparison context
       expect(result).toBe('EVAL passed = `score` >= 60');
     });
 
@@ -580,55 +332,8 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  describe('constants', () => {
-    it('should transpile pi(): "pi()"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'radius * 2 * pi()',
-        to: 'circumference',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL circumference = radius * 2 * PI()');
-    });
-  });
-
-  describe('nested function expressions', () => {
-    it('should handle nested functions: "sqrt(pow(a, 2) + pow(b, 2))"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(pow(a, 2) + pow(b, 2))',
-        to: 'hypotenuse',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL hypotenuse = SQRT(POW(a, 2) + POW(b, 2))');
-    });
-
-    it('should handle deeply nested: "ceil(abs(floor(x)))"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'ceil(abs(floor(x)))',
-        to: 'result',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL result = CEIL(ABS(FLOOR(x)))');
-    });
-
-    it('should handle nested with dotted paths: "sqrt(pow(attributes.x, 2) + pow(attributes.y, 2))"', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(pow(attributes.x, 2) + pow(attributes.y, 2))',
-        to: 'attributes.distance',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe(
-        'EVAL `attributes.distance` = SQRT(POW(`attributes.x`, 2) + POW(`attributes.y`, 2))'
-      );
-    });
-  });
-
-  // Where condition handling
   describe('where condition', () => {
-    it('should wrap with CASE WHEN for where condition: eq filter', () => {
+    it('should wrap with CASE for where condition: eq filter', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'price * quantity',
@@ -636,30 +341,29 @@ describe('convertMathProcessorToESQL', () => {
         where: { field: 'active', eq: true },
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // ES|QL formats boolean as TRUE (uppercase)
       expect(result).toBe('EVAL total = CASE(active == TRUE, price * quantity, total)');
     });
 
     it('should handle where with gt condition', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'abs(delta)',
-        to: 'magnitude',
+        expression: 'price * 2',
+        to: 'doubled',
         where: { field: 'priority', gt: 5 },
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL magnitude = CASE(priority > 5, ABS(delta), magnitude)');
+      expect(result).toBe('EVAL doubled = CASE(priority > 5, price * 2, doubled)');
     });
 
     it('should handle where with exists condition', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'sqrt(variance)',
-        to: 'std_dev',
-        where: { field: 'variance', exists: true },
+        expression: 'value * 10',
+        to: 'scaled',
+        where: { field: 'value', exists: true },
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL std_dev = CASE(NOT(variance IS NULL), SQRT(variance), std_dev)');
+      expect(result).toBe('EVAL scaled = CASE(NOT(value IS NULL), value * 10, scaled)');
     });
 
     it('should handle where with and condition', () => {
@@ -681,17 +385,16 @@ describe('convertMathProcessorToESQL', () => {
     });
   });
 
-  // ignore_missing handling
   describe('ignore_missing handling', () => {
     it('should generate null checks for single field when ignore_missing is true', () => {
       const processor: MathProcessor = {
         action: 'math',
-        expression: 'abs(value)',
+        expression: 'value * 2',
         to: 'result',
         ignore_missing: true,
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL result = CASE(NOT(value IS NULL), ABS(value), result)');
+      expect(result).toBe('EVAL result = CASE(NOT(value IS NULL), value * 2, result)');
     });
 
     it('should generate null checks for multiple fields when ignore_missing is true', () => {
@@ -702,7 +405,6 @@ describe('convertMathProcessorToESQL', () => {
         ignore_missing: true,
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // Fields are extracted and sorted: price, quantity, tax
       expect(result).toBe(
         'EVAL total = CASE(NOT(price IS NULL) AND NOT(quantity IS NULL) AND NOT(tax IS NULL), price * quantity + tax, total)'
       );
@@ -732,28 +434,6 @@ describe('convertMathProcessorToESQL', () => {
       expect(result).toBe('EVAL total = price * quantity');
     });
 
-    it('should not generate null checks when ignore_missing is undefined', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'price * quantity',
-        to: 'total',
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL total = price * quantity');
-    });
-
-    it('should handle expression with no fields (constants only)', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'pi() * 2',
-        to: 'tau_value',
-        ignore_missing: true,
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      // No fields to check, no CASE wrapper needed
-      expect(result).toBe('EVAL tau_value = PI() * 2');
-    });
-
     it('should deduplicate repeated field references', () => {
       const processor: MathProcessor = {
         action: 'math',
@@ -762,12 +442,10 @@ describe('convertMathProcessorToESQL', () => {
         ignore_missing: true,
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      // Only one null check for 'a' even though it's referenced 4 times
       expect(result).toBe('EVAL result = CASE(NOT(a IS NULL), a + a + a * a, result)');
     });
   });
 
-  // Combined where + ignore_missing
   describe('combined where and ignore_missing', () => {
     it('should combine where and ignore_missing conditions with AND', () => {
       const processor: MathProcessor = {
@@ -782,30 +460,96 @@ describe('convertMathProcessorToESQL', () => {
         'EVAL total = CASE(active == TRUE AND NOT(price IS NULL) AND NOT(quantity IS NULL), price * quantity, total)'
       );
     });
-
-    it('should handle complex where with multiple fields and ignore_missing', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sqrt(pow(x, 2) + pow(y, 2))',
-        to: 'distance',
-        where: {
-          and: [
-            { field: 'valid', eq: true },
-            { field: 'type', eq: 'point' },
-          ],
-        },
-        ignore_missing: true,
-      };
-      const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe(
-        'EVAL distance = CASE(valid == TRUE AND type == "point" AND NOT(x IS NULL) AND NOT(y IS NULL), SQRT(POW(x, 2) + POW(y, 2)), distance)'
-      );
-    });
   });
 
-  // Validation errors
-  describe('validation errors', () => {
-    it('should throw error for rejected function: mean()', () => {
+  describe('validation errors for rejected functions', () => {
+    it('should throw error for abs()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'abs(value)',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(
+        /Function 'abs' is not supported/
+      );
+    });
+
+    it('should throw error for sqrt()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'sqrt(value)',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(
+        /Function 'sqrt' is not supported/
+      );
+    });
+
+    it('should throw error for pow()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'pow(base, 2)',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(
+        /Function 'pow' is not supported/
+      );
+    });
+
+    it('should throw error for mod()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'mod(a, 10)',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(
+        /Function 'mod' is not supported/
+      );
+    });
+
+    it('should throw error for trigonometric functions', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'sin(angle)',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(
+        /Function 'sin' is not supported/
+      );
+    });
+
+    it('should throw error for constants', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'pi()',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(/Function 'pi' is not supported/);
+    });
+
+    it('should throw error for log_ten()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'log_ten(value)',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(
+        /Function 'log_ten' is not supported/
+      );
+    });
+
+    it('should throw error for round()', () => {
+      const processor: MathProcessor = {
+        action: 'math',
+        expression: 'round(price)',
+        to: 'result',
+      };
+      expect(() => convertMathProcessorToESQL(processor)).toThrow(
+        /Function 'round' is not supported/
+      );
+    });
+
+    it('should throw error for mean()', () => {
       const processor: MathProcessor = {
         action: 'math',
         expression: 'mean(a, b, c)',
@@ -813,17 +557,6 @@ describe('convertMathProcessorToESQL', () => {
       };
       expect(() => convertMathProcessorToESQL(processor)).toThrow(
         /Function 'mean' is not supported/
-      );
-    });
-
-    it('should throw error for rejected function: sum()', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'sum(a, b)',
-        to: 'total',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(
-        /Function 'sum' is not supported/
       );
     });
 
@@ -843,15 +576,6 @@ describe('convertMathProcessorToESQL', () => {
         to: 'result',
       };
       expect(() => convertMathProcessorToESQL(processor)).toThrow(/Failed to parse expression/);
-    });
-
-    it('should include suggestion in error for rejected functions', () => {
-      const processor: MathProcessor = {
-        action: 'math',
-        expression: 'square(x)',
-        to: 'squared',
-      };
-      expect(() => convertMathProcessorToESQL(processor)).toThrow(/pow\(a, 2\)/);
     });
   });
 });

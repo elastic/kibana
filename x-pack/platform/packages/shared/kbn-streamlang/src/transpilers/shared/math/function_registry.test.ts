@@ -36,9 +36,7 @@ describe('FUNCTION_REGISTRY', () => {
     it('should have arity for all functions', () => {
       Object.entries(FUNCTION_REGISTRY).forEach(([, def]) => {
         expect(def.arity).toBeDefined();
-        const validArity =
-          typeof def.arity === 'number' || (Array.isArray(def.arity) && def.arity.length === 2);
-        expect(validArity).toBe(true);
+        expect(typeof def.arity).toBe('number');
       });
     });
   });
@@ -55,32 +53,9 @@ describe('FUNCTION_REGISTRY', () => {
     });
   });
 
-  describe('two-arg functions', () => {
-    const twoArgFuncs = ['pow'];
-
-    twoArgFuncs.forEach((func) => {
-      it(`should define ${func} with arity 2`, () => {
-        expect(FUNCTION_REGISTRY[func]).toBeDefined();
-        expect(FUNCTION_REGISTRY[func].arity).toBe(2);
-      });
-    });
-  });
-
-  describe('variable-arity functions', () => {
-    it('should define round with arity [1, 2]', () => {
-      expect(FUNCTION_REGISTRY.round.arity).toEqual([1, 2]);
-    });
-
-    it('should define log with arity [1, 2] and argOrder swap', () => {
-      expect(FUNCTION_REGISTRY.log.arity).toEqual([1, 2]);
-      expect(FUNCTION_REGISTRY.log.esqlArgOrder).toBe('swap');
-    });
-  });
-
-  describe('binary operators', () => {
-    // mod is special: arithmetic function but rendered as % operator
+  describe('binary operators (comparison functions)', () => {
     // Comparison functions are derived from language_definition
-    const binaryOps = ['mod', ...getBinaryComparisonFunctions()];
+    const binaryOps = getBinaryComparisonFunctions();
 
     binaryOps.forEach((op) => {
       it(`should define ${op} as binary operator`, () => {
@@ -91,11 +66,12 @@ describe('FUNCTION_REGISTRY', () => {
     });
   });
 
-  describe('constants', () => {
-    it('should define pi as constant with arity 0', () => {
-      expect(FUNCTION_REGISTRY.pi).toBeDefined();
-      expect(FUNCTION_REGISTRY.pi.arity).toBe(0);
-      expect(FUNCTION_REGISTRY.pi.isConstant).toBe(true);
+  describe('log function', () => {
+    it('should define log with arity 1 (natural log only)', () => {
+      expect(FUNCTION_REGISTRY.log).toBeDefined();
+      expect(FUNCTION_REGISTRY.log.arity).toBe(1);
+      expect(FUNCTION_REGISTRY.log.esql).toBe('LOG');
+      expect(FUNCTION_REGISTRY.log.painless).toBe('Math.log');
     });
   });
 });
@@ -110,11 +86,31 @@ describe('BINARY_ARITHMETIC_OPERATORS', () => {
 });
 
 describe('REJECTED_FUNCTIONS', () => {
-  it('should have suggestions for common rejected functions', () => {
-    expect(REJECTED_FUNCTIONS.mean).toContain('add(a, b) / 2');
-    expect(REJECTED_FUNCTIONS.sum).toContain('add(a, b)');
-    expect(REJECTED_FUNCTIONS.square).toContain('pow(a, 2)');
-    expect(REJECTED_FUNCTIONS.cube).toContain('pow(a, 3)');
+  it('should reject previously supported math functions', () => {
+    // These were supported before OTTL restriction
+    expect(REJECTED_FUNCTIONS.abs).toBeDefined();
+    expect(REJECTED_FUNCTIONS.sqrt).toBeDefined();
+    expect(REJECTED_FUNCTIONS.pow).toBeDefined();
+    expect(REJECTED_FUNCTIONS.ceil).toBeDefined();
+    expect(REJECTED_FUNCTIONS.floor).toBeDefined();
+    expect(REJECTED_FUNCTIONS.round).toBeDefined();
+    expect(REJECTED_FUNCTIONS.mod).toBeDefined();
+  });
+
+  it('should reject trigonometric functions', () => {
+    expect(REJECTED_FUNCTIONS.sin).toBeDefined();
+    expect(REJECTED_FUNCTIONS.cos).toBeDefined();
+    expect(REJECTED_FUNCTIONS.tan).toBeDefined();
+  });
+
+  it('should reject constants', () => {
+    expect(REJECTED_FUNCTIONS.pi).toContain('3.14159265359');
+    expect(REJECTED_FUNCTIONS.e).toContain('2.71828182846');
+    expect(REJECTED_FUNCTIONS.tau).toContain('6.28318530718');
+  });
+
+  it('should reject log_ten with helpful message', () => {
+    expect(REJECTED_FUNCTIONS.log_ten).toContain('natural logarithm');
   });
 
   it('should reject array functions', () => {
@@ -130,10 +126,17 @@ describe('REJECTED_FUNCTIONS', () => {
 });
 
 describe('isSupportedFunction', () => {
-  it('should return true for registry functions', () => {
-    expect(isSupportedFunction('abs')).toBe(true);
-    expect(isSupportedFunction('sqrt')).toBe(true);
-    expect(isSupportedFunction('pow')).toBe(true);
+  it('should return true for log function', () => {
+    expect(isSupportedFunction('log')).toBe(true);
+  });
+
+  it('should return true for comparison functions', () => {
+    expect(isSupportedFunction('eq')).toBe(true);
+    expect(isSupportedFunction('neq')).toBe(true);
+    expect(isSupportedFunction('lt')).toBe(true);
+    expect(isSupportedFunction('gt')).toBe(true);
+    expect(isSupportedFunction('lte')).toBe(true);
+    expect(isSupportedFunction('gte')).toBe(true);
   });
 
   it('should return true for binary arithmetic operators', () => {
@@ -143,9 +146,12 @@ describe('isSupportedFunction', () => {
     expect(isSupportedFunction('divide')).toBe(true);
   });
 
-  it('should return false for rejected functions', () => {
-    expect(isSupportedFunction('mean')).toBe(false);
-    expect(isSupportedFunction('sum')).toBe(false);
+  it('should return false for now-rejected functions', () => {
+    expect(isSupportedFunction('abs')).toBe(false);
+    expect(isSupportedFunction('sqrt')).toBe(false);
+    expect(isSupportedFunction('pow')).toBe(false);
+    expect(isSupportedFunction('sin')).toBe(false);
+    expect(isSupportedFunction('pi')).toBe(false);
   });
 
   it('should return false for unknown functions', () => {
@@ -158,10 +164,13 @@ describe('isRejectedFunction', () => {
     expect(isRejectedFunction('mean')).toBe(true);
     expect(isRejectedFunction('sum')).toBe(true);
     expect(isRejectedFunction('random')).toBe(true);
+    expect(isRejectedFunction('abs')).toBe(true);
+    expect(isRejectedFunction('sqrt')).toBe(true);
   });
 
   it('should return false for supported functions', () => {
-    expect(isRejectedFunction('abs')).toBe(false);
+    expect(isRejectedFunction('log')).toBe(false);
+    expect(isRejectedFunction('eq')).toBe(false);
     expect(isRejectedFunction('add')).toBe(false);
   });
 
@@ -172,26 +181,26 @@ describe('isRejectedFunction', () => {
 
 describe('getFunctionDefinition', () => {
   it('should return definition for registry functions', () => {
-    const def = getFunctionDefinition('abs');
+    const def = getFunctionDefinition('log');
     expect(def).toBeDefined();
-    expect(def?.esql).toBe('ABS');
-    expect(def?.painless).toBe('Math.abs');
+    expect(def?.esql).toBe('LOG');
+    expect(def?.painless).toBe('Math.log');
   });
 
   it('should return undefined for non-registry functions', () => {
     expect(getFunctionDefinition('add')).toBeUndefined();
-    expect(getFunctionDefinition('mean')).toBeUndefined();
+    expect(getFunctionDefinition('abs')).toBeUndefined();
     expect(getFunctionDefinition('unknownFunc')).toBeUndefined();
   });
 });
 
 describe('getRejectionReason', () => {
   it('should return reason for rejected functions', () => {
-    expect(getRejectionReason('mean')).toContain('add(a, b) / 2');
+    expect(getRejectionReason('abs')).toContain('not supported');
   });
 
   it('should return undefined for non-rejected functions', () => {
-    expect(getRejectionReason('abs')).toBeUndefined();
+    expect(getRejectionReason('log')).toBeUndefined();
     expect(getRejectionReason('unknownFunc')).toBeUndefined();
   });
 });
@@ -199,30 +208,14 @@ describe('getRejectionReason', () => {
 describe('validateArity', () => {
   describe('fixed arity', () => {
     it('should validate correct arity', () => {
-      expect(validateArity('abs', 1)).toEqual({ valid: true });
-      expect(validateArity('pow', 2)).toEqual({ valid: true });
-      expect(validateArity('pi', 0)).toEqual({ valid: true });
+      expect(validateArity('log', 1)).toEqual({ valid: true });
+      expect(validateArity('eq', 2)).toEqual({ valid: true });
     });
 
     it('should reject incorrect arity', () => {
-      const result = validateArity('abs', 2);
+      const result = validateArity('log', 2);
       expect(result.valid).toBe(false);
       expect(result.error).toContain('requires exactly 1 argument');
-    });
-  });
-
-  describe('variable arity', () => {
-    it('should validate within range', () => {
-      expect(validateArity('round', 1)).toEqual({ valid: true });
-      expect(validateArity('round', 2)).toEqual({ valid: true });
-      expect(validateArity('log', 1)).toEqual({ valid: true });
-      expect(validateArity('log', 2)).toEqual({ valid: true });
-    });
-
-    it('should reject outside range', () => {
-      const result = validateArity('round', 3);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain('requires 1 to 2 arguments');
     });
   });
 

@@ -30,10 +30,8 @@ function createFunctionCompletionItems(range: monaco.IRange): monaco.languages.C
           params.length > 0 ? `(${params.map((p) => `[${p.replace('?', '')}]`).join(', ')})` : '()',
         description: func.category,
       },
-      kind: func.isConstant
-        ? monaco.languages.CompletionItemKind.Constant
-        : monaco.languages.CompletionItemKind.Function,
-      insertText: func.isConstant ? `${func.name}()` : `${func.name}($0)`,
+      kind: monaco.languages.CompletionItemKind.Function,
+      insertText: `${func.name}($0)`,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       detail: func.signature,
       documentation: func.description,

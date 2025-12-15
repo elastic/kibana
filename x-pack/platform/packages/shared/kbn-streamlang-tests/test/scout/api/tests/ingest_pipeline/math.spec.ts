@@ -127,29 +127,32 @@ apiTest.describe(
       expect(doc['attributes.total']).toBe(100);
     });
 
-    // === Custom Behaviors: mod and neq ===
-    apiTest('should compute mod (modulus) operation', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-mod';
+    // === Log Function ===
+    apiTest('should compute log (natural log)', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-math-log';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
             action: 'math',
-            expression: 'mod(value, 3)',
-            to: 'remainder',
+            expression: 'log(value)',
+            to: 'result',
           } as MathProcessor,
         ],
       };
 
       const { processors } = transpile(streamlangDSL);
 
-      const docs = [{ value: 10 }];
+      // log(e) = 1
+      const docs = [{ value: 2.718281828459045 }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]remainder', 1);
+      const result = (ingestedDocs as Array<Record<string, unknown>>)[0].result as number;
+      expect(result).toBeCloseTo(1, 5);
     });
 
+    // === Comparison Operators ===
     apiTest('should compute neq (not equal) comparison', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-math-neq';
 
@@ -176,166 +179,6 @@ apiTest.describe(
       expect(ingestedDocs).toHaveProperty('[1]not_equal', false);
     });
 
-    // === Math Functions ===
-    apiTest('should compute abs function', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-abs';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'abs(value)',
-            to: 'absolute',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ value: -42 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]absolute', 42);
-    });
-
-    apiTest('should compute sqrt function', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-sqrt';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'sqrt(value)',
-            to: 'root',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ value: 144 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]root', 12);
-    });
-
-    apiTest('should compute pow function', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-pow';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'pow(base, exponent)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ base: 2, exponent: 3 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]result', 8);
-    });
-
-    // === Variable Arity Functions ===
-    apiTest('should compute round with 1 argument', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-round-1arg';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'round(value)',
-            to: 'rounded',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ value: 3.7 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]rounded', 4);
-    });
-
-    apiTest('should compute round with 2 arguments (decimal places)', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-round-2arg';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'round(value, 2)',
-            to: 'rounded',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ value: 3.14159 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]rounded', 3.14);
-    });
-
-    apiTest('should compute log with 1 argument (natural log)', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-log-1arg';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'log(value)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      // log(e) = 1
-      const docs = [{ value: 2.718281828459045 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      const result = (ingestedDocs as Array<Record<string, unknown>>)[0].result as number;
-      expect(result).toBeCloseTo(1, 5);
-    });
-
-    apiTest('should compute log with 2 arguments (custom base)', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-log-2arg';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'log(value, 2)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      // log base 2 of 8 = 3
-      const docs = [{ value: 8 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]result', 3);
-    });
-
-    // === Comparison Operators ===
     apiTest('should compute gt (greater than) comparison', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-math-gt';
 
@@ -414,53 +257,6 @@ apiTest.describe(
       expect(ingestedDocs).toHaveProperty('[1]equal', false);
     });
 
-    // === Constants ===
-    apiTest('should use pi constant in expressions', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-pi';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'pi() * radius * radius',
-            to: 'area',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ radius: 1 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      const area = (ingestedDocs as Array<Record<string, unknown>>)[0].area as number;
-      expect(area).toBeCloseTo(Math.PI, 5);
-    });
-
-    apiTest('should use e constant in expressions', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-math-e';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'e()',
-            to: 'euler',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ dummy: 1 }];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      const euler = (ingestedDocs as Array<Record<string, unknown>>)[0].euler as number;
-      expect(euler).toBeCloseTo(Math.E, 5);
-    });
-
     // === Where Condition ===
     apiTest('should only apply math when where condition is met', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-math-where';
@@ -527,10 +323,86 @@ apiTest.describe(
       }
     );
 
-    // === Validation Errors ===
+    // === Validation Errors for Rejected Functions ===
     // Math processor generates error-throwing scripts for invalid expressions,
     // so errors are reported at runtime via simulation rather than during transpilation
-    apiTest('should report error for unsupported function via simulation', async ({ testBed }) => {
+    apiTest('should report error for abs() via simulation', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'math',
+            expression: 'abs(value)',
+            to: 'result',
+          } as MathProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ value: -42 }];
+      const { errors } = await testBed.ingest('stream-e2e-test-math-abs-error', docs, processors);
+
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].caused_by?.reason).toMatch(/abs.*not supported/i);
+    });
+
+    apiTest('should report error for sqrt() via simulation', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'math',
+            expression: 'sqrt(value)',
+            to: 'result',
+          } as MathProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ value: 144 }];
+      const { errors } = await testBed.ingest('stream-e2e-test-math-sqrt-error', docs, processors);
+
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].caused_by?.reason).toMatch(/sqrt.*not supported/i);
+    });
+
+    apiTest('should report error for mod() via simulation', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'math',
+            expression: 'mod(value, 3)',
+            to: 'result',
+          } as MathProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ value: 10 }];
+      const { errors } = await testBed.ingest('stream-e2e-test-math-mod-error', docs, processors);
+
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].caused_by?.reason).toMatch(/mod.*not supported/i);
+    });
+
+    apiTest('should report error for pi() via simulation', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'math',
+            expression: 'pi()',
+            to: 'result',
+          } as MathProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ dummy: 1 }];
+      const { errors } = await testBed.ingest('stream-e2e-test-math-pi-error', docs, processors);
+
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].caused_by?.reason).toMatch(/pi.*not supported/i);
+    });
+
+    apiTest('should report error for mean() via simulation', async ({ testBed }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -543,9 +415,8 @@ apiTest.describe(
 
       const { processors } = transpile(streamlangDSL);
       const docs = [{ values: 10 }];
-      const { errors } = await testBed.ingest('stream-e2e-test-math-error', docs, processors);
+      const { errors } = await testBed.ingest('stream-e2e-test-math-mean-error', docs, processors);
 
-      // Should have errors from the script processor (error details in caused_by)
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].caused_by?.reason).toMatch(/mean.*not supported/i);
     });
@@ -569,7 +440,6 @@ apiTest.describe(
         processors
       );
 
-      // Should have errors from the script processor (error details in caused_by)
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].caused_by?.reason).toMatch(/parse/i);
     });

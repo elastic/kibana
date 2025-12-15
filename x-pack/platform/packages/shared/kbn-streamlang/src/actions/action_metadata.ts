@@ -460,7 +460,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.math.usage', {
       defaultMessage:
-        'Provide an `expression` using field names and math functions, and a `to` field for the result. Expressions can use arithmetic operators (+, -, *, /), comparison operators (>, <, ==), and functions like abs(), sqrt(), round().',
+        'Provide an `expression` using field names and operators, and a `to` field for the result. Expressions can use arithmetic operators (+, -, *, /), comparison operators (>, <, ==), the log() function, and comparison functions (eq, neq, gt, lt, gte, lte).',
     }),
     examples: [
       {
@@ -468,7 +468,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
           defaultMessage: 'Convert milliseconds to seconds',
         }),
         yaml: `- action: math
-  expression: "floor(duration_ms / 1000)"
+  expression: "duration_ms / 1000"
   to: duration_sec`,
       },
       {
@@ -483,7 +483,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     tips: [
       i18n.translate('xpack.streamlang.actionMetadata.math.tips.functions', {
         defaultMessage:
-          'Use arithmetic (+, -, *, /), comparison (>, <, ==), trigonometric (sin, cos), and logarithmic (log, exp) functions with field values or constants like pi()',
+          'Use arithmetic operators (+, -, *, /), comparison operators (>, <, ==, >=, <=), the log() function for natural logarithm, and comparison functions (eq, neq, gt, lt, gte, lte)',
       }),
       i18n.translate('xpack.streamlang.actionMetadata.math.tips.types', {
         defaultMessage: 'Results are stored as numbers or booleans depending on the expression',

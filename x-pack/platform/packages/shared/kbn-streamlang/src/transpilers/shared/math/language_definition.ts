@@ -11,21 +11,18 @@ import { i18n } from '@kbn/i18n';
  * Streams Math Expression Language Definition
  *
  * This file is the single source of truth for the math expression language.
- * It defines all functions, operators, constants, and their metadata used for:
+ * It defines all functions, operators, and their metadata used for:
  * - Documentation
  * - Autocomplete
  * - Syntax highlighting
  * - Validation
  * - Type inference
+ *
+ * Note: The function set is intentionally minimal to ensure compatibility
+ * across all transpilation targets (ES|QL, Painless, and future OTTL support).
  */
 
-export type MathFunctionCategory =
-  | 'arithmetic'
-  | 'rounding'
-  | 'trigonometry'
-  | 'logarithmic'
-  | 'comparison'
-  | 'constant';
+export type MathFunctionCategory = 'logarithmic' | 'comparison';
 
 export interface MathFunctionArg {
   name: string;
@@ -35,9 +32,9 @@ export interface MathFunctionArg {
 }
 
 export interface MathFunctionDefinition {
-  /** Function name (e.g., 'abs', 'sqrt') */
+  /** Function name (e.g., 'log', 'eq') */
   name: string;
-  /** Function signature for display (e.g., 'abs(value)') */
+  /** Function signature for display (e.g., 'log(value)') */
   signature: string;
   /** i18n description for documentation and autocomplete */
   description: string;
@@ -45,8 +42,6 @@ export interface MathFunctionDefinition {
   args: MathFunctionArg[];
   /** Category for grouping */
   category: MathFunctionCategory;
-  /** Whether this is a constant (0-arity function) */
-  isConstant?: boolean;
   /** Whether this function returns a boolean */
   returnsBoolean?: boolean;
   /** Example usage for documentation */
@@ -70,269 +65,17 @@ export function getMathParameterNames(func: MathFunctionDefinition): string[] {
   return func.args.map((arg) => (arg.optional ? `${arg.name}?` : arg.name));
 }
 
-// Arithmetic Functions
-export const ARITHMETIC_FUNCTIONS: MathFunctionDefinition[] = [
-  {
-    name: 'abs',
-    signature: 'abs(value)',
-    description: i18n.translate('xpack.streams.math.docs.abs', {
-      defaultMessage:
-        'Calculates absolute value. Negative values are multiplied by -1; positive values remain unchanged.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'arithmetic',
-    example: 'abs(attributes.temperature_delta)',
-  },
-  {
-    name: 'sqrt',
-    signature: 'sqrt(value)',
-    description: i18n.translate('xpack.streams.math.docs.sqrt', {
-      defaultMessage: 'Calculates the square root. Returns null for negative values.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'arithmetic',
-    example: 'sqrt(pow(attributes.x, 2) + pow(attributes.y, 2))',
-  },
-  {
-    name: 'cbrt',
-    signature: 'cbrt(value)',
-    description: i18n.translate('xpack.streams.math.docs.cbrt', {
-      defaultMessage: 'Calculates the cube root of a value.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'arithmetic',
-    example: 'cbrt(attributes.volume)',
-  },
-  {
-    name: 'exp',
-    signature: 'exp(value)',
-    description: i18n.translate('xpack.streams.math.docs.exp', {
-      defaultMessage: "Raises e (Euler's number) to the power of value.",
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'arithmetic',
-    example: 'exp(attributes.growth_rate)',
-  },
-  {
-    name: 'signum',
-    signature: 'signum(value)',
-    description: i18n.translate('xpack.streams.math.docs.signum', {
-      defaultMessage: 'Returns the sign of the value: -1 for negative, 0 for zero, 1 for positive.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'arithmetic',
-    example: 'signum(attributes.delta)',
-  },
-  {
-    name: 'pow',
-    signature: 'pow(base, exponent)',
-    description: i18n.translate('xpack.streams.math.docs.pow', {
-      defaultMessage: 'Raises the base to the power of the exponent.',
-    }),
-    args: [
-      { name: 'base', type: 'number' },
-      { name: 'exponent', type: 'number' },
-    ],
-    category: 'arithmetic',
-    example: 'pow(attributes.side_length, 3)',
-  },
-  {
-    name: 'hypot',
-    signature: 'hypot(x, y)',
-    description: i18n.translate('xpack.streams.math.docs.hypot', {
-      defaultMessage: 'Returns the hypotenuse: sqrt(x² + y²). Useful for calculating distances.',
-    }),
-    args: [
-      { name: 'x', type: 'number' },
-      { name: 'y', type: 'number' },
-    ],
-    category: 'arithmetic',
-    example: 'hypot(attributes.delta_x, attributes.delta_y)',
-  },
-  {
-    name: 'mod',
-    signature: 'mod(value, divisor)',
-    description: i18n.translate('xpack.streams.math.docs.mod', {
-      defaultMessage: 'Returns the remainder after division (modulo operation).',
-    }),
-    args: [
-      { name: 'value', type: 'number' },
-      { name: 'divisor', type: 'number' },
-    ],
-    category: 'arithmetic',
-    example: 'mod(attributes.request_id, 100)',
-  },
-];
-
-// Rounding Functions
-export const ROUNDING_FUNCTIONS: MathFunctionDefinition[] = [
-  {
-    name: 'ceil',
-    signature: 'ceil(value)',
-    description: i18n.translate('xpack.streams.math.docs.ceil', {
-      defaultMessage: 'Rounds up to the nearest integer.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'rounding',
-    example: 'ceil(attributes.price)',
-  },
-  {
-    name: 'floor',
-    signature: 'floor(value)',
-    description: i18n.translate('xpack.streams.math.docs.floor', {
-      defaultMessage: 'Rounds down to the nearest integer.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'rounding',
-    example: 'floor(attributes.duration_ms / 1000)',
-  },
-  {
-    name: 'round',
-    signature: 'round(value, [decimals])',
-    description: i18n.translate('xpack.streams.math.docs.round', {
-      defaultMessage: 'Rounds to a specific number of decimal places. Defaults to 0.',
-    }),
-    args: [
-      { name: 'value', type: 'number' },
-      { name: 'decimals', type: 'number', optional: true, defaultValue: '0' },
-    ],
-    category: 'rounding',
-    example: 'round(attributes.cpu_percent, 2)',
-  },
-];
-
-// Trigonometric Functions
-export const TRIGONOMETRY_FUNCTIONS: MathFunctionDefinition[] = [
-  {
-    name: 'sin',
-    signature: 'sin(angle)',
-    description: i18n.translate('xpack.streams.math.docs.sin', {
-      defaultMessage: 'Returns the sine of an angle in radians.',
-    }),
-    args: [{ name: 'angle', type: 'number (radians)' }],
-    category: 'trigonometry',
-    example: 'sin(attributes.angle_rad)',
-  },
-  {
-    name: 'cos',
-    signature: 'cos(angle)',
-    description: i18n.translate('xpack.streams.math.docs.cos', {
-      defaultMessage: 'Returns the cosine of an angle in radians.',
-    }),
-    args: [{ name: 'angle', type: 'number (radians)' }],
-    category: 'trigonometry',
-    example: 'cos(attributes.angle_rad)',
-  },
-  {
-    name: 'tan',
-    signature: 'tan(angle)',
-    description: i18n.translate('xpack.streams.math.docs.tan', {
-      defaultMessage: 'Returns the tangent of an angle in radians.',
-    }),
-    args: [{ name: 'angle', type: 'number (radians)' }],
-    category: 'trigonometry',
-    example: 'tan(attributes.angle_rad)',
-  },
-  {
-    name: 'asin',
-    signature: 'asin(value)',
-    description: i18n.translate('xpack.streams.math.docs.asin', {
-      defaultMessage: 'Returns the arc sine (inverse sine) of a value in radians.',
-    }),
-    args: [{ name: 'value', type: 'number (-1 to 1)' }],
-    category: 'trigonometry',
-    example: 'asin(attributes.ratio)',
-  },
-  {
-    name: 'acos',
-    signature: 'acos(value)',
-    description: i18n.translate('xpack.streams.math.docs.acos', {
-      defaultMessage: 'Returns the arc cosine (inverse cosine) of a value in radians.',
-    }),
-    args: [{ name: 'value', type: 'number (-1 to 1)' }],
-    category: 'trigonometry',
-    example: 'acos(attributes.ratio)',
-  },
-  {
-    name: 'atan',
-    signature: 'atan(value)',
-    description: i18n.translate('xpack.streams.math.docs.atan', {
-      defaultMessage: 'Returns the arc tangent (inverse tangent) of a value in radians.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'trigonometry',
-    example: 'atan(attributes.slope)',
-  },
-  {
-    name: 'atan_two',
-    signature: 'atan_two(y, x)',
-    description: i18n.translate('xpack.streams.math.docs.atanTwo', {
-      defaultMessage:
-        'Returns the angle in radians between the positive x-axis and the point (x, y). Useful for converting rectangular to polar coordinates.',
-    }),
-    args: [
-      { name: 'y', type: 'number' },
-      { name: 'x', type: 'number' },
-    ],
-    category: 'trigonometry',
-    example: 'atan_two(attributes.delta_y, attributes.delta_x)',
-  },
-  {
-    name: 'sinh',
-    signature: 'sinh(value)',
-    description: i18n.translate('xpack.streams.math.docs.sinh', {
-      defaultMessage: 'Returns the hyperbolic sine of a value.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'trigonometry',
-    example: 'sinh(attributes.x)',
-  },
-  {
-    name: 'cosh',
-    signature: 'cosh(value)',
-    description: i18n.translate('xpack.streams.math.docs.cosh', {
-      defaultMessage: 'Returns the hyperbolic cosine of a value.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'trigonometry',
-    example: 'cosh(attributes.x)',
-  },
-  {
-    name: 'tanh',
-    signature: 'tanh(value)',
-    description: i18n.translate('xpack.streams.math.docs.tanh', {
-      defaultMessage: 'Returns the hyperbolic tangent of a value.',
-    }),
-    args: [{ name: 'value', type: 'number' }],
-    category: 'trigonometry',
-    example: 'tanh(attributes.x)',
-  },
-];
-
 // Logarithmic Functions
 export const LOGARITHMIC_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'log',
-    signature: 'log(value, [base])',
+    signature: 'log(value)',
     description: i18n.translate('xpack.streams.math.docs.log', {
-      defaultMessage: 'Logarithm with optional base. Natural log (base e) is the default.',
-    }),
-    args: [
-      { name: 'value', type: 'number' },
-      { name: 'base', type: 'number', optional: true, defaultValue: 'e' },
-    ],
-    category: 'logarithmic',
-    example: 'log(attributes.bytes, 2)',
-  },
-  {
-    name: 'log_ten',
-    signature: 'log_ten(value)',
-    description: i18n.translate('xpack.streams.math.docs.logTen', {
-      defaultMessage: 'Returns the base-10 logarithm of a value.',
+      defaultMessage: 'Returns the natural logarithm (base e) of a value.',
     }),
     args: [{ name: 'value', type: 'number' }],
     category: 'logarithmic',
-    example: 'log_ten(attributes.bytes)',
+    example: 'log(attributes.bytes)',
   },
 ];
 
@@ -430,43 +173,6 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   },
 ];
 
-// Constants
-export const CONSTANT_FUNCTIONS: MathFunctionDefinition[] = [
-  {
-    name: 'pi',
-    signature: 'pi()',
-    description: i18n.translate('xpack.streams.math.docs.pi', {
-      defaultMessage: 'Returns the mathematical constant π (pi), approximately 3.14159.',
-    }),
-    args: [],
-    category: 'constant',
-    isConstant: true,
-    example: 'attributes.radius * pi() * 2',
-  },
-  {
-    name: 'e',
-    signature: 'e()',
-    description: i18n.translate('xpack.streams.math.docs.e', {
-      defaultMessage: "Returns Euler's number e, approximately 2.71828.",
-    }),
-    args: [],
-    category: 'constant',
-    isConstant: true,
-    example: 'pow(e(), attributes.exponent)',
-  },
-  {
-    name: 'tau',
-    signature: 'tau()',
-    description: i18n.translate('xpack.streams.math.docs.tau', {
-      defaultMessage: 'Returns τ (tau), equal to 2π, approximately 6.28318.',
-    }),
-    args: [],
-    category: 'constant',
-    isConstant: true,
-    example: 'attributes.radius * tau()',
-  },
-];
-
 // Operators
 
 export const ARITHMETIC_OPERATORS: OperatorDefinition[] = [
@@ -474,7 +180,6 @@ export const ARITHMETIC_OPERATORS: OperatorDefinition[] = [
   { symbol: '-', description: 'Subtraction' },
   { symbol: '*', description: 'Multiplication' },
   { symbol: '/', description: 'Division' },
-  // Note: % is NOT supported as an inline operator. Use mod(a, b) function instead.
 ];
 
 export const COMPARISON_OPERATORS: OperatorDefinition[] = [
@@ -490,12 +195,8 @@ export const COMPARISON_OPERATORS: OperatorDefinition[] = [
  * All math functions - the complete list
  */
 export const ALL_MATH_FUNCTIONS: MathFunctionDefinition[] = [
-  ...ARITHMETIC_FUNCTIONS,
-  ...ROUNDING_FUNCTIONS,
-  ...TRIGONOMETRY_FUNCTIONS,
   ...LOGARITHMIC_FUNCTIONS,
   ...COMPARISON_FUNCTIONS,
-  ...CONSTANT_FUNCTIONS,
 ];
 
 /**
@@ -515,11 +216,6 @@ export const BOOLEAN_RETURNING_MATH_FUNCTIONS = new Set(COMPARISON_FUNCTIONS.map
  * Set of all function names for validation
  */
 export const ALL_FUNCTION_NAMES = new Set(ALL_MATH_FUNCTIONS.map((f) => f.name));
-
-/**
- * Set of constant function names
- */
-export const CONSTANT_FUNCTION_NAMES = new Set(CONSTANT_FUNCTIONS.map((f) => f.name));
 
 const FUNCTION_MAP = new Map(ALL_MATH_FUNCTIONS.map((f) => [f.name, f]));
 
@@ -561,21 +257,12 @@ export function getTotalArgCount(func: MathFunctionDefinition): number {
 }
 
 /**
- * Get functions with exactly N required arguments (excluding constants)
+ * Get functions with exactly N required arguments
  */
 export function getFunctionsWithArity(arity: number): string[] {
   return ALL_MATH_FUNCTIONS.filter(
-    (f) => !f.isConstant && getRequiredArgCount(f) === arity && getTotalArgCount(f) === arity
+    (f) => getRequiredArgCount(f) === arity && getTotalArgCount(f) === arity
   ).map((f) => f.name);
-}
-
-/**
- * Get functions with variable arity (have optional arguments)
- */
-export function getVariableArityFunctions(): string[] {
-  return ALL_MATH_FUNCTIONS.filter((f) => !f.isConstant && f.args.some((arg) => arg.optional)).map(
-    (f) => f.name
-  );
 }
 
 /**
@@ -586,10 +273,6 @@ export function getBinaryComparisonFunctions(): string[] {
 }
 
 export const CATEGORY_TO_DOC_SECTION: Record<MathFunctionCategory, string> = {
-  arithmetic: 'math',
-  rounding: 'math',
-  trigonometry: 'trigonometry',
-  logarithmic: 'math',
+  logarithmic: 'functions',
   comparison: 'comparison',
-  constant: 'constants',
 };
