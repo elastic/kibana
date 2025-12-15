@@ -39,7 +39,12 @@ interface Props {
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
-  const { unifiedSearch } = useKibana().dependencies.start;
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { unifiedSearch },
+    },
+  } = useKibana();
 
   const aiFeatures = useAIFeatures();
 
@@ -152,6 +157,17 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
               .then((data) => {
                 setDetectedFeatures(data.features);
+              })
+              .catch((error) => {
+                if (error.name === 'AbortError') {
+                  return;
+                }
+                notifications.toasts.addError(error, {
+                  title: i18n.translate(
+                    'xpack.streams.streamDetailView.featureIdentification.errorTitle',
+                    { defaultMessage: 'Failed to identify features' }
+                  ),
+                });
               })
               .finally(() => {
                 setIsFeatureDetectionLoading(false);
