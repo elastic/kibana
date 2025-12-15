@@ -11,11 +11,11 @@ import type { SavedDashboardPanel } from '../dashboard_saved_object';
 import {
   getEmptyDashboardData,
   collectPanelsByType,
-  collectDashboardInfo,
+  collectSectionsAndAccessControl,
 } from './dashboard_telemetry';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import type { DashboardSavedObjectInfo } from './types';
+import type { DashboardHit } from './types';
 
 const visualizationType1ByValue = {
   embeddableConfig: {
@@ -202,7 +202,7 @@ describe('dashboard telemetry', () => {
         optionsJSON: '{}',
       },
       references: [],
-    } as DashboardSavedObjectInfo;
+    } as DashboardHit;
 
     it('should collect access mode from dashboard with accessControl', () => {
       const accessControlledDashboard = {
@@ -211,9 +211,9 @@ describe('dashboard telemetry', () => {
           owner: 'tom_bombadil',
           accessMode: 'write_restricted',
         },
-      } as DashboardSavedObjectInfo;
+      } as DashboardHit;
       const collectorData = getEmptyDashboardData();
-      collectDashboardInfo(accessControlledDashboard, collectorData);
+      collectSectionsAndAccessControl(accessControlledDashboard, collectorData);
 
       expect(collectorData.access_mode).toEqual({
         write_restricted: { total: 1 },
@@ -222,7 +222,7 @@ describe('dashboard telemetry', () => {
 
     it('should skip access mode collection for dashboard without accessControl', () => {
       const collectorData = getEmptyDashboardData();
-      collectDashboardInfo(savedDashboard, collectorData);
+      collectSectionsAndAccessControl(savedDashboard, collectorData);
 
       expect(collectorData.access_mode).toEqual({});
     });
