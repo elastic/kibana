@@ -1095,16 +1095,6 @@
   },
   "data_connector": {
     "properties": {
-      "config": {
-        "enabled": false,
-        "type": "object"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "features": {
-        "type": "keyword"
-      },
       "kscIds": {
         "type": "keyword"
       },
@@ -1121,9 +1111,6 @@
       },
       "type": {
         "type": "keyword"
-      },
-      "updatedAt": {
-        "type": "date"
       },
       "workflowIds": {
         "type": "keyword"
@@ -2717,6 +2704,9 @@
         "dynamic": false,
         "properties": {}
       },
+      "integration_knowledge_enabled": {
+        "type": "boolean"
+      },
       "output_secret_storage_requirements_met": {
         "type": "boolean"
       },
@@ -3915,6 +3905,10 @@
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "stream-prompts": {
     "dynamic": false,
     "properties": {}
   },
