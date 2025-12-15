@@ -140,120 +140,120 @@ describe('WorkflowSchemaForAutocomplete', () => {
 });
 
 describe('WorkflowSettingsSchema', () => {
-  describe('concurrency_key', () => {
-    it('should accept valid concurrency_key string', () => {
+  describe('concurrency-key', () => {
+    it('should accept valid concurrency-key string', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        concurrency_key: 'server-1',
+        'concurrency-key': 'server-1',
       });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.concurrency_key).toBe('server-1');
+        expect(result.data['concurrency-key']).toBe('server-1');
       }
     });
 
-    it('should accept template expression concurrency_key', () => {
+    it('should accept template expression concurrency-key', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        concurrency_key: '{{ event.host.name }}',
+        'concurrency-key': '{{ event.host.name }}',
       });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.concurrency_key).toBe('{{ event.host.name }}');
+        expect(result.data['concurrency-key']).toBe('{{ event.host.name }}');
       }
     });
 
-    it('should accept empty concurrency_key', () => {
+    it('should accept empty concurrency-key', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        concurrency_key: '',
+        'concurrency-key': '',
       });
       expect(result.success).toBe(true);
     });
 
-    it('should allow concurrency_key to be optional', () => {
+    it('should allow concurrency-key to be optional', () => {
       const result = WorkflowSettingsSchema.safeParse({});
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.concurrency_key).toBeUndefined();
+        expect(result.data['concurrency-key']).toBeUndefined();
       }
     });
   });
 
-  describe('collision_strategy', () => {
-    it('should accept valid collision_strategy values', () => {
+  describe('collision-strategy', () => {
+    it('should accept valid collision-strategy values', () => {
       const strategies = ['queue', 'drop', 'cancel-in-progress'] as const;
       strategies.forEach((strategy) => {
         const result = WorkflowSettingsSchema.safeParse({
-          collision_strategy: strategy,
+          'collision-strategy': strategy,
         });
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data.collision_strategy).toBe(strategy);
+          expect(result.data['collision-strategy']).toBe(strategy);
         }
       });
     });
 
-    it('should reject invalid collision_strategy values', () => {
+    it('should reject invalid collision-strategy values', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        collision_strategy: 'invalid-strategy',
+        'collision-strategy': 'invalid-strategy',
       });
       expect(result.success).toBe(false);
     });
 
-    it('should allow collision_strategy to be omitted', () => {
+    it('should allow collision-strategy to be omitted', () => {
       const result = WorkflowSettingsSchema.safeParse({});
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.collision_strategy).toBeUndefined();
+        expect(result.data['collision-strategy']).toBeUndefined();
       }
     });
   });
 
-  describe('max_concurrency_per_group', () => {
+  describe('max-concurrency-per-group', () => {
     it('should accept valid positive integer values', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        max_concurrency_per_group: 5,
+        'max-concurrency-per-group': 5,
       });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.max_concurrency_per_group).toBe(5);
+        expect(result.data['max-concurrency-per-group']).toBe(5);
       }
     });
 
     it('should accept minimum value of 1', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        max_concurrency_per_group: 1,
+        'max-concurrency-per-group': 1,
       });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.max_concurrency_per_group).toBe(1);
+        expect(result.data['max-concurrency-per-group']).toBe(1);
       }
     });
 
     it('should reject values less than 1', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        max_concurrency_per_group: 0,
+        'max-concurrency-per-group': 0,
       });
       expect(result.success).toBe(false);
     });
 
     it('should reject negative values', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        max_concurrency_per_group: -1,
+        'max-concurrency-per-group': -1,
       });
       expect(result.success).toBe(false);
     });
 
     it('should reject non-integer values', () => {
       const result = WorkflowSettingsSchema.safeParse({
-        max_concurrency_per_group: 1.5,
+        'max-concurrency-per-group': 1.5,
       });
       expect(result.success).toBe(false);
     });
 
-    it('should allow max_concurrency_per_group to be omitted', () => {
+    it('should allow max-concurrency-per-group to be omitted', () => {
       const result = WorkflowSettingsSchema.safeParse({});
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.max_concurrency_per_group).toBeUndefined();
+        expect(result.data['max-concurrency-per-group']).toBeUndefined();
       }
     });
   });
