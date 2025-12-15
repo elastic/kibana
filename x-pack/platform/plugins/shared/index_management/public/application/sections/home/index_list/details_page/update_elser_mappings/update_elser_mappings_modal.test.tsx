@@ -7,23 +7,23 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import * as mappingsContext from '../../../public/application/components/mappings_editor/mappings_state_context';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import * as mappingsContext from '../../../../../components/mappings_editor/mappings_state_context';
 import {
   deNormalize,
   prepareFieldsForEisUpdate,
   isElserOnMlNodeSemanticField,
-} from '../../../public/application/components/mappings_editor/lib/utils';
+} from '../../../../../components/mappings_editor/lib/utils';
 import {
   UpdateElserMappingsModal,
   type UpdateElserMappingsModalProps,
-} from '../../../public/application/sections/home/index_list/details_page/update_elser_mappings/update_elser_mappings_modal';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import * as apiService from '../../../public/application/services/api';
-import { notificationService } from '../../../public/application/services/notification';
-import type { NormalizedFields } from '../../../public/application/components/mappings_editor/types';
+} from './update_elser_mappings_modal';
+import * as apiService from '../../../../../services/api';
+import { notificationService } from '../../../../../services/notification';
+import type { NormalizedFields } from '../../../../../components/mappings_editor/types';
 
-jest.mock('../../../public/application/components/mappings_editor/lib/utils', () => ({
+jest.mock('../../../../../components/mappings_editor/lib/utils', () => ({
   deNormalize: jest.fn(),
   prepareFieldsForEisUpdate: jest.fn(),
   isElserOnMlNodeSemanticField: jest.fn(),
@@ -33,13 +33,13 @@ jest.mock('../../../public/application/components/mappings_editor/lib/utils', ()
   })),
 }));
 
-jest.mock('../../../public/application/components/mappings_editor/mappings_state_context');
+jest.mock('../../../../../components/mappings_editor/mappings_state_context');
 
-jest.mock('../../../public/application/services/api', () => ({
+jest.mock('../../../../../services/api', () => ({
   updateIndexMappings: jest.fn(),
 }));
 
-jest.mock('../../../public/application/services', () => ({
+jest.mock('../../../../../services', () => ({
   documentationService: {
     docLinks: {
       enterpriseSearch: {
@@ -49,7 +49,7 @@ jest.mock('../../../public/application/services', () => ({
   },
 }));
 
-jest.mock('../../../public/application/services/notification', () => ({
+jest.mock('../../../../../services/notification', () => ({
   notificationService: { showSuccessToast: jest.fn(), showDangerToast: jest.fn() },
 }));
 
