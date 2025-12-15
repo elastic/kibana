@@ -107,7 +107,7 @@ const readSignificantEventsRoute = createServerRoute({
       query: z
         .string()
         .optional()
-        .describe('Query string to filter significant events on metadata fields '),
+        .describe('Query string to filter significant events on metadata fields'),
     }),
   }),
 
