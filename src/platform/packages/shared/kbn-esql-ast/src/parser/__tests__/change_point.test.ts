@@ -9,7 +9,7 @@
 
 import { EsqlQuery } from '../../query';
 import type { ESQLCommandOption } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('CHANGE_POINT command', () => {
   describe('correctly formatted', () => {
