@@ -114,11 +114,9 @@ describe('findRuleTemplates', () => {
     });
 
     // filter is the authorized rule types by default
-    expect( 
-      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
-    ).toBe(
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-      'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
     );
 
     expect(authorization.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
@@ -144,12 +142,10 @@ describe('findRuleTemplates', () => {
     expect(result.data).toHaveLength(1);
 
     // filter is the ruleTypeId combined with the authorized rule types
-    expect( 
-      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
-    ).toBe(
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '(alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
-      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 
@@ -172,12 +168,10 @@ describe('findRuleTemplates', () => {
     expect(result.data[0].tags).toContain('tag1');
 
     // filter is the tags combined with the authorized rule types
-    expect( 
-      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
-    ).toBe(
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '(alerting_rule_template.attributes.tags: tag1 AND ' +
-      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 
@@ -196,13 +190,11 @@ describe('findRuleTemplates', () => {
     });
 
     // filter is the tags combined with the authorized rule types
-    expect( 
-      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
-    ).toBe(
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '((alerting_rule_template.attributes.tags: tag1 OR ' +
-      'alerting_rule_template.attributes.tags: tag2) AND ' +
-      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+        'alerting_rule_template.attributes.tags: tag2) AND ' +
+        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 
@@ -222,13 +214,11 @@ describe('findRuleTemplates', () => {
     });
 
     // filter is the ruleTypeId and tags combined with the authorized rule types
-    expect( 
-      toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)
-    ).toBe(
-      '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' + 
-      'alerting_rule_template.attributes.tags: tag1) AND ' +
-      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-      'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
+      '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
+        'alerting_rule_template.attributes.tags: tag1) AND ' +
+        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
     );
   });
 

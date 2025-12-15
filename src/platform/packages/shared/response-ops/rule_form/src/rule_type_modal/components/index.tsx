@@ -47,10 +47,13 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   const { run: updateDebouncedSearch } = useDebounceFn(setDebouncedSearchString, DEBOUNCE_OPTIONS);
 
   // Update both immediate and debounced search strings on user input
-  const updateSearch = useCallback((value: string) => {
-    setSearchString(value);
-    updateDebouncedSearch(value);
-  }, [updateDebouncedSearch]);
+  const updateSearch = useCallback(
+    (value: string) => {
+      setSearchString(value);
+      updateDebouncedSearch(value);
+    },
+    [updateDebouncedSearch]
+  );
 
   const registeredRuleTypesWithAppContext = registeredRuleTypes.filter(
     ({ requiresAppContext }) => !requiresAppContext

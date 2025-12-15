@@ -26,10 +26,7 @@ export interface UseFindTemplatesQueryParams extends SetOptional<FindRuleTemplat
 
 export const getKey = (
   params: Omit<UseFindTemplatesQueryParams, 'http' | 'toasts' | 'enabled'>
-) => [
-  'ruleTemplates',
-  params,
-];
+) => ['ruleTemplates', params];
 
 export const useFindTemplatesQuery = ({
   http,
