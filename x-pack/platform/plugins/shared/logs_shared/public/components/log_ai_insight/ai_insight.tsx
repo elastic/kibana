@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/ai-insights';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LogEntryField } from '../../../common';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
 
@@ -27,13 +27,11 @@ export interface LogAIInsightProps {
   doc: LogAIInsightDocument | undefined;
   onechat?: OnechatPluginStart;
 }
+
 export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProps) {
   const {
-    services: {
-      http,
-      core: { featureFlags },
-    },
-  } = useKibana();
+    services: { http, featureFlags },
+  } = useKibanaContextForPlugin();
 
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');

@@ -74,6 +74,19 @@ export function createLogAttachmentType({
                   id,
                 });
 
+                if (!logEntry) {
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `Log document not found for ${index}:${id}`,
+                        },
+                      },
+                    ],
+                  };
+                }
+
                 return {
                   results: [
                     {
