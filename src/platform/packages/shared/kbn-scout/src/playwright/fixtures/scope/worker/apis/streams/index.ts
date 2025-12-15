@@ -7,37 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RoutingStatus } from '@kbn/streams-schema';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
-import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
 import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type { ScoutSpaceParallelFixture } from '../../scout_space';
 
-export interface StreamsApiService<TCondition = unknown, TStreamlangDSL = unknown> {
+/**
+ * Type definitions for Streams API service.
+ * Consumers can provide specific types by extending this interface.
+ */
+export interface StreamsApiServiceTypes {
+  condition?: unknown;
+  streamlangDSL?: unknown;
+  routingStatus?: string;
+  streamDefinition?: unknown;
+  ingestUpsertRequest?: unknown;
+}
+
+/**
+ * Helper type to extract a type from StreamsApiServiceTypes with a default fallback.
+ */
+type WithDefault<
+  T extends StreamsApiServiceTypes,
+  K extends keyof StreamsApiServiceTypes,
+  Default
+> = T[K] extends undefined ? Default : T[K];
+
+export interface StreamsApiService<T extends StreamsApiServiceTypes = {}> {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
   forkStream: (
     streamName: string,
     destination: string,
-    condition: TCondition,
-    status?: RoutingStatus
+    condition: WithDefault<T, 'condition', unknown>,
+    status?: WithDefault<T, 'routingStatus', string>
   ) => Promise<void>;
-  getStreamDefinition: (streamName: string) => Promise<IngestStream.all.GetResponse>;
+  getStreamDefinition: (streamName: string) => Promise<WithDefault<T, 'streamDefinition', unknown>>;
   deleteStream: (streamName: string) => Promise<void>;
-  updateStream: (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => Promise<void>;
+  updateStream: (
+    streamName: string,
+    updateBody: {
+      ingest: WithDefault<T, 'ingestUpsertRequest', unknown>;
+    }
+  ) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
   clearStreamMappings: (streamName: string) => Promise<void>;
   clearStreamProcessors: (streamName: string) => Promise<void>;
   updateStreamProcessors: (
     streamName: string,
-    getProcessors: TStreamlangDSL | ((prevProcessors: TStreamlangDSL) => TStreamlangDSL)
+    getProcessors:
+      | WithDefault<T, 'streamlangDSL', unknown>
+      | ((
+          prevProcessors: WithDefault<T, 'streamlangDSL', unknown>
+        ) => WithDefault<T, 'streamlangDSL', unknown>)
   ) => Promise<void>;
 }
 
-export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unknown>({
+export const getStreamsApiService = <T extends StreamsApiServiceTypes = {}>({
   kbnClient,
   log,
   scoutSpace,
@@ -45,7 +71,7 @@ export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unkn
   kbnClient: KbnClient;
   log: ScoutLogger;
   scoutSpace?: ScoutSpaceParallelFixture;
-}): StreamsApiService<TCondition, TStreamlangDSL> => {
+}): StreamsApiService<T> => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
   const service = {
@@ -68,8 +94,8 @@ export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unkn
     forkStream: async (
       streamName: string,
       newStreamName: string,
-      condition: TCondition,
-      status: RoutingStatus = 'enabled'
+      condition: WithDefault<T, 'condition', unknown>,
+      status: WithDefault<T, 'routingStatus', string> = 'enabled' as any
     ) => {
       await measurePerformanceAsync(log, 'streamsApi.createRoutingRule', async () => {
         await kbnClient.request({
@@ -91,7 +117,7 @@ export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unkn
           method: 'GET',
           path: `${basePath}/api/streams/${streamName}`,
         });
-        return response.data as IngestStream.all.GetResponse;
+        return response.data as WithDefault<T, 'streamDefinition', unknown>;
       });
     },
     deleteStream: async (streamName: string) => {
@@ -102,7 +128,12 @@ export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unkn
         });
       });
     },
-    updateStream: async (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => {
+    updateStream: async (
+      streamName: string,
+      updateBody: {
+        ingest: WithDefault<T, 'ingestUpsertRequest', unknown>;
+      }
+    ) => {
       await measurePerformanceAsync(log, 'streamsApi.updateStream', async () => {
         await kbnClient.request({
           method: 'PUT',
@@ -114,11 +145,10 @@ export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unkn
     clearStreamChildren: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
         const definition = await service.getStreamDefinition(streamName);
-        if (WiredStream.Definition.is(definition.stream)) {
+        const stream = (definition as any).stream;
+        if (stream?.ingest && 'wired' in stream.ingest) {
           await Promise.all(
-            definition.stream.ingest.wired.routing.map((child) =>
-              service.deleteStream(child.destination)
-            )
+            stream.ingest.wired.routing.map((child: any) => service.deleteStream(child.destination))
           );
         }
       });
@@ -126,27 +156,28 @@ export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unkn
     clearStreamMappings: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamMappings', async () => {
         const definition = await service.getStreamDefinition(streamName);
-        if (WiredStream.Definition.is(definition.stream)) {
+        const stream = (definition as any).stream;
+        if (stream?.ingest && 'wired' in stream.ingest) {
           await service.updateStream(streamName, {
             ingest: {
-              ...definition.stream.ingest,
-              processing: omit(definition.stream.ingest.processing, 'updated_at'),
+              ...stream.ingest,
+              processing: omit(stream.ingest.processing, 'updated_at'),
               wired: {
-                ...definition.stream.ingest.wired,
+                ...stream.ingest.wired,
                 fields: {},
               },
-            },
+            } as WithDefault<T, 'ingestUpsertRequest', unknown>,
           });
-        } else if (ClassicStream.Definition.is(definition.stream)) {
+        } else if (stream?.ingest && 'classic' in stream.ingest) {
           await service.updateStream(streamName, {
             ingest: {
-              ...definition.stream.ingest,
-              processing: omit(definition.stream.ingest.processing, 'updated_at'),
+              ...stream.ingest,
+              processing: omit(stream.ingest.processing, 'updated_at'),
               classic: {
-                ...definition.stream.ingest.classic,
+                ...stream.ingest.classic,
                 field_overrides: {},
               },
-            },
+            } as WithDefault<T, 'ingestUpsertRequest', unknown>,
           });
         } else {
           throw new Error(
@@ -158,33 +189,41 @@ export const getStreamsApiService = <TCondition = unknown, TStreamlangDSL = unkn
     clearStreamProcessors: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamProcessors', async () => {
         const definition = await service.getStreamDefinition(streamName);
+        const stream = (definition as any).stream;
         await service.updateStream(streamName, {
           ingest: {
-            ...definition.stream.ingest,
+            ...stream.ingest,
             processing: {
               steps: [],
             },
-          },
+          } as T['ingestUpsertRequest'] extends undefined ? unknown : T['ingestUpsertRequest'],
         });
       });
     },
     updateStreamProcessors: async (
       streamName: string,
-      getProcessors: TStreamlangDSL | ((prevProcessors: TStreamlangDSL) => TStreamlangDSL)
+      getProcessors:
+        | WithDefault<T, 'streamlangDSL', unknown>
+        | ((
+            prevProcessors: WithDefault<T, 'streamlangDSL', unknown>
+          ) => WithDefault<T, 'streamlangDSL', unknown>)
     ) => {
       await measurePerformanceAsync(log, 'streamsApi.updateStreamProcessors', async () => {
         const definition = await service.getStreamDefinition(streamName);
+        const stream = (definition as any).stream;
         const isFunction = typeof getProcessors === 'function';
         const processing = isFunction
-          ? (getProcessors as (prevProcessors: TStreamlangDSL) => TStreamlangDSL)(
-              definition.stream.ingest.processing as unknown as TStreamlangDSL
-            )
-          : (getProcessors as TStreamlangDSL);
+          ? (
+              getProcessors as (
+                prevProcessors: WithDefault<T, 'streamlangDSL', unknown>
+              ) => WithDefault<T, 'streamlangDSL', unknown>
+            )(stream.ingest.processing as unknown as WithDefault<T, 'streamlangDSL', unknown>)
+          : (getProcessors as WithDefault<T, 'streamlangDSL', unknown>);
         await service.updateStream(streamName, {
           ingest: {
-            ...definition.stream.ingest,
-            processing: processing as unknown as IngestUpsertRequest['processing'],
-          },
+            ...stream.ingest,
+            processing: processing as any,
+          } as T['ingestUpsertRequest'] extends undefined ? unknown : T['ingestUpsertRequest'],
         });
       });
     },
