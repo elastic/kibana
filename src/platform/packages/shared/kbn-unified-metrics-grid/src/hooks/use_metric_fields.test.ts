@@ -33,12 +33,8 @@ describe('useMetricFields', () => {
   const defaultStateContext = {
     currentPage: 0,
     selectedDimensions: [] as Dimension[],
-    selectedDimensionValues: [],
-    selectedValuesMetricFields: [] as string[],
-    dimensionFilters: undefined,
     onDimensionsChange: mockOnDimensionsChange,
     onPageChange: jest.fn(),
-    onDimensionValuesChange: jest.fn(),
     isFullscreen: false,
     searchTerm: '',
     onSearchTermChange: jest.fn(),
@@ -49,7 +45,6 @@ describe('useMetricFields', () => {
     metricFields: [] as MetricField[],
     dimensions: [] as Dimension[],
     sampleRowByMetric: new Map(),
-    getValuesByDimension: jest.fn(() => new Map()),
   };
 
   beforeEach(() => {

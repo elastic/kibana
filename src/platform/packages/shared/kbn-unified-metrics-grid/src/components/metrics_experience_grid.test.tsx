@@ -154,7 +154,6 @@ describe('MetricsExperienceGrid', () => {
       metricFields: [],
       dimensions: [],
       sampleRowByMetric: new Map(),
-      getValuesByDimension: jest.fn(() => new Map()),
     });
 
     useMetricFieldsMock.mockReturnValue({
@@ -174,7 +173,6 @@ describe('MetricsExperienceGrid', () => {
       metricFields: [],
       dimensions: [],
       sampleRowByMetric: new Map(),
-      getValuesByDimension: jest.fn(() => new Map()),
     });
 
     useMetricFieldsMock.mockReturnValue({
@@ -195,7 +193,6 @@ describe('MetricsExperienceGrid', () => {
       metricFields: [],
       dimensions: [],
       sampleRowByMetric: new Map(),
-      getValuesByDimension: jest.fn(() => new Map()),
     });
 
     useMetricFieldsMock.mockReturnValue({

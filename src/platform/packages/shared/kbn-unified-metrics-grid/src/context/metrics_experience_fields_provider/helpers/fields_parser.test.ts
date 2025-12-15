@@ -218,13 +218,5 @@ describe('fields_parser', () => {
 
       expect(result.sampleRowByMetric.get('system.cpu.utilization')).toEqual(rows[2]);
     });
-
-    it('populates fieldSpecsByRow', () => {
-      const rows: DatatableRow[] = [{ 'system.cpu.utilization': 0.5, 'host.name': 'host-1' }];
-
-      const result = createSampleRowByMetric({ rows, fieldSpecs: baseFieldSpecs });
-
-      expect(result.fieldSpecsByRow.get(rows[0])).toEqual(baseFieldSpecs[0]);
-    });
   });
 });

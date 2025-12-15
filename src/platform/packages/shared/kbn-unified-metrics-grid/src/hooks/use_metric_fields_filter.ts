@@ -14,16 +14,13 @@ export const useMetricFieldsFilter = ({
   fields,
   dimensions,
   searchTerm,
-  dimensionValuesMetricFields: dimensionMetricFields,
 }: {
   fields: MetricField[];
   searchTerm: string;
   dimensions: Dimension[];
-  dimensionValuesMetricFields: string[];
 }) => {
   const filteredFields = useMemo(() => {
     const dimensionFieldNamesSet = new Set(dimensions.map((d) => d.name));
-    const dimensionMetricFieldsSet = new Set(dimensionMetricFields);
     const searchTermLower = searchTerm?.toLowerCase();
 
     const hasClientFilters = dimensionFieldNamesSet.size > 0 || searchTermLower?.length > 0;
@@ -37,15 +34,13 @@ export const useMetricFieldsFilter = ({
         return false;
       }
 
-      if (dimensionMetricFieldsSet.size > 0) {
-        return dimensionMetricFieldsSet.has(field.name);
-      } else if (dimensionFieldNamesSet.size > 0) {
+      if (dimensionFieldNamesSet.size > 0) {
         return field.dimensions.some((d) => dimensionFieldNamesSet.has(d.name));
       }
 
       return true;
     });
-  }, [fields, searchTerm, dimensions, dimensionMetricFields]);
+  }, [fields, searchTerm, dimensions]);
 
   return { filteredFields };
 };

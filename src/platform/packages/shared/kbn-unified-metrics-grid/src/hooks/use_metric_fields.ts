@@ -30,8 +30,7 @@ interface UseMetricFieldsReturn {
  * - dimensions: Unique dimensions extracted from sampled metric fields
  */
 export const useMetricFields = (): UseMetricFieldsReturn => {
-  const { searchTerm, selectedDimensions, selectedValuesMetricFields, onDimensionsChange } =
-    useMetricsExperienceState();
+  const { searchTerm, selectedDimensions, onDimensionsChange } = useMetricsExperienceState();
   const { metricFields, dimensions, sampleRowByMetric } = useMetricsExperienceFieldsContext();
 
   // Ref to access current values in effects without adding them to dependencies
@@ -67,7 +66,6 @@ export const useMetricFields = (): UseMetricFieldsReturn => {
     fields: sampledMetricFields,
     searchTerm,
     dimensions: selectedDimensions,
-    dimensionValuesMetricFields: selectedValuesMetricFields,
   });
 
   // Update return value
