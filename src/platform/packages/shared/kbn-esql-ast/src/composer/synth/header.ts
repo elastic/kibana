@@ -7,33 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParseOptions } from '../parser';
-import { Parser } from '../parser';
+import type { ParseOptions } from '../../parser';
+import { Parser } from '../../parser';
 import { createTag } from './tag';
 import { SynthNode } from './synth_node';
 import type { SynthGenerator } from './types';
-import type { ESQLCommand } from '../types';
+import type { ESQLAstHeaderCommand } from '../../types';
 
-const generator: SynthGenerator<ESQLCommand> = (
+const generator: SynthGenerator<ESQLAstHeaderCommand> = (
   src: string,
   { withFormatting = true, ...rest }: ParseOptions = {}
-): ESQLCommand => {
+): ESQLAstHeaderCommand => {
   src = src.trimStart();
 
-  const { root } = Parser.parseCommand(src, { withFormatting, ...rest });
+  const { root } = Parser.parseHeaderCommand(src, { withFormatting, ...rest });
 
-  if (root.type !== 'command') {
-    throw new Error('Expected a command node');
-  }
-
-  const node = SynthNode.from(root);
+  // The parser returns the header command as ESQLCommand type, but it's actually
+  // an ESQLAstSetHeaderCommand at runtime
+  const node = SynthNode.from(root as any);
 
   return node;
 };
 
-export const command = createTag<ESQLCommand>(generator);
+export const header = createTag<ESQLAstHeaderCommand>(generator);
 
 /**
  * Short 3-letter alias for DX convenience.
  */
-export const cmd = command;
+export const hdr = header;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter, Builder, synth } from '../../..';
+import { BasicPrettyPrinter, Builder, synth } from '../../../..';
 import { SynthNode } from '../synth_node';
 
 test('synthesized nodes have SynthNodePrototype prototype', () => {

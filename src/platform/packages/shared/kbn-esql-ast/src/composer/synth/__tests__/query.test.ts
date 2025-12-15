@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth } from '../../..';
-import { Builder } from '../../ast/builder';
-import { BasicPrettyPrinter } from '../../pretty_print';
+import { synth } from '../../../..';
+import { Builder } from '../../../ast/builder';
+import { BasicPrettyPrinter } from '../../../pretty_print';
 import { query } from '../query';
 
 test('can create a WHERE command', () => {
