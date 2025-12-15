@@ -170,7 +170,9 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
     const isEnterprise = useLicense().isEnterprise();
     const trustedDevicesVisible =
       useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
-    const endpointExceptionsVisible = useIsExperimentalFeatureEnabled('endpointExceptionsMovedUnderManagement') && canReadEndpointExceptions;
+    const endpointExceptionsVisible =
+      useIsExperimentalFeatureEnabled('endpointExceptionsMovedUnderManagement') &&
+      canReadEndpointExceptions;
 
     const artifactCards: ReactElement = useMemo(() => {
       if (loading) {
