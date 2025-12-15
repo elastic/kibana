@@ -16,6 +16,7 @@ import type {
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 
 export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
   'observability.get_downstream_dependencies';
@@ -50,6 +51,12 @@ export function createDownstreamDependenciesTool({
       'Identifies downstream dependencies (other services, databases, external APIs) for a specific service within a time range. Critical for mapping service architecture and troubleshooting dependency-related issues.',
     schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (args, context) => {
       const { request } = context;
 

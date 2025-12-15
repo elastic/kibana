@@ -16,6 +16,7 @@ import type {
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
@@ -51,6 +52,12 @@ export function createGetServicesTool({
       'Retrieves a list of monitored APM services, including their health status, environment, and active alert counts. Useful for high-level system overview and identifying unhealthy services.',
     schema: getServicesSchema,
     tags: ['observability', 'services'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async ({ start, end, environment, healthStatus }, context) => {
       const { request } = context;
 
