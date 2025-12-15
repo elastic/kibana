@@ -9,7 +9,9 @@
 
 import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
+import type { WorkflowsRequestHandlerContext } from '../types';
 
 export const mockLogger = loggingSystemMock.create().get();
 
@@ -70,3 +72,57 @@ export const createMockStepExecution = (overrides = {}) => ({
   status: 'pending',
   ...overrides,
 });
+
+/**
+ * Creates a mock rule type for testing alert preprocessing
+ */
+const createMockRuleType = (ruleTypeId: string) => ({
+  id: ruleTypeId,
+  name: 'Test Rule Type',
+  alerts: {
+    formatAlert: jest.fn((source: Record<string, unknown>) => {
+      // Add signal property if signal-mappable fields are present
+      const hasSignalFields =
+        source['kibana.alert.depth'] ||
+        source['kibana.alert.original_time'] ||
+        source['kibana.alert.reason'];
+      return hasSignalFields ? { ...source, signal: {} } : source;
+    }),
+  },
+});
+
+/**
+ * Creates a mock request handler context with core and alerting contexts
+ * @param overrides - Optional overrides for the core context (e.g., custom elasticsearch client)
+ * @param ruleTypes - Optional array of rule type IDs to include in the alerting context
+ */
+export const createMockRequestHandlerContext = (
+  overrides?: {
+    elasticsearchClient?: {
+      mget?: jest.Mock;
+    };
+  },
+  ruleTypes: string[] = ['test-rule-type']
+): WorkflowsRequestHandlerContext => {
+  const mockCoreContext = coreMock.createRequestHandlerContext();
+
+  // Apply overrides if provided
+  if (overrides?.elasticsearchClient?.mget) {
+    // Directly assign the mock function - asCurrentUser from coreMock allows property assignment
+    (mockCoreContext.elasticsearch.client.asCurrentUser as any).mget =
+      overrides.elasticsearchClient.mget;
+  }
+
+  // Create mock rule type registry map
+  const mockRuleTypeRegistryMap = new Map();
+  ruleTypes.forEach((ruleTypeId) => {
+    mockRuleTypeRegistryMap.set(ruleTypeId, createMockRuleType(ruleTypeId));
+  });
+
+  return {
+    core: Promise.resolve(mockCoreContext),
+    alerting: Promise.resolve({
+      listTypes: jest.fn(() => mockRuleTypeRegistryMap),
+    }),
+  } as WorkflowsRequestHandlerContext;
+};
