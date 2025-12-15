@@ -29,11 +29,7 @@
             "section": "def-common.CommonStepDefinition",
             "text": "CommonStepDefinition"
           },
-          "<",
-          "ZodTypeAny",
-          ", ",
-          "ZodTypeAny",
-          ">"
+          "<z.ZodType, z.ZodType>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
         "deprecated": false,
@@ -181,27 +177,69 @@
     "setup": {
       "parentPluginId": "workflowsExtensions",
       "id": "def-public.WorkflowsExtensionsPublicPluginSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "WorkflowsExtensionsPublicPluginSetup",
       "description": [
         "\nPublic-side plugin setup contract.\nExposes methods for other plugins to register public-side step definition."
       ],
-      "signature": [
-        "WorkflowsExtensionsSetupContract",
-        "<",
-        {
-          "pluginId": "workflowsExtensions",
-          "scope": "public",
-          "docId": "kibWorkflowsExtensionsPluginApi",
-          "section": "def-public.PublicStepDefinition",
-          "text": "PublicStepDefinition"
-        },
-        ">"
-      ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "workflowsExtensions",
+          "id": "def-public.WorkflowsExtensionsPublicPluginSetup.registerStepDefinition",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "registerStepDefinition",
+          "description": [
+            "\nRegister user-facing definition for a workflow step.\nThis should be called during the plugin's setup phase.\n"
+          ],
+          "signature": [
+            "(definition: ",
+            {
+              "pluginId": "workflowsExtensions",
+              "scope": "public",
+              "docId": "kibWorkflowsExtensionsPluginApi",
+              "section": "def-public.PublicStepDefinition",
+              "text": "PublicStepDefinition"
+            },
+            ") => void"
+          ],
+          "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "workflowsExtensions",
+              "id": "def-public.WorkflowsExtensionsPublicPluginSetup.registerStepDefinition.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "definition",
+              "description": [
+                "- The public-side step definition"
+              ],
+              "signature": [
+                {
+                  "pluginId": "workflowsExtensions",
+                  "scope": "public",
+                  "docId": "kibWorkflowsExtensionsPluginApi",
+                  "section": "def-public.PublicStepDefinition",
+                  "text": "PublicStepDefinition"
+                }
+              ],
+              "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -254,15 +292,7 @@
             "section": "def-server.ServerStepDefinition",
             "text": "ServerStepDefinition"
           },
-          "<",
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "common",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-common.CommonStepDefinition",
-            "text": "CommonStepDefinition"
-          },
-          "<TInputSchema, TOutputSchema>>) => ",
+          "<Input, Output>) => ",
           {
             "pluginId": "workflowsExtensions",
             "scope": "server",
@@ -270,15 +300,7 @@
             "section": "def-server.ServerStepDefinition",
             "text": "ServerStepDefinition"
           },
-          "<",
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "common",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-common.CommonStepDefinition",
-            "text": "CommonStepDefinition"
-          },
-          "<TInputSchema, TOutputSchema>>"
+          "<Input, Output>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
         "deprecated": false,
@@ -287,7 +309,7 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.createServerStepDefinition.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "definition",
             "description": [],
@@ -299,15 +321,7 @@
                 "section": "def-server.ServerStepDefinition",
                 "text": "ServerStepDefinition"
               },
-              "<",
-              {
-                "pluginId": "workflowsExtensions",
-                "scope": "common",
-                "docId": "kibWorkflowsExtensionsPluginApi",
-                "section": "def-common.CommonStepDefinition",
-                "text": "CommonStepDefinition"
-              },
-              "<TInputSchema, TOutputSchema>>"
+              "<Input, Output>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "deprecated": false,
@@ -320,6 +334,96 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.ServerStepDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServerStepDefinition",
+        "description": [
+          "\nDefinition of a server-side workflow step extension.\nContains the technical/behavioral implementation of a step.\n\nThe input and output types are automatically inferred from the inputSchema and outputSchema,\nso you don't need to specify them explicitly. Use `createServerStepDefinition` helper function\nfor the best type inference experience.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.ServerStepDefinition",
+            "text": "ServerStepDefinition"
+          },
+          "<Input, Output> extends ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "common",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-common.CommonStepDefinition",
+            "text": "CommonStepDefinition"
+          },
+          "<z.ZodType<Input>, z.ZodType<Output>>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.ServerStepDefinition.handler",
+            "type": "Function",
+            "tags": [],
+            "label": "handler",
+            "description": [
+              "\nThe handler function that executes this step's logic.\nInput and output types are automatically inferred from the schemas."
+            ],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.StepHandlerContext",
+                "text": "StepHandlerContext"
+              },
+              "<Input>) => Promise<",
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.StepHandlerResult",
+                "text": "StepHandlerResult"
+              },
+              "<Output>>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-server.ServerStepDefinition.handler.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "workflowsExtensions",
+                    "scope": "server",
+                    "docId": "kibWorkflowsExtensionsPluginApi",
+                    "section": "def-server.StepHandlerContext",
+                    "text": "StepHandlerContext"
+                  },
+                  "<Input>"
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "workflowsExtensions",
         "id": "def-server.StepHandlerContext",
@@ -369,9 +473,7 @@
               "\nRuntime context manager for accessing workflow state, context, and template evaluation"
             ],
             "signature": [
-              "{ getContext(): { execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; steps: Record<string, { error?: any; output?: any; }>; kibanaUrl: string; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: any[]; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: unknown[]; item?: unknown; } | undefined; }; getScopedEsClient(): ",
-              "ElasticsearchClient",
-              "; renderInputTemplate<T>(input: T): T; }"
+              "ContextManager"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "deprecated": false,
@@ -523,53 +625,53 @@
         "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.WorkflowsExtensionsServerPluginStartDeps.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.PluginStartContract",
+                "text": "PluginStartContract"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.WorkflowsExtensionsServerPluginStartDeps.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "workflowsExtensions",
-        "id": "def-server.ServerStepDefinition",
-        "type": "Type",
-        "tags": [],
-        "label": "ServerStepDefinition",
-        "description": [
-          "\nDefinition of a server-side workflow step extension.\nContains the technical/behavioral implementation of a step.\n\nThe input and output types are automatically inferred from the inputSchema and outputSchema,\nso you don't need to specify them explicitly. Use `createServerStepDefinition` helper function\nfor the best type inference experience.\n"
-        ],
-        "signature": [
-          "TCommon & { handler: ",
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "server",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-server.StepHandler",
-            "text": "StepHandler"
-          },
-          "<",
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "common",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-common.InferStepInput",
-            "text": "InferStepInput"
-          },
-          "<TCommon>, ",
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "common",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-common.InferStepOutput",
-            "text": "InferStepOutput"
-          },
-          "<TCommon>>; }"
-        ],
-        "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "workflowsExtensions",
         "id": "def-server.StepHandler",
@@ -588,7 +690,7 @@
             "section": "def-server.StepHandlerContext",
             "text": "StepHandlerContext"
           },
-          "<TInput>) => Promise<",
+          "<Input>) => Promise<",
           {
             "pluginId": "workflowsExtensions",
             "scope": "server",
@@ -596,7 +698,7 @@
             "section": "def-server.StepHandlerResult",
             "text": "StepHandlerResult"
           },
-          "<TOutput>>"
+          "<Output>>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
         "deprecated": false,
@@ -622,7 +724,7 @@
                 "section": "def-server.StepHandlerContext",
                 "text": "StepHandlerContext"
               },
-              "<TInput>"
+              "<Input>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "deprecated": false,
@@ -636,39 +738,70 @@
     "setup": {
       "parentPluginId": "workflowsExtensions",
       "id": "def-server.WorkflowsExtensionsServerPluginSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "WorkflowsExtensionsServerPluginSetup",
       "description": [
         "\nServer-side plugin setup contract.\nExposes methods for other plugins to register server-side custom workflow steps."
       ],
-      "signature": [
-        "WorkflowsExtensionsSetupContract",
-        "<",
-        {
-          "pluginId": "workflowsExtensions",
-          "scope": "server",
-          "docId": "kibWorkflowsExtensionsPluginApi",
-          "section": "def-server.ServerStepDefinition",
-          "text": "ServerStepDefinition"
-        },
-        "<",
-        {
-          "pluginId": "workflowsExtensions",
-          "scope": "common",
-          "docId": "kibWorkflowsExtensionsPluginApi",
-          "section": "def-common.CommonStepDefinition",
-          "text": "CommonStepDefinition"
-        },
-        "<",
-        "ZodTypeAny",
-        ", ",
-        "ZodTypeAny",
-        ">>>"
-      ],
       "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "workflowsExtensions",
+          "id": "def-server.WorkflowsExtensionsServerPluginSetup.registerStepDefinition",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "registerStepDefinition",
+          "description": [
+            "\nRegister server-side definition for a workflow step.\nThis should be called during the plugin's setup phase.\n"
+          ],
+          "signature": [
+            "<TInput, TOutput>(definition: ",
+            {
+              "pluginId": "workflowsExtensions",
+              "scope": "server",
+              "docId": "kibWorkflowsExtensionsPluginApi",
+              "section": "def-server.ServerStepDefinition",
+              "text": "ServerStepDefinition"
+            },
+            "<TInput, TOutput>) => void"
+          ],
+          "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "workflowsExtensions",
+              "id": "def-server.WorkflowsExtensionsServerPluginSetup.registerStepDefinition.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "definition",
+              "description": [
+                "- The step server-side definition"
+              ],
+              "signature": [
+                {
+                  "pluginId": "workflowsExtensions",
+                  "scope": "server",
+                  "docId": "kibWorkflowsExtensionsPluginApi",
+                  "section": "def-server.ServerStepDefinition",
+                  "text": "ServerStepDefinition"
+                },
+                "<TInput, TOutput>"
+              ],
+              "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -691,19 +824,7 @@
           "section": "def-server.ServerStepDefinition",
           "text": "ServerStepDefinition"
         },
-        "<",
-        {
-          "pluginId": "workflowsExtensions",
-          "scope": "common",
-          "docId": "kibWorkflowsExtensionsPluginApi",
-          "section": "def-common.CommonStepDefinition",
-          "text": "CommonStepDefinition"
-        },
-        "<",
-        "ZodTypeAny",
-        ", ",
-        "ZodTypeAny",
-        ">>>"
+        "<unknown, unknown>>"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
       "deprecated": false,
@@ -733,7 +854,7 @@
             "section": "def-common.CommonStepDefinition",
             "text": "CommonStepDefinition"
           },
-          "<TInputSchema, TOutputSchema>"
+          "<InputSchema, OutputSchema>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
         "deprecated": false,
@@ -762,7 +883,7 @@
               "\nZod schema for validating step input.\nDefines the structure and validation rules for the step's input parameters.\nThe input type is automatically inferred from this schema."
             ],
             "signature": [
-              "TInputSchema"
+              "InputSchema"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
             "deprecated": false,
@@ -778,7 +899,7 @@
               "\nZod schema for validating step output.\nDefines the structure and validation rules for the step's output.\nThe output type is automatically inferred from this schema."
             ],
             "signature": [
-              "TOutputSchema"
+              "OutputSchema"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
             "deprecated": false,
@@ -789,70 +910,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "workflowsExtensions",
-        "id": "def-common.InferStepInput",
-        "type": "Type",
-        "tags": [],
-        "label": "InferStepInput",
-        "description": [
-          "\nHelper type to infer input type from a CommonStepDefinition's inputSchema"
-        ],
-        "signature": [
-          "T extends ",
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "common",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-common.CommonStepDefinition",
-            "text": "CommonStepDefinition"
-          },
-          "<infer TInputSchema extends ",
-          "ZodTypeAny",
-          ", ",
-          "ZodTypeAny",
-          "> ? ",
-          "TypeOf",
-          "<TInputSchema> : unknown"
-        ],
-        "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workflowsExtensions",
-        "id": "def-common.InferStepOutput",
-        "type": "Type",
-        "tags": [],
-        "label": "InferStepOutput",
-        "description": [
-          "\nHelper type to infer output type from a CommonStepDefinition's outputSchema"
-        ],
-        "signature": [
-          "T extends ",
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "common",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-common.CommonStepDefinition",
-            "text": "CommonStepDefinition"
-          },
-          "<",
-          "ZodTypeAny",
-          ", infer TOutputSchema extends ",
-          "ZodTypeAny",
-          "> ? ",
-          "TypeOf",
-          "<TOutputSchema> : unknown"
-        ],
-        "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

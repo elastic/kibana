@@ -11,12 +11,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elasti
 import { css } from '@emotion/react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { useBoolean } from '@kbn/react-hooks';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React, { useRef } from 'react';
 import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 export const ChartSizes = {
   s: 230,
@@ -24,14 +24,10 @@ export const ChartSizes = {
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<ChartSectionProps, 'fetchParams'> &
-  Omit<
-    LensWrapperProps,
-    'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description' | 'abortController'
-  > & {
+export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
+  Omit<LensWrapperProps, 'lensProps' | 'description' | 'abortController'> & {
     size?: ChartSize;
-    discoverFetch$: ChartSectionProps['fetch$'];
-    onViewDetails?: () => void;
+    discoverFetch$: UnifiedMetricsGridProps['fetch$'];
     esqlQuery: string;
     title: string;
     chartLayers: LensSeriesLayer[];
@@ -44,6 +40,7 @@ export const Chart = ({
   onBrushEnd,
   onFilter,
   onViewDetails,
+  onExploreInDiscoverTab,
   fetchParams,
   discoverFetch$,
   titleHighlight,
@@ -54,6 +51,7 @@ export const Chart = ({
   syncCursor,
   syncTooltips,
   yBounds,
+  extraDisabledActions,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -98,9 +96,11 @@ export const Chart = ({
             abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
+            onExploreInDiscoverTab={onExploreInDiscoverTab}
             syncCursor={syncCursor}
             titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}
+            extraDisabledActions={extraDisabledActions}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

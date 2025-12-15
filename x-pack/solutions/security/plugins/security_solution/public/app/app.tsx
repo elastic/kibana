@@ -7,7 +7,7 @@
 
 import type { History } from 'history';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -103,6 +103,22 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   theme$,
 }) => {
   const CloudProvider = services.cloud?.CloudContextProvider ?? React.Fragment;
+
+  // Set conversation flyout active config on mount, clear on unmount
+  useEffect(() => {
+    if (services.onechat?.setConversationFlyoutActiveConfig) {
+      services.onechat.setConversationFlyoutActiveConfig({
+        sessionTag: 'security',
+        newConversation: false,
+      });
+    }
+
+    return () => {
+      if (services.onechat?.clearConversationFlyoutActiveConfig) {
+        services.onechat.clearConversationFlyoutActiveConfig();
+      }
+    };
+  }, [services.onechat]);
 
   return (
     <KibanaContextProvider

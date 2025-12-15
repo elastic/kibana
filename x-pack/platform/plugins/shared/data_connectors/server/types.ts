@@ -4,6 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import type {
+  DataSourcesRegistryPluginSetup,
+  DataSourcesRegistryPluginStart,
+} from '@kbn/data-sources-registry-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
@@ -11,6 +19,12 @@ export interface DataConnectorsServerSetup {}
 
 export interface DataConnectorsServerStart {}
 
-export interface DataConnectorsServerSetupDependencies {}
+export interface DataConnectorsServerSetupDependencies {
+  actions: ActionsPluginSetup;
+  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
+}
 
-export interface DataConnectorsServerStartDependencies {}
+export interface DataConnectorsServerStartDependencies {
+  actions: ActionsPluginStart;
+  dataSourcesRegistry: DataSourcesRegistryPluginStart;
+}

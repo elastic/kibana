@@ -8,6 +8,7 @@
  */
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Observable } from 'rxjs';
 import { combineLatest, debounceTime, map } from 'rxjs';
 import type { ChainingContext } from './chaining';
@@ -17,15 +18,17 @@ export interface ControlFetchContext {
   filters?: Filter[] | undefined;
   query?: Query | AggregateQuery | undefined;
   timeRange?: TimeRange | undefined;
+  esqlVariables?: ESQLControlVariable[] | undefined;
 }
 
 export function controlFetch$(
   chaining$: Observable<ChainingContext>,
-  controlGroupFetch$: Observable<ControlGroupFetchContext>
+  controlGroupFetch$: Observable<ControlGroupFetchContext>,
+  esqlVariables$: Observable<ESQLControlVariable[]>
 ): Observable<ControlFetchContext> {
-  return combineLatest([chaining$, controlGroupFetch$]).pipe(
+  return combineLatest([chaining$, controlGroupFetch$, esqlVariables$]).pipe(
     debounceTime(0),
-    map(([chainingContext, controlGroupFetchContext]) => {
+    map(([chainingContext, controlGroupFetchContext, esqlVariables]) => {
       const filters = [];
       if (controlGroupFetchContext.unifiedSearchFilters) {
         filters.push(...controlGroupFetchContext.unifiedSearchFilters);
@@ -38,6 +41,7 @@ export function controlFetch$(
         filters,
         query: controlGroupFetchContext.query,
         timeRange: chainingContext.timeRange ?? controlGroupFetchContext.timeRange,
+        esqlVariables,
       };
     })
   );

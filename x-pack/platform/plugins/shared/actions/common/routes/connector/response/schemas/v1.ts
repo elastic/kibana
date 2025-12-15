@@ -114,6 +114,19 @@ export const connectorTypeResponseSchema = schema.object({
   is_deprecated: schema.boolean({
     meta: { description: 'Indicates whether the connector type is deprecated.' },
   }),
+  allow_multiple_system_actions: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Indicates whether multiple instances of the same system action connector can be used in a single rule.',
+      },
+    })
+  ),
+  source: schema.oneOf([schema.literal('yml'), schema.literal('spec'), schema.literal('stack')], {
+    meta: {
+      description: 'The source of the connector type definition.',
+    },
+  }),
 });
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);

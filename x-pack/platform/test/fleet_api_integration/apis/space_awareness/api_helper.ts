@@ -45,6 +45,7 @@ import type {
   GetSettingsResponse,
   PutSettingsRequest,
   CreateAgentlessPolicyResponse,
+  PutDownloadSourceRequest,
 } from '@kbn/fleet-plugin/common/types';
 import type {
   GetUninstallTokenResponse,
@@ -720,6 +721,15 @@ export class SpaceTestApiClient {
   ): Promise<GetOneDownloadSourceResponse> {
     const res = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_download_sources`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+  async putDownloadSource(data: PutDownloadSourceRequest['body'], id: string, spaceId?: string) {
+    const res = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/agent_download_sources/${id}`)
       .set('kbn-xsrf', 'xxxx')
       .send(data);
     expectStatusCode200(res);

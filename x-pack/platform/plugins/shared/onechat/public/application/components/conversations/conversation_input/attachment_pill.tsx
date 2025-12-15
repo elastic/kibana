@@ -5,60 +5,101 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { css } from '@emotion/css';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonIcon,
+  EuiIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
+import React, { useState } from 'react';
+import type { Attachment } from '@kbn/onechat-common/attachments';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
+
+const removeAriaLabel = i18n.translate('xpack.onechat.attachmentPill.removeAriaLabel', {
+  defaultMessage: 'Remove attachment',
+});
 
 export interface AttachmentPillProps {
-  id: string;
-  type: AttachmentType;
+  attachment: Attachment;
+  onRemoveAttachment?: () => void;
 }
 
-const getAttachmentIcon = (type: AttachmentType): string => {
-  switch (type) {
-    case AttachmentType.text:
-      return 'document';
-    case AttachmentType.screenContext:
-      return 'inspect';
-    case AttachmentType.esql:
-      return 'editorCodeBlock';
-    default:
-      return 'document';
-  }
-};
+const DEFAULT_ICON = 'document';
 
-const getAttachmentDisplayName = (type: AttachmentType): string => {
-  switch (type) {
-    case AttachmentType.text:
-      return i18n.translate('xpack.onechat.attachmentPill.textAttachment', {
-        defaultMessage: 'Text',
-      });
-    case AttachmentType.screenContext:
-      return i18n.translate('xpack.onechat.attachmentPill.screenContextAttachment', {
-        defaultMessage: 'Screen context',
-      });
-    case AttachmentType.esql:
-      return i18n.translate('xpack.onechat.attachmentPill.esqlAttachment', {
-        defaultMessage: 'ES|QL query',
-      });
-    default:
-      return type;
-  }
-};
+export const AttachmentPill: React.FC<AttachmentPillProps> = ({
+  attachment,
+  onRemoveAttachment,
+}) => {
+  const { attachmentsService } = useOnechatServices();
+  const { euiTheme } = useEuiTheme();
+  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+  const [isHovered, setIsHovered] = useState(false);
 
-export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type }) => {
-  const displayName = getAttachmentDisplayName(type);
-  const iconType = getAttachmentIcon(type);
+  const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
+  const canRemoveAttachment = Boolean(onRemoveAttachment);
+  const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
+
+  const iconContainerStyles = css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xl};
+    border-radius: ${euiTheme.border.radius.small};
+    background-color: ${euiTheme.colors.backgroundBasePrimary};
+  `;
+
+  const titleStyles = css`
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+  `;
 
   return (
-    <EuiBadge
-      color="default"
-      iconType={iconType}
-      iconSide="left"
-      data-test-subj={`onechatAttachmentPill-${id}`}
+    <EuiPanel
+      hasShadow={false}
+      hasBorder
+      color="subdued"
+      paddingSize="s"
+      css={css`
+        max-width: 200px;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
+      `}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      data-test-subj={`onechatAttachmentPill-${attachment.id}`}
     >
-      {displayName}
-    </EuiBadge>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <div className={iconContainerStyles}>
+            <EuiIcon type={iconType} size="m" color="primary" />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiText size="xs" className={titleStyles}>
+            <strong>{displayName}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        {canRemoveAttachment && isHovered && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              size="xs"
+              color="text"
+              aria-label={removeAriaLabel}
+              onClick={onRemoveAttachment}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

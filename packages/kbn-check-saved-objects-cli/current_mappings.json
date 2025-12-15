@@ -884,6 +884,23 @@
     "dynamic": false,
     "properties": {}
   },
+  "cloud-connect-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      },
+      "clusterId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
@@ -1073,6 +1090,30 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "data_connector": {
+    "properties": {
+      "kscIds": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "toolIds": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "workflowIds": {
+        "type": "keyword"
       }
     }
   },
@@ -1866,6 +1907,9 @@
   "fleet-cloud-connector": {
     "dynamic": false,
     "properties": {
+      "accountType": {
+        "type": "keyword"
+      },
       "cloudProvider": {
         "type": "keyword"
       },
@@ -2660,6 +2704,9 @@
         "dynamic": false,
         "properties": {}
       },
+      "integration_knowledge_enabled": {
+        "type": "boolean"
+      },
       "output_secret_storage_requirements_met": {
         "type": "boolean"
       },
@@ -2667,6 +2714,9 @@
         "type": "boolean"
       },
       "secret_storage_requirements_met": {
+        "type": "boolean"
+      },
+      "ssl_secret_storage_requirements_met": {
         "type": "boolean"
       },
       "use_space_awareness_migration_started_at": {
@@ -3855,6 +3905,10 @@
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "stream-prompts": {
     "dynamic": false,
     "properties": {}
   },
