@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { type ESQLCommand } from '../../../types';
-import { walk } from '../../../walker';
+import { walk } from '../../../ast/walker';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (
