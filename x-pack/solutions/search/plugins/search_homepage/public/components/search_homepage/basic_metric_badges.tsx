@@ -54,11 +54,13 @@ const BasicMetricPanel = ({
         &nbsp;&nbsp;
         {isLoading && <EuiLoadingSpinner size="s" />}
         {!isLoading && isError && '—'}
-        {!isLoading && !isError && Array.isArray(metric)
-          ? metric.map((m) => {
-              return (m && `${m} `) ?? null;
-            })
-          : metric}
+        {!isLoading &&
+          !isError &&
+          (Array.isArray(metric)
+            ? metric.map((m) => {
+                return (m && `${m} `) ?? null;
+              })
+            : metric)}
       </EuiText>
     </EuiBadge>
   );

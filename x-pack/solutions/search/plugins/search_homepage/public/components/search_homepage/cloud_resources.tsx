@@ -20,6 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { docLinks } from '../../../common/doc_links';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -30,37 +31,6 @@ interface ResourceCardProps {
   actionHref: string;
   actionText: string;
 }
-
-const CLOUD_RESOURCE_CARDS = [
-  {
-    icon: (assetBasePath: string) => `${assetBasePath}/search_value_calc.svg`,
-    title: i18n.translate('xpack.searchHomepage.cloudResources.billing.title', {
-      defaultMessage: 'Cloud Billing and Usage',
-    }),
-    description: i18n.translate('xpack.searchHomepage.cloudResources.billing.description', {
-      defaultMessage:
-        'Get a detailed breakdown of your organization’s cloud resource usage across your deployments.',
-    }),
-    actionText: i18n.translate('xpack.searchHomepage.cloudResources.billing.actionText', {
-      defaultMessage: 'Go to Billing',
-    }),
-    type: 'billing' as const,
-  },
-  {
-    icon: (assetBasePath: string) => `${assetBasePath}/search_analytics.svg`,
-    title: i18n.translate('xpack.searchHomepage.cloudResources.autoops.title', {
-      defaultMessage: 'Cluster performance insights',
-    }),
-    description: i18n.translate('xpack.searchHomepage.cloudResources.autoops.description', {
-      defaultMessage:
-        'Enable AutoOps for performance recommendations, resource utilization, and cost insights.',
-    }),
-    actionText: i18n.translate('xpack.searchHomepage.cloudResources.autoops.actionText', {
-      defaultMessage: 'AutoOps',
-    }),
-    type: 'autoops' as const,
-  },
-];
 
 const ResourceCard = ({ title, icon, description, actionHref, actionText }: ResourceCardProps) => {
   const assetBasePath = useAssetBasePath();
@@ -82,7 +52,7 @@ const ResourceCard = ({ title, icon, description, actionHref, actionText }: Reso
         <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
             <div css={css({ margin: `${euiTheme.size.xxl} 0` })}>
-              <EuiImage size={96} src={icon(assetBasePath)} alt="" />
+              <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -120,6 +90,8 @@ export const CloudResources = () => {
   const {
     services: { cloud },
   } = useKibana();
+  const isServerless = cloud?.isServerlessEnabled;
+
   const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
     cloud?.getPrivilegedUrls().then((urls) => {
@@ -128,6 +100,69 @@ export const CloudResources = () => {
       }
     });
   }, [cloud]);
+  const SERVERLESS_CARDS: ResourceCardProps[] = [
+    {
+      icon: (assetBasePath: string) => `${assetBasePath}/search_value_calc.svg`,
+      title: i18n.translate('xpack.searchHomepage.cloudResources.billing.title', {
+        defaultMessage: 'Cloud Billing and Usage',
+      }),
+      description: i18n.translate('xpack.searchHomepage.cloudResources.billing.description', {
+        defaultMessage:
+          'Get a detailed breakdown of your organization’s cloud resource usage across your deployments.',
+      }),
+      actionText: i18n.translate('xpack.searchHomepage.cloudResources.billing.actionText', {
+        defaultMessage: 'Go to Billing',
+      }),
+      actionHref: billingUrl,
+    },
+    {
+      icon: (assetBasePath: string) => `${assetBasePath}/search_analytics.svg`,
+      title: i18n.translate('xpack.searchHomepage.cloudResources.autoops.title', {
+        defaultMessage: 'Cluster performance insights',
+      }),
+      description: i18n.translate('xpack.searchHomepage.cloudResources.autoops.description', {
+        defaultMessage:
+          'Enable AutoOps for performance recommendations, resource utilization, and cost insights.',
+      }),
+      actionText: i18n.translate('xpack.searchHomepage.cloudResources.autoops.actionText', {
+        defaultMessage: 'AutoOps',
+      }),
+      actionHref: cloud?.performanceUrl ?? '',
+    },
+  ];
+  const HOSTED_CARDS: ResourceCardProps[] = [
+    {
+      icon: (assetBasePath: string) => `${assetBasePath}/search_cloud_deploy.svg`,
+      title: i18n.translate('xpack.searchHomepage.cloudResources.cloudConnect.title', {
+        defaultMessage: 'Cloud Connect',
+      }),
+      description: i18n.translate('xpack.searchHomepage.cloudResources.cloudConnect.description', {
+        defaultMessage:
+          'Use Elastic Cloud services like AutoOps and Elastic Inference Service in your self-managed clusters.',
+      }),
+      actionText: i18n.translate('xpack.searchHomepage.cloudResources.cloudConnect.actionText', {
+        defaultMessage: 'Connect this cluster',
+      }),
+      actionHref: docLinks.cloudConnect,
+    },
+    {
+      icon: (assetBasePath: string) => `${assetBasePath}/search_serverless.svg`,
+      title: i18n.translate('xpack.searchHomepage.cloudResources.elasticCloud.title', {
+        defaultMessage: 'Try manage Elastic',
+      }),
+      description: i18n.translate('xpack.searchHomepage.cloudResources.elasticCloud.description', {
+        defaultMessage:
+          'Deploy, scale and upgrade your stack faster with Elastic Cloud. We’ll help you quickly move your data.',
+      }),
+      actionText: i18n.translate('xpack.searchHomepage.cloudResources.elasticCloud.actionText', {
+        defaultMessage: 'Elastic Cloud',
+      }),
+      actionHref: docLinks.elasticCloud,
+    },
+  ];
+
+  const cards = isServerless ? SERVERLESS_CARDS : HOSTED_CARDS;
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -141,13 +176,13 @@ export const CloudResources = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup>
-          {CLOUD_RESOURCE_CARDS.map((card, index) => (
+          {cards.map((card, index) => (
             <EuiFlexItem key={`resource-${index}`}>
               <ResourceCard
                 title={card.title}
                 icon={card.icon}
                 description={card.description}
-                actionHref={card.type === 'billing' ? billingUrl : cloud?.performanceUrl ?? ''}
+                actionHref={card.actionHref}
                 actionText={card.actionText}
               />
             </EuiFlexItem>
