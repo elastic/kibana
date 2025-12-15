@@ -250,4 +250,104 @@ describe('Slack action params validation', () => {
       });
     });
   });
+
+  describe('channels', () => {
+    it('should fail when all channel variables are undefined', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text' },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: ['Channel ID is required.'],
+        },
+      });
+    });
+
+    it('should fail when all channel variables are empty', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelNames: [], channels: [], channelIds: [] },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: ['Channel ID is required.'],
+        },
+      });
+    });
+
+    it('should not fail when channelNames is set', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelNames: ['#test'] },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: [],
+        },
+      });
+    });
+
+    it('should not fail when channelIds is set', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelIds: ['channel-id'] },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: [],
+        },
+      });
+    });
+
+    it('should not fail when channels is set', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channels: ['my-channel'] },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: [],
+        },
+      });
+    });
+
+    it('should not fail if channel names do not start with #', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelNames: ['test'] },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: ['Channel name must start with a #'],
+        },
+      });
+    });
+  });
+
+  describe('default values', () => {
+    it('sets the default values as expected', () => {
+      expect(connectorTypeModel.defaultActionParams).toEqual({
+        subAction: 'postMessage',
+        subActionParams: { text: undefined },
+      });
+
+      expect(connectorTypeModel.defaultRecoveredActionParams).toEqual({
+        subAction: 'postMessage',
+        subActionParams: { text: undefined },
+      });
+    });
+  });
 });

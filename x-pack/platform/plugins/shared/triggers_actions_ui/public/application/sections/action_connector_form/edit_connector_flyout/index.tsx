@@ -78,6 +78,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
+  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -97,7 +98,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
     Record<string, unknown>
-  >({});
+  >(actionTypeModel.defaultActionParams ?? {});
+
   const [testExecutionResult, setTestExecutionResult] =
     useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
 
@@ -119,7 +121,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
   const disabled = !isFormModified || hasErrors || isSaving;
 

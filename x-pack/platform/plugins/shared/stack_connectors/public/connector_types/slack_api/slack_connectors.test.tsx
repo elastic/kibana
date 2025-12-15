@@ -36,7 +36,7 @@ describe('SlackActionFields renders', () => {
       secrets: {},
       config: {},
       id: 'test',
-      actionTypeId: '.slack-api',
+      actionTypeId: '.slack_api',
       name: 'slack',
       isDeprecated: false,
     };
@@ -187,7 +187,7 @@ describe('SlackActionFields renders', () => {
       },
       config: { allowedChannels: [{ id: 'channel-id', name: '#test' }] },
       id: 'test',
-      actionTypeId: '.slack-api',
+      actionTypeId: '.slack_api',
       name: 'slack',
       isDeprecated: false,
     };
