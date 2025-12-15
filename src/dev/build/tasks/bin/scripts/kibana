@@ -30,12 +30,10 @@ fi
 
 NODE="${DIR}/node/default/bin/node"
 {{#linux}}
-GLIBC_217_NODE="${DIR}/node/glibc-217/bin/node"
 if ! "$NODE" --version >/dev/null 2>&1; then
-  NODE="$GLIBC_217_NODE"
+  NODE="${DIR}/node/glibc-217/bin/node"
 fi
 {{/linux}}
-
 {{#serverless}}
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
