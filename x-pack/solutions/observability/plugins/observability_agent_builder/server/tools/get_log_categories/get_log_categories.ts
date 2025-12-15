@@ -12,8 +12,8 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat
 import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
@@ -53,7 +53,10 @@ export function createGetLogCategoriesTool({
   core,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
 }): StaticToolRegistration<typeof getLogsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
@@ -137,7 +140,7 @@ export function createGetLogCategoriesTool({
   return toolDefinition;
 }
 
-async function getFilteredLogCategories({
+export async function getFilteredLogCategories({
   esClient,
   logsIndices,
   boolQuery,

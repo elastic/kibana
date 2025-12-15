@@ -83,16 +83,9 @@ export function createESQLQuery({ metric, dimensions = [], filters = {} }: Creat
     );
   });
 
-  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !(dim.name in filters));
   const queryPipeline = source.pipe(
     ...whereConditions,
-    unfilteredDimensions.length > 0
-      ? where(
-          unfilteredDimensions
-            .map((dim) => `${sanitazeESQLInput(dim.name)} IS NOT NULL`)
-            .join(' AND ')
-        )
-      : (query) => query,
+    (query) => query,
     stats(
       `${createMetricAggregation({
         instrument,

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createAgentNotFoundError, createBadRequestError } from '@kbn/onechat-common';
 import type { AgentDefinition } from '@kbn/onechat-common/agents';
 import { validateAgentId } from '@kbn/onechat-common/agents';
+import type { AgentAvailabilityContext, AgentAvailabilityResult } from '@kbn/onechat-server/agents';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
   AgentCreateRequest,
   AgentListOptions,
@@ -18,8 +22,14 @@ import type {
 import type { WritableAgentProvider, ReadonlyAgentProvider } from './agent_source';
 import { isReadonlyProvider } from './agent_source';
 
-// for now it's the same
-export type InternalAgentDefinition = AgentDefinition;
+// internal definition for our agents
+export type InternalAgentDefinition = AgentDefinition & {
+  isAvailable: InternalAgentDefinitionAvailabilityHandler;
+};
+
+export type InternalAgentDefinitionAvailabilityHandler = (
+  ctx: AgentAvailabilityContext
+) => MaybePromise<AgentAvailabilityResult>;
 
 export interface AgentRegistry {
   has(agentId: string): Promise<boolean>;
@@ -32,9 +42,11 @@ export interface AgentRegistry {
 
 interface CreateAgentRegistryOpts {
   request: KibanaRequest;
-  space: string;
+  spaceId: string;
   persistedProvider: WritableAgentProvider;
   builtinProvider: ReadonlyAgentProvider;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export const createAgentRegistry = (opts: CreateAgentRegistryOpts): AgentRegistry => {
@@ -42,12 +54,27 @@ export const createAgentRegistry = (opts: CreateAgentRegistryOpts): AgentRegistr
 };
 
 class AgentRegistryImpl implements AgentRegistry {
+  private readonly request: KibanaRequest;
+  private readonly spaceId: string;
   private readonly persistedProvider: WritableAgentProvider;
   private readonly builtinProvider: ReadonlyAgentProvider;
+  private readonly uiSettings: UiSettingsServiceStart;
+  private readonly savedObjects: SavedObjectsServiceStart;
 
-  constructor({ persistedProvider, builtinProvider }: CreateAgentRegistryOpts) {
+  constructor({
+    request,
+    spaceId,
+    persistedProvider,
+    builtinProvider,
+    uiSettings,
+    savedObjects,
+  }: CreateAgentRegistryOpts) {
+    this.request = request;
+    this.spaceId = spaceId;
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
+    this.uiSettings = uiSettings;
+    this.savedObjects = savedObjects;
   }
 
   private get orderedProviders() {
@@ -66,7 +93,11 @@ class AgentRegistryImpl implements AgentRegistry {
   async get(agentId: string): Promise<InternalAgentDefinition> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
-        return provider.get(agentId);
+        const agent = await provider.get(agentId);
+        if (!(await this.isAvailable(agent))) {
+          throw createBadRequestError(`Agent ${agentId} is not available`);
+        }
+        return agent;
       }
     }
     throw createAgentNotFoundError({ agentId });
@@ -76,7 +107,11 @@ class AgentRegistryImpl implements AgentRegistry {
     const allAgents: InternalAgentDefinition[] = [];
     for (const provider of this.orderedProviders) {
       const providerAgents = await provider.list(opts);
-      allAgents.push(...providerAgents);
+      for (const agent of providerAgents) {
+        if (await this.isAvailable(agent)) {
+          allAgents.push(agent);
+        }
+      }
     }
     return allAgents;
   }
@@ -120,5 +155,19 @@ class AgentRegistryImpl implements AgentRegistry {
       }
     }
     throw createAgentNotFoundError({ agentId });
+  }
+
+  private async isAvailable(agent: InternalAgentDefinition): Promise<boolean> {
+    const soClient = this.savedObjects.getScopedClient(this.request);
+    const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+
+    const context: AgentAvailabilityContext = {
+      spaceId: this.spaceId,
+      request: this.request,
+      uiSettings: uiSettingsClient,
+    };
+
+    const status = await agent.isAvailable(context);
+    return status.status === 'available';
   }
 }
