@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiMarkdownEditor, EuiTitle, EuiSpacer, EuiFlexGroup, EuiButtonIcon, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import type { Condition } from '@kbn/streamlang';
 import { isFeatureWithFilter, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +40,7 @@ export const FeatureDetailExpanded = ({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize='xs' css={{ padding: '24px 24px 0 0' }}>
+    <EuiFlexGroup direction="column" gutterSize="xs" css={{ padding: '24px 24px 0 0' }}>
       <EuiTitle size="xxs">
         <h3>
           {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
@@ -90,7 +96,6 @@ export const FeatureDetailExpanded = ({
           />
           <EuiHorizontalRule />
         </EuiFlexGroup>
-        
       )}
     </EuiFlexGroup>
   );
