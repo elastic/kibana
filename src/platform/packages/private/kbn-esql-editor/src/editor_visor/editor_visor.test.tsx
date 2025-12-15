@@ -95,7 +95,7 @@ describe('Quick search visor', () => {
     });
 
     expect(props.onUpdateAndSubmitQuery).toHaveBeenCalledWith(
-      'FROM test_index | WHERE KQL("error")'
+      'FROM test_index | WHERE KQL("""error""")'
     );
   });
 });

@@ -15,11 +15,36 @@ import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /** User profile data keys that are allowed to be updated by Cloud users */
-const ALLOWED_KEYS_UPDATE_CLOUD = [
-  'userSettings.darkMode',
-  'userSettings.contrastMode',
-  'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
-];
+const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode', 'userSettings.contrastMode'];
+
+const MAX_STRING_FIELD_LENGTH = 1024;
+
+const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
+
+const userProfileUpdateSchema = schema.object({
+  avatar: schema.maybe(
+    schema.object({
+      initials: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      color: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      imageUrl: schema.nullable(schema.string()),
+    })
+  ),
+  userSettings: schema.maybe(
+    schema.object({
+      darkMode: schema.maybe(
+        schema.oneOf([
+          schema.literal('system'),
+          schema.literal('dark'),
+          schema.literal('light'),
+          schema.literal('space_default'),
+        ])
+      ),
+      contrastMode: schema.maybe(
+        schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
+      ),
+    })
+  ),
+});
 
 export function defineUpdateUserProfileDataRoute({
   router,
@@ -39,7 +64,12 @@ export function defineUpdateUserProfileDataRoute({
         },
       },
       validate: {
-        body: schema.recordOf(schema.string(), schema.any()),
+        body: userProfileUpdateSchema,
+      },
+      options: {
+        body: {
+          maxBytes: MAX_USER_PROFILE_DATA_SIZE_BYTES,
+        },
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

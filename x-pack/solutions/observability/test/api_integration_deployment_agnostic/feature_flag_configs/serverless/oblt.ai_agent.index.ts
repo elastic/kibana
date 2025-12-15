@@ -8,6 +8,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Serverless Observability feature flag testing - Deployment-agnostic Observability Agent API integration tests', function () {
-    loadTestFile(require.resolve('../../apis/observability_agent/index.ts'));
+    loadTestFile(require.resolve('../../apis/observability_agent_builder/index.ts'));
   });
 }

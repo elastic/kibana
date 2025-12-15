@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/features-plugin'
   - '@kbn/fleet-plugin'
+  - '@kbn/kubernetes-security-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/lists-plugin'
   - '@kbn/maps-plugin'
@@ -254,7 +255,6 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/onechat-genai-utils'
   - '@kbn/onechat-server'
-  - '@kbn/core-analytics-server-mocks'
   - '@kbn/object-utils'
   - '@kbn/onechat-plugin'
   - '@kbn/onechat-common'
@@ -263,7 +263,14 @@ dependsOn:
   - '@kbn/response-ops-rule-form'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/connector-schemas'
+  - '@kbn/deeplinks-analytics'
   - '@kbn/tour-queue'
+  - '@kbn/shared-ux-file-types'
+  - '@kbn/onechat-common'
+  - '@kbn/onechat-plugin'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/onechat-browser'
+  - '@kbn/ai-assistant-common'
 tags:
   - plugin
   - prod

@@ -33,6 +33,7 @@
       "fieldFormats",
       "inference",
       "inspector",
+      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -63,7 +64,8 @@
       "telemetry",
       "elasticAssistantSharedState",
       "onechat",
-      "llmTasks"
+      "llmTasks",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -79,7 +81,8 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "onechat"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -90,7 +93,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "onechat"
     ],
     "extraPublicDirs": [
       "common"

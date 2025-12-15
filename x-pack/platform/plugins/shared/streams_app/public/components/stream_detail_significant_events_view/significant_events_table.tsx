@@ -23,6 +23,7 @@ import { SignificantEventsHistogramChart } from './significant_events_histogram'
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
+import { SeverityBadge } from './severity_badge';
 
 export function SignificantEventsTable({
   definition,
@@ -66,6 +67,7 @@ export function SignificantEventsTable({
             href={discoverLocator.getRedirectUrl(
               buildDiscoverParams(record.query, definition, timeState)
             )}
+            data-test-subj="significant_events_table_discover_link"
           >
             {record.query.title}
           </EuiLink>
@@ -104,6 +106,7 @@ export function SignificantEventsTable({
                 defaultMessage: 'Open feature details',
               }
             )}
+            data-test-subj="significant_events_table_feature_badge"
           >
             {query.feature?.name ?? '--'}
           </EuiBadge>
@@ -121,6 +124,15 @@ export function SignificantEventsTable({
         }
 
         return <EuiCodeBlock paddingSize="none">{JSON.stringify(query.kql.query)}</EuiCodeBlock>;
+      },
+    },
+    {
+      field: 'query',
+      name: i18n.translate('xpack.streams.significantEventsTable.severityColumnTitle', {
+        defaultMessage: 'Severity',
+      }),
+      render: (query: StreamQuery) => {
+        return <SeverityBadge score={query.severity_score} />;
       },
     },
     {
@@ -163,6 +175,7 @@ export function SignificantEventsTable({
             discoverLocator?.navigate(buildDiscoverParams(item.query, definition, timeState));
           },
           isPrimary: true,
+          'data-test-subj': 'significant_events_table_open_in_discover_action',
         },
         {
           icon: 'pencil',
@@ -180,6 +193,7 @@ export function SignificantEventsTable({
           onClick: (item) => {
             onEditClick?.(item);
           },
+          'data-test-subj': 'significant_events_table_edit_query_action',
         },
         {
           icon: 'trash',
@@ -229,6 +243,7 @@ export function SignificantEventsTable({
       )}
       {isDeleteModalVisible && selectedDeleteItem && (
         <EuiConfirmModal
+          data-test-subj="significant_events_table_delete_confirm_modal"
           aria-labelledby={'deleteSignificantModal'}
           title={i18n.translate(
             'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventLabel',

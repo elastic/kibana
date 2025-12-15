@@ -8,4 +8,3 @@
 export { ToolsService } from './tools_service';
 export type { ToolsServiceSetup, ToolsServiceStart } from './types';
 export type { ToolRegistry } from './tool_registry';
-export { registerBuiltinTools } from './builtin';

@@ -19,8 +19,9 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -29,17 +30,18 @@ import { from, concatMap } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
-import { defaultQuery } from './utils/default_query';
+import { defaultQuery, NO_FEATURE } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { FeaturesSelector } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
-import { useAIFeatures } from './generated_flow_form/use_ai_features';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 
 interface Props {
   onClose: () => void;
@@ -114,6 +116,12 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(() => {
+    let numberOfGeneratedQueries = 0;
+    const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
+      system: 0,
+    };
+    let inputTokensUsed = 0;
+    let outputTokensUsed = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
     if (!connector || selectedFeatures.length === 0) {
       return;
@@ -127,23 +135,33 @@ export function AddSignificantEventFlyout({
       .pipe(
         concatMap((feature) =>
           generate(connector, feature).pipe(
-            concatMap((result) => {
-              const validation = validateQuery({
-                title: result.query.title,
-                kql: { query: result.query.kql },
-              });
+            concatMap(({ queries: nextQueries, tokensUsed }) => {
+              numberOfGeneratedQueries += nextQueries.length;
+              numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
+              inputTokensUsed += tokensUsed.prompt;
+              outputTokensUsed += tokensUsed.completion;
 
-              if (!validation.kql.isInvalid) {
-                setGeneratedQueries((prev) => [
-                  ...prev,
-                  {
+              setGeneratedQueries((prev) => [
+                ...prev,
+                ...nextQueries
+                  .filter((nextQuery) => {
+                    const validation = validateQuery({
+                      title: nextQuery.title,
+                      kql: { query: nextQuery.kql },
+                    });
+
+                    return validation.kql.isInvalid === false;
+                  })
+                  .map((nextQuery) => ({
                     id: v4(),
-                    kql: { query: result.query.kql },
-                    title: result.query.title,
-                    feature: result.query.feature,
-                  },
-                ]);
-              }
+                    kql: { query: nextQuery.kql },
+                    title: nextQuery.title,
+                    feature: nextQuery.feature,
+                    severity_score: nextQuery.severity_score,
+                    evidence: nextQuery.evidence,
+                  })),
+              ]);
+
               return [];
             })
           )
@@ -174,12 +192,27 @@ export function AddSignificantEventFlyout({
           });
           telemetryClient.trackSignificantEventsSuggestionsGenerate({
             duration_ms: Date.now() - startTime,
+            input_tokens_used: inputTokensUsed,
+            output_tokens_used: outputTokensUsed,
+            count: numberOfGeneratedQueries,
+            count_by_feature_type: numberOfGeneratedQueriesByFeature,
+            features_selected: selectedFeatures.length,
+            features_total: features.length,
+            stream_name: definition.name,
             stream_type: getStreamTypeFromDefinition(definition),
           });
           setIsGenerating(false);
         },
       });
-  }, [aiFeatures, definition, generate, notifications, telemetryClient, selectedFeatures]);
+  }, [
+    aiFeatures?.genAiConnectors.selectedConnector,
+    selectedFeatures,
+    generate,
+    notifications,
+    telemetryClient,
+    features.length,
+    definition,
+  ]);
 
   useEffect(() => {
     if (initialFlow === 'ai' && initialSelectedFeatures.length > 0) {
@@ -256,24 +289,22 @@ export function AddSignificantEventFlyout({
                       selectedFeatures={selectedFeatures}
                       onFeaturesChange={setSelectedFeatures}
                     />
-                    <EuiButton
-                      iconType="sparkles"
-                      fill
-                      isLoading={isGenerating}
-                      disabled={
-                        isSubmitting ||
-                        selectedFeatures.length === 0 ||
-                        !aiFeatures?.genAiConnectors?.selectedConnector
-                      }
-                      onClick={generateQueries}
-                    >
-                      {i18n.translate(
-                        'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
-                        {
-                          defaultMessage: 'Generate suggestions',
-                        }
-                      )}
-                    </EuiButton>
+                    <EuiSpacer size="m" />
+                    <ConnectorListButton
+                      buttonProps={{
+                        iconType: 'sparkles',
+                        isLoading: isGenerating,
+                        isDisabled: isSubmitting || selectedFeatures.length === 0,
+                        onClick: generateQueries,
+                        'data-test-subj': 'significant_events_flyout_generate_suggestions_button',
+                        children: i18n.translate(
+                          'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
+                          {
+                            defaultMessage: 'Generate suggestions',
+                          }
+                        ),
+                      }}
+                    />
                   </>
                 )}
               </EuiPanel>
@@ -353,7 +384,16 @@ export function AddSignificantEventFlyout({
                 }}
               >
                 <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                  <EuiButtonEmpty color="primary" onClick={() => onClose()} disabled={isSubmitting}>
+                  <EuiButtonEmpty
+                    color="primary"
+                    onClick={() => onClose()}
+                    disabled={isSubmitting}
+                    data-test-subj={
+                      selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_cancel_button'
+                        : 'significant_events_ai_generate_cancel_button'
+                    }
+                  >
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
                       { defaultMessage: 'Cancel' }
@@ -371,17 +411,39 @@ export function AddSignificantEventFlyout({
                         case 'manual':
                           onSave({
                             type: 'single',
-                            query: queries[0],
+                            query: {
+                              ...queries[0],
+                              feature: queries[0].feature
+                                ? queries[0].feature.name === NO_FEATURE.name
+                                  ? undefined
+                                  : omit(queries[0].feature, 'description')
+                                : undefined,
+                            },
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
                           break;
                         case 'ai':
-                          onSave({ type: 'multiple', queries }).finally(() =>
-                            setIsSubmitting(false)
-                          );
+                          onSave({
+                            type: 'multiple',
+                            queries: queries.map((nextQuery) => ({
+                              ...nextQuery,
+                              feature: nextQuery.feature
+                                ? nextQuery.feature.name === NO_FEATURE.name
+                                  ? undefined
+                                  : omit(nextQuery.feature, 'description')
+                                : undefined,
+                            })),
+                          }).finally(() => setIsSubmitting(false));
                           break;
                       }
                     }}
+                    data-test-subj={
+                      isEditMode
+                        ? 'significant_events_edit_save_button'
+                        : selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_save_button'
+                        : 'significant_events_ai_generate_save_button'
+                    }
                   >
                     {selectedFlow === 'manual'
                       ? isEditMode

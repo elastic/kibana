@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import type { Response as SupertestResponse } from 'supertest';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const actionTypeIdsFromSpecs = new Set(
+  Object.values(connectorsSpecs).map(({ metadata }) => `actions:${metadata.id}`)
+);
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -46,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('check_registered_task_types', () => {
     it('should check changes on all registered task types', async () => {
       const types = (await getRegisteredTypes())
-        .filter((t: string) => !TEST_TYPES.includes(t))
+        .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
       expect(types).to.eql([
         'Fleet-Metrics-Task',
@@ -60,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
         'SampleDataIngest:InstallSampleData',
         'Synthetics:Clean-Up-Package-Policies',
+        'Synthetics:Sync-Global-Params-Private-Locations',
         'Synthetics:Sync-Private-Location-Monitors',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',
@@ -164,8 +170,10 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_analytics:monitoring:privileges:engine',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'entity_store:health',
         'entity_store:snapshot',
         'fleet:agent-status-change-task',
+        'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
         'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
@@ -177,6 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:policy-revisions-cleanup-task',
         'fleet:privilege_level_change:retry',
         'fleet:reassign_action:retry',
+        'fleet:reindex_integration_knowledge',
         'fleet:request_diagnostics:retry',
         'fleet:setup',
         'fleet:setup:upgrade_managed_package_policies',

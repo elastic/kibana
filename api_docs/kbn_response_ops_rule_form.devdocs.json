@@ -1657,6 +1657,27 @@
             "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormPlugins.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3284,13 +3305,13 @@
         "label": "RuleDashboardsPlugins",
         "description": [],
         "signature": [
-          "{ contentManagement?: ",
+          "{ uiActions?: ",
           {
-            "pluginId": "contentManagement",
+            "pluginId": "uiActions",
             "scope": "public",
-            "docId": "kibContentManagementPluginApi",
-            "section": "def-public.ContentManagementPublicStart",
-            "text": "ContentManagementPublicStart"
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           " | undefined; }"
         ],

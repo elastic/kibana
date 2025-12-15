@@ -1,25 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/exploratory-view-example-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": "@elastic/obs-presentation-team",
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "exploratoryViewExample",
     "server": false,
     "browser": true,
-    "configPath": [
-      "exploratory_view_example"
-    ],
-    "requiredPlugins": [
-      "cases",
-      "data",
-      "developerExamples",
-      "embeddable",
-      "observability"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "configPath": ["exploratory_view_example"],
+    "requiredPlugins": ["cases", "data", "developerExamples", "embeddable", "observability"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

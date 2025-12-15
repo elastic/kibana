@@ -17,9 +17,10 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { generateStreamDescription } from '@kbn/streams-ai';
+import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
+import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/promps_config_service';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
@@ -97,6 +98,7 @@ export const deleteFeatureRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<StorageClientDeleteResponse> => {
     const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -113,6 +115,9 @@ export const deleteFeatureRoute = createServerRoute({
       throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
     }
 
+    logger
+      .get('feature_identification')
+      .debug(`Deleting feature ${featureType}/${featureName} for stream ${name}`);
     return await featureClient.deleteFeature(name, { type: featureType, name: featureName });
   },
 });
@@ -248,6 +253,7 @@ export const bulkFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<StorageClientBulkResponse> => {
     const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -267,6 +273,11 @@ export const bulkFeaturesRoute = createServerRoute({
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
+    logger
+      .get('feature_identification')
+      .debug(
+        `Performing bulk feature operation with ${operations.length} operations for stream ${name}`
+      );
     return await featureClient.bulk(name, operations);
   },
 });
@@ -305,6 +316,7 @@ export const identifyFeaturesRoute = createServerRoute({
       uiSettingsClient,
       streamsClient,
       inferenceClient,
+      soClient,
     } = await getScopedClients({
       request,
     });
@@ -332,6 +344,12 @@ export const identifyFeaturesRoute = createServerRoute({
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
     const signal = getRequestAbortSignal(request);
     const featureRegistry = getDefaultFeatureRegistry();
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    const { featurePromptOverride } = await promptsConfigService.getPrompt();
 
     return from(
       featureRegistry.identifyFeatures({
@@ -339,16 +357,18 @@ export const identifyFeaturesRoute = createServerRoute({
         end: end.getTime(),
         esClient,
         inferenceClient: boundInferenceClient,
-        logger,
+        logger: logger.get('feature_identification'),
         stream,
         features: hits,
         signal,
+        systemPromptOverride: featurePromptOverride,
       })
     ).pipe(
-      map(({ features }) => {
+      map(({ features, tokensUsed }) => {
         return {
           type: 'identified_features',
           features,
+          tokensUsed,
         };
       })
     );
@@ -380,6 +400,7 @@ export const describeStreamRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<Observable<StreamDescriptionEvent>> => {
     const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
       await getScopedClients({
@@ -411,12 +432,22 @@ export const describeStreamRoute = createServerRoute({
         start: start.valueOf(),
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
+        logger: logger.get('stream_description'),
       })
     ).pipe(
-      map((description) => {
+      map((result) => {
         return {
           type: 'stream_description',
-          description,
+          description: result.description,
+          tokensUsed: sumTokens(
+            {
+              prompt: 0,
+              completion: 0,
+              total: 0,
+              cached: 0,
+            },
+            result.tokensUsed
+          ),
         };
       })
     );

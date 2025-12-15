@@ -30,11 +30,7 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({
-    logger,
-    workflowsManagement,
-    trackingService,
-  }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
@@ -87,6 +83,8 @@ export class ServiceManager {
       spaces,
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       getRunner,
       toolsService: tools,
     });
@@ -96,6 +94,7 @@ export class ServiceManager {
       security,
       elasticsearch,
       inference,
+      spaces,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,

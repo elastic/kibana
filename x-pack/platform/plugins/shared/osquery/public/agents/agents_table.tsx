@@ -342,6 +342,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
           <EuiComboBox
             data-test-subj="agentSelection"
             placeholder={SELECT_AGENT_LABEL}
+            aria-label={AGENT_SELECTION_LABEL}
             isLoading={agentsLoading || modifyingSearch}
             options={options}
             isClearable={true}

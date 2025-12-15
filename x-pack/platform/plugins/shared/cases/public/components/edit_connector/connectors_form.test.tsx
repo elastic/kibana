@@ -13,21 +13,19 @@ import { basicCase, connectorsMock } from '../../containers/mock';
 import { ConnectorsForm } from './connectors_form';
 import type { CaseConnectors } from '../../containers/types';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
-import { choices, resilientIncidentTypes, resilientSeverity } from '../connectors/mock';
+import { choices } from '../connectors/mock';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
-import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetFields } from '../connectors/resilient/use_get_fields';
 import { renderWithTestingProviders } from '../../common/mock';
+import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../connectors/resilient/use_get_incident_types');
-jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/resilient/use_get_fields');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('ConnectorsForm ', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -68,11 +66,7 @@ describe('ConnectorsForm ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useGetChoicesMock.mockReturnValue({ isLoading: false, data: { data: choices } });
-    useGetIncidentTypesMock.mockReturnValue({
-      isLoading: false,
-      data: { data: resilientIncidentTypes },
-    });
-    useGetSeverityMock.mockReturnValue({ isLoading: false, data: { data: resilientSeverity } });
+    useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
   });
 
   it('renders correctly', async () => {

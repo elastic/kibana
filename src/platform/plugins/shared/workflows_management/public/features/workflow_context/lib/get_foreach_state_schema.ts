@@ -10,7 +10,8 @@
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
 import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from './errors';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { VARIABLE_REGEX } from '../../../../common/lib/regex';
 import {
@@ -27,75 +28,102 @@ export function getForeachStateSchema(
   let itemSchema: z.ZodType = z.unknown();
   const cleanedForeachParam =
     foreachStep.foreach.match(VARIABLE_REGEX)?.groups?.key ?? foreachStep.foreach;
-  itemSchema = getForeachItemSchema(stepContextSchema, cleanedForeachParam);
-  return ForEachContextSchema.extend({
-    item: itemSchema,
-    items: z.array(itemSchema),
-  });
+  try {
+    itemSchema = getForeachItemSchema(stepContextSchema, cleanedForeachParam);
+    return ForEachContextSchema.extend({
+      item: itemSchema,
+      items: z.array(itemSchema),
+    });
+  } catch (error) {
+    if (error instanceof InvalidForeachParameterError) {
+      itemSchema = z.unknown().describe(error.message);
+      return ForEachContextSchema.extend({
+        item: itemSchema,
+        items: z.array(itemSchema),
+      });
+    } else {
+      throw error;
+    }
+  }
 }
 
-const extractForeachItemSchemaFromJson = (foreachParam: string) => {
+const extractForeachItemSchemaFromJson = (foreachParam: string): z.ZodType => {
   try {
     const json = JSON.parse(foreachParam);
     if (!Array.isArray(json)) {
-      return z.any().describe(`Expected array for foreach iteration, but got: ${typeof json}`);
+      throw new InvalidForeachParameterError(
+        `Expected array for foreach iteration, but got: ${typeof json}`,
+        InvalidForeachParameterErrorCodes.INVALID_ARRAY
+      );
     }
-    if (json.length > 0) {
-      return inferZodType(json[0]);
+    if (json.length === 0) {
+      throw new InvalidForeachParameterError(
+        'Expected non-empty array for foreach iteration',
+        InvalidForeachParameterErrorCodes.INVALID_ARRAY
+      );
     }
-    return z.any().describe('Expected non-empty array for foreach iteration');
+    return inferZodType(json[0]);
   } catch (e) {
-    return z.any().describe('Unable to parse foreach parameter as JSON');
+    if (e instanceof InvalidForeachParameterError) {
+      throw e;
+    }
+    throw new InvalidForeachParameterError(
+      'Unable to parse foreach parameter as JSON',
+      InvalidForeachParameterErrorCodes.INVALID_JSON
+    );
   }
 };
 
 export function getForeachItemSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachParam: string
-) {
+): z.ZodType {
   const parsedPath = parseVariablePath(foreachParam);
   const iterateOverPath = parsedPath?.propertyPath;
 
   // If we have a valid variable path syntax (e.g., {{some.path}})
   if (parsedPath && !parsedPath.errors && iterateOverPath) {
-    let itemSchema: z.ZodType = z.unknown().describe('Unable to parse foreach parameter'); // we need this constant to have references in json schema
+    // eslint-disable-next-line prefer-const -- we need this constant to have references in json schema
+    let itemSchema: z.ZodType = z.unknown().describe('Unable to parse foreach parameter');
     const { schema: iterableSchema } = getSchemaAtPath(stepContextSchema, iterateOverPath);
     if (!iterableSchema) {
       // if we cannot resolve the path in the schema, we return an unknown schema
       return itemSchema;
     }
     if (iterableSchema instanceof z.ZodArray) {
-      itemSchema = iterableSchema.element;
-      return itemSchema;
+      return iterableSchema.element as z.ZodType;
     } else if (iterableSchema instanceof z.ZodLiteral) {
       // If the resolved path is a known literal string, we need to try to parse it as JSON
-      return extractForeachItemSchemaFromJson(iterableSchema.value);
+      const literalValue = iterableSchema.value;
+      if (typeof literalValue === 'string') {
+        return extractForeachItemSchemaFromJson(literalValue);
+      }
+      throw new InvalidForeachParameterError(
+        'Unable to parse foreach parameter: literal value is not a string',
+        InvalidForeachParameterErrorCodes.INVALID_LITERAL
+      );
     } else if (iterableSchema instanceof z.ZodString) {
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
-      return z.any().describe('Unable to determine foreach item type');
+      return z.unknown().describe('Unable to determine foreach item type');
     } else if (iterableSchema instanceof z.ZodUnion) {
-      const arrayOption = iterableSchema.options.find(
-        (option: z.ZodType) => option instanceof z.ZodArray
-      );
+      const arrayOption = iterableSchema.options.find((option) => option instanceof z.ZodArray);
       if (arrayOption && arrayOption instanceof z.ZodArray) {
-        return arrayOption.element;
+        return arrayOption.element as z.ZodType;
       } else {
-        return z
-          .any()
-          .describe(
-            `Expected array in union for foreach iteration, but no array type was found. Union options: [${iterableSchema.options
-              .map((opt: z.ZodType) => getZodTypeName(opt))
-              .join(', ')}]`
-          );
+        throw new InvalidForeachParameterError(
+          `Expected array in union for foreach iteration, but no array type was found. Union options: [${iterableSchema.options
+            .map((opt) => getZodTypeName(opt as z.ZodType))
+            .join(', ')}]`,
+          InvalidForeachParameterErrorCodes.INVALID_UNION
+        );
       }
     } else {
-      return z
-        .any()
-        .describe(
-          `Expected array for foreach iteration, but got ${getZodTypeName(
-            iterableSchema
-          )} (${getDetailedTypeDescription(iterableSchema)})`
-        );
+      throw new InvalidForeachParameterError(
+        `Expected array for foreach iteration, but got ${getZodTypeName(
+          iterableSchema
+        )} (${getDetailedTypeDescription(iterableSchema)})`,
+        InvalidForeachParameterErrorCodes.INVALID_TYPE
+      );
     }
   } else {
     // Not a valid variable path syntax or has errors, try to parse as JSON

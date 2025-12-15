@@ -72,6 +72,7 @@ export class IndexMgmtUIPlugin
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
   };
   private canUseSyntheticSource: boolean = false;
   private licensingSubscription?: Subscription;
@@ -94,6 +95,7 @@ export class IndexMgmtUIPlugin
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
+      enableFailureStoreRetentionDisabling,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
@@ -109,6 +111,7 @@ export class IndexMgmtUIPlugin
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
       enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
+      enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
   }
 

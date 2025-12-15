@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateChanges } from './validate_changes';
+import { validateChangesExistingType } from './validate_changes';
 import type { MigrationSnapshot } from '../types';
 import path from 'path';
 import fs from 'fs';
@@ -18,7 +18,7 @@ function loadSnapshot(filename: string): MigrationSnapshot {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-describe('validateChanges', () => {
+describe('validateChangesExistingType', () => {
   beforeEach(() => jest.clearAllMocks());
 
   const validateChangesWrapper = ({
@@ -32,7 +32,7 @@ describe('validateChanges', () => {
   }) => {
     const typeFrom = from.typeDefinitions[name];
     const typeTo = to.typeDefinitions[name];
-    return validateChanges({ from: typeFrom, to: typeTo });
+    return validateChangesExistingType({ from: typeFrom, to: typeTo });
   };
 
   it('should throw if migrations are deleted', () => {

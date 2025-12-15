@@ -18,7 +18,11 @@ export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
   }
 }
 
-export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
+export const NonEmptyString = z
+  .string()
+  .min(1)
+  .superRefine(isNonEmptyString)
+  .describe('A non-empty string.');
 
 /**
  * Checks that the input is a string that is not empty while allowing whitespace.
@@ -32,4 +36,8 @@ export function isNonEmptyOrWhitespace(input: string, ctx: z.RefinementCtx): voi
   }
 }
 
-export const NonEmptyOrWhitespaceString = z.string().min(1).superRefine(isNonEmptyOrWhitespace);
+export const NonEmptyOrWhitespaceString = z
+  .string()
+  .min(1)
+  .superRefine(isNonEmptyOrWhitespace)
+  .describe('A non-empty string or string with whitespace.');

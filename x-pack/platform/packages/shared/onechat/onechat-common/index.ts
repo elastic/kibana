@@ -85,6 +85,7 @@ export {
   AgentExecutionErrorCode,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
   type AgentAnswerStepConfiguration,

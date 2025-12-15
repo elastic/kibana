@@ -24,6 +24,7 @@ import {
   ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
+  isElasticsearchRole,
 } from '../../../../common/services';
 import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';
@@ -88,6 +89,18 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       const serversConfigDir = projectUse.serversConfigDir;
       const configInstance = createScoutConfig(serversConfigDir, projectUse.configName, log);
 
+      log.info(
+        `Running tests against ${
+          configInstance.isCloud
+            ? configInstance.serverless
+              ? `MKI ${configInstance.projectType} project`
+              : 'ECH deployment'
+            : `local ${
+                configInstance.serverless ? `serverless ${configInstance.projectType}` : 'stateful'
+              } cluster`
+        }`
+      );
+
       use(configInstance);
     },
     { scope: 'worker' },
@@ -150,10 +163,6 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
       const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
 
-      const isElasticsearchRole = (role: any): role is ElasticsearchRoleDescriptor => {
-        return 'applications' in role;
-      };
-
       const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
         const newRoleHash = JSON.stringify(role);
 
@@ -174,12 +183,16 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
         if (isElasticsearchRole(role)) {
           await createElasticsearchCustomRole(esClient, customRoleName, role);
+          log.debug(`Created Elasticsearch custom role: ${customRoleName}`);
         } else {
           await createCustomRole(kbnClient, customRoleName, role);
+          log.debug(`Created Kibana custom role: ${customRoleName}`);
         }
 
         customRoleHash = newRoleHash;
       };
+      // Hide the announcements (including the sidenav tour) in the default space
+      await kbnClient.uiSettings.update({ hideAnnouncements: true });
 
       await use({ session, customRoleName, setCustomRole });
 

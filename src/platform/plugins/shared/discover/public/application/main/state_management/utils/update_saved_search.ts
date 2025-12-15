@@ -10,7 +10,7 @@
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
-import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverAppState } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { TabState, TabStateGlobalState } from '../redux';

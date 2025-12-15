@@ -12,9 +12,9 @@ import {
   metaSchema,
   remoteSchema,
   sloDefinitionSchema,
-  type sloDefinitionWithHealthSchema,
   summarySchema,
 } from '../schema';
+import type { SLODefinitionResponse } from './routes/find_definition';
 
 const sloWithDataResponseSchema = t.intersection([
   sloDefinitionSchema,
@@ -25,9 +25,7 @@ const sloWithDataResponseSchema = t.intersection([
   }),
 ]);
 
-type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionSchema>;
-type SLODefinitionWithHealthResponse = t.OutputOf<typeof sloDefinitionWithHealthSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
 export { sloWithDataResponseSchema };
-export type { SLODefinitionResponse, SLODefinitionWithHealthResponse, SLOWithSummaryResponse };
+export type { SLODefinitionResponse, SLOWithSummaryResponse };

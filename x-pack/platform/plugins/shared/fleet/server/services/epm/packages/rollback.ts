@@ -10,6 +10,8 @@ import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { RollbackAvailableCheckResponse } from '../../../../common/types';
+
 import { PackageRollbackError } from '../../../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 
@@ -31,6 +33,45 @@ export const isIntegrationRollbackTTLExpired = (installStartedAt: string): boole
   const ttlDuration = moment.duration(Number(numberPart), unitPart).asMilliseconds();
   return Date.parse(installStartedAt) < Date.now() - ttlDuration;
 };
+
+export async function rollbackAvailableCheck(
+  pkgName: string
+): Promise<RollbackAvailableCheckResponse> {
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  const packageSORes = await getPackageSavedObjects(savedObjectsClient, {
+    searchFields: ['name'],
+    search: pkgName,
+  });
+  const packageSO = packageSORes.saved_objects[0];
+  const packageVersion = packageSO?.attributes.version;
+
+  const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(
+    savedObjectsClient,
+    {
+      searchFields: ['package.name'],
+      search: pkgName,
+      spaceIds: ['*'],
+    }
+  );
+  const packagePolicySOs = packagePolicySORes.saved_objects;
+
+  if (
+    packagePolicySOs
+      .filter((so) => !so.id.endsWith(':prev'))
+      .some((so) => so.attributes.package?.version !== packageVersion)
+  ) {
+    return {
+      isAvailable: false,
+      reason: `Rollback not available because some integration policies are not upgraded to version ${packageVersion}`,
+    };
+  }
+
+  return {
+    isAvailable: true,
+  };
+}
 
 export async function rollbackInstallation(options: {
   esClient: ElasticsearchClient;

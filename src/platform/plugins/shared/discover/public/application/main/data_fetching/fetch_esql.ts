@@ -10,7 +10,7 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -43,6 +43,7 @@ export function fetchEsql({
   scopedProfilesManager,
   esqlVariables,
   searchSessionId,
+  projectRouting,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -56,6 +57,7 @@ export function fetchEsql({
   scopedProfilesManager: ScopedProfilesManager;
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -73,6 +75,7 @@ export function fetchEsql({
           searchContext: {
             timeRange,
             esqlVariables,
+            projectRouting,
           },
           searchSessionId,
         });
