@@ -41,6 +41,7 @@ expect.addSnapshotSerializer({
           .replaceAll(nodeVersion, '<node version>')
           .replace('<node version>/glibc-217', '<node version>/<node variant>')
           .replace('<node version>/pointer-compression', '<node version>/<node variant>')
+          .replace('<node version>/default', '<node version>/<node variant>')
           .replace(REPO_ROOT, '<absolute path>')
           .replace(/\\/g, '/')
       : '',
@@ -99,21 +100,28 @@ it('runs expected fs operations', async () => {
     Object {
       "copy": Array [
         Array [
-          <absolute path>/.node_binaries/<node version>/default/win32-x64/download/node.exe,
-          <absolute path>/.node_binaries/<node version>/default/win32-x64/extract/node.exe,
+          <absolute path>/.node_binaries/<node version>/<node variant>/win32-x64/download/node.exe,
+          <absolute path>/.node_binaries/<node version>/<node variant>/win32-x64/extract/node.exe,
           Object {
             "clone": true,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/default/win32-arm64/download/node.exe,
-          <absolute path>/.node_binaries/<node version>/default/win32-arm64/extract/node.exe,
+          <absolute path>/.node_binaries/<node version>/<node variant>/win32-arm64/download/node.exe,
+          <absolute path>/.node_binaries/<node version>/<node variant>/win32-arm64/extract/node.exe,
           Object {
             "clone": true,
           },
         ],
       ],
       "untar": Array [
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
         Array [
           <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
           <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
@@ -129,15 +137,22 @@ it('runs expected fs operations', async () => {
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/default/darwin-x64/download/node-v<node version>-darwin-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-x64/extract,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/download/node-v<node version>-darwin-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/extract,
+          <absolute path>/.node_binaries/<node version>/<node variant>/darwin-x64/download/node-v<node version>-darwin-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/darwin-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/darwin-arm64/download/node-v<node version>-darwin-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/darwin-arm64/extract,
           Object {
             "strip": 1,
           },
