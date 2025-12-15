@@ -139,8 +139,8 @@ class ToolRegistryImpl implements ToolRegistry {
     for (const provider of this.orderedProviders) {
       if (await provider.has(toolId)) {
         const tool = await provider.get(toolId);
-          if (!(await this.isAvailable(tool))) {
-            throw createBadRequestError(`Tool ${toolId} is not available`);
+        if (!(await this.isAvailable(tool))) {
+          throw createBadRequestError(`Tool ${toolId} is not available`);
         }
         return tool;
       }
