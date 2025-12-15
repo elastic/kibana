@@ -213,7 +213,7 @@ export const MathExpressionEditor: React.FC = () => {
           }}
           placeholder={i18n.translate('xpack.streams.math.editorPlaceholder', {
             defaultMessage:
-              'For example: \nfloor(attributes.duration_ms / 1000) \nor \nresource.a.size > resource.b.size',
+              'For example: \nattributes.duration_ms / 1000 \nor \nresource.a.size > resource.b.size',
           })}
           data-test-subj="streamsMathExpressionEditor-input"
         />
