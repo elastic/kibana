@@ -326,122 +326,30 @@ apiTest.describe(
     // === Validation Errors for Rejected Functions ===
     // Math processor generates error-throwing scripts for invalid expressions,
     // so errors are reported at runtime via simulation rather than during transpilation
-    apiTest('should report error for abs() via simulation', async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'abs(value)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
+    apiTest(
+      'should report errors for unsupported functions via simulation',
+      async ({ testBed }) => {
+        const rejectedCases = [
+          { expression: 'abs(value)', pattern: /abs.*not supported/i, doc: { value: -42 } },
+          { expression: 'sqrt(value)', pattern: /sqrt.*not supported/i, doc: { value: 144 } },
+          { expression: 'mod(value, 3)', pattern: /mod.*not supported/i, doc: { value: 10 } },
+          { expression: 'pi()', pattern: /pi.*not supported/i, doc: { dummy: 1 } },
+          { expression: 'mean(values)', pattern: /mean.*not supported/i, doc: { values: 10 } },
+          { expression: 'price * * quantity', pattern: /parse/i, doc: { price: 10, quantity: 5 } },
+        ];
 
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ value: -42 }];
-      const { errors } = await testBed.ingest('stream-e2e-test-math-abs-error', docs, processors);
+        for (let i = 0; i < rejectedCases.length; i++) {
+          const { expression, pattern, doc } = rejectedCases[i];
+          const streamlangDSL: StreamlangDSL = {
+            steps: [{ action: 'math', expression, to: 'result' } as MathProcessor],
+          };
+          const { processors } = transpile(streamlangDSL);
+          const { errors } = await testBed.ingest(`math-reject-${i}`, [doc], processors);
 
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].caused_by?.reason).toMatch(/abs.*not supported/i);
-    });
-
-    apiTest('should report error for sqrt() via simulation', async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'sqrt(value)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ value: 144 }];
-      const { errors } = await testBed.ingest('stream-e2e-test-math-sqrt-error', docs, processors);
-
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].caused_by?.reason).toMatch(/sqrt.*not supported/i);
-    });
-
-    apiTest('should report error for mod() via simulation', async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'mod(value, 3)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ value: 10 }];
-      const { errors } = await testBed.ingest('stream-e2e-test-math-mod-error', docs, processors);
-
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].caused_by?.reason).toMatch(/mod.*not supported/i);
-    });
-
-    apiTest('should report error for pi() via simulation', async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'pi()',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ dummy: 1 }];
-      const { errors } = await testBed.ingest('stream-e2e-test-math-pi-error', docs, processors);
-
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].caused_by?.reason).toMatch(/pi.*not supported/i);
-    });
-
-    apiTest('should report error for mean() via simulation', async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'mean(values)',
-            to: 'avg',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ values: 10 }];
-      const { errors } = await testBed.ingest('stream-e2e-test-math-mean-error', docs, processors);
-
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].caused_by?.reason).toMatch(/mean.*not supported/i);
-    });
-
-    apiTest('should report error for invalid syntax via simulation', async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'price * * quantity', // Invalid double operator
-            to: 'total',
-          } as MathProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ price: 10, quantity: 5 }];
-      const { errors } = await testBed.ingest(
-        'stream-e2e-test-math-syntax-error',
-        docs,
-        processors
-      );
-
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].caused_by?.reason).toMatch(/parse/i);
-    });
+          expect(errors.length).toBeGreaterThan(0);
+          expect(errors[0].caused_by?.reason).toMatch(pattern);
+        }
+      }
+    );
   }
 );

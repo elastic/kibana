@@ -375,115 +375,23 @@ apiTest.describe('Streamlang to ES|QL - Math Processor', { tag: ['@ess', '@svlOb
   );
 
   // === Validation Errors for Rejected Functions ===
-  apiTest('should throw error for abs()', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'abs(value)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
+  apiTest('should throw errors for unsupported functions and invalid syntax', async () => {
+    const rejectedCases = [
+      { expression: 'abs(value)', pattern: /abs.*not supported/i },
+      { expression: 'sqrt(value)', pattern: /sqrt.*not supported/i },
+      { expression: 'pow(base, 2)', pattern: /pow.*not supported/i },
+      { expression: 'mod(value, 3)', pattern: /mod.*not supported/i },
+      { expression: 'pi()', pattern: /pi.*not supported/i },
+      { expression: 'round(value)', pattern: /round.*not supported/i },
+      { expression: 'mean(values)', pattern: /mean.*not supported/i },
+      { expression: 'price * * quantity', pattern: /parse/i }, // Invalid syntax
+    ];
 
-    expect(() => transpile(streamlangDSL)).toThrow(/Function 'abs' is not supported/);
-  });
-
-  apiTest('should throw error for sqrt()', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'sqrt(value)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    expect(() => transpile(streamlangDSL)).toThrow(/Function 'sqrt' is not supported/);
-  });
-
-  apiTest('should throw error for pow()', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'pow(base, 2)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    expect(() => transpile(streamlangDSL)).toThrow(/Function 'pow' is not supported/);
-  });
-
-  apiTest('should throw error for mod()', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'mod(value, 3)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    expect(() => transpile(streamlangDSL)).toThrow(/Function 'mod' is not supported/);
-  });
-
-  apiTest('should throw error for pi()', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'pi()',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    expect(() => transpile(streamlangDSL)).toThrow(/Function 'pi' is not supported/);
-  });
-
-  apiTest('should throw error for round()', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'round(value)',
-          to: 'result',
-        } as MathProcessor,
-      ],
-    };
-
-    expect(() => transpile(streamlangDSL)).toThrow(/Function 'round' is not supported/);
-  });
-
-  apiTest('should throw error for mean()', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'mean(values)',
-          to: 'avg',
-        } as MathProcessor,
-      ],
-    };
-
-    expect(() => transpile(streamlangDSL)).toThrow(/Function 'mean' is not supported/);
-  });
-
-  apiTest('should throw error for invalid syntax', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'price * * quantity', // Invalid double operator
-          to: 'total',
-        } as MathProcessor,
-      ],
-    };
-
-    expect(() => transpile(streamlangDSL)).toThrow(/parse/i);
+    for (const { expression, pattern } of rejectedCases) {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [{ action: 'math', expression, to: 'result' } as MathProcessor],
+      };
+      expect(() => transpile(streamlangDSL)).toThrow(pattern);
+    }
   });
 });

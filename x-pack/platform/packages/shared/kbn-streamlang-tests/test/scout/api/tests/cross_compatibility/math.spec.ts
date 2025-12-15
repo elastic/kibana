@@ -315,88 +315,31 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
 
   // === Validation Errors (consistent rejection) ===
   apiTest(
-    'should consistently reject unsupported functions in both transpilers',
+    'should consistently reject unsupported functions and invalid syntax in both transpilers',
     async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'abs(value)',
-            to: 'result',
-          } as MathProcessor,
-        ],
-      };
+      const rejectedCases = [
+        { expression: 'abs(value)', pattern: /abs.*not supported/i, doc: { value: -42 } },
+        { expression: 'mean(values)', pattern: /mean.*not supported/i, doc: { values: 10 } },
+        { expression: 'price * * quantity', pattern: /parse/i, doc: { price: 10, quantity: 5 } },
+      ];
 
-      // Ingest pipeline: generates error-throwing script, error at runtime
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const docs = [{ value: -42 }];
-      const { errors: ingestErrors } = await testBed.ingest(
-        'ingest-math-unsupported',
-        docs,
-        processors
-      );
-      expect(ingestErrors.length).toBeGreaterThan(0);
-      expect(ingestErrors[0].caused_by?.reason).toMatch(/abs.*not supported/i);
+      for (let i = 0; i < rejectedCases.length; i++) {
+        const { expression, pattern, doc } = rejectedCases[i];
+        const streamlangDSL: StreamlangDSL = {
+          steps: [{ action: 'math', expression, to: 'result' } as MathProcessor],
+        };
 
-      // ES|QL: throws during transpilation
-      expect(() => transpileEsql(streamlangDSL)).toThrow(/abs.*not supported/i);
+        // Ingest pipeline: generates error-throwing script, error at runtime
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { errors } = await testBed.ingest(`cross-reject-${i}`, [doc], processors);
+        expect(errors.length).toBeGreaterThan(0);
+        expect(errors[0].caused_by?.reason).toMatch(pattern);
+
+        // ES|QL: throws during transpilation
+        expect(() => transpileEsql(streamlangDSL)).toThrow(pattern);
+      }
     }
   );
-
-  apiTest(
-    'should consistently reject aggregation functions in both transpilers',
-    async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'math',
-            expression: 'mean(values)',
-            to: 'avg',
-          } as MathProcessor,
-        ],
-      };
-
-      // Ingest pipeline: generates error-throwing script, error at runtime
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const docs = [{ values: 10 }];
-      const { errors: ingestErrors } = await testBed.ingest(
-        'ingest-math-mean-error',
-        docs,
-        processors
-      );
-      expect(ingestErrors.length).toBeGreaterThan(0);
-      expect(ingestErrors[0].caused_by?.reason).toMatch(/mean.*not supported/i);
-
-      // ES|QL: throws during transpilation
-      expect(() => transpileEsql(streamlangDSL)).toThrow(/mean.*not supported/i);
-    }
-  );
-
-  apiTest('should consistently reject invalid syntax in both transpilers', async ({ testBed }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'math',
-          expression: 'price * * quantity', // Invalid double operator
-          to: 'total',
-        } as MathProcessor,
-      ],
-    };
-
-    // Ingest pipeline: generates error-throwing script, error at runtime
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const docs = [{ price: 10, quantity: 5 }];
-    const { errors: ingestErrors } = await testBed.ingest(
-      'ingest-math-syntax-error',
-      docs,
-      processors
-    );
-    expect(ingestErrors.length).toBeGreaterThan(0);
-    expect(ingestErrors[0].caused_by?.reason).toMatch(/parse/i);
-
-    // ES|QL: throws during transpilation
-    expect(() => transpileEsql(streamlangDSL)).toThrow(/parse/i);
-  });
 
   // *** Incompatible / Partially Compatible Cases ***
   // Note that the Incompatible test suite doesn't necessarily mean the features are functionally incompatible,
