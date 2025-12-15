@@ -217,7 +217,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAll();
       });
 
-      describe('Status', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/246048
+      describe.skip('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('to in progress', async () => {
