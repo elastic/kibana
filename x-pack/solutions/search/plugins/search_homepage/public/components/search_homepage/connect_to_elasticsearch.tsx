@@ -59,7 +59,11 @@ export const ConnectToElasticsearch = () => {
           color="text"
           iconType="plusInCircle"
           size="s"
-          onClick={() => openWiredConnectionDetails()}
+          onClick={() =>
+            openWiredConnectionDetails({
+              props: { options: { defaultTabId: 'apiKeys' } },
+            })
+          }
         >
           <FormattedMessage
             id="xpack.searchHomepage.connectToElasticsearch.apiKeysButtonEmptyLabel"
