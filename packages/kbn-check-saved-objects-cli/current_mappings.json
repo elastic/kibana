@@ -328,6 +328,17 @@
       }
     }
   },
+  "api_key_to_invalidate": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      }
+    }
+  },
   "apm-custom-dashboards": {
     "properties": {
       "dashboardSavedObjectId": {
