@@ -47,7 +47,7 @@ import { ALL_DATA_OPTION } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { SignificantEventsGenerationPanel } from '../empty_state';
+import { SignificantEventsGenerationPanel } from '../generation_panel';
 
 interface Props {
   onClose: () => void;
