@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { alertDeletionClientMock } from '@kbn/alerting-plugin/server/alert_deletion/alert_deletion_client.mock';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { rulesSettingsClientMock } from '@kbn/alerting-plugin/server/rules_settings/rules_settings_client.mock';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { WorkflowsRequestHandlerContext } from '../types';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import type { WorkflowsRequestHandlerContext } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 export const mockLogger = loggingSystemMock.create().get();
@@ -109,8 +115,11 @@ export const createMockRequestHandlerContext = (
   // Apply overrides if provided
   if (overrides?.elasticsearchClient?.mget) {
     // Directly assign the mock function - asCurrentUser from coreMock allows property assignment
-    (mockCoreContext.elasticsearch.client.asCurrentUser as any).mget =
-      overrides.elasticsearchClient.mget;
+    (
+      mockCoreContext.elasticsearch.client.asCurrentUser as jest.Mocked<
+        IScopedClusterClient['asCurrentUser']
+      >
+    ).mget = overrides.elasticsearchClient.mget;
   }
 
   // Create mock rule type registry map
@@ -119,10 +128,20 @@ export const createMockRequestHandlerContext = (
     mockRuleTypeRegistryMap.set(ruleTypeId, createMockRuleType(ruleTypeId));
   });
 
-  return {
-    core: Promise.resolve(mockCoreContext),
-    alerting: Promise.resolve({
+  return coreMock.createCustomRequestHandlerContext({
+    core: mockCoreContext,
+    actions: {
+      getActionsClient: jest.fn(() => actionsClientMock.create()),
+      listTypes: jest.fn(() => []),
+    },
+    alerting: {
       listTypes: jest.fn(() => mockRuleTypeRegistryMap),
-    }),
-  } as WorkflowsRequestHandlerContext;
+      getRulesClient: jest.fn(() => Promise.resolve(rulesClientMock.create())),
+      getRulesSettingsClient: jest.fn(() => rulesSettingsClientMock.create()),
+      getFrameworkHealth: jest.fn(() => Promise.resolve({ isHealthy: true, message: 'OK' })),
+      areApiKeysEnabled: jest.fn(() => Promise.resolve(true)),
+      getAlertDeletionClient: jest.fn(() => alertDeletionClientMock.create()),
+    },
+    licensing: licensingMock.createRequestHandlerContext(),
+  }) as unknown as WorkflowsRequestHandlerContext;
 };
