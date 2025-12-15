@@ -42,15 +42,17 @@ export function SignificantEventsGenerationPanel({
           <EuiFlexGroup direction="row">
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h4>
+                <b>
                   {i18n.translate(
                     'xpack.streams.significantEvents.significantEventsGenerationPanel.generationContextTitle',
                     {
                       defaultMessage: 'Generation context',
                     }
                   )}
-                </h4>
+                </b>
               </EuiTitle>
+
+              <EuiSpacer size="s" />
 
               <EuiText size="s" color="subdued">
                 {i18n.translate(

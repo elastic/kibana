@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AssetImage } from '../../asset_image';
-import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
-import { FeaturesSelector, type FeatureSelectorProps } from '../feature_selector';
+import { type FeatureSelectorProps } from '../feature_selector';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 
 export function EmptyState({
