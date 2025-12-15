@@ -32,7 +32,7 @@ type ParamsProps = ActionParamsProps<PostMessageParams | PostBlockkitParams>;
 const SlackParamsFields: React.FunctionComponent<ParamsProps> = (props) => {
   const { editAction, index, useDefaultMessage, defaultMessage } = props;
   const { subActionParams } = props.actionParams;
-  const { channels, text, channelIds, channelNames } = subActionParams ?? {};
+  const { channels = [], channelIds = [], channelNames = [], text } = subActionParams ?? {};
 
   const connectorId = props.actionConnector?.id ?? '';
   const key = `${connectorId}:${index}`;
