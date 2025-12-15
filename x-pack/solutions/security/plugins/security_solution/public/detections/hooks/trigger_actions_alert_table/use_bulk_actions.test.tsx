@@ -97,7 +97,7 @@ describe('useBulkActionsByTableType', () => {
 
     const [bulkActionsGroup] = result.current;
     const timelineAction = bulkActionsGroup.items.find(
-      (item) => (item as { key?: string }).key === 'add-bulk-to-timeline'
+      (item) => item.key === 'add-bulk-to-timeline'
     );
 
     expect(timelineAction).toBeUndefined();

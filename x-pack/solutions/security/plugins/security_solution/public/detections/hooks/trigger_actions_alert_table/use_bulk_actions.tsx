@@ -11,7 +11,11 @@ import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import { useCallback, useMemo } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableProps,
+  BulkActionsPanelConfig,
+  ItemsPanelConfig,
+} from '@kbn/response-ops-alerts-table/types';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
@@ -65,7 +69,7 @@ export const useBulkActionsByTableType = (
   tableId: TableId,
   query: AlertsTableProps['query'],
   refresh: () => void
-) => {
+): [ItemsPanelConfig, ...BulkActionsPanelConfig[]] => {
   const { from, to } = useGlobalTime();
   const filters = useMemo(() => {
     return getFiltersForDSLQuery(query);
