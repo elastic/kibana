@@ -70,7 +70,7 @@ async function handleFunctionParameterContext(
   }
 
   // Try exclusive suggestions first (COUNT(*), enum values)
-  const exclusiveSuggestions = tryExclusiveSuggestions(functionParamContext, ctx);
+  const exclusiveSuggestions = await tryExclusiveSuggestions(functionParamContext, ctx);
 
   if (exclusiveSuggestions.length > 0) {
     return exclusiveSuggestions;
@@ -81,10 +81,10 @@ async function handleFunctionParameterContext(
 }
 
 /** Try suggestions that are exclusive (if present, return only these) */
-function tryExclusiveSuggestions(
+async function tryExclusiveSuggestions(
   functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
-): ISuggestionItem[] {
+): Promise<ISuggestionItem[]> {
   const { functionDefinition, paramDefinitions } = functionParamContext;
   const { options } = ctx;
 
@@ -95,9 +95,14 @@ function tryExclusiveSuggestions(
     Boolean(functionParamContext.hasMoreMandatoryArgs),
     options.isCursorFollowedByComma ?? false
   );
-
   if (enumItems.length > 0) {
     return enumItems;
+  }
+
+  // Some parameters suggests special values that are deduced from the hints object provided by ES.
+  const itemsFromHints = await buildSuggestionsFromHints(paramDefinitions, ctx);
+  if (itemsFromHints.length > 0) {
+    return itemsFromHints;
   }
 
   return [];
@@ -372,6 +377,31 @@ function buildEnumValueSuggestions(
     addComma: shouldAddComma,
     advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
   });
+}
+
+async function buildSuggestionsFromHints(
+  paramDefinitions: FunctionParameter[],
+  ctx: ExpressionContext
+): Promise<ISuggestionItem[]> {
+  const hints = paramDefinitions
+    .filter((param) => param.hint !== undefined)
+    .map((param) => param.hint);
+
+  if (hints.length > 0) {
+    return (
+      await Promise.all(
+        hints.map((hint) => {
+          if (parametersFromHintsMap[hint.entityType]) {
+            return parametersFromHintsMap[hint.entityType](hint, ctx);
+          } else {
+            return [];
+          }
+        })
+      )
+    ).flat();
+  }
+
+  return [];
 }
 
 /** Builds suggestions for constant-only literal parameters */

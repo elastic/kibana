@@ -16595,6 +16595,12 @@ const textEmbeddingDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Identifier of an existing inference endpoint the that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
+          hint: {
+            entityType: 'inference_endpoint',
+            constraints: {
+              task_type: 'text_embedding',
+            },
+          },
         },
       ],
       returnType: 'dense_vector',
@@ -16614,8 +16620,6 @@ const textEmbeddingDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: [
-    'ROW input="Who is Victor Hugo?"\n| EVAL embedding = TEXT_EMBEDDING("Who is Victor Hugo?", "test_dense_inference")',
-    'FROM dense_vector_text METADATA _score\n| EVAL query_embedding = TEXT_EMBEDDING("be excellent to each other", "test_dense_inference")\n| WHERE KNN(text_embedding_field, query_embedding)',
     'FROM dense_vector_text METADATA _score\n| WHERE KNN(text_embedding_field, TEXT_EMBEDDING("be excellent to each other", "test_dense_inference"))',
   ],
 };
@@ -19439,6 +19443,7 @@ const topSnippetsDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: [
+    'FROM books\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien")',
     'FROM books\n| WHERE MATCH(title, "Return")\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })',
   ],
 };
@@ -19786,7 +19791,6 @@ const vCosineDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.v_cosine', {
     defaultMessage: 'Calculates the cosine similarity between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19833,7 +19837,6 @@ const vDotProductDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.v_dot_product', {
     defaultMessage: 'Calculates the dot product between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19880,7 +19883,6 @@ const vHammingDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.v_hamming', {
     defaultMessage: 'Calculates the Hamming distance between two dense vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19927,7 +19929,6 @@ const vL1NormDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.v_l1_norm', {
     defaultMessage: 'Calculates the l1 norm between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -19974,7 +19975,6 @@ const vL2NormDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.v_l2_norm', {
     defaultMessage: 'Calculates the l2 norm between two dense_vectors.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [

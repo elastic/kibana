@@ -273,6 +273,7 @@ async function getSuggestionsWithinCommandExpression(
       hasMinimumLicenseRequired,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
       isServerless: callbacks?.isServerless,
+      getInferenceEndpoints: callbacks?.getInferenceEndpoints,
     },
     context,
     offset

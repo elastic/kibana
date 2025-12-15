@@ -13,9 +13,11 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
   ESQLFieldWithMetadata,
+  InferenceEndpointsAutocompleteResult,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLLocation } from '../../types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -138,6 +140,9 @@ export interface ICommandCallbacks {
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  getInferenceEndpoints?: (
+    taskType: InferenceTaskType
+  ) => Promise<InferenceEndpointsAutocompleteResult>;
 }
 
 export interface ICommandContext {
