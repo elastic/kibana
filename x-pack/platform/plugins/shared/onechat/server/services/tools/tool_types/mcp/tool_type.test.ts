@@ -349,7 +349,7 @@ describe('MCP tool_type', () => {
         expect(schema).toBe(mockZodSchema);
       });
 
-      it('should throw error when listTools fails', async () => {
+      it('should return empty schema when listTools fails', async () => {
         const toolType = getMcpToolType({ actions: mockActions });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
@@ -361,12 +361,12 @@ describe('MCP tool_type', () => {
           message: 'Connection failed',
         });
 
-        await expect(dynamicProps.getSchema()).rejects.toThrow(
-          `Failed to retrieve input schema for MCP tool 'test_tool' from connector 'test-connector-id'`
-        );
+        const schema = await dynamicProps.getSchema();
+        expect(schema).toBeDefined();
+        expect(mockJsonSchemaToZod).not.toHaveBeenCalled();
       });
 
-      it('should throw error when tool not found in listTools response', async () => {
+      it('should return empty schema when tool not found in listTools response', async () => {
         const toolType = getMcpToolType({ actions: mockActions });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
@@ -380,13 +380,12 @@ describe('MCP tool_type', () => {
           },
         });
 
-        await expect(dynamicProps.getSchema()).rejects.toThrow(
-          `Failed to retrieve input schema for MCP tool 'test_tool' from connector 'test-connector-id'`
-        );
+        const schema = await dynamicProps.getSchema();
+        expect(schema).toBeDefined();
         expect(mockJsonSchemaToZod).not.toHaveBeenCalled();
       });
 
-      it('should return empty schema when jsonSchemaToZod fails', async () => {
+      it('should throw error when jsonSchemaToZod fails', async () => {
         const toolType = getMcpToolType({ actions: mockActions });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
@@ -402,10 +401,7 @@ describe('MCP tool_type', () => {
           throw new Error('Invalid JSON Schema');
         });
 
-        // Follows workflow pattern: return empty schema on conversion failure
-        const schema = await dynamicProps.getSchema();
-        expect(schema).toBeDefined();
-        expect(mockJsonSchemaToZod).toHaveBeenCalled();
+        await expect(dynamicProps.getSchema()).rejects.toThrow('Invalid JSON Schema');
       });
     });
 

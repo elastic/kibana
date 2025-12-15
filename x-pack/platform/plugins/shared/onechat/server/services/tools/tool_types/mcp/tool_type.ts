@@ -213,20 +213,12 @@ export const getMcpToolType = ({
             toolName: config.tool_name,
           });
 
-          if (!inputSchema) {
-            throw new Error(
-              `Failed to retrieve input schema for MCP tool '${config.tool_name}' from connector '${config.connector_id}'. ` +
-                `The MCP connector may not be accessible or the tool may not exist on the MCP server.`
-            );
-          }
-
-          try {
-            // Convert JSON Schema to Zod schema
+          if (inputSchema) {
             const zodSchema = jsonSchemaToZod(inputSchema);
             return zodSchema as z.ZodObject<any>;
-          } catch (error) {
-            return z.object({});
           }
+
+          return z.object({});
         },
 
         getLlmDescription: ({ description }) => {
