@@ -20,10 +20,10 @@ export const convertPersistedDefinition = ({
   context: ToolTypeConversionContext;
 }): InternalToolDefinition => {
   const { id, type, description, tags, configuration } = tool;
-  const { request, spaceId, actions } = context;
+  const { request, spaceId } = context;
 
   const getDynamicProps = () => {
-    return definition.getDynamicProps(configuration, { request, spaceId, actions });
+    return definition.getDynamicProps(configuration, { request, spaceId });
   };
 
   return {

@@ -10,7 +10,6 @@ import type { AttachmentsService, ExecutableTool } from '@kbn/onechat-server/run
 import type { Runner, StaticToolRegistration } from '@kbn/onechat-server';
 import type { ToolType } from '@kbn/onechat-common';
 import type { AttachmentBoundedTool } from '@kbn/onechat-server/attachments';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../../tools/tool_types';
 import { convertTool } from '../../tools/builtin/converter';
 import { toExecutableTool } from '../../tools/utils/tool_conversion';
@@ -27,21 +26,18 @@ export const createAttachmentsService = ({
   runner,
   request,
   spaceId,
-  actions,
 }: {
   attachmentsStart: AttachmentServiceStart;
   toolsStart: ToolsServiceStart;
   runner: Runner;
   request: KibanaRequest;
   spaceId: string;
-  actions: ActionsPluginStart;
 }): AttachmentsService => {
   const toolConverterFn = createToolConverter({
     request,
     spaceId,
     definitions: toolsStart.getToolDefinitions(),
     runner,
-    actions,
   });
 
   return {
@@ -59,13 +55,11 @@ export const createToolConverter = ({
   spaceId,
   definitions,
   runner,
-  actions,
 }: {
   request: KibanaRequest;
   spaceId: string;
   definitions: AnyToolTypeDefinition[];
   runner: Runner;
-  actions: ActionsPluginStart;
 }): AttachmentToolConverterFn => {
   const definitionMap = definitions
     .filter((def) => !isDisabledDefinition(def))
@@ -77,7 +71,6 @@ export const createToolConverter = ({
   const context: ToolDynamicPropsContext = {
     spaceId,
     request,
-    actions,
   };
 
   const cache = new ToolAvailabilityCache();

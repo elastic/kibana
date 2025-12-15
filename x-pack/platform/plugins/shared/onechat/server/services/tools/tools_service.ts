@@ -77,7 +77,7 @@ export class ToolsService {
   }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
 
-    const toolTypes = getToolTypeDefinitions({ workflowsManagement });
+    const toolTypes = getToolTypeDefinitions({ workflowsManagement, actions });
 
     // Compute the set of tool types that have health tracking enabled
     const healthTrackedToolTypes = new Set(
@@ -90,13 +90,11 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
-      actions,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
       esClient: elasticsearch.client.asInternalUser,
       toolTypes,
-      actions,
     });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
