@@ -26,7 +26,6 @@ interface GetInstalledPackagesParams {
   perPage?: number;
   searchAfter?: GetInstalledPackagesResponse['searchAfter'];
   nameQuery?: string;
-  packageNames?: string[];
 }
 
 export const getInstalledPackages = async (
