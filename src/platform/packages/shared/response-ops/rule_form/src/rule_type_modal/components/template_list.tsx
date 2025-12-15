@@ -121,9 +121,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
     },
     [fetchNext]
   );
-
-  const lastTemplateId = templates[templates.length - 1]?.id;
-
+  
   return (
     <EuiFlexGroup
       style={{
@@ -166,16 +164,18 @@ export const TemplateList: React.FC<TemplateListProps> = ({
           <React.Fragment key={tpl.id}>
             <TemplateCard template={tpl} onSelectTemplate={onSelectTemplate} />
             <EuiSpacer size="s" />
-            {/* Observer element for infinite scrolling - attached to last item */}
-            {hasMore && tpl.id === lastTemplateId && (
-              <div
-                ref={setPaginationObserver}
-                style={{ height: '1px' }}
-                data-test-subj="templateList-loadMoreTrigger"
-              />
-            )}
           </React.Fragment>
         ))}
+
+        {/* Observer element for infinite scrolling */}
+        {hasMore && (
+          <div
+            ref={setPaginationObserver}
+            style={{ height: '1px' }}
+            data-test-subj="templateList-loadMoreTrigger"
+          />
+        )}
+        
         {loadingMore && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
