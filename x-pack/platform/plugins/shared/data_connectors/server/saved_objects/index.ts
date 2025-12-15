@@ -46,19 +46,6 @@ export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
     type: {
       type: 'keyword',
     },
-    config: {
-      type: 'object',
-      enabled: false,
-    },
-    createdAt: {
-      type: 'date',
-    },
-    updatedAt: {
-      type: 'date',
-    },
-    features: {
-      type: 'keyword',
-    },
     workflowIds: {
       type: 'keyword',
     },
