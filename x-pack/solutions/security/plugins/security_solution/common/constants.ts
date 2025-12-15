@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
@@ -14,7 +15,6 @@ export {
   SecurityPageName,
   ATTACKS_ALERTS_ALIGNMENT_ENABLED,
 } from '@kbn/security-solution-navigation';
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 /**
  * as const
  *
