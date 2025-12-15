@@ -46,7 +46,7 @@ export function getStepsCollectionSchema(
     if (!isEnterForeach(node)) {
       stepsSchema = stepsSchema.extend({
         [node.stepId]: z.object({
-          output: getOutputSchemaForStepType(node.stepType).optional(),
+          output: getOutputSchemaForStepType(node).optional(),
           error: z.any().optional(),
         }),
       });

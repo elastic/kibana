@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { convertJsonSchemaToZod } from './temp';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 /**
@@ -51,4 +52,16 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
   id: AiPromptStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  dynamicOutputSchema: (input) => {
+    if (input.outputSchema) {
+      return z.object({
+        content: convertJsonSchemaToZod(input.outputSchema), // zodSchema,
+      });
+    }
+
+    return z.object({
+      content: z.string(),
+      response_metadata: z.record(z.string(), z.any()).optional(),
+    });
+  },
 };

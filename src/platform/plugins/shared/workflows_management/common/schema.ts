@@ -13,6 +13,7 @@ import {
   getElasticsearchConnectors,
   getKibanaConnectors,
 } from '@kbn/workflows';
+import { isAtomic, type GraphNodeUnion } from '@kbn/workflows/graph';
 import type { BaseConnectorContract } from '@kbn/workflows/types/v1';
 import { z } from '@kbn/zod/v4';
 
@@ -342,9 +343,27 @@ export function getAllConnectors(): ConnectorContractUnion[] {
   return getAllConnectorsInternal();
 }
 
-export const getOutputSchemaForStepType = (stepType: string): z.ZodSchema => {
+export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
+  if (isAtomic(node)) {
+    const stepDefinition = stepSchemas.getStepDefinition(node.stepType);
+
+    if (stepDefinition) {
+      try {
+        if (stepDefinition.dynamicOutputSchema) {
+          return stepDefinition.dynamicOutputSchema(node.configuration.with);
+        }
+      } catch (error) {
+        return stepDefinition.outputSchema;
+      }
+
+      return stepDefinition.outputSchema;
+    }
+  }
+
+  const stepType = node.stepType;
   const allConnectors = getAllConnectorsInternal();
   const connector = allConnectors.find((c) => c.type === stepType);
+
   if (connector) {
     if (!connector.outputSchema) {
       // throw new Error(`Output schema not found for step type ${stepType}`);
