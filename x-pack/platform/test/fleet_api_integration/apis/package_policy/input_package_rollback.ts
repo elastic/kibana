@@ -127,8 +127,15 @@ export default function (providerContext: FtrProviderContext) {
       await installPackage(PACKAGE_NAME, START_VERSION);
       await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
 
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
-      expectIdArraysEqual(installation.installed_es, []);
+      expectIdArraysEqual(installation.installed_es, [
+        {
+          id: 'input_package_upgrade-README.md',
+          type: 'knowledge_base',
+        },
+      ]);
 
       await uninstallPackage(PACKAGE_NAME, START_VERSION);
     });
