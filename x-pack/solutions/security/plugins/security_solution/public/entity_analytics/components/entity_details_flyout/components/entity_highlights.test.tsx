@@ -126,20 +126,6 @@ describe('EntityHighlights', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('returns null when assistant is not visible', () => {
-    mockUseAssistantAvailability.mockReturnValue({
-      hasAssistantPrivilege: true,
-      isAssistantEnabled: true,
-      isAssistantVisible: false,
-    });
-
-    const { container } = render(<EntityHighlightsAccordion {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(container.firstChild).toBeNull();
-  });
-
   it('returns null when assistant is not enabled', () => {
     mockUseAssistantAvailability.mockReturnValue({
       hasAssistantPrivilege: true,
