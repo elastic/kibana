@@ -11,8 +11,8 @@ import type { PropsWithChildren } from 'react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { VisualizationListItem, VisualizationStage } from '@kbn/visualizations-plugin/public';
-import type { DashboardListingViewRegistry } from '../plugin';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { DashboardListingViewRegistry } from '../plugin';
 
 export type TabId = (typeof TAB_IDS)[keyof typeof TAB_IDS];
 export type { VisualizationListItem, VisualizationStage };

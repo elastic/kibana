@@ -16,8 +16,6 @@ import type { TableListViewTableProps } from '@kbn/content-management-table-list
 import type { Reference } from '@kbn/content-management-utils';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import { asyncMap } from '@kbn/std';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import {
   checkForDuplicateDashboardTitle,
@@ -34,10 +32,6 @@ import {
 } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
-import {
-  SAVED_OBJECT_DELETE_TIME,
-  SAVED_OBJECT_LOADED_TIME,
-} from '../../utils/telemetry_constants';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
