@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
@@ -695,3 +696,5 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   rule = 'security.rule',
 }
+
+export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
