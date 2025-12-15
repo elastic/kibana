@@ -19439,7 +19439,6 @@ const topSnippetsDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: [
-    null,
     'FROM books\n| WHERE MATCH(title, "Return")\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })',
   ],
 };
