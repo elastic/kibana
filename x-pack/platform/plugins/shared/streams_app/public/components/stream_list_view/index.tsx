@@ -134,13 +134,7 @@ export function StreamListView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}>
-                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
-                  defaultMessage: 'Create classic stream',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+            <FeedbackButton />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="gear"
@@ -155,7 +149,13 @@ export function StreamListView() {
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <FeedbackButton iconButton />
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}>
+                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
+                  defaultMessage: 'Create classic stream',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
       />

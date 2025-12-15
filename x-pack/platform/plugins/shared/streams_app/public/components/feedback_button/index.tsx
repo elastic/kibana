@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 
 const STREAMS_FEEDBACK_URL = 'https://ela.st/feedback-streams-ui';
 
-export function FeedbackButton({ iconButton = false }: { iconButton?: boolean }) {
+export function FeedbackButton() {
   const {
     isServerless,
     dependencies: {
@@ -31,7 +31,7 @@ export function FeedbackButton({ iconButton = false }: { iconButton?: boolean })
   const queryParams = new URLSearchParams({ environment: deploymentType, version, path });
   const feedbackUrl = `${STREAMS_FEEDBACK_URL}?${queryParams.toString()}`;
 
-  return !iconButton ? (
+  return (
     <EuiButtonEmpty
       size="s"
       iconType="popout"
@@ -47,16 +47,5 @@ export function FeedbackButton({ iconButton = false }: { iconButton?: boolean })
         defaultMessage: 'Give feedback',
       })}
     </EuiButtonEmpty>
-  ) : (
-    <EuiButtonIcon
-      size="s"
-      iconType="thumbUp"
-      href={feedbackUrl}
-      target="_blank"
-      rel="noopener"
-      aria-label={i18n.translate('xpack.streams.feedbackButtonLabel', {
-        defaultMessage: 'Give feedback',
-      })}
-    />
   );
 }
