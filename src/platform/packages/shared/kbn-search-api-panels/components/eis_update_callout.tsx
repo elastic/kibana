@@ -63,7 +63,7 @@ export const EisUpdateCallout = ({
       onDismiss={onDismissTour}
     >
       <EuiFlexGroup direction={direction} alignItems="flexStart">
-        <EuiImage src={searchRocketIcon} alt={i18n.EIS_CALLOUT_ICON_ALT} size="original" />
+        <EuiImage src={searchRocketIcon} alt="" size="original" />
         <div>
           <EuiTitle>
             <h4>{i18n.EIS_CALLOUT_TITLE}</h4>

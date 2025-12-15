@@ -29,7 +29,7 @@ export const AddFieldButton = ({
       content={
         isDisabled
           ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
-              defaultMessage: 'You do not have permission to add fields in an Index',
+              defaultMessage: 'You do not have permission to add fields to an index',
             })
           : undefined
       }

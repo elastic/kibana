@@ -12,11 +12,7 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { EisPromotionalCallout, type EisPromotionalCalloutProps } from './eis_promotional_callout';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
-import {
-  EIS_PROMO_CALLOUT_DESCRIPTION,
-  EIS_CALLOUT_ICON_ALT,
-  EIS_CALLOUT_TITLE,
-} from '../translations';
+import { EIS_PROMO_CALLOUT_DESCRIPTION, EIS_CALLOUT_TITLE } from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
@@ -64,7 +60,6 @@ describe('EisPromotionalCallout', () => {
     expect(screen.getByText(EIS_CALLOUT_TITLE)).toBeInTheDocument();
     expect(screen.getByText(EIS_PROMO_CALLOUT_DESCRIPTION)).toBeInTheDocument();
     expect(screen.getByTestId('eisPromoCalloutCtaBtn')).toBeInTheDocument();
-    expect(screen.getByAltText(EIS_CALLOUT_ICON_ALT)).toBeInTheDocument();
   });
 
   it('calls onDismissTour when dismiss button is clicked', () => {

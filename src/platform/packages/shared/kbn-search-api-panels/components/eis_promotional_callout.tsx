@@ -23,7 +23,6 @@ import {
   EIS_CALLOUT_DOCUMENTATION_BTN,
   EIS_PROMO_CALLOUT_DESCRIPTION,
   EIS_CALLOUT_DISMISS_ARIA,
-  EIS_CALLOUT_ICON_ALT,
   EIS_CALLOUT_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
@@ -75,7 +74,7 @@ export const EisPromotionalCallout = ({
         />
       </div>
       <EuiFlexGroup direction={direction} alignItems="flexStart">
-        <EuiImage src={searchRocketIcon} alt={EIS_CALLOUT_ICON_ALT} size="original" />
+        <EuiImage src={searchRocketIcon} alt="" size="original" />
         <div>
           <EuiTitle size="xxs">
             <h2>{EIS_CALLOUT_TITLE}</h2>

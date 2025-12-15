@@ -183,7 +183,7 @@ export function UpdateElserMappingsModal({
         <EuiSelectable<MappingsOptionData>
           data-test-subj="updateElserMappingsSelect"
           aria-label={i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.select', {
-            defaultMessage: 'Select elser mappings',
+            defaultMessage: 'Select ELSER mappings',
           })}
           options={options}
           listProps={{ bordered: true, isVirtualized: true, rowHeight: 50 }}

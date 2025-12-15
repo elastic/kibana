@@ -15,7 +15,6 @@ import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_
 
 import {
   EIS_CALLOUT_TITLE,
-  EIS_CALLOUT_ICON_ALT,
   EIS_UPDATE_CALLOUT_DESCRIPTION,
   EIS_UPDATE_CALLOUT_CTA,
   EIS_CALLOUT_DOCUMENTATION_BTN,
@@ -71,8 +70,6 @@ describe('EisUpdateCallout', () => {
 
     expect(screen.getByText(EIS_UPDATE_CALLOUT_CTA)).toBeInTheDocument();
     expect(screen.getByText(EIS_CALLOUT_DOCUMENTATION_BTN)).toBeInTheDocument();
-
-    expect(screen.getByAltText(EIS_CALLOUT_ICON_ALT)).toBeInTheDocument();
   });
 
   it('calls onDismissTour when dismiss button is clicked', () => {

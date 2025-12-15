@@ -96,12 +96,3 @@ export const EIS_CALLOUT_DISMISS_ARIA = i18n.translate(
     defaultMessage: 'Dismiss the Elastic Inference Service callout',
   }
 );
-
-// ICON ALT TAGS
-
-export const EIS_CALLOUT_ICON_ALT = i18n.translate(
-  'searchApiPanels.eisPromotion.callout.icon.alt',
-  {
-    defaultMessage: 'Rocket icon',
-  }
-);
