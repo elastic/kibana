@@ -905,6 +905,98 @@ describe('CreateClassicStreamFlyout', () => {
     });
   });
 
+  describe('showDataRetention prop', () => {
+    describe('select template step', () => {
+      it('hides ILM badge and policy name when showDataRetention is false', () => {
+        const { queryAllByText, queryByText, getByTestId } = renderFlyout({
+          showDataRetention: false,
+        });
+
+        // template-1 and template-2 have ILM policies, but badges should be hidden
+        expect(queryAllByText('ILM')).toHaveLength(0);
+
+        // ILM policy names should also be hidden
+        expect(queryByText('30d')).not.toBeInTheDocument();
+        expect(queryByText('90d')).not.toBeInTheDocument();
+
+        // Template options should still be visible
+        expect(getByTestId('template-option-template-1')).toBeInTheDocument();
+        expect(getByTestId('template-option-template-2')).toBeInTheDocument();
+      });
+
+      it('hides data retention text when showDataRetention is false', () => {
+        const { queryByText } = renderFlyout({ showDataRetention: false });
+
+        // template-3 has lifecycle: { enabled: true, value: 30, unit: 'd' } - retention text should be hidden
+        // ILM policy names should also be hidden
+        expect(queryByText('30d')).not.toBeInTheDocument();
+        expect(queryByText('90d')).not.toBeInTheDocument();
+      });
+
+      it('shows ILM badge when showDataRetention is true (default)', () => {
+        const { getAllByText } = renderFlyout();
+
+        // template-1 and template-2 have ILM policies - badges should be visible
+        const ilmBadges = getAllByText('ILM');
+        expect(ilmBadges.length).toBeGreaterThanOrEqual(2);
+      });
+    });
+
+    describe('name and confirm step', () => {
+      it('hides retention section when showDataRetention is false', () => {
+        const { getByTestId, queryByText } = renderFlyout({ showDataRetention: false });
+
+        // Select template with ILM policy and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Retention should be hidden
+        expect(queryByText('Retention')).not.toBeInTheDocument();
+        expect(queryByText('30d')).not.toBeInTheDocument();
+        expect(queryByText('ILM')).not.toBeInTheDocument();
+
+        // Other template details should still be visible
+        expect(queryByText('Index mode')).toBeInTheDocument();
+        expect(queryByText('Component templates')).toBeInTheDocument();
+      });
+
+      it('does not call getIlmPolicy when showDataRetention is false', () => {
+        const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
+        const { getByTestId } = renderFlyout({
+          showDataRetention: false,
+          getIlmPolicy: mockGetIlmPolicy,
+        });
+
+        // Select template with ILM policy and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Verify we're on the second step
+        expect(getByTestId('nameAndConfirmStep')).toBeInTheDocument();
+
+        // getIlmPolicy should not be called
+        expect(mockGetIlmPolicy).not.toHaveBeenCalled();
+      });
+
+      it('shows retention section and calls getIlmPolicy when showDataRetention is true', async () => {
+        const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
+        const { getByTestId, getByText } = renderFlyout({
+          showDataRetention: true,
+          getIlmPolicy: mockGetIlmPolicy,
+        });
+
+        // Select template with ILM policy and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Retention should be visible
+        expect(getByText('Retention')).toBeInTheDocument();
+
+        // getIlmPolicy should be called
+        await waitFor(() => {
+          expect(mockGetIlmPolicy).toHaveBeenCalledWith('30d', expect.any(AbortSignal));
+        });
+      });
+    });
+  });
+
   describe('ILM policy fetching integration', () => {
     // Note: Basic ILM policy fetching, loading states, error handling, and abort signal tests
     // are covered in confirm_template_details_section.test.tsx.

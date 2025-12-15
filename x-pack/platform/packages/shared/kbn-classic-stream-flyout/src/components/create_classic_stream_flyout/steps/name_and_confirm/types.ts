@@ -20,6 +20,7 @@ export interface NameAndConfirmBaseProps {
 export interface NameAndConfirmStepProps extends NameAndConfirmBaseProps {
   template: IndexTemplate;
   getIlmPolicy?: IlmPolicyFetcher;
+  showDataRetention?: boolean;
 }
 
 export interface NameStreamSectionProps extends NameAndConfirmBaseProps {

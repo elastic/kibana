@@ -35,10 +35,18 @@ const createMockIlmPolicy = (phases: PolicyFromES['policy']['phases'] = {}): Pol
   },
 });
 
-const renderComponent = (template: IndexTemplate, getIlmPolicy?: IlmPolicyFetcher, props = {}) => {
+const renderComponent = (
+  template: IndexTemplate,
+  getIlmPolicy?: IlmPolicyFetcher,
+  showDataRetention = true
+) => {
   return render(
     <IntlProvider>
-      <ConfirmTemplateDetailsSection template={template} getIlmPolicy={getIlmPolicy} {...props} />
+      <ConfirmTemplateDetailsSection
+        template={template}
+        getIlmPolicy={getIlmPolicy}
+        showDataRetention={showDataRetention}
+      />
     </IntlProvider>
   );
 };
@@ -536,6 +544,86 @@ describe('ConfirmTemplateDetailsSection', () => {
           expect(queryByText('ILM')).not.toBeInTheDocument();
         });
       });
+    });
+  });
+
+  describe('showDataRetention prop', () => {
+    it('hides ILM policy retention when showDataRetention is false', () => {
+      const template = createMockTemplate({ ilmPolicy: { name: 'my-ilm-policy' } });
+      const { queryByText } = renderComponent(template, undefined, false);
+
+      expect(queryByText('Retention')).not.toBeInTheDocument();
+      expect(queryByText('my-ilm-policy')).not.toBeInTheDocument();
+      expect(queryByText('ILM')).not.toBeInTheDocument();
+    });
+
+    it('hides lifecycle data retention when showDataRetention is false', () => {
+      const template = createMockTemplate({
+        lifecycle: { enabled: true, value: 30, unit: 'd' },
+      });
+      const { queryByText } = renderComponent(template, undefined, false);
+
+      expect(queryByText('Retention')).not.toBeInTheDocument();
+      expect(queryByText('30d')).not.toBeInTheDocument();
+    });
+
+    it('does not call getIlmPolicy when showDataRetention is false', () => {
+      const mockGetIlmPolicy = jest.fn().mockResolvedValue(createMockIlmPolicy({}));
+      const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
+      renderComponent(template, mockGetIlmPolicy, false);
+
+      expect(mockGetIlmPolicy).not.toHaveBeenCalled();
+    });
+
+    it('still displays other template details when showDataRetention is false', () => {
+      const template = createMockTemplate({
+        version: 5,
+        indexMode: 'logsdb',
+        ilmPolicy: { name: 'hidden-policy' },
+        composedOf: ['component-1', 'component-2'],
+      });
+      const { getByText, queryByText } = renderComponent(template, undefined, false);
+
+      // Version should be visible
+      expect(getByText('Version')).toBeInTheDocument();
+      expect(getByText('5')).toBeInTheDocument();
+
+      // Index mode should be visible
+      expect(getByText('Index mode')).toBeInTheDocument();
+      expect(getByText('LogsDB')).toBeInTheDocument();
+
+      // Component templates should be visible
+      expect(getByText('Component templates')).toBeInTheDocument();
+      expect(getByText('component-1')).toBeInTheDocument();
+      expect(getByText('component-2')).toBeInTheDocument();
+
+      // Retention should be hidden
+      expect(queryByText('Retention')).not.toBeInTheDocument();
+      expect(queryByText('hidden-policy')).not.toBeInTheDocument();
+    });
+
+    it('shows retention when showDataRetention is true (default)', () => {
+      const template = createMockTemplate({ ilmPolicy: { name: 'visible-policy' } });
+      const { getByText } = renderComponent(template, undefined, true);
+
+      expect(getByText('Retention')).toBeInTheDocument();
+      expect(getByText('visible-policy')).toBeInTheDocument();
+      expect(getByText('ILM')).toBeInTheDocument();
+    });
+
+    it('calls getIlmPolicy when showDataRetention is true', async () => {
+      const mockGetIlmPolicy = jest.fn().mockResolvedValue(
+        createMockIlmPolicy({
+          hot: { actions: {} },
+        })
+      );
+      const template = createMockTemplate({ ilmPolicy: { name: 'test-policy' } });
+      const { findByText } = renderComponent(template, mockGetIlmPolicy, true);
+
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalledWith('test-policy', expect.any(AbortSignal));
+      });
+      await findByText(/Hot/i);
     });
   });
 

@@ -33,6 +33,7 @@ interface SelectTemplateStepProps {
   onCreateTemplate: () => void;
   hasErrorLoadingTemplates?: boolean;
   onRetryLoadTemplates: () => void;
+  showDataRetention?: boolean;
 }
 
 export const SelectTemplateStep = ({
@@ -42,6 +43,7 @@ export const SelectTemplateStep = ({
   onCreateTemplate,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
+  showDataRetention = true,
 }: SelectTemplateStepProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -51,37 +53,53 @@ export const SelectTemplateStep = ({
         const hasIlmPolicy = Boolean(template.ilmPolicy?.name);
         const dataRetention = !hasIlmPolicy ? formatDataRetention(template) : undefined;
 
+        const getAppendContent = () => {
+          if (!showDataRetention) {
+            return undefined;
+          }
+
+          if (hasIlmPolicy) {
+            return (
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    <EuiTextTruncate text={template.ilmPolicy?.name ?? ''} width={250} />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">
+                    {i18n.translate(
+                      'xpack.createClassicStreamFlyout.selectTemplateStep.ilmBadgeLabel',
+                      {
+                        defaultMessage: 'ILM',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
+
+          if (dataRetention) {
+            return (
+              <EuiText size="s" color="subdued">
+                {dataRetention}
+              </EuiText>
+            );
+          }
+
+          return undefined;
+        };
+
         return {
           label: template.name,
           checked: template.name === selectedTemplate ? 'on' : undefined,
           'data-test-subj': `template-option-${template.name}`,
           template,
-          append: hasIlmPolicy ? (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <EuiTextTruncate text={template.ilmPolicy?.name ?? ''} width={250} />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate(
-                    'xpack.createClassicStreamFlyout.selectTemplateStep.ilmBadgeLabel',
-                    {
-                      defaultMessage: 'ILM',
-                    }
-                  )}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : dataRetention ? (
-            <EuiText size="s" color="subdued">
-              {dataRetention}
-            </EuiText>
-          ) : undefined,
+          append: getAppendContent(),
         } as EuiSelectableOption<{ template: IndexTemplate }>;
       }),
-    [templates, selectedTemplate]
+    [templates, selectedTemplate, showDataRetention]
   );
 
   const renderOption = (option: EuiSelectableOption<{ template: IndexTemplate }>) => {

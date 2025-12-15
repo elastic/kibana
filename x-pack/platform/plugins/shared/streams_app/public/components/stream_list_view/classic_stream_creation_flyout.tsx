@@ -159,6 +159,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}
       getIlmPolicy={getIlmPolicy}
+      showDataRetention={false}
     />
   );
 }
