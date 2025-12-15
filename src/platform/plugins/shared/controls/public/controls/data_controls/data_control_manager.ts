@@ -120,13 +120,13 @@ export const initializeDataControlManager = async <EditorState extends object = 
       })
     )
     .subscribe(({ dataView, error }) => {
-      if (error) {
+      if (error || !dataView) {
         setBlockingError(error);
+        if (willHaveInitialFilter && getInitialFilter) rejectInitialDataViewReady(error);
+        return;
       }
       if (dataView) {
         resolveInitialDataViewReady(dataView);
-      } else {
-        rejectInitialDataViewReady(error);
       }
       dataViews$.next(dataView ? [dataView] : undefined);
     });
