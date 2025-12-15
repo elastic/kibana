@@ -28,7 +28,7 @@ import { useMigrationDataInputContext } from '../../../common/components/migrati
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-import type { MigrationSettingsBase, MissingResourcesIndexed } from '../../../common/types';
+import type { HandleMissingResourcesIndexed, MigrationSettingsBase } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { useMissingResources } from '../../../rules/components/data_input_flyout/steps/hooks/use_missing_resources';
 import { STEP_COMPONENTS } from './configs';
@@ -59,14 +59,14 @@ export const DashboardMigrationDataInputFlyout = React.memo(
       SplunkDataInputStep.Upload
     );
 
-    const setMissingResourcesStep = useCallback(
-      (newMissingResourcesIndexed: MissingResourcesIndexed) => {
-        if (newMissingResourcesIndexed.macros.length) {
+    const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
+      ({ newMissingResourcesIndexed }) => {
+        if (newMissingResourcesIndexed?.macros.length) {
           setDataInputStep(SplunkDataInputStep.Macros);
           return;
         }
 
-        if (newMissingResourcesIndexed.lookups.length) {
+        if (newMissingResourcesIndexed?.lookups.length) {
           setDataInputStep(SplunkDataInputStep.Lookups);
           return;
         }
@@ -77,8 +77,8 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     );
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
-      setDataInputStep,
       handleMissingResourcesIndexed: setMissingResourcesStep,
+      migrationSource: MigrationSource.SPLUNK,
     });
 
     const onMigrationCreated = useCallback(

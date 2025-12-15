@@ -55,7 +55,10 @@ export interface MissingResourcesIndexed {
   lookups: string[];
 }
 
-export type OnMissingResourcesFetched = (missingResources: SiemMigrationResourceBase[]) => void;
+export type OnMissingResourcesFetched = (
+  missingResources: SiemMigrationResourceBase[],
+  migrationSource: MigrationSource
+) => void;
 
 export enum MigrationSource {
   SPLUNK = 'splunk',
@@ -80,3 +83,10 @@ export interface Step<
 }
 
 export type Steps = Array<Step<MigrationStepProps>>;
+export type HandleMissingResourcesIndexed = ({
+  migrationSource,
+  newMissingResourcesIndexed,
+}: {
+  migrationSource: MigrationSource;
+  newMissingResourcesIndexed?: MissingResourcesIndexed;
+}) => void;

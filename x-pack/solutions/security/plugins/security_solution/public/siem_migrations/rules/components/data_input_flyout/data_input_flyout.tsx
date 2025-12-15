@@ -29,7 +29,11 @@ import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
 import { useMissingResources } from './steps/hooks/use_missing_resources';
-import type { MigrationStepProps, MissingResourcesIndexed, Step } from '../../../common/types';
+import type {
+  HandleMissingResourcesIndexed,
+  MigrationStepProps,
+  Step,
+} from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
 import { QradarDataInputStep } from './types';
@@ -52,13 +56,32 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
 
-    const {
-      migrationSource,
-      setMigrationSource,
-      migrationSourceDisabled,
-      setMigrationSourceDisabled,
-      migrationSourceOptions,
-    } = useMigrationSourceStep(initialMigrationSource);
+    const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
+      ({ migrationSource: vendor, newMissingResourcesIndexed }) => {
+        if (vendor === MigrationSource.QRADAR) {
+          if (newMissingResourcesIndexed?.lookups.length) {
+            setDataInputStep(QradarDataInputStep.ReferenceSet);
+            return;
+          }
+
+          setDataInputStep(QradarDataInputStep.End);
+          return;
+        }
+
+        if (newMissingResourcesIndexed?.macros.length) {
+          setDataInputStep(SplunkDataInputStep.Macros);
+          return;
+        }
+
+        if (newMissingResourcesIndexed?.lookups.length) {
+          setDataInputStep(SplunkDataInputStep.Lookups);
+          return;
+        }
+
+        setDataInputStep(SplunkDataInputStep.End);
+      },
+      []
+    );
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
       initialMigrationSats
@@ -68,37 +91,17 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
 
     const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
 
-    const setMissingResourcesStep = useCallback(
-      (newMissingResourcesIndexed: MissingResourcesIndexed) => {
-        if (migrationSource === MigrationSource.QRADAR) {
-          if (newMissingResourcesIndexed.lookups.length) {
-            setDataInputStep(QradarDataInputStep.ReferenceSet);
-            return;
-          }
-
-          setDataInputStep(QradarDataInputStep.End);
-          return;
-        }
-
-        if (newMissingResourcesIndexed.macros.length) {
-          setDataInputStep(SplunkDataInputStep.Macros);
-          return;
-        }
-
-        if (newMissingResourcesIndexed.lookups.length) {
-          setDataInputStep(SplunkDataInputStep.Lookups);
-          return;
-        }
-
-        setDataInputStep(SplunkDataInputStep.End);
-      },
-      [migrationSource]
-    );
+    const {
+      migrationSource,
+      setMigrationSource,
+      migrationSourceDisabled,
+      setMigrationSourceDisabled,
+      migrationSourceOptions,
+    } = useMigrationSourceStep(initialMigrationSource);
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
-      setDataInputStep,
-      migrationSource,
       handleMissingResourcesIndexed: setMissingResourcesStep,
+      migrationSource,
     });
 
     const onMigrationCreated = useCallback(
@@ -165,6 +168,8 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                   setMigrationSource={setMigrationSource}
                   disabled={migrationSourceDisabled}
                   migrationSourceOptions={migrationSourceOptions}
+                  missingResourcesIndexed={missingResourcesIndexed}
+                  handleMissingResourcesIndexed={setMissingResourcesStep}
                 />
               </EuiFlexItem>
               <>

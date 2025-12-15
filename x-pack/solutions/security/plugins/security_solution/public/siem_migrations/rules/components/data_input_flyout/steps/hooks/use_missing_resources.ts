@@ -8,27 +8,25 @@
 import { useCallback, useState } from 'react';
 import type { SiemMigrationResourceBase } from '../../../../../../../common/siem_migrations/model/common.gen';
 import type {
-  MigrationStepProps,
-  MissingResourcesIndexed,
+  HandleMissingResourcesIndexed,
   MigrationSource,
+  MissingResourcesIndexed,
 } from '../../../../../common/types';
 
 export const useMissingResources = ({
-  setDataInputStep,
-  migrationSource,
   handleMissingResourcesIndexed,
+  migrationSource,
 }: {
-  setDataInputStep: MigrationStepProps['setDataInputStep'];
-  migrationSource?: MigrationSource;
-  handleMissingResourcesIndexed: (newMissingResourcesIndexed: MissingResourcesIndexed) => void;
+  handleMissingResourcesIndexed: HandleMissingResourcesIndexed;
+  migrationSource: MigrationSource;
 }) => {
   const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
     MissingResourcesIndexed | undefined
   >();
 
   const onMissingResourcesFetched = useCallback(
-    (missingResources: SiemMigrationResourceBase[]) => {
-      const newMissingResourcesIndexed = missingResources.reduce<MissingResourcesIndexed>(
+    (missingResources?: SiemMigrationResourceBase[]) => {
+      const newMissingResourcesIndexed = missingResources?.reduce<MissingResourcesIndexed>(
         (acc, { type, name }) => {
           if (type === 'macro') {
             acc.macros.push(name);
@@ -38,12 +36,15 @@ export const useMissingResources = ({
           return acc;
         },
         { macros: [], lookups: [] }
-      );
+      ) ?? { macros: [], lookups: [] };
       setMissingResourcesIndexed(newMissingResourcesIndexed);
 
-      handleMissingResourcesIndexed?.(newMissingResourcesIndexed);
+      handleMissingResourcesIndexed?.({
+        migrationSource,
+        newMissingResourcesIndexed,
+      });
     },
-    [handleMissingResourcesIndexed]
+    [handleMissingResourcesIndexed, migrationSource]
   );
 
   return { missingResourcesIndexed, onMissingResourcesFetched };
