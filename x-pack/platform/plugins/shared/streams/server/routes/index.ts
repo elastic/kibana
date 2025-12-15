@@ -23,6 +23,7 @@ import { queryRoutes } from './queries/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
 import { internalIngestRoutes } from './internal/streams/ingest/route';
 import { connectorRoutes } from './internal/connectors/route';
+import { docCountsRoutes } from './streams/doc_counts/route';
 import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 
@@ -40,6 +41,7 @@ export const streamsRouteRepository = {
   ...connectorRoutes,
   ...internalAttachmentRoutes,
   // public APIs
+  ...docCountsRoutes,
   ...crudRoutes,
   ...enablementRoutes,
   ...managementRoutes,
