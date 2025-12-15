@@ -107,7 +107,7 @@ export const useFetchSignificantEvents = ({
 
       return response;
     },
-    [name, start, end, streamsRepositoryClient, data.query.timefilter]
+    [name, start, end, streamsRepositoryClient, data.query.timefilter, query]
   );
 
   return result;
