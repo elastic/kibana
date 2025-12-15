@@ -12,16 +12,40 @@ import '@testing-library/jest-dom';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent, screen } from '@testing-library/react';
 import { EisCloudConnectPromoTour } from './eis_ccm_promotional_tour';
+import { useKibana } from '../hooks/use_kibana';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import * as i18n from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
+jest.mock('../hooks/use_kibana');
+
+const mockUiSettingsGet = jest.fn();
+const mockNavigateToApp = jest.fn();
+
+const mockUseKibana = (overrides?: Partial<any>) => {
+  (useKibana as jest.Mock).mockReturnValue({
+    services: {
+      uiSettings: {
+        get: mockUiSettingsGet,
+      },
+      application: {
+        navigateToApp: mockNavigateToApp,
+        capabilities: {
+          cloudConnect: {
+            show: true,
+            configure: true,
+          },
+        },
+      },
+      ...overrides,
+    },
+  });
+};
 
 describe('EisCloudConnectPromoTour', () => {
   const promoId = 'cloudConnectPromo';
   const dataId = `${promoId}-cloud-connect-promo-tour`;
   const childTestId = 'tourChild';
-  const mockNavigateToApp = jest.fn();
 
   const renderComponent = (
     props: Partial<React.ComponentProps<typeof EisCloudConnectPromoTour>> = {}
@@ -39,6 +63,8 @@ describe('EisCloudConnectPromoTour', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUiSettingsGet.mockReturnValue(true);
+    mockUseKibana();
   });
 
   it('renders children only when promo is not visible', () => {

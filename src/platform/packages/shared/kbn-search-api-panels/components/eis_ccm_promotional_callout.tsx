@@ -18,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import * as i18n from '../translations';
+import { useKibana } from '../hooks/use_kibana';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import searchRocketIcon from '../assets/search-rocket.svg';
 
@@ -36,13 +37,20 @@ export const EisCloudConnectPromoCallout = ({
   direction,
   addSpacer,
 }: EisCloudConnectPromoCalloutProps) => {
+  const {
+    services: { application },
+  } = useKibana();
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}CloudConnectCallout`,
   });
 
+  const hasCloudConnectPermission = Boolean(
+    application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
+  );
+
   const dataId = `${promoId}-cloud-connect-callout`;
 
-  if (!isPromoVisible || !isSelfManaged) {
+  if (!isPromoVisible || !isSelfManaged || !hasCloudConnectPermission) {
     return null;
   }
 
@@ -53,9 +61,9 @@ export const EisCloudConnectPromoCallout = ({
         data-telemetry-id={dataId}
         data-test-subj={dataId}
         css={({ euiTheme }) => ({
-          color: euiTheme.colors.primaryText,
           backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
           border: `${euiTheme.border.thin}`,
+          borderRadius: `${euiTheme.border.radius.medium}`,
         })}
         onDismiss={onDismissTour}
       >

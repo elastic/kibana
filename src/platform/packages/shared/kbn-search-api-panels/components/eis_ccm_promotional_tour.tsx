@@ -23,6 +23,8 @@ import {
   EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
+import { useKibana } from '../hooks/use_kibana';
+import { EIS_TOUR_ENABLED_FEATURE_FLAG_ID } from '../constants';
 
 /**
  * Props for the EisCloudConnectPromoTour component.
@@ -67,12 +69,28 @@ export const EisCloudConnectPromoTour = ({
   children,
 }: EisCloudConnectPromoTourProps) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { application, uiSettings },
+  } = useKibana();
+  // Setting to enable hiding the tour for FTR tests
+  const isEISTourEnabled = uiSettings?.get<boolean>(EIS_TOUR_ENABLED_FEATURE_FLAG_ID, true);
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}CloudConnectTour`,
   });
+
   const dataId = `${promoId}-cloud-connect-promo-tour`;
 
-  if (!isPromoVisible || !isReady || !isSelfManaged) {
+  const hasCloudConnectPermission = Boolean(
+    application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
+  );
+
+  if (
+    !isPromoVisible ||
+    !isReady ||
+    !isSelfManaged ||
+    !hasCloudConnectPermission ||
+    !isEISTourEnabled
+  ) {
     return children;
   }
 

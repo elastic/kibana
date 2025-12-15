@@ -21,16 +21,39 @@ import {
   EisCloudConnectPromoCallout,
   type EisCloudConnectPromoCalloutProps,
 } from './eis_ccm_promotional_callout';
+import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
+jest.mock('../hooks/use_kibana');
+
+const mockUiSettingsGet = jest.fn();
+const mockNavigateToApp = jest.fn();
+const mockOnDismissTour = jest.fn();
+
+const mockUseKibana = (overrides?: Partial<any>) => {
+  (useKibana as jest.Mock).mockReturnValue({
+    services: {
+      uiSettings: {
+        get: mockUiSettingsGet,
+      },
+      application: {
+        navigateToApp: mockNavigateToApp,
+        capabilities: {
+          cloudConnect: {
+            show: true,
+            configure: true,
+          },
+        },
+      },
+      ...overrides,
+    },
+  });
+};
 
 describe('EisCloudConnectPromoCallout', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-cloud-connect-callout`;
   const direction: EisCloudConnectPromoCalloutProps['direction'] = 'row';
-
-  const mockOnDismissTour = jest.fn();
-  const mockNavigateToApp = jest.fn();
 
   const renderComponent = (props?: Partial<EisCloudConnectPromoCalloutProps>) =>
     render(
@@ -47,6 +70,8 @@ describe('EisCloudConnectPromoCallout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUiSettingsGet.mockReturnValue(true);
+    mockUseKibana();
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
       onDismissTour: mockOnDismissTour,
