@@ -9,9 +9,9 @@
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { coreServices, embeddableService } from '../../../services/kibana_services';
 import { navigateToVisualization } from './navigation';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { DashboardVisualizationUserContent } from '../../types';
 
 export async function editDashboardListingItem(

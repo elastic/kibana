@@ -21,6 +21,7 @@ import {
 } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import {
@@ -31,7 +32,6 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { TAB_IDS, type DashboardListingProps } from './types';
 
 type GetDashboardListingTabsParams = Pick<

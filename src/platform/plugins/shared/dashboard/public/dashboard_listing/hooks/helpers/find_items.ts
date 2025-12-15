@@ -20,11 +20,7 @@ import {
   visualizationsService,
 } from '../../../services/kibana_services';
 import { findService } from '../../../dashboard_client';
-import {
-  TAB_IDS,
-  type TabId,
-  type DashboardVisualizationUserContent,
-} from '../../types';
+import { TAB_IDS, type TabId, type DashboardVisualizationUserContent } from '../../types';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 
