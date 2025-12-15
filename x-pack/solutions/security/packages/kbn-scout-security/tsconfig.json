@@ -15,7 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/es",
-    "@kbn/security-solution-plugin",
+    "@kbn/es"
   ]
 }

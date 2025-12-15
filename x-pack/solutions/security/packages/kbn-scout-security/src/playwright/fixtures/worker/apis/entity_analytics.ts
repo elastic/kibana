@@ -7,15 +7,25 @@
 
 import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import { API_VERSIONS } from '@kbn/security-solution-plugin/common/entity_analytics/constants';
-import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine/constants';
-import type { RiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
+import type {
+  RiskEngineStatusResponse,
+  GetEntityStoreStatusResponse,
+} from '../../constants/entity_analytics';
 
 const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
 const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
+const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status' as const;
+
+const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+};
 
 export interface EntityAnalyticsApiService {
   deleteEntityStoreEngines: () => Promise<void>;

@@ -7,3 +7,4 @@
 
 export * as archives from './archives';
 export * as detection_rules from './detection_rules';
+export * as entity_analytics from './entity_analytics';
