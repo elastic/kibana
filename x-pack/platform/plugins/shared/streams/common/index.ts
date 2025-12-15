@@ -20,6 +20,7 @@ export {
   ATTACHMENT_SUGGESTIONS_LIMIT,
 } from './constants';
 
+export type { StreamDocsStat } from './doc_counts';
 export {
   excludeFrozenQuery,
   kqlQuery,
