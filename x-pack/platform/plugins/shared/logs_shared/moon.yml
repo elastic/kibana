@@ -64,7 +64,7 @@ dependsOn:
   - '@kbn/ml-plugin'
   - '@kbn/saved-search-component'
   - '@kbn/onechat-plugin'
-  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/ai-insights'
 tags:
   - plugin
   - prod
