@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IconType } from '@elastic/eui';
 import type { EventOutcome, StatusCode } from '@kbn/apm-types';
 import { STATUS_CODE, EVENT_OUTCOME } from '@kbn/apm-types';
 
@@ -27,4 +28,5 @@ export interface TraceItem {
     incoming: number;
     outgoing: number;
   };
+  icon?: IconType;
 }

@@ -75,6 +75,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           }
         `}
       >
+        <EuiFlexItem grow={false}>{item.icon && <EuiIcon type={item.icon} />}</EuiFlexItem>
         <EuiFlexItem
           grow={false}
           css={css`

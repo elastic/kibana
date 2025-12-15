@@ -11,8 +11,10 @@ import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/ut
 import type { EventOutcome, StatusCode } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { isRumAgentName } from '@kbn/elastic-agent-utils';
 import type { APMConfig } from '../..';
 import {
+  AGENT_NAME,
   AT_TIMESTAMP,
   DURATION,
   EVENT_OUTCOME,
@@ -64,6 +66,7 @@ const optionalFields = asMutableArray([
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
+  AGENT_NAME,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -190,6 +193,19 @@ export async function getUnifiedTraceItems({
         return undefined;
       }
 
+      let icon;
+      if (event[SPAN_TYPE]?.startsWith('db')) {
+        icon = 'database';
+      } else if (isRumAgentName(event[AGENT_NAME])) {
+        if (event[TRANSACTION_ID]) {
+          icon = 'globe';
+        } else {
+          icon = 'merge';
+        }
+      } /* else {
+        icon = 'heart'; // TODO: remove before merge
+      } */
+
       return {
         id,
         name,
@@ -206,6 +222,7 @@ export async function getUnifiedTraceItems({
           outgoing:
             event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
         },
+        icon,
       } satisfies TraceItem;
     }),
     unifiedTraceErrors,
