@@ -25,7 +25,6 @@ import type {
   ComposerRenameShorthand,
   ComposerSortShorthand,
   ComposerSourceShorthand,
-  ComposerSourceWithAlias,
   EsqlRequest,
   QueryCommandTag,
   QueryCommandTagParametrized,
@@ -741,19 +740,12 @@ export class ComposerQuery {
     onFieldName: ComposerColumnShorthand,
     ...onFieldNames: Array<ComposerColumnShorthand>
   ): ComposerQuery => {
-    const isSourceWithAlias = (
-      source: ComposerSourceShorthand
-    ): source is ComposerSourceWithAlias =>
-      typeof source === 'object' && 'index' in source && 'alias' in source;
-
     let lookupIndexNode;
 
     if (typeof lookupIndex === 'string') {
       lookupIndexNode = synth.src(lookupIndex);
-    } else if (isSourceWithAlias(lookupIndex)) {
-      const source = synth.src(lookupIndex.index);
-      const alias = Builder.identifier({ name: lookupIndex.alias });
-      lookupIndexNode = Builder.expression.func.binary('as', [source, alias]);
+    } else if ('index' in lookupIndex && 'alias' in lookupIndex) {
+      lookupIndexNode = synth.srcAs(lookupIndex.index, lookupIndex.alias);
     } else {
       lookupIndexNode = lookupIndex;
     }
