@@ -22,6 +22,7 @@ import {
   baseMappings,
   NAMESPACE_PRIORITIES,
   otelEquivalentLookupMap,
+  REQUIRED_RESOURCE_ATTRIBUTES_FIELDS,
 } from './logs_layer';
 import { getComponentTemplateName } from './name';
 
@@ -61,7 +62,8 @@ function buildNamespaceStructure(
             attributes: {
               type: 'passthrough',
               priority,
-              properties,
+              // Always include required fields (used for index sorting) plus stream-specific fields
+              properties: { ...REQUIRED_RESOURCE_ATTRIBUTES_FIELDS, ...properties },
             },
           },
         },
@@ -210,6 +212,12 @@ export function generateLayer(
       description: `Default settings for the ${name} stream`,
     },
   };
+
+  // DEBUG: Remove after debugging
+  // eslint-disable-next-line no-console
+  console.log('\n=== FINAL RESULT ===');
+  // eslint-disable-next-line no-console
+  console.dir(result, { depth: null });
 
   return result;
 }

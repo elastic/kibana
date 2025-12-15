@@ -119,6 +119,14 @@ describe('generateLayer', () => {
                 "properties": Object {
                   "attributes": Object {
                     "priority": 40,
+                    "properties": Object {
+                      "host.name": Object {
+                        "type": "keyword",
+                      },
+                      "service.name": Object {
+                        "type": "keyword",
+                      },
+                    },
                     "type": "passthrough",
                   },
                 },

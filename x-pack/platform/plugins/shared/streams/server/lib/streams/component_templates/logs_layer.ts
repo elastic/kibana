@@ -95,6 +95,14 @@ export const NAMESPACE_PRIORITIES: Record<string, number> = {
   'resource.attributes.': 40,
 };
 
+// Fields that MUST be present in every resource.attributes passthrough because they're used for index sorting.
+// When child streams override resource.attributes, these fields must be preserved.
+// Now that we pass an object (passthrough) instead of a flat key, ES replaces the whole thing when merging, so we need to always send it.
+export const REQUIRED_RESOURCE_ATTRIBUTES_FIELDS = {
+  'host.name': { type: 'keyword' as const },
+  'service.name': { type: 'keyword' as const },
+};
+
 export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
   body: {
     type: 'object',
@@ -124,6 +132,8 @@ export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> 
       attributes: {
         type: 'passthrough',
         priority: NAMESPACE_PRIORITIES['resource.attributes.'],
+        // Required fields for index sorting - must always be present
+        properties: REQUIRED_RESOURCE_ATTRIBUTES_FIELDS,
       },
     },
   },
