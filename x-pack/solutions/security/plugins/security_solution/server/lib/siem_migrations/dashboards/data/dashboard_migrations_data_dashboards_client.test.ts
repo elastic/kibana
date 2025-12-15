@@ -252,7 +252,6 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
                   data: 'elastic data 1',
                 },
                 status: SiemMigrationStatus.COMPLETED,
-                vendor: 'splunk',
               },
             },
             {
@@ -273,7 +272,6 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
                   data: 'elastic data 2',
                 },
                 status: SiemMigrationStatus.PENDING,
-                vendor: 'splunk',
               },
             },
           ],
@@ -309,7 +307,6 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               data: 'elastic data 1',
             },
             status: SiemMigrationStatus.COMPLETED,
-            vendor: 'splunk',
           },
           {
             id: 'doc2',
@@ -328,7 +325,6 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               data: 'elastic data 2',
             },
             status: SiemMigrationStatus.PENDING,
-            vendor: 'splunk',
           },
         ],
       });
