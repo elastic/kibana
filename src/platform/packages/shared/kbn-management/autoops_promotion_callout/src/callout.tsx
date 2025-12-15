@@ -48,16 +48,17 @@ export const AutoOpsPromotionCallout = ({
   }
 
   // Determine button behavior based on cloudConnect permission
-  const buttonProps = hasCloudConnectPermission === false
-    ? {
-        href: 'https://cloud.elastic.co/connect-cluster-services-portal',
-        target: '_blank' as const,
-        rel: 'noopener noreferrer',
-      }
-    : {
-        href: cloudConnectUrl,
-        onClick: onConnectClick,
-      };
+  const buttonProps =
+    hasCloudConnectPermission === false
+      ? {
+          href: 'https://cloud.elastic.co/connect-cluster-services-portal',
+          target: '_blank' as const,
+          rel: 'noopener noreferrer',
+        }
+      : {
+          href: cloudConnectUrl,
+          onClick: onConnectClick,
+        };
 
   return (
     <EuiCallOut
