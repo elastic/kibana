@@ -22,15 +22,14 @@ import { useSignificantEventsApi } from '../../hooks/use_significant_events_api'
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
-import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
-import { NoFeaturesEmptyState } from './empty_state/no_features';
-import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
+import { EmptyState } from './empty_state';
 import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
 } from '../../constants';
+import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -140,10 +139,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const noSignificantEvents =
     significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
 
-  if (noFeatures && noSignificantEvents) {
+  if (noFeatures || noSignificantEvents) {
     return (
       <>
-        <NoFeaturesEmptyState
+        <EmptyState
+          features={features}
+          selectedFeatures={selectedFeatures}
+          onFeaturesChange={setSelectedFeatures}
           onFeatureIdentificationClick={() => {
             setIsFeatureDetectionLoading(true);
             setIsFeatureDetectionFlyoutOpen(true);
@@ -161,30 +163,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setInitialFlow('manual');
             setIsEditFlyoutOpen(true);
           }}
-        />
-        {featureDetectionFlyout}
-        {editFlyout}
-      </>
-    );
-  }
-
-  if (noSignificantEvents) {
-    return (
-      <>
-        <NoSignificantEventsEmptyState
           onGenerateSuggestionsClick={() => {
             setInitialFlow('ai');
             setIsEditFlyoutOpen(true);
           }}
-          onManualEntryClick={() => {
-            setQueryToEdit(undefined);
-            setInitialFlow('manual');
-            setIsEditFlyoutOpen(true);
-          }}
-          features={features}
-          selectedFeatures={selectedFeatures}
-          onFeaturesChange={setSelectedFeatures}
         />
+        {featureDetectionFlyout}
         {editFlyout}
       </>
     );

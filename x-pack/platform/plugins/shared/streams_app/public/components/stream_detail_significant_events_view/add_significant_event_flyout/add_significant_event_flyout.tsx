@@ -48,6 +48,7 @@ import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
+import { SignificantEventsGenerationPanel } from '../empty_state';
 
 interface Props {
   onClose: () => void;
@@ -293,29 +294,13 @@ export function AddSignificantEventFlyout({
                 />
                 <EuiSpacer size="m" />
                 {selectedFlow === 'ai' && (
-                  <>
-                    <FeaturesSelector
-                      features={features}
-                      selectedFeatures={selectedFeatures}
-                      onFeaturesChange={setSelectedFeatures}
-                    />
-                    <EuiSpacer size="m" />
-                    <ConnectorListButton
-                      buttonProps={{
-                        iconType: 'sparkles',
-                        isLoading: isGenerating,
-                        isDisabled: isSubmitting,
-                        onClick: generateQueries,
-                        'data-test-subj': 'significant_events_flyout_generate_suggestions_button',
-                        children: i18n.translate(
-                          'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
-                          {
-                            defaultMessage: 'Generate suggestions',
-                          }
-                        ),
-                      }}
-                    />
-                  </>
+                  <SignificantEventsGenerationPanel
+                    features={features}
+                    selectedFeatures={selectedFeatures}
+                    onFeaturesChange={setSelectedFeatures}
+                    onGenerateSuggestionsClick={generateQueries}
+                    onFeatureIdentificationClick={() => {}}
+                  />
                 )}
               </EuiPanel>
             </EuiFlexItem>

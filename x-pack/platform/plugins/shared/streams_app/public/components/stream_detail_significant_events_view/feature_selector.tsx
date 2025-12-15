@@ -59,6 +59,7 @@ export function FeaturesSelector({
             }
           )}
           options={options}
+          isDisabled={features.length === 0}
           selectedOptions={
             !selectedFeatures
               ? [{ label: ALL_DATA_OPTION.label, value: ALL_DATA_OPTION.value }]
