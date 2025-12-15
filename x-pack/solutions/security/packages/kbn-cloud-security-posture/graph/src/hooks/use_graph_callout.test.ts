@@ -109,7 +109,7 @@ describe('useGraphCallout', () => {
         expect(result.current.config.title).toBe('Enrich graph experience');
         expect(result.current.config.links).toHaveLength(2);
         expect(result.current.config.links[0].href).toBe(
-          '/app/integrations/browse/security/asset_inventory'
+          '/app/integrations/detail/cloud_asset_inventory/overview'
         );
         expect(result.current.config.links[1].href).toBe(
           '/app/security/entity_analytics_entity_store'
@@ -141,7 +141,7 @@ describe('useGraphCallout', () => {
         expect(result.current.config.title).toBe('Enrich graph experience');
         expect(result.current.config.links).toHaveLength(1);
         expect(result.current.config.links[0].href).toBe(
-          '/app/integrations/browse/security/asset_inventory'
+          '/app/integrations/detail/cloud_asset_inventory/overview'
         );
       }
     });

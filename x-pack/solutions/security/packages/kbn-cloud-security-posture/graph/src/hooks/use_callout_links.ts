@@ -30,7 +30,9 @@ export const useCalloutLinks = ():
   }
 
   // Build URLs using Kibana's getUrlForApp
-  const integrationUrl = `${getUrlForApp(INTEGRATIONS_PLUGIN_ID)}/browse/security/asset_inventory`;
+  const integrationUrl = `${getUrlForApp(
+    INTEGRATIONS_PLUGIN_ID
+  )}/detail/cloud_asset_inventory/overview`;
 
   // Hard-coded path referencing ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH
   // from x-pack/solutions/security/plugins/security_solution/common/constants.ts
