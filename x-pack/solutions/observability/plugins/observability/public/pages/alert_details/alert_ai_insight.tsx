@@ -20,7 +20,6 @@ import {
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { useKibana } from '../../utils/kibana_react';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
