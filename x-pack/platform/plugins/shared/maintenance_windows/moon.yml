@@ -19,13 +19,13 @@ project:
     sourceRoot: x-pack/platform/plugins/shared/maintenance_windows
 dependsOn:
   - '@kbn/core'
-  - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
   - '@kbn/licensing-plugin'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/spaces-plugin'
   - '@kbn/i18n'
   - '@kbn/core-saved-objects-server'
   - '@kbn/data-plugin'
-  - '@kbn/kibana-utils-plugin'
   - '@kbn/alerting-types'
   - '@kbn/rrule'
   - '@kbn/es-query'
@@ -53,6 +53,8 @@ dependsOn:
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/response-ops-recurring-schedule-form'
   - '@kbn/react-query'
+  - '@kbn/shared-ux-router'
+  - '@kbn/response-ops-rules-apis'
 tags:
   - plugin
   - prod
