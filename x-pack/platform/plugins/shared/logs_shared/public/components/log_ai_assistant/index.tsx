@@ -13,14 +13,9 @@ export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));
 
 export function createLogAIAssistant({
   observabilityAIAssistant,
-  onechat,
-}: Pick<LogAIAssistantProps, 'observabilityAIAssistant' | 'onechat'>) {
-  return (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant' | 'onechat'>) => (
-    <LogAIAssistant
-      observabilityAIAssistant={observabilityAIAssistant}
-      onechat={onechat}
-      {...props}
-    />
+}: Pick<LogAIAssistantProps, 'observabilityAIAssistant'>) {
+  return (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => (
+    <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} {...props} />
   );
 }
 

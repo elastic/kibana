@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { LogsLocatorDefinition } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
+import { createLogAIInsight, createLogsAIInsightRenderer } from './components/log_ai_insight';
 import { createLogsOverview } from './components/logs_overview';
 import { LogViewsService } from './services/log_views';
 import type {
@@ -85,12 +86,20 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
 
     const LogAIAssistant = createLogAIAssistant({
       observabilityAIAssistant,
-      onechat: plugins.onechat,
     });
 
     discoverShared.features.registry.register({
       id: 'observability-logs-ai-assistant',
       render: createLogsAIAssistantRenderer(LogAIAssistant),
+    });
+
+    const LogAIInsight = createLogAIInsight({
+      onechat: plugins.onechat,
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-logs-ai-insight',
+      render: createLogsAIInsightRenderer(LogAIInsight),
     });
 
     // Register "Log Events" as a feature in Discover.

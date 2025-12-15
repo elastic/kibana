@@ -12,11 +12,8 @@ import type {
   Message,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
-import { LogEntryAgentBuilderAiInsight } from './ai_insight';
-
 export interface LogAIAssistantDocument {
   fields: LogEntryField[];
 }
@@ -24,7 +21,6 @@ export interface LogAIAssistantDocument {
 export interface LogAIAssistantProps {
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   doc: LogAIAssistantDocument | undefined;
-  onechat?: OnechatPluginStart;
 }
 
 export const LogAIAssistant = ({
@@ -77,9 +73,7 @@ export const LogAIAssistant = ({
   }, [getContextualInsightMessages, doc]);
 
   const hasAtLeastOnePrompt = Boolean(explainLogMessageMessages || similarLogMessageMessages);
-  if (onechat) {
-    return <LogEntryAgentBuilderAiInsight doc={doc} onechat={onechat} />;
-  }
+
   return hasAtLeastOnePrompt ? (
     <EuiFlexGroup direction="column" gutterSize="m">
       {ObservabilityAIAssistantContextualInsight && explainLogMessageMessages ? (

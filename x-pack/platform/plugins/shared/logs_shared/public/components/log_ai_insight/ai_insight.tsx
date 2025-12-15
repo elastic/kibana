@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/ai-insights';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { LogAIAssistantDocument } from './log_ai_assistant';
+import type { LogEntryField } from '../../../common';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
 
 // cannot import from observability-agent-builder-plugin because it is a private plugin
@@ -19,13 +19,15 @@ const OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID = 'observability.log';
 const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
 const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
-export function LogEntryAgentBuilderAiInsight({
-  doc,
-  onechat,
-}: {
-  doc: LogAIAssistantDocument | undefined;
+export interface LogAIInsightDocument {
+  fields: LogEntryField[];
+}
+
+export interface LogAIInsightProps {
+  doc: LogAIInsightDocument | undefined;
   onechat?: OnechatPluginStart;
-}) {
+}
+export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProps) {
   const {
     services: {
       http,
@@ -119,3 +121,6 @@ export function LogEntryAgentBuilderAiInsight({
     </>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryAgentBuilderAiInsight;
