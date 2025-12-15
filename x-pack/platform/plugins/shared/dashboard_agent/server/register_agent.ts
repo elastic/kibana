@@ -6,6 +6,7 @@
  */
 
 import { ToolResultType, platformCoreTools } from '@kbn/onechat-common';
+import { dashboardElement } from '@kbn/onechat-common/tools/tool_result';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import { dashboardTools } from '../common';
 
@@ -108,17 +109,22 @@ General Guidelines:
 
 function renderDashboardResultPrompt() {
   const { dashboard } = ToolResultType;
+  const { tagName, attributes } = dashboardElement;
 
-  return `#### Handling Dashboard Results
-      When a tool call returns a result of type "${dashboard}", you should inform the user that a dashboard has been created and provide relevant information about it.
+  return `#### Rendering Dashboards
+      When a tool call returns a result of type "${dashboard}", you should render the dashboard in the UI by emitting a custom XML element:
+
+      <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
 
       **Rules**
-      * When you receive a tool result with \`"type": "${dashboard}"\`, extract the \`id\`, \`title\`, and other relevant data from the result.
-      * Provide a clickable link if a URL is available in \`content.url\`.
+      * The \`<${tagName}>\` element must only be used to render tool results of type \`${dashboard}\`.
+      * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
+      * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
+      * You must not include any other attributes or content within the \`<${tagName}>\` element.
 
-      **Example for Dashboard:**
+      **Example Usage:**
 
-      Tool response:
+      Tool response includes:
       {
         "tool_result_id": "abc123",
         "type": "${dashboard}",
@@ -133,6 +139,10 @@ function renderDashboardResultPrompt() {
         }
       }
 
-      Your response to the user should include:
-      Dashboard "My Dashboard" created successfully. You can view it at: [/app/dashboards#/view/dashboard-123](/app/dashboards#/view/dashboard-123)`;
+      To render this dashboard your reply should include:
+      <${tagName} ${attributes.toolResultId}="abc123" />
+
+      You may also add a brief message about the dashboard creation, for example:
+      "I've created a dashboard for you:"
+      <${tagName} ${attributes.toolResultId}="abc123" />`;
 }

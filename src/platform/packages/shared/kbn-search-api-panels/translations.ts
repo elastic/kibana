@@ -70,7 +70,14 @@ export const EIS_TOUR_DISMISS = i18n.translate('searchApiPanels.eis.tour.dismiss
 export const EIS_COSTS_TOUR_DISMISS_ARIA = i18n.translate(
   'searchApiPanels.eisCosts.tour.dismiss.aria',
   {
-    defaultMessage: 'Close the cost tour',
+    defaultMessage: 'Close the Elastic Inference Service cost tour',
+  }
+);
+
+export const EIS_PROMO_CALLOUT_DISMISS_ARIA = i18n.translate(
+  'searchApiPanels.eisPromotion.callout.dismiss.aria',
+  {
+    defaultMessage: 'Dismiss the Elastic Inference Service callout',
   }
 );
 
