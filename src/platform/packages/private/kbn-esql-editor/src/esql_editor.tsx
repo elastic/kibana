@@ -481,15 +481,20 @@ const ESQLEditorInternal = function ESQLEditor({
             .filter((item) => item.status !== 'error')
             .map((item) => item.queryString);
 
-          const { favoriteMetadata } = (await favoritesClientInstance?.getFavorites()) || {};
+          try {
+            const { favoriteMetadata } = (await favoritesClientInstance?.getFavorites()) || {};
 
-          if (favoriteMetadata) {
-            Object.keys(favoriteMetadata).forEach((id) => {
-              const item = favoriteMetadata[id];
-              const { queryString } = item;
-              historyStarredItems.push(queryString);
-            });
+            if (favoriteMetadata) {
+              Object.keys(favoriteMetadata).forEach((id) => {
+                const item = favoriteMetadata[id];
+                const { queryString } = item;
+                historyStarredItems.push(queryString);
+              });
+            }
+          } catch {
+            // do nothing
           }
+
           return historyStarredItems;
         })(),
       }),

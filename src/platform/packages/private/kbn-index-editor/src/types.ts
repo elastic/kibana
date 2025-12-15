@@ -48,7 +48,7 @@ export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
   storage: Storage;
   indexUpdateService: IndexUpdateService;
   indexEditorTelemetryService: IndexEditorTelemetryService;
-  fileManager: FileUploadManager;
+  existingIndexName: string | undefined | null;
 };
 
 /** Extended kibana context */
