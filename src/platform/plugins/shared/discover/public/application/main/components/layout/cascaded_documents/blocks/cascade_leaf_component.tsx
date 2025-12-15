@@ -36,7 +36,6 @@ interface ESQLDataCascadeLeafCellProps
       | 'onSetColumns'
       | 'sampleSizeState'
       | 'onUpdateSampleSize'
-      | 'onUpdateDataGridDensity'
       | 'expandedDoc'
       | 'setExpandedDoc'
     >,
@@ -74,10 +73,6 @@ const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme']) => ({
       {
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },
-  }),
-  headerRow: css({
-    position: 'sticky',
-    top: 0,
   }),
   virtualizerContainer: css({
     width: '100%',
@@ -236,8 +231,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollElement,
     getScrollMargin,
     getScrollOffset,
+    onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
-    const [sampleSize, setSampleSize] = useState(cellData.length);
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
@@ -246,6 +241,12 @@ export const ESQLDataCascadeLeafCell = React.memo(
     // TODO: Implement column selection logic,
     // probably requires a new selection component that will be used within the row
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+
+    useEffect(() => {
+      // propagate localized changes of the data grid density,
+      // so that other rows can use the same density value
+      onUpdateDataGridDensity(cascadeDataGridDensityState);
+    }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
 
@@ -305,6 +306,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     return (
       <EuiPanel paddingSize="none">
         <UnifiedDataTable
+          isPlainRecord
           dataView={dataView}
           showTimeCol={showTimeCol}
           showKeyboardShortcuts={showKeyboardShortcuts}
@@ -318,9 +320,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           loadingState={DataLoadingState.loaded}
           columns={selectedColumns}
           onSetColumns={setSelectedColumns}
-          sampleSizeState={sampleSize}
           renderCustomToolbar={renderCustomToolbarWithElements}
-          onUpdateSampleSize={setSampleSize}
           expandedDoc={expandedDoc}
           setExpandedDoc={setExpandedDocFn}
           dataGridDensityState={cascadeDataGridDensityState}
