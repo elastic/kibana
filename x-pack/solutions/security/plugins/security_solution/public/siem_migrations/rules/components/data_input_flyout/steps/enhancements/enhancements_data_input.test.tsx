@@ -38,11 +38,7 @@ describe('EnhancementsDataInput', () => {
     jest.clearAllMocks();
     useAppToastsMock.mockReturnValue({
       addError: addErrorMock,
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addInfo: jest.fn(),
-      remove: jest.fn(),
-    });
+    } as unknown as ReturnType<typeof useAppToastsModule.useAppToasts>);
 
     (useEnhanceRules as jest.Mock).mockReturnValue({
       enhanceRules: mockEnhanceRules,
