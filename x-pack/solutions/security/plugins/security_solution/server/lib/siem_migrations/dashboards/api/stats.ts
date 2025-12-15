@@ -12,7 +12,7 @@ import { GetDashboardMigrationStatsRequestParams } from '../../../../../common/s
 import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
-import { authz } from '../../common/api/util/authz';
+import { authz } from './util/authz';
 import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsStatsRoute = (

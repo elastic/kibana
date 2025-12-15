@@ -79,6 +79,7 @@ export const Edit: StoryFn<{}> = () => {
         },
         feature: {
           name: 'Test feature',
+          type: 'system',
           filter: {
             field: 'host.name',
             eq: 'test.host',

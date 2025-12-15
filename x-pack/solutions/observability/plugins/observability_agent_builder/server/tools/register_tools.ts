@@ -9,9 +9,9 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
 import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
@@ -31,6 +31,10 @@ import {
   createGetLogCategoriesTool,
 } from './get_log_categories/get_log_categories';
 import {
+  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+  createGetCorrelatedLogsTool,
+} from './get_correlated_logs/get_correlated_logs';
+import {
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 } from '../../common/constants';
@@ -40,6 +44,7 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
+  platformCoreTools.productDocumentation,
 ];
 
 const OBSERVABILITY_TOOL_IDS = [
@@ -48,6 +53,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
+  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
 ];
 
 // registered in the APM plugin
@@ -67,8 +73,11 @@ export async function registerTools({
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = [
@@ -77,6 +86,7 @@ export async function registerTools({
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
+    createGetCorrelatedLogsTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {

@@ -62,7 +62,7 @@ import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
-import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { ProductFeatureKeyType, ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -180,6 +180,7 @@ export interface ContractStartServices {
   getComponents$: GetComponents$;
   upselling: UpsellingService;
   onboarding: OnboardingService;
+  productFeatureKeys$: Observable<Set<ProductFeatureKeyType> | null>;
 }
 
 export type StartServices = CoreStart &
