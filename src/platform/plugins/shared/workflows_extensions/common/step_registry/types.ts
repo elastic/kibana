@@ -36,4 +36,12 @@ export interface CommonStepDefinition<
    * The output type is automatically inferred from this schema.
    */
   outputSchema: OutputSchema;
+
+  /**
+   * Dynamic Zod schema for validating step output based on input.
+   * Allows for more flexible output validation based on the specific input provided.
+   * @param input The input data for the step.
+   * @returns A Zod schema for validating the output of the step.
+   */
+  dynamicOutputSchema?: (input: z.infer<InputSchema>) => z.ZodType<z.infer<OutputSchema>>;
 }
