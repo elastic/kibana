@@ -313,7 +313,7 @@ export function LensEditConfigurationFlyout({
     const layers = datasourceStates[datasourceId].state?.layers;
 
     if (!isSingleLayerVisualization || textBasedMode || !layers) {
-      return { isConvertToEsqlButtonDisbaled: true };
+      return { isConvertToEsqlButtonDisabled: true };
     }
 
     // Take the first (and only) layer
