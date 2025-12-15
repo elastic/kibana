@@ -187,18 +187,18 @@ export class StreamsPlugin
             coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
           ]);
 
+          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          const inferenceClient = pluginsStart.inference.getClient({ request });
+          const licensing = pluginsStart.licensing;
+          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+
           const streamsClient = await streamsService.getClientWithRequest({
             request,
             assetClient,
             queryClient,
             featureClient,
           });
-
-          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-          const soClient = coreStart.savedObjects.getScopedClient(request);
-          const inferenceClient = pluginsStart.inference.getClient({ request });
-          const licensing = pluginsStart.licensing;
-          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
           return {
             scopedClusterClient,
