@@ -82,6 +82,136 @@ describe('Datatable Schema', () => {
       const validated = datatableStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
+
+    it('validates metric sorted configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+            sorted: {
+              direction: 'desc',
+            },
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            size: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['api'],
+            size: 5,
+          },
+        ],
+      };
+
+      const validated = datatableStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates row sorted configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            size: 10,
+            sorted: {
+              direction: 'desc',
+            },
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['api'],
+            size: 5,
+          },
+        ],
+      };
+
+      const validated = datatableStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates transposed metric sorted configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            size: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            size: 5,
+            sorted: {
+              direction: 'desc',
+              value: 'success',
+            },
+          },
+        ],
+      };
+
+      const validated = datatableStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
   });
 
   describe('validation errors', () => {
@@ -177,7 +307,7 @@ describe('Datatable Schema', () => {
       expect(() => datatableStateSchema.validate(input)).toThrow();
     });
 
-    it('throw when using invalid density mode', () => {
+    it('throws when using invalid density mode', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'density'> & {
         density: { mode: 'invalid' };
       } = {
@@ -200,7 +330,7 @@ describe('Datatable Schema', () => {
       expect(() => datatableStateSchema.validate(input)).toThrow();
     });
 
-    it('throw when using invalid height type', () => {
+    it('throws when using invalid height type', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'density'> & {
         density: { height: { header: { type: 'invalid' } } };
       } = {
@@ -221,7 +351,7 @@ describe('Datatable Schema', () => {
       expect(() => datatableStateSchema.validate(input)).toThrow();
     });
 
-    it('throw when missing summary type', () => {
+    it('throws when missing summary type', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> & {
         metrics: {
           operation: 'median';
@@ -242,7 +372,7 @@ describe('Datatable Schema', () => {
       expect(() => datatableStateSchema.validate(input)).toThrow();
     });
 
-    it('throw when using term buckets operation in an esql configuration', () => {
+    it('throws when using term buckets operation in an esql configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'datatable',
         dataset: {
@@ -260,6 +390,55 @@ describe('Datatable Schema', () => {
           },
         ],
         rows: [{ operation: 'terms', fields: ['geo.dest'], size: 10 }],
+      };
+
+      expect(() => datatableStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using multiple sorted columns', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+            sorted: {
+              direction: 'desc',
+            },
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+            sorted: {
+              direction: 'desc',
+            },
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            size: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            size: 5,
+            sorted: {
+              direction: 'desc',
+              value: 'success',
+            },
+          },
+        ],
       };
 
       expect(() => datatableStateSchema.validate(input)).toThrow();
@@ -295,6 +474,9 @@ describe('Datatable Schema', () => {
                   color: '#000000',
                 },
               ],
+            },
+            sorted: {
+              direction: 'asc',
             },
           },
           {

@@ -10,8 +10,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
+import { omit } from 'lodash';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
-import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -115,6 +115,27 @@ const datatableStateSharedOptionsSchema = {
   ),
 };
 
+/**
+ * Sorting configuration split_metrics_by
+ */
+const splitMetricsBySortingSchema = {
+  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+    defaultValue: 'asc',
+    meta: { description: 'Direction to sort by' },
+  }),
+  value: schema.string({
+    meta: {
+      description:
+        'The transposed column value to sort by (e.g., if split_metrics_by uses "status" field, this could be "success" or "error")',
+    },
+  }),
+};
+
+/**
+ * Sorting configuration for rows and metrics
+ */
+const rowsMetricsSortingSchema = omit(splitMetricsBySortingSchema, ['value']);
+
 const datatableStateCommonOptionsSchema = {
   /**
    * Where to apply the color (background or value)
@@ -124,6 +145,17 @@ const datatableStateCommonOptionsSchema = {
    * Whether to show the row
    */
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
+  /**
+   * Whether to sort by this column
+   */
+  sorted: schema.maybe(
+    schema.object(rowsMetricsSortingSchema, {
+      meta: {
+        description:
+          'Sorting configuration. Only one column across metrics, rows, and split_metrics_by can be sorted at a time.',
+      },
+    })
+  ),
 };
 
 const datatableStateRowsOptionsSchema = schema.object({
@@ -196,95 +228,152 @@ const datatableStateMetricsOptionsSchema = schema.object({
   ),
 });
 
-export const datatableStateSchemaNoESQL = schema.object({
-  type: schema.literal('datatable'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  ...datatableStateSharedOptionsSchema,
+const datatableStateSplitMetricsByOptionsSchema = schema.object({
   /**
-   * Metric columns configuration, must define operation.
+   * Sorting configuration for the split metrics by
    */
-  metrics: schema.arrayOf(
-    mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateMetricsOptionsSchema),
-    {
-      minSize: 1,
-      maxSize: 1000,
-      meta: { description: 'Array of metrics to display as columns in the datatable' },
-    }
-  ),
-  /**
-   * Row configuration, optional bucket operations.
-   */
-  rows: schema.maybe(
-    schema.arrayOf(mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsSchema), {
-      minSize: 1,
-      maxSize: 1000,
-      meta: { description: 'Array of operations to split the datatable rows by' },
-    })
-  ),
-  /**
-   * Split metrics by configuration, optional bucket operations.
-   */
-  split_metrics_by: schema.maybe(
-    schema.arrayOf(bucketOperationDefinitionSchema, {
-      minSize: 1,
-      maxSize: 1000,
-      meta: { description: 'Array of operations to split the metric columns by' },
+  sorted: schema.maybe(
+    schema.object(splitMetricsBySortingSchema, {
+      meta: {
+        description:
+          'Sorting configuration for the split metrics by. Only one column across metrics, rows, and split_metrics_by can be sorted at a time.',
+      },
     })
   ),
 });
 
-export const datatableStateSchemaESQL = schema.object({
-  type: schema.literal('datatable'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  ...datatableStateSharedOptionsSchema,
-  /**
-   * Metric columns configuration, must define operation.
-   */
-  metrics: schema.arrayOf(
-    schema.allOf([
-      schema.object({
-        ...genericOperationOptionsSchema,
-      }),
-      datatableStateMetricsOptionsSchema,
-      esqlColumnSchema,
-    ]),
-    {
-      minSize: 1,
-      maxSize: 1000,
-      meta: { description: 'Array of metrics to display as columns in the datatable' },
+function validateSorting({
+  metrics,
+  rows,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  split_metrics_by,
+}: {
+  metrics: Array<{}>;
+  rows?: Array<{}>;
+  split_metrics_by?: Array<{}>;
+}) {
+  const allColumns = [...metrics, ...(rows ?? []), ...(split_metrics_by ?? [])];
+  let sortedCount = 0;
+  for (const column of allColumns) {
+    if ('sorted' in column) {
+      sortedCount++;
+      if (sortedCount > 1) {
+        return 'Only one column across metrics, rows, and split_metrics_by can be sorted at a time.';
+      }
     }
-  ),
-  /**
-   * Row configuration, optional operations.
-   */
-  rows: schema.maybe(
-    schema.arrayOf(schema.allOf([datatableStateRowsOptionsSchema, esqlColumnSchema]), {
-      minSize: 1,
-      maxSize: 1000,
-      meta: { description: 'AArray of operations to split the datatable rows by' },
-    })
-  ),
-  /**
-   * Split metrics by configuration, optional operations.
-   */
-  split_metrics_by: schema.maybe(
-    schema.arrayOf(esqlColumnSchema, {
-      minSize: 1,
-      maxSize: 1000,
-      meta: { description: 'Array of operations to split the metric columns by' },
-    })
-  ),
-});
+  }
+}
 
-export const datatableStateSchema = schema.oneOf([
-  datatableStateSchemaNoESQL,
-  datatableStateSchemaESQL,
-]);
+export const datatableStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('datatable'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    ...datatableStateSharedOptionsSchema,
+    /**
+     * Metric columns configuration, must define operation.
+     */
+    metrics: schema.arrayOf(
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateMetricsOptionsSchema),
+      {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'Array of metrics to display as columns in the datatable' },
+      }
+    ),
+    /**
+     * Row configuration, optional bucket operations.
+     */
+    rows: schema.maybe(
+      schema.arrayOf(mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsSchema), {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'Array of operations to split the datatable rows by' },
+      })
+    ),
+    /**
+     * Split metrics by configuration, optional bucket operations.
+     */
+    split_metrics_by: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(datatableStateSplitMetricsByOptionsSchema),
+        {
+          minSize: 1,
+          maxSize: 1000,
+          meta: { description: 'Array of operations to split the metric columns by' },
+        }
+      )
+    ),
+  },
+  {
+    validate: validateSorting,
+    meta: {
+      description: 'Datatable state configuration for standard queries',
+    },
+  }
+);
+
+export const datatableStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('datatable'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    ...datatableStateSharedOptionsSchema,
+    /**
+     * Metric columns configuration, must define operation.
+     */
+    metrics: schema.arrayOf(
+      schema.allOf([
+        schema.object({
+          ...genericOperationOptionsSchema,
+        }),
+        datatableStateMetricsOptionsSchema,
+        esqlColumnSchema,
+      ]),
+      {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'Array of metrics to display as columns in the datatable' },
+      }
+    ),
+    /**
+     * Row configuration, optional operations.
+     */
+    rows: schema.maybe(
+      schema.arrayOf(schema.allOf([datatableStateRowsOptionsSchema, esqlColumnSchema]), {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'AArray of operations to split the datatable rows by' },
+      })
+    ),
+    /**
+     * Split metrics by configuration, optional operations.
+     */
+    split_metrics_by: schema.maybe(
+      schema.arrayOf(esqlColumnSchema, {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'Array of operations to split the metric columns by' },
+      })
+    ),
+  },
+  {
+    validate: validateSorting,
+    meta: {
+      description: 'Datatable state configuration for ES|QL queries',
+    },
+  }
+);
+
+export const datatableStateSchema = schema.oneOf(
+  [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
+  {
+    meta: { description: 'Datatable chart configuration: DSL or ES|QL query based' },
+  }
+);
 
 export type DatatableState = TypeOf<typeof datatableStateSchema>;
 export type DatatableStateNoESQL = TypeOf<typeof datatableStateSchemaNoESQL>;
