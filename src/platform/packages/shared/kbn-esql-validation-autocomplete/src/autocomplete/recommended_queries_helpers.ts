@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { RecommendedQuery } from '@kbn/esql-types';
-import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
 
 /**
  * This function maps the recommended queries from the extensions to the autocomplete suggestions.
