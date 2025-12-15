@@ -18,7 +18,7 @@ export const chatExperienceSetting: Omit<UiSettingsParams<AIChatExperience>, 'va
   description: i18n.translate(
     'aiAssistantManagementSelection.preferredChatExperienceSettingDescription',
     {
-      defaultMessage: 'Choose which chat experience to use for everyone in this space.',
+      defaultMessage: 'Choose which chat experience to use for all users in this space.',
     }
   ),
   schema: schema.oneOf(

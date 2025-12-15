@@ -111,9 +111,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can configure a third-party connector or use the Elastic Managed LLM ({atAdditionalCost}). 
-              When using these features, this space's Default AI connector is pre-selected. To prevent the use of other connectors, enable Disallow all other connectors. 
-              If no default is set, the last-used connector will be selected automatically. {manageConnectors}`}
+            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector. 
+              When you set a default AI connector, it is pre-selected for all of these features in this space. 
+              If you haven't set a default, the most recently used connector is selected automatically. {manageConnectors}`}
             values={{
               manageConnectors: (
                 <EuiLink
