@@ -10,7 +10,7 @@
 import { EsqlQuery } from '../../query';
 import { printAst } from '../../shared/debug/print_ast';
 import type { ESQLCommand, ESQLMap, ESQLMapEntry, ESQLParens } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('PROMQL <params>... ( <query> )', () => {
   describe('correctly formatted', () => {

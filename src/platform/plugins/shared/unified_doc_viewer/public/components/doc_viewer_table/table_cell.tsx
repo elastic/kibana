@@ -21,11 +21,12 @@ interface TableCellProps {
   rowIndex: number;
   columnId: string;
   isDetails: boolean;
+  isESQLMode: boolean;
   onFindSearchTermMatch?: UseTableFiltersReturn['onFindSearchTermMatch'];
 }
 
 export const TableCell: React.FC<TableCellProps> = React.memo(
-  ({ searchTerm, rows, rowIndex, columnId, isDetails, onFindSearchTermMatch }) => {
+  ({ searchTerm, rows, rowIndex, columnId, isDetails, isESQLMode, onFindSearchTermMatch }) => {
     const { fieldsMetadata } = getUnifiedDocViewerServices();
 
     const row = rows[rowIndex];
@@ -62,6 +63,7 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
             fieldMapping={dataViewField}
             scripted={dataViewField?.scripted}
             highlight={nameHighlight}
+            disableMultiFieldBadge={isESQLMode}
           />
 
           {isDetails && !!dataViewField ? (
