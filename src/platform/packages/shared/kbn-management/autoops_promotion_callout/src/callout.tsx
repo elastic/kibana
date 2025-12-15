@@ -62,7 +62,7 @@ export const AutoOpsPromotionCallout = ({
       <p>
         <FormattedMessage
           id="management.autoOpsPromotionCallout.description"
-          defaultMessage="Connect this cluster to AutoOps in Elastic Cloud for simplified monitoring, real-time issue detection, and performance recommendations. {learnMoreLink}"
+          defaultMessage="Connect this cluster to AutoOps on Elastic Cloud for simplified monitoring, real-time issue detection, and performance recommendations. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <a href={learnMoreLink} target="_blank" rel="noopener noreferrer">
