@@ -102,9 +102,7 @@ export const useAgentBuilderOptIn = ({
     }
 
     try {
-      await Promise.all([
-        settings.client.set(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, AIChatExperience.Agent),
-      ]);
+      await settings.client.set(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY, AIChatExperience.Agent);
 
       if (navigateFromConversationApp) {
         await application.navigateToApp('observability', { path: '/' });
