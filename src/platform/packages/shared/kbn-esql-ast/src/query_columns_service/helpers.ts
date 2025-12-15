@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import {
   BasicPrettyPrinter,
   esqlCommandRegistry,
@@ -13,11 +14,10 @@ import {
   mutate,
   synth,
   type ESQLAstCommand,
-} from '@kbn/esql-ast';
-import type { ESQLColumnData, ESQLPolicy } from '@kbn/esql-ast/src/commands/registry/types';
-import type { ESQLAstQueryExpression } from '@kbn/esql-ast/src/types';
-import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { IAdditionalFields } from '@kbn/esql-ast/src/commands/registry/registry';
+} from '../..';
+import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
+import type { ESQLAstQueryExpression } from '../types';
+import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {

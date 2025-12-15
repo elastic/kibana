@@ -14,18 +14,12 @@ import { isESQLNamedParamLiteral, type ESQLAstItem, type ESQLFunction } from '..
 import { fromCache, setToCache } from './hover_cache';
 
 const TIME_SYSTEM_DESCRIPTIONS = {
-  '?_tstart': i18n.translate(
-    'kbn-esql-ast.esql.autocomplete.timeSystemParamStart',
-    {
-      defaultMessage: 'The start time from the date picker',
-    }
-  ),
-  '?_tend': i18n.translate(
-    'kbn-esql-ast.esql.autocomplete.timeSystemParamEnd',
-    {
-      defaultMessage: 'The end time from the date picker',
-    }
-  ),
+  '?_tstart': i18n.translate('kbn-esql-ast.esql.autocomplete.timeSystemParamStart', {
+    defaultMessage: 'The start time from the date picker',
+  }),
+  '?_tend': i18n.translate('kbn-esql-ast.esql.autocomplete.timeSystemParamEnd', {
+    defaultMessage: 'The end time from the date picker',
+  }),
 };
 
 // Find the argument that contains the cursor offset

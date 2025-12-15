@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, SOURCE_COMMANDS } from '@kbn/esql-ast';
-import type { ESQLColumnData, ESQLPolicy } from '@kbn/esql-ast/src/commands/registry/types';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLAstQueryExpression } from '../..';
+import { BasicPrettyPrinter, SOURCE_COMMANDS } from '../..';
+import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];

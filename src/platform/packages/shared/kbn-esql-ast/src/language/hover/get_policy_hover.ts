@@ -37,20 +37,14 @@ export async function getPolicyHover(
           })}: ${policyMetadata.sourceIndices.join(', ')}`,
         },
         {
-          value: `${i18n.translate(
-            'kbn-esql-ast.esql.hover.policyMatchingField',
-            {
-              defaultMessage: '**Matching field**',
-            }
-          )}: ${policyMetadata.matchField}`,
+          value: `${i18n.translate('kbn-esql-ast.esql.hover.policyMatchingField', {
+            defaultMessage: '**Matching field**',
+          })}: ${policyMetadata.matchField}`,
         },
         {
-          value: `${i18n.translate(
-            'kbn-esql-ast.esql.hover.policyEnrichedFields',
-            {
-              defaultMessage: '**Fields**',
-            }
-          )}: ${policyMetadata.enrichFields.join(', ')}`,
+          value: `${i18n.translate('kbn-esql-ast.esql.hover.policyEnrichedFields', {
+            defaultMessage: '**Fields**',
+          })}: ${policyMetadata.enrichFields.join(', ')}`,
         },
       ]
     );
