@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
-export type * from './src/policies';
-export type * from './src/locator';
+export { PublicApiService } from './public_api_service';

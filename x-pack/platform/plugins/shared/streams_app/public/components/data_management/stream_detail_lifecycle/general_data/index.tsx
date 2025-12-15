@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createIlmApiClient } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
@@ -38,6 +37,7 @@ export const StreamDetailGeneralData = ({
     core,
     dependencies: {
       start: {
+        indexLifecycleManagement,
         streams: { streamsRepositoryClient },
       },
     },
@@ -53,7 +53,7 @@ export const StreamDetailGeneralData = ({
 
   const { signal } = useAbortController();
 
-  const getIlmPolicies = () => createIlmApiClient(core).getPolicies({ signal });
+  const getIlmPolicies = () => indexLifecycleManagement.apiService.getPolicies({ signal });
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {

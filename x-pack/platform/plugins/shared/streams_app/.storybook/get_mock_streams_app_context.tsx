@@ -91,6 +91,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
         licensing: licensingMock.createStart(),
+        indexLifecycleManagement: {},
         indexManagement: {},
         ingestPipelines: {},
         discoverShared: {},

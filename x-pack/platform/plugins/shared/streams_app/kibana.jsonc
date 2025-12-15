@@ -19,6 +19,7 @@
       "fieldFormats",
       "fieldsMetadata",
       "licensing",
+      "indexLifecycleManagement",
       "indexManagement",
       "ingestPipelines",
       "navigation",
