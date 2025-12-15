@@ -32,7 +32,7 @@ describe('various dynamic query construction scenarios', () => {
     expect(query.print()).toBe('FROM index | WHERE [index].[field] > 42 | LIMIT 10');
   });
 
-  test('can inline a list of qualified field names with multiple parts', () => {
+  test('can inline a qualified field name with multiple parts', () => {
     const fields: SynthQualifiedColumnShorthand = ['index', ['field', 'subfield']];
 
     const query = esql`FROM index | WHERE ${fields} IS NOT NULL | LIMIT 10`;
