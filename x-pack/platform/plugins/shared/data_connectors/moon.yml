@@ -28,11 +28,15 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/config-schema'
   - '@kbn/data-sources-registry-plugin'
+  - '@kbn/connector-specs'
+  - '@kbn/actions-plugin'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -41,4 +45,16 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
