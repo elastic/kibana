@@ -408,10 +408,14 @@ export function registerInternalToolsRoutes({
       const healthClient = tools.getHealthClient({ request });
       const health = await healthClient.get(request.params.toolId);
 
+      if (!health) {
+        return response.notFound({
+          body: { message: `No health data found for tool '${request.params.toolId}'` },
+        });
+      }
+
       return response.ok<GetToolHealthResponse>({
-        body: {
-          health: health ?? null,
-        },
+        body: { health },
       });
     })
   );

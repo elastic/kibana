@@ -46,4 +46,3 @@ export const mcpToolRegistryEntry: ToolTypeRegistryEntry<McpToolFormData> = {
   },
   getValidationResolver: () => zodResolver(z.any({})),
 };
-

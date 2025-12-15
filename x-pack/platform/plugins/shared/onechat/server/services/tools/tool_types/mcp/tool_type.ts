@@ -5,36 +5,16 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { McpToolConfig } from '@kbn/onechat-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { Tool, ListToolsResponse } from '@kbn/mcp-client';
+import type { ListToolsResponse } from '@kbn/mcp-client';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
-
-/**
- * Type guard to validate ListToolsResponse structure from MCP connector.
- * Ensures runtime safety when processing connector responses.
- */
-function isListToolsResponse(data: unknown): data is ListToolsResponse {
-  if (typeof data !== 'object' || data === null) return false;
-  if (!('tools' in data)) return false;
-  const { tools } = data as { tools: unknown };
-  if (!Array.isArray(tools)) return false;
-  return tools.every(
-    (tool) =>
-      typeof tool === 'object' &&
-      tool !== null &&
-      'name' in tool &&
-      typeof (tool as Tool).name === 'string' &&
-      'inputSchema' in tool &&
-      typeof (tool as Tool).inputSchema === 'object'
-  );
-}
 
 /**
  * Lists available tools from an MCP connector by calling the listTools subAction.
@@ -61,14 +41,7 @@ export async function listMcpTools({
     throw new Error(result.message || 'Failed to list MCP tools');
   }
 
-  // Runtime validation to ensure type safety
-  if (!isListToolsResponse(result.data)) {
-    throw new Error(
-      `Invalid response from MCP connector '${connectorId}': expected ListToolsResponse with tools array`
-    );
-  }
-
-  return result.data;
+  return result.data as ListToolsResponse;
 }
 
 /**
@@ -97,6 +70,21 @@ async function getMcpToolInputSchema({
 }
 
 /**
+ * Discriminated union for MCP tool execution results
+ */
+interface McpToolExecutionResultSuccess {
+  isError: false;
+  content: unknown;
+}
+
+interface McpToolExecutionResultError {
+  isError: true;
+  content: string;
+}
+
+type McpToolExecutionResult = McpToolExecutionResultSuccess | McpToolExecutionResultError;
+
+/**
  * Executes an MCP tool via the connector's callTool sub-action
  */
 async function executeMcpTool({
@@ -111,7 +99,7 @@ async function executeMcpTool({
   connectorId: string;
   toolName: string;
   toolArguments: Record<string, unknown>;
-}): Promise<{ content: unknown; isError?: boolean }> {
+}): Promise<McpToolExecutionResult> {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
   const result = await actionsClient.execute({
@@ -127,14 +115,14 @@ async function executeMcpTool({
 
   if (result.status === 'error') {
     return {
-      content: result.message || 'MCP tool execution failed',
       isError: true,
+      content: result.message || 'MCP tool execution failed',
     };
   }
 
   return {
-    content: result.data,
     isError: false,
+    content: result.data,
   };
 }
 
@@ -237,11 +225,7 @@ export const getMcpToolType = ({
             const zodSchema = jsonSchemaToZod(inputSchema);
             return zodSchema as z.ZodObject<any>;
           } catch (error) {
-            throw new Error(
-              `Failed to convert JSON Schema to Zod for MCP tool '${config.tool_name}': ` +
-                `${error instanceof Error ? error.message : String(error)}. ` +
-                `The MCP server may have provided an unsupported or malformed schema.`
-            );
+            return z.object({});
           }
         },
 
