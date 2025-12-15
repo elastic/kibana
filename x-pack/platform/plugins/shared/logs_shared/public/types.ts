@@ -24,7 +24,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { LogsSharedLocators } from '../common/locators';
 import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 import type { SelfContainedLogsOverview } from './components/logs_overview';
@@ -46,7 +45,6 @@ export interface LogsSharedClientSetupDeps {
   share: SharePluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
-  onechat: OnechatPluginSetup;
 }
 
 export interface LogsSharedClientStartDeps {
@@ -62,7 +60,6 @@ export interface LogsSharedClientStartDeps {
   embeddable: EmbeddableStart;
   savedSearch: SavedSearchPublicPluginStart;
   ml?: MlPluginStart;
-  onechat: OnechatPluginStart;
 }
 
 export type LogsSharedClientCoreSetup = CoreSetup<

@@ -63,8 +63,6 @@ dependsOn:
   - '@kbn/xstate-utils'
   - '@kbn/ml-plugin'
   - '@kbn/saved-search-component'
-  - '@kbn/onechat-plugin'
-  - '@kbn/ai-insights'
 tags:
   - plugin
   - prod

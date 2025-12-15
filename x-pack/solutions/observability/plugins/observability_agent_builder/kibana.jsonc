@@ -6,7 +6,7 @@
   "visibility": "private",
   "plugin": {
     "id": "observabilityAgentBuilder",
-    "browser": false,
+    "browser": true,
     "server": true,
     "requiredPlugins": [
       "onechat",
@@ -17,10 +17,11 @@
       "ruleRegistry",
       "dataViews",
       "metricsDataAccess",
-      "inference"
+      "inference",
+      "discoverShared"
     ],
     "optionalPlugins": ["ml"],
-    "requiredBundles": [],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": []
   }
 }

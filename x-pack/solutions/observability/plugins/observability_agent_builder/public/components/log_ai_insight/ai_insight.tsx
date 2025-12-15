@@ -8,17 +8,18 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/ai-insights';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import type { LogEntryField } from '../../../common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
-
-// cannot import from observability-agent-builder-plugin because it is a private plugin
-// Illegal import statement: "@kbn/logs-shared-plugin" (platform) is importing "@kbn/observability-agent-builder-plugin" (observability/private).
-const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
-const OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID = 'observability.log';
+import {
+  OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+} from '../../../common';
 
 export interface LogAIInsightDocument {
-  fields: LogEntryField[];
+  fields: {
+    field: string;
+    value: unknown[];
+  }[];
 }
 
 export interface LogAIInsightProps {
@@ -29,7 +30,7 @@ export interface LogAIInsightProps {
 export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProps) {
   const {
     services: { http },
-  } = useKibanaContextForPlugin();
+  } = useKibana();
 
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');

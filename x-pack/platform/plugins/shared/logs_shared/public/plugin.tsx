@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { LogsLocatorDefinition } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
-import { createLogAIInsight, createLogsAIInsightRenderer } from './components/log_ai_insight';
 import { createLogsOverview } from './components/logs_overview';
 import { LogViewsService } from './services/log_views';
 import type {
@@ -18,11 +17,6 @@ import type {
   LogsSharedClientStartDeps,
 } from './types';
 import { createLogEventsRenderer } from './components/log_events';
-
-// cannot import from observability-agent-builder-plugin because it is a private plugin
-// Illegal import statement: "@kbn/logs-shared-plugin" (platform) is importing "@kbn/observability-agent-builder-plugin" (observability/private).
-const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   private logViews: LogViewsService;
@@ -98,22 +92,6 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       id: 'observability-logs-ai-assistant',
       render: createLogsAIAssistantRenderer(LogAIAssistant),
     });
-
-    const isObservabilityAgentEnabled = core.featureFlags.getBooleanValue(
-      OBSERVABILITY_AGENT_FEATURE_FLAG,
-      OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
-    );
-
-    if (plugins.onechat && isObservabilityAgentEnabled) {
-      const LogAIInsight = createLogAIInsight({
-        onechat: plugins.onechat,
-      });
-
-      discoverShared.features.registry.register({
-        id: 'observability-logs-ai-insight',
-        render: createLogsAIInsightRenderer(LogAIInsight),
-      });
-    }
 
     // Register "Log Events" as a feature in Discover.
     // The LazySavedSearchComponent cannot be used directly because of circular dependencies

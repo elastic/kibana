@@ -22,8 +22,7 @@
       "uiActions",
       "usageCollection",
       "embeddable",
-      "savedSearch",
-      "onechat"
+      "savedSearch"
     ],
     "optionalPlugins": ["observabilityAIAssistant", "ml"],
     "requiredBundles": ["kibanaUtils", "kibanaReact"],

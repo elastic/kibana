@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const explainLogMessageButtonLabel = i18n.translate(
-  'xpack.logsShared.logFlyout.explainLogMessageButtonLabel',
+  'xpack.observability.agentBuilder.explainLogMessageButtonLabel',
   {
     defaultMessage: 'Explain this log entry',
   }
 );
 
 export const explainLogMessageDescription = i18n.translate(
-  'xpack.logsShared.logFlyout.explainLogMessageDescription',
+  'xpack.observability.agentBuilder.explainLogMessageDescription',
   {
     defaultMessage: 'Get helpful insights from our Elastic AI Agent',
   }

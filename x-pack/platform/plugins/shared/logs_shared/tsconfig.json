@@ -57,8 +57,6 @@
     "@kbn/discover-utils",
     "@kbn/xstate-utils",
     "@kbn/ml-plugin",
-    "@kbn/saved-search-component",
-    "@kbn/onechat-plugin",
-    "@kbn/ai-insights",
+    "@kbn/saved-search-component"
   ]
 }
