@@ -11,7 +11,7 @@ import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { THREAT_HUNTING_AGENT } from '../constants';
+import { THREAT_HUNTING_AGENT } from '../../../common/constants';
 
 const mockFlyoutRef = {
   close: jest.fn(),

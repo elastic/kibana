@@ -14,6 +14,7 @@ export {
   SecurityPageName,
   ATTACKS_ALERTS_ALIGNMENT_ENABLED,
 } from '@kbn/security-solution-navigation';
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 /**
  * as const
  *
@@ -722,3 +723,5 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   rule = 'security.rule',
 }
+
+export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;

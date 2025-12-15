@@ -6,9 +6,9 @@
  */
 
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
+import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
@@ -17,8 +17,6 @@ import {
 } from '../tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-
-export const SECURITY_AGENT_ID = `${internalNamespaces.security}.agent`;
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -36,14 +34,14 @@ const SECURITY_TOOL_IDS = [
   SECURITY_LABS_SEARCH_TOOL_ID,
 ];
 
-export const SECURITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SECURITY_TOOL_IDS];
+export const THREAT_HUNTING_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SECURITY_TOOL_IDS];
 
-export const createSecurityAgent = (
+export const createThreatHuntingAgent = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
 ): BuiltInAgentDefinition => {
   return {
-    id: SECURITY_AGENT_ID,
+    id: THREAT_HUNTING_AGENT_ID,
     avatar_icon: 'logoSecurity',
     name: 'Threat Hunting Agent',
     description:
@@ -59,7 +57,7 @@ export const createSecurityAgent = (
       instructions: `You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security.`,
       tools: [
         {
-          tool_ids: SECURITY_AGENT_TOOL_IDS,
+          tool_ids: THREAT_HUNTING_AGENT_TOOL_IDS,
         },
       ],
     },
