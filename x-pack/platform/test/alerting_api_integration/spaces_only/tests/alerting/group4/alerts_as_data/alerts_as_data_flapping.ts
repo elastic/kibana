@@ -321,27 +321,29 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        // Query for alerts
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Get rule state from task document
+        state = await getRuleState(ruleId);
 
-      // Should still be 3 alert docs
-      expect(alertDocs.length).to.equal(3);
-      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+        // Should still be 3 alert docs
+        expect(alertDocs.length).to.equal(3);
+        expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertRecoveredInstances.alertA.meta.flappingHistory
-      );
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertRecoveredInstances.alertA.meta.flappingHistory
+        );
 
-      // Flapping value for alert doc and task state should be true because alert recovered while flapping
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+        // Flapping value for alert doc and task state should be true because alert recovered while flapping
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      });
     });
 
     it('should increase and persist pendingRecoveredCount in the alert doc', async () => {

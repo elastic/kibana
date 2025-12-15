@@ -315,13 +315,93 @@
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgentBuilder",
+            "id": "def-server.ObservabilityAgentBuilderPluginStartDependencies.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-server.ObservabilityAgentBuilderServerRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "ObservabilityAgentBuilderServerRouteRepository",
+        "description": [],
+        "signature": [
+          "{ \"POST /internal/observability_agent_builder/ai_insights/alert\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/observability_agent_builder/ai_insights/alert\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ alertId: ",
+          "StringC",
+          "; }>; }>, ",
+          "ObservabilityAgentBuilderRouteHandlerResources",
+          ", { summary: string; context: string; }, undefined>; \"POST /internal/observability_agent_builder/ai_insights/error\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/observability_agent_builder/ai_insights/error\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ errorId: ",
+          "StringC",
+          "; start: ",
+          "StringC",
+          "; end: ",
+          "StringC",
+          "; serviceName: ",
+          "StringC",
+          "; environment: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "UndefinedC",
+          "]>; }>; }>, ",
+          "ObservabilityAgentBuilderRouteHandlerResources",
+          ", { context: string; summary: string; }, undefined>; }"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/routes/get_global_observability_agent_builder_route_repository.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "observabilityAgentBuilder",
@@ -382,24 +462,7 @@
               "deprecated": false,
               "trackAdoption": false,
               "returnComment": [],
-              "children": [
-                {
-                  "parentPluginId": "observabilityAgentBuilder",
-                  "id": "def-server.ObservabilityAgentBuilderPluginSetup.registerDataProvider.$2.$1",
-                  "type": "Object",
-                  "tags": [],
-                  "label": "params",
-                  "description": [],
-                  "signature": [
-                    "{ request: ",
-                    "KibanaRequest",
-                    "<unknown, unknown, unknown, any>; serviceName: string; serviceEnvironment: string; transactionType?: string | undefined; transactionName?: string | undefined; start: string; end: string; }"
-                  ],
-                  "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/data_registry/data_registry_types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                }
-              ]
+              "children": []
             }
           ]
         }
@@ -429,7 +492,98 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_AGENT_FEATURE_FLAG",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AGENT_FEATURE_FLAG",
+        "description": [],
+        "signature": [
+          "\"observabilityAgent.enabled\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT",
+        "type": "boolean",
+        "tags": [],
+        "label": "OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT",
+        "description": [],
+        "signature": [
+          "false"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.ai_insight\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.error\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID",
+        "description": [],
+        "signature": [
+          "\"observability.get_downstream_dependencies\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_GET_SERVICES_TOOL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_GET_SERVICES_TOOL_ID",
+        "description": [],
+        "signature": [
+          "\"observability.get_services\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

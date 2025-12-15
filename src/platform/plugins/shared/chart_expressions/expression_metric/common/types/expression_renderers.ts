@@ -48,7 +48,7 @@ export interface MetricVisParam {
   secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
   /**
    * Determines where the metric color should be applied.
-   * Only applies when the supporting visualization is a panel.
+   * Only applies when the background chart is a panel.
    * - 'background': Applies the color to the metric's background area.
    * - 'value': Applies the color to the Primary Metric's value.
    */
