@@ -11,11 +11,11 @@ import { SEARCH_GETTING_STARTED_FEATURE_FLAG } from '@kbn/search-shared-ui';
 /**
  * Check if the Getting Started feature is enabled via feature flag.
  * This is a client-side synchronous evaluation.
- * Default to false if the feature flag is not set.
+ * Default to true if the feature flag is not set.
  *
  * @param featureFlags - The FeatureFlags service from core
  * @returns boolean indicating if the feature is enabled
  */
 export function isGettingStartedEnabled(featureFlags: FeatureFlagsStart): boolean {
-  return featureFlags.getBooleanValue(SEARCH_GETTING_STARTED_FEATURE_FLAG, false);
+  return featureFlags.getBooleanValue(SEARCH_GETTING_STARTED_FEATURE_FLAG, true);
 }

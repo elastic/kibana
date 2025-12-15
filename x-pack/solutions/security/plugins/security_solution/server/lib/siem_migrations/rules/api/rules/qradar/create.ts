@@ -13,6 +13,7 @@ import {
   CreateQRadarRuleMigrationRulesRequestParams,
 } from '../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { QradarRulesXmlParser } from '../../../../../../../common/siem_migrations/parsers/qradar/rules_xml';
+import { RuleResourceIdentifier } from '../../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../../common/api/util/audit';
 import { authz } from '../../util/authz';
@@ -112,6 +113,23 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
 
             await ruleMigrationsClient.data.items.create(rulesToBeCreated);
 
+            // Identify reference sets from rule data and create resource records without content
+            // This allows tracking missing resources that need to be uploaded
+            const resourceIdentifier = new RuleResourceIdentifier('qradar');
+            const extractedResources = await resourceIdentifier.fromOriginals(
+              rulesToBeCreated.map((r) => r.original_rule)
+            );
+            logger.info(`Identified ${extractedResources.length} QRadar resources from rules`);
+
+            const referenceSetResources = extractedResources.map((resource) => ({
+              ...resource,
+              migration_id: migrationId,
+            }));
+
+            if (referenceSetResources.length > 0) {
+              await ruleMigrationsClient.data.resources.create(referenceSetResources);
+            }
+
             // TODO: Handle and report success and failures
             // For example,  {success: number, failed: number, errors: Array<{ruleId: string, error: string}>}
             return res.ok({
@@ -119,6 +137,7 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
                 message: `Successfully imported ${rulesCount} QRadar rule${
                   rulesCount !== 1 ? 's' : ''
                 }`,
+                count: rulesCount,
               },
             });
           } catch (error) {
