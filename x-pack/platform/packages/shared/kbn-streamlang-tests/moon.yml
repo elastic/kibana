@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/streamlang'
+  - '@kbn/streams-schema'
 tags:
   - test-helper
   - package
