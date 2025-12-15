@@ -43,11 +43,10 @@ import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { ALL_DATA_OPTION, FeaturesSelector } from '../feature_selector';
+import { ALL_DATA_OPTION } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 import { SignificantEventsGenerationPanel } from '../empty_state';
 
 interface Props {
@@ -57,7 +56,7 @@ interface Props {
   features: Feature[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedFeatures?: Feature[];
+  initialSelectedFeatures: Feature[];
 }
 
 export function AddSignificantEventFlyout({
@@ -99,9 +98,7 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[] | undefined>(
-    initialSelectedFeatures
-  );
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>(initialSelectedFeatures);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -140,7 +137,7 @@ export function AddSignificantEventFlyout({
     setIsGenerating(true);
     setGeneratedQueries([]);
 
-    from(selectedFeatures ?? [ALL_DATA_OPTION.value])
+    from(selectedFeatures.length === 0 ? [ALL_DATA_OPTION.value] : selectedFeatures)
       .pipe(
         concatMap((feature) =>
           generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
@@ -289,7 +286,7 @@ export function AddSignificantEventFlyout({
                   selected={selectedFlow}
                   updateSelected={(flow) => {
                     setSelectedFlow(flow);
-                    setSelectedFeatures(undefined);
+                    setSelectedFeatures([]);
                   }}
                 />
                 <EuiSpacer size="m" />

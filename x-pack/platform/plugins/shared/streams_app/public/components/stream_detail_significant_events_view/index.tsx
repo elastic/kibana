@@ -65,7 +65,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[] | undefined>(undefined);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   const [dateRange, setDateRange] = useState<TimeRange | undefined>(undefined);

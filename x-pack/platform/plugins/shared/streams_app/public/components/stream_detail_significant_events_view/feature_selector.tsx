@@ -13,8 +13,8 @@ import React from 'react';
 
 export interface FeatureSelectorProps {
   features: Feature[];
-  selectedFeatures: Feature[] | undefined;
-  onFeaturesChange: (features: Feature[] | undefined) => void;
+  selectedFeatures: Feature[];
+  onFeaturesChange: (features: Feature[]) => void;
 }
 
 export const ALL_DATA_OPTION = {
@@ -61,7 +61,7 @@ export function FeaturesSelector({
           options={options}
           isDisabled={features.length === 0}
           selectedOptions={
-            !selectedFeatures
+            selectedFeatures.length === 0
               ? [{ label: ALL_DATA_OPTION.label, value: ALL_DATA_OPTION.value }]
               : selectedFeatures.map((feature) => ({
                   label: feature.name,
@@ -69,11 +69,9 @@ export function FeaturesSelector({
                 }))
           }
           onChange={(selected) => {
-            const hasAllData = selected.some(
-              (option) => option.value?.type === ALL_DATA_OPTION.value.type
-            );
-            if (hasAllData) {
-              onFeaturesChange(undefined);
+            const addedOption = selected[selected.length - 1];
+            if (addedOption?.value?.type === ALL_DATA_OPTION.value.type) {
+              onFeaturesChange([]);
             } else {
               onFeaturesChange(selected.map((option) => option.value).filter(isFeature));
             }
