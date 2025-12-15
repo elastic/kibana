@@ -22,7 +22,7 @@ export const StickyFlexItem = styled(EuiFlexItem)`
   position: sticky;
   background-color: ${(props) => props.theme.euiTheme.colors.backgroundBasePlain};
   z-index: ${(props) => props.theme.euiTheme.levels.menu};
-  top: var(--kbn-application--sticky-headers-offset, 96px);
+  top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
   padding-top: ${(props) => props.theme.euiTheme.size.m};
 `;
 

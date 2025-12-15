@@ -75,13 +75,11 @@ export interface Props {
   onCategoryChange: (category: CategoryFacet) => void;
 }
 
-const EUI_HEADER_HEIGHT = '96px';
-
 const StickySidebar = styled(EuiFlexItem)`
   position: sticky;
-  top: var(--kbn-application--sticky-headers-offset, ${EUI_HEADER_HEIGHT});
+  top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
   padding-top: ${(props) => props.theme.euiTheme.size.m};
-  max-height: calc(100vh - ${EUI_HEADER_HEIGHT});
+  max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
   overflow: scroll;
   padding-right: ${(props) => props.theme.euiTheme.size.l};
 `;
