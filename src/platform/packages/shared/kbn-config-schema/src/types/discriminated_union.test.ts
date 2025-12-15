@@ -14,6 +14,14 @@ test('handles single object', () => {
     schema.object({ type: schema.literal('foo'), age: schema.number() }),
   ]);
 
+  expect(type.validate({ type: 'foo', age: 24 })).toEqual({ type: 'foo', age: 24 });
+});
+
+test('fails as expected with single object', () => {
+  const type = schema.discriminatedOneOf('type', [
+    schema.object({ type: schema.literal('foo'), age: schema.number() }),
+  ]);
+
   expect(() => type.validate({ type: 'foo', age: 'foo' })).toThrowErrorMatchingInlineSnapshot(
     `"[age]: Error: expected value of type [number] but got [string]"`
   );
