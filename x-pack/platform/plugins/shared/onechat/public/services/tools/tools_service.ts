@@ -21,6 +21,11 @@ import type {
   ListWorkflowsResponse,
   GetWorkflowResponse,
   GetToolTypeInfoResponse,
+  ListConnectorsResponse,
+  ListMcpToolsResponse,
+  GetConnectorResponse,
+  GetToolHealthResponse,
+  ListToolHealthResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -100,5 +105,32 @@ export class ToolsService {
       `${internalApiPath}/tools/_types_info`
     );
     return response.toolTypes;
+  }
+
+  async listConnectors({ type }: { type?: string }) {
+    return await this.http.get<ListConnectorsResponse>(
+      `${internalApiPath}/tools/_list_connectors`,
+      { query: { type } }
+    );
+  }
+
+  async getConnector({ connectorId }: { connectorId: string }) {
+    return await this.http.get<GetConnectorResponse>(
+      `${internalApiPath}/tools/_get_connector/${connectorId}`
+    );
+  }
+
+  async listMcpTools({ connectorId }: { connectorId: string }) {
+    return await this.http.get<ListMcpToolsResponse>(`${internalApiPath}/tools/_list_mcp_tools`, {
+      query: { connectorId },
+    });
+  }
+
+  async listToolsHealth() {
+    return await this.http.get<ListToolHealthResponse>(`${internalApiPath}/tools/_health`);
+  }
+
+  async getToolHealth({ toolId }: { toolId: string }) {
+    return await this.http.get<GetToolHealthResponse>(`${internalApiPath}/tools/${toolId}/_health`);
   }
 }
