@@ -383,7 +383,8 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         .update<ScriptsLibrarySavedObjectAttributes>(
           SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
           id,
-          soUpdate
+          soUpdate,
+          { version }
         )
         .catch(catchAndWrapError.withMessage(`Failed to update script with id: ${id}`));
     } catch (error) {
