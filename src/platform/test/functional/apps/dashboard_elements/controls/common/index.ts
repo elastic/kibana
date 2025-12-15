@@ -50,5 +50,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./control_group_apply_button'));
     loadTestFile(require.resolve('./replace_controls'));
     loadTestFile(require.resolve('./multiple_data_views'));
+    loadTestFile(require.resolve('./pin_controls'));
   });
 }

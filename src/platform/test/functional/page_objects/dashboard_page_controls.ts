@@ -261,15 +261,23 @@ export class DashboardPageControls extends FtrService {
     fieldName,
     title,
     additionalSettings,
+    skipOpenFlyout = false,
   }: {
     controlType: string;
     title?: string;
     fieldName: string;
     dataViewTitle?: string;
     additionalSettings?: OptionsListAdditionalSettings | RangeSliderAdditionalSettings;
+    skipOpenFlyout?: boolean;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
-    await this.openCreateControlFlyout();
+    if (!skipOpenFlyout) {
+      await this.openCreateControlFlyout();
+    } else {
+      await this.retry.try(async () => {
+        await this.testSubjects.existOrFail('control-editor-flyout');
+      });
+    }
 
     if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
     if (fieldName) {
