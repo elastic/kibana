@@ -303,6 +303,8 @@ export interface ConnectorToken extends SavedObjectAttributes {
   expiresAt: string;
   createdAt: string;
   updatedAt?: string;
+  refreshToken?: string;
+  refreshTokenExpiresAt?: string;
 }
 
 // This unallowlist should only contain connector types that require a request or API key for

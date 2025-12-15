@@ -390,6 +390,12 @@ export class ActionsPlugin
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
+      logger: this.logger,
+      core,
+      getEncryptedSavedObjects: async () => {
+        const [, { encryptedSavedObjects }] = await core.getStartServices();
+        return encryptedSavedObjects;
+      },
     });
 
     return {

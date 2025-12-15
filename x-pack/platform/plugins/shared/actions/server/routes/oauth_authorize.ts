@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { ILicenseState } from '../lib';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import type { ActionsRequestHandlerContext } from '../types';
+import { verifyAccessAndContext } from './verify_access_and_context';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
+import { OAuthStateClient } from '../lib/oauth_state_client';
+import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
+import type { ActionsPluginsStart } from '../plugin';
+
+const paramsSchema = schema.object({
+  connectorId: schema.string(),
+});
+
+export type OAuthAuthorizeParams = TypeOf<typeof paramsSchema>;
+
+/**
+ * Initiates OAuth2 Authorization Code flow
+ * Returns authorization URL for user to visit
+ */
+export const oauthAuthorizeRoute = (
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState,
+  configurationUtilities: ActionsConfigurationUtilities,
+  logger: Logger,
+  coreSetup: CoreSetup<ActionsPluginsStart>,
+  getEncryptedSavedObjects?: () => Promise<EncryptedSavedObjectsPluginStart>
+) => {
+  router.post(
+    {
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_oauth_authorize`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      validate: {
+        params: paramsSchema,
+      },
+      options: {
+        access: 'internal',
+      },
+    },
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const { connectorId } = req.params;
+
+        try {
+          const core = await context.core;
+          const actionsClient = (await context.actions).getActionsClient();
+          const routeLogger = logger.get('oauth_authorize');
+
+          // Get encrypted saved objects client
+          if (!getEncryptedSavedObjects) {
+            throw new Error('EncryptedSavedObjects plugin not available');
+          }
+
+          const encryptedSavedObjects = await getEncryptedSavedObjects();
+          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+            includedHiddenTypes: ['action', 'oauth_state'],
+          });
+
+          // Get Kibana base URL
+          const [coreStart] = await coreSetup.getStartServices();
+          const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
+
+          if (!kibanaUrl) {
+            return res.badRequest({
+              body: {
+                message:
+                  'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml',
+              },
+            });
+          }
+
+          // Create OAuth authorization service
+          const oauthService = new OAuthAuthorizationService(
+            actionsClient,
+            encryptedSavedObjectsClient,
+            kibanaUrl,
+            routeLogger
+          );
+
+          // Get OAuth configuration (validates connector and retrieves decrypted config)
+          const oauthConfig = await oauthService.getOAuthConfig(connectorId);
+
+          // Get redirect URI
+          const redirectUri = oauthService.getRedirectUri();
+
+          // Create OAuth state with PKCE
+          const oauthStateClient = new OAuthStateClient({
+            encryptedSavedObjectsClient,
+            unsecuredSavedObjectsClient: core.savedObjects.getClient({
+              includedHiddenTypes: ['oauth_state'],
+            }),
+            logger: routeLogger,
+          });
+
+          const { state, codeChallenge } = await oauthStateClient.create({
+            connectorId,
+            redirectUri,
+            authorizationUrl: oauthConfig.authorizationUrl,
+            scope: oauthConfig.scope,
+          });
+
+          // Build authorization URL
+          const authorizationUrl = oauthService.buildAuthorizationUrl({
+            authorizationUrl: oauthConfig.authorizationUrl,
+            clientId: oauthConfig.clientId,
+            scope: oauthConfig.scope,
+            redirectUri,
+            state: state.state,
+            codeChallenge,
+          });
+
+          return res.ok({
+            body: {
+              authorizationUrl,
+              state: state.state,
+            },
+          });
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          const statusCode =
+            err instanceof Error && 'statusCode' in err
+              ? (err as Error & { statusCode: number }).statusCode
+              : 500;
+
+          return res.customError({
+            statusCode,
+            body: {
+              message: errorMessage || 'Failed to initiate OAuth authorization',
+            },
+          });
+        }
+      })
+    )
+  );
+};

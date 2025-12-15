@@ -16,6 +16,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
+import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
@@ -98,9 +99,55 @@ export const getAxiosInstanceWithAuth = ({
         axiosInstance.interceptors.response.use(onFulfilled, onRejected);
       }
 
+      // Add response interceptor to handle 401 errors for OAuth connectors
+      if (authTypeId === 'oauth_authorization_code') {
+        axiosInstance.interceptors.response.use(
+          (response) => response,
+          (error) => {
+            if (error.response?.status === 401) {
+              const message =
+                'Authentication failed: The access token was rejected by the service (HTTP 401). ' +
+                'This usually means the token has expired, been revoked, or does not have the required scopes. ' +
+                'Please re-authorize the connector by clicking the "Authorize" button in the connector settings.';
+              logger.error(
+                `OAuth 401 error for connectorId ${connectorId}: ${error.message}. ${message}`
+              );
+              error.message = message;
+            }
+            return Promise.reject(error);
+          }
+        );
+      }
+
       const configureCtx = {
         getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
         getToken: async (opts: GetTokenOpts) => {
+          // Use different token retrieval method based on auth type
+          if (authTypeId === 'oauth_authorization_code') {
+            // For authorization code flow, retrieve stored tokens from callback
+            if (!connectorTokenClient) {
+              throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
+            }
+            return await getOAuthAuthorizationCodeAccessToken({
+              connectorId,
+              logger,
+              configurationUtilities,
+              credentials: {
+                config: {
+                  clientId: opts.clientId,
+                  tokenUrl: opts.tokenUrl,
+                  ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
+                },
+                secrets: {
+                  clientSecret: opts.clientSecret,
+                },
+              },
+              connectorTokenClient,
+              scope: opts.scope,
+            });
+          }
+
+          // For client credentials flow, request new token each time
           return await getOAuthClientCredentialsAccessToken({
             connectorId,
             logger,

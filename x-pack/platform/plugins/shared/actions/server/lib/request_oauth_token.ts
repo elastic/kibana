@@ -17,6 +17,8 @@ export interface OAuthTokenResponse {
   tokenType: string;
   accessToken: string;
   expiresIn: number;
+  refreshToken?: string;
+  refreshTokenExpiresIn?: number;
 }
 
 export async function requestOAuthToken<T>(
@@ -49,6 +51,8 @@ export async function requestOAuthToken<T>(
       tokenType: res.data.token_type,
       accessToken: res.data.access_token,
       expiresIn: res.data.expires_in,
+      refreshToken: res.data.refresh_token,
+      refreshTokenExpiresIn: res.data.refresh_token_expires_in,
     };
   } else {
     const errString = stringify(res.data);
