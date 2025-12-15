@@ -45,17 +45,12 @@ The editor also ships with some built in plugins. For example it can handle chec
 It can also handle emojis! :smile:
 And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip content!)}
 `;
-  const now = Date.now();
+
   return (
     <StreamExistingFeaturesTable
       features={features}
       isLoading={false}
       refreshFeatures={() => {}}
-      timeRange={{
-        from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-        to: new Date(now).toISOString(),
-        mode: 'absolute',
-      }}
       definition={{
         name: 'synthetics-http-default',
         description: '',
