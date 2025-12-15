@@ -41,7 +41,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request });
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
@@ -88,7 +88,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
 
       const { summary, context } = await generateErrorAiInsight({
