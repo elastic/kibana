@@ -378,6 +378,53 @@ describe('cascaded documents helpers utils', () => {
             'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(tags, "some random pattern")'
           );
         });
+
+        it('uses match phrase query when the selected column is a multi field with a parent field that is a text or keyword field that is not aggregatable', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY tags.keyword
+            `,
+          };
+
+          const nodePath = ['tags.keyword'];
+          const nodePathMap = { 'tags.keyword': 'some random pattern' };
+
+          const mockImpl = (fieldName) => {
+            return {
+              esTypes: ['text', 'keyword'],
+              aggregatable: fieldName === 'tags.keyword',
+              ...(fieldName === 'tags.keyword'
+                ? {
+                    subType: {
+                      multi: {
+                        parent: 'tags',
+                      },
+                    },
+                  }
+                : {}),
+            } as unknown as DataViewField;
+          };
+
+          // only apply this mock for this test
+          jest
+            .spyOn(dataViewMock.fields, 'getByName')
+            .mockImplementationOnce(mockImpl) // satisfies first the call to getByName that marks the field as subType
+            .mockImplementationOnce(mockImpl); // satisfies the call to getByName for the parent field
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`tags.keyword`, "some random pattern")'
+          );
+        });
       });
 
       describe('function group operations', () => {

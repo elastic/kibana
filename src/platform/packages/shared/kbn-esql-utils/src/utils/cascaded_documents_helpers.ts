@@ -86,7 +86,12 @@ export const isSupportedFieldType = (fieldType: unknown): fieldType is Supported
 
 // if value is a text or keyword field and it's not "aggregatable", we opt to use match phrase for the where command
 const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields']) => {
-  const dataViewField = dataViewFields.getByName(fieldName);
+  let dataViewField = dataViewFields.getByName(fieldName);
+
+  if (dataViewField?.subType?.multi?.parent) {
+    // if the field is a subtype, we want to use the parent field to determine wether to use the match phrase
+    dataViewField = dataViewFields.getByName(dataViewField.subType.multi.parent);
+  }
 
   return (
     (dataViewField?.esTypes?.includes('text') || dataViewField?.esTypes?.includes('keyword')) &&
