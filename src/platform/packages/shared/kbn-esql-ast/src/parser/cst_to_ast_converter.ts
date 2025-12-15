@@ -1988,6 +1988,7 @@ export class CstToAstConverter {
       {
         args: [Builder.identifier({ name: text }, this.createParserFieldsFromToken(node.symbol))],
       },
+      undefined,
       {
         text,
         location: getPosition(node.symbol),
@@ -2569,7 +2570,6 @@ export class CstToAstConverter {
       const qualifierToken = ctx._qualifier;
       if (qualifierToken) {
         const qualifierNode = this.toIdentifierFromToken(qualifierToken);
-        args.push(qualifierNode);
         qualifier = qualifierNode;
       }
 
@@ -2598,14 +2598,11 @@ export class CstToAstConverter {
 
     const text = unescapeColumn(ctx.getText());
     const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
-    const column = Builder.expression.column(
-      { args, qualifier },
-      {
-        text: ctx.getText(),
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception || text === ''),
-      }
-    );
+    const column = Builder.expression.column({ args }, qualifier, {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+    });
 
     column.name = text;
     column.quoted = hasQuotes;
@@ -2661,23 +2658,14 @@ export class CstToAstConverter {
 
     const text = unescapeColumn(ctx.getText());
     const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
-    const column = Builder.expression.column(
-      { args },
-      {
-        text: ctx.getText(),
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception || text === ''),
-      }
-    );
-
     const qualifierToken = ctx._qualifier;
+    const qualifierNode = qualifierToken ? this.toIdentifierFromToken(qualifierToken) : undefined;
 
-    if (qualifierToken) {
-      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
-
-      column.qualifier = qualifierNode;
-      column.args = [qualifierNode, ...column.args];
-    }
+    const column = Builder.expression.column({ args }, qualifierNode, {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+    });
 
     column.name = text;
     column.quoted = hasQuotes;
@@ -2695,6 +2683,7 @@ export class CstToAstConverter {
     };
     const node = Builder.expression.column(
       { args: [Builder.identifier({ name: '*' }, parserFields)] },
+      undefined,
       parserFields
     );
 

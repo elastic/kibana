@@ -12,7 +12,11 @@ import { BasicPrettyPrinter, LeafPrinter } from '../pretty_print';
 import { isProperNode } from '../ast/is';
 import { SynthNode } from './synth_node';
 import { SynthLiteralFragment } from './synth_literal_fragment';
-import type { SynthColumnShorthand, SynthTemplateHole } from './types';
+import type {
+  SynthColumnShorthand,
+  SynthQualifiedColumnShorthand,
+  SynthTemplateHole,
+} from './types';
 
 class UnexpectedSynthHoleError extends Error {
   constructor(hole: unknown) {
@@ -22,6 +26,24 @@ class UnexpectedSynthHoleError extends Error {
 
 const isColumnShorthand = (hole: unknown): hole is SynthColumnShorthand => {
   return Array.isArray(hole) && hole.every((part) => typeof part === 'string');
+};
+
+/**
+ * Identifies qualified column shorthand tuples.
+ * ['qualifier', ['fieldName']]
+ * ['qualifier', ['fieldPart1', 'fieldPart2']]
+ * @param hole
+ * @returns
+ */
+export const isQualifiedColumnShorthand = (
+  hole: unknown
+): hole is SynthQualifiedColumnShorthand => {
+  return (
+    Array.isArray(hole) &&
+    hole.length === 2 &&
+    typeof hole[0] === 'string' &&
+    isColumnShorthand(hole[1])
+  );
 };
 
 /**
@@ -67,6 +89,14 @@ export const holeToFragment = (hole: SynthTemplateHole): string => {
 
       if (isColumnShorthand(hole)) {
         const node = Builder.expression.column(hole);
+
+        return LeafPrinter.column(node);
+      }
+
+      if (isQualifiedColumnShorthand(hole)) {
+        const qualifier = hole[0];
+        const columnParts = hole[1];
+        const node = Builder.expression.column(columnParts, qualifier);
 
         return LeafPrinter.column(node);
       }
