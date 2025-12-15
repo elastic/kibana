@@ -28,7 +28,7 @@ export const getRulesByNameGetter =
         },
       },
     });
-    return response.data.map((item) => item.original_rule.query);
+    return { result: response.data.map((item) => item.original_rule.query) };
   };
 
 export function getRulesByNameTool(migrationId: string, rulesClient: RuleMigrationsDataClient) {

@@ -10,12 +10,12 @@ import { useKibana } from './use_kibana';
 
 /**
  * React hook to check if the Getting Started feature is enabled.
- * Default to false if the feature flag is not set or the feature flags service is not available.
+ * Default to true if the feature flag is not set or the feature flags service is not available.
  *
  * @returns boolean indicating if the feature is enabled
  */
 export const useSearchGettingStartedFeatureFlag = (): boolean => {
   const { featureFlags } = useKibana().services;
 
-  return featureFlags ? isGettingStartedEnabled(featureFlags) : false;
+  return featureFlags ? isGettingStartedEnabled(featureFlags) : true;
 };

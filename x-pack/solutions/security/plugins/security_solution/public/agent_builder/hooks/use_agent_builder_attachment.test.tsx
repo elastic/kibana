@@ -11,6 +11,7 @@ import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 
 const mockFlyoutRef = {
   close: jest.fn(),
@@ -83,6 +84,7 @@ describe('useAgentBuilderAttachment', () => {
     expect(mockOpenConversationFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenConversationFlyout).toHaveBeenCalledWith({
       newConversation: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Analyze this alert',
       attachments: [
         {
@@ -92,6 +94,7 @@ describe('useAgentBuilderAttachment', () => {
         },
       ],
       sessionTag: 'security',
+      agentId: oneChatDefaultAgentId,
     });
   });
 
