@@ -101,6 +101,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/core-chrome-navigation'
   - '@kbn/classic-stream-flyout'
+  - '@kbn/index-lifecycle-management-plugin'
 tags:
   - plugin
   - prod
