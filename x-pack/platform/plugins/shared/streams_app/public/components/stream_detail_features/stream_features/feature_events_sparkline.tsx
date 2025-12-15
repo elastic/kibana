@@ -12,18 +12,16 @@ import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_vie
 
 const BUCKET_SIZE_MINUTES = 30;
 
-export const FeatureEventsSparkline = ({
+export const FeatureEventsSparklineLast24hrs = ({
   feature,
   definition,
   hideAxis = true,
   height = 100,
-  timeRange,
 }: {
   feature: Feature;
   definition: Streams.all.Definition;
   hideAxis?: boolean;
   height?: number;
-  timeRange?: AbsoluteTimeRange;
 }) => {
   const query = useMemo(
     () => ({
@@ -39,15 +37,22 @@ export const FeatureEventsSparkline = ({
     [feature.name, feature.filter, feature.type]
   );
 
-  const noOfBuckets = useMemo(() => {
-    if (!timeRange) {
-      return undefined;
-    }
-    const fromMs = new Date(timeRange.from).getTime();
-    const toMs = new Date(timeRange.to).getTime();
-    const durationMinutes = (toMs - fromMs) / (1000 * 60);
-    return Math.ceil(durationMinutes / BUCKET_SIZE_MINUTES);
-  }, [timeRange]);
+  const { noOfBuckets, timeRange }: { noOfBuckets: number; timeRange: AbsoluteTimeRange } =
+    useMemo(() => {
+      const now = Date.now();
+      const absoluteTimeRange: AbsoluteTimeRange = {
+        from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+        to: new Date(now).toISOString(),
+        mode: 'absolute',
+      };
+      const durationMinutes =
+        (new Date(absoluteTimeRange.to).getTime() - new Date(absoluteTimeRange.from).getTime()) /
+        (1000 * 60);
+      return {
+        noOfBuckets: Math.ceil(durationMinutes / BUCKET_SIZE_MINUTES),
+        timeRange: absoluteTimeRange,
+      };
+    }, []);
 
   return (
     <PreviewDataSparkPlot
@@ -59,27 +64,6 @@ export const FeatureEventsSparkline = ({
       height={height}
       timeRange={timeRange}
       noOfBuckets={noOfBuckets}
-    />
-  );
-};
-
-export const FeatureEventsSparklineLast24hrs = ({
-  feature,
-  definition,
-}: {
-  feature: Feature;
-  definition: Streams.all.Definition;
-}) => {
-  const now = Date.now();
-  return (
-    <FeatureEventsSparkline
-      feature={feature}
-      definition={definition}
-      timeRange={{
-        from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-        to: new Date(now).toISOString(),
-        mode: 'absolute',
-      }}
     />
   );
 };
