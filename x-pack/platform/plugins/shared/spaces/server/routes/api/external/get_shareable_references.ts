@@ -32,7 +32,9 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
       },
       validate: {
         body: schema.object({
-          objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),
+          objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() }), {
+            maxSize: 1000,
+          }),
         }),
       },
     },

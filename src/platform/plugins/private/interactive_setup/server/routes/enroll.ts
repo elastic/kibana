@@ -51,6 +51,7 @@ export function defineEnrollRoutes({
         body: schema.object({
           hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
             minSize: 1,
+            maxSize: 100,
           }),
           apiKey: schema.string({ minLength: 1 }),
           caFingerprint: schema.string({ maxLength: 64, minLength: 64 }),
