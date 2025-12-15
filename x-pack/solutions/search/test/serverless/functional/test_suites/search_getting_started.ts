@@ -106,6 +106,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
+        describe('Elasticsearch endpoint', function () {
+          it('shows checkmark icon feedback when copy button is clicked', async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.click('copyEndpointButton');
+            // After clicking, the button should show copied state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton-copied');
+            });
+            // After 1 second, it should revert back to normal state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton');
+              await testSubjects.missingOrFail('copyEndpointButton-copied');
+            });
+          });
+        });
+
         describe('View connection details', function () {
           it('renders the view connection details button', async () => {
             await testSubjects.existOrFail('viewConnectionDetailsLink');
