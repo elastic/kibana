@@ -5,12 +5,30 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutSpaceParallelFixture } from '@kbn/scout';
+import type { KbnClient } from '@kbn/scout';
+
+interface ScoutSpace {
+  id: string;
+}
+
+interface FleetItemResponse {
+  item: unknown;
+}
+
+interface FleetItemsResponse {
+  items: Array<{ id: string }>;
+}
+
+interface FleetSettingsResponse {
+  item?: {
+    has_seen_add_data_notice?: boolean;
+  };
+}
 
 export interface CloudConnectorApiService {
-  getCloudConnector: (id: string) => Promise<any>;
-  getPackagePolicy: (id: string) => Promise<any>;
-  getAllCloudConnectors: () => Promise<any[]>;
+  getCloudConnector: (id: string) => Promise<unknown>;
+  getPackagePolicy: (id: string) => Promise<unknown>;
+  getAllCloudConnectors: () => Promise<unknown[]>;
   deleteAllCloudConnectors: () => Promise<void>;
   deleteAllPackagePolicies: () => Promise<void>;
   isAgentlessEnabled: () => Promise<boolean>;
@@ -21,14 +39,14 @@ export const getCloudConnectorApiService = ({
   scoutSpace,
 }: {
   kbnClient: KbnClient;
-  scoutSpace?: ScoutSpaceParallelFixture;
+  scoutSpace?: ScoutSpace;
 }): CloudConnectorApiService => {
   // Build space-aware path prefix
   const basePath = scoutSpace?.id ? `/s/${scoutSpace.id}` : '';
 
   return {
     getCloudConnector: async (id: string) => {
-      const response = await kbnClient.request({
+      const response = await kbnClient.request<FleetItemResponse>({
         method: 'GET',
         path: `${basePath}/api/fleet/cloud_connectors/${id}`,
       });
@@ -36,7 +54,7 @@ export const getCloudConnectorApiService = ({
     },
 
     getPackagePolicy: async (id: string) => {
-      const response = await kbnClient.request({
+      const response = await kbnClient.request<FleetItemResponse>({
         method: 'GET',
         path: `${basePath}/api/fleet/package_policies/${id}`,
       });
@@ -44,7 +62,7 @@ export const getCloudConnectorApiService = ({
     },
 
     getAllCloudConnectors: async () => {
-      const response = await kbnClient.request({
+      const response = await kbnClient.request<FleetItemsResponse>({
         method: 'GET',
         path: `${basePath}/api/fleet/cloud_connectors`,
       });
@@ -52,7 +70,7 @@ export const getCloudConnectorApiService = ({
     },
 
     deleteAllCloudConnectors: async () => {
-      const response = await kbnClient.request({
+      const response = await kbnClient.request<FleetItemsResponse>({
         method: 'GET',
         path: `${basePath}/api/fleet/cloud_connectors`,
       });
@@ -74,13 +92,13 @@ export const getCloudConnectorApiService = ({
     },
 
     deleteAllPackagePolicies: async () => {
-      const response = await kbnClient.request({
+      const response = await kbnClient.request<FleetItemsResponse>({
         method: 'GET',
         path: `${basePath}/api/fleet/package_policies`,
       });
 
       const policies = response.data.items || [];
-      const policyIds = policies.map((p: any) => p.id);
+      const policyIds = policies.map((p) => p.id);
 
       if (policyIds.length > 0) {
         try {
@@ -102,7 +120,7 @@ export const getCloudConnectorApiService = ({
      */
     isAgentlessEnabled: async () => {
       try {
-        const response = await kbnClient.request({
+        const response = await kbnClient.request<FleetSettingsResponse>({
           method: 'GET',
           path: `${basePath}/api/fleet/settings`,
         });

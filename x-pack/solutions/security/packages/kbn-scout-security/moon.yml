@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/es'
-  - '@kbn/cloud-security-posture-common'
 tags:
   - test-helper
   - package

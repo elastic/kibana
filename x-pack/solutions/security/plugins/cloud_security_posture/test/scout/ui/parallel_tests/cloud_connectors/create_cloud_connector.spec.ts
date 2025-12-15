@@ -21,10 +21,10 @@ function createMockAgentlessPolicyResponse(requestBody: AgentlessPolicyRequestBo
   const mockConnectorId = `mock-connector-${Date.now()}`;
 
   // Convert legacy inputs format to array format for the response
-  const inputsArray = Object.entries(requestBody.inputs).map(([type, input]) => ({
+  const inputsArray = Object.entries(requestBody.inputs ?? {}).map(([type, input]) => ({
     type,
     enabled: input.enabled,
-    streams: Object.entries(input.streams).map(([streamKey, stream]) => ({
+    streams: Object.entries(input.streams ?? {}).map(([streamKey, stream]) => ({
       enabled: stream.enabled,
       data_stream: { type: 'logs', dataset: streamKey },
       vars: stream.vars,
@@ -128,15 +128,15 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
       expect(capturedRequestBody!.name).toBe(integrationName);
 
       // Validate AWS-specific input is enabled in the captured request (legacy format uses object keys)
-      const awsInputKey = Object.keys(capturedRequestBody!.inputs).find((key) =>
+      const awsInputKey = Object.keys(capturedRequestBody!.inputs ?? {}).find((key) =>
         key.includes(AWS_INPUT_KEY_PATTERN)
       );
       expect(awsInputKey).toBeDefined();
-      expect(capturedRequestBody!.inputs[awsInputKey!].enabled).toBe(true);
+      expect(capturedRequestBody!.inputs![awsInputKey!].enabled).toBe(true);
 
       // Validate AWS cloud connector credentials in the captured request
-      const awsInput = capturedRequestBody!.inputs[awsInputKey!];
-      const awsFindingsStream = awsInput.streams[FINDINGS_STREAM_KEY];
+      const awsInput = capturedRequestBody!.inputs![awsInputKey!];
+      const awsFindingsStream = awsInput.streams![FINDINGS_STREAM_KEY];
       expect(awsFindingsStream).toBeDefined();
       expect(awsFindingsStream.vars).toBeDefined();
 
@@ -207,15 +207,15 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
       expect(capturedRequestBody!.name).toBe(integrationName);
 
       // Validate Azure-specific input is enabled in the captured request (legacy format uses object keys)
-      const azureInputKey = Object.keys(capturedRequestBody!.inputs).find((key) =>
+      const azureInputKey = Object.keys(capturedRequestBody!.inputs ?? {}).find((key) =>
         key.includes(AZURE_INPUT_KEY_PATTERN)
       );
       expect(azureInputKey).toBeDefined();
-      expect(capturedRequestBody!.inputs[azureInputKey!].enabled).toBe(true);
+      expect(capturedRequestBody!.inputs![azureInputKey!].enabled).toBe(true);
 
       // Validate Azure cloud connector credentials in the captured request
-      const azureInput = capturedRequestBody!.inputs[azureInputKey!];
-      const azureFindingsStream = azureInput.streams[FINDINGS_STREAM_KEY];
+      const azureInput = capturedRequestBody!.inputs![azureInputKey!];
+      const azureFindingsStream = azureInput.streams![FINDINGS_STREAM_KEY];
       expect(azureFindingsStream).toBeDefined();
       expect(azureFindingsStream.vars).toBeDefined();
 
