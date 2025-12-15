@@ -18,6 +18,19 @@ import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
 import { VALID_CONFIG_MARKER } from '../types';
 
+/**
+ * Parses the SCOUT_DELETE_SPACE_AFTER_TESTS environment variable as a boolean.
+ * Returns false only when explicitly set to "false" (case-insensitive),
+ * defaults to true otherwise (when undefined, empty, or set to "true").
+ */
+function parseDeleteSpaceAfterTests(): boolean {
+  const envValue = process.env.SCOUT_DELETE_SPACE_AFTER_TESTS;
+  if (!envValue) {
+    return true;
+  }
+  return envValue.toLowerCase().trim() !== 'false';
+}
+
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   /**
    * Playwright loads the config file multiple times, so we need to generate a unique run id
@@ -88,6 +101,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
+      deleteSpaceAfterTests: parseDeleteSpaceAfterTests(),
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 

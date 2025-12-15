@@ -12,6 +12,7 @@ import { formatTime, isValidUTCDate } from '../../../../utils';
 import { coreWorkerFixtures } from '..';
 import type { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';
 import { measurePerformanceAsync } from '../../../../../common';
+import type { ScoutTestOptions } from '../../../../types';
 
 export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
   {},
@@ -20,11 +21,27 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
   scoutSpace: [
     async ({ log, kbnClient }, use, workerInfo) => {
       const spaceId = `test-space-${workerInfo.parallelIndex + 1}`;
+      const projectUse = workerInfo.project.use as ScoutTestOptions;
+      const deleteSpaceAfterTests = projectUse.deleteSpaceAfterTests ?? true;
+
       const spacePayload = {
         id: spaceId,
         name: spaceId,
         disabledFeatures: [],
       };
+
+      // If deleteSpaceAfterTests is false, delete the space at the beginning to ensure clean state
+      if (deleteSpaceAfterTests === false) {
+        await measurePerformanceAsync(log, `space.delete(${spaceId}) [cleanup]`, async () => {
+          await kbnClient.request({
+            method: 'DELETE',
+            path: `/api/spaces/space/${spaceId}`,
+            ignoreErrors: [404],
+          });
+        });
+      }
+
+      // Create the space
       await measurePerformanceAsync(log, `spaces.create('${spaceId}')`, async () => {
         return kbnClient.spaces.create(spacePayload);
       });
@@ -137,11 +154,15 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
       await use({ savedObjects, uiSettings, id: spaceId });
 
-      // Cleanup space after tests via API call
-      await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {
-        log.debug(`Deleting space ${spaceId}`);
-        return kbnClient.spaces.delete(spaceId);
-      });
+      // Cleanup space after tests via API call (only if deleteSpaceAfterTests is true)
+      if (deleteSpaceAfterTests === true) {
+        await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {
+          log.debug(`Deleting space ${spaceId}`);
+          return kbnClient.spaces.delete(spaceId);
+        });
+      } else {
+        log.debug(`Skipping space deletion for ${spaceId} (deleteSpaceAfterTests=false)`);
+      }
     },
     { scope: 'worker', auto: true },
   ],

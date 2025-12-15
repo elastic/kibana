@@ -32,6 +32,7 @@ describe('createPlaywrightConfig', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.TEST_RUN_ID;
+    delete process.env.SCOUT_DELETE_SPACE_AFTER_TESTS;
   });
 
   it('should return a valid default Playwright configuration', () => {
@@ -57,6 +58,7 @@ describe('createPlaywrightConfig', () => {
       screenshot: 'only-on-failure',
       testIdAttribute: 'data-test-subj',
       trace: 'on-first-retry',
+      deleteSpaceAfterTests: true,
     });
     expect(config.globalSetup).toBeUndefined();
     expect(config.globalTeardown).toBeUndefined();
@@ -146,5 +148,39 @@ describe('createPlaywrightConfig', () => {
 
     expect(generateTestRunId).toHaveBeenCalledTimes(1);
     expect(process.env.TEST_RUN_ID).toBe(mockedRunId);
+  });
+
+  describe('SCOUT_DELETE_SPACE_AFTER_TESTS environment variable', () => {
+    it('should default to true when environment variable is not set', () => {
+      mockGenerateTestRunId.mockImplementationOnce(() => mockedRunId);
+      mockedScoutPlaywrightReporter.mockReturnValueOnce(['null']);
+      mockedScoutFailedTestsReporter.mockReturnValueOnce(['null']);
+
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+
+      expect(config.use?.deleteSpaceAfterTests).toBe(true);
+    });
+
+    it('should parse "false" as false', () => {
+      mockGenerateTestRunId.mockImplementationOnce(() => mockedRunId);
+      mockedScoutPlaywrightReporter.mockReturnValueOnce(['null']);
+      mockedScoutFailedTestsReporter.mockReturnValueOnce(['null']);
+      process.env.SCOUT_DELETE_SPACE_AFTER_TESTS = 'false';
+
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+
+      expect(config.use?.deleteSpaceAfterTests).toBe(false);
+    });
+
+    it('should be case-insensitive when parsing "false"', () => {
+      mockGenerateTestRunId.mockImplementationOnce(() => mockedRunId);
+      mockedScoutPlaywrightReporter.mockReturnValueOnce(['null']);
+      mockedScoutFailedTestsReporter.mockReturnValueOnce(['null']);
+      process.env.SCOUT_DELETE_SPACE_AFTER_TESTS = 'FALSE';
+
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+
+      expect(config.use?.deleteSpaceAfterTests).toBe(false);
+    });
   });
 });
