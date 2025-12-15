@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/observability-plugin",
   "owner": [
-    "@elastic/obs-ux-management-team"
+    "@elastic/observability-ui"
   ],
   "group": "observability",
   "visibility": "private",
@@ -48,6 +48,7 @@
       "streams",
     ],
     "optionalPlugins": [
+      "onechat",
       "aiops",
       "cases",
       "discover",

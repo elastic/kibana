@@ -60,6 +60,7 @@ import {
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 import { visit } from './navigation';
 import { LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
+import { GAP_AUTO_FILL_LOGS_TABLE } from '../screens/rule_gaps';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -247,4 +248,8 @@ export const filterGapsByStatus = (status: string) => {
 
 export const refreshGapsTable = () => {
   cy.get(RULE_GAPS_DATE_PICKER_APPLY_REFRESH).click();
+};
+
+export const getGapAutoFillLogsTableRows = () => {
+  return cy.get(GAP_AUTO_FILL_LOGS_TABLE).find('tbody tr');
 };

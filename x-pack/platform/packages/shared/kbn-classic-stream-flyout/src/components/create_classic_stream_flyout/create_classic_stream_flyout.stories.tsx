@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
+import type { StreamNameValidator, IlmPolicyFetcher } from '../../utils';
 
 const MOCK_TEMPLATES: TemplateDeserialized[] = [
   {
@@ -52,6 +54,8 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     ilmPolicy: { name: '.alerts-ilm-policy' },
     indexPatterns: ['logs-apache.access-*'],
     allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'standard',
+    composedOf: ['logs@mappings', 'logs@settings', 'ecs@mappings'],
     _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
@@ -136,6 +140,14 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     ilmPolicy: { name: 'profiling-60-days' },
     indexPatterns: ['logs-elastic_agent.apm_server-*'],
     allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'standard',
+    composedOf: [
+      '.fleet_agent_id_verification-1',
+      '.fleet_globals-1',
+      'logs@mappings',
+      'logs@settings',
+      'ecs@mappings',
+    ],
     _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
@@ -163,8 +175,50 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     name: 'logs-infinite-retention',
     indexPatterns: ['logs-infinite-*'],
     allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'logsdb',
     lifecycle: { enabled: true, infiniteDataRetention: true },
+    composedOf: ['logs@mappings'],
     _kbnMeta: { type: 'default', hasDatastream: true },
+  },
+  {
+    name: 'multi-pattern-template',
+    ilmPolicy: { name: 'logs' },
+    indexPatterns: ['*-logs-*-*', 'logs-*-data-*', 'metrics-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'lookup',
+    version: 12,
+    composedOf: [
+      '.fleet_agent_id_verification-1',
+      '.fleet_globals-1',
+      'ecs@mappings',
+      'elastic_agent@custom',
+      'logs@custom',
+      'logs@mappings',
+      'logs@settings',
+      'logs-elastic_agent.apm_server@custom',
+      'logs-elastic_agent.apm_server@package',
+    ],
+    _kbnMeta: { type: 'managed', hasDatastream: true },
+  },
+  {
+    name: 'very-long-pattern-template',
+    ilmPolicy: { name: 'logs' },
+    indexPatterns: ['*-reallllllllllllllllllly-*-loooooooooooong-*-index-*-name-*', 'short-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    indexMode: 'lookup',
+    version: 12,
+    composedOf: [
+      '.fleet_agent_id_verification-1',
+      '.fleet_globals-1',
+      'ecs@mappings',
+      'elastic_agent@custom',
+      'logs@custom',
+      'logs@mappings',
+      'logs@settings',
+      'logs-elastic_agent.apm_server@custom',
+      'logs-elastic_agent.apm_server@package',
+    ],
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
 ];
 
@@ -176,95 +230,351 @@ const meta: Meta<typeof CreateClassicStreamFlyout> = {
 export default meta;
 type Story = StoryObj<typeof CreateClassicStreamFlyout>;
 
-const PrimaryStory = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+// Mock validation data for stories
+const EXISTING_STREAM_NAMES = [
+  'foo-logs-bar-baz', // Matches *-logs-*-* pattern with foo, bar, baz
+  'test-logs-data-stream',
+  'logs-myapp-data-production',
+];
 
-  return (
+const HIGHER_PRIORITY_PATTERNS = [
+  'foo-logs-bar-*', // Matches foo-logs-bar-anything
+  'test-logs-*-stream',
+];
+
+/**
+ * Mock ILM policies for demonstrating ILM phase display
+ */
+const MOCK_ILM_POLICIES: Record<string, PolicyFromES> = {
+  logs: {
+    name: 'logs',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: 'logs',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '7d' } },
+        },
+        warm: {
+          min_age: '7d',
+          actions: {},
+        },
+        cold: {
+          min_age: '14d',
+          actions: {},
+        },
+        frozen: {
+          min_age: '44d',
+          actions: {},
+        },
+        delete: {
+          min_age: '74d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  'profiling-60-days': {
+    name: 'profiling-60-days',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: 'profiling-60-days',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '30d' } },
+        },
+        delete: {
+          min_age: '60d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  '.alerts-ilm-policy': {
+    name: '.alerts-ilm-policy',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: '.alerts-ilm-policy',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '90d' } },
+        },
+        warm: {
+          min_age: '30d',
+          actions: {},
+        },
+        delete: {
+          min_age: '180d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  '.monitoring-8-ilm-policy': {
+    name: '.monitoring-8-ilm-policy',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: '.monitoring-8-ilm-policy',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {},
+        },
+        delete: {
+          min_age: '7d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+  'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer': {
+    name: 'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer',
+    modifiedDate: '2024-01-01T00:00:00.000Z',
+    version: 1,
+    policy: {
+      name: 'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: { rollover: { max_age: '7d' } },
+        },
+        warm: {
+          min_age: '7d',
+          actions: {},
+        },
+        cold: {
+          min_age: '30d',
+          actions: {},
+        },
+        delete: {
+          min_age: '90d',
+          actions: { delete: {} },
+        },
+      },
+    },
+  },
+};
+
+/**
+ * Creates a mock ILM policy fetcher that wraps fetch logic with Storybook action logging.
+ */
+const createMockIlmPolicyFetcher = (): IlmPolicyFetcher => {
+  const onGetIlmPolicyAction = action('getIlmPolicy');
+
+  return async (policyName: string, signal?: AbortSignal) => {
+    onGetIlmPolicyAction(policyName);
+    action('getIlmPolicy:start')({ policyName, timestamp: Date.now() });
+
+    // Check if aborted before starting delay
+    if (signal?.aborted) {
+      action('getIlmPolicy:aborted')({ policyName, reason: 'aborted before delay' });
+      throw new Error('ILM policy fetch aborted');
+    }
+
+    // Simulate network delay with periodic abort checks
+    const delay = 500;
+    const startTime = Date.now();
+    while (Date.now() - startTime < delay) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      if (signal?.aborted) {
+        action('getIlmPolicy:aborted')({
+          policyName,
+          reason: 'aborted during delay',
+          elapsed: Date.now() - startTime,
+        });
+        throw new Error('ILM policy fetch aborted');
+      }
+    }
+
+    const policy = MOCK_ILM_POLICIES[policyName];
+    action('getIlmPolicy:result')(policy ?? null);
+    return policy ?? null;
+  };
+};
+
+/**
+ * Creates a mock validator that wraps validation logic with Storybook action logging.
+ * You'll see "onValidate" events in the Actions panel whenever validation is triggered.
+ */
+const createMockValidator = (
+  existingNames: string[],
+  higherPriorityPatterns: string[],
+  delayMs: number = 500
+): StreamNameValidator => {
+  const onValidateAction = action('onValidate');
+
+  return async (
+    streamName: string,
+    selectedTemplate: TemplateDeserialized,
+    signal?: AbortSignal
+  ) => {
+    // Log the validation call to Storybook actions panel
+    onValidateAction({ streamName, template: selectedTemplate.name });
+    action('onValidate:start')({
+      streamName,
+      template: selectedTemplate.name,
+      timestamp: Date.now(),
+    });
+
+    // Simulate network delay (configurable for testing race conditions)
+    const delay = delayMs;
+
+    // Check if aborted before starting delay
+    if (signal?.aborted) {
+      action('onValidate:aborted')({
+        streamName,
+        template: selectedTemplate.name,
+        reason: 'aborted before delay',
+      });
+      throw new Error('Validation aborted');
+    }
+
+    // Wait with periodic abort checks
+    const startTime = Date.now();
+    while (Date.now() - startTime < delay) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      if (signal?.aborted) {
+        action('onValidate:aborted')({
+          streamName,
+          template: selectedTemplate.name,
+          reason: 'aborted during delay',
+          elapsed: Date.now() - startTime,
+        });
+        throw new Error('Validation aborted');
+      }
+    }
+
+    // Check for duplicate
+    if (existingNames.includes(streamName)) {
+      const result = { errorType: 'duplicate' as const, conflictingIndexPattern: undefined };
+      action('onValidate:result')({
+        streamName,
+        template: selectedTemplate.name,
+        result,
+      });
+      return result;
+    }
+
+    // Check for higher priority pattern conflict
+    for (const pattern of higherPriorityPatterns) {
+      const regexPattern = pattern.replace(/\*/g, '.*');
+      const regex = new RegExp(`^${regexPattern}$`);
+      if (regex.test(streamName)) {
+        const result = { errorType: 'higherPriority' as const, conflictingIndexPattern: pattern };
+        action('onValidate:result')({
+          streamName,
+          template: selectedTemplate.name,
+          result,
+        });
+        return result;
+      }
+    }
+
+    const result = { errorType: null, conflictingIndexPattern: undefined };
+    action('onValidate:result')({
+      streamName,
+      template: selectedTemplate.name,
+      result,
+    });
+    return result;
+  };
+};
+
+export const Default: Story = {
+  render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
       onCreate={action('onCreate')}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
-      selectedTemplate={selectedTemplate}
-      onTemplateSelect={(template) => {
-        action('onTemplateSelect')(template);
-        setSelectedTemplate(template);
-      }}
+      getIlmPolicy={createMockIlmPolicyFetcher()}
     />
-  );
+  ),
 };
 
-export const Primary: Story = {
-  render: () => <PrimaryStory />,
+/**
+ * Tests all validation scenarios. Watch the Actions panel to see when `onValidate` is triggered:
+ * - Empty fields: Leave any wildcard empty and click Create
+ * - Duplicate: Select "multi-pattern-template", enter "foo", "bar", "baz" to trigger duplicate validation
+ * - Higher priority: Enter "foo", "bar", then anything (e.g., "test") to trigger higher priority conflict
+ *
+ * Uses 500ms delay (normal network conditions).
+ */
+export const WithValidation: Story = {
+  render: () => {
+    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 500);
+    return (
+      <CreateClassicStreamFlyout
+        onClose={action('onClose')}
+        onCreate={action('onCreate')}
+        onCreateTemplate={action('onCreateTemplate')}
+        onRetryLoadTemplates={action('onRetryLoadTemplates')}
+        templates={MOCK_TEMPLATES}
+        onValidate={validator}
+        getIlmPolicy={createMockIlmPolicyFetcher()}
+      />
+    );
+  },
 };
 
-const WithPreselectedTemplateStory = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>('logs-apache.access');
-
-  return (
-    <CreateClassicStreamFlyout
-      onClose={action('onClose')}
-      onCreate={action('onCreate')}
-      onCreateTemplate={action('onCreateTemplate')}
-      onRetryLoadTemplates={action('onRetryLoadTemplates')}
-      templates={MOCK_TEMPLATES}
-      selectedTemplate={selectedTemplate}
-      onTemplateSelect={(template) => {
-        action('onTemplateSelect')(template);
-        setSelectedTemplate(template);
-      }}
-    />
-  );
-};
-
-export const WithPreselectedTemplate: Story = {
-  render: () => <WithPreselectedTemplateStory />,
-};
-
-const EmptyStateStory = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-
-  return (
-    <CreateClassicStreamFlyout
-      onClose={action('onClose')}
-      onCreate={action('onCreate')}
-      onCreateTemplate={action('onCreateTemplate')}
-      onRetryLoadTemplates={action('onRetryLoadTemplates')}
-      templates={[]}
-      selectedTemplate={selectedTemplate}
-      onTemplateSelect={(template) => {
-        action('onTemplateSelect')(template);
-        setSelectedTemplate(template);
-      }}
-    />
-  );
+/**
+ * Tests race condition scenarios with very slow network (2500ms delay).
+ *
+ * To test the debounce bug:
+ * 1. Select "multi-pattern-template" template and go to name step
+ * 2. Type "foo", "bar", "baz" in the inputs
+ * 3. Click Create button - validation starts (5s delay)
+ * 4. While validation is running, quickly backspace "baz" to "ba"
+ * 5. Observe: Create button loader stops (isSubmitting becomes false)
+ * 6. Quickly backspace again from "ba" to "b"
+ * 7. Bug: No validation is triggered, but async request eventually completes
+ */
+export const WithSlowValidation: Story = {
+  render: () => {
+    const validator = createMockValidator(EXISTING_STREAM_NAMES, HIGHER_PRIORITY_PATTERNS, 2500);
+    return (
+      <CreateClassicStreamFlyout
+        onClose={action('onClose')}
+        onCreate={action('onCreate')}
+        onCreateTemplate={action('onCreateTemplate')}
+        onRetryLoadTemplates={action('onRetryLoadTemplates')}
+        templates={MOCK_TEMPLATES}
+        onValidate={validator}
+        getIlmPolicy={createMockIlmPolicyFetcher()}
+      />
+    );
+  },
 };
 
 export const EmptyState: Story = {
-  render: () => <EmptyStateStory />,
-};
-
-const ErrorStateStory = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-
-  return (
+  render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
       onCreate={action('onCreate')}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={[]}
-      selectedTemplate={selectedTemplate}
-      onTemplateSelect={(template) => {
-        action('onTemplateSelect')(template);
-        setSelectedTemplate(template);
-      }}
-      hasErrorLoadingTemplates={true}
     />
-  );
+  ),
 };
 
 export const ErrorState: Story = {
-  render: () => <ErrorStateStory />,
+  render: () => (
+    <CreateClassicStreamFlyout
+      onClose={action('onClose')}
+      onCreate={action('onCreate')}
+      onCreateTemplate={action('onCreateTemplate')}
+      onRetryLoadTemplates={action('onRetryLoadTemplates')}
+      templates={[]}
+      hasErrorLoadingTemplates={true}
+    />
+  ),
 };

@@ -19,13 +19,13 @@
         "label": "describeDataset",
         "description": [],
         "signature": [
-          "({\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n  filter,\n}: { esClient: ",
+          "({\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n  filter,\n  sampleDocsSize,\n}: { esClient: ",
           "ElasticsearchClient",
           "; start: number; end: number; index: string | string[]; kql?: string | undefined; filter?: ",
           "QueryDslQueryContainer",
           " | ",
           "QueryDslQueryContainer",
-          "[] | undefined; }) => Promise<",
+          "[] | undefined; sampleDocsSize?: number | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/ai-tools",
             "scope": "server",
@@ -44,7 +44,7 @@
             "id": "def-server.describeDataset.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n  filter,\n}",
+            "label": "{\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n  filter,\n  sampleDocsSize,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
             "deprecated": false,
@@ -1112,6 +1112,20 @@
                   " | ",
                   "QueryDslQueryContainer",
                   "[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-tools",
+                "id": "def-server.describeDataset.$1.sampleDocsSize",
+                "type": "number",
+                "tags": [],
+                "label": "sampleDocsSize",
+                "description": [],
+                "signature": [
+                  "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
                 "deprecated": false,
