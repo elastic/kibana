@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerCoreObjectTypes } from './registration';
-
-// set minimum number of registered saved objects to ensure no object types are removed after 8.8
-// declared in internal implementation explicitly to prevent unintended changes.
-export const SAVED_OBJECT_TYPES_COUNT = 142 as const;
+export * from './setup_cloud_connect';
