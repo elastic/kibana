@@ -9,9 +9,15 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import type { ProcessorFormState } from '../../../types';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
+import { isFilterConditionComplete } from '../../../../../../util/condition';
 
 export const ProcessorConditionEditor = () => {
-  const { field } = useController<ProcessorFormState, 'where'>({ name: 'where' });
+  const { field } = useController<ProcessorFormState, 'where'>({
+    name: 'where',
+    rules: {
+      validate: isFilterConditionComplete,
+    },
+  });
 
   if (field.value === undefined) {
     return null;

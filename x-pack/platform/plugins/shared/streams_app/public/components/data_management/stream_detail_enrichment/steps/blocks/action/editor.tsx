@@ -98,7 +98,12 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const isConfigured = useSelector(stepRef, (snapshot) => snapshot.matches('configured'));
   const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
-  const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
+  const canSaveStateMachine = useSelector(stepRef, (snapshot) =>
+    snapshot.can({ type: 'step.save' })
+  );
+
+  const isFormValid = methods.formState.isValid;
+  const canSave = canSaveStateMachine && isFormValid;
 
   const hasStepChanges = useSelector(
     stepRef,

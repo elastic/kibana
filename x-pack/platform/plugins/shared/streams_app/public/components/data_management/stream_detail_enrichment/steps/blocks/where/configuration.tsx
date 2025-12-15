@@ -15,14 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
-import {
-  isCondition,
-  isFilterConditionObject,
-  getFilterOperator,
-  getFilterValue,
-} from '@kbn/streamlang';
-import type { FilterCondition } from '@kbn/streamlang';
-import { isEqual, isPlainObject } from 'lodash';
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm, FormProvider, useController } from 'react-hook-form';
@@ -39,6 +32,7 @@ import {
 import { discardChangesPromptOptions, deleteConditionPromptOptions } from './prompt_options';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import { isFilterConditionComplete } from '../../../../../../util/condition';
 
 interface WhereBlockConfigurationProps {
   stepRef: StepActorRef;
@@ -175,56 +169,7 @@ export const WhereBlockConditionEditor = () => {
   const { field } = useController<ConditionBlockFormState, 'condition'>({
     name: 'condition',
     rules: {
-      validate: (value) => {
-        // First check: validate structure with existing isCondition check
-        if (!isCondition(value)) {
-          return false;
-        }
-
-        // Additional check: ensure filter conditions have complete values
-        if (isPlainObject(value) && isFilterConditionObject(value)) {
-          const filterCondition = value as FilterCondition;
-
-          // Field must be non-empty
-          if (!filterCondition.field || filterCondition.field.trim() === '') {
-            return false;
-          }
-
-          const operator = getFilterOperator(filterCondition);
-          const conditionValue = getFilterValue(filterCondition);
-
-          // For range conditions, check that both boundaries are filled
-          if (
-            operator === 'range' &&
-            typeof conditionValue === 'object' &&
-            conditionValue !== null
-          ) {
-            const hasFrom =
-              (conditionValue.gte !== undefined && conditionValue.gte !== '') ||
-              (conditionValue.gt !== undefined && conditionValue.gt !== '');
-            const hasTo =
-              (conditionValue.lte !== undefined && conditionValue.lte !== '') ||
-              (conditionValue.lt !== undefined && conditionValue.lt !== '');
-            return hasFrom && hasTo;
-          }
-
-          // For boolean values, any boolean is valid (exists operator or eq/neq shorthand)
-          if (typeof conditionValue === 'boolean') {
-            return true;
-          }
-
-          // For string values, must be non-empty
-          if (typeof conditionValue === 'string') {
-            return conditionValue.trim() !== '';
-          }
-
-          // If we reach here, the value is missing or invalid
-          return false;
-        }
-
-        // For other valid conditions, pass through
-        return true;
-      },
+      validate: isFilterConditionComplete,
     },
   });
 

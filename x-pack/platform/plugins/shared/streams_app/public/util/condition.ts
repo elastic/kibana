@@ -132,3 +132,56 @@ export const getFilterConditionField = (condition: Condition) => {
       : undefined
     : undefined;
 };
+
+/**
+ * Validates that a condition is complete and ready to be saved.
+ * Checks for valid structure, non-empty field, and non-empty values.
+ * @param value condition to validate
+ * @returns true if the condition is complete and valid
+ */
+export const isFilterConditionComplete = (value: Condition | unknown): boolean => {
+  // First check: validate structure with existing isCondition check
+  if (!isCondition(value)) {
+    return false;
+  }
+
+  // Additional check: ensure filter conditions have complete values
+  if (isPlainObject(value) && isFilterConditionObject(value)) {
+    const filterCondition = value as FilterCondition;
+
+    // Field must be non-empty
+    if (!filterCondition.field || filterCondition.field.trim() === '') {
+      return false;
+    }
+
+    const operator = getFilterOperator(filterCondition);
+    const conditionValue = getFilterValue(filterCondition);
+
+    // For range conditions, check that both boundaries are filled
+    if (operator === 'range' && typeof conditionValue === 'object' && conditionValue !== null) {
+      const hasFrom =
+        (conditionValue.gte !== undefined && conditionValue.gte !== '') ||
+        (conditionValue.gt !== undefined && conditionValue.gt !== '');
+      const hasTo =
+        (conditionValue.lte !== undefined && conditionValue.lte !== '') ||
+        (conditionValue.lt !== undefined && conditionValue.lt !== '');
+      return hasFrom && hasTo;
+    }
+
+    // For boolean values, any boolean is valid (exists operator or eq/neq shorthand)
+    if (typeof conditionValue === 'boolean') {
+      return true;
+    }
+
+    // For string values, must be non-empty
+    if (typeof conditionValue === 'string') {
+      return conditionValue.trim() !== '';
+    }
+
+    // If we reach here, the value is missing or invalid
+    return false;
+  }
+
+  // For other valid conditions (e.g., 'always'), pass through
+  return true;
+};
