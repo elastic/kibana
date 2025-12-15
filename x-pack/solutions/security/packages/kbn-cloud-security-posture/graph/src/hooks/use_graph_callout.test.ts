@@ -53,11 +53,13 @@ describe('useGraphCallout', () => {
     id,
     hasType = true,
     hasSubType = true,
+    hasName = true,
     availableInEntityStore = true,
   }: {
     id: string;
     hasType?: boolean;
     hasSubType?: boolean;
+    hasName?: boolean;
     availableInEntityStore?: boolean;
   }): EntityNodeViewModel => ({
     id,
@@ -72,9 +74,10 @@ describe('useGraphCallout', () => {
         entity: {
           type: hasType ? 'user' : '',
           sub_type: hasSubType ? 'local' : '',
+          name: hasName ? 'entity-name' : '',
           availableInEntityStore,
           // TODO Remove workaround for missing type in schema when https://github.com/elastic/kibana/pull/243711 is merged
-        } as { type?: string; sub_type?: string; availableInEntityStore?: boolean },
+        } as { type?: string; sub_type?: string; name?: string; availableInEntityStore?: boolean },
       },
     ],
   });
@@ -250,6 +253,34 @@ describe('useGraphCallout', () => {
       const nodes: NodeViewModel[] = [
         createMockEntityNode({ id: 'node1' }),
         createMockEntityNode({ id: 'node2', hasSubType: false }),
+      ];
+
+      const { result } = renderHook(() => useGraphCallout(nodes));
+
+      expect(result.current.shouldShowCallout).toBe(true);
+      if (result.current.shouldShowCallout) {
+        expect(result.current.config.title).toContain('Unknown entity type');
+        expect(result.current.config.links).toHaveLength(1);
+        expect(result.current.config.links[0].href).toBe('/app/discover');
+      }
+    });
+
+    it('should show callout with unknownEntityType config when entity has no name', () => {
+      mockUseQuery
+        // Query 1: Integration installed
+        .mockReturnValueOnce({
+          data: { item: { status: 'installed' } },
+          error: null,
+        })
+        // Query 2: Entity Store running
+        .mockReturnValueOnce({
+          data: { status: 'running' },
+          error: null,
+        });
+
+      const nodes: NodeViewModel[] = [
+        createMockEntityNode({ id: 'node1' }),
+        createMockEntityNode({ id: 'node2', hasName: false }),
       ];
 
       const { result } = renderHook(() => useGraphCallout(nodes));

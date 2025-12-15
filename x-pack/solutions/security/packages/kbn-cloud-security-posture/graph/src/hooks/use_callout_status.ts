@@ -56,11 +56,10 @@ const hasUnenrichedEntity = (entityNodes: EntityNodeViewModel[]): boolean => {
     if (!node.documentsData || !Array.isArray(node.documentsData)) {
       return false;
     }
-    return node.documentsData.some((doc) => {
-      const hasNoType = !doc.entity?.type || doc.entity.type === '';
-      const hasNoSubType = !doc.entity?.sub_type || doc.entity.sub_type === '';
-      return hasNoType || hasNoSubType;
-    });
+
+    return node.documentsData.some(
+      (doc) => !doc.entity?.name || !doc.entity?.type || !doc.entity?.sub_type
+    );
   });
 };
 
