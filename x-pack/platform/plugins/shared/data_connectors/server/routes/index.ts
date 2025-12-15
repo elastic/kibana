@@ -14,9 +14,13 @@ import type {
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { connectorsSpecs } from '@kbn/connector-specs';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { DataConnectorsServerStartDependencies } from '../types';
+import type {
+  DataConnectorsServerSetupDependencies,
+  DataConnectorsServerStartDependencies,
+} from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
 
 /**
@@ -69,7 +73,8 @@ export function buildSecretsFromConnectorSpec(
 export function registerRoutes(
   router: IRouter,
   logger: Logger,
-  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>
+  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>,
+  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement']
 ) {
   // List all data connectors
   router.get(
@@ -199,6 +204,8 @@ export function registerRoutes(
         });
 
         const savedObjectsClient = coreContext.savedObjects.client;
+        const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+
         const now = new Date().toISOString();
         const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
           name,
