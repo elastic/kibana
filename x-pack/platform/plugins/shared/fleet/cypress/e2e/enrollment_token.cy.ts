@@ -9,7 +9,6 @@ import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS } from '../screens/fleet';
-import { CONFIRM_MODAL } from '../screens/navigation';
 
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
@@ -42,10 +41,8 @@ describe('Enrollment token page', () => {
     cy.visit('app/fleet/enrollment-tokens');
     cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_BUTTON).click();
     cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD).clear().type('New Token');
-    cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_SELECT_FIELD)
-      .find('input')
-      .type('{downArrow}{enter}');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+    cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_SELECT_FIELD).contains('Agent policy 1');
+    cy.get('.euiButton').contains('Create enrollment token').click({ force: true });
 
     cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE, { timeout: 15000 }).contains('Agent policy 1');
   });
