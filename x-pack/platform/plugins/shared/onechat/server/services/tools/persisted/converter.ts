@@ -33,7 +33,8 @@ export const convertPersistedDefinition = ({
     tags,
     configuration,
     readonly: false,
-    isAvailable: async () => {
+    isAvailable: () => {
+      // persisted tools are always available atm (space check is done via the persistence client)
       return { status: 'available' };
     },
     getSchema: async () => {

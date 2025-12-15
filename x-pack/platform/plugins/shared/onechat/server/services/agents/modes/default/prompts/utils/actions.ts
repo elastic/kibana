@@ -135,18 +135,6 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
     ];
   }
 
-  // tool unavailable -> the tool exists but its backing service (e.g., connector) is not accessible.
-  if (isExecutionError(error, AgentExecutionErrorCode.toolUnavailable)) {
-    const toolCallId = generateFakeToolCallId();
-    return [
-      createToolCallMessage({ toolCallId, toolName: error.meta.toolName, args: {} }),
-      createToolResultMessage({
-        toolCallId,
-        content: `ERROR: The tool "${error.meta.toolName}" is currently unavailable. ${error.meta.reason}. Please inform the user that this tool cannot be used right now and try a different approach.`,
-      }),
-    ];
-  }
-
   // tool call validation -> we format that as a tool call returning an error.
   if (isExecutionError(error, AgentExecutionErrorCode.toolValidationError)) {
     const toolCallId = generateFakeToolCallId();
