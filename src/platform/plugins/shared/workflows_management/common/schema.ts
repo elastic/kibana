@@ -13,7 +13,7 @@ import {
   getElasticsearchConnectors,
   getKibanaConnectors,
 } from '@kbn/workflows';
-import { isAtomic, type GraphNodeUnion } from '@kbn/workflows/graph';
+import { type GraphNodeUnion, isAtomic } from '@kbn/workflows/graph';
 import type { BaseConnectorContract } from '@kbn/workflows/types/v1';
 import { z } from '@kbn/zod/v4';
 
@@ -344,6 +344,16 @@ export function getAllConnectors(): ConnectorContractUnion[] {
 }
 
 export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
+  // Handle internal actions with pattern matching first
+  // TODO: add output schema support for elasticsearch.request and kibana.request connectors
+  if (node.stepType.startsWith('elasticsearch.')) {
+    return z.unknown();
+  }
+
+  if (node.stepType.startsWith('kibana.')) {
+    return z.unknown();
+  }
+
   if (isAtomic(node)) {
     const stepDefinition = stepSchemas.getStepDefinition(node.stepType);
 
@@ -360,9 +370,8 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
     }
   }
 
-  const stepType = node.stepType;
   const allConnectors = getAllConnectorsInternal();
-  const connector = allConnectors.find((c) => c.type === stepType);
+  const connector = allConnectors.find((c) => c.type === node.stepType);
 
   if (connector) {
     if (!connector.outputSchema) {
@@ -372,17 +381,7 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
     return connector.outputSchema;
   }
 
-  // Handle internal actions with pattern matching
-  // TODO: add output schema support for elasticsearch.request and kibana.request connectors
-  if (stepType.startsWith('elasticsearch.')) {
-    return z.unknown();
-  }
-
-  if (stepType.startsWith('kibana.')) {
-    return z.unknown();
-  }
-
-  // Fallback to any if not found
+  // Fallback to unknown if not found
   return z.unknown();
 };
 
