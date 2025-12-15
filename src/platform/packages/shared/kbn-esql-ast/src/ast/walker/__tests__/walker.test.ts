@@ -9,7 +9,7 @@
 
 import { parse } from '../../../parser';
 import { Parser } from '../../../parser';
-import { EsqlQuery } from '../../../query';
+import { EsqlQuery } from '../../../composer/query';
 import type {
   ESQLColumn,
   ESQLCommand,
