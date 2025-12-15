@@ -590,7 +590,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       request.params.agentPolicyId,
       false
     );
-    if (existingAgentPolicy?.supports_agentless) {
+    if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
       throw new FleetError(
         'To update agentless agent policies, use the Fleet agentless policies API.'
       );
