@@ -53,9 +53,6 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/spaces-utils",
-    "@kbn/css-utils",
-    "@kbn/licensing-types",
-    "@kbn/react-query",
     "@kbn/scout",
   ],
   "exclude": [
