@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For e
 Notion connectors have the following configuration properties:
 
 API Token
-:   The Notion API token (bearer token) for authentication.
+:   The Notion API token (bearer token) for authentication. You can obtain this by creating an [internal integration](https://www.notion.com/help/create-integrations-with-the-notion-api#create-an-internal-integration).
 
 ## Test connectors [notion-action-configuration]
 
@@ -40,8 +40,8 @@ Get Page
     - **Page ID** (required): The unique identifier of the page.
 
 Get Data Source
-:   Retrieve a database by its ID.
-    - **Data Source ID** (required): The unique identifier of the database.
+:   Retrieve a database by its ID. This will return only information about the database properties/columns, _not_ about its rows.
+    - **Data Source ID** (required): The unique identifier of the database. See [Notion docs](https://developers.notion.com/reference/retrieve-a-data-source#finding-a-data-source-id) for how to find this.
 
 Query Data Source
 :   Query a database with optional filters.
