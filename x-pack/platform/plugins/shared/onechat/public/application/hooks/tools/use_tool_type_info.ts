@@ -28,13 +28,18 @@ export const useToolTypes = () => {
     [settings]
   );
 
+  const mcpEnabled = useMemo(
+    () => settings.client.get('mcp:ui:enabled', false),
+    [settings]
+  );
+
   const toolTypes = useMemo(() => {
     return serverToolTypes.filter(
       (toolType) =>
-        toolType.type !== ToolType.mcp &&
+        (mcpEnabled || toolType.type !== ToolType.mcp) &&
         (workflowsEnabled || toolType.type !== ToolType.workflow)
     );
-  }, [serverToolTypes, workflowsEnabled]);
+  }, [serverToolTypes, workflowsEnabled, mcpEnabled]);
 
   return { toolTypes, isLoading };
 };
