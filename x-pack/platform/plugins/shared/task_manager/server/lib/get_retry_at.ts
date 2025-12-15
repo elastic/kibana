@@ -17,7 +17,7 @@ export function getRetryAt(
 ): Date | undefined {
   const taskTimeout = getTimeout(task, taskDefinition);
   // If the task timeout is greater than 5m use a 5m timeout to calculate retryAt
-  const timeout = parseIntervalAsSecond(taskTimeout) > 300 ? '5m' : taskTimeout;
+  const timeout = parseIntervalAsSecond(taskTimeout) > 300 ? DEFAULT_TIMEOUT : taskTimeout;
 
   if (task.schedule) {
     return maxIntervalFromDate(new Date(), task.schedule.interval, timeout);
