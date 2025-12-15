@@ -397,6 +397,8 @@ export function Table<T extends UserContentCommonSchema>({
                 entityName={entityName}
                 entityNamePlural={entityNamePlural}
               />
+            ) : hasQueryOrFilters ? (
+              emptyPromptBody
             ) : (
               <EuiEmptyPrompt
                 title={<h3>{emptyPromptTitle}</h3>}

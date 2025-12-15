@@ -1207,7 +1207,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
-          emptyPrompt={emptyPrompt}
         />
 
         {/* Delete modal */}

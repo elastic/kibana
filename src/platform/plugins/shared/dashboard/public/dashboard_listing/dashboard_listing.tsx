@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -54,16 +54,11 @@ export const DashboardListing = ({
     ]
   );
 
-  const activeTabId = useMemo(() => {
-    const validTabIds = tabs.map((tab) => tab.id);
-    return activeTabParam && validTabIds.includes(activeTabParam)
-      ? activeTabParam
-      : TAB_IDS.DASHBOARDS;
-  }, [activeTabParam, tabs]);
+  const activeTabId = tabs.find((tab) => tab.id === activeTabParam)?.id ?? TAB_IDS.DASHBOARDS;
 
-  const changeActiveTab = useCallback((tabId: string) => {
+  const changeActiveTab = (tabId: string) => {
     coreServices.application.navigateToUrl(`#/list/${tabId}`);
-  }, []);
+  };
 
   return (
     <I18nProvider>
