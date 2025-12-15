@@ -22,11 +22,7 @@ export function getFindFilter(opts: GetFindFilterOpts): string {
     const excludedSOIdFilter = (excluded ?? []).map(
       (id: string) => `NOT ${savedObjectType}.id: "${savedObjectType}:${id}"`
     );
-    if (filter.length > 0) {
-      filter += ` AND ${excludedSOIdFilter.join(' AND ')}`;
-    } else {
-      filter += excludedSOIdFilter.join(' AND ');
-    }
+    filter += ` AND ${excludedSOIdFilter.join(' AND ')}`;
   }
   return filter;
 }

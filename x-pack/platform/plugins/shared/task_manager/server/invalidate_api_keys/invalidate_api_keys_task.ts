@@ -112,7 +112,9 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
             schedule: { interval: configInterval },
           };
         } catch (e) {
-          logger.error(`Error invalidating task manager API keys - ${e.message} `);
+          logger.error(`Error invalidating task manager API keys - ${e.message}`, {
+            error: { stack_trace: e.stack },
+          });
           return {
             state: {},
             schedule: { interval: configInterval },
