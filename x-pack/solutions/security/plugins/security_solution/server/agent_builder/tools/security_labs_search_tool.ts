@@ -7,9 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
-import { getSecurityLabsIndexName } from '@kbn/product-doc-common';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { ResourceTypes } from '@kbn/product-doc-common';
+import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
 
@@ -23,9 +25,8 @@ const securityLabsSearchSchema = z.object({
 
 export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search');
 
-// Security Labs artifacts are installed to a global, hidden index.
-// When called without an `inferenceId`, this resolves to the default (ELSER) index name.
-const SECURITY_LABS_INDEX = getSecurityLabsIndexName();
+// Path to GenAI Settings within the management app
+const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';
 
 export const securityLabsSearchTool = (
   core: SecuritySolutionPluginCoreSetupDependencies
@@ -33,60 +34,82 @@ export const securityLabsSearchTool = (
   return {
     id: SECURITY_LABS_SEARCH_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze Security Labs content installed via the AI knowledge base artifacts. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Limits results to 10 articles.`,
+    description: `Search and analyze Security Labs content installed via the AI knowledge base artifacts. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Limits results to 3 articles.`,
     schema: securityLabsSearchSchema,
+    // Tool is always available - handler will check if docs are installed and provide guidance
     availability: {
-      // Security Labs artifacts are installed in a global (non-space) index.
       cacheMode: 'global',
-      handler: async (_ctx: ToolAvailabilityContext) => {
-        try {
-          const [coreStart] = await core.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-          const response = await esClient.search({
-            index: SECURITY_LABS_INDEX,
-            size: 1,
-            terminate_after: 1,
-            query: { match_all: {} },
-          });
-
-          if (response.hits.hits.length > 0) {
-            return { status: 'available' };
-          }
-
-          return {
-            status: 'unavailable',
-            reason: 'Security Labs content not installed',
-          };
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check Security Labs content availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
+      handler: async () => {
+        return { status: 'available' };
       },
     },
-    handler: async ({ query: nlQuery }, { request, esClient, modelProvider, logger, events }) => {
+    handler: async ({ query: nlQuery }, { request, modelProvider, logger }) => {
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {
-        // Enhance query and limit results
-        const enhancedQuery = `${nlQuery} Limit to 3 results.`;
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const llmTasks = pluginsStart.llmTasks;
+        if (!llmTasks) {
+          return {
+            results: [
+              createErrorResult({
+                message: 'Security Labs tool is not available. LlmTasks plugin is not available.',
+              }),
+            ],
+          };
+        }
 
-        const results = await runSearchTool({
-          nlQuery: enhancedQuery,
-          index: SECURITY_LABS_INDEX,
-          model: await modelProvider.getDefaultModel(),
-          // Security Labs is stored in a restricted, hidden index.
-          // Use an internal client for the search.
-          esClient: esClient.asInternalUser,
-          logger,
-          events,
+        const inferenceId = defaultInferenceEndpoints.ELSER;
+        const isAvailable =
+          (await llmTasks.retrieveDocumentationAvailable({
+            inferenceId,
+            resourceType: ResourceTypes.securityLabs,
+          })) ?? false;
+
+        if (!isAvailable) {
+          const basePath = coreStart.http.basePath.get(request);
+          const settingsUrl = `${basePath}${GENAI_SETTINGS_APP_PATH}`;
+          return {
+            results: [
+              createErrorResult({
+                message: `Security Labs content is not installed. To use this tool, please install Security Labs from the GenAI Settings page: ${settingsUrl}. Do not perform any other tool calls, and provide the user with a link to install the documentation.`,
+                metadata: { settingsUrl },
+              }),
+            ],
+          };
+        }
+
+        const model = await modelProvider.getDefaultModel();
+        const connector = model.connector;
+
+        const result = await llmTasks.retrieveDocumentation({
+          searchTerm: nlQuery,
+          max: 3,
+          connectorId: connector.connectorId,
+          request,
+          inferenceId,
+          resourceTypes: [ResourceTypes.securityLabs],
         });
 
-        return { results };
+        if (!result.success || result.documents.length === 0) {
+          return { results: [] };
+        }
+
+        return {
+          results: result.documents.map((doc: RetrieveDocumentationResultDoc) => ({
+            type: ToolResultType.other,
+            data: {
+              reference: { url: doc.url, title: doc.title },
+              partial: doc.summarized,
+              content: {
+                title: doc.title,
+                url: doc.url,
+                content: doc.content,
+                summarized: doc.summarized,
+              },
+            },
+          })),
+        };
       } catch (error) {
         logger.error(`Error in ${SECURITY_LABS_SEARCH_TOOL_ID} tool: ${error.message}`);
         return {

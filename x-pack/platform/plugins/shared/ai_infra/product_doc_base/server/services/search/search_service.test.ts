@@ -8,7 +8,7 @@
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SearchService } from './search_service';
-import { getIndicesWithSecurityLabs } from './utils';
+import { getIndicesForResourceTypes } from './utils';
 
 import { performSearch } from './perform_search';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -46,7 +46,7 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: getIndicesWithSecurityLabs(['kibana'], undefined, undefined),
+        index: getIndicesForResourceTypes(['kibana'], undefined, undefined),
         client: esClient,
       });
     });

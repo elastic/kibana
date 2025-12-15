@@ -10,6 +10,8 @@ import {
   getSecurityLabsIndexName,
   DocumentationProduct,
   type ProductName,
+  type ResourceType,
+  ResourceTypes,
 } from '@kbn/product-doc-common';
 
 export const getIndicesForProductNames = (
@@ -27,17 +29,21 @@ export const getIndicesForProductNames = (
 };
 
 /**
- * Returns the indices to search including Security Labs if requested.
+ * Returns the indices to search for the requested resource types.
  */
-export const getIndicesWithSecurityLabs = (
+export const getIndicesForResourceTypes = (
   productNames: ProductName[] | undefined,
   inferenceId?: string,
-  includeSecurityLabs?: boolean
+  resourceTypes: ResourceType[] | undefined = [ResourceTypes.productDoc]
 ): string | string[] => {
-  const productIndices = getIndicesForProductNames(productNames, inferenceId);
-  const indices = Array.isArray(productIndices) ? productIndices : [productIndices];
+  const indices: string[] = [];
 
-  if (includeSecurityLabs) {
+  if (resourceTypes.includes(ResourceTypes.productDoc)) {
+    const productIndices = getIndicesForProductNames(productNames, inferenceId);
+    indices.push(...(Array.isArray(productIndices) ? productIndices : [productIndices]));
+  }
+
+  if (resourceTypes.includes(ResourceTypes.securityLabs)) {
     indices.push(getSecurityLabsIndexName(inferenceId));
   }
 
