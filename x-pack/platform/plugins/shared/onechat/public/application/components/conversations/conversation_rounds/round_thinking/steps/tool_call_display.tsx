@@ -27,16 +27,17 @@ const labels = {
 interface ToolCallDisplayProps {
   step: ToolCallStep;
   icon?: ReactNode;
+  textColor?: string;
 }
 
-export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon }) => {
+export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, textColor }) => {
   const { tool_id: toolId } = step;
   const { createOnechatUrl } = useNavigation();
   const toolHref = createOnechatUrl(appPaths.tools.details({ toolId }));
   const toolLinkId = `tool-link-${toolId}`;
 
   return (
-    <ThinkingItemLayout icon={icon} accordionContent={step.params}>
+    <ThinkingItemLayout icon={icon} accordionContent={step.params} textColor={textColor}>
       <EuiText size="s">
         <p role="status" aria-label={labels.toolCall}>
           <FormattedMessage
