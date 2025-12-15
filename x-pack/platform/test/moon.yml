@@ -157,6 +157,7 @@ dependsOn:
   - '@kbn/onechat-plugin'
   - '@kbn/field-formats-common'
   - '@kbn/reporting-test-routes'
+  - '@kbn/access-control-test-plugin'
   - '@kbn/alerting-types'
   - '@kbn/visualizations-common'
   - '@kbn/test-subj-selector'
@@ -164,8 +165,10 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/connector-schemas'
   - '@kbn/es-types'
-  - '@kbn/automatic-import-v2-plugin'
   - '@kbn/streamlang'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/automatic-import-v2-plugin'
+  - '@kbn/connector-specs'
 tags:
   - test-helper
   - package

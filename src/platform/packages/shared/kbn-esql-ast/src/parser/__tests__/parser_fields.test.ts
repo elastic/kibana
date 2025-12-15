@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 import * as fixtures from '../../__tests__/fixtures';
 import type { ESQLProperNode } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 /**
  * Asserts that a node has all {@link AstNodeParserFields} defined.

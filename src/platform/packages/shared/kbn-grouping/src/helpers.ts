@@ -10,6 +10,7 @@
 import type { GroupModel, GroupsById, Storage } from './hooks/types';
 import { EMPTY_GROUP_BY_ID } from './hooks/types';
 import * as i18n from './components/translations';
+import type { GroupingBucket, RawBucket } from './components';
 
 /**
  * All mappings in Elasticsearch support arrays. They can also return null values or be missing. For example, a `keyword` mapping could return `null` or `[null]` or `[]` or `'hi'`, or `['hi', 'there']`. We need to handle these cases in order to avoid throwing an error.
@@ -52,5 +53,45 @@ export const addGroupsToStorage = (storage: Storage, groupingId: string, group: 
       ...groups,
       [groupingId]: group,
     })
+  );
+};
+
+/**
+ * A type guard function that checks if a given value is a `RawBucket`.
+ * It verifies that the value is an object with the required properties:
+ * `key` and `doc_count`.
+ *
+ * @param bucket The value to check.
+ * @returns `true` if the value is a `RawBucket`, `false` otherwise.
+ */
+export const isRawBucket = <T>(bucket: unknown): bucket is RawBucket<T> => {
+  return (
+    typeof bucket === 'object' &&
+    bucket !== null &&
+    'key' in bucket &&
+    (typeof bucket.key === 'string' || Array.isArray(bucket.key)) &&
+    'doc_count' in bucket &&
+    typeof bucket.doc_count === 'number'
+  );
+};
+
+/**
+ * A type guard function that checks if a given bucket is a `GroupingBucket`.
+ * It differentiates from a `RawBucket` by verifying the presence of the
+ * `selectedGroup` property, which is unique to `GroupingBucket`.
+ * Since `GroupingBucket` is derived from `RawBucket`, it first checks if
+ * the bucket is a valid `RawBucket` before checking for `GroupingBucket`-specific properties.
+ *
+ * @param bucket The bucket to check.
+ * @returns `true` if the bucket is a `GroupingBucket`, `false` otherwise.
+ */
+export const isGroupingBucket = <T>(bucket: unknown): bucket is GroupingBucket<T> => {
+  return (
+    isRawBucket<T>(bucket) &&
+    Array.isArray(bucket.key) &&
+    'selectedGroup' in bucket &&
+    typeof bucket.selectedGroup === 'string' &&
+    'key_as_string' in bucket &&
+    typeof bucket.key_as_string === 'string'
   );
 };
