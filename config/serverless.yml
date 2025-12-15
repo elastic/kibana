@@ -298,9 +298,6 @@ xpack.genAiSettings:
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
 
-# AI Assistant Management Selection plugin
-aiAssistantManagementSelection.preferredChatExperience: 'classic'
-
 # Cross Project Search
 cps.enabled: true
 cps.cpsEnabled: false
