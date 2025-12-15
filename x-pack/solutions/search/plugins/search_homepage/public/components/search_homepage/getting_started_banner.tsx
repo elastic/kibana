@@ -47,7 +47,7 @@ export const GettingStartedBanner = () => {
                     'xpack.searchHomepage.gettingStartedBanner.h4.exploreAPITutorialsAndLabel',
                     {
                       defaultMessage:
-                        'Explore API tutorials and connect Elasticsearch to your next application.',
+                        'Explore API tutorials and connect Elasticsearch to your application.',
                     }
                   )}
                 </h4>
