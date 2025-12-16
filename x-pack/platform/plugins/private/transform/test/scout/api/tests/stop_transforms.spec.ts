@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
@@ -20,14 +19,6 @@ import { COMMON_HEADERS } from '../constants';
 const transformId = 'transform-test-stop';
 
 apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-  });
-
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     // to test stopping transforms we create a slow continuous transform so it doesn't stop automatically
     const config = {
@@ -48,14 +39,16 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest('should stop the transform by transformId', async ({ apiClient }) => {
+  apiTest('should stop the transform by transformId', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
     const reqBody: StopTransformsRequestSchema = [
       { id: transformId, state: TRANSFORM_STATE.STARTED },
     ];
     const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -68,14 +61,16 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
     expect(stopResponse[transformId].error).toBeUndefined();
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
+  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformViewer();
+
     const reqBody: StopTransformsRequestSchema = [
       { id: transformId, state: TRANSFORM_STATE.STARTED },
     ];
     const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformViewerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',

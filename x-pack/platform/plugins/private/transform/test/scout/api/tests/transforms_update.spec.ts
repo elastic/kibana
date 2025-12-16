@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type { GetTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import type { PostTransformsUpdateResponseSchema } from '../../../../server/routes/api_schemas/update_transforms';
 import { generateTransformConfig } from '../helpers/transform_config';
@@ -39,13 +38,7 @@ apiTest.describe(
   '/internal/transform/transforms/{transformId}/_update',
   { tag: tags.ESS_ONLY },
   () => {
-    let transformPowerUserApiCredentials: RoleApiCredentials;
-    let transformViewerUserApiCredentials: RoleApiCredentials;
-
-    apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-      transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-      transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-
+    apiTest.beforeAll(async ({ apiServices }) => {
       const config = generateTransformConfig(TRANSFORM_ID);
       await apiServices.transform.createTransform(TRANSFORM_ID, config);
     });
@@ -54,13 +47,15 @@ apiTest.describe(
       await apiServices.transform.cleanTransformIndices();
     });
 
-    apiTest('should update a transform', async ({ apiClient }) => {
+    apiTest('should update a transform', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const originalResponse = await apiClient.get(
         `internal/transform/transforms/${TRANSFORM_ID}`,
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...cookieHeader,
           },
           responseType: 'json',
         }
@@ -87,7 +82,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...cookieHeader,
           },
           body: getTransformUpdateConfig(),
           responseType: 'json',
@@ -110,7 +105,7 @@ apiTest.describe(
       const verifyResponse = await apiClient.get(`internal/transform/transforms/${TRANSFORM_ID}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         responseType: 'json',
       });
@@ -131,13 +126,15 @@ apiTest.describe(
       expect(verifiedConfig.settings).toMatchObject({});
     });
 
-    apiTest('should return 403 for transform view-only user', async ({ apiClient }) => {
+    apiTest('should return 403 for transform view-only user', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformViewer();
+
       const { statusCode } = await apiClient.post(
         `internal/transform/transforms/${TRANSFORM_ID}/_update`,
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformViewerUserApiCredentials.apiKeyHeader,
+            ...cookieHeader,
           },
           body: getTransformUpdateConfig(),
           responseType: 'json',

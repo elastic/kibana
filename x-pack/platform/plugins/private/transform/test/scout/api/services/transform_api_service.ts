@@ -13,7 +13,7 @@ export interface TransformApiService {
   createTransformWithSecondaryAuth: (
     transformId: string,
     config: PutTransformsRequestSchema,
-    encodedApiKey: string,
+    secondaryAuthValue: string,
     deferValidation?: boolean
   ) => Promise<void>;
   getTransform: (transformId: string) => Promise<any>;
@@ -57,7 +57,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
     async createTransformWithSecondaryAuth(
       transformId: string,
       config: PutTransformsRequestSchema,
-      encodedApiKey: string,
+      secondaryAuthEncodedApiKey: string,
       deferValidation = false
     ) {
       try {
@@ -69,7 +69,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
           } as any,
           {
             headers: {
-              'es-secondary-authorization': `ApiKey ${encodedApiKey}`,
+              'es-secondary-authorization': `ApiKey ${secondaryAuthEncodedApiKey}`,
             },
           }
         );
@@ -157,6 +157,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
         throw new Error(`Failed to delete transform notification indices: ${error}`);
       }
     },
+
     async deleteIndices(index: string) {
       try {
         await esClient.indices.delete({

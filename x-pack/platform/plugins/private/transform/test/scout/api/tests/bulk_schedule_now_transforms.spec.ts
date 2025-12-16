@@ -6,7 +6,7 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { CookieHeader } from '@kbn/scout';
 import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
@@ -16,12 +16,12 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-
   const transformIds = ['bulk_schedule_now_test_1', 'bulk_schedule_now_test_2'];
+  let transformPowerUserCookieHeader: CookieHeader;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+  apiTest.beforeAll(async ({ samlAuth }) => {
+    const credentials = await samlAuth.asTransformPowerUser();
+    transformPowerUserCookieHeader = credentials.cookieHeader;
   });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
@@ -43,7 +43,7 @@ apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
       {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...transformPowerUserCookieHeader,
         },
         body: reqBody,
         responseType: 'json',
@@ -71,7 +71,7 @@ apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...transformPowerUserCookieHeader,
           },
           body: reqBody,
           responseType: 'json',

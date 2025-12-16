@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
@@ -16,15 +15,7 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-
   const transformId = 'transform-test-schedule-now';
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-  });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     const config = generateTransformConfig(transformId, true);
@@ -36,14 +27,16 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest('should schedule the transform by transformId', async ({ apiClient }) => {
+  apiTest('should schedule the transform by transformId', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
     const reqBody: ScheduleNowTransformsRequestSchema = [{ id: transformId }];
     const { statusCode, body } = await apiClient.post(
       'internal/transform/schedule_now_transforms',
       {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         body: reqBody,
         responseType: 'json',
@@ -56,14 +49,16 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
     expect(scheduleResponse[transformId].error).toBeUndefined();
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
+  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformViewer();
+
     const reqBody: ScheduleNowTransformsRequestSchema = [{ id: transformId }];
     const { statusCode, body } = await apiClient.post(
       'internal/transform/schedule_now_transforms',
       {
         headers: {
           ...COMMON_HEADERS,
-          ...transformViewerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         body: reqBody,
         responseType: 'json',
@@ -79,14 +74,16 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
   // single transform schedule with invalid transformId
   apiTest(
     'should return 200 with error in response if invalid transformId',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const reqBody: ScheduleNowTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
       const { statusCode, body } = await apiClient.post(
         'internal/transform/schedule_now_transforms',
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...cookieHeader,
           },
           body: reqBody,
           responseType: 'json',

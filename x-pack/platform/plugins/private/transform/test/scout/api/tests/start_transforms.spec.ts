@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
@@ -16,15 +15,7 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-
   const transformId = 'transform-test-start';
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-  });
 
   apiTest.beforeEach(async ({ apiServices }) => {
     const config = generateTransformConfig(transformId);
@@ -35,12 +26,14 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest('should start the transform by transformId', async ({ apiClient }) => {
+  apiTest('should start the transform by transformId', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
     const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
     const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -53,12 +46,14 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
     expect(startResponse[transformId].error).toBeUndefined();
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient }) => {
+  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformViewer();
+
     const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
     const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformViewerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -74,12 +69,14 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
   // single transform start with invalid transformId
   apiTest(
     'should return 200 with error in response if invalid transformId',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const reqBody: StartTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
       const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         body: reqBody,
         responseType: 'json',

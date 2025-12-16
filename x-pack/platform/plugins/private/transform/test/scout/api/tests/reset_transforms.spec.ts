@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
@@ -19,14 +18,6 @@ import { COMMON_HEADERS } from '../constants';
 // single transform reset
 apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY }, () => {
   const transformId = 'transform-test-reset';
-
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-  });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     const config = generateTransformConfig(transformId);
@@ -44,7 +35,9 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest('should reset transform by transformId', async ({ apiClient }) => {
+  apiTest('should reset transform by transformId', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
     // Check that batch transform finished running and assert stats.
     const reqBody: ResetTransformsRequestSchema = {
       transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
@@ -52,7 +45,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -63,7 +56,9 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     expect(resetResponse[transformId].transformReset.success).toBe(true);
   });
 
-  apiTest('should return 403 for unauthorized user', async ({ apiClient }) => {
+  apiTest('should return 403 for unauthorized user', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformViewer();
+
     // Check that batch transform finished running and assert stats.
     const reqBody: ResetTransformsRequestSchema = {
       transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
@@ -71,7 +66,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     const { statusCode } = await apiClient.post('internal/transform/reset_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformViewerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -82,14 +77,16 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
 
   apiTest(
     'should return 200 with error in response if invalid transformId',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const reqBody: ResetTransformsRequestSchema = {
         transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
       };
       const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         body: reqBody,
         responseType: 'json',

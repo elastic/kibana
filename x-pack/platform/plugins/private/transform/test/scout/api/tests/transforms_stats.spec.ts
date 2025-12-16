@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type { GetTransformsStatsResponseSchema } from '../../../../server/routes/api_schemas/transforms_stats';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { transformApiTest as apiTest } from '../fixtures';
@@ -17,13 +16,7 @@ const TRANSFORM_1_ID = 'transform-test-stats-1';
 const TRANSFORM_2_ID = 'transform-test-stats-2';
 
 apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-
+  apiTest.beforeAll(async ({ apiServices }) => {
     const config1 = generateTransformConfig(TRANSFORM_1_ID);
     const config2 = generateTransformConfig(TRANSFORM_2_ID);
 
@@ -37,11 +30,13 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should return a list of transforms statistics for transform admin',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_stats', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         responseType: 'json',
       });
@@ -72,13 +67,15 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should return statistics for a single transform for transform admin',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const { statusCode, body } = await apiClient.get(
         `internal/transform/transforms/${TRANSFORM_1_ID}/_stats`,
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...cookieHeader,
           },
           responseType: 'json',
         }
@@ -100,11 +97,13 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should return a list of transforms statistics for transform user',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformViewer();
+
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_stats', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformViewerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         responseType: 'json',
       });
@@ -127,13 +126,15 @@ apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should return statistics for a single transform for transform user',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformViewer();
+
       const { statusCode, body } = await apiClient.get(
         `internal/transform/transforms/${TRANSFORM_2_ID}/_stats`,
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformViewerUserApiCredentials.apiKeyHeader,
+            ...cookieHeader,
           },
           responseType: 'json',
         }

@@ -6,41 +6,20 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type { GetTransformNodesResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-  let unauthorizedApiCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-    unauthorizedApiCredentials = await requestAuth.getApiKeyForCustomRole({
-      kibana: [
-        {
-          base: ['all'],
-          feature: {},
-          spaces: ['*'],
-        },
-      ],
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-      },
-    });
-  });
-
   apiTest(
     'should return the number of available transform nodes for a power user',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_nodes', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         responseType: 'json',
       });
@@ -54,11 +33,13 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should return the number of available transform nodes for a viewer user',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformViewer();
+
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_nodes', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformViewerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         responseType: 'json',
       });
@@ -72,11 +53,13 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should not return the number of available transform nodes for an unauthorized user',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformUnauthorizedUser();
+
       const { statusCode } = await apiClient.get('internal/transform/transforms/_nodes', {
         headers: {
           ...COMMON_HEADERS,
-          ...unauthorizedApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         responseType: 'json',
       });

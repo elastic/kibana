@@ -6,7 +6,7 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { KbnClient, RoleApiCredentials } from '@kbn/scout';
+import type { CookieHeader, KbnClient } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
@@ -39,11 +39,12 @@ apiTest.describe(
   '/internal/transform/transforms/{transformId} create',
   { tag: tags.ESS_ONLY },
   () => {
-    let transformPowerUserApiCredentials: RoleApiCredentials;
     let dataViewToBeDeletedTitle: string | undefined;
+    let transformPowerUserCookieHeader: CookieHeader;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      const credentials = await samlAuth.asTransformPowerUser();
+      transformPowerUserCookieHeader = credentials.cookieHeader;
     });
 
     apiTest.afterEach(async ({ apiServices, kbnClient }) => {
@@ -63,7 +64,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...transformPowerUserCookieHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -94,7 +95,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...transformPowerUserCookieHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -129,7 +130,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...transformPowerUserCookieHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -165,7 +166,7 @@ apiTest.describe(
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformPowerUserApiCredentials.apiKeyHeader,
+              ...transformPowerUserCookieHeader,
             },
             body: {
               ...generateTransformConfig(transformId),
@@ -194,7 +195,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserApiCredentials.apiKeyHeader,
+            ...transformPowerUserCookieHeader,
           },
           body: config,
           responseType: 'json',

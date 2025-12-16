@@ -27,14 +27,15 @@ export async function expectUnauthorizedTransform(
   expect(stats.health?.issues![0].type).toBe('privileges_check_failed');
 }
 
-export async function expectAuthorizedTransform(
+export async function expectReauthorizedTransform(
   transformId: string,
-  createdByRole: string,
+  createdByUserCredentials: RoleApiCredentials,
   apiServices: TransformApiServicesFixture
 ) {
   const transformInfo = await apiServices.transform.getTransform(transformId);
 
-  expect(transformInfo.authorization.roles[0]).toBe(createdByRole);
+  // assumption: each reauthorization generates a brand new API key, even for the same user
+  expect(transformInfo.authorization.api_key.id).not.toBe(createdByUserCredentials.apiKey.id);
 
   const stats = await apiServices.transform.getTransformStats(transformId);
   expect(stats.health?.status).toBe('green');

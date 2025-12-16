@@ -6,7 +6,7 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { CookieHeader } from '@kbn/scout';
 import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
@@ -18,11 +18,11 @@ import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('bulk reset', { tag: tags.ESS_ONLY }, () => {
   const transformIds = ['bulk_reset_test_1', 'bulk_reset_test_2'];
+  let transformPowerUserCookieHeader: CookieHeader;
 
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+  apiTest.beforeAll(async ({ samlAuth }) => {
+    const credentials = await samlAuth.asTransformPowerUser();
+    transformPowerUserCookieHeader = credentials.cookieHeader;
   });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
@@ -37,7 +37,15 @@ apiTest.describe('bulk reset', { tag: tags.ESS_ONLY }, () => {
     }
   });
 
-  apiTest.afterEach(async ({ apiServices }) => {
+  apiTest.afterEach(async ({ apiServices, esClient }) => {
+    // Delete transforms explicitly before cleaning indices
+    for (const id of transformIds) {
+      try {
+        await esClient.transform.deleteTransform({ transform_id: id, force: true });
+      } catch {
+        // Ignore if transform doesn't exist
+      }
+    }
     await apiServices.transform.cleanTransformIndices();
   });
 
@@ -48,7 +56,7 @@ apiTest.describe('bulk reset', { tag: tags.ESS_ONLY }, () => {
     const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...transformPowerUserCookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -74,7 +82,7 @@ apiTest.describe('bulk reset', { tag: tags.ESS_ONLY }, () => {
       const { statusCode, body } = await apiClient.post('internal/transform/reset_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...transformPowerUserCookieHeader,
         },
         body: reqBody,
         responseType: 'json',

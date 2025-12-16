@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -17,17 +16,11 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-
   const transformId = 'transform-test-delete';
   const transformId2 = 'test2';
   const destinationIndex2 = generateDestIndex(transformId2);
 
-  apiTest.beforeAll(async ({ requestAuth, esClient }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-
+  apiTest.beforeAll(async ({ esClient }) => {
     await esClient.indices.create({ index: destinationIndex2 });
   });
 
@@ -46,14 +39,16 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
     await apiServices.transform.cleanTransformIndices();
   });
 
-  apiTest('should delete transform by transformId', async ({ apiClient }) => {
+  apiTest('should delete transform by transformId', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
     const reqBody: DeleteTransformsRequestSchema = {
       transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
     };
     const { statusCode, body } = await apiClient.post('internal/transform/delete_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -67,14 +62,16 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
     expect(deleteResponse[transformId]!.destDataViewDeleted!.success).toBe(false);
   });
 
-  apiTest('should return 403 for unauthorized user', async ({ apiClient }) => {
+  apiTest('should return 403 for unauthorized user', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformViewer();
+
     const reqBody: DeleteTransformsRequestSchema = {
       transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
     };
     const { statusCode } = await apiClient.post('internal/transform/delete_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformViewerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -85,14 +82,16 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should return 200 with error in response if invalid transformId',
-    async ({ apiClient }) => {
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const reqBody: DeleteTransformsRequestSchema = {
         transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
       };
       const { statusCode, body } = await apiClient.post('internal/transform/delete_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         body: reqBody,
         responseType: 'json',
@@ -107,7 +106,9 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
 
   apiTest(
     'should delete transform and destination index with deleteDestIndex setting',
-    async ({ apiClient, apiServices, esClient }) => {
+    async ({ apiClient, apiServices, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
       const config = generateTransformConfig(transformId2);
       await apiServices.transform.createTransform(transformId2, config);
 
@@ -118,7 +119,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
       const { statusCode, body } = await apiClient.post('internal/transform/delete_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...cookieHeader,
         },
         body: reqBody,
         responseType: 'json',

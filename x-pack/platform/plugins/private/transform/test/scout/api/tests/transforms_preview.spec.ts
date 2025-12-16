@@ -6,7 +6,6 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
 import type {
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
@@ -24,59 +23,59 @@ function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
 }
 
 apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformViewerUserApiCredentials: RoleApiCredentials;
+  apiTest('should return a transform preview', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformPowerUser();
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
-    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-  });
-
-  apiTest('should return a transform preview', async ({ apiClient }) => {
     const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: getTransformPreviewConfig(),
       responseType: 'json',
     });
     const previewResponse = body as PostTransformsPreviewResponseSchema;
-
     expect(statusCode).toBe(200);
 
     expect(previewResponse.preview).toHaveLength(19);
     expect(typeof previewResponse.generated_dest_index).toBe('object');
   });
 
-  apiTest('should return a correct error for transform preview', async ({ apiClient }) => {
-    const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
-      headers: {
-        ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
-      },
-      body: {
-        ...getTransformPreviewConfig(),
-        pivot: {
-          group_by: { airline: { terms: { field: 'airline' } } },
-          aggregations: {
-            '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
+  apiTest(
+    'should return a correct error for transform preview',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+
+      const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...cookieHeader,
+        },
+        body: {
+          ...getTransformPreviewConfig(),
+          pivot: {
+            group_by: { airline: { terms: { field: 'airline' } } },
+            aggregations: {
+              '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
+            },
           },
         },
-      },
-      responseType: 'json',
-    });
+        responseType: 'json',
+      });
 
-    expect(statusCode).toBe(400);
+      expect(statusCode).toBe(400);
 
-    expect(body.message).toContain('Unknown aggregation type [value_countt]');
-  });
+      expect(body.message).toContain('Unknown aggregation type [value_countt]');
+    }
+  );
 
-  apiTest('should return 403 for transform view-only user', async ({ apiClient }) => {
+  apiTest('should return 403 for transform view-only user', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asTransformViewer();
+
     const { statusCode } = await apiClient.post('internal/transform/transforms/_preview', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformViewerUserApiCredentials.apiKeyHeader,
+        ...cookieHeader,
       },
       body: getTransformPreviewConfig(),
       responseType: 'json',

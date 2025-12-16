@@ -6,7 +6,7 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { CookieHeader } from '@kbn/scout';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -19,11 +19,12 @@ import { COMMON_HEADERS } from '../constants';
 const transformIds = ['bulk_delete_test_1', 'bulk_delete_test_2'];
 
 apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
   const destinationIndices = transformIds.map(generateDestIndex);
+  let transformPowerUserCookieHeader: CookieHeader;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+  apiTest.beforeAll(async ({ samlAuth }) => {
+    const credentials = await samlAuth.asTransformPowerUser();
+    transformPowerUserCookieHeader = credentials.cookieHeader;
   });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
@@ -51,7 +52,7 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
     const { statusCode, body } = await apiClient.post('internal/transform/delete_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...transformPowerUserCookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -80,7 +81,7 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
       const { statusCode, body } = await apiClient.post('internal/transform/delete_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...transformPowerUserCookieHeader,
         },
         body: reqBody,
         responseType: 'json',

@@ -36,10 +36,33 @@ export type { KibanaUrl } from '../../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../../types';
 export type { ScoutLogger } from '../../../../common/services/logger';
 
+export interface CookieHeader {
+  [Cookie: string]: string;
+}
+
+export interface RoleSessionCredentials {
+  cookieValue: string;
+  cookieHeader: CookieHeader;
+}
+
 export interface SamlAuth {
   session: SamlSessionManager;
   customRoleName: string;
   setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
+  /**
+   * Gets session credentials for a predefined role.
+   * @param role - A predefined role name (e.g., 'admin', 'viewer', 'editor').
+   * @returns A Promise that resolves to session credentials with both raw cookie value and formatted header.
+   */
+  getSessionCookie(role: string): Promise<RoleSessionCredentials>;
+  /**
+   * Gets session credentials for a custom role.
+   * @param role - A role object that defines the Kibana and ES privileges. Role will be re-created if it doesn't exist.
+   * @returns A Promise that resolves to session credentials with both raw cookie value and formatted header.
+   */
+  getSessionCookieForCustomRole(
+    role: KibanaRole | ElasticsearchRoleDescriptor
+  ): Promise<RoleSessionCredentials>;
 }
 
 export interface CoreWorkerFixtures {
@@ -191,10 +214,30 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
         customRoleHash = newRoleHash;
       };
+
+      const getSessionCookie = async (role: string): Promise<RoleSessionCredentials> => {
+        const cookieValue = await session.getInteractiveUserSessionCookieWithRoleScope(role);
+        const cookieHeader = { Cookie: `sid=${cookieValue}` };
+        return { cookieValue, cookieHeader };
+      };
+
+      const getSessionCookieForCustomRole = async (
+        role: KibanaRole | ElasticsearchRoleDescriptor
+      ): Promise<RoleSessionCredentials> => {
+        await setCustomRole(role);
+        return await getSessionCookie(customRoleName);
+      };
+
       // Hide the announcements (including the sidenav tour) in the default space
       await kbnClient.uiSettings.update({ hideAnnouncements: true });
 
-      await use({ session, customRoleName, setCustomRole });
+      await use({
+        session,
+        customRoleName,
+        setCustomRole,
+        getSessionCookie,
+        getSessionCookieForCustomRole,
+      });
 
       // Delete custom role when worker completes (if it was created)
       if (isCustomRoleCreated) {

@@ -6,28 +6,31 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { CookieHeader, RoleApiCredentials } from '@kbn/scout';
 import type { ReauthorizeTransformsRequestSchema } from '../../../../server/routes/api_schemas/reauthorize_transforms';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
-import { expectAuthorizedTransform } from '../helpers/transform_assertions';
+import { expectReauthorizedTransform } from '../helpers/transform_assertions';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.ESS_ONLY }, () => {
-  let transformViewerUserApiCredentials: RoleApiCredentials;
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-
   const transformCreatedByViewerId = 'transform-by-viewer';
   const transformCreatedByPowerUserId = 'transform-by-poweruser';
   const transformIds = [transformCreatedByViewerId, transformCreatedByPowerUserId];
+
+  let transformViewerUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserCookieHeader: CookieHeader;
 
   function getDestinationIndices() {
     return transformIds.map((id) => generateDestIndex(id));
   }
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ samlAuth, requestAuth }) => {
     transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
     transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+
+    transformPowerUserCookieHeader = (await samlAuth.asTransformPowerUser()).cookieHeader;
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -58,10 +61,8 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
 
   apiTest(
     'should reauthorize multiple transforms for transform_poweruser, even if one of the transformIds is invalid',
-    async ({ apiClient, samlAuth, apiServices }) => {
+    async ({ apiClient, apiServices }) => {
       const invalidTransformId = 'invalid_transform_id';
-      const transformPowerUserSessionCookie =
-        await samlAuth.getInteractiveUserSessionCookieForTransformPowerUser();
 
       const reqBody: ReauthorizeTransformsRequestSchema = [
         { id: transformCreatedByViewerId },
@@ -74,7 +75,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
         {
           headers: {
             ...COMMON_HEADERS,
-            Cookie: transformPowerUserSessionCookie,
+            ...transformPowerUserCookieHeader,
           },
           body: reqBody,
           responseType: 'json',
@@ -87,21 +88,21 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
       expect(body[transformCreatedByViewerId].success).toBe(true);
       expect(body[transformCreatedByPowerUserId].success).toBe(true);
 
+      // Verify both transforms are now authorized with poweruser role
+      await expectReauthorizedTransform(
+        transformCreatedByViewerId,
+        transformViewerUserApiCredentials,
+        apiServices
+      );
+      await expectReauthorizedTransform(
+        transformCreatedByPowerUserId,
+        transformPowerUserApiCredentials,
+        apiServices
+      );
+
       // Invalid transform should fail
       expect(body[invalidTransformId].success).toBe(false);
       expect(body[invalidTransformId].error).toBeDefined();
-
-      // Verify both transforms are now authorized with poweruser role
-      await expectAuthorizedTransform(
-        transformCreatedByViewerId,
-        samlAuth.customRoleName,
-        apiServices
-      );
-      await expectAuthorizedTransform(
-        transformCreatedByPowerUserId,
-        samlAuth.customRoleName,
-        apiServices
-      );
     }
   );
 });

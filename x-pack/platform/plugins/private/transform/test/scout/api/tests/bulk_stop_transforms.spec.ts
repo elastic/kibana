@@ -6,7 +6,7 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { CookieHeader } from '@kbn/scout';
 import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
@@ -20,12 +20,12 @@ import { COMMON_HEADERS } from '../constants';
 const transformIds = ['bulk_stop_test_1', 'bulk_stop_test_2'];
 
 apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserCookieHeader: CookieHeader;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+  apiTest.beforeAll(async ({ samlAuth }) => {
+    const credentials = await samlAuth.asTransformPowerUser();
+    transformPowerUserCookieHeader = credentials.cookieHeader;
   });
-
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     for (const id of transformIds) {
       const config = {
@@ -55,7 +55,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
     const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserApiCredentials.apiKeyHeader,
+        ...transformPowerUserCookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -81,7 +81,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
       const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserApiCredentials.apiKeyHeader,
+          ...transformPowerUserCookieHeader,
         },
         body: reqBody,
         responseType: 'json',
