@@ -37,7 +37,7 @@ export const getDataViewAndSavedSearchCallback =
     }
     const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
     if (dataViewId) {
-      resp.dataView = await deps.dataViewsService.get(dataViewId!);
+      resp.dataView = await deps.dataViewsService.get(dataViewId);
     } else {
       try {
         const json: SearchSourceFields = JSON.parse(
