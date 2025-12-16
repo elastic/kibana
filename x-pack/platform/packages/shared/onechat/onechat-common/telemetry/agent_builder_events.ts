@@ -23,12 +23,13 @@ export const AGENT_BUILDER_EVENT_TYPES = {
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
 export type OptInStep = 'initial' | 'confirmation_modal' | 'final';
 export type OptInAction = 'step_reached' | 'confirmation_shown' | 'confirmed' | 'cancelled';
-export type AttachmentType = 'alert' | 'entity' | 'rule' | 'attack_discovery' | 'other';
+export type AttachmentType = 'alert' | 'entity' | 'rule' | 'other';
 export type Pathway =
   | 'alerts_flyout'
   | 'entity_flyout'
   | 'rules_table'
   | 'rule_creation'
+  | 'rule_failure'
   | 'attack_discovery'
   | 'other';
 export type ErrorContext = 'opt_in' | 'message_send' | 'tool_execution' | 'invocation' | 'other';

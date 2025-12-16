@@ -109,7 +109,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             title: i18n.AI_AGENT_SWITCH_ERROR,
           });
         }
-        analytics?.reportEvent('Agent Builder Error', {
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
           errorType: 'opt_in_error',
           errorMessage: error instanceof Error ? error.message : String(error),
           context: 'opt_in',

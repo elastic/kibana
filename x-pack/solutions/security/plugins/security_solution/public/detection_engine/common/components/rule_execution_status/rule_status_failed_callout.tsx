@@ -109,7 +109,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
               onClick={openAgentBuilderFlyout}
               color={color}
               telemetry={{
-                pathway: 'rule_creation',
+                pathway: 'rule_failure',
                 attachmentType: 'rule',
                 attachmentCount: 1,
               }}
