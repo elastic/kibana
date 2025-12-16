@@ -10,7 +10,7 @@
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 import type { RuleExecutionStatus, RuleLastRun } from '@kbn/alerting-types';
 import { transformAction } from '@kbn/alerts-ui-shared/src/common/transformations';
-import type { ResolvedRule, Rule, RuleUiAction } from '..';
+import type { ResolvedRule, Rule, RuleUiAction, RuleTemplate } from '..';
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
   last_execution_date: lastExecutionDate,
@@ -40,6 +40,7 @@ const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
   }
 
   return {
+    enabled: flapping.enabled,
     lookBackWindow: flapping.look_back_window,
     statusChangeThreshold: flapping.status_change_threshold,
   };
@@ -94,9 +95,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
 });
 
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_target_id,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_purpose,
   outcome,
   ...rest
@@ -108,3 +107,15 @@ export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
     outcome,
   };
 };
+
+export const transformRuleTemplate: RewriteRequestCase<RuleTemplate> = ({
+  rule_type_id: ruleTypeId,
+  alert_delay: alertDelay,
+  flapping,
+  ...rest
+}: any) => ({
+  ruleTypeId,
+  ...(alertDelay ? { alertDelay } : {}),
+  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
+  ...rest,
+});

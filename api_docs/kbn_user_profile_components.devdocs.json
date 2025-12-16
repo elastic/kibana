@@ -72,6 +72,45 @@
       },
       {
         "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.isValidUserProfileAvatarColor",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidUserProfileAvatarColor",
+        "description": [
+          "\nValidates if the provided color string is a valid hex color."
+        ],
+        "signature": [
+          "(color: string | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.isValidUserProfileAvatarColor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [
+              "- The color to validate."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "True if the color is a valid hex color, false otherwise."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.UserAvatar",
         "type": "Function",
         "tags": [],
