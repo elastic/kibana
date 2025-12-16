@@ -6,10 +6,21 @@
  */
 
 import { apiTest } from '@kbn/scout';
-import type { RoleApiCredentials, ApiServicesFixture, RequestAuthFixture } from '@kbn/scout';
+import type {
+  RoleApiCredentials,
+  ApiServicesFixture,
+  RequestAuthFixture,
+  SamlAuth,
+} from '@kbn/scout';
 import type { TransformApiService } from '../services/transform_api_service';
 import { getTransformApiService } from '../services/transform_api_service';
 import { TRANSFORM_USERS } from './constants';
+
+export interface TransformSamlAuthFixture extends SamlAuth {
+  getInteractiveUserSessionCookieForTransformPowerUser: () => Promise<string>;
+  getInteractiveUserSessionCookieForTransformViewerUser: () => Promise<string>;
+  getInteractiveUserSessionCookieForTransformUnauthorizedUser: () => Promise<string>;
+}
 
 export interface TransformRequestAuthFixture extends RequestAuthFixture {
   loginAsTransformPowerUser: () => Promise<RoleApiCredentials>;
@@ -23,6 +34,7 @@ export interface TransformApiServicesFixture extends ApiServicesFixture {
 
 export const transformApiTest = apiTest.extend<{
   requestAuth: TransformRequestAuthFixture;
+  samlAuth: TransformSamlAuthFixture;
   apiServices: TransformApiServicesFixture;
 }>({
   requestAuth: async ({ requestAuth }, use) => {
@@ -42,6 +54,38 @@ export const transformApiTest = apiTest.extend<{
       loginAsTransformUnauthorizedUser,
     };
     await use(extendedRequestAuth);
+  },
+
+  samlAuth: async ({ samlAuth }, use) => {
+    const getInteractiveUserSessionCookieForTransformPowerUser = async () => {
+      await samlAuth.setCustomRole(TRANSFORM_USERS.transformPowerUser);
+      return `sid=${await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(
+        samlAuth.customRoleName
+      )}`;
+    };
+
+    const getInteractiveUserSessionCookieForTransformViewerUser = async () => {
+      await samlAuth.setCustomRole(TRANSFORM_USERS.transformViewerUser);
+      return `sid=${await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(
+        samlAuth.customRoleName
+      )}`;
+    };
+
+    const getInteractiveUserSessionCookieForTransformUnauthorizedUser = async () => {
+      await samlAuth.setCustomRole(TRANSFORM_USERS.transformUnauthorizedUser);
+      return `sid=${await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(
+        samlAuth.customRoleName
+      )}`;
+    };
+
+    const extendedSamlAuth: TransformSamlAuthFixture = {
+      ...samlAuth,
+      getInteractiveUserSessionCookieForTransformPowerUser,
+      getInteractiveUserSessionCookieForTransformViewerUser,
+      getInteractiveUserSessionCookieForTransformUnauthorizedUser,
+    };
+
+    await use(extendedSamlAuth);
   },
 
   apiServices: async ({ apiServices, esClient }, use) => {

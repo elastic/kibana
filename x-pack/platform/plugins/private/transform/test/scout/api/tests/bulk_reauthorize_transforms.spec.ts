@@ -1,0 +1,107 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect, tags } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
+import type { ReauthorizeTransformsRequestSchema } from '../../../../server/routes/api_schemas/reauthorize_transforms';
+import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
+import { expectAuthorizedTransform } from '../helpers/transform_assertions';
+import { transformApiTest as apiTest } from '../fixtures';
+import { COMMON_HEADERS } from '../constants';
+
+apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.ESS_ONLY }, () => {
+  let transformViewerUserApiCredentials: RoleApiCredentials;
+  let transformPowerUserApiCredentials: RoleApiCredentials;
+
+  const transformCreatedByViewerId = 'transform-by-viewer';
+  const transformCreatedByPowerUserId = 'transform-by-poweruser';
+  const transformIds = [transformCreatedByViewerId, transformCreatedByPowerUserId];
+
+  function getDestinationIndices() {
+    return transformIds.map((id) => generateDestIndex(id));
+  }
+
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
+    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+  });
+
+  apiTest.beforeEach(async ({ apiServices }) => {
+    // Create transform by viewer user
+    await apiServices.transform.createTransformWithSecondaryAuth(
+      transformCreatedByViewerId,
+      generateTransformConfig(transformCreatedByViewerId, true),
+      transformViewerUserApiCredentials.apiKey.encoded,
+      true // deferValidation
+    );
+
+    // Create transform by poweruser
+    await apiServices.transform.createTransformWithSecondaryAuth(
+      transformCreatedByPowerUserId,
+      generateTransformConfig(transformCreatedByPowerUserId, true),
+      transformPowerUserApiCredentials.apiKey.encoded,
+      true // deferValidation
+    );
+  });
+
+  apiTest.afterEach(async ({ apiServices }) => {
+    await apiServices.transform.cleanTransformIndices();
+    const destinationIndices = getDestinationIndices();
+    for (const destinationIndex of destinationIndices) {
+      await apiServices.transform.deleteIndices(destinationIndex);
+    }
+  });
+
+  apiTest(
+    'should reauthorize multiple transforms for transform_poweruser, even if one of the transformIds is invalid',
+    async ({ apiClient, samlAuth, apiServices }) => {
+      const invalidTransformId = 'invalid_transform_id';
+      const transformPowerUserSessionCookie =
+        await samlAuth.getInteractiveUserSessionCookieForTransformPowerUser();
+
+      const reqBody: ReauthorizeTransformsRequestSchema = [
+        { id: transformCreatedByViewerId },
+        { id: transformCreatedByPowerUserId },
+        { id: invalidTransformId },
+      ];
+
+      const { statusCode, body } = await apiClient.post(
+        'internal/transform/reauthorize_transforms',
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            Cookie: transformPowerUserSessionCookie,
+          },
+          body: reqBody,
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+
+      // Valid transforms should be reauthorized successfully
+      expect(body[transformCreatedByViewerId].success).toBe(true);
+      expect(body[transformCreatedByPowerUserId].success).toBe(true);
+
+      // Invalid transform should fail
+      expect(body[invalidTransformId].success).toBe(false);
+      expect(body[invalidTransformId].error).toBeDefined();
+
+      // Verify both transforms are now authorized with poweruser role
+      await expectAuthorizedTransform(
+        transformCreatedByViewerId,
+        samlAuth.customRoleName,
+        apiServices
+      );
+      await expectAuthorizedTransform(
+        transformCreatedByPowerUserId,
+        samlAuth.customRoleName,
+        apiServices
+      );
+    }
+  );
+});
