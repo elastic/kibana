@@ -299,12 +299,17 @@ describe('scripts library client', () => {
 
       expect(
         endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
-      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3', {
-        name: 'updated name',
-        description: 'updated description',
-        updated_by: 'elastic',
-        updated_at: expect.any(String),
-      });
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        {
+          name: 'updated name',
+          description: 'updated description',
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { version: undefined }
+      );
 
       expect(fileMock.uploadContent).not.toHaveBeenCalled();
     });
@@ -322,14 +327,19 @@ describe('scripts library client', () => {
 
       expect(
         endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
-      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3', {
-        file_hash_sha256: 'e5441eb2bb',
-        file_id: '123',
-        file_name: 'test.txt',
-        file_size: 1234,
-        updated_by: 'elastic',
-        updated_at: expect.any(String),
-      });
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        {
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { version: undefined }
+      );
 
       expect(filesPluginClient.delete).toHaveBeenCalledWith({ id: 'file-1-2-3' });
     });
