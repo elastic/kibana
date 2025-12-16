@@ -9,6 +9,7 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { ToolType } from '@kbn/onechat-common';
 import React, { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { labels } from '../../../../../utils/i18n';
 import { McpToolHealthStatus } from '../../types/mcp';
 import { useToolHealth } from '../../../../../hooks/tools/use_tools_health';
 import { useToolsActions } from '../../../../../context/tools_provider';
@@ -27,7 +28,7 @@ export const McpReadOnlyFields = ({
   const { createTool, deleteTool } = useToolsActions();
   const { navigateToManageConnectors } = useNavigation();
 
-  const { control } = useFormContext<McpToolFormData>();
+  const { control, setError, clearErrors } = useFormContext<McpToolFormData>();
   const [connectorId, mcpToolName, toolId] = useWatch({
     control,
     name: ['connectorId', 'mcpToolName', 'toolId'],
@@ -63,28 +64,41 @@ export const McpReadOnlyFields = ({
     // MCP connector deleted
     if (isLoadingConnectorError) {
       setMcpHealthStatus(McpToolHealthStatus.ConnectorNotFound);
+      setError('connectorId', {
+        message: labels.tools.mcpHealthStatus.connectorNotFound.title,
+      });
       return;
     }
 
     // MCP tools not found
     if (isLoadingMcpToolsError) {
       setMcpHealthStatus(McpToolHealthStatus.ListToolsFailed);
+      setError('connectorId', {
+        message: labels.tools.mcpHealthStatus.listToolsFailed.title,
+      });
       return;
     }
 
     // MCP tool not found
     if (!mcpTools.find((tool) => tool.name === mcpToolName)) {
       setMcpHealthStatus(McpToolHealthStatus.ToolNotFound);
+      setError('mcpToolName', {
+        message: labels.tools.mcpHealthStatus.toolNotFound.title,
+      });
       return;
     }
 
     // MCP tool is unhealthy; treat no health data as healthy
     if (toolHealth && toolHealth.status !== 'healthy') {
       setMcpHealthStatus(McpToolHealthStatus.ToolUnhealthy);
+      setError('mcpToolName', {
+        message: labels.tools.mcpHealthStatus.toolUnhealthy.title,
+      });
       return;
     }
 
     setMcpHealthStatus(McpToolHealthStatus.Healthy);
+    clearErrors(['connectorId', 'mcpToolName']);
   }, [
     mcpToolName,
     mcpTools,
@@ -94,6 +108,8 @@ export const McpReadOnlyFields = ({
     isLoadingConnector,
     isLoadingMcpTools,
     setMcpHealthStatus,
+    setError,
+    clearErrors,
   ]);
 
   return (
