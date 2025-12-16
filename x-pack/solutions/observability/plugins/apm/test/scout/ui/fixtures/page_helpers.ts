@@ -17,3 +17,11 @@ export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<voi
     .getByTestId('apmSettingsHeaderLink')
     .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
 }
+
+/**
+ * Waits for the APM main container to be visible.
+ * This is commonly used to ensure the APM page has fully loaded.
+ */
+export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
+  await page.testSubj.waitForSelector('apmMainContainer', { timeout: BIGGER_TIMEOUT });
+}

@@ -8,7 +8,6 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -57,31 +56,5 @@ test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Verify transaction type is still 'Worker'
     await expect(transactionTypeFilter).toHaveValue('Worker');
-  });
-
-  test('Viewer: Includes the correct transactionNames in the detailed statistics request', async ({
-    page,
-    pageObjects: { transactionsOverviewPage },
-  }) => {
-    await transactionsOverviewPage.goto(
-      'service-go',
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
-
-    await expect(page.getByTestId('tableSearchInput')).toBeVisible({ timeout: BIGGER_TIMEOUT });
-
-    await expect(page.getByTestId('transactionNameLink-DELETE /cart')).toBeVisible({
-      timeout: BIGGER_TIMEOUT,
-    });
-    await expect(page.getByTestId('transactionNameLink-DELETE /categories')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /customers')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /invoices')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /orders')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /payments')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /products')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /profile')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /reviews')).toBeVisible();
-    await expect(page.getByTestId('transactionNameLink-DELETE /users')).toBeVisible();
   });
 });

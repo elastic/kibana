@@ -9,13 +9,14 @@ import { expect } from '@kbn/scout-oblt';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { BIGGER_TIMEOUT } from '../constants';
+import { waitForApmMainContainer } from '../page_helpers';
 
 export class AnomalyDetectionPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/anomaly-detection`);
-    await this.page.testSubj.waitForSelector('apmMainContainer', { timeout: BIGGER_TIMEOUT });
+    await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
     await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
