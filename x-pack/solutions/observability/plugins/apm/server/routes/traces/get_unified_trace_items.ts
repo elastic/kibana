@@ -202,9 +202,7 @@ export async function getUnifiedTraceItems({
         } else {
           icon = 'merge';
         }
-      } /* else {
-        icon = 'heart'; // TODO: remove before merge
-      } */
+      }
 
       return {
         id,
