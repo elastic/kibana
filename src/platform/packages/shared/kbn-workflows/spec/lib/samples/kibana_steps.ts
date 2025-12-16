@@ -37,17 +37,18 @@ export const KIBANA_SAMPLE_STEPS = [
       },
     },
   },
-  {
-    name: 'set_alert_assignees_by_ids',
-    type: 'kibana.SetAlertAssignees',
-    with: {
-      assignees: {
-        add: ['123'],
-        remove: [],
-      },
-      ids: ['123'],
-    },
-  },
+  // NOTE: kibana.SetAlertAssignees is not currently available in generated connectors
+  // {
+  //   name: 'set_alert_assignees_by_ids',
+  //   type: 'kibana.SetAlertAssignees',
+  //   with: {
+  //     assignees: {
+  //       add: ['123'],
+  //       remove: [],
+  //     },
+  //     ids: ['123'],
+  //   },
+  // },
   {
     name: 'set_alert_tags',
     type: 'kibana.SetAlertTags',
@@ -59,11 +60,12 @@ export const KIBANA_SAMPLE_STEPS = [
       ids: ['123'],
     },
   },
-  {
-    name: 'read_tags',
-    type: 'kibana.ReadTags',
-    with: {},
-  },
+  // NOTE: kibana.ReadTags is not currently available in generated connectors
+  // {
+  //   name: 'read_tags',
+  //   type: 'kibana.ReadTags',
+  //   with: {},
+  // },
   {
     name: 'create_case',
     type: 'kibana.createCaseDefaultSpace',

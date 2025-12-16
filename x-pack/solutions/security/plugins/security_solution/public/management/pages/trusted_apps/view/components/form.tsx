@@ -310,7 +310,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
-    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
+    const { getTagsUpdatedBy, getMultipleTagsUpdatedBy } = useGetUpdatedTags(item);
     const [lastBasicFormConditions, setLastBasicFormConditions] = useState<
       ArtifactFormComponentProps['item']['entries']
     >(!isFormAdvancedMode ? item.entries : []);
@@ -320,6 +320,9 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const isProcessDescendantsSelected = useMemo(
       () => isProcessDescendantsEnabled(item, TRUSTED_PROCESS_DESCENDANTS_TAG),
       [item]
+    );
+    const [wasProcessDescendantsSelected, setWasProcessDescendantsSelected] = useState(
+      isProcessDescendantsSelected
     );
 
     // Combine related state into a single object to reduce re-renders
@@ -452,24 +455,43 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         // save current form to relevant state before switching
         if (selectedId === 'advancedMode') {
           setLastBasicFormConditions(item.entries);
+          // set is process descendants state true if wasSelected before
         } else {
           setLastAdvancedFormConditions(item.entries);
+          setWasProcessDescendantsSelected(isProcessDescendantsSelected);
         }
 
         const nextItem: ArtifactFormComponentProps['item'] = {
           ...item,
           entries:
             selectedId === 'advancedMode' ? lastAdvancedFormConditions : lastBasicFormConditions,
-          tags: getTagsUpdatedBy(
-            'advancedMode',
-            selectedId === 'advancedMode' ? [ADVANCED_MODE_TAG] : []
-          ),
+          tags: getMultipleTagsUpdatedBy([
+            {
+              tagType: 'advancedMode',
+              newTags: selectedId === 'advancedMode' ? [ADVANCED_MODE_TAG] : [],
+            },
+            {
+              tagType: 'trustedProcessDescendants',
+              newTags:
+                selectedId === 'advancedMode' && wasProcessDescendantsSelected
+                  ? [TRUSTED_PROCESS_DESCENDANTS_TAG]
+                  : [],
+            },
+          ]),
         };
 
         processChanged(nextItem);
         setHasFormChanged(true);
       },
-      [lastAdvancedFormConditions, lastBasicFormConditions, getTagsUpdatedBy, item, processChanged]
+      [
+        lastAdvancedFormConditions,
+        lastBasicFormConditions,
+        getMultipleTagsUpdatedBy,
+        isProcessDescendantsSelected,
+        item,
+        processChanged,
+        wasProcessDescendantsSelected,
+      ]
     );
 
     const handleOnOsChange = useCallback(
@@ -707,7 +729,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const filterTypeOptions = useMemo(
       () => [
         {
-          id: 'events',
+          id: 'trustedApps',
           label: <EuiText size="s">{TRUSTED_APPLICATIONS}</EuiText>,
           iconType: isProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
           'data-test-subj': 'trustedApps-filterEventsButton',
@@ -740,7 +762,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             color="primary"
             onChange={handleFilterTypeOnChange}
             options={filterTypeOptions}
-            idSelected={isProcessDescendantsSelected ? 'descendants' : 'events'}
+            idSelected={isProcessDescendantsSelected ? 'descendants' : 'trustedApps'}
             data-test-subj="trustedApps-processDescendantsSelector"
           />
           <EuiSpacer size="m" />
