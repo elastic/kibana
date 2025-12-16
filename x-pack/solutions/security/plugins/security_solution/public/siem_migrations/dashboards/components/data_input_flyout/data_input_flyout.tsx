@@ -32,6 +32,8 @@ import type { MigrationSettingsBase, MissingResourcesIndexed } from '../../../co
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { useMissingResources } from '../../../rules/components/data_input_flyout/steps/hooks/use_missing_resources';
 import { STEP_COMPONENTS } from './configs';
+import { PanelText } from '../../../../common/components/panel_text';
+import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -150,6 +152,11 @@ export const DashboardMigrationDataInputFlyout = React.memo(
                   </EuiFlexItem>
                 ))}
               </>
+              <EuiFlexItem>
+                <PanelText size="xs" subdued cursive>
+                  <p>{getCopyrightNoticeByVendor(MigrationSource.SPLUNK)}</p>
+                </PanelText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
