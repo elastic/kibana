@@ -28,9 +28,6 @@ export const versionSchema = schema.object({
     }),
     controls: schema.object({
       total: schema.number(),
-      chaining_system: schema.recordOf(schema.string(), schema.number()),
-      label_position: schema.recordOf(schema.string(), schema.number()),
-      ignore_settings: schema.recordOf(schema.string(), schema.number()),
       by_type: schema.recordOf(
         schema.string(),
         schema.object({

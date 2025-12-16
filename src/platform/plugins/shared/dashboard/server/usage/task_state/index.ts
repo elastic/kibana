@@ -35,9 +35,6 @@ export const emptyState: LatestTaskStateSchema = {
     },
     controls: {
       total: 0,
-      chaining_system: {},
-      ignore_settings: {},
-      label_position: {},
       by_type: {},
     },
     sections: {

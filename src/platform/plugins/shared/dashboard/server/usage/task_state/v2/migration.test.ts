@@ -30,9 +30,6 @@ describe('upMigration', () => {
         },
         controls: {
           total: 2,
-          chaining_system: { hierarchical: 1 },
-          label_position: { inline: 2 },
-          ignore_settings: {},
           by_type: { optionsListControl: 2 },
         },
         sections: {
@@ -64,9 +61,6 @@ describe('upMigration', () => {
         },
         controls: {
           total: 0,
-          chaining_system: {},
-          label_position: {},
-          ignore_settings: {},
           by_type: {},
         },
         sections: {

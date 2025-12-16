@@ -19,9 +19,6 @@ describe('upMigration', () => {
         "telemetry": Object {
           "controls": Object {
             "by_type": Object {},
-            "chaining_system": Object {},
-            "ignore_settings": Object {},
-            "label_position": Object {},
             "total": 0,
           },
           "panels": Object {
@@ -52,9 +49,6 @@ describe('upMigration', () => {
         },
         controls: {
           total: 6,
-          chaining_system: { foo: 7 },
-          label_position: { foo: 8 },
-          ignore_settings: { foo: 9 },
           by_type: { foo: 10 },
         },
         sections: { total: 0 },
@@ -72,9 +66,6 @@ describe('upMigration', () => {
         "telemetry": Object {
           "controls": Object {
             "by_type": Object {},
-            "chaining_system": Object {},
-            "ignore_settings": Object {},
-            "label_position": Object {},
             "total": 0,
           },
           "panels": Object {
