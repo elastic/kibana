@@ -8,8 +8,17 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 
-import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
+import {
+  ESQL_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 
 import {
   APP_ID,
@@ -32,19 +41,29 @@ import {
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
 
-const alertingFeatures = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS].map(
-  (ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [SERVER_APP_ID],
-  })
-);
+const SECURITY_RULE_TYPES = [
+  LEGACY_NOTIFICATIONS_ID,
+  ESQL_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
+];
+
+const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [SERVER_APP_ID],
+}));
 
 export const getRulesV3BaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
   id: RULES_FEATURE_ID_V3,
   name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRulesV3Title',
+    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesTitle',
     {
       defaultMessage: 'Rules and Exceptions',
     }
@@ -62,16 +81,11 @@ export const getRulesV3BaseKibanaFeature = (
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
-        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE_AWARE),
-        read: params.savedObjects,
+        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
       },
       alerting: {
-        rule: {
-          all: alertingFeatures,
-          enable: alertingFeatures,
-          manual_run: alertingFeatures,
-          manage_rule_settings: alertingFeatures,
-        },
+        rule: { all: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
@@ -93,7 +107,7 @@ export const getRulesV3BaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: params.savedObjects,
+        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
       },
       alerting: {
         rule: { read: alertingFeatures },

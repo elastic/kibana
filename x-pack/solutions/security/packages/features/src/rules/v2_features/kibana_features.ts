@@ -31,10 +31,8 @@ import {
   SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
-  ALERTS_FEATURE_ID,
-  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
-  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
   EXCEPTIONS_SUBFEATURE_ALL,
+  ALERTS_FEATURE_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';

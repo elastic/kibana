@@ -89,32 +89,6 @@ export const ALERTS_FEATURE_ID = 'securitySolutionAlertsV1' as const;
 export const ALERTS_API_READ = 'alerts-read' as const;
 export const ALERTS_API_ALL = 'alerts-all' as const;
 
-// Alerts UI privileges
-export const ALERTS_UI_READ = 'read_alerts' as const;
-export const ALERTS_UI_EDIT = 'edit_alerts' as const;
-export const ALERTS_UI_DETECTIONS = 'detections' as const;
-export const ALERTS_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
-export const ALERTS_UI_READ_PRIVILEGE = `${ALERTS_FEATURE_ID}.${ALERTS_UI_READ}` as const;
-export const ALERTS_UI_EDIT_PRIVILEGE = `${ALERTS_FEATURE_ID}.${ALERTS_UI_EDIT}` as const;
-export const ALERTS_UI_DETECTIONS_PRIVILEGE =
-  `${ALERTS_FEATURE_ID}.${ALERTS_UI_DETECTIONS}` as const;
-export const ALERTS_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
-  `${ALERTS_FEATURE_ID}.${ALERTS_UI_EXTERNAL_DETECTIONS}` as const;
-
-// Previously users with "ALERTS_API_READ" were able to update alerts (assign, tag, change status)
-// When the alerts feature was introduced, the privilege in the endpoints was changed to `ALERTS_API_ALL`
-// however to ensure backwards compatibility with old features, these permissions were added in the affected places.
-export const ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE =
-  'alerts-signal-update-deprecated-privilege' as const;
-export const ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE =
-  'edit_alerts-update-deprecated-privilege' as const;
-
-export const ALERTS_FEATURE_ID = 'securitySolutionAlertsV1' as const;
-
-// Alerts API privileges
-export const ALERTS_API_READ = 'alerts-read' as const;
-export const ALERTS_API_ALL = 'alerts-all' as const;
-
 // Rules UI privileges
 export const ALERTS_UI_READ = 'read_alerts' as const;
 export const ALERTS_UI_EDIT = 'edit_alerts' as const;
