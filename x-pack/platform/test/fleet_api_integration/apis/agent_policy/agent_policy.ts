@@ -651,19 +651,8 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const agentPolicyResponse = await supertest
-          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'test-agentless-policy',
-            namespace: 'default',
-          })
-          .expect(200);
-
-        const agentPolicy = agentPolicyResponse.body.item;
-
         const response = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
+          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'test-agentless-policy',
@@ -1807,19 +1796,8 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const agentPolicyResponse = await supertest
-          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'test-agentless-policy',
-            namespace: 'default',
-          })
-          .expect(200);
-
-        const agentPolicy = agentPolicyResponse.body.item;
-
         const response = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
+          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'test-agentless-policy',
