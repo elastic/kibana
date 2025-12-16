@@ -141,8 +141,8 @@ export class UrlFormat extends FieldFormat {
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
 
-    const url = escape(this.formatUrl(rawValue));
-    const label = escape(this.formatLabel(rawValue, url));
+    const url = escape(this.formatUrl(rawValue)).replace(/&amp;/g, '&');
+    const label = escape(this.formatLabel(rawValue, url)).replace(/&amp;/g, '&');
 
     switch (this.param('type')) {
       case 'audio':
