@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type { RootSchema } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core/public';
 
 /**
  * Event type constants for Agent Builder telemetry events.
@@ -104,10 +103,16 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.AgentBuilderError]: ReportAgentBuilderErrorParams;
 }
 
-export interface AgentBuilderTelemetryEvent {
-  eventType: (typeof AGENT_BUILDER_EVENT_TYPES)[keyof typeof AGENT_BUILDER_EVENT_TYPES];
-  schema: RootSchema<AgentBuilderTelemetryEventsMap[keyof AgentBuilderTelemetryEventsMap]>;
-}
+export type AgentBuilderTelemetryEvent =
+  | EventTypeOpts<ReportOptInStepReachedParams>
+  | EventTypeOpts<ReportOptInConfirmationShownParams>
+  | EventTypeOpts<ReportOptInConfirmedParams>
+  | EventTypeOpts<ReportOptInCancelledParams>
+  | EventTypeOpts<ReportOptOutParams>
+  | EventTypeOpts<ReportAddToChatClickedParams>
+  | EventTypeOpts<ReportMessageSentParams>
+  | EventTypeOpts<ReportMessageReceivedParams>
+  | EventTypeOpts<ReportAgentBuilderErrorParams>;
 
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
@@ -267,6 +272,9 @@ const messageSentEvent: AgentBuilderTelemetryEvent = {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'Type of attachment',
+        },
       },
       _meta: {
         description: 'Types of attachments',
@@ -318,6 +326,9 @@ const messageReceivedEvent: AgentBuilderTelemetryEvent = {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'Name of tool used',
+        },
       },
       _meta: {
         description: 'Names of tools used in the response',
@@ -335,6 +346,10 @@ const messageReceivedEvent: AgentBuilderTelemetryEvent = {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID invoked (normalized: built-in tools keep ID, custom tools become "Custom")',
+        },
       },
       _meta: {
         description:
@@ -395,7 +410,7 @@ const agentBuilderErrorEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const agentBuilderTelemetryEvents: AgentBuilderTelemetryEvent[] = [
+export const agentBuilderTelemetryEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   optInStepReachedEvent,
   optInConfirmationShownEvent,
   optInConfirmedEvent,

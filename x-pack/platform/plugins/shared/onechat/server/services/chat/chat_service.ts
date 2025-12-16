@@ -19,6 +19,7 @@ import {
   isRoundCompleteEvent,
   ConversationRoundStepType,
 } from '@kbn/onechat-common';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -37,7 +38,6 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { TrackingService } from '../../telemetry';
-import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { MESSAGE_RECEIVED_EVENT } from '../../telemetry/events';
 import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from '../../telemetry/utils';
 
@@ -168,34 +168,37 @@ class ChatServiceImpl implements ChatService {
             tap((event) => {
               // Track round completion and query-to-result time
               try {
-                if (isRoundCompleteEvent(event) && trackingService) {
-                  if (requestId) trackingService.trackQueryEnd(requestId);
+                if (isRoundCompleteEvent(event)) {
                   const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
-                  if (conversationId) {
-                    trackingService.trackConversationRound(conversationId, currentRoundCount);
+
+                  if (trackingService) {
+                    if (requestId) trackingService.trackQueryEnd(requestId);
+                    if (conversationId) {
+                      trackingService.trackConversationRound(conversationId, currentRoundCount);
+                    }
                   }
-                }
 
-                // Track MessageReceived event for Agent Builder
-                if (isRoundCompleteEvent(event) && analytics) {
-                  const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
-                  // Only track if this is an agent conversation (not default assistant)
-                  if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
-                    const round = event.data.round;
-                    const toolsInvoked =
-                      round.steps
-                        ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
-                        .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
+                  // Track MessageReceived event for Agent Builder
+                  if (analytics) {
+                    const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
+                    // Only track if this is an agent conversation (not default assistant)
+                    if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
+                      const round = event.data.round;
+                      const toolsInvoked =
+                        round.steps
+                          ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
+                          .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
 
-                    analytics.reportEvent(MESSAGE_RECEIVED_EVENT.eventType, {
-                      conversationId: effectiveConversationId,
-                      responseLength: round.response?.message?.length,
-                      roundNumber: currentRoundCount,
-                      agentId: normalizedAgentId,
-                      toolsUsed: toolsInvoked,
-                      toolCount: toolsInvoked.length > 0 ? toolsInvoked.length : undefined,
-                      toolsInvoked: toolsInvoked.length > 0 ? toolsInvoked : undefined,
-                    });
+                      analytics.reportEvent(MESSAGE_RECEIVED_EVENT.eventType, {
+                        conversationId: effectiveConversationId,
+                        responseLength: round.response?.message?.length,
+                        roundNumber: currentRoundCount,
+                        agentId: normalizedAgentId,
+                        toolsUsed: toolsInvoked,
+                        toolCount: toolsInvoked.length > 0 ? toolsInvoked.length : undefined,
+                        toolsInvoked: toolsInvoked.length > 0 ? toolsInvoked : undefined,
+                      });
+                    }
                   }
                 }
               } catch (error) {

@@ -61,6 +61,9 @@ export const MESSAGE_SENT_EVENT: EventTypeOpts<MessageSentEventProperties> = {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'Type of attachment',
+        },
       },
       _meta: {
         description: 'Types of attachments',
@@ -70,7 +73,8 @@ export const MESSAGE_SENT_EVENT: EventTypeOpts<MessageSentEventProperties> = {
     agentId: {
       type: 'keyword',
       _meta: {
-        description: 'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom")',
+        description:
+          'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom")',
         optional: true,
       },
     },
@@ -104,7 +108,8 @@ export const MESSAGE_RECEIVED_EVENT: EventTypeOpts<MessageReceivedEventPropertie
     agentId: {
       type: 'keyword',
       _meta: {
-        description: 'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom")',
+        description:
+          'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom")',
         optional: true,
       },
     },
@@ -112,6 +117,9 @@ export const MESSAGE_RECEIVED_EVENT: EventTypeOpts<MessageReceivedEventPropertie
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'Name of tool used (normalized tool ID)',
+        },
       },
       _meta: {
         description: 'Names of tools used in the response (normalized tool IDs)',
@@ -129,9 +137,14 @@ export const MESSAGE_RECEIVED_EVENT: EventTypeOpts<MessageReceivedEventPropertie
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID invoked (normalized: built-in tools keep ID, custom tools become "Custom")',
+        },
       },
       _meta: {
-        description: 'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "Custom")',
+        description:
+          'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "Custom")',
         optional: true,
       },
     },
@@ -142,4 +155,3 @@ export const agentBuilderServerTelemetryEvents: Array<EventTypeOpts<Record<strin
   MESSAGE_SENT_EVENT,
   MESSAGE_RECEIVED_EVENT,
 ];
-

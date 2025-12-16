@@ -9,11 +9,11 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal';
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 
 const TELEMETRY_SOURCE = 'stack_management' as const;
 
@@ -33,6 +33,16 @@ const reportTelemetryEvent = (
 };
 
 /**
+ * Type guard to check if a value is a valid AIChatExperience
+ */
+const isAIChatExperience = (value: unknown): value is AIChatExperience => {
+  return (
+    typeof value === 'string' &&
+    (value === AIChatExperience.Classic || value === AIChatExperience.Agent)
+  );
+};
+
+/**
  * Helper function to track telemetry events for chat experience changes
  */
 const trackChatExperienceTelemetry = (
@@ -44,7 +54,7 @@ const trackChatExperienceTelemetry = (
     reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown, {
       source: TELEMETRY_SOURCE,
     });
-  } else if (newValue === AIChatExperience.Assistant && currentValue === AIChatExperience.Agent) {
+  } else if (newValue === AIChatExperience.Classic && currentValue === AIChatExperience.Agent) {
     reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptOut, {
       source: TELEMETRY_SOURCE,
     });
@@ -61,7 +71,7 @@ export const ChatExperience: React.FC = () => {
   const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
 
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
-  const currentValue = field?.savedValue;
+  const currentValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
   const hasTrackedInitialStep = useRef(false);
 
   // Track initial step reached when component mounts (user views the opt-in settings)
@@ -79,14 +89,14 @@ export const ChatExperience: React.FC = () => {
   const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
     (id, change) => {
       if (id === AI_CHAT_EXPERIENCE_TYPE) {
-        const newValue = change?.unsavedValue;
+        const newValue = isAIChatExperience(change?.unsavedValue) ? change.unsavedValue : undefined;
 
         // Track telemetry events
         trackChatExperienceTelemetry(analytics, newValue, currentValue);
 
         // Handle modal display logic
         if (newValue === AIChatExperience.Agent) {
-        setConfirmModalOpen(true);
+          setConfirmModalOpen(true);
         }
       }
       handleFieldChange(id, change);
