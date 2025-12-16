@@ -67,7 +67,6 @@ export const SomeThings: StoryFn<{}> = () => {
       }}
       items={[
         {
-          title: 'High error rate',
           query: {
             id: 'match_everything',
             title: 'Match everything',

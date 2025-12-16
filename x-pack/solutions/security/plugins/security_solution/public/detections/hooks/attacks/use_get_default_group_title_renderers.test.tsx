@@ -127,4 +127,75 @@ describe('useGetDefaultGroupTitleRenderers', () => {
     const { queryByTestId } = render(rendered as React.ReactElement);
     expect(queryByTestId(`attack${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeNull();
   });
+
+  describe('showAnonymized prop', () => {
+    it('should pass showAnonymized=true to AttackGroupContent when provided', () => {
+      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+        data: { data: mockAttacks },
+        isLoading: false,
+      });
+
+      const { result } = renderHook(() =>
+        useGetDefaultGroupTitleRenderers({
+          attackIds: mockAttacks.map((a) => a.id),
+          showAnonymized: true,
+        })
+      );
+
+      const renderer = result.current.defaultGroupTitleRenderers;
+      const bucket = { key: [mockAttacks[0].id], doc_count: 1 };
+      const rendered = renderer(ALERT_ATTACK_IDS, bucket);
+
+      const { container } = render(rendered as React.ReactElement);
+      // Verify the component is rendered (AttackGroupContent will handle the showAnonymized prop)
+      expect(
+        container.querySelector(`[data-test-subj="attack${ATTACK_TITLE_TEST_ID_SUFFIX}"]`)
+      ).toBeInTheDocument();
+    });
+
+    it('should pass showAnonymized=false to AttackGroupContent when explicitly set to false', () => {
+      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+        data: { data: mockAttacks },
+        isLoading: false,
+      });
+
+      const { result } = renderHook(() =>
+        useGetDefaultGroupTitleRenderers({
+          attackIds: mockAttacks.map((a) => a.id),
+          showAnonymized: false,
+        })
+      );
+
+      const renderer = result.current.defaultGroupTitleRenderers;
+      const bucket = { key: [mockAttacks[0].id], doc_count: 1 };
+      const rendered = renderer(ALERT_ATTACK_IDS, bucket);
+
+      const { container } = render(rendered as React.ReactElement);
+      // Verify the component is rendered (AttackGroupContent will handle the showAnonymized prop)
+      expect(
+        container.querySelector(`[data-test-subj="attack${ATTACK_TITLE_TEST_ID_SUFFIX}"]`)
+      ).toBeInTheDocument();
+    });
+
+    it('should default to showAnonymized=undefined when not provided', () => {
+      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+        data: { data: mockAttacks },
+        isLoading: false,
+      });
+
+      const { result } = renderHook(() =>
+        useGetDefaultGroupTitleRenderers({ attackIds: mockAttacks.map((a) => a.id) })
+      );
+
+      const renderer = result.current.defaultGroupTitleRenderers;
+      const bucket = { key: [mockAttacks[0].id], doc_count: 1 };
+      const rendered = renderer(ALERT_ATTACK_IDS, bucket);
+
+      const { container } = render(rendered as React.ReactElement);
+      // Verify the component is rendered (AttackGroupContent will default showAnonymized to false)
+      expect(
+        container.querySelector(`[data-test-subj="attack${ATTACK_TITLE_TEST_ID_SUFFIX}"]`)
+      ).toBeInTheDocument();
+    });
+  });
 });

@@ -58,6 +58,7 @@ import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import type { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
+import { AlertAiInsight } from './alert_ai_insight';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
@@ -77,6 +78,9 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
   defaultMessage: 'Alert details',
 });
 
+// avoiding circular dependency by having the attachment id here
+const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
+
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
@@ -91,6 +95,7 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
+    onechat,
     uiSettings,
     serverless,
   } = services;
@@ -166,6 +171,33 @@ export function AlertDetails() {
       setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
   }, [alertDetail, ruleTypeRegistry, urlTabId]);
+
+  // Configure agent builder global flyout with the current alert attachment
+  useEffect(() => {
+    if (!onechat) return;
+    const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
+
+    if (!alertUuid) {
+      return;
+    }
+
+    onechat.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      attachments: [
+        {
+          id: alertUuid,
+          type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+          data: {
+            alertId: alertUuid,
+          },
+        },
+      ],
+    });
+
+    return () => {
+      onechat.clearConversationFlyoutActiveConfig();
+    };
+  }, [onechat, alertDetail]);
 
   useBreadcrumbs(
     [
@@ -268,6 +300,7 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
+          <AlertAiInsight alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -293,6 +326,7 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
+        <AlertAiInsight alert={alertDetail} />
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
