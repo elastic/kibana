@@ -156,11 +156,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   );
 
-  const noFeatures = features.length === 0;
   const noSignificantEvents =
     significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
 
-  if (noFeatures || noSignificantEvents) {
+  if (noSignificantEvents) {
     return (
       <>
         <EmptyState
