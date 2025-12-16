@@ -70,11 +70,11 @@ export const FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS = {
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_DELETE = (idx: number) => {
-  return `[data-test-subj="control-action-${idx}-deletePanel"]`;
+  return `[data-test-subj="hover-actions-${idx}"] [data-test-subj="embeddablePanelAction-deletePanel"]`;
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_EDIT = (idx: number) => {
-  return `[data-test-subj="control-action-${idx}-editPanel"]`;
+  return `[data-test-subj="hover-actions-${idx}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
 };
 
 export const FILTER_GROUP_CHANGED_BANNER = `[data-test-subj="filter-group--changed-banner"]`;
