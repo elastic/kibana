@@ -38,14 +38,19 @@ export function AlertControlsProvider({ getService }: FtrProviderContext) {
       const elementToHover = await this.getControlElementById(controlId);
       await retry.try(async () => {
         await elementToHover.moveMouseTo();
-        await testSubjects.existOrFail(`control-action-${controlId}-clearControl`);
+        await testSubjects.existOrFail(`hover-actions-${controlId}`);
       });
     },
 
     async clearControlSelections(controlId: string) {
       log.debug(`clearing all selections from control ${controlId}`);
       await this.hoverOverExistingControl(controlId);
-      await testSubjects.click(`control-action-${controlId}-clearControl`);
+      const hoverActions = await testSubjects.find(`hover-actions-${controlId}`);
+      const clearButton = await testSubjects.findDescendant(
+        `embeddablePanelAction-clearControl`,
+        hoverActions
+      );
+      await clearButton.click();
     },
 
     async optionsListOpenPopover(controlId: string) {

@@ -438,7 +438,7 @@ export const PresentationPanelHoverActions = ({
       {api && hasHoverActions && (
         <div
           className={classNames('embPanel__hoverActions', className)}
-          data-test-subj="hover-actions"
+          data-test-subj={`hover-actions-${api.uuid}`}
         >
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}

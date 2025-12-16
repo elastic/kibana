@@ -312,14 +312,14 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
       await elementToHover.focus();
-      expect(this.testSubjects.descendantExists('hover-actions', elementToHover));
+      expect(this.testSubjects.descendantExists(`hover-actions-${controlId}`, elementToHover));
     });
   }
 
   public async hideHoverActions() {
     await this.retry.try(async () => {
       await this.browser.clickMouseButton({ x: 0, y: 0 });
-      await this.testSubjects.missingOrFail('hover-actions', {
+      await this.testSubjects.missingOrFail('hover-actions*', {
         allowHidden: true,
       });
     });

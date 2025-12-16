@@ -167,7 +167,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       {children}
       {floatingActions.length > 0 && (
         <div
-          data-test-subj="hover-actions"
+          data-test-subj={`hover-actions-${uuid}`}
           key={`presentationUtil__floatingActions__${uuid}`}
           className={classNames('presentationUtil__floatingActions', `controlFrameFloatingActions`)}
           css={styles.floatingActions}
