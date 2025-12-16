@@ -140,6 +140,11 @@ export const getFilterConditionField = (condition: Condition) => {
  * @returns true if the condition is complete and valid
  */
 export const isFilterConditionComplete = (value: Condition | unknown): boolean => {
+  // undefined means no condition specified, which is valid (optional condition)
+  if (value === undefined) {
+    return true;
+  }
+
   // First check: validate structure with existing isCondition check
   if (!isCondition(value)) {
     return false;
