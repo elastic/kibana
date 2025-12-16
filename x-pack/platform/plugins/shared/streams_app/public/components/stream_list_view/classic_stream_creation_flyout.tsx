@@ -13,6 +13,7 @@ import type {
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { useAbortController } from '@kbn/react-hooks';
 import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -70,7 +71,12 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         });
 
         core.notifications.toasts.addSuccess({
-          title: `Classic stream created`,
+          title: i18n.translate(
+            'xpack.streams.classicStreamCreationFlyout.streamCreatedToastTitle',
+            {
+              defaultMessage: 'Classic stream created',
+            }
+          ),
         });
 
         router.push('/{key}/management/{tab}', {
@@ -81,7 +87,13 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         onClose();
       } catch (error) {
         core.notifications.toasts.addError(error as Error, {
-          title: `Failed to create classic stream "${streamName}"`,
+          title: i18n.translate(
+            'xpack.streams.classicStreamCreationFlyout.streamCreationFailedToastTitle',
+            {
+              defaultMessage: 'Failed to create classic stream "{streamName}"',
+              values: { streamName },
+            }
+          ),
         });
       }
     },
@@ -114,7 +126,13 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         return { errorType: null };
       } catch (error) {
         core.notifications.toasts.addError(error as Error, {
-          title: `Failed to validate classic stream "${streamName}"`,
+          title: i18n.translate(
+            'xpack.streams.classicStreamCreationFlyout.streamValidationFailedToastTitle',
+            {
+              defaultMessage: 'Failed to validate classic stream "{streamName}"',
+              values: { streamName },
+            }
+          ),
         });
         // Re-throw the error to be handled by the caller (useStreamValidation) - it will be caught and dispatched as an ABORT_VALIDATION action.
         throw error;
