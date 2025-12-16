@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './components/code_box';
-export * from './components/github_link';
-export * from './components/eis_promotional_tour';
-export * from './components/eis_promotional_callout';
-export * from './components/eis_token_cost_tour';
-export * from './components/eis_update_callout';
-export * from './components/eis_ccm_promotional_tour';
-export * from './components/eis_ccm_promotional_callout';
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SearchApiPanelsServicesContext } from '../types';
 
-export * from './types';
-export * from './utils';
+export const useKibana = () => _useKibana<SearchApiPanelsServicesContext>();

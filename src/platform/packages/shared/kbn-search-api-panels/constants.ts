@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './components/code_box';
-export * from './components/github_link';
-export * from './components/eis_promotional_tour';
-export * from './components/eis_promotional_callout';
-export * from './components/eis_token_cost_tour';
-export * from './components/eis_update_callout';
-export * from './components/eis_ccm_promotional_tour';
-export * from './components/eis_ccm_promotional_callout';
-
-export * from './types';
-export * from './utils';
+export const EIS_TOUR_ENABLED_FEATURE_FLAG_ID = 'eisPromotionalTour:enabled';
