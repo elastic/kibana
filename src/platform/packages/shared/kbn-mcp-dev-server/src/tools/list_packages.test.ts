@@ -9,6 +9,7 @@
 
 import { listKibanaPackagesTool } from './list_packages';
 import { getPackages } from '@kbn/repo-packages';
+import { parseToolResultJsonContent } from './test_utils';
 
 jest.mock('@kbn/repo-packages', () => ({ getPackages: jest.fn() }));
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
@@ -37,7 +38,7 @@ describe('listKibanaPackagesTool', () => {
     ] as any);
 
     const result = await listKibanaPackagesTool.handler({ excludePlugins: false, owner: '' });
-    const resultObject = JSON.parse(result.content[0].text as string);
+    const resultObject = parseToolResultJsonContent(result);
 
     expect(resultObject.packages).toHaveLength(1);
     expect(resultObject.packages[0].name).toBe('pkg-a');
@@ -52,7 +53,7 @@ describe('listKibanaPackagesTool', () => {
     ] as any);
 
     const result = await listKibanaPackagesTool.handler({ excludePlugins: true, owner: '' });
-    const resultObject = JSON.parse(result.content[0].text as string);
+    const resultObject = parseToolResultJsonContent(result);
 
     expect(resultObject.packages).toHaveLength(1);
     expect(resultObject.plugins).toBeUndefined();
@@ -65,7 +66,7 @@ describe('listKibanaPackagesTool', () => {
     ] as any);
 
     const result = await listKibanaPackagesTool.handler({ owner: 'team-b', excludePlugins: false });
-    const resultObject = JSON.parse(result.content[0].text as string);
+    const resultObject = parseToolResultJsonContent(result);
 
     expect(resultObject.packages).toHaveLength(1);
     expect(resultObject.packages[0].name).toBe('pkg-b');
@@ -78,7 +79,7 @@ describe('listKibanaPackagesTool', () => {
     ] as any);
 
     const result = await listKibanaPackagesTool.handler({ owner: '', excludePlugins: false });
-    const resultObject = JSON.parse(result.content[0].text as string);
+    const resultObject = parseToolResultJsonContent(result);
 
     expect(resultObject.packages).toHaveLength(2);
   });

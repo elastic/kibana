@@ -267,6 +267,9 @@ dependsOn:
   - '@kbn/onechat-common'
   - '@kbn/onechat-plugin'
   - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/onechat-browser'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/product-doc-common'
 tags:
   - plugin
   - prod

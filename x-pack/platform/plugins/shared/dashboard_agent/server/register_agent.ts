@@ -6,6 +6,7 @@
  */
 
 import { ToolResultType, platformCoreTools } from '@kbn/onechat-common';
+import { dashboardElement } from '@kbn/onechat-common/tools/tool_result';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import { dashboardTools } from '../common';
 
@@ -56,29 +57,36 @@ When a user requests to create a dashboard, you MUST follow this exact workflow:
   \`\`\`
 - Extract \`data.visualization\` - this is the panel configuration you need
 
-**Step 3: Create Dashboard with Panels**
+**Step 3: Create Dashboard with Panels and Markdown Summary**
 - Call ${dashboardTools.createDashboard} with:
   - \`title\`: The dashboard title
   - \`description\`: A description of the dashboard
   - \`panels\`: An array containing the \`visualization\` config(s) from Step 2
     - For a single visualization: \`panels: [visualizationConfig]\`
     - For multiple visualizations: \`panels: [visualizationConfig1, visualizationConfig2, ...]\`
+  - \`markdownContent\`: A markdown summary that will be displayed at the top of the dashboard
+    - This should describe what the dashboard shows and provide helpful context
+    - Use markdown formatting (headers, lists, bold text) to make it readable
+    - Example: "### Server Performance Overview\\n\\nThis dashboard displays key server metrics including:\\n- **CPU utilization** trends over time\\n- **Memory usage** patterns\\n- **Disk I/O** performance"
 
 **IMPORTANT RULES:**
 - NEVER call ${dashboardTools.createDashboard} without first calling ${platformCoreTools.createVisualization}
 - NEVER create dashboards with empty panels arrays unless explicitly requested
 - ALWAYS extract the \`data.visualization\` field from the ${platformCoreTools.createVisualization} result
+- ALWAYS provide \`markdownContent\` when creating dashboards - this is required
 - If the user wants multiple visualizations, call ${platformCoreTools.createVisualization} multiple times (once per visualization), then combine all visualization configs into the panels array
 
 **Example Workflow:**
 1. User: "Create a dashboard showing server metrics"
 2. You call: ${platformCoreTools.createVisualization}({ query: "Show server CPU and memory metrics" })
 3. Result contains: \`data.visualization\` = { ... visualization config ... }
-4. You call: ${dashboardTools.createDashboard}({ title: "Server Metrics", description: "...", panels: [data.visualization] })
+4. You call: ${dashboardTools.createDashboard}({ title: "Server Metrics", description: "...", panels: [data.visualization], markdownContent: "### Server Metrics Overview\\n\\nThis dashboard displays real-time server performance metrics including CPU and memory utilization." })
 
 When updating existing dashboards:
 - Use ${dashboardTools.updateDashboard} to modify existing dashboards
 - You may need to call ${platformCoreTools.createVisualization} for new panels to add
+- ALWAYS pass \`panels\` containing the full set of visualization configs you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
+- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel at the top
 
 General Guidelines:
 - Ensure dashboards are well-organized and easy to understand
@@ -108,17 +116,22 @@ General Guidelines:
 
 function renderDashboardResultPrompt() {
   const { dashboard } = ToolResultType;
+  const { tagName, attributes } = dashboardElement;
 
-  return `#### Handling Dashboard Results
-      When a tool call returns a result of type "${dashboard}", you should inform the user that a dashboard has been created and provide relevant information about it.
+  return `#### Rendering Dashboards
+      When a tool call returns a result of type "${dashboard}", you should render the dashboard in the UI by emitting a custom XML element:
+
+      <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
 
       **Rules**
-      * When you receive a tool result with \`"type": "${dashboard}"\`, extract the \`id\`, \`title\`, and other relevant data from the result.
-      * Provide a clickable link if a URL is available in \`content.url\`.
+      * The \`<${tagName}>\` element must only be used to render tool results of type \`${dashboard}\`.
+      * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
+      * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
+      * You must not include any other attributes or content within the \`<${tagName}>\` element.
 
-      **Example for Dashboard:**
+      **Example Usage:**
 
-      Tool response:
+      Tool response includes:
       {
         "tool_result_id": "abc123",
         "type": "${dashboard}",
@@ -133,6 +146,10 @@ function renderDashboardResultPrompt() {
         }
       }
 
-      Your response to the user should include:
-      Dashboard "My Dashboard" created successfully. You can view it at: [/app/dashboards#/view/dashboard-123](/app/dashboards#/view/dashboard-123)`;
+      To render this dashboard your reply should include:
+      <${tagName} ${attributes.toolResultId}="abc123" />
+
+      You may also add a brief message about the dashboard creation, for example:
+      "I've created a dashboard for you:"
+      <${tagName} ${attributes.toolResultId}="abc123" />`;
 }
