@@ -10,14 +10,18 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
+import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { SpaceTestApiClient } from '../space_awareness/api_helper';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
   const supertest = getService('supertest');
+
+  const apiClient = new SpaceTestApiClient(supertest);
 
   async function installPackage(pkgName: string, pkgVersion: string) {
     await supertest
@@ -33,12 +37,22 @@ export default function (providerContext: FtrProviderContext) {
     inputs = {}
   ) {
     for (const id of policyIds) {
+      let agentPolicy: CreateAgentPolicyResponse | undefined;
+      if (id.match(/all-spaces/)) {
+        agentPolicy = await apiClient.createAgentPolicy(undefined, {
+          name: `Agent Policy for all spaces ${id} ${Date.now()}`,
+          description: 'test ',
+          namespace: 'default',
+          space_ids: ['*'],
+        });
+      }
+
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           id,
-          policy_ids: [],
+          policy_ids: agentPolicy ? [agentPolicy.item.id] : [],
           package: {
             name: pkgName,
             version: pkgVersion,
@@ -136,7 +150,7 @@ export default function (providerContext: FtrProviderContext) {
     latestPkgVersion: string
   ) {
     describe(`${type} package`, () => {
-      const policyIds = [`${pkgName}-1`, `${pkgName}-2`];
+      const policyIds = [`${pkgName}-1`, `${pkgName}-2`, `${pkgName}-all-spaces-3`];
 
       beforeEach(async () => {
         await installPackage(pkgName, oldPkgVersion);
@@ -195,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
         // Cannot predict order of SO creation.
         const re = new RegExp(
-          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}-[1-2], ${pkgName}-[1-2]`,
+          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3]`,
           'g'
         );
         expect(res.body.message).to.match(re);
@@ -209,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
         // Cannot predict order of SO creation.
-        const errorMsg = String.raw`${pkgName}-[1-2] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
+        const errorMsg = String.raw`${pkgName}(-all-spaces)?-[1-2-3] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
         const re = new RegExp(
           `Failed to roll back package ${pkgName}: Wrong previous version for package policies: ${errorMsg}, ${errorMsg}`,
           'g'
@@ -236,6 +250,8 @@ export default function (providerContext: FtrProviderContext) {
           `${pkgName}-1:prev`,
           `${pkgName}-2`,
           `${pkgName}-2:prev`,
+          `${pkgName}-all-spaces-3`,
+          `${pkgName}-all-spaces-3:prev`,
         ]);
         expect(
           packagePolicySORes.saved_objects.find((so) => so.id === `${pkgName}-1`)?.attributes
@@ -252,6 +268,14 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           packagePolicySORes.saved_objects.find((so) => so.id === `${pkgName}-2:prev`)?.attributes
             .package.version
+        ).to.eql(oldPkgVersion);
+        expect(
+          packagePolicySORes.saved_objects.find((so) => so.id === `${pkgName}-all-spaces-3`)
+            ?.attributes.package.version
+        ).to.eql(newPkgVersion);
+        expect(
+          packagePolicySORes.saved_objects.find((so) => so.id === `${pkgName}-all-spaces-3:prev`)
+            ?.attributes.package.version
         ).to.eql(oldPkgVersion);
 
         await assertPackageInstallVersion(pkgName, newPkgVersion);
@@ -364,6 +388,21 @@ export default function (providerContext: FtrProviderContext) {
           isAvailable: false,
           reason:
             'Rollback not available because some integration policies are not upgraded to version 0.2.0',
+        });
+      });
+
+      it('should return bulk rollback available check for installed packages', async () => {
+        await createPackagePolicies(policyIds, pkgName, oldPkgVersion);
+        await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, true);
+
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/_bulk_rollback/available_check`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(res.body.multiple_versions).to.eql({
+          isAvailable: true,
         });
       });
     });

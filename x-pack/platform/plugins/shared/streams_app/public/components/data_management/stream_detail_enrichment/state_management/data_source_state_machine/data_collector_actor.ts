@@ -12,10 +12,12 @@ import { fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { Observable, filter, map, of } from 'rxjs';
+import { Observable, filter, map, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
+import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { DataSourceMachineDeps } from './types';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
@@ -23,6 +25,7 @@ import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 export interface SamplesFetchInput {
   dataSource: EnrichmentDataSourceWithUIAttributes;
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
 }
 
 interface SearchParamsOptions {
@@ -35,17 +38,33 @@ interface SearchParamsOptions {
 
 interface CollectKqlDataParams extends SearchParamsOptions {
   data: DataSourceMachineDeps['data'];
+  telemetryClient: StreamsTelemetryClient;
+  dataSourceType: EnrichmentDataSource['type'];
+  streamType: 'wired' | 'classic' | 'unknown';
 }
 
-type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'index'>;
+type CollectorParams = Pick<
+  CollectKqlDataParams,
+  'data' | 'index' | 'telemetryClient' | 'streamType'
+>;
+
+const SEARCH_TIMEOUT = '10s';
 
 /**
  * Creates a data collector actor that fetches sample documents based on the data source type
  */
-export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, 'data'>) {
+export function createDataCollectorActor({
+  data,
+  telemetryClient,
+}: Pick<DataSourceMachineDeps, 'data' | 'telemetryClient'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
-    const { dataSource, streamName } = input;
-    return getDataCollectorForDataSource(dataSource)({ data, index: streamName });
+    const { dataSource, streamName, streamType } = input;
+    return getDataCollectorForDataSource(dataSource)({
+      data,
+      index: streamName,
+      telemetryClient,
+      streamType,
+    });
   });
 }
 
@@ -54,11 +73,15 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
   if (dataSource.type === 'latest-samples') {
-    return (args: CollectorParams) => collectKqlData(args);
+    return (args: CollectorParams) => collectKqlData({ ...args, dataSourceType: dataSource.type });
   }
   if (dataSource.type === 'kql-samples') {
     return (args: CollectorParams) =>
-      collectKqlData({ ...args, ...pick(dataSource, ['filters', 'query', 'timeRange']) });
+      collectKqlData({
+        ...args,
+        ...pick(dataSource, ['filters', 'query', 'timeRange']),
+        dataSourceType: dataSource.type,
+      });
   }
   if (dataSource.type === 'custom-samples') {
     return () => of(dataSource.documents);
@@ -71,15 +94,35 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
  */
 function collectKqlData({
   data,
+  telemetryClient,
+  dataSourceType,
+  streamType,
   ...searchParams
 }: CollectKqlDataParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
   const params = buildSamplesSearchParams(searchParams);
 
   return new Observable((observer) => {
+    let registerFetchLatency: () => void = () => {};
+
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal })
-      .pipe(filter(isValidSearchResult), map(extractDocumentsFromResult))
+      .pipe(
+        tap({
+          subscribe: () => {
+            registerFetchLatency = telemetryClient.startTrackingSimulationSamplesFetchLatency({
+              stream_name: searchParams.index,
+              stream_type: streamType,
+              data_source_type: dataSourceType,
+            });
+          },
+          finalize: () => {
+            registerFetchLatency();
+          },
+        }),
+        filter(isValidSearchResult),
+        map(extractDocumentsFromResult)
+      )
       .subscribe(observer);
 
     return () => {
@@ -128,8 +171,8 @@ function buildSamplesSearchParams({
       },
     ],
     size,
-    terminate_after: size,
     track_total_hits: false,
+    timeout: SEARCH_TIMEOUT,
   };
 }
 

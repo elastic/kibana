@@ -397,11 +397,14 @@ export const RuleActionsConnectorsBody = ({
           );
 
           const isSystemActionsSelected = Boolean(
-            actionTypeModel.isSystemActionType &&
+            actionType.isSystemActionType &&
               actions.find((action) => action.actionTypeId === actionTypeModel.id)
           );
 
-          const isDisabled = !checkEnabledResult.isEnabled || isSystemActionsSelected;
+          const shouldDisableSystemAction =
+            isSystemActionsSelected && !Boolean(actionType.allowMultipleSystemActions);
+
+          const isDisabled = !checkEnabledResult.isEnabled || shouldDisableSystemAction;
 
           const connectorCard = (
             <EuiCard

@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: remove eslint exception and use i18n for strings
-/* eslint-disable @typescript-eslint/no-explicit-any, react/jsx-no-literals */
-
 import {
   EuiCallOut,
   EuiDescriptionList,
@@ -30,6 +27,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { formatHit } from '@kbn/discover-utils';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { SearchHit } from '@kbn/es-types';
+import { i18n } from '@kbn/i18n';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -48,7 +46,7 @@ interface Document {
   '@timestamp': string;
   agent?: string;
   user?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface WorkflowExecuteEventFormProps {
@@ -58,15 +56,15 @@ interface WorkflowExecuteEventFormProps {
   setErrors: (errors: string | null) => void;
 }
 
-const flattenObject = (obj: any, prefix = ''): Record<string, any> => {
-  const flattened: Record<string, any> = {};
+const flattenObject = (obj: Record<string, unknown>, prefix = ''): Record<string, unknown> => {
+  const flattened: Record<string, unknown> = {};
 
   for (const [key, val] of Object.entries(obj)) {
     const fieldName = prefix ? `${prefix}.${key}` : key;
 
     if (val && typeof val === 'object' && !Array.isArray(val)) {
       // Recursively flatten nested objects
-      Object.assign(flattened, flattenObject(val, fieldName));
+      Object.assign(flattened, flattenObject(val as Record<string, unknown>, fieldName));
     } else {
       flattened[fieldName] = val;
     }
@@ -82,7 +80,7 @@ export const WorkflowExecuteIndexForm = ({
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { services } = useKibana();
-  const { unifiedSearch } = services;
+  const { unifiedSearch, notifications } = services;
   const { SearchBar } = unifiedSearch.ui;
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [dataViews, setDataViews] = useState<DataViewListItem[]>([]);
@@ -90,6 +88,7 @@ export const WorkflowExecuteIndexForm = ({
   const [selectedDocuments, setSelectedDocuments] = useState<SearchHit<Document>[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
     to: 'now',
@@ -110,10 +109,16 @@ export const WorkflowExecuteIndexForm = ({
           dataViewsList[0];
         if (defaultDataView) {
           const dataView = await services.dataViews.get(defaultDataView.id);
+          // Refresh fields to ensure they're up to date and properly loaded
+          await services.dataViews.refreshFields(dataView, false, true);
           setSelectedDataView(dataView);
         }
       } catch (error) {
-        setErrors('Failed to load data views');
+        setErrors(
+          i18n.translate('workflows.workflowExecuteIndexForm.loadDataViewsError', {
+            defaultMessage: 'Failed to load data views',
+          })
+        );
       }
     };
 
@@ -123,98 +128,155 @@ export const WorkflowExecuteIndexForm = ({
   // Fetch documents based on selected data view and query
   const fetchDocuments = useCallback(async () => {
     if (!selectedDataView || !services.data) {
+      setDocumentsLoading(false);
       return;
     }
 
     setDocumentsLoading(true);
     setErrors(null);
 
-    const esQuery = buildEsQuery(selectedDataView, query ? [query] : [], []);
-    const searchQuery = {
-      bool: {
-        must: esQuery.bool.must || [],
-        filter: [
-          ...(esQuery.bool.filter || []),
-          {
-            range: {
-              '@timestamp': {
-                gte: timeRange.from,
-                lte: timeRange.to,
+    try {
+      const esQuery = buildEsQuery(selectedDataView, submittedQuery ? [submittedQuery] : [], []);
+      const searchQuery = {
+        bool: {
+          must: esQuery.bool.must || [],
+          filter: [
+            ...(esQuery.bool.filter || []),
+            {
+              range: {
+                '@timestamp': {
+                  gte: timeRange?.from || 'now-15m',
+                  lte: timeRange?.to || 'now',
+                },
               },
             },
+          ],
+          should: esQuery.bool.should || [],
+          must_not: esQuery.bool.must_not || [],
+        },
+      };
+
+      const request: IEsSearchRequest = {
+        params: {
+          index: selectedDataView.getIndexPattern(),
+          query: searchQuery,
+          size: 50,
+          sort: [{ '@timestamp': { order: 'desc' } }],
+          _source: ['@timestamp', 'agent', 'user', 'message', 'host.name', 'source.ip'],
+        },
+      };
+
+      services.data.search
+        .search<IEsSearchRequest, IEsSearchResponse<Document>>(request)
+        .pipe(take(1))
+        .subscribe({
+          next: (response) => {
+            const hits: SearchHit<Document>[] =
+              response?.rawResponse?.hits?.hits.filter(
+                (hit): hit is SearchHit<Document> => !!hit._source
+              ) ?? [];
+            setDocuments(hits);
+            setDocumentsLoading(false);
           },
-        ],
-        should: esQuery.bool.should || [],
-        must_not: esQuery.bool.must_not || [],
-      },
-    };
+          error: (err) => {
+            setErrors(
+              err instanceof Error
+                ? err.message
+                : i18n.translate('workflows.workflowExecuteIndexForm.fetchDocumentsError', {
+                    defaultMessage: 'Failed to fetch documents',
+                  })
+            );
+            setDocuments([]);
+            setDocumentsLoading(false);
+          },
+        });
+    } catch (err) {
+      setDocumentsLoading(false);
+      setErrors(
+        err instanceof Error
+          ? err.message
+          : i18n.translate('workflows.workflowExecuteIndexForm.buildQueryError', {
+              defaultMessage: 'Failed to build query',
+            })
+      );
+      setDocuments([]);
+    }
+  }, [selectedDataView, submittedQuery, services.data, setErrors, timeRange?.from, timeRange?.to]);
 
-    const request: IEsSearchRequest = {
-      params: {
-        index: selectedDataView.getIndexPattern(),
-        query: searchQuery,
-        size: 50,
-        sort: [{ '@timestamp': { order: 'desc' } }],
-        _source: ['@timestamp', 'agent', 'user', 'message', 'host.name', 'source.ip'],
-      },
-    };
-
-    services.data.search
-      .search<IEsSearchRequest, IEsSearchResponse<Document>>(request)
-      .pipe(take(1))
-      .subscribe({
-        next: (response) => {
-          const hits: SearchHit<Document>[] =
-            response?.rawResponse?.hits?.hits.filter(
-              (hit): hit is SearchHit<Document> => !!hit._source
-            ) ?? [];
-          setDocuments(hits);
-        },
-        error: (err) => {
-          setErrors(err instanceof Error ? err.message : 'Failed to fetch documents');
-          setDocuments([]);
-        },
-        complete: () => {
-          setDocumentsLoading(false);
-        },
-      });
-  }, [selectedDataView, query, services.data, setErrors, timeRange.from, timeRange.to]);
-
-  // Fetch documents when data view, query, or filters change
+  // Fetch documents when data view, query, or time range changes
   useEffect(() => {
     if (selectedDataView) {
       fetchDocuments();
     }
-  }, [selectedDataView, fetchDocuments]);
+    // Only include stable dependencies to avoid infinite loops
+    // fetchDocuments is stable due to useCallback with proper deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDataView?.id, submittedQuery?.query, timeRange?.from, timeRange?.to]);
 
-  // Handle data view selection
+  // Handle data view selection - refreshes fields inline like Discovery does
   const handleDataViewChange = useCallback(
     async (dataViewId: string) => {
       if (!services.dataViews) return;
 
       try {
         const dataView = await services.dataViews.get(dataViewId);
+
+        // Refresh fields if needed (following Discovery's pattern)
+        // Only refresh if the data view has no fields loaded
+        if (!dataView.fields.length) {
+          try {
+            await services.dataViews.refreshFields(dataView, false, true);
+          } catch (refreshError) {
+            // Log but don't block - fields may be partially available
+            notifications.toasts.addWarning({
+              title: i18n.translate('workflows.workflowExecuteIndexForm.refreshFieldsErrorTitle', {
+                defaultMessage: 'Failed to refresh fields',
+              }),
+              text: i18n.translate('workflows.workflowExecuteIndexForm.refreshFieldsError', {
+                defaultMessage: 'Some data view fields may be outdated.',
+              }),
+            });
+          }
+        }
+
         setSelectedDataView(dataView);
         setSelectedDocuments([]); // Clear selection when changing data view
       } catch (error) {
-        setErrors('Failed to load data view');
+        setErrors(
+          i18n.translate('workflows.workflowExecuteIndexForm.loadDataViewError', {
+            defaultMessage: 'Failed to load data view',
+          })
+        );
       }
     },
-    [services.dataViews, setErrors]
+    [services.dataViews, setErrors, notifications.toasts]
   );
 
-  const handleQueryChange = ({
-    query: newQuery,
-    dateRange,
-  }: {
-    query?: Query;
-    dateRange: TimeRange;
-  }) => {
-    if (newQuery) {
-      setQuery(newQuery);
-    }
-    setTimeRange(dateRange);
-  };
+  const handleQueryChange = useCallback(
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      // Only update the draft query for the SearchBar input (for autocomplete)
+      // Don't trigger fetch - that happens only on submit
+      if (newQuery) {
+        setQuery(newQuery);
+      }
+      // Update time range immediately as it doesn't cause blinking
+      setTimeRange(dateRange);
+    },
+    []
+  );
+
+  const handleQuerySubmit = useCallback(
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      // Update both draft and submitted query on submit
+      if (newQuery) {
+        setQuery(newQuery);
+        setSubmittedQuery(newQuery);
+      }
+      setTimeRange(dateRange);
+      // fetchDocuments will be triggered by useEffect when submittedQuery changes
+    },
+    []
+  );
 
   // Handle document selection
   const handleDocumentSelection = (selectedItems: SearchHit<Document>[]) => {
@@ -230,7 +292,7 @@ export const WorkflowExecuteIndexForm = ({
             timestamp: doc._source['@timestamp'],
             data: doc._source,
           })),
-          query: query.query,
+          query: submittedQuery.query,
           dataView: selectedDataView?.title,
         },
       };
@@ -246,7 +308,9 @@ export const WorkflowExecuteIndexForm = ({
     () => [
       {
         field: '_source.@timestamp',
-        name: 'timestamp',
+        name: i18n.translate('workflows.workflowExecuteIndexForm.timestampColumn', {
+          defaultMessage: 'Timestamp',
+        }),
         width: '200px',
         sortable: true,
         render: (timestamp: string) => (
@@ -255,28 +319,31 @@ export const WorkflowExecuteIndexForm = ({
       },
       {
         field: '_source',
-        name: 'Document',
-        render: (source: any) => {
-          const flattened = flattenObject(source);
+        name: i18n.translate('workflows.workflowExecuteIndexForm.documentColumn', {
+          defaultMessage: 'Document',
+        }),
+        render: (source: Document) => {
+          const flattened = flattenObject(source as Record<string, unknown>);
 
           // Create a mock DataTableRecord-like object for formatHit
           const mockRecord = {
             raw: { _source: source },
             flattened,
-            id: source && source._id ? source._id : undefined,
+            id: '', //  formatHit doesn't use ID
             isAnchor: false,
           };
 
           // Use formatHit to get properly formatted field pairs
-          const formattedPairs = selectedDataView
-            ? formatHit(
-                mockRecord,
-                selectedDataView,
-                () => true, // Show all fields
-                10, // Max entries
-                services.fieldFormats
-              )
-            : [];
+          const formattedPairs =
+            selectedDataView && typeof selectedDataView.getFieldByName === 'function'
+              ? formatHit(
+                  mockRecord,
+                  selectedDataView,
+                  () => true, // Show all fields
+                  10, // Max entries
+                  services.fieldFormats
+                )
+              : [];
 
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -306,8 +373,13 @@ export const WorkflowExecuteIndexForm = ({
   // Table selection configuration
   const selection = {
     onSelectionChange: handleDocumentSelection,
-    selectable: (item: SearchHit<Document>) => true,
-    selectableMessage: (selectable: boolean) => (!selectable ? 'Document not selectable' : ''),
+    selectable: () => true,
+    selectableMessage: (selectable: boolean) =>
+      !selectable
+        ? i18n.translate('workflows.workflowExecuteIndexForm.documentNotSelectable', {
+            defaultMessage: 'Document not selectable',
+          })
+        : '',
   };
 
   return (
@@ -320,7 +392,12 @@ export const WorkflowExecuteIndexForm = ({
             <DataViewPicker
               trigger={{
                 'data-test-subj': 'workflow-data-view-selector',
-                label: selectedDataView?.name || selectedDataView?.title || 'Select data view',
+                label:
+                  selectedDataView?.name ||
+                  selectedDataView?.title ||
+                  i18n.translate('workflows.workflowExecuteIndexForm.selectDataView', {
+                    defaultMessage: 'Select data view',
+                  }),
                 fullWidth: true,
                 size: 's',
               }}
@@ -332,16 +409,21 @@ export const WorkflowExecuteIndexForm = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <SearchBar
+            key={selectedDataView?.id || 'no-dataview'}
             appName="workflow_management"
-            onQuerySubmit={handleQueryChange}
+            useDefaultBehaviors={true}
+            onQueryChange={handleQueryChange}
+            onQuerySubmit={handleQuerySubmit}
             query={query}
             indexPatterns={selectedDataView ? [selectedDataView] : []}
             showDatePicker={true}
-            dateRangeFrom={timeRange.from}
-            dateRangeTo={timeRange.to}
+            dateRangeFrom={timeRange?.from || 'now-15m'}
+            dateRangeTo={timeRange?.to || 'now'}
             showFilterBar={false}
             showSubmitButton={true}
-            placeholder="Filter your data using KQL syntax"
+            placeholder={i18n.translate('workflows.workflowExecuteIndexForm.searchPlaceholder', {
+              defaultMessage: 'Filter your data using KQL syntax',
+            })}
             data-test-subj="workflow-query-input"
           />
         </EuiFlexItem>
@@ -349,7 +431,15 @@ export const WorkflowExecuteIndexForm = ({
       {/* Error Display */}
       {errors && (
         <EuiFlexItem>
-          <EuiCallOut announceOnMount title="Error" color="danger" iconType="error" size="s">
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('workflows.workflowExecuteIndexForm.errorTitle', {
+              defaultMessage: 'Error',
+            })}
+            color="danger"
+            iconType="error"
+            size="s"
+          >
             <p>{errors}</p>
           </EuiCallOut>
         </EuiFlexItem>
@@ -363,7 +453,11 @@ export const WorkflowExecuteIndexForm = ({
               <EuiLoadingSpinner size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s">Loading documents...</EuiText>
+              <EuiText size="s">
+                {i18n.translate('workflows.workflowExecuteIndexForm.loadingDocuments', {
+                  defaultMessage: 'Loading documents...',
+                })}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -379,6 +473,9 @@ export const WorkflowExecuteIndexForm = ({
             }}
             tableLayout="fixed"
             itemId="_id"
+            tableCaption={i18n.translate('workflows.workflowExecuteIndexForm.tableCaption', {
+              defaultMessage: 'Documents list for workflow execution',
+            })}
             data-test-subj="workflow-documents-table"
           />
         )}
@@ -389,13 +486,19 @@ export const WorkflowExecuteIndexForm = ({
         <EuiFlexItem>
           <EuiCallOut
             announceOnMount
-            title="Documents Selected"
+            title={i18n.translate('workflows.workflowExecuteIndexForm.documentsSelectedTitle', {
+              defaultMessage: 'Documents Selected',
+            })}
             color="success"
             iconType="check"
             size="s"
           >
             <EuiText size="s">
-              {selectedDocuments.length} document(s) selected for workflow execution
+              {i18n.translate('workflows.workflowExecuteIndexForm.documentsSelectedCount', {
+                defaultMessage:
+                  '{count, plural, one {# document} other {# documents}} selected for workflow execution',
+                values: { count: selectedDocuments.length },
+              })}
             </EuiText>
           </EuiCallOut>
         </EuiFlexItem>

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { LoginAsInteractiveUserResponse } from './helpers';
 import { loginAsInteractiveUser, setupInteractiveUser, cleanupInteractiveUser } from './helpers';
@@ -16,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       it('created_by is empty', async () => {
         const { body, status } = await supertest
-          .post('/api/dashboards/dashboard')
+          .post(DASHBOARD_API_PATH)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
@@ -27,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.data).to.be.ok();
-        expect(body.meta).to.not.have.key('createdBy');
+        expect(body.meta).to.not.have.key('created_by');
       });
     });
 
@@ -46,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('created_by is with profile_id', async () => {
         const createResponse = await supertest
-          .post('/api/dashboards/dashboard')
+          .post(DASHBOARD_API_PATH)
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
@@ -58,8 +59,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(createResponse.status).to.be(200);
         expect(createResponse.body.data).to.be.ok();
-        expect(createResponse.body.meta).to.have.key('createdBy');
-        expect(createResponse.body.meta.createdBy).to.be(interactiveUser.uid);
+        expect(createResponse.body.meta).to.have.key('created_by');
+        expect(createResponse.body.meta.created_by).to.be(interactiveUser.uid);
       });
     });
   });

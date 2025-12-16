@@ -6,10 +6,13 @@
  */
 
 import type { Streams, Feature } from '@kbn/streams-schema';
+import type { AbsoluteTimeRange } from '@kbn/es-query';
 import React, { useMemo } from 'react';
 import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
 
-export const FeatureEventsSparkline = ({
+const BUCKET_SIZE_MINUTES = 30;
+
+export const FeatureEventsSparklineLast24hrs = ({
   feature,
   definition,
   hideAxis = true,
@@ -25,13 +28,31 @@ export const FeatureEventsSparkline = ({
       feature: {
         name: feature.name,
         filter: feature.filter,
+        type: feature.type,
       },
       kql: { query: '' },
       id: 'feature-events-sparkline',
       title: feature.name,
     }),
-    [feature.name, feature.filter]
+    [feature.name, feature.filter, feature.type]
   );
+
+  const { noOfBuckets, timeRange }: { noOfBuckets: number; timeRange: AbsoluteTimeRange } =
+    useMemo(() => {
+      const now = Date.now();
+      const absoluteTimeRange: AbsoluteTimeRange = {
+        from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+        to: new Date(now).toISOString(),
+        mode: 'absolute',
+      };
+      const durationMinutes =
+        (new Date(absoluteTimeRange.to).getTime() - new Date(absoluteTimeRange.from).getTime()) /
+        (1000 * 60);
+      return {
+        noOfBuckets: Math.ceil(durationMinutes / BUCKET_SIZE_MINUTES),
+        timeRange: absoluteTimeRange,
+      };
+    }, []);
 
   return (
     <PreviewDataSparkPlot
@@ -41,6 +62,8 @@ export const FeatureEventsSparkline = ({
       query={query}
       hideAxis={hideAxis}
       height={height}
+      timeRange={timeRange}
+      noOfBuckets={noOfBuckets}
     />
   );
 };

@@ -49,13 +49,29 @@ export const useStreamDescriptionApi = ({
   const save = useCallback(
     async (nextDescription: string) => {
       setIsUpdating(true);
+
+      let stream;
+      if (Streams.GroupStream.Definition.is(definition.stream)) {
+        stream = omit(definition.stream, ['name', 'updated_at']);
+      } else {
+        stream = {
+          ...omit(definition.stream, ['name', 'updated_at']),
+          ingest: {
+            ...definition.stream.ingest,
+            processing: {
+              ...omit(definition.stream.ingest.processing, ['updated_at']),
+            },
+          },
+        };
+      }
+
       updateStream(
         Streams.all.UpsertRequest.parse({
           dashboards: definition.dashboards,
           queries: definition.queries,
           rules: definition.rules,
           stream: {
-            ...omit(definition.stream, 'name'),
+            ...stream,
             description: nextDescription,
           },
         })

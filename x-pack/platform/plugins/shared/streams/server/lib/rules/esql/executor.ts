@@ -71,7 +71,8 @@ export async function getRuleExecutor(
 
   const { createdAlerts, errors } = await alertWithPersistence(
     alerts,
-    true,
+    // keep refresh false to optimize performance as we don't need to read these alerts back immediately
+    false,
     MAX_ALERTS_PER_EXECUTION
   );
 

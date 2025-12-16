@@ -149,7 +149,7 @@ const casesConfiguration = {
 };
 const emptyInputFilters: Filter[] = [];
 
-const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
+const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlertsEnabled'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
   pageScope = PageScope.alerts,
@@ -289,7 +289,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [isEventRenderedView]);
 
   const alertColumns = useMemo(
-    () => (columns.length ? columns : getColumns(license)),
+    () => (columns?.length ? columns : getColumns(license)),
     [columns, license]
   );
 
@@ -461,6 +461,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
         <EuiDataGridContainer hideLastPage={false}>
           <AlertTableCellContextProvider tableId={tableType} sourcererScope={pageScope}>
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
+              key={isEventRenderedView ? 'eventRenderedView' : 'defaultView'}
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
@@ -478,6 +479,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
+              isMutedAlertsEnabled={false}
               pageSize={50}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
