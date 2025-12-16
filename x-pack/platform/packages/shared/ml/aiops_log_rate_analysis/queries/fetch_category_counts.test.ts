@@ -35,8 +35,6 @@ describe('getCategoryCountRequest', () => {
             { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
           ],
         },
-        size: 0,
-        track_total_hits: true,
       },
       size: 0,
       track_total_hits: false,
