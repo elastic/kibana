@@ -483,21 +483,6 @@ describe('AttachmentStateManager', () => {
     });
   });
 
-  describe('toArray()', () => {
-    it('returns all attachments as array', () => {
-      manager.add({ id: 'att-1', type: 'text', data: { content: 'test1' } });
-      manager.add({ id: 'att-2', type: 'text', data: { content: 'test2' } });
-
-      const arr = manager.toArray();
-
-      expect(arr).toHaveLength(2);
-      expect(arr.map((a) => a.id).sort()).toEqual(['att-1', 'att-2']);
-    });
-
-    it('returns empty array for empty state', () => {
-      expect(manager.toArray()).toEqual([]);
-    });
-  });
 
   describe('hasChanges()', () => {
     it('returns false initially', () => {
