@@ -481,7 +481,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       );
 
     return {
-      stream: await file.downloadContent(),
+      stream: await file
+        .downloadContent()
+        .catch(
+          catchAndWrapError.withMessage(
+            `Failed to download file content for file id [${scriptSo.attributes.file_id}] of script [${scriptId}]`
+          )
+        ),
       fileName: scriptSo.attributes.file_name,
       mimeType: file.data.mimeType,
     };
