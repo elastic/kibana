@@ -162,10 +162,7 @@ export function setupSavedObjects(
       const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
       return {
         bool: {
-          must: [
-            { term: { type: 'oauth_state' } },
-            { range: { expiresAt: { lt: oneHourAgo } } },
-          ],
+          must: [{ term: { type: 'oauth_state' } }, { range: { expiresAt: { lt: oneHourAgo } } }],
         },
       };
     },
