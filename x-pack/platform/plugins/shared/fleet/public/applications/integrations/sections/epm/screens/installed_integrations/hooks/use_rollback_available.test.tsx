@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { renderHook } from '@testing-library/react';
 
 import type { useLicense } from '../../../../../../../hooks';
 
@@ -163,7 +164,7 @@ describe('useRollbackAvailablePackages', () => {
       },
     ] as InstalledPackageUIPackageListItem[];
 
-    const result = useRollbackAvailablePackages(items);
+    const { result } = renderHook(() => useRollbackAvailablePackages(items));
 
     const expected = {
       'package-1': true,
@@ -171,6 +172,6 @@ describe('useRollbackAvailablePackages', () => {
       'package-3': false,
     };
 
-    expect(result).toEqual(expected);
+    expect(result.current).toEqual(expected);
   });
 });
