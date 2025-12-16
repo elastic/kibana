@@ -29,7 +29,8 @@ export const casesQueriesKeys = {
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
   caseFiles: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), 'files', params] as const,
-  caseFileStats: (id: string) => [...casesQueriesKeys.case(id), 'files', 'stats'] as const,
+  caseFileStats: (id: string, params?: unknown) =>
+    [...casesQueriesKeys.case(id), 'files', 'stats', params] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
@@ -76,7 +77,16 @@ export const inferenceKeys = {
   getConnectors: () => ['get-inference-connectors'] as const,
 };
 
-const DEFAULT_SEARCH_FIELDS = ['title', 'description', 'incremental_id.text'];
+const DEFAULT_SEARCH_FIELDS = [
+  'cases.title',
+  'cases.description',
+  'cases.incremental_id.text',
+  'cases.observables.value',
+  'cases.customFields.value',
+  'cases-comments.comment',
+  'cases-comments.alertId',
+  'cases-comments.eventId',
+];
 
 export const DEFAULT_FROM_DATE = 'now-30d';
 export const DEFAULT_TO_DATE = 'now';

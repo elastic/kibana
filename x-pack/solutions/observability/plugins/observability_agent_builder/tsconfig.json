@@ -20,14 +20,22 @@
     "@kbn/datemath",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/rule-registry-plugin",
-    "@kbn/observability-plugin",
+    "@kbn/observability-shared-plugin",
     "@kbn/core-http-server",
     "@kbn/data-views-plugin",
     "@kbn/metrics-data-access-plugin",
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-plugin",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/logging",
+    "@kbn/inference-common",
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-common"
   ],
   "exclude": ["target/**/*"]
 }
