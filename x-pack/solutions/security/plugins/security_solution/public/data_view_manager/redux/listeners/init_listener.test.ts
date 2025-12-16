@@ -17,6 +17,7 @@ import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../utils/create_default_data_view', () => ({
   createDefaultDataView: jest.fn(),
@@ -67,13 +68,21 @@ describe('createInitListener', () => {
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
 
-    listener = createInitListener({
-      dataViews: mockDataViewsService,
-      http,
-      application,
-      uiSettings,
-      spaces,
-    });
+    listener = createInitListener(
+      {
+        dataViews: mockDataViewsService,
+        http,
+        application,
+        uiSettings,
+        spaces,
+        storage: {
+          get: jest.fn(),
+          set: jest.fn(),
+          remove: jest.fn(),
+          clear: jest.fn(),
+        } as unknown as Storage,
+      }
+    );
   });
 
   it('should load the data views and dispatch further actions', async () => {

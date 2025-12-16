@@ -7,6 +7,7 @@
 
 import type { DataView, DataViewLazy, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { isEmpty } from 'lodash';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
@@ -27,12 +28,13 @@ import type { DataViewManagerScopeName } from '../../constants';
  * If a data view is successfully resolved, it dispatches an action to set it as selected for the current scope.
  * If an error occurs during fetching or creation, it dispatches an error action for the current scope.
  *
- * @param dependencies - The dependencies required for the listener, including the scope and DataViews service.
+ * @param dependencies - The dependencies required for the listener, including the scope, DataViews service, and storage.
  * @returns An object with the action creator and effect for Redux middleware.
  */
 export const createDataViewSelectedListener = (dependencies: {
   scope: DataViewManagerScopeName;
   dataViews: DataViewsServicePublic;
+  storage: Storage;
 }) => {
   return {
     actionCreator: selectDataViewAsync,
@@ -130,6 +132,12 @@ export const createDataViewSelectedListener = (dependencies: {
         }
 
         listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
+        if (action.payload.scope === PageScope.analyzer) {
+          dependencies.storage.set(
+            `securitySolution.dataViewManager.selectedDataView.${action.payload.scope}`,
+            resolvedIdToUse
+          );
+        }
       } else if (dataViewByIdError || adhocDataViewCreationError) {
         const err = dataViewByIdError || adhocDataViewCreationError;
         listenerApi.dispatch(
