@@ -201,7 +201,10 @@ export type ComposerSourceShorthand = string | ESQLSource | ComposerSourceWithAl
  * A shorthand for specifying a column in the query.
  * It can be a string a simple column or an array of strings for a nested column.
  */
-export type ComposerColumnShorthand = string | synth.SynthColumnShorthand;
+export type ComposerColumnShorthand =
+  | string
+  | synth.SynthColumnShorthand
+  | synth.SynthQualifiedColumnShorthand;
 
 /**
  * A shorthand for specifying a rename expression in the `RENAME` command.

@@ -17,8 +17,10 @@ import type {
   ESQLSource,
   ESQLStringLiteral,
 } from '../../types';
+import { isQualifiedColumnShorthand } from './holes';
 import { SynthLiteralFragment } from './synth_literal_fragment';
 import { SynthNode } from './synth_node';
+import type { SynthColumnShorthand, SynthQualifiedColumnShorthand } from './types';
 
 /**
  * Creates an ES|QL source node.
@@ -139,8 +141,22 @@ export const dpar = (name: string): ESQLParamLiteral => {
  * @param name The name of the column.
  * @returns ES|QL column node.
  */
-export const col = (name: string | string[]): ESQLColumn => {
-  const node = Builder.expression.column(name);
+export const col = (
+  name: string | SynthColumnShorthand | SynthQualifiedColumnShorthand
+): ESQLColumn => {
+  let columnName: string | SynthColumnShorthand;
+  let qualifierName: string | undefined;
+
+  // Identify qualified columns names tuples ['qualifier', ['fieldName']]
+  if (isQualifiedColumnShorthand(name)) {
+    qualifierName = name[0];
+    columnName = name[1];
+  } else {
+    // Simple or nested column
+    columnName = name as string | SynthColumnShorthand;
+  }
+
+  const node = Builder.expression.column(columnName, qualifierName);
 
   return SynthNode.from(node);
 };

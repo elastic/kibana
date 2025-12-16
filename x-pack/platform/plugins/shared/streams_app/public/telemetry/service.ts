@@ -29,6 +29,7 @@ import {
   streamsFeatureIdentificationDeletedEventType,
   streamsDescriptionGeneratedEventType,
   streamsProcessingSimulationSamplesFetchLatencyEventType,
+  streamsPartitioningSamplesFetchLatencyEventType,
   streamsTabVisitedEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
@@ -62,6 +63,7 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsFeatureIdentificationDeletedEventType);
     this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
     this.analytics.registerEventType(streamsProcessingSimulationSamplesFetchLatencyEventType);
+    this.analytics.registerEventType(streamsPartitioningSamplesFetchLatencyEventType);
     this.analytics.registerEventType(streamsTabVisitedEventType);
   }
 
