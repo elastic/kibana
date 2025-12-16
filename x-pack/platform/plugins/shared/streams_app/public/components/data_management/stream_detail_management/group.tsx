@@ -9,6 +9,9 @@ import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsContext } from '../../../hooks/use_streams_context';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { useKibana } from '../../../hooks/use_kibana';
 import { RedirectTo } from '../../redirect_to';
 import { Wrapper } from './wrapper';
 import { StreamDetailReferencesView } from '../../stream_detail_references_view/stream_detail_references_view';
@@ -35,6 +38,22 @@ export function GroupStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  const aiFeatures = useAIFeatures();
+  const {
+    dependencies: {
+      start: { onechat },
+    },
+  } = useKibana();
+
+  // Provide streams context to agent builder
+  useStreamsContext({
+    definition,
+    pageContext: 'management',
+    pageState: { currentTab: tab },
+    aiEnabled: aiFeatures?.enabled ?? false,
+    onechat,
+  });
 
   if (!groupStreams?.enabled) {
     return <RedirectTo path="/" />;

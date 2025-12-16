@@ -92,9 +92,24 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 
   // Agent Builder / Onechat integration
   const { browserApiTools, attachments } = useAgentBuilderIntegration({
-    streamName: definition.stream.name,
+    definition,
+    uiState: {
+      currentRuleId: currentRuleId ?? undefined,
+      editingForm:
+        routingSnapshot.matches({ ready: 'editingRule' }) && currentRuleId
+          ? (() => {
+              const rule = routing.find((r) => r.id === currentRuleId);
+              return rule ? { name: rule.destination, condition: rule.where } : undefined;
+            })()
+          : undefined,
+      routing: routing.map((rule) => ({
+        name: rule.destination,
+        condition: rule.where,
+      })),
+      isReordering: routingSnapshot.matches({ ready: 'reorderingRules' }),
+      suggestions,
+    },
     onSetPartitionSuggestions: setSuggestions,
-    aiEnabled: aiFeatures?.enabled ?? false,
   });
 
   // Configure the onechat flyout with stream context when the component mounts
@@ -104,6 +119,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         attachments,
         browserApiTools,
         sessionTag: `streams-partitioning-${definition.stream.name}`,
+        newConversation: false,
       });
 
       return () => {

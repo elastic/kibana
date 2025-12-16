@@ -9,10 +9,19 @@ import { z } from '@kbn/zod';
 import dedent from 'dedent';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { STREAMS_ATTACHMENT_TYPE_ID, STREAMS_SUGGEST_PARTITIONS_TOOL_ID } from '../constants';
+import type { Streams } from '@kbn/streams-schema';
+import {
+  STREAMS_ATTACHMENT_TYPE_ID,
+  STREAMS_SUGGEST_PARTITIONS_TOOL_ID,
+  STREAMS_SUGGEST_PIPELINE_TOOL_ID,
+  STREAMS_GET_PROCESSING_STEPS_TOOL_ID,
+  STREAMS_SUGGEST_GROK_PATTERN_TOOL_ID,
+  STREAMS_SUGGEST_DISSECT_PATTERN_TOOL_ID,
+} from '../constants';
 
 export const streamAttachmentDataSchema = z.object({
   streamName: z.string(),
+  streamDefinition: z.record(z.any()).optional(),
 });
 
 export type StreamAttachmentData = z.infer<typeof streamAttachmentDataSchema>;
@@ -54,21 +63,85 @@ export function createStreamAttachmentType(): AttachmentTypeDefinition<
             throw new Error(`Invalid stream attachment data for attachment ${attachment.id}`);
           }
 
-          const { streamName } = attachment.data;
+          const { streamName, streamDefinition } = attachment.data;
 
-          // Provide the stream name as context
-          // The agent can use the suggest_partitions tool to get full details and suggestions
-          const value = dedent(`
-            Stream Context:
-            - Stream Name: ${streamName}
-            
-            This is a Streams data stream. You can use the streams.suggest_partitions tool to:
-            1. Analyze the stream's data
-            2. Generate AI-powered partition suggestions based on log clustering
-            3. Help the user organize their data into logical partitions
-            
-            When the user asks about partitioning this stream, use the suggest_partitions tool with streamName: "${streamName}"
-          `);
+          // Build comprehensive stream context
+          const contextParts = [`Stream: ${streamName}`, ``];
+
+          if (streamDefinition) {
+            const def = streamDefinition as Streams.all.Definition;
+
+            if (def.description) {
+              contextParts.push(`Description: ${def.description}`);
+              contextParts.push('');
+            }
+
+            // Add ingest-specific information if available
+            if ('ingest' in def) {
+              const ingestDef = def as Streams.ingest.all.Definition;
+
+              // Processing information
+              if (ingestDef.ingest.processing?.steps) {
+                const steps = ingestDef.ingest.processing.steps;
+                contextParts.push(`Processing Pipeline (${steps.length} step(s)):`);
+                steps.forEach((step: any, idx: number) => {
+                  const stepType = Object.keys(step)[0];
+                  contextParts.push(`  ${idx + 1}. ${stepType}`);
+                });
+                contextParts.push('');
+              }
+
+              // Lifecycle information
+              if (ingestDef.ingest.lifecycle) {
+                contextParts.push(`Lifecycle: Configured`);
+                contextParts.push('');
+              }
+
+              // Routing information
+              if ('routing' in ingestDef && (ingestDef as any).routing) {
+                const routing = (ingestDef as any).routing || [];
+                if (routing.length > 0) {
+                  contextParts.push(`Routing Rules (${routing.length} rule(s)):`);
+                  routing.forEach((rule: any, idx: number) => {
+                    contextParts.push(
+                      `  ${idx + 1}. ${rule.destination || 'unknown'}: ${
+                        rule.condition || 'no condition'
+                      }`
+                    );
+                  });
+                  contextParts.push('');
+                }
+              }
+
+              // Field mappings
+              if ('classic' in ingestDef.ingest && ingestDef.ingest.classic?.field_overrides) {
+                const overrides = Object.keys(ingestDef.ingest.classic.field_overrides);
+                if (overrides.length > 0) {
+                  contextParts.push(`Field Overrides: ${overrides.length} field(s) customized`);
+                  contextParts.push('');
+                }
+              }
+            }
+          }
+
+          contextParts.push('Available Tools:');
+          contextParts.push(
+            '- streams.suggest_partitions: Generate AI-powered partition suggestions based on log clustering'
+          );
+          contextParts.push(
+            '- streams.suggest_pipeline: Generate complete processing pipeline with parsing and enrichment'
+          );
+          contextParts.push(
+            '- streams.get_processing_steps: View current processing pipeline configuration'
+          );
+          contextParts.push(
+            '- streams.suggest_grok_pattern: Analyze sample logs and generate grok patterns for parsing'
+          );
+          contextParts.push(
+            '- streams.suggest_dissect_pattern: Generate dissect patterns for structured log parsing'
+          );
+
+          const value = dedent(contextParts.join('\n'));
 
           return {
             type: 'text' as const,
@@ -77,12 +150,28 @@ export function createStreamAttachmentType(): AttachmentTypeDefinition<
         },
       };
     },
-    getTools: () => [STREAMS_SUGGEST_PARTITIONS_TOOL_ID],
+    getTools: () => [
+      STREAMS_SUGGEST_PARTITIONS_TOOL_ID,
+      STREAMS_SUGGEST_PIPELINE_TOOL_ID,
+      STREAMS_GET_PROCESSING_STEPS_TOOL_ID,
+      STREAMS_SUGGEST_GROK_PATTERN_TOOL_ID,
+      STREAMS_SUGGEST_DISSECT_PATTERN_TOOL_ID,
+    ],
     getAgentDescription: () => {
       return dedent(`
         A Stream attachment provides context about an Elasticsearch data stream managed by the Streams plugin.
-        Use the streams.suggest_partitions tool to analyze the stream and generate AI-powered partition suggestions.
-        After generating suggestions, use the streams_set_partition_suggestions browser tool to display them in the UI.
+        
+        The attachment includes comprehensive stream information such as name, description, lifecycle settings, 
+        processing pipeline details, routing rules, and field mappings.
+        
+        Use the available tools to:
+        - Analyze the stream and suggest partitions (streams.suggest_partitions)
+        - Generate complete processing pipelines (streams.suggest_pipeline)
+        - View and modify processing steps (streams.get_processing_steps)
+        - Generate grok patterns for log parsing (streams.suggest_grok_pattern)
+        - Generate dissect patterns for structured logs (streams.suggest_dissect_pattern)
+        
+        After generating suggestions or patterns, use the appropriate browser tools to display them in the UI for user review.
       `);
     },
   };

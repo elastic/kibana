@@ -6,4 +6,9 @@
  */
 
 export { createSuggestPartitionsTool } from './suggest_partitions';
-
+export { createSuggestPipelineTool } from './suggest_pipeline';
+export { createGetProcessingStepsTool } from './get_processing_steps';
+export { createSuggestGrokPatternTool } from './suggest_grok_pattern';
+export { createSuggestDissectPatternTool } from './suggest_dissect_pattern';
+export { createGetStreamlangDocsTool } from './get_streamlang_docs';
+export { createSimulatePipelineTool } from './simulate_pipeline';

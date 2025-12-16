@@ -12,6 +12,9 @@ import { StreamDetailFailureStore } from './failure_store';
 import { StreamDetailGeneralData } from './general_data';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useStreamsContext } from '../../../hooks/use_streams_context';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function StreamDetailLifecycle({
   definition,
@@ -22,6 +25,20 @@ export function StreamDetailLifecycle({
 }) {
   const { timeState } = useTimefilter();
   const data = useDataStreamStats({ definition, timeState });
+  const aiFeatures = useAIFeatures();
+  const {
+    dependencies: {
+      start: { onechat },
+    },
+  } = useKibana();
+
+  // Provide streams context to agent builder
+  useStreamsContext({
+    definition,
+    pageContext: 'lifecycle',
+    aiEnabled: aiFeatures?.enabled ?? false,
+    onechat,
+  });
 
   return (
     <EuiFlexGroup gutterSize="m" direction="column">

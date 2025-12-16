@@ -24,6 +24,8 @@ import React from 'react';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
+import { useStreamsContext } from '../../../hooks/use_streams_context';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
@@ -46,6 +48,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   const context = useKibana();
   const { loading } = useStreamDetail();
   const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
+  const aiFeatures = useAIFeatures();
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,
@@ -72,6 +75,19 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     definitionFields.forEach((field) => map.add(field.name));
     return map;
   }, [definitionFields]);
+
+  // Provide streams context to agent builder with current schema state
+  useStreamsContext({
+    definition,
+    pageContext: 'schema_editor',
+    pageState: {
+      pendingChangesCount,
+      selectedFields,
+      totalFields: fields.length,
+    },
+    aiEnabled: aiFeatures?.enabled ?? false,
+    onechat: context.dependencies.start.onechat,
+  });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: pendingChangesCount > 0,

@@ -44,6 +44,9 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { buildUpsertStreamRequestPayload } from './utils';
 import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { useEnrichmentIntegration } from './agent_builder_integration';
+import type { EnrichmentUIState } from './agent_builder_integration';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -62,6 +65,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
     data,
     streams: { streamsRepositoryClient },
   } = dependencies.start;
+  const { onechat } = dependencies.start;
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
@@ -82,6 +86,12 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
 
 export function StreamDetailEnrichmentContentImpl() {
   const context = useKibana();
+  const aiFeatures = useAIFeatures();
+  const {
+    dependencies: {
+      start: { onechat },
+    },
+  } = context;
   const isInteractiveMode = useStreamEnrichmentSelector(selectIsInteractiveMode);
   const isYamlMode = !isInteractiveMode;
   const interactiveModeWithStepUnderEdit = useOptionalInteractiveModeSelector(
@@ -91,7 +101,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const { appParams, core } = context;
 
   const getStreamEnrichmentState = useGetStreamEnrichmentState();
-  const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
+  const { resetChanges, saveChanges, resetSteps } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
@@ -207,6 +217,53 @@ export function StreamDetailEnrichmentContentImpl() {
       body,
     });
   };
+
+  // Collect UI state for agent builder integration
+  const simulationState = useSimulatorSelector((state) => state.context);
+  const enrichmentUIState: EnrichmentUIState = React.useMemo(
+    () => ({
+      isInteractiveMode,
+      currentProcessors: nextDSL?.steps || [],
+      editingStep: interactiveModeWithStepUnderEdit,
+      isPipelineSuggestionActive: isSuggestionVisible,
+      simulation: simulationState,
+      hasChanges,
+    }),
+    [
+      isInteractiveMode,
+      nextDSL,
+      interactiveModeWithStepUnderEdit,
+      isSuggestionVisible,
+      simulationState,
+      hasChanges,
+    ]
+  );
+
+  // Initialize agent builder integration
+  const { browserApiTools, attachments } = useEnrichmentIntegration({
+    definition,
+    uiState: enrichmentUIState,
+    onUpdateProcessingSteps: (processors) => {
+      // Convert processors array to steps format
+      resetSteps(processors as any);
+    },
+  });
+
+  // Configure the onechat flyout with stream enrichment context when the component mounts
+  React.useEffect(() => {
+    if (onechat && aiFeatures?.enabled) {
+      onechat.setConversationFlyoutActiveConfig({
+        attachments,
+        browserApiTools,
+        sessionTag: `streams-enrichment-${definition.stream.name}`,
+        newConversation: false,
+      });
+
+      return () => {
+        onechat.clearConversationFlyoutActiveConfig();
+      };
+    }
+  }, [onechat, attachments, browserApiTools, definition.stream.name, aiFeatures?.enabled]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,

@@ -110,15 +110,17 @@ After getting suggestions, use the streams_set_partition_suggestions browser too
         const inferenceClient = pluginsStart.inference.getClient({ request: context.request });
 
         // Fetch the stream definition from the streams storage index
-        const searchResult = await scopedClusterClient.asCurrentUser.search<Streams.all.Definition>({
-          index: STREAMS_INDEX,
-          query: {
-            term: {
-              _id: streamName,
+        const searchResult = await scopedClusterClient.asCurrentUser.search<Streams.all.Definition>(
+          {
+            index: STREAMS_INDEX,
+            query: {
+              term: {
+                _id: streamName,
+              },
             },
-          },
-          size: 1,
-        });
+            size: 1,
+          }
+        );
 
         if (searchResult.hits.hits.length === 0) {
           return {

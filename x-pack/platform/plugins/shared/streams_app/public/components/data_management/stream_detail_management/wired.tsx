@@ -10,6 +10,9 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useStreamsContext } from '../../../hooks/use_streams_context';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { useKibana } from '../../../hooks/use_kibana';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -61,9 +64,25 @@ export function WiredStreamDetailManagement({
     features: { attachments },
   } = useStreamsPrivileges();
 
+  const aiFeatures = useAIFeatures();
+  const {
+    dependencies: {
+      start: { onechat },
+    },
+  } = useKibana();
+
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
+  });
+
+  // Provide streams context to agent builder
+  useStreamsContext({
+    definition,
+    pageContext: 'management',
+    pageState: { currentTab: tab },
+    aiEnabled: aiFeatures?.enabled ?? false,
+    onechat,
   });
 
   if (!definition.privileges.view_index_metadata) {

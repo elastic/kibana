@@ -54,10 +54,20 @@ When a pre-generated parsing processor is provided, focus on post-parsing steps:
 
 # Tools Available
 
-1. **`simulate_pipeline(pipeline=Pipeline)`**
+1. **`suggest_grok_pattern(streamName, guidance?)`** [EXTERNAL TOOL - REQUIRED FOR GROK]
+   ⚠️ CRITICAL: You MUST call this tool to generate grok patterns. DO NOT write grok patterns manually.
+   Analyzes sample documents and generates correct grok patterns automatically. Grok patterns are extremely complex and error-prone when written manually.
+   Returns complete grok processor config in streamlang format ready to use.
+
+2. **`suggest_dissect_pattern(streamName, guidance?)`** [EXTERNAL TOOL - REQUIRED FOR DISSECT]
+   ⚠️ CRITICAL: You MUST call this tool to generate dissect patterns. DO NOT write dissect patterns manually.
+   Analyzes sample documents and generates correct dissect patterns automatically. Dissect patterns require precise delimiter handling.
+   Returns complete dissect processor config in streamlang format ready to use.
+
+3. **`simulate_pipeline(pipeline=Pipeline)`**
    Simulate a complete ingest pipeline with processors. First performs structural validation (processor configuration, required fields, error handling). If validation passes, the tool automatically simulates the pipeline against the entire data stream to validate parsing coverage, timestamp success rate, type correctness, and failure behavior. Returns validation results and simulation results with detailed metrics per document and aggregate statistics.
 
-2. **`commit_pipeline(message=string)`**
+4. **`commit_pipeline(message=string)`**
    Commit the validated pipeline and complete the workflow.
 
 # Important: Pipeline Validation
@@ -85,10 +95,20 @@ Use this feedback to:
 # Workflow
 
 1. **Analyze:** Review the initial dataset analysis to understand field types, timestamps, likely PII/secrets, and cardinality risks. **If a pre-generated parsing processor is provided, the dataset analysis reflects parsed documents** - use this to determine what additional processors are needed. Identify fields that have incorrect or unmapped types and need explicit type conversions to match the target schema (ECS or OTel).
-2. **Design:** Compose stages with clear contracts. **If a pre-generated parsing processor is provided, include it as the first processor (immutable)**. Then add processors for date normalization, type conversions, field cleanup, and enrichment based on the parsed document structure.
-3. **Simulate:** Call `simulate_pipeline` to check structural integrity and simulate against the data stream. The tool automatically simulates the pipeline after validation passes, providing detailed metrics on parsing coverage, timestamp success rate, and failure behavior.
-4. **Refine:** If a processor fails on ALL documents (100% failure rate), it is fundamentally broken—remove it or completely redesign it. Do not keep retrying minor variations of a consistently failing processor.
-5. **Commit:** When validation and simulation pass, call `commit_pipeline` to finalize.
+
+2. **Generate Parsing Patterns (if needed):** 
+   - ⚠️ If you need grok parsing: Call `suggest_grok_pattern` tool - DO NOT write grok patterns manually
+   - ⚠️ If you need dissect parsing: Call `suggest_dissect_pattern` tool - DO NOT write dissect patterns manually
+   - These tools analyze actual data and generate correct patterns automatically
+   - Use the returned processor configs directly in your pipeline
+
+3. **Design:** Compose stages with clear contracts. **If a pre-generated parsing processor is provided, include it as the first processor (immutable)**. If you generated a pattern with suggest_grok_pattern or suggest_dissect_pattern, use that as your first processor. Then add processors for date normalization, type conversions, field cleanup, and enrichment based on the parsed document structure.
+
+4. **Simulate:** Call `simulate_pipeline` to check structural integrity and simulate against the data stream. The tool automatically simulates the pipeline after validation passes, providing detailed metrics on parsing coverage, timestamp success rate, and failure behavior.
+
+5. **Refine:** If a processor fails on ALL documents (100% failure rate), it is fundamentally broken—remove it or completely redesign it. For grok/dissect failures, call the suggest_grok_pattern or suggest_dissect_pattern tool again with better guidance. Do not keep retrying manual patterns.
+
+6. **Commit:** When validation and simulation pass, call `commit_pipeline` to finalize.
 
 # Acceptance Gates (checked via `simulate_pipeline`)
 
@@ -106,8 +126,25 @@ Use this feedback to:
 
 Name: {{stream.name}}
 
+If the stream name is just logs or starts with "logs.", then it's a "wired" stream. Make sure to follow the otel naming scheme and put
+all new fields in attributes.* or resource.attributes.*, even temporary ones
+
 Description:
 {{{stream.description}}}
+
+{{#guidance}}
+
+---
+
+# User Guidance
+
+The user has provided the following guidance for pipeline generation:
+
+{{{guidance}}}
+
+**Important:** Consider this guidance when designing the pipeline. The user's guidance should influence processor selection, field extraction priorities, and overall pipeline structure. However, you must still satisfy all acceptance gates and schema requirements.
+
+{{/guidance}}
 
 ---
 

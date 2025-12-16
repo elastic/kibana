@@ -11,6 +11,7 @@ import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browse
 import type { Condition } from '@kbn/streamlang';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { Streams } from '@kbn/streams-schema';
 import { STREAMS_ATTACHMENT_TYPE_ID } from '@kbn/streams-plugin/common';
 
 /**
@@ -29,21 +30,54 @@ const setPartitionSuggestionsSchema = z.object({
 
 export type PartitionSuggestionFromTool = z.infer<typeof partitionSchema>;
 
+/**
+ * Current UI state for routing page
+ */
+export interface RoutingUIState {
+  /**
+   * Currently editing rule ID
+   */
+  currentRuleId?: string;
+  /**
+   * Form values for rule being edited
+   */
+  editingForm?: {
+    name: string;
+    condition: Condition;
+  };
+  /**
+   * Current routing rules
+   */
+  routing: Array<{
+    name: string;
+    condition: Condition;
+  }>;
+  /**
+   * Whether user is reordering rules
+   */
+  isReordering: boolean;
+  /**
+   * Current suggestions being reviewed
+   */
+  suggestions?: Array<{
+    name: string;
+    condition: Condition;
+  }>;
+}
+
 export interface UseAgentBuilderIntegrationOptions {
   /**
-   * The current stream name
+   * Full stream definition
    */
-  streamName: string;
+  definition: Streams.ingest.all.GetResponse;
+  /**
+   * Current UI editing state
+   */
+  uiState: RoutingUIState;
   /**
    * Callback to set partition suggestions in the UI
    */
-  onSetPartitionSuggestions: (
-    partitions: Array<{ name: string; condition: Condition }>
-  ) => void;
-  /**
-   * Whether AI features are enabled
-   */
-  aiEnabled: boolean;
+  onSetPartitionSuggestions: (partitions: Array<{ name: string; condition: Condition }>) => void;
 }
 
 export interface UseAgentBuilderIntegrationResult {
@@ -62,17 +96,17 @@ export interface UseAgentBuilderIntegrationResult {
 }
 
 /**
- * Hook to integrate with the Agent Builder / Onechat system.
+ * Hook to integrate with the Agent Builder / Onechat system for routing page.
  *
  * Provides:
  * - Browser API tool for setting partition suggestions from the agent
- * - Stream attachment for providing context to the agent
+ * - Full stream attachment with current UI state for providing context to the agent
  * - Helper to open the onechat flyout with proper configuration
  */
 export function useAgentBuilderIntegration({
-  streamName,
+  definition,
+  uiState,
   onSetPartitionSuggestions,
-  aiEnabled,
 }: UseAgentBuilderIntegrationOptions): UseAgentBuilderIntegrationResult {
   // Use a ref to store the latest callback to avoid recreating the tool
   const callbackRef = useRef(onSetPartitionSuggestions);
@@ -110,23 +144,43 @@ Each partition should have a name and a routing condition.`,
   );
 
   const browserApiTools = useMemo(
-    () => (aiEnabled ? [setPartitionSuggestionsTool] : []),
-    [aiEnabled, setPartitionSuggestionsTool]
+    () => [setPartitionSuggestionsTool],
+    [setPartitionSuggestionsTool]
   );
 
   /**
-   * Stream attachment providing context about the current stream to the agent
+   * Stream attachment that provides comprehensive context about the current stream
+   * and UI state to the agent
    */
-  const attachments: AttachmentInput[] = useMemo(
-    () => [
+  const attachments: AttachmentInput[] = useMemo(() => {
+    // Build comprehensive context including current UI state
+    const contextData: Record<string, any> = {
+      streamName: definition.stream.name,
+      streamDefinition: definition.stream,
+      currentUIState: {
+        editingRule: uiState.currentRuleId
+          ? {
+              ruleId: uiState.currentRuleId,
+              form: uiState.editingForm,
+            }
+          : undefined,
+        existingRules: uiState.routing.map((rule) => ({
+          name: rule.name,
+          condition: rule.condition,
+        })),
+        isReordering: uiState.isReordering,
+        pendingSuggestions: uiState.suggestions,
+      },
+    };
+
+    return [
       {
         type: STREAMS_ATTACHMENT_TYPE_ID,
-        data: { streamName },
+        data: contextData,
         hidden: true, // Context-only, not shown in the chat UI
       },
-    ],
-    [streamName]
-  );
+    ];
+  }, [definition, uiState]);
 
   /**
    * Opens the onechat flyout with stream context and browser tools configured
@@ -136,10 +190,11 @@ Each partition should have a name and a routing condition.`,
       onechat.openConversationFlyout({
         attachments,
         browserApiTools,
-        sessionTag: `streams-partitioning-${streamName}`,
+        sessionTag: `streams-partitioning-${definition.stream.name}`,
+        newConversation: false,
       });
     },
-    [attachments, browserApiTools, streamName]
+    [attachments, browserApiTools, definition.stream.name]
   );
 
   return {
@@ -154,22 +209,42 @@ Each partition should have a name and a routing condition.`,
  * of stream partitioning.
  */
 export function createOnechatFlyoutConfig({
-  streamName,
+  definition,
+  uiState,
   browserApiTools,
 }: {
-  streamName: string;
+  definition: Streams.ingest.all.GetResponse;
+  uiState: RoutingUIState;
   browserApiTools: Array<BrowserApiToolDefinition<any>>;
 }) {
+  const contextData: Record<string, any> = {
+    streamName: definition.stream.name,
+    streamDefinition: definition.stream,
+    currentUIState: {
+      editingRule: uiState.currentRuleId
+        ? {
+            ruleId: uiState.currentRuleId,
+            form: uiState.editingForm,
+          }
+        : undefined,
+      existingRules: uiState.routing.map((rule) => ({
+        name: rule.name,
+        condition: rule.condition,
+      })),
+      isReordering: uiState.isReordering,
+      pendingSuggestions: uiState.suggestions,
+    },
+  };
+
   return {
     attachments: [
       {
         type: STREAMS_ATTACHMENT_TYPE_ID,
-        data: { streamName },
+        data: contextData,
         hidden: true,
       },
     ] as AttachmentInput[],
     browserApiTools,
-    sessionTag: `streams-partitioning-${streamName}`,
+    sessionTag: `streams-partitioning-${definition.stream.name}`,
   };
 }
-

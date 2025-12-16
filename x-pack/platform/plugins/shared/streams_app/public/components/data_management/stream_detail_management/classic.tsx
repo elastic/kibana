@@ -11,6 +11,9 @@ import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '
 import { StreamDescription } from '../../stream_detail_features/stream_description';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useStreamsContext } from '../../../hooks/use_streams_context';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { useKibana } from '../../../hooks/use_kibana';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
@@ -62,9 +65,25 @@ export function ClassicStreamDetailManagement({
     features: { attachments },
   } = useStreamsPrivileges();
 
+  const aiFeatures = useAIFeatures();
+  const {
+    dependencies: {
+      start: { onechat },
+    },
+  } = useKibana();
+
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
+  });
+
+  // Provide streams context to agent builder
+  useStreamsContext({
+    definition,
+    pageContext: 'management',
+    pageState: { currentTab: tab },
+    aiEnabled: aiFeatures?.enabled ?? false,
+    onechat,
   });
 
   if (!definition.data_stream_exists) {
