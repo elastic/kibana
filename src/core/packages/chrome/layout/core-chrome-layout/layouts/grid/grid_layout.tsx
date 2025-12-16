@@ -82,10 +82,9 @@ export class GridLayout implements LayoutService {
 
     // in project style, the project app menu is displayed at the top of application area
     const projectAppMenu = chrome.getProjectAppMenuComponent();
-    const hasAppMenu$ = combineLatest([
-      application.currentActionMenu$,
-      application.currentAppMenu$,
-    ]).pipe(map(([menu, appMenu]) => !!menu || !!appMenu));
+    const hasAppMenu$ = combineLatest([application.currentActionMenu$, chrome.getAppMenu$()]).pipe(
+      map(([menu, appMenu]) => !!menu || !!appMenu)
+    );
 
     const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
 

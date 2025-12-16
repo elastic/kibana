@@ -24,7 +24,6 @@ describe('AppContainer', () => {
   const appId = 'someApp';
   const setAppLeaveHandler = jest.fn();
   const setAppActionMenu = jest.fn();
-  const setAppMenu = jest.fn();
   const setIsMounting = jest.fn();
   const theme$ = themeServiceMock.createTheme$();
 
@@ -87,7 +86,6 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
-        setAppMenu={setAppMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -103,14 +101,14 @@ describe('AppContainer', () => {
     });
 
     expect(mounter.mount).toHaveBeenCalledTimes(1);
-    const mountCall = (mounter.mount as jest.Mock).mock.calls[0][0];
-    expect(mountCall.appBasePath).toBe('/base-path');
-    expect(mountCall.theme$).toBe(theme$);
-    expect(mountCall.history).toBeInstanceOf(ScopedHistory);
-    expect(mountCall.element).toBeInstanceOf(HTMLElement);
-    expect(typeof mountCall.onAppLeave).toBe('function');
-    expect(typeof mountCall.setHeaderActionMenu).toBe('function');
-    expect(typeof mountCall.setAppMenu).toBe('function');
+    expect(mounter.mount).toHaveBeenCalledWith({
+      appBasePath: '/base-path',
+      history: expect.any(ScopedHistory),
+      element: expect.any(HTMLElement),
+      theme$,
+      onAppLeave: expect.any(Function),
+      setHeaderActionMenu: expect.any(Function),
+    });
   });
 
   it('should hide the "not found" page before mounting the route', async () => {
@@ -125,7 +123,6 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
-        setAppMenu={setAppMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -168,7 +165,6 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
-        setAppMenu={setAppMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -203,7 +199,6 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
-        setAppMenu={setAppMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -240,7 +235,6 @@ describe('AppContainer', () => {
             mounter={mounter}
             setAppLeaveHandler={setAppLeaveHandler}
             setAppActionMenu={setAppActionMenu}
-            setAppMenu={setAppMenu}
             setIsMounting={setIsMounting}
             createScopedHistory={(appPath: string) =>
               // Create a history using the appPath as the current location

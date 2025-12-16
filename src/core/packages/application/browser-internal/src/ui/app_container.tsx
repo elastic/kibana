@@ -24,7 +24,6 @@ import {
   type ScopedHistory,
 } from '@kbn/core-application-browser';
 import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -37,7 +36,6 @@ interface Props {
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
-  setAppMenu: (appId: string, config: AppMenuConfig) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
   showPlainSpinner?: boolean;
@@ -49,7 +47,6 @@ export const AppContainer: FC<Props> = ({
   appPath,
   setAppLeaveHandler,
   setAppActionMenu,
-  setAppMenu,
   createScopedHistory,
   appStatus,
   setIsMounting,
@@ -91,7 +88,6 @@ export const AppContainer: FC<Props> = ({
             theme$,
             onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
-            setAppMenu: (config) => setAppMenu(appId, config),
           })) || null;
       } catch (e) {
         setError(e);
@@ -115,7 +111,6 @@ export const AppContainer: FC<Props> = ({
     createScopedHistory,
     setAppLeaveHandler,
     setAppActionMenu,
-    setAppMenu,
     appPath,
     setIsMounting,
     theme$,

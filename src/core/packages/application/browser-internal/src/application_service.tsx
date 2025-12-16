@@ -12,6 +12,7 @@ import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscri
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
+
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
@@ -32,7 +33,6 @@ import type {
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -97,7 +97,6 @@ interface AppUpdaterWrapper {
 interface AppInternalState {
   leaveHandler?: AppLeaveHandler;
   actionMenu?: MountPoint;
-  appMenu?: AppMenuConfig;
 }
 
 /**
@@ -111,7 +110,6 @@ export class ApplicationService {
   private readonly appInternalStates = new Map<string, AppInternalState>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
-  private currentAppMenu$ = new BehaviorSubject<AppMenuConfig | undefined>({});
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject<void>();
@@ -332,7 +330,6 @@ export class ApplicationService {
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
-      currentAppMenu$: this.currentAppMenu$.pipe(distinctUntilChanged(), takeUntil(this.stop$)),
       history: this.history!,
       isAppRegistered: (appId: string): boolean => {
         return applications$.value.get(appId) !== undefined;
@@ -385,7 +382,6 @@ export class ApplicationService {
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
-            setAppMenu={this.setAppMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
             hasCustomBranding$={this.hasCustomBranding$}
           />
@@ -409,20 +405,10 @@ export class ApplicationService {
     this.refreshCurrentActionMenu();
   };
 
-  private setAppMenu = (appId: string, config: AppMenuConfig) => {
-    this.appInternalStates.set(appId, {
-      ...(this.appInternalStates.get(appId) ?? {}),
-      appMenu: config,
-    });
-    this.refreshCurrentActionMenu();
-  };
-
   private refreshCurrentActionMenu = () => {
     const appId = this.currentAppId$.getValue();
     const currentActionMenu = appId ? this.appInternalStates.get(appId)?.actionMenu : undefined;
-    const currentAppMenu = appId ? this.appInternalStates.get(appId)?.appMenu : undefined;
     this.currentActionMenu$.next(currentActionMenu);
-    this.currentAppMenu$.next(currentAppMenu);
   };
 
   private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
@@ -468,7 +454,6 @@ export class ApplicationService {
     this.stop$.next();
     this.currentAppId$.complete();
     this.currentActionMenu$.complete();
-    this.currentAppMenu$.complete();
     this.statusUpdaters$.complete();
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);

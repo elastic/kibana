@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-capabilities-common'
   - '@kbn/core-application-common'
-  - '@kbn/core-chrome-app-menu-components'
 tags:
   - shared-browser
   - package

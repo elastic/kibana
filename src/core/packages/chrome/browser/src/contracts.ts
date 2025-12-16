@@ -22,6 +22,7 @@ import type {
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -95,6 +96,38 @@ export interface ChromeStart {
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
+
+  /**
+   * Get an observable of the current app menu configuration
+   */
+  getAppMenu$(): Observable<AppMenuConfig | undefined>;
+
+  /**
+   * Set the app menu configuration for the current application.
+   * This allows applications to define action buttons and menus that appear in the chrome header.
+   *
+   * @param config - The app menu configuration object, or undefined to clear the menu
+   *
+   * @example
+   * ```ts
+   * // Set a simple app menu with action buttons
+   * core.chrome.setAppMenu({
+   *   items: [
+   *     {
+   *       id: 'save',
+   *       label: 'Save',
+   *       iconType: 'save',
+   *       order: 1,
+   *       run: () => handleSave(),
+   *     },
+   *   ],
+   * });
+   *
+   * // Clear the app menu
+   * core.chrome.setAppMenu();
+   * ```
+   */
+  setAppMenu(config?: AppMenuConfig): void;
 
   /**
    * Get an observable of the current extensions appended to breadcrumbs

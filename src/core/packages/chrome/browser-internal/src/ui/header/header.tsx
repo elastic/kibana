@@ -33,6 +33,7 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { CollapsibleNav } from './collapsible_nav';
@@ -74,6 +75,7 @@ export interface HeaderProps {
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
   isFixed: boolean;
+  appMenu$?: Observable<AppMenuConfig | undefined>;
 }
 
 export function Header({
@@ -208,10 +210,7 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderActionMenu
-                  mounter={headerActionMenuMounter}
-                  config={application.currentAppMenu$}
-                />
+                <HeaderActionMenu mounter={headerActionMenuMounter} config={observables.appMenu$} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

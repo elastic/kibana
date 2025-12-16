@@ -21,7 +21,6 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -34,7 +33,6 @@ interface Props {
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
-  setAppMenu: (appId: string, config: AppMenuConfig) => void;
   setIsMounting: (isMounting: boolean) => void;
   hasCustomBranding$?: Observable<boolean>;
 }
@@ -50,7 +48,6 @@ export const AppRouter: FunctionComponent<Props> = ({
   theme$,
   setAppLeaveHandler,
   setAppActionMenu,
-  setAppMenu,
   appStatuses$,
   setIsMounting,
   hasCustomBranding$,
@@ -83,7 +80,6 @@ export const AppRouter: FunctionComponent<Props> = ({
                       mounter,
                       setAppLeaveHandler,
                       setAppActionMenu,
-                      setAppMenu,
                       setIsMounting,
                       theme$,
                       showPlainSpinner,
@@ -113,7 +109,6 @@ export const AppRouter: FunctionComponent<Props> = ({
                       mounter,
                       setAppLeaveHandler,
                       setAppActionMenu,
-                      setAppMenu,
                       setIsMounting,
                       theme$,
                       showPlainSpinner,

@@ -10,7 +10,6 @@
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { AppLeaveHandler } from './app_leave';
 import type { ScopedHistory } from './scoped_history';
 
@@ -203,15 +202,8 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    *    return renderApp({ element, history });
    * }
    * ```
-   * @deprecated Use {@link AppMountParameters.setAppMenu} instead.
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
-
-  /**
-   * A function that can be used to set the mount point used to populate the application action container
-   * in the chrome app menu.
-   */
-  setAppMenu: (config: AppMenuConfig) => void;
 
   /**
    * An observable emitting {@link CoreTheme | Core's theme}.
