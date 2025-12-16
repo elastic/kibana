@@ -12714,6 +12714,10 @@
                 "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
               },
               {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_tags.tsx"
               },
@@ -12824,10 +12828,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
               },
               {
                 "plugin": "@kbn/elastic-assistant",
