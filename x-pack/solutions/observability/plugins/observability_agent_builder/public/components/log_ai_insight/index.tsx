@@ -15,7 +15,6 @@ import type { ObservabilityAgentBuilderPluginStartDependencies } from '../../typ
 export const LogEntryAiInsight = dynamic(() => import('./log_entry_ai_insight'));
 
 export function createLogAIInsight(
-  { onechat }: Pick<LogAiInsightProps, 'onechat'>,
   core: CoreStart,
   plugins: ObservabilityAgentBuilderPluginStartDependencies
 ) {
@@ -26,7 +25,7 @@ export function createLogAIInsight(
     });
     return (
       <KibanaReactContextProvider>
-        <LogEntryAiInsight onechat={onechat} {...props} />
+        <LogEntryAiInsight onechat={plugins.onechat} {...props} />
       </KibanaReactContextProvider>
     );
   };

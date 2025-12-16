@@ -44,20 +44,12 @@ export class ObservabilityAgentBuilderPlugin
     core: CoreStart,
     plugins: ObservabilityAgentBuilderPluginStartDependencies
   ): ObservabilityAgentBuilderPluginPublicStart {
-    if (plugins.onechat) {
-      const LogAIInsight = createLogAIInsight(
-        {
-          onechat: plugins.onechat,
-        },
-        core,
-        plugins
-      );
+    const LogAIInsight = createLogAIInsight(core, plugins);
 
-      plugins.discoverShared.features.registry.register({
-        id: 'observability-logs-ai-insight',
-        render: createLogsAIInsightRenderer(LogAIInsight),
-      });
-    }
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-logs-ai-insight',
+      render: createLogsAIInsightRenderer(LogAIInsight),
+    });
     return {};
   }
 
