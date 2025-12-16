@@ -20,7 +20,7 @@ import type {
 import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
-import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/promps_config_service';
+import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
