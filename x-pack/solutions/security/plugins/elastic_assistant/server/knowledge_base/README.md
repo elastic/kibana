@@ -12,33 +12,7 @@ The assets are stored in their original source format, so `.asciidoc` for docume
 
 NOTE: When adding knowledge base assets, please ensure that the source files and directories are not excluded as part of the Kibana build process, otherwise things will work fine locally, but will fail once a distribution has been built (i.e. cloud deployments). See `src/dev/build/tasks/copy_legacy_source_task.ts` for details on exclusion patterns.
 
-## Security Labs Content
-
-### CDN Distribution (Preferred)
-
-Security Labs content can now be distributed via the Kibana Knowledge Base Artifacts CDN. This is the preferred method as it:
-- Allows for independent updates without Kibana releases
-- Uses pre-embedded content with ELSER for faster installation
-- Reduces the Kibana build artifact size
-
-When Security Labs content is installed via CDN, the bundled content loading is automatically skipped.
-
-**To install Security Labs via CDN:**
-```
-POST kbn://internal/product_doc_base/install
-{
-  "inferenceId": ".elser-2-elasticsearch",
-  "resourceType": "security_labs"
-}
-```
-
-The CDN artifacts use date-based versioning (e.g., `security-labs-2024.12.11.zip`) independent of Kibana versions.
-
-### Bundled Content (Fallback)
-
-If Security Labs is not installed via CDN, the bundled content in this directory will be used as a fallback. The bundled content is encoded to prevent antivirus false positives (see [issue](https://github.com/elastic/kibana/issues/202114)).
-
-#### Adding new bundled security labs content
+#### Adding new security labs content
 
 When adding new security labs content ensure that the content follows the same structure as the existing documents. The header of the files must be valid yaml format as described bellow and must be fenced by `---`.
 
@@ -82,9 +56,8 @@ cd x-pack/solutions/security/plugins/elastic_assistant
 yarn encode-security-labs-content
 ```
 
+Files are encoded due to this [issue](https://github.com/elastic/kibana/issues/202114).
+
 ### Future
 
-The long-term plan is to fully transition to CDN distribution for Security Labs content. Once that is complete:
-- The bundled content in this directory can be removed
-- Manual content updates will no longer be needed
-- Updates will be handled by generating new CDN artifacts from the source GitHub repository
+Once asset format and chunking strategies are finalized, we may want to either move the assets to a shared package so they can be consumed by other plugins, or potentially ship the pre-packaged ELSER embeddings as part of a Fleet Integration. For now though, the assets will be included in their source format within the plugin, and can then be processed and embedded at runtime.
