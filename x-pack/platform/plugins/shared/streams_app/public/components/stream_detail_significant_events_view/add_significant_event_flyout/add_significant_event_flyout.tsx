@@ -238,6 +238,8 @@ export function AddSignificantEventFlyout({
     telemetryClient,
     features.length,
     definition,
+    generateDescription,
+    saveDescription,
   ]);
 
   useEffect(() => {
