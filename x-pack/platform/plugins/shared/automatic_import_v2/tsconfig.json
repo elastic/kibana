@@ -38,6 +38,10 @@
     "@kbn/i18n",
     "@kbn/features-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/management-settings-ids"
   ]
 }
