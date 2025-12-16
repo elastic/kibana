@@ -65,7 +65,7 @@ function getSortPredicateForColumn(
   direction: 'asc' | 'desc',
   layerId: string | undefined,
   frame: FramePublicAPI
-): 'numAsc' | 'numDesc' | 'alphaAsc' | 'alphaDesc' | undefined {
+):  HeatmapGridConfig['xSortPredicate'] {
   if (!accessor || !layerId || !frame.activeData?.[layerId]) {
     // Fallback to alphabetical if we can't determine the type
     return direction === 'asc' ? 'alphaAsc' : 'alphaDesc';
@@ -194,13 +194,7 @@ export function HeatmapVerticalAxisSettings({
           value={getDisplayValue(state?.gridConfig.ySortPredicate)}
           onChange={(e) => {
             const selectedValue = e.target.value;
-            let predicate:
-              | 'numAsc'
-              | 'numDesc'
-              | 'alphaAsc'
-              | 'alphaDesc'
-              | 'dataIndex'
-              | undefined;
+            let predicate: HeatmapGridConfig['ySortPredicate'];
 
             if (selectedValue === '') {
               predicate = undefined; // Auto
