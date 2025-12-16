@@ -492,4 +492,40 @@ describe('scripts library client', () => {
       );
     });
   });
+
+  describe('#delete()', () => {
+    it('should delete both script entry and associated file', async () => {
+      await scriptsClient.delete('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().delete
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+
+      expect(filesPluginClient.delete).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+    });
+
+    it('should return void on successful deletion', async () => {
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+    });
+
+    it('should throw error when script does not exist', async () => {
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(scriptsClient.delete('non-existent')).rejects.toThrow(
+        'Script with id non-existent not found'
+      );
+    });
+
+    it('should complete successfully even if file deletion fails', async () => {
+      filesPluginClient.delete.mockRejectedValue(new Error('file deletion failed'));
+
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().delete
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+  });
 });
