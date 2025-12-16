@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getShardTimeout, getDefaultSearchParams } from './request_utils';
+import { getShardTimeout, getDefaultSearchParams, getProjectRouting } from './request_utils';
 import type { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
 
 describe('request utils', () => {
@@ -77,6 +77,65 @@ describe('request utils', () => {
         } as unknown as IUiSettingsClient);
         expect(result).toHaveProperty('ignore_unavailable', true);
         expect(result).toHaveProperty('track_total_hits', true);
+      });
+    });
+  });
+
+  describe('getProjectRouting', () => {
+    describe('with params.project_routing structure (ES|QL)', () => {
+      test('returns sanitized value when project_routing is "_alias:_origin"', () => {
+        const result = getProjectRouting({ project_routing: '_alias:_origin' } as any);
+        expect(result).toBe('_alias:_origin');
+      });
+
+      test('returns undefined when project_routing is "_alias:*"', () => {
+        const result = getProjectRouting({ project_routing: '_alias:*' } as any);
+        expect(result).toBeUndefined();
+      });
+
+      test('returns undefined when project_routing is not set', () => {
+        const result = getProjectRouting({} as any);
+        expect(result).toBeUndefined();
+      });
+
+      test('returns undefined when params is undefined', () => {
+        const result = getProjectRouting(undefined);
+        expect(result).toBeUndefined();
+      });
+    });
+
+    describe('with params.body.project_routing structure (SearchSource)', () => {
+      test('returns sanitized value when body.project_routing is "_alias:_origin"', () => {
+        const result = getProjectRouting({ body: { project_routing: '_alias:_origin' } } as any);
+        expect(result).toBe('_alias:_origin');
+      });
+
+      test('returns undefined when body.project_routing is "_alias:*"', () => {
+        const result = getProjectRouting({ body: { project_routing: '_alias:*' } } as any);
+        expect(result).toBeUndefined();
+      });
+
+      test('returns undefined when body.project_routing is not set', () => {
+        const result = getProjectRouting({ body: {} } as any);
+        expect(result).toBeUndefined();
+      });
+    });
+
+    describe('precedence - params.body.project_routing over params.project_routing', () => {
+      test('uses body.project_routing when both are present', () => {
+        const result = getProjectRouting({
+          project_routing: '_alias:*',
+          body: { project_routing: '_alias:_origin' },
+        } as any);
+        expect(result).toBe('_alias:_origin');
+      });
+
+      test('falls back to params.project_routing when body exists but no project_routing', () => {
+        const result = getProjectRouting({
+          project_routing: '_alias:_origin',
+          body: {},
+        } as any);
+        expect(result).toBe('_alias:_origin');
       });
     });
   });

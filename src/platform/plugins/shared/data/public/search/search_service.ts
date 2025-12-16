@@ -148,7 +148,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       session: this.sessionService,
       searchConfig: this.initializerContext.config.get().search,
-      getCPSManager: () => this.cpsManager,
     });
 
     expressions.registerFunction(
@@ -273,6 +272,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       dataViews,
+      getCPSManager: () => this.cpsManager,
       onResponse: (request, response, options) => {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;

@@ -26,7 +26,7 @@ import {
 import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 import type { SearchUsage } from '../../collectors/search';
 import { searchUsageObserver } from '../../collectors/search';
-import { getDefaultSearchParams, getShardTimeout } from '../es_search';
+import { getDefaultSearchParams, getShardTimeout, getProjectRouting } from '../es_search';
 import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
 import type { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
@@ -103,6 +103,7 @@ export const enhancedEsSearchStrategyProvider = (
     const params = {
       ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, isServerless)),
       ...request.params,
+      project_routing: getProjectRouting(request.params),
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
       ...options.transport,

@@ -8,6 +8,8 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { UI_SETTINGS } from '../../../constants';
 import type { GetConfigFn } from '../../../types';
 import type { SearchRequest } from './types';
@@ -29,13 +31,28 @@ export function getEsPreference(
 // already wired up.
 export function getSearchParamsFromRequest(
   searchRequest: SearchRequest,
-  dependencies: { getConfig: GetConfigFn }
+  dependencies: {
+    getConfig: GetConfigFn;
+    getCPSManager?: () => ICPSManager | undefined;
+  }
 ): ISearchRequestParams {
-  const { getConfig } = dependencies;
+  const { getConfig, getCPSManager } = dependencies;
   const searchParams = { preference: getEsPreference(getConfig) };
   const dataView = typeof searchRequest.index !== 'string' ? searchRequest.index : undefined;
   const index = dataView?.title ?? `${searchRequest.index}`;
   const trackTotalHits = searchRequest.track_total_hits ?? searchRequest.body.track_total_hits;
+
+  // Inject global CPS project routing if not explicitly set
+  const cpsManager = getCPSManager?.();
+  if (cpsManager && cpsManager.getProjectPickerAccess() !== ProjectRoutingAccess.DISABLED) {
+    console.log('Injecting global CPS project routing into search request', searchRequest);
+    if (searchRequest.body && searchRequest.body.project_routing === undefined) {
+      const globalProjectRouting = cpsManager.getProjectRouting();
+      if (globalProjectRouting !== undefined) {
+        searchRequest.body.project_routing = globalProjectRouting;
+      }
+    }
+  }
 
   // @ts-expect-error elasticsearch@9.0.0 `query` types don't match (it seems like it's been wrong here for a while)
   return {

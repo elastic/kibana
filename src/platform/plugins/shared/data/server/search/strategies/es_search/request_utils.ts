@@ -9,6 +9,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
+import { sanitizeProjectRoutingForES } from '@kbn/es-query';
+import type { IAsyncSearchRequestParams } from '../..';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import { UI_SETTINGS } from '../../../../common';
 
 export function getShardTimeout(
@@ -44,4 +47,25 @@ export async function getDefaultSearchParams(
   }
 
   return defaults;
+}
+
+/**
+ * Extracts and sanitizes project_routing parameter from search request params.
+ * Handles both request structures: params.project_routing OR params.body.project_routing
+ *
+ * @param params - Search request parameters (can be IAsyncSearchRequestParams or ESQLSearchParams)
+ * @returns Sanitized project_routing value (undefined if value is '_alias:*' or not set)
+ */
+export function getProjectRouting(
+  params?: IAsyncSearchRequestParams | ESQLSearchParams
+): string | undefined {
+  if (!params) {
+    return undefined;
+  }
+
+  console.log('$$$$$', params);
+
+  // Handle both structures: params.project_routing OR params.body.project_routing
+  const rawValue = (params as any).body?.project_routing ?? (params as any).project_routing;
+  return sanitizeProjectRoutingForES(rawValue);
 }

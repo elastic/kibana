@@ -11,6 +11,7 @@ import { UI_SETTINGS } from '../../../constants';
 import type { GetConfigFn } from '../../../types';
 import { getSearchParamsFromRequest, getEsPreference } from './get_search_params';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { ProjectRoutingAccess, type ICPSManager } from '@kbn/cps-utils';
 
 function getConfigStub(config: any = {}): GetConfigFn {
   return (key) => config[key];
@@ -139,6 +140,90 @@ describe('getSearchParams', () => {
       });
       const preference = getEsPreference(mockConfigGet);
       expect(preference).toBe(undefined);
+    });
+  });
+
+  describe('project_routing CPS fallback', () => {
+    const createMockCPSManager = (
+      projectRouting: string | undefined,
+      access: ProjectRoutingAccess = ProjectRoutingAccess.EDITABLE
+    ): ICPSManager =>
+      ({
+        getProjectRouting: jest.fn().mockReturnValue(projectRouting),
+        getProjectPickerAccess: jest.fn().mockReturnValue(access),
+      } as unknown as ICPSManager);
+
+    test('injects global project_routing when not explicitly set', () => {
+      const getConfig = getConfigStub({});
+      const getCPSManager = jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin'));
+
+      const searchParams = getSearchParamsFromRequest(
+        { index: 'abc', body: {} },
+        { getConfig, getCPSManager }
+      );
+
+      expect((searchParams.body as any).project_routing).toBe('_alias:_origin');
+    });
+
+    test('does not override explicit project_routing value', () => {
+      const getConfig = getConfigStub({});
+      const getCPSManager = jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin'));
+
+      const searchParams = getSearchParamsFromRequest(
+        { index: 'abc', body: { project_routing: '_alias:*' } },
+        { getConfig, getCPSManager }
+      );
+
+      expect((searchParams.body as any).project_routing).toBe('_alias:*');
+    });
+
+    test('does not inject when CPS is disabled', () => {
+      const getConfig = getConfigStub({});
+      const getCPSManager = jest
+        .fn()
+        .mockReturnValue(createMockCPSManager('_alias:_origin', ProjectRoutingAccess.DISABLED));
+
+      const searchParams = getSearchParamsFromRequest(
+        { index: 'abc', body: {} },
+        { getConfig, getCPSManager }
+      );
+
+      expect((searchParams.body as any).project_routing).toBeUndefined();
+    });
+
+    test('does not inject when getCPSManager is not provided', () => {
+      const getConfig = getConfigStub({});
+
+      const searchParams = getSearchParamsFromRequest(
+        { index: 'abc', body: {} },
+        { getConfig }
+      );
+
+      expect((searchParams.body as any).project_routing).toBeUndefined();
+    });
+
+    test('does not inject when CPS manager returns undefined', () => {
+      const getConfig = getConfigStub({});
+      const getCPSManager = jest.fn().mockReturnValue(undefined);
+
+      const searchParams = getSearchParamsFromRequest(
+        { index: 'abc', body: {} },
+        { getConfig, getCPSManager }
+      );
+
+      expect((searchParams.body as any).project_routing).toBeUndefined();
+    });
+
+    test('does not inject when global project_routing is undefined', () => {
+      const getConfig = getConfigStub({});
+      const getCPSManager = jest.fn().mockReturnValue(createMockCPSManager(undefined));
+
+      const searchParams = getSearchParamsFromRequest(
+        { index: 'abc', body: {} },
+        { getConfig, getCPSManager }
+      );
+
+      expect((searchParams.body as any).project_routing).toBeUndefined();
     });
   });
 });

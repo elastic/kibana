@@ -18,7 +18,7 @@ import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors/search';
-import { getDefaultSearchParams, getShardTimeout } from './request_utils';
+import { getDefaultSearchParams, getShardTimeout, getProjectRouting } from './request_utils';
 import { searchUsageObserver } from '../../collectors/search/usage';
 
 /**
@@ -71,6 +71,7 @@ export const esSearchStrategyProvider = (
           ...getShardTimeout(config),
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,
+          project_routing: getProjectRouting(request.params),
         };
         const { body, meta } = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,

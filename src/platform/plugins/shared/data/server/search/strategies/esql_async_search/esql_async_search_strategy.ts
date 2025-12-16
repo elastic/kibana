@@ -24,6 +24,7 @@ import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import type { SearchConfigSchema } from '../../../config';
+import { getProjectRouting } from '../es_search/request_utils';
 
 // `drop_null_columns` is going to change the response
 // now we get `all_columns` and `columns`
@@ -113,6 +114,7 @@ export const esqlAsyncSearchStrategyProvider = (
     const params = {
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
       ...requestParams,
+      project_routing: getProjectRouting(request.params),
     };
 
     return esClient.asCurrentUser.transport.request<SqlGetAsyncResponse>(

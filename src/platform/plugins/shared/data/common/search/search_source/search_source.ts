@@ -131,6 +131,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   search: ISearchGeneric;
   dataViews: DataViewsContract;
   scriptedFieldsEnabled: boolean;
+  getCPSManager?: () => import('@kbn/cps-utils').ICPSManager | undefined;
 }
 
 interface ExpressionAstOptions {
@@ -535,10 +536,11 @@ export class SearchSource {
     searchRequest: SearchRequest,
     options: SearchSourceSearchOptions
   ): Observable<IKibanaSearchResponse<unknown>> {
-    const { search, getConfig, onResponse } = this.dependencies;
+    const { search, getConfig, getCPSManager, onResponse } = this.dependencies;
     const { indexType, ...restRequest } = searchRequest;
     const params = getSearchParamsFromRequest(restRequest, {
       getConfig,
+      getCPSManager,
     });
 
     return search({ params, indexType }, options).pipe(
