@@ -60,7 +60,7 @@ describe('<TableSection />', () => {
   it('should render correctly', async () => {
     const { getByTestId } = render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -73,7 +73,7 @@ describe('<TableSection />', () => {
   it('should pass groupingOptions and groupingSettings to GroupedAlertsTable', async () => {
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
       </TestProviders>
     );
 
@@ -97,7 +97,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -139,7 +139,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -180,7 +180,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -202,7 +202,7 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -227,7 +227,7 @@ describe('<TableSection />', () => {
     it('should render the show anonymized switch', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -239,7 +239,7 @@ describe('<TableSection />', () => {
     it('should render the switch as unchecked by default', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -254,7 +254,7 @@ describe('<TableSection />', () => {
     it('should toggle the switch state when clicked', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -281,7 +281,7 @@ describe('<TableSection />', () => {
     it('should pass the switch in additionalToolbarControls to GroupedAlertsTable', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -299,7 +299,7 @@ describe('<TableSection />', () => {
     it('should pass showAnonymized=false to useGetDefaultGroupTitleRenderers by default', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -314,7 +314,7 @@ describe('<TableSection />', () => {
     it('should pass showAnonymized=true to useGetDefaultGroupTitleRenderers when switch is toggled on', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -344,7 +344,7 @@ describe('<TableSection />', () => {
     it('should update showAnonymized back to false when switch is toggled off', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -373,6 +373,27 @@ describe('<TableSection />', () => {
         expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
           attackIds: undefined,
           showAnonymized: false,
+        });
+      });
+    });
+  });
+
+  describe('enforced groups', () => {
+    it('should pass all grouping settings including enforcedGroups', async () => {
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(GroupedAlertsTable).toHaveBeenCalled();
+        const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+        expect(props.settings).toMatchObject({
+          hideNoneOption: true,
+          hideCustomFieldOption: true,
+          hideOptionsTitle: true,
+          enforcedGroups: [ALERT_ATTACK_IDS],
         });
       });
     });

@@ -250,10 +250,8 @@ export const chatCompleteSuite = (
 
         const message = await lastValueFrom(observable);
 
-        expect({
-          ...message,
-          content: '',
-        }).to.eql({ type: 'chatCompletionMessage', content: '', toolCalls: [] });
+        expect(message.type).to.eql('chatCompletionMessage');
+        expect(message.toolCalls).to.eql([]);
         expect(message.content).to.contain('4');
       });
 
@@ -315,6 +313,10 @@ export const chatCompleteSuite = (
         expect(tokenEvent.tokens.total).to.be(
           tokenEvent.tokens.prompt + tokenEvent.tokens.completion
         );
+        // Model field is optional and may be present if provided by the connector
+        if (tokenEvent.model !== undefined) {
+          expect(tokenEvent.model).to.be.a('string');
+        }
       });
 
       it('returns an error with the expected shape in case of error', async () => {
