@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core/public';
+import type { EventTypeOpts } from '@kbn/core/public';
 
 /**
  * Event type constants for Agent Builder telemetry events.
@@ -95,7 +95,7 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.MessageReceived
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentBuilderError;
 
-const optInActionEvent: AgentBuilderTelemetryEvent = {
+const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
   schema: {
     action: {
@@ -125,7 +125,7 @@ const optInActionEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const optOutEvent: AgentBuilderTelemetryEvent = {
+const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptOut,
   schema: {
     source: {
@@ -138,7 +138,7 @@ const optOutEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
+const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.AddToChatClicked,
   schema: {
     pathway: {
@@ -166,7 +166,7 @@ const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const messageSentEvent: AgentBuilderTelemetryEvent = {
+const MESSAGE_SENT_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.MessageSent,
   schema: {
     conversationId: {
@@ -220,7 +220,7 @@ const messageSentEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const messageReceivedEvent: AgentBuilderTelemetryEvent = {
+const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.MessageReceived,
   schema: {
     conversationId: {
@@ -289,7 +289,7 @@ const messageReceivedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const agentBuilderErrorEvent: AgentBuilderTelemetryEvent = {
+const AGENT_BUILDER_ERROR_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.AgentBuilderError,
   schema: {
     errorType: {
@@ -339,20 +339,14 @@ const agentBuilderErrorEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-export const agentBuilderTelemetryEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
-  optInActionEvent,
-  optOutEvent,
-  addToChatClickedEvent,
-  messageSentEvent,
-  messageReceivedEvent,
-  agentBuilderErrorEvent,
+export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
+  OPT_IN_EVENT,
+  OPT_OUT_EVENT,
+  ADD_TO_CHAT_CLICKED_EVENT,
+  AGENT_BUILDER_ERROR_EVENT,
 ];
 
-/**
- * Registers Agent Builder telemetry events with the analytics service.
- */
-export const registerAgentBuilderTelemetryEvents = (analytics: AnalyticsServiceSetup) => {
-  agentBuilderTelemetryEvents.forEach((eventConfig) => {
-    analytics.registerEventType(eventConfig);
-  });
-};
+export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
+  MESSAGE_SENT_EVENT,
+  MESSAGE_RECEIVED_EVENT,
+];

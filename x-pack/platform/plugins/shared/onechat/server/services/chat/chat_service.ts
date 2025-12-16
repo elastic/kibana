@@ -18,6 +18,7 @@ import {
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
   ConversationRoundStepType,
+  AGENT_BUILDER_EVENT_TYPES,
 } from '@kbn/onechat-common';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { withConverseSpan } from '../../tracing';
@@ -38,7 +39,6 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { TrackingService } from '../../telemetry';
-import { MESSAGE_RECEIVED_EVENT } from '../../telemetry/events';
 import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from '../../telemetry/utils';
 
 interface ChatServiceDeps {
@@ -189,7 +189,7 @@ class ChatServiceImpl implements ChatService {
                           ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
                           .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
 
-                      analytics.reportEvent(MESSAGE_RECEIVED_EVENT.eventType, {
+                      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, {
                         conversationId: effectiveConversationId,
                         responseLength: round.response?.message?.length,
                         roundNumber: currentRoundCount,

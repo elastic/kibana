@@ -14,6 +14,7 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common';
 import {
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
@@ -30,7 +31,6 @@ import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
-import { MESSAGE_SENT_EVENT } from '../telemetry/events';
 import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 export function registerChatRoutes({
@@ -438,7 +438,7 @@ export function registerChatRoutes({
           const normalizedAgentId = normalizeAgentIdForTelemetry(payload.agent_id);
           // Only track if this is an agent conversation (not default assistant)
           if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
-            coreSetup.analytics.reportEvent(MESSAGE_SENT_EVENT.eventType, {
+            coreSetup.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageSent, {
               conversationId: payload.conversation_id || 'new',
               messageLength: payload.input?.length,
               hasAttachments: attachments.length > 0,

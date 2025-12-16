@@ -7,7 +7,8 @@
 
 export {
   AGENT_BUILDER_EVENT_TYPES,
-  agentBuilderTelemetryEvents,
+  agentBuilderPublicEbtEvents,
+  agentBuilderServerEbtEvents,
   type AgentBuilderTelemetryEventsMap,
   type AgentBuilderEventTypes,
 } from './agent_builder_events';
