@@ -18,7 +18,7 @@ import {
   HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
-import { useAuthz, useLicense } from '../../../../hooks';
+import { useAuthz, useLicense, useStartServices } from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
@@ -67,6 +67,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
+  const { cloud } = useStartServices();
+
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const agentPrivilegeLevelChangeEnabled =
@@ -220,6 +222,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         ),
         panelTitle: 'Maintenance and diagnostics',
+        'data-test-subj': 'agentBulkActionsMaintenanceAndDiagnostics',
         children: [
           {
             id: 'migrate',
@@ -263,7 +266,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
               />
             ),
             icon: 'exportAction',
-            disabled: !authz.fleet.readAgents,
+            // remove serverless check when https://github.com/elastic/kibana/issues/232193 is resolved
+            disabled: !authz.fleet.readAgents || cloud?.isServerlessEnabled,
             onClick: () => {
               setIsExportCSVModalOpen(true);
             },
