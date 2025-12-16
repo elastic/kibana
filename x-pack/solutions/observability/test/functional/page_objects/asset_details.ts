@@ -128,7 +128,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
         `infraAssetDetailsDockerChartsSection${metric}`
       );
 
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"])'
+      );
     },
 
     async getOverviewTabKubernetesMetricCharts() {
