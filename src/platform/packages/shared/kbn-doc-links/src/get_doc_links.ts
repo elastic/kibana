@@ -40,6 +40,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
 
   return deepFreeze({
     settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference`,
+    aiAssistantSettings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/ai-assistant-settings`,
     elasticStackGetStarted: isServerless
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,
