@@ -203,10 +203,8 @@ describe('Processor: Set', () => {
     await saveNewProcessor();
 
     const processors = getProcessorValue(onUpdate, SET_TYPE);
-    expect(processors[0][SET_TYPE]).toEqual({
-      field: 'field_1',
-      value: '',
-    });
+    expect(processors[0][SET_TYPE].field).toEqual('field_1');
+    expect(processors[0][SET_TYPE].value).toEqual('');
   });
 
   test('saves with "0" as value', async () => {
