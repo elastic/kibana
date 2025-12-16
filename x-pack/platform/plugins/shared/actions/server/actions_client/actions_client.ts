@@ -442,16 +442,12 @@ export class ActionsClient {
 
         this.context.logger.debug(
           () =>
-            `Successfully retrieved access token using Authorization Code OAuth for connector ${
-              tokenOpts.connectorId
-            } with tokenUrl ${tokenOpts.tokenUrl}`
+            `Successfully retrieved access token using Authorization Code OAuth for connector ${tokenOpts.connectorId} with tokenUrl ${tokenOpts.tokenUrl}`
         );
       } catch (err) {
         this.context.logger.debug(
           () =>
-            `Failed to retrieve access token using Authorization Code OAuth for connector ${
-              tokenOpts.connectorId
-            } with tokenUrl ${tokenOpts.tokenUrl} - ${err.message}`
+            `Failed to retrieve access token using Authorization Code OAuth for connector ${tokenOpts.connectorId} with tokenUrl ${tokenOpts.tokenUrl} - ${err.message}`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
