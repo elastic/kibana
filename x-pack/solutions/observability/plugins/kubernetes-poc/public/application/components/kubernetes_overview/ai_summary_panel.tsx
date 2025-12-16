@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiLoadingSpinner,
+  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -81,11 +82,59 @@ export const AiSummaryPanel: React.FC<AiSummaryPanelProps> = ({ isLoading = fals
     />
   );
 
-  // Placeholder summary text matching the Figma design
-  const summaryText = i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.summaryText', {
-    defaultMessage:
-      'The cluster is running smoothly, with most workloads healthy and control plane components responding normally. Two worker nodes show increased memory pressure, and CPU usage is rising in the production namespace. Pod restarts and network latency remain low, and no critical alerts were triggered in the last hour. Overall, capacity is sufficient but worth monitoring.',
-  });
+  // Summary content with inline links matching the design mockup
+  const summaryContent = (
+    <>
+      {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.summaryPart1', {
+        defaultMessage:
+          'Overall, the Kubernetes cluster is operating within healthy parameters, with all control plane components responding normally and 94% of ',
+      })}
+      <EuiLink
+        href="#"
+        onClick={(e: React.MouseEvent) => e.preventDefault()}
+        data-test-subj="aiSummaryWorkloadsLink"
+      >
+        {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.workloadsLink', {
+          defaultMessage: 'workloads',
+        })}
+      </EuiLink>
+      {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.summaryPart2', {
+        defaultMessage: ' running without issues. Node availability is stable, though ',
+      })}
+      <EuiLink
+        href="#"
+        onClick={(e: React.MouseEvent) => e.preventDefault()}
+        data-test-subj="aiSummaryWorkerNodesLink"
+      >
+        {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.workerNodesLink', {
+          defaultMessage: 'two worker nodes',
+        })}
+      </EuiLink>
+      {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.summaryPart3', {
+        defaultMessage:
+          ' are showing elevated memory pressure and may require attention if usage trends continue.',
+      })}
+      <br />
+      <br />
+      {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.summaryPart4', {
+        defaultMessage:
+          'Pod restart rates remain low across namespaces, indicating no widespread instability, while network latency between nodes is consistent with baseline performance. ',
+      })}
+      <EuiLink
+        href="#"
+        onClick={(e: React.MouseEvent) => e.preventDefault()}
+        data-test-subj="aiSummaryResourceUtilizationLink"
+      >
+        {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.resourceUtilizationLink', {
+          defaultMessage: 'Resource utilization',
+        })}
+      </EuiLink>
+      {i18n.translate('xpack.kubernetesPoc.aiSummaryPanel.summaryPart5', {
+        defaultMessage:
+          ' is balanced overall, but CPU saturation is beginning to emerge in the production namespace, suggesting upcoming scaling needs. No critical alerts were triggered in the last hour, and cluster capacity remains sufficient for current workloads.',
+      })}
+    </>
+  );
 
   return (
     <EuiPanel
@@ -147,7 +196,7 @@ export const AiSummaryPanel: React.FC<AiSummaryPanelProps> = ({ isLoading = fals
           </EuiFlexGroup>
         ) : (
           <EuiText size="s" color="default">
-            {summaryText}
+            {summaryContent}
           </EuiText>
         )}
       </div>
