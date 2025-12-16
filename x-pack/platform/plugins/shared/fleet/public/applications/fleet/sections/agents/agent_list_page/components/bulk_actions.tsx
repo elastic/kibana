@@ -115,6 +115,63 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const { generateReportingJobCSV } = useExportCSV();
 
+  const maintainanceItems: MenuItem[] = useMemo(() => {
+    return [
+      {
+        id: 'migrate',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
+            defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+            values={{ agentCount }}
+          />
+        ),
+        icon: 'cluster',
+        disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
+        onClick: () => {
+          setIsMigrateModalOpen(true);
+        },
+        'data-test-subj': 'agentBulkActionsBulkMigrate',
+      },
+      {
+        id: 'diagnostics',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.requestDiagnostics"
+            defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+            values={{ agentCount }}
+          />
+        ),
+        icon: 'download',
+        disabled: !authz.fleet.readAgents,
+        onClick: () => {
+          setIsRequestDiagnosticsModalOpen(true);
+        },
+        'data-test-subj': 'agentBulkActionsRequestDiagnostics',
+      },
+    ];
+  }, [agentCount, authz.fleet.allAgents, authz.fleet.readAgents, doesLicenseAllowMigration]);
+
+  // remove serverless check when https://github.com/elastic/kibana/issues/232193 is resolved
+  if (!cloud?.isServerlessEnabled) {
+    maintainanceItems.push({
+      id: 'export',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.exportAgents"
+          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+          values={{ agentCount }}
+        />
+      ),
+      icon: 'exportAction',
+      disabled: !authz.fleet.readAgents,
+      onClick: () => {
+        setIsExportCSVModalOpen(true);
+      },
+      'data-test-subj': 'bulkAgentExportBtn',
+    });
+  }
+
   // Build hierarchical menu items
   const menuItems: MenuItem[] = useMemo(() => {
     const items: MenuItem[] = [
@@ -222,58 +279,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         ),
         panelTitle: 'Maintenance and diagnostics',
-        'data-test-subj': 'agentBulkActionsMaintenanceAndDiagnostics',
-        children: [
-          {
-            id: 'migrate',
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
-                defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount }}
-              />
-            ),
-            icon: 'cluster',
-            disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
-            onClick: () => {
-              setIsMigrateModalOpen(true);
-            },
-            'data-test-subj': 'agentBulkActionsBulkMigrate',
-          },
-          {
-            id: 'diagnostics',
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.requestDiagnostics"
-                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount }}
-              />
-            ),
-            icon: 'download',
-            disabled: !authz.fleet.readAgents,
-            onClick: () => {
-              setIsRequestDiagnosticsModalOpen(true);
-            },
-            'data-test-subj': 'agentBulkActionsRequestDiagnostics',
-          },
-          {
-            id: 'export',
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.exportAgents"
-                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-                values={{ agentCount }}
-              />
-            ),
-            icon: 'exportAction',
-            // remove serverless check when https://github.com/elastic/kibana/issues/232193 is resolved
-            disabled: !authz.fleet.readAgents || cloud?.isServerlessEnabled,
-            onClick: () => {
-              setIsExportCSVModalOpen(true);
-            },
-            'data-test-subj': 'bulkAgentExportBtn',
-          },
-        ],
+        children: maintainanceItems,
       },
       // Security and removal submenu
       {
@@ -330,12 +336,11 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     return items;
   }, [
     authz.fleet.allAgents,
-    authz.fleet.readAgents,
     agentCount,
-    isTagAddVisible,
     isLicenceAllowingScheduleUpgrade,
-    doesLicenseAllowMigration,
+    maintainanceItems,
     agentPrivilegeLevelChangeEnabled,
+    isTagAddVisible,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(

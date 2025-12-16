@@ -232,7 +232,7 @@ describe('AgentBulkActions', () => {
 
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeEnabled();
     });
-    it('should enable export to CSV action if not in serverless mode', async () => {
+    it('should show export to CSV action if not in serverless mode', async () => {
       mockStartServices(false);
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
@@ -255,8 +255,8 @@ describe('AgentBulkActions', () => {
 
       await navigateToSubmenu(results, 'Maintenance and diagnostics');
 
-      const exportToCSVButton = results.getByTestId('bulkAgentExportBtn');
-      expect(exportToCSVButton).not.toBeDisabled();
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
     });
 
     it('should disable export to CSV action in serverless mode', async () => {
@@ -282,8 +282,8 @@ describe('AgentBulkActions', () => {
 
       await navigateToSubmenu(results, 'Maintenance and diagnostics');
 
-      const exportToCSVButton = results.getByTestId('bulkAgentExportBtn');
-      expect(exportToCSVButton).toBeDisabled();
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).not.toBeInTheDocument();
     });
   });
 
@@ -405,7 +405,7 @@ describe('AgentBulkActions', () => {
       expect(results.queryByText(/Remove root privilege/)).not.toBeInTheDocument();
     });
 
-    it('should enable export to CSV action if not in serverless mode', async () => {
+    it('should show export to CSV action if not in serverless mode', async () => {
       mockStartServices(false);
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
@@ -428,11 +428,11 @@ describe('AgentBulkActions', () => {
 
       await navigateToSubmenu(results, 'Maintenance and diagnostics');
 
-      const exportToCSVButton = results.getByTestId('bulkAgentExportBtn');
-      expect(exportToCSVButton).not.toBeDisabled();
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
     });
 
-    it('should disable export to CSV action in serverless mode', async () => {
+    it('should hide export to CSV action if in serverless mode', async () => {
       mockStartServices(true);
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
@@ -455,8 +455,8 @@ describe('AgentBulkActions', () => {
 
       await navigateToSubmenu(results, 'Maintenance and diagnostics');
 
-      const exportToCSVButton = results.getByTestId('bulkAgentExportBtn');
-      expect(exportToCSVButton).toBeDisabled();
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).not.toBeInTheDocument();
     });
   });
 
