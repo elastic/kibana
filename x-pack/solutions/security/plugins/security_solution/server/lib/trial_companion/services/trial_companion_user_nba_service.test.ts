@@ -65,6 +65,13 @@ describe('TrialCompanionUserNBAServiceImpl', () => {
       ['first milestone seen', createNBASO([1], 1), createNBAUserSO([[1]], 1), undefined],
       ['M6 milestone', createNBASO([6], 1), createNBAUserSO([[1, 2, 3, 4, 5]], 1), Milestone.M6],
       ['M6 seen', createNBASO([6], 1), createNBAUserSO([[1, 2, 3, 4, 5, 6]], 1), undefined],
+      ['Final milestone - non seen', createNBASO([7], 1), createNBAUserSO([[]], 1), undefined],
+      [
+        'Final milestone - M6 seen',
+        createNBASO([7], 1),
+        createNBAUserSO([[1, 2, 3, 4, 5, 6]], 1),
+        undefined,
+      ],
       [
         'no current milestone',
         createNBASO([], 0),
