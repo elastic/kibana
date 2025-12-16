@@ -33,9 +33,10 @@ import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 
 interface Props {
   definition: Streams.all.GetResponse;
+  refreshDefinition: () => void;
 }
 
-export function StreamDetailSignificantEventsView({ definition }: Props) {
+export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
   const { unifiedSearch } = useKibana().dependencies.start;
 
@@ -144,6 +145,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
       definition={definition}
+      refreshDefinition={refreshDefinition}
       refresh={significantEventsFetchState.refresh}
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
