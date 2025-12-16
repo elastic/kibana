@@ -203,3 +203,22 @@ export interface GetConnectorResponse {
 export interface ListMcpToolsResponse {
   mcpTools: McpTool[];
 }
+
+export type McpToolHealthStatus =
+  | 'healthy'
+  | 'tool_not_found'
+  | 'connector_not_found'
+  | 'list_tools_failed'
+  | 'tool_unhealthy';
+
+export interface McpToolHealthState {
+  toolId: string;
+  connectorId: string;
+  mcpToolName: string;
+  status: McpToolHealthStatus;
+  errorMessage?: string;
+}
+
+export interface ListMcpToolsHealthResponse {
+  results: McpToolHealthState[];
+}

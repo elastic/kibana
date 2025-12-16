@@ -22,13 +22,14 @@ import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/c
 import type { Tool } from '@kbn/mcp-client';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { McpToolHealthStatus } from '../../types/mcp';
 import { useListConnectors, useListMcpTools } from '../../../../../hooks/tools/use_mcp_connectors';
 import { truncateAtSentence } from '../../../../../utils/truncate_at_sentence';
 import { McpHealthBanner } from './mcp_health_banner';
 import { useAddMcpServerFlyout } from '../../hooks/use_add_mcp_server_flyout';
 import { useEditMcpServerFlyout } from '../../hooks/use_edit_mcp_server_flyout';
 import { i18nMessages } from '../../i18n';
-import { type McpConfigurationFieldsProps, McpHealthStatus } from '../../types/mcp';
+import type { McpConfigurationFieldsProps } from '../../types/mcp';
 import type { McpToolFormData } from '../../types/tool_form_types';
 
 interface McpToolOption extends Tool {
@@ -88,11 +89,11 @@ export const McpEditableFields = ({
     }
 
     if (isErrorMcpTools) {
-      setMcpHealthStatus(McpHealthStatus.ListToolsFailed);
+      setMcpHealthStatus(McpToolHealthStatus.ListToolsFailed);
       return;
     }
 
-    setMcpHealthStatus(McpHealthStatus.Healthy);
+    setMcpHealthStatus(McpToolHealthStatus.Healthy);
   }, [isLoadingMcpTools, isErrorMcpTools, setMcpHealthStatus]);
 
   // Clear the MCP tool, error state, and tool fields when the connector changes
@@ -147,7 +148,7 @@ export const McpEditableFields = ({
   );
 
   const isMcpToolsDisabled =
-    !connectorId || isLoadingMcpTools || mcpHealthStatus !== McpHealthStatus.Healthy;
+    !connectorId || isLoadingMcpTools || mcpHealthStatus !== McpToolHealthStatus.Healthy;
 
   return (
     <>

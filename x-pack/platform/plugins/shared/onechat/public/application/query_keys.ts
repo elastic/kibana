@@ -37,6 +37,7 @@ export const queryKeys = {
     health: {
       list: () => ['tools', 'health', 'list'] as const,
       byId: (toolId: string) => ['tools', 'health', toolId],
+      mcp: () => ['tools', 'health', 'mcp'] as const,
     },
   },
 };
