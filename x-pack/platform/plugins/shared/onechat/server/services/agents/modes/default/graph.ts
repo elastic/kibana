@@ -18,7 +18,6 @@ import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
-import { AgentPromptSource } from '@kbn/onechat-common/agents/prompts';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import { getAnswerAgentPrompt, getResearchAgentPrompt } from './prompts';
@@ -32,6 +31,7 @@ import {
   processToolNodeResponse,
 } from './action_utils';
 import { createAnswerAgentStructured } from './answer_agent_structured';
+import type { ResearchAgentAction } from './actions';
 import {
   errorAction,
   handoverAction,
@@ -41,9 +41,9 @@ import {
   isStructuredAnswerAction,
   isToolCallAction,
   isToolPromptAction,
-  toolCallAction,
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
+import { roundToActions } from '../utils/round_to_actions';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -72,35 +72,28 @@ export const createAgentGraph = ({
   onechatToLangchainIdMap: ToolIdMapping;
 }) => {
   const initialize = async (state: StateType) => {
-    const lastRound =
-      processedConversation.previousRounds[processedConversation.previousRounds.length - 1];
+    const restoredState: Partial<StateType> = {};
+    let actions: ResearchAgentAction[] = [];
 
-    if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
-      const awaitingPrompt = lastRound.pending_prompt!;
-      if (awaitingPrompt.source === AgentPromptSource.tool) {
-        // TODO: should load full history of previous events instead
-        const toolName =
-          onechatToLangchainIdMap.get(awaitingPrompt.data.toolId) ?? awaitingPrompt.data.toolId;
-        const action = toolCallAction([
-          {
-            toolName,
-            args: awaitingPrompt.data.toolParams,
-            toolCallId: awaitingPrompt.data.toolCallId,
-          },
-        ]);
-        return { mainActions: [action], awaitingPrompt };
-      } else {
-        throw invalidState(
-          `[initialize] expected last round to be a tool prompt, got ${awaitingPrompt.source}`
-        );
-      }
+    const lastRound = processedConversation.previousRounds.length
+      ? processedConversation.previousRounds[processedConversation.previousRounds.length - 1]
+      : undefined;
+
+    if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
+      actions = roundToActions({ round: lastRound, toolIdMapping: onechatToLangchainIdMap });
+      restoredState.resumeToStep = steps.executeTool;
     }
 
-    return {};
+    if (lastRound?.state) {
+      restoredState.currentCycle = lastRound.state.agent.errorCount;
+      restoredState.errorCount = lastRound.state.agent.errorCount;
+    }
+
+    return { ...restoredState, mainActions: [...actions] };
   };
 
   const initializeEdge = async (state: StateType) => {
-    if (state.awaitingPrompt) {
+    if (state.resumeToStep === steps.executeTool) {
       return steps.executeTool;
     }
     return steps.researchAgent;

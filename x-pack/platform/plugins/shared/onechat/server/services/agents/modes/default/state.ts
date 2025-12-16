@@ -22,7 +22,7 @@ export const StateAnnotation = Annotation.Root({
     default: () => 10,
   }),
   // internals
-  awaitingPrompt: Annotation<PromptRequest>(),
+  resumeToStep: Annotation<string>(),
 
   currentCycle: Annotation<number>({
     reducer: (a, b) => b,
