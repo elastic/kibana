@@ -427,4 +427,32 @@ describe('scripts library client', () => {
       });
     });
   });
+
+  describe('#get()', () => {
+    it('should retrieve script entry using ID provided', async () => {
+      await scriptsClient.get('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().get
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+
+    it('should respond with script', async () => {
+      await expect(scriptsClient.get('1-2-3')).resolves.toEqual({
+        createdAt: '2025-11-24T16:04:17.471Z',
+        createdBy: 'elastic',
+        downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
+        fileHash: 'e5441eb2bb',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
+        id: '1-2-3',
+        name: 'my script',
+        platform: ['macos', 'linux'],
+        requiresInput: false,
+        updatedAt: '2025-11-24T16:04:17.471Z',
+        updatedBy: 'elastic',
+        version: 'WzgsMV0=',
+      });
+    });
+  });
 });
