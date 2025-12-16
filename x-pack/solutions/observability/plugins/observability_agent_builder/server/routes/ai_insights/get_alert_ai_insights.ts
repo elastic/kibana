@@ -11,6 +11,7 @@ import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
+import { ENVIRONMENT_ALL } from '../../../common/constants';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 
 /**
@@ -84,7 +85,7 @@ async function fetchAlertContext({
   'alertDoc' | 'dataRegistry' | 'request' | 'logger'
 >): Promise<string> {
   const serviceName = alertDoc?.['service.name'] ?? '';
-  const serviceEnvironment = alertDoc?.['service.environment'] ?? '';
+  const serviceEnvironment = alertDoc?.['service.environment'] || ENVIRONMENT_ALL;
   const transactionType = alertDoc?.['transaction.type'];
   const transactionName = alertDoc?.['transaction.name'];
 
