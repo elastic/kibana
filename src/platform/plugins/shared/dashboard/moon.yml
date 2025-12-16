@@ -110,6 +110,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/controls-plugin'
 tags:
   - plugin
   - prod
