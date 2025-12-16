@@ -7,8 +7,17 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+
+import {
+  ESQL_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
 import {
   ALERTS_API_ALL,
   ALERTS_API_READ,
@@ -23,12 +32,22 @@ import {
 } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 
-const alertingFeatures = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS].map(
-  (ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [SERVER_APP_ID],
-  })
-);
+const SECURITY_RULE_TYPES = [
+  LEGACY_NOTIFICATIONS_ID,
+  ESQL_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
+];
+
+const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [SERVER_APP_ID],
+}));
 
 export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: ALERTS_FEATURE_ID,
@@ -43,29 +62,46 @@ export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   app: [ALERTS_FEATURE_ID, 'kibana', 'securitySolution'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
+  management: {
+    insightsAndAlerting: ['triggersActions'], // Access to the stack alerts management UI
+  },
   privileges: {
     all: {
       app: ['securitySolution', ALERTS_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: [DATA_VIEW_SAVED_OBJECT_TYPE],
+        read: [],
       },
       alerting: {
         alert: { all: alertingFeatures },
       },
+      // TODO: figure out if this should be here
+      management: {
+        insightsAndAlerting: ['triggersActions'], // Access to the stack alerts management UI
+      },
       ui: [ALERTS_UI_READ, ALERTS_UI_EDIT],
-      api: ['rac', INITIALIZE_SECURITY_SOLUTION, ALERTS_API_ALL, ALERTS_API_READ, USERS_API_READ],
+      api: [
+        'rac',
+        // TODO: should it be able to initialize the security solution
+        INITIALIZE_SECURITY_SOLUTION,
+        ALERTS_API_ALL,
+        ALERTS_API_READ,
+        USERS_API_READ,
+      ],
     },
     read: {
       app: [ALERTS_FEATURE_ID, 'kibana', 'securitySolution'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: [DATA_VIEW_SAVED_OBJECT_TYPE],
+        read: [],
       },
       alerting: {
         alert: { read: alertingFeatures },
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'], // Access to the stack alerts management UI
       },
       ui: [ALERTS_UI_READ],
       api: ['rac', INITIALIZE_SECURITY_SOLUTION, ALERTS_API_READ, USERS_API_READ],

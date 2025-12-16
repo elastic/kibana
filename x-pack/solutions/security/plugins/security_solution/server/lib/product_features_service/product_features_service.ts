@@ -25,8 +25,6 @@ import {
   getNotesFeature,
   getSiemMigrationsFeature,
   getRulesFeature,
-  getRulesV2Feature,
-  getRulesV3Feature,
   getAlertsFeature,
 } from '@kbn/security-solution-features/product_features';
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
@@ -97,7 +95,9 @@ export class ProductFeaturesService {
         savedObjects: [...rulesV3SavedObjects, ...securityExceptionsSavedObjects],
       }),
     ]);
-    this.productFeaturesRegistry.create('alerts', [getAlertsFeature()]);
+    this.productFeaturesRegistry.create('alerts', [
+      getAlertsFeature(),
+    ]);
     if (!experimentalFeatures.siemMigrationsDisabled) {
       this.productFeaturesRegistry.create('siemMigrations', [getSiemMigrationsFeature()]);
     }
