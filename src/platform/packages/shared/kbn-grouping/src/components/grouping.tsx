@@ -224,6 +224,10 @@ const GroupingComponent = <T,>({
     [groupCount, itemsPerPage]
   );
 
+  const emptyComponent = useMemo(() => {
+    return emptyGroupingComponent ? emptyGroupingComponent : <EmptyGroupingComponent />;
+  }, [emptyGroupingComponent]);
+
   return (
     <>
       {groupingLevel > 0 ? null : (
@@ -297,10 +301,8 @@ const GroupingComponent = <T,>({
               </>
             )}
           </span>
-        ) : emptyGroupingComponent ? (
-          emptyGroupingComponent
         ) : (
-          <EmptyGroupingComponent />
+          emptyComponent
         )}
       </div>
     </>
