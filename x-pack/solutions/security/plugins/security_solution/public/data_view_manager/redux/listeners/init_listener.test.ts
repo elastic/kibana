@@ -81,10 +81,10 @@ describe('createInitListener', () => {
         uiSettings,
         spaces,
         storage: {
-          get: jest.fn((key: string) => key),
-          set: jest.fn((key: string, value: string) => key),
-          remove: jest.fn((key: string) => key),
-          clear: jest.fn(() => {}),
+          get: jest.fn(),
+          set: jest.fn(),
+          remove: jest.fn(),
+          clear: jest.fn(),
         } as unknown as Storage,
       },
       false
