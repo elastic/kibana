@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/ai-insights';
 import {
@@ -17,10 +17,12 @@ import type { ObservabilityAgentBuilderServerRouteRepository } from '@kbn/observ
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/common';
+} from '@kbn/observability-agent-builder-plugin/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -30,7 +32,9 @@ type ErrorSampleDetails =
 
 export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'>) {
   const { onechat, core } = useApmPluginContext();
-  const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
+
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   const observabilityAgentBuilderApiClient = createRepositoryClient<
     ObservabilityAgentBuilderServerRouteRepository,
@@ -46,17 +50,18 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [aiInsightError, setAiInsightError] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
 
   const license = useLicenseContext();
-  const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
 
   const errorId = error.error.id;
   const serviceName = error.service.name;
 
   const fetchAiInsights = async () => {
     setIsLoading(true);
+    setAiInsightError(undefined);
     try {
       const response = await observabilityAgentBuilderApiClient.fetch(
         'POST /internal/observability_agent_builder/ai_insights/error',
@@ -77,61 +82,50 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
       setSummary(response?.summary ?? '');
       setContext(response?.context ?? '');
     } catch (e) {
-      setSummary('');
-      setContext('');
+      setAiInsightError(e instanceof Error ? e.message : 'Failed to load AI insight');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const attachments = useMemo(() => {
-    if (!onechat || !isObservabilityAgentEnabled || !hasEnterpriseLicense) {
-      return [];
-    }
+  const onStartConversation = () => {
+    if (!onechat?.openConversationFlyout) return;
 
-    return [
-      {
-        type: 'screen_context',
-        data: {
-          app: 'apm',
-          url: window.location.href,
-          description: `APM error details page for error ID ${errorId} on service ${serviceName}`,
+    onechat.openConversationFlyout({
+      newConversation: true,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'apm',
+            url: window.location.href,
+            description: `APM error details page for error ID ${errorId} on service ${serviceName}`,
+          },
+          hidden: true,
         },
-        hidden: true,
-      },
-      {
-        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-        data: {
-          summary,
-          context,
+        {
+          type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+          data: {
+            summary,
+            context,
+          },
         },
-      },
-      {
-        type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
-        data: {
-          errorId,
-          serviceName,
-          environment,
-          start,
-          end,
+        {
+          type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+          data: {
+            errorId,
+            serviceName,
+            environment,
+            start,
+            end,
+          },
         },
-      },
-    ];
-  }, [
-    onechat,
-    isObservabilityAgentEnabled,
-    hasEnterpriseLicense,
-    errorId,
-    serviceName,
-    summary,
-    context,
-    environment,
-    start,
-    end,
-  ]);
+      ],
+    });
+  };
 
-  if (!onechat || !isObservabilityAgentEnabled || !hasEnterpriseLicense) {
-    return <></>;
+  if (!onechat || !isAgentChatExperienceEnabled) {
+    return null;
   }
 
   return (
@@ -143,15 +137,12 @@ export function ErrorSampleAiInsight({ error }: Pick<ErrorSampleDetails, 'error'
         description={i18n.translate('xpack.apm.errorAiInsight.descriptionLabel', {
           defaultMessage: 'Get helpful insights from our Elastic AI Agent',
         })}
+        license={license}
         content={summary}
         isLoading={isLoading}
+        error={aiInsightError}
         onOpen={fetchAiInsights}
-        onStartConversation={() => {
-          onechat.openConversationFlyout({
-            attachments,
-            newConversation: true,
-          });
-        }}
+        onStartConversation={onStartConversation}
       />
       <EuiSpacer size="s" />
     </>
