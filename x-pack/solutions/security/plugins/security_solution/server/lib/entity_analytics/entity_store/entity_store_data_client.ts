@@ -548,7 +548,7 @@ export class EntityStoreDataClient {
         taskManager,
       });
 
-      taskManager.runSoon(getDataViewRefreshTaskId(namespace));
+      await taskManager.runSoon(getDataViewRefreshTaskId(namespace));
 
       this.log(`debug`, entityType, `Started entity store data view refresh task`);
 
