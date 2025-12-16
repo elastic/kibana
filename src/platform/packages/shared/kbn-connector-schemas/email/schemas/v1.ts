@@ -14,7 +14,7 @@ export const portSchema = () => z.coerce.number().min(1).max(PORT_MAX);
 
 const ConfigSchemaProps = {
   service: z.string().max(512).default('other'),
-  host: z.string().max(512).nullable().default(null),
+  host: z.string().max(2048).nullable().default(null),
   port: portSchema().nullable().default(null),
   secure: z.boolean().nullable().default(null),
   from: z.string(),
@@ -42,10 +42,12 @@ const AttachmentSchemaProps = {
 };
 export const AttachmentSchema = z.object(AttachmentSchemaProps).strict();
 
+const emailSchema = z.array(z.string().max(256)).max(100).default([]);
+
 export const ParamsSchemaProps = {
-  to: z.array(z.string().max(512)).max(100).default([]),
-  cc: z.array(z.string().max(512)).max(100).default([]),
-  bcc: z.array(z.string().max(512)).max(100).default([]),
+  to: emailSchema,
+  cc: emailSchema,
+  bcc: emailSchema,
   subject: z.string().max(1024),
   message: z.string(), // we trim in the code, so no need to limit here
   messageHTML: z.string().nullable().default(null), // we trim in the code, so no need to limit here
