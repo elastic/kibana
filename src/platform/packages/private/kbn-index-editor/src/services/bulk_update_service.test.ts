@@ -10,7 +10,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { BULK_UPDATE_CHUNK_SIZE, bulkUpdate } from './bulk_update_service';
 import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 import { times } from 'lodash';
@@ -26,18 +26,18 @@ describe('Bulk update', () => {
   it('builds bulk update operations correctly and posts to the correct endpoint', async () => {
     const updates = [
       {
-        type: 'add-doc',
+        type: 'add-doc' as const,
         payload: { id: `${ROW_PLACEHOLDER_PREFIX}xyz`, value: { b: 2 } },
       },
       {
-        type: 'add-doc',
+        type: 'add-doc' as const,
         payload: { id: `${ROW_PLACEHOLDER_PREFIX}xyz`, value: { c: 3 } },
       },
       {
-        type: 'delete-doc',
+        type: 'delete-doc' as const,
         payload: { ids: ['abc123', 'to-del'] },
       },
-    ] as any;
+    ];
 
     // mock success response
     (http.post as jest.Mock).mockResolvedValue({
@@ -53,21 +53,22 @@ describe('Bulk update', () => {
     expect(url).toBe(`${LOOKUP_INDEX_UPDATE_ROUTE}/my-index`);
 
     const body = JSON.parse(options.body);
-    expect(Array.isArray(body.operations)).toBe(true);
+    const operations: BulkOperationContainer[] = body.operations;
+    expect(Array.isArray(operations)).toBe(true);
 
     // We expect: 1 index operation (2 entries: action + source) and 2 delete ops (each is a single entry)
     // So total flattened entries = 4
-    expect(body.operations.length).toBe(4);
+    expect(operations.length).toBe(4);
 
     // Validate presence of delete operations for non-placeholder ids only
-    const deletes = body.operations.filter((op: any) => op.delete);
-    const deleteIds = deletes.map((d: any) => d.delete._id).sort();
+    const deletes = operations.filter((op) => op.delete);
+    const deleteIds = deletes.map((d) => d.delete?._id).sort();
     expect(deleteIds).toEqual(['abc123', 'to-del']);
 
     // Validate there is an index operation and that the document merges values
-    const indexIdx = body.operations.findIndex((op: any) => op.index);
+    const indexIdx = operations.findIndex((op) => op.index);
     expect(indexIdx).toBeGreaterThanOrEqual(0);
-    const doc = body.operations[indexIdx + 1];
+    const doc = operations[indexIdx + 1];
     expect(doc).toEqual({ b: 2, c: 3 });
   });
 
