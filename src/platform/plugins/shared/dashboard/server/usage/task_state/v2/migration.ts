@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Project routing constants for cross-project search
- * These are stored as strings in saved objects to explicitly override parent values
- */
-export const PROJECT_ROUTING = {
-  /** Search across all linked projects */
-  ALL: '_alias:*',
-  /** Search only the origin project */
-  ORIGIN: '_alias:_origin',
-} as const;
+import { type TypeOf } from '@kbn/config-schema';
+import type { versionSchema } from './schema';
 
-export type ProjectRoutingValue = (typeof PROJECT_ROUTING)[keyof typeof PROJECT_ROUTING];
+type VersionSchema = TypeOf<typeof versionSchema>;
+
+export const upMigration = (state: Record<string, any>): VersionSchema => {
+  return {
+    runs: typeof state.runs === 'number' ? state.runs : 0,
+    telemetry: {
+      ...state.telemetry,
+      access_mode: state.telemetry?.access_mode ?? {},
+    },
+  };
+};

@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Project routing constants for cross-project search
- * These are stored as strings in saved objects to explicitly override parent values
- */
-export const PROJECT_ROUTING = {
-  /** Search across all linked projects */
-  ALL: '_alias:*',
-  /** Search only the origin project */
-  ORIGIN: '_alias:_origin',
-} as const;
+import { upMigration } from './migration';
+import { versionSchema } from './schema';
 
-export type ProjectRoutingValue = (typeof PROJECT_ROUTING)[keyof typeof PROJECT_ROUTING];
+export const versionDefinition = {
+  up: upMigration,
+  schema: versionSchema,
+};

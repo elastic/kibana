@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Project routing constants for cross-project search
- * These are stored as strings in saved objects to explicitly override parent values
- */
-export const PROJECT_ROUTING = {
-  /** Search across all linked projects */
-  ALL: '_alias:*',
-  /** Search only the origin project */
-  ORIGIN: '_alias:_origin',
-} as const;
+import { schema } from '@kbn/config-schema';
+import { versionSchema as v1VersionSchema } from '../v1/schema';
 
-export type ProjectRoutingValue = (typeof PROJECT_ROUTING)[keyof typeof PROJECT_ROUTING];
+export const versionSchema = v1VersionSchema.extends({
+  telemetry: v1VersionSchema.getPropSchemas().telemetry.extends({
+    access_mode: schema.recordOf(schema.string(), schema.object({ total: schema.number() })),
+  }),
+});
