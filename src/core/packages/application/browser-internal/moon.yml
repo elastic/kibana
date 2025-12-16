@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/core-analytics-browser'
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/core-chrome-app-menu-components'
 tags:
   - shared-browser
   - package
