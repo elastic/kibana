@@ -4,26 +4,160 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import type { EuiConfirmModalProps } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useCallback, useState } from 'react';
+
+import type {
+  EuiBasicTableColumn,
+  EuiConfirmModalProps,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import {
+  EuiBasicTable,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
   EuiConfirmModal,
+  EuiFlexItem,
+  EuiIcon,
   EuiLink,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function ConverToEsqlModal({
+export interface Layer {
+  id: string;
+  icon: string;
+  name: string;
+  typology: string;
+  query: string;
+  isConvertibleToEsql: boolean;
+}
+
+export function ConvertToEsqlModal({
+  layers,
   onCancel,
-  queries,
+  onConfirm,
 }: {
+  layers: Layer[];
   onCancel: EuiConfirmModalProps['onCancel'];
-  queries: Record<string, string>;
+  /**
+   * Callback invoked when user confirms the conversion.
+   * @param params - Object containing array of layer IDs selected for conversion
+   */
+  onConfirm: (params: { layersToConvert: string[] }) => void;
 }) {
-  const queryCount = Object.keys(queries).length;
+  const { euiTheme } = useEuiTheme();
+
+  const [selectedItems, setSelectedItems] = useState<Layer[]>([]);
+  const onSelectionChange = useCallback((items: Layer[]) => {
+    setSelectedItems(items);
+  }, []);
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+
+  const toggleDetails = useCallback(
+    (layer: Layer) => {
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+      if (itemIdToExpandedRowMapValues[layer.id]) {
+        delete itemIdToExpandedRowMapValues[layer.id];
+      } else {
+        itemIdToExpandedRowMapValues[layer.id] = (
+          <EuiFlexItem>
+            <EuiCodeBlock isCopyable language="esql" paddingSize="s">
+              {layer.query}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+        );
+      }
+
+      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [itemIdToExpandedRowMap]
+  );
+
+  const columns: Array<EuiBasicTableColumn<Layer>> = [
+    {
+      field: 'icon',
+      name: '',
+      width: euiTheme.size.l,
+      render: (icon: string) => <EuiIcon type={icon} />,
+    },
+    {
+      field: 'name',
+      name: 'Layer',
+      width: '166px',
+      truncateText: true,
+    },
+    {
+      field: 'typology',
+      name: 'Typology',
+      truncateText: true,
+    },
+    {
+      align: 'right',
+      width: euiTheme.size.xxl,
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            {i18n.translate('xpack.lens.config.expandEsqlPreviewDescription', {
+              defaultMessage: 'Expand to view ES|QL query',
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+      ),
+      render: (layer: Layer) => {
+        const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
+
+        return (
+          // Add tooltip?
+          <EuiButtonIcon
+            onClick={() => toggleDetails(layer)}
+            aria-label={
+              isExpanded
+                ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.lens.config.expandAriaLabel', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            disabled={!layer.isConvertibleToEsql}
+          />
+        );
+      },
+    },
+  ];
+
+  const selection: EuiTableSelectionType<Layer> = {
+    selectable: (layer: Layer) => layer.isConvertibleToEsql,
+    selectableMessage: (selectable: boolean, layer: Layer) => {
+      // TODO: Add message with the typologies that cannot be switched yet
+      return !selectable
+        ? i18n.translate('xpack.lens.config.cannotBeSwitchedAriaLabel', {
+            defaultMessage: '{layerName} cannot be switched to query mode',
+            values: {
+              layerName: layer.name,
+            },
+          })
+        : i18n.translate('xpack.lens.config.selectLayerAriaLabel', {
+            defaultMessage: 'Select {layerName} for conversion to query mode',
+            values: {
+              layerName: layer.name,
+            },
+          });
+    },
+    onSelectionChange,
+    initialSelected: [],
+  };
 
   return (
     <EuiConfirmModal
@@ -37,14 +171,19 @@ export function ConverToEsqlModal({
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
         defaultMessage: 'Cancel',
       })}
+      onConfirm={() => {
+        onConfirm({ layersToConvert: selectedItems.map((layer) => layer.id) });
+      }}
       confirmButtonText={i18n.translate('xpack.lens.config.switchToQueryModeButtonLabel', {
         defaultMessage: 'Switch to query mode',
       })}
+      confirmButtonDisabled={selectedItems.length === 0}
     >
       <p>
         {i18n.translate('xpack.lens.config.queryModeDescription', {
           defaultMessage: 'Query mode enables advanced data analysis with ES|QL.',
         })}{' '}
+        {/* TODO: Add link to docs */}
         <EuiLink href="" target="_blank" external={false}>
           {i18n.translate('xpack.lens.config.readMoreLinkText', {
             defaultMessage: 'Read more.',
@@ -63,7 +202,7 @@ export function ConverToEsqlModal({
 
       <EuiSpacer size="l" />
 
-      {queryCount === 1 ? (
+      {layers.length === 1 ? (
         <>
           <EuiText size="xs" component="div">
             <p>
@@ -75,9 +214,23 @@ export function ConverToEsqlModal({
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock isCopyable>{Object.entries(queries)[0][1]}</EuiCodeBlock>
+          <EuiCodeBlock isCopyable language="esql" paddingSize="s">
+            {layers[0].query}
+          </EuiCodeBlock>
         </>
-      ) : null}
+      ) : (
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.lens.config.layersTableCaption', {
+            defaultMessage: 'Layers available for conversion to query mode',
+          })}
+          responsiveBreakpoint={false}
+          items={layers}
+          itemId="id"
+          columns={columns}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          selection={selection}
+        />
+      )}
     </EuiConfirmModal>
   );
 }
