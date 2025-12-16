@@ -1133,14 +1133,6 @@ describe('SearchSource', () => {
       expect(request.project_routing).toBe('_alias:_origin');
     });
 
-    test('should not include project_routing in ES request body when projectRouting is set to ALL (sanitized)', () => {
-      searchSource.setField('index', indexPattern);
-      searchSource.setField('projectRouting', 'ALL');
-      const request = searchSource.getSearchRequestBody();
-      // 'ALL' gets sanitized to undefined since it means "search all projects" which is the default
-      expect(request.project_routing).toBeUndefined();
-    });
-
     test('should not include project_routing in ES request body when projectRouting is undefined', () => {
       searchSource.setField('index', indexPattern);
       searchSource.setField('projectRouting', undefined);

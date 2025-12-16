@@ -17,7 +17,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { search as dataPluginSearch } from '@kbn/data-plugin/public';
 import type { RequestResponder } from '@kbn/inspector-plugin/public';
 import type { ProjectRouting } from '@kbn/es-query';
-import { sanitizeProjectRoutingForES } from '@kbn/es-query';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 
 /** @internal **/
@@ -87,10 +86,9 @@ export class SearchAPI {
             }
           }),
           switchMap((params) => {
-            const sanitizedRouting = sanitizeProjectRoutingForES(this.projectRouting);
-            if (sanitizedRouting) {
+            if (this.projectRouting) {
               // @ts-ignore it will not throw ts error once ES client supports it
-              params.body.project_routing = sanitizedRouting;
+              params.body.project_routing = this.projectRouting;
             }
 
             return search
