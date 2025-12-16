@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/logging'
   - '@kbn/core-ui-settings-server'
-  - '@kbn/actions-plugin'
 tags:
   - shared-common
   - package
