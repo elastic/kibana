@@ -110,3 +110,8 @@ export interface DeleteDocAction {
   type: 'delete-doc';
   payload: { ids: string[] };
 }
+
+export interface AddDocAction {
+  type: 'add-doc';
+  payload: DocUpdate;
+}

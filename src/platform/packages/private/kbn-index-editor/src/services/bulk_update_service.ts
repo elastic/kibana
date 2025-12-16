@@ -12,10 +12,10 @@ import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 import { groupBy, chunk } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
-import type { DeleteDocAction, DocUpdate } from '../types';
+import type { AddDocAction, DeleteDocAction } from '../types';
 import { isDocDelete, isDocUpdate } from '../utils';
 
-export type BulkUpdateOperations = Array<{ type: 'add-doc'; payload: DocUpdate } | DeleteDocAction>;
+export type BulkUpdateOperations = Array<AddDocAction | DeleteDocAction>;
 
 // Update operations will be split in chunks of this size.
 export const BULK_UPDATE_CHUNK_SIZE = 500;
