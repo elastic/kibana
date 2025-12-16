@@ -6,11 +6,12 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
+import { SloSelectorEmptyState } from './slo_selector_empty_state';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 
 interface Props {
@@ -23,7 +24,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { isLoading, data } = useFetchSloDefinitions({ name: searchValue });
+  const { isLoading, isInitialLoading, data } = useFetchSloDefinitions({ name: searchValue });
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
@@ -46,6 +47,14 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   };
 
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
+
+  if (isInitialLoading) {
+    return <EuiLoadingSpinner size="m" data-test-subj="sloSelectorLoadingSpinner" />;
+  }
+
+  if (data?.total === 0) {
+    return <SloSelectorEmptyState />;
+  }
 
   return (
     <EuiFormRow

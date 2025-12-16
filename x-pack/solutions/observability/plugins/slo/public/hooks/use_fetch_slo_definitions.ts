@@ -13,6 +13,7 @@ import { usePluginContext } from './use_plugin_context';
 export interface UseFetchSloDefinitionsResponse {
   data: FindSLODefinitionsResponse | undefined;
   isLoading: boolean;
+  isInitialLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
   refetch: () => void;
@@ -39,7 +40,7 @@ export function useFetchSloDefinitions({
   const search = name.endsWith('*') ? name : `${name}*`;
   const validTags = tags.filter((tag) => !!tag).join();
 
-  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
+  const { isLoading, isInitialLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly, validTags }),
     queryFn: async ({ signal }) => {
       try {
@@ -64,5 +65,5 @@ export function useFetchSloDefinitions({
     refetchOnWindowFocus: false,
   });
 
-  return { isLoading, isError, isSuccess, data, refetch };
+  return { isLoading, isInitialLoading, isError, isSuccess, data, refetch };
 }
