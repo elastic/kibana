@@ -10,6 +10,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { Observable } from 'rxjs';
 import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -142,6 +143,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
+  onechat?: OnechatPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}
