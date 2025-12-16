@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ATTACKS_ALERTS_ALIGNMENT_ENABLED,
   SecurityPageName,
@@ -13,6 +14,7 @@ import {
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import {
   defaultNavigationTree,
+  LazyIconAgentBuilder,
   LazyIconFindings,
   LazyIconIntelligence,
   LazyIconWorkflow,
@@ -21,7 +23,10 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
-export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
+export const createNavigationTree = (
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'security_solution_home',
@@ -49,6 +54,15 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       link: 'workflows',
       badgeType: 'techPreview' as const,
     },
+    ...(chatExperience === AIChatExperience.Agent
+      ? [
+          {
+            // TODO: update icon to 'robot' once it's available in EUI
+            icon: LazyIconAgentBuilder,
+            link: 'agent_builder' as AppDeepLinkId,
+          },
+        ]
+      : []),
     {
       id: SecurityPageName.attackDiscovery,
       icon: 'bolt',
@@ -175,6 +189,15 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               title: i18nStrings.stackManagementV2.home.title,
               breadcrumbStatus: 'hidden',
             },
+            // Only show Cloud Connect in on-prem deployments (not cloud)
+            ...(services.cloud?.isCloudEnabled
+              ? []
+              : [
+                  {
+                    id: 'cloud_connect' as const,
+                    link: 'cloud_connect' as const,
+                  },
+                ]),
             { link: 'monitoring' },
           ],
         },

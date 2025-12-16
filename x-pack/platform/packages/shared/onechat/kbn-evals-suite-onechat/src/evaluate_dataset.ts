@@ -15,6 +15,9 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
+  createRagEvaluators,
+  type GroundTruth,
+  type RetrievedDoc,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -28,6 +31,10 @@ interface DatasetExample extends Example {
   };
   output: {
     expected?: string;
+    groundTruth?: GroundTruth;
+  };
+  metadata?: {
+    [key: string]: unknown;
   };
 }
 
@@ -102,11 +109,39 @@ export function createEvaluateDataset({
       return {
         errors: response.errors,
         messages: response.messages,
+        steps: response.steps,
         traceId: response.traceId,
         correctnessAnalysis: correctnessResult?.metadata,
         groundednessAnalysis: groundednessResult?.metadata,
       };
     };
+
+    const ragEvaluators = createRagEvaluators({
+      k: 10,
+      relevanceThreshold: 1,
+      extractRetrievedDocs: (output: TaskOutput) => {
+        const steps =
+          (
+            output as {
+              steps?: Array<{
+                type: string;
+                tool_id?: string;
+                results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
+              }>;
+            }
+          )?.steps ?? [];
+        return steps
+          .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
+          .flatMap((step) => step.results ?? [])
+          .map((result) => ({
+            index: result.data?.reference?.index,
+            id: result.data?.reference?.id,
+          }))
+          .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
+      },
+      extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
+        referenceOutput?.groundTruth ?? {},
+    });
 
     await phoenixClient.runExperiment(
       {
@@ -116,6 +151,7 @@ export function createEvaluateDataset({
       selectEvaluators([
         ...createQuantitativeCorrectnessEvaluators(),
         createQuantitativeGroundednessEvaluator(),
+        ...ragEvaluators,
         ...Object.values({
           ...evaluators.traceBasedEvaluators,
           latency: createSpanLatencyEvaluator({
