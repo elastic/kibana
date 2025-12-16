@@ -200,7 +200,7 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
     <>
       <EuiFormRow
         label={i18n.translate('xpack.stackConnectors.slack.params.channelsComboBoxLabel', {
-          defaultMessage: 'Channel',
+          defaultMessage: 'Channel name',
         })}
         fullWidth
         error={errors.channels as string[]}
