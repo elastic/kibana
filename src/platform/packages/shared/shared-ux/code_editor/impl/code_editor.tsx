@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Interpolation, Theme } from '@emotion/react';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
@@ -602,11 +602,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div
-      css={[styles.container, classNameCss]}
+      css={styles.container}
       onKeyDown={onKeyDown}
       data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
       className="kibanaCodeEditor"
     >
+      <Global styles={classNameCss} />
       {accessibilityOverlayEnabled && renderPrompt()}
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (

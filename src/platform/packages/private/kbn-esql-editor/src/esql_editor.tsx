@@ -1048,11 +1048,11 @@ const ESQLEditorInternal = function ESQLEditor({
               `}
             >
               <div css={styles.editorContainer}>
-                <Global styles={getEditorOverwrites(theme)} />
                 <CodeEditor
                   htmlId={htmlId}
                   aria-label={formLabel}
                   languageId={ESQL_LANG_ID}
+                  classNameCss={getEditorOverwrites(theme)}
                   value={code}
                   options={codeEditorOptions}
                   width="100%"
