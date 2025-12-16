@@ -134,6 +134,11 @@ export class UrlFormat extends FieldFormat {
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
+  private escapeForHtml(value: string): string {
+    // Escape HTML entities for security, but preserve ampersands for URL functionality
+    return escape(value).replace(/&amp;/g, '&');
+  }
+
   textConvert: TextContextTypeConvert = (value: string) => this.formatLabel(value);
 
   htmlConvert: HtmlContextTypeConvert = (rawValue: string, options = {}) => {
@@ -141,8 +146,8 @@ export class UrlFormat extends FieldFormat {
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
 
-    const url = escape(this.formatUrl(rawValue)).replace(/&amp;/g, '&');
-    const label = escape(this.formatLabel(rawValue, url)).replace(/&amp;/g, '&');
+    const url = this.escapeForHtml(this.formatUrl(rawValue));
+    const label = this.escapeForHtml(this.formatLabel(rawValue, url));
 
     switch (this.param('type')) {
       case 'audio':
