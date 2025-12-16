@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
+import { waitForChartToLoad, waitForTableToLoad } from './utils';
 
 type ServiceDetailsPageTabName =
   | 'overview'
@@ -34,7 +35,7 @@ export class ServiceDetailsPage {
         rangeTo: end,
       })}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.getByRole('tablist').waitFor();
   }
 
   // #region Go to Tabs
@@ -54,8 +55,9 @@ export class ServiceDetailsPage {
         rangeTo: end,
       })}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
   }
+
+  // TODO: Add waitForXTabToLoad to all tabs
 
   async gotoOverviewTab(params: { serviceName: string; start: string; end: string }) {
     await this.gotoTab({ ...params, tabName: 'overview' });
@@ -65,8 +67,16 @@ export class ServiceDetailsPage {
     await this.gotoTab({ ...params, tabName: 'transactions' });
   }
 
+  private async waitForDependenciesTabToLoad() {
+    await Promise.all([
+      waitForChartToLoad(this.page, 'serviceDependenciesBreakdownChart'),
+      waitForTableToLoad(this.page, 'dependenciesTable'),
+    ]);
+  }
+
   async gotoDependenciesTab(params: { serviceName: string; start: string; end: string }) {
     await this.gotoTab({ ...params, tabName: 'dependencies' });
+    await this.waitForDependenciesTabToLoad();
   }
 
   async gotoErrorsTab(params: { serviceName: string; start: string; end: string }) {

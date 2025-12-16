@@ -6,6 +6,7 @@
  */
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
+import { waitForTableToLoad } from './utils';
 
 export class DependenciesInventoryPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -19,7 +20,7 @@ export class DependenciesInventoryPage {
         rangeTo: end,
       })}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitForDependenciesToLoad();
   }
 
   async expectPageHeaderVisible() {
@@ -36,5 +37,9 @@ export class DependenciesInventoryPage {
 
   async clickDependencyInDependenciesTable(dependencyName: string) {
     await this.page.getByRole('link', { name: dependencyName }).click();
+  }
+
+  async waitForDependenciesToLoad() {
+    await waitForTableToLoad(this.page, 'dependenciesTable');
   }
 }

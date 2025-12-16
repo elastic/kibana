@@ -8,6 +8,7 @@
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { capitalize } from 'lodash';
 import { expect } from '@kbn/scout-oblt';
+import { waitForChartToLoad, waitForTableToLoad } from './utils';
 
 type DependencyDetailsPageTabName = 'overview' | 'operations';
 
@@ -24,7 +25,7 @@ export class DependencyDetailsPage {
         rangeTo: end,
       })}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.getByRole('tablist').waitFor();
   }
 
   // #region Go to Tabs
@@ -43,15 +44,29 @@ export class DependencyDetailsPage {
         rangeTo: end,
       })}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+  }
+
+  private async waitForOverviewTabToLoad() {
+    await Promise.all([
+      waitForChartToLoad(this.page, 'latencyChart'),
+      waitForChartToLoad(this.page, 'throughputChart'),
+      waitForChartToLoad(this.page, 'errorRateChart'),
+      waitForTableToLoad(this.page, 'dependenciesTable'),
+    ]);
   }
 
   async gotoOverviewTab(params: { dependencyName: string; start: string; end: string }) {
     await this.gotoTab({ ...params, tabName: 'overview' });
+    await this.waitForOverviewTabToLoad();
+  }
+
+  private async waitForOperationsTabToLoad() {
+    await waitForTableToLoad(this.page, 'apmDependencyDetailOperationsListTable');
   }
 
   async gotoOperationsTab(params: { dependencyName: string; start: string; end: string }) {
     await this.gotoTab({ ...params, tabName: 'operations' });
+    await this.waitForOperationsTabToLoad();
   }
   // #endregion
 
