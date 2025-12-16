@@ -9,9 +9,15 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import type {
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
 
@@ -42,8 +48,13 @@ const logRateAnalysisSchema = z.object({
 });
 
 export function createRunLogRateAnalysisTool({
+  core,
   logger,
 }: {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
 }): StaticToolRegistration<typeof logRateAnalysisSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
@@ -66,6 +77,12 @@ Do NOT use for:
 - Investigating individual log entries or transactions`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery },
       context

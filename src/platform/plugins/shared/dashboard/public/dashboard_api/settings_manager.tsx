@@ -64,7 +64,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
   );
 
   function serializeSettings() {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { description, tags, time_restore, project_routing_restore, title, ...options } =
       stateManager.getLatestState();
     return {
@@ -109,9 +108,9 @@ export function initializeSettingsManager(initialState: DashboardState) {
             const {
               description,
               tags,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               time_restore,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               project_routing_restore,
               title,
               ...optionDiffs
