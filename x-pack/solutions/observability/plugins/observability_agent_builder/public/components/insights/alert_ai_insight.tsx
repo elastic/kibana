@@ -72,12 +72,6 @@ export function AlertAiInsight({ alertId }: AlertAiInsightProps) {
       title={i18n.translate('xpack.observabilityAgentBuilder.alertAiInsight.titleLabel', {
         defaultMessage: 'Help me understand this alert',
       })}
-      description={i18n.translate(
-        'xpack.observabilityAgentBuilder.alertAiInsight.descriptionLabel',
-        {
-          defaultMessage: 'Get helpful insights from our Elastic AI Agent.',
-        }
-      )}
       fetchInsight={fetchInsight}
       buildAttachments={buildAttachments}
     />

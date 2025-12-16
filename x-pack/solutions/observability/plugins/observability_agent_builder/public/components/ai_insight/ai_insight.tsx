@@ -18,6 +18,7 @@ import {
   EuiMarkdownFormat,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -39,12 +40,11 @@ export interface AiInsightAttachment {
 
 export interface AiInsightProps {
   title: string;
-  description: string;
   fetchInsight: () => Promise<AiInsightResponse>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
 }
 
-export function AiInsight({ title, description, fetchInsight, buildAttachments }: AiInsightProps) {
+export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,7 +123,11 @@ export function AiInsight({ title, description, fetchInsight, buildAttachments }
                 <h5>{title}</h5>
               </EuiText>
               <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
-                <span>{description}</span>
+                <span>
+                  {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
+                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
+                  })}
+                </span>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

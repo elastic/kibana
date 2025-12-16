@@ -26,16 +26,9 @@ export interface LogAiInsightProps {
 }
 
 const explainLogMessageButtonLabel = i18n.translate(
-  'xpack.observabilityAgentBuilder.aiInsight.explainLogMessageButtonLabel',
+  'xpack.observabilityAgentBuilder.logAiInsight.titleLabel',
   {
     defaultMessage: 'Explain this log entry',
-  }
-);
-
-const explainLogMessageDescription = i18n.translate(
-  'xpack.observabilityAgentBuilder.aiInsight.explainLogMessageDescription',
-  {
-    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
   }
 );
 
@@ -99,7 +92,6 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     <>
       <AiInsight
         title={explainLogMessageButtonLabel}
-        description={explainLogMessageDescription}
         fetchInsight={fetchInsight}
         buildAttachments={buildAttachments}
       />

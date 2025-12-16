@@ -96,11 +96,8 @@ export function ErrorSampleAiInsight({
 
   return (
     <AiInsight
-      title={i18n.translate('xpack.observability.errorAiInsight.titleLabel', {
+      title={i18n.translate('xpack.observabilityAgentBuilder.errorAiInsight.titleLabel', {
         defaultMessage: "What's this error?",
-      })}
-      description={i18n.translate('xpack.observability.errorAiInsight.descriptionLabel', {
-        defaultMessage: 'Get helpful insights from our Elastic AI Agent',
       })}
       fetchInsight={fetchInsight}
       buildAttachments={buildAttachments}
