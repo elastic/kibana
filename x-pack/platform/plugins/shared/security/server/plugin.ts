@@ -13,6 +13,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
+  ISavedObjectTypeRegistry,
   KibanaRequest,
   Logger,
   Plugin,
@@ -292,13 +293,22 @@ export class SecurityPlugin
     this.fipsServiceSetup = this.fipsService.setup({ config, license });
     this.fipsServiceSetup.validateLicenseForFips();
 
+    let getTypeRegistrySync: (() => ISavedObjectTypeRegistry) | undefined;
+    core.getStartServices().then(([coreStart]) => {
+      getTypeRegistrySync = () => coreStart.savedObjects.getTypeRegistry();
+    });
+
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       getCurrentUser,
-      getTypeRegistry: () =>
-        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getTypeRegistry()),
+      getTypeRegistry: () => {
+        if (!getTypeRegistrySync) {
+          throw new Error('Type registry is not available');
+        }
+        return getTypeRegistrySync();
+      },
     });
 
     setupSavedObjects({
