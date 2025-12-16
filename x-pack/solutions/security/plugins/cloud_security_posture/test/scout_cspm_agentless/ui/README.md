@@ -21,12 +21,18 @@ This approach focuses on testing that the UI sends correctly shaped requests.
 ### Run Tests
 
 ```bash
+# Stateful mode
 node scripts/scout.js run-tests \
   --stateful \
-  --config-dir=cspm_agentless \
-  --config x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/parallel.playwright.config.ts \
-  --testTarget=local
+  --config x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+
+# Serverless Security mode
+node scripts/scout.js run-tests \
+  --serverless=security \
+  --config x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
 ```
+
+> **Note:** Scout auto-detects the custom `cspm_agentless` config from the `scout_cspm_agentless` directory name.
 
 Scout automatically:
 
@@ -152,7 +158,7 @@ interface AgentlessPolicyRequestBody {
 ## File Structure
 
 ```
-x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/
+x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/
 ├── README.md                          ← This file
 ├── parallel.playwright.config.ts      ← Playwright config
 └── parallel_tests/
@@ -161,10 +167,12 @@ x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/
         ├── reuse_cloud_connector.spec.ts
         └── switch_setup_technology.spec.ts
 
-Scout Config:
+Scout Config (auto-detected from 'scout_cspm_agentless' directory name):
 src/platform/packages/shared/kbn-scout/src/servers/configs/custom/cspm_agentless/
-└── stateful/
-    └── stateful.config.ts             ← Kibana config for agentless
+├── stateful/
+│   └── stateful.config.ts             ← Kibana config for stateful mode
+└── serverless/
+    └── security.serverless.config.ts  ← Kibana config for serverless security mode
 ```
 
 ---
