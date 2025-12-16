@@ -8,10 +8,10 @@ import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityAgentBuilderPluginSetup {}
+export interface ObservabilityAgentBuilderPluginPublicSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityAgentBuilderPluginStart {}
+export interface ObservabilityAgentBuilderPluginPublicStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginSetupDependencies {}

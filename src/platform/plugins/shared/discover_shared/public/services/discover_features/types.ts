@@ -54,7 +54,7 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
-export interface ObservabilityLogsAIInsightFeatureRenderDeps {
+export interface ObservabilityLogsAiInsightFeatureRenderDeps {
   doc: DataTableRecord;
 }
 export interface ObservabilityLogsAIInsightFeature {

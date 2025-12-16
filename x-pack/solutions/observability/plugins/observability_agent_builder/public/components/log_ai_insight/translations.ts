@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const explainLogMessageButtonLabel = i18n.translate(
-  'xpack.observability.agentBuilder.explainLogMessageButtonLabel',
+  'xpack.observabilityAgentBuilder.aiInsight.explainLogMessageButtonLabel',
   {
     defaultMessage: 'Explain this log entry',
   }
