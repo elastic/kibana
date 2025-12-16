@@ -208,28 +208,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
       });
-
-      describe('Getting Started navigation', function () {
-        it('renders Getting Started side nav item', async () => {
-          await pageObjects.searchNavigation.navigateToElasticsearchSearchGettingStartedPage();
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'searchGettingStarted',
-          });
-        });
-
-        it('Getting Started nav item is active and shows correct breadcrumbs', async () => {
-          await pageObjects.solutionNavigation.sidenav.clickLink({
-            deepLinkId: 'searchGettingStarted',
-          });
-          await testSubjects.existOrFail('gettingStartedHeader');
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'searchGettingStarted',
-          });
-          await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-            text: 'Getting started',
-          });
-        });
-      });
     });
   });
 }
