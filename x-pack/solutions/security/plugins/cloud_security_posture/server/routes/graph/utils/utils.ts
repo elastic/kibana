@@ -6,7 +6,7 @@
  */
 
 import type { EntityNodeDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { entityTypeMappings } from './entity_type_constants';
+import { entityTypeMappings } from '../entity_type_constants';
 
 /**
  * Interface for visual properties returned by the transform function
