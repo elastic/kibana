@@ -1000,6 +1000,8 @@
       "@kbn/es-query-constants/*": ["src/platform/packages/shared/kbn-es-query-constants/*"],
       "@kbn/es-query-server": ["src/platform/packages/shared/kbn-es-query-server"],
       "@kbn/es-query-server/*": ["src/platform/packages/shared/kbn-es-query-server/*"],
+      "@kbn/es-snapshot-loader": ["x-pack/platform/packages/shared/kbn-es-snapshot-loader"],
+      "@kbn/es-snapshot-loader/*": ["x-pack/platform/packages/shared/kbn-es-snapshot-loader/*"],
       "@kbn/es-types": ["src/platform/packages/shared/kbn-es-types"],
       "@kbn/es-types/*": ["src/platform/packages/shared/kbn-es-types/*"],
       "@kbn/es-ui-shared-plugin": ["src/platform/plugins/shared/es_ui_shared"],

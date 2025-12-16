@@ -1615,6 +1615,7 @@
     "@kbn/edot-collector": "link:src/platform/packages/shared/kbn-edot-collector",
     "@kbn/es": "link:src/platform/packages/shared/kbn-es",
     "@kbn/es-archiver": "link:src/platform/packages/shared/kbn-es-archiver",
+    "@kbn/es-snapshot-loader": "link:x-pack/platform/packages/shared/kbn-es-snapshot-loader",
     "@kbn/eslint-config": "link:packages/kbn-eslint-config",
     "@kbn/eslint-plugin-disable": "link:packages/kbn-eslint-plugin-disable",
     "@kbn/eslint-plugin-eslint": "link:packages/kbn-eslint-plugin-eslint",
