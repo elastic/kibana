@@ -45,7 +45,7 @@ export const setStreamsPromptRoute = createServerRoute({
       logger,
     });
 
-    if (!Object.values(params.body).some((value) => value?.length > 0)) {
+    if (!Object.values(params.body ?? {}).some((value) => value?.length > 0)) {
       throw new StatusError('At least one prompt template must be provided', 400);
     }
     const results = await promptsConfigService.upsertPrompt(params.body);
