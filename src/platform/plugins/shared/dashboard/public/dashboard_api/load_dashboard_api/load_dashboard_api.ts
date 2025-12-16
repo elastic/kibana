@@ -72,7 +72,6 @@ export async function loadDashboardApi({
     savedObjectId,
     user,
     isAccessControlEnabled,
-    clearCacheFunction: dashboardClient.clearCache,
   });
 
   const performanceSubscription = startQueryPerformanceTracking(api, {
