@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  createRepositoryClient,
+  type DefaultClientOptions,
+} from '@kbn/server-route-repository-client';
+import type { ObservabilityAgentBuilderServerRouteRepository } from '../../../server';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
@@ -37,56 +42,62 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     services: { http },
   } = useKibana();
 
+  const apiClient = createRepositoryClient<
+    ObservabilityAgentBuilderServerRouteRepository,
+    DefaultClientOptions
+  >({ http });
+
   const { index, id } = useMemo(() => {
     return {
-      index: doc?.fields.find((field) => field.field === '_index')?.value[0] as string | undefined,
-      id: doc?.fields.find((field) => field.field === '_id')?.value[0] as string | undefined,
+      index: doc?.fields.find((field) => field.field === '_index')?.value[0],
+      id: doc?.fields.find((field) => field.field === '_id')?.value[0],
     };
   }, [doc]);
 
-  const fetchInsight = useCallback(async () => {
-    const response = await http?.post<{ summary: string; context: string }>(
-      '/internal/observability_agent_builder/ai_insights/log',
+  if (!index || !id) {
+    return null;
+  }
+
+  const fetchInsight = async () => {
+    const response = await apiClient.fetch(
+      'POST /internal/observability_agent_builder/ai_insights/log',
       {
-        body: JSON.stringify({
-          index,
-          id,
-        }),
+        signal: null,
+        params: {
+          body: {
+            index,
+            id,
+          },
+        },
       }
     );
-    return {
-      summary: response?.summary ?? '',
-      context: response?.context ?? '',
-    };
-  }, [http, index, id]);
+    return response;
+  };
 
-  const buildAttachments = useCallback(
-    (summary: string, context: string): AiInsightAttachment[] => [
-      {
-        type: 'screen_context',
-        data: {
-          app: 'discover',
-          url: window.location.href,
-        },
-        hidden: true,
+  const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
+    {
+      type: 'screen_context',
+      data: {
+        app: 'discover',
+        url: window.location.href,
       },
-      {
-        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-        data: {
-          summary,
-          context,
-        },
+      hidden: true,
+    },
+    {
+      type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+      data: {
+        summary,
+        context,
       },
-      {
-        type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
-        data: {
-          index,
-          id,
-        },
+    },
+    {
+      type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+      data: {
+        index,
+        id,
       },
-    ],
-    [index, id]
-  );
+    },
+  ];
 
   return (
     <>
