@@ -90,7 +90,7 @@ export async function registerTools({
     createGetServicesTool({ core, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
-    createGetHostsTool({ core, plugins, logger, dataRegistry }),
+    createGetHostsTool({ core, logger, dataRegistry }),
   ];
 
   for (const tool of observabilityTools) {

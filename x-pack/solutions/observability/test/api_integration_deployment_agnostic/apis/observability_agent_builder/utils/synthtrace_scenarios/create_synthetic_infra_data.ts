@@ -9,7 +9,7 @@ import moment from 'moment';
 import { infra, timerange } from '@kbn/synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-interface HostConfig {
+export interface HostConfig {
   name: string;
   cpuUsage: number;
   memoryUsage: number;
@@ -18,42 +18,15 @@ interface HostConfig {
   cloudRegion: string;
 }
 
-const DEFAULT_HOSTS: HostConfig[] = [
-  {
-    name: 'web-server-01',
-    cpuUsage: 0.65,
-    memoryUsage: 0.72,
-    diskUsage: 0.45,
-    cloudProvider: 'aws',
-    cloudRegion: 'us-east-1',
-  },
-  {
-    name: 'db-server-01',
-    cpuUsage: 0.35,
-    memoryUsage: 0.85,
-    diskUsage: 0.68,
-    cloudProvider: 'aws',
-    cloudRegion: 'us-east-1',
-  },
-  {
-    name: 'api-server-01',
-    cpuUsage: 0.45,
-    memoryUsage: 0.55,
-    diskUsage: 0.25,
-    cloudProvider: 'gcp',
-    cloudRegion: 'us-central1',
-  },
-];
-
 /**
  * Creates synthetic infrastructure data for testing the get_hosts tool.
  */
 export const createSyntheticInfraData = async ({
   getService,
-  hostNames,
+  hosts,
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
-  hostNames?: string[];
+  hosts: HostConfig[];
 }) => {
   const synthtrace = getService('synthtrace');
   const infraSynthtraceEsClient = synthtrace.createInfraSynthtraceEsClient();
@@ -63,20 +36,12 @@ export const createSyntheticInfraData = async ({
   const from = moment().subtract(15, 'minutes');
   const to = moment();
 
-  // Use custom host names with default profiles, or use defaults
-  const hostConfigs = hostNames
-    ? hostNames.map((name, idx) => ({
-        ...DEFAULT_HOSTS[idx % DEFAULT_HOSTS.length],
-        name,
-      }))
-    : DEFAULT_HOSTS;
-
   await infraSynthtraceEsClient.index(
     timerange(from, to)
       .interval('30s')
       .rate(1)
       .generator((timestamp) =>
-        hostConfigs.flatMap((hostConfig) => {
+        hosts.flatMap((hostConfig) => {
           const host = infra.host(hostConfig.name);
           const totalMemory = 68_719_476_736; // 64GB
           const usedMemory = Math.floor(totalMemory * hostConfig.memoryUsage);

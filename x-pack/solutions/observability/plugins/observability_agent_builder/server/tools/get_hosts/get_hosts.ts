@@ -7,14 +7,18 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
+import type { ErrorResult, OtherResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import type {
+  BuiltinToolDefinition,
+  StaticToolRegistration,
+  ToolHandlerReturn,
+} from '@kbn/onechat-server';
 import type { CoreSetup, Logger, KibanaRequest } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import type {
-  ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
@@ -29,6 +33,15 @@ const DEFAULT_TIME_RANGE = {
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
+
+export type GetHostsToolResult = OtherResult<{
+  total: number;
+  hosts: Array<{
+    name: string;
+    metrics: Array<{ name: string; value: number | null }>;
+    metadata: Array<{ name: string; value: string | number | null }>;
+  }>;
+}>;
 
 const getHostsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
@@ -55,7 +68,6 @@ const getHostsSchema = z.object({
 
 export function createGetHostsTool({
   core,
-  plugins,
   logger,
   dataRegistry,
 }: {
@@ -63,7 +75,6 @@ export function createGetHostsTool({
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): StaticToolRegistration<typeof getHostsSchema> {
@@ -96,7 +107,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
         hostNames,
       },
       { request }
-    ) => {
+    ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
       try {
         const startMs = parseDatemath(start);
         const endMs = parseDatemath(end, { roundUp: true });
@@ -140,7 +151,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
         return {
           results: [
             {
-              type: ToolResultType.other,
+              type: ToolResultType.other as const,
               data: {
                 hosts: result.nodes,
                 total: result.nodes.length,

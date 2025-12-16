@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
-import type { OtherResult } from '@kbn/onechat-common';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
+import type { GetHostsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_hosts/get_hosts';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticInfraData } from '../utils/synthtrace_scenarios';
+import { createSyntheticInfraData, type HostConfig } from '../utils/synthtrace_scenarios';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -24,9 +24,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
+      const testHosts: HostConfig[] = [
+        {
+          name: 'test-host-01',
+          cpuUsage: 0.65,
+          memoryUsage: 0.72,
+          diskUsage: 0.45,
+          cloudProvider: 'aws',
+          cloudRegion: 'us-east-1',
+        },
+        {
+          name: 'test-host-02',
+          cpuUsage: 0.35,
+          memoryUsage: 0.85,
+          diskUsage: 0.68,
+          cloudProvider: 'gcp',
+          cloudRegion: 'us-central1',
+        },
+      ];
+
       ({ infraSynthtraceEsClient } = await createSyntheticInfraData({
         getService,
-        hostNames: ['test-host-01', 'test-host-02'],
+        hosts: testHosts,
       }));
     });
 
@@ -36,20 +55,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    interface ResponseData {
-      total: number;
-      hosts: Array<{
-        name: string;
-        metrics: Array<{ name: string; value: number | null }>;
-        metadata: Array<{ name: string; value: string | number | null }>;
-      }>;
-    }
-
     describe('when fetching hosts', () => {
-      let responseData: ResponseData;
+      let resultData: GetHostsToolResult['data'];
 
       before(async () => {
-        const results = await agentBuilderApiClient.executeTool<OtherResult<ResponseData>>({
+        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
           id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -59,41 +69,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(results).to.have.length(1);
 
-        responseData = results[0].data;
+        resultData = results[0].data;
       });
 
       it('returns the correct total count', () => {
-        expect(responseData.total).to.be(2);
+        expect(resultData.total).to.be(2);
       });
 
       it('returns the expected hosts', () => {
-        const hostNames = responseData.hosts.map((host) => host.name);
+        const hostNames = resultData.hosts.map((host) => host.name);
         expect(hostNames).to.eql(['test-host-01', 'test-host-02']);
       });
 
       it('includes metrics for each host', () => {
-        for (const host of responseData.hosts) {
+        for (const host of resultData.hosts) {
           expect(host).to.have.property('metrics');
           expect(host.metrics).to.be.an('array');
         }
       });
 
       it('includes metadata for each host', () => {
-        for (const host of responseData.hosts) {
+        for (const host of resultData.hosts) {
           expect(host).to.have.property('metadata');
           expect(host.metadata).to.be.an('array');
         }
       });
 
       it('returns correct CPU metrics', () => {
-        const host01Cpu = responseData.hosts
+        const host01Cpu = resultData.hosts
           .find((h) => h.name === 'test-host-01')
           ?.metrics.find((m) => m.name === 'cpuV2');
 
         expect(host01Cpu).to.be.ok();
         expect(host01Cpu!.value).to.be.within(0.6, 0.7);
 
-        const host02Cpu = responseData.hosts
+        const host02Cpu = resultData.hosts
           .find((h) => h.name === 'test-host-02')
           ?.metrics.find((m) => m.name === 'cpuV2');
 
@@ -102,14 +112,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct memory metrics', () => {
-        const host01Memory = responseData.hosts
+        const host01Memory = resultData.hosts
           .find((h) => h.name === 'test-host-01')
           ?.metrics.find((m) => m.name === 'memory');
 
         expect(host01Memory).to.be.ok();
         expect(host01Memory!.value).to.be.within(0.7, 0.75);
 
-        const host02Memory = responseData.hosts
+        const host02Memory = resultData.hosts
           .find((h) => h.name === 'test-host-02')
           ?.metrics.find((m) => m.name === 'memory');
 
@@ -118,13 +128,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct disk metrics', () => {
-        const host01Cpu = responseData.hosts
+        const host01Cpu = resultData.hosts
           .find((h) => h.name === 'test-host-01')
           ?.metrics.find((m) => m.name === 'diskSpaceUsage');
         expect(host01Cpu).to.be.ok();
         expect(host01Cpu!.value).to.be.within(0.4, 0.5);
 
-        const host02Cpu = responseData.hosts
+        const host02Cpu = resultData.hosts
           .find((h) => h.name === 'test-host-02')
           ?.metrics.find((m) => m.name === 'diskSpaceUsage');
         expect(host02Cpu).to.be.ok();
@@ -134,7 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when using limit parameter', () => {
       it('respects the limit and returns fewer hosts', async () => {
-        const results = await agentBuilderApiClient.executeTool<OtherResult<ResponseData>>({
+        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
           id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -151,7 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when using hostNames parameter', () => {
       it('filters to specific hosts', async () => {
-        const results = await agentBuilderApiClient.executeTool<OtherResult<ResponseData>>({
+        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
           id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -168,7 +178,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when using kqlFilter parameter', () => {
       it('filters hosts by KQL query', async () => {
-        const results = await agentBuilderApiClient.executeTool<OtherResult<ResponseData>>({
+        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
           id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
           params: {
             start: 'now-1h',

@@ -89,13 +89,13 @@ export type ErrorResult = ToolResultMixin<
   }
 >;
 
-export type ToolResult =
+export type ToolResult<T extends Object = Record<string, unknown>> =
   | ResourceResult
   | TabularDataResult
   | QueryResult
   | VisualizationResult
   | DashboardResult
-  | OtherResult<object>
+  | OtherResult<T>
   | ErrorResult;
 
 export const isResourceResult = (result: ToolResult): result is ResourceResult => {
