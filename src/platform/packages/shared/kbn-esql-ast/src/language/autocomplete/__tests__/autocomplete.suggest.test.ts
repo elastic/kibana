@@ -7,32 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCallbacks } from '@kbn/esql-types';
-import * as autocomplete from '../autocomplete';
+import { setup } from './helpers';
 import { getCallbackMocks } from '../../../__tests__/language/helpers';
-
-const setup = async (caret = '?') => {
-  if (caret.length !== 1) throw new Error('Caret must be a single character');
-  const callbacks = getCallbackMocks();
-  const suggest = async (query: string, cb: ESQLCallbacks = callbacks) => {
-    const pos = query.indexOf(caret);
-    if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
-    const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    return await autocomplete.suggest(querySansCaret, pos, cb);
-  };
-
-  return {
-    callbacks,
-    suggest,
-  };
-};
 
 describe('autocomplete.suggest', () => {
   test('does not load fields when suggesting within a single  SHOW, ROW command', async () => {
-    const { suggest, callbacks } = await setup();
+    const { suggest } = await setup('?');
+    const callbacks = getCallbackMocks();
 
-    await suggest('sHoW ?');
-    await suggest('row ? |');
+    await suggest('sHoW ?', { callbacks });
+    await suggest('row ? |', { callbacks });
 
     expect((callbacks.getColumnsFor as any).mock.calls.length).toBe(0);
   });
