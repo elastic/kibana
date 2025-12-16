@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+export interface Field {
+  name: string;
+  type: FieldType;
+  properties?: { [key: string]: Omit<Field, 'name'> };
+  fields?: Fields;
+  inference_id?: string | undefined;
+}
+
+export interface Fields {
+  [key: string]: Omit<Field, 'name'>;
+}
+
+export type FieldType = 'object' | 'semantic_text';
+
 export interface IndicesStatusResponse {
   indexNames: string[];
 }
@@ -27,4 +41,9 @@ export interface CreateIndexRequest {
 
 export interface CreateIndexResponse {
   index: string;
+}
+
+export interface UpdateIndexMappingsRequest {
+  indexName: string;
+  fields: Fields;
 }
