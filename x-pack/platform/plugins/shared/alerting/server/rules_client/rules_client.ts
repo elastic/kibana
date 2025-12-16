@@ -100,10 +100,8 @@ import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
-import {
-  createESQLRule,
-  type CreateESQLRuleData,
-} from '../application/rule/methods/create_esql_rule';
+import { createESQLRule } from '../application/esql_rule/methods/create/create_esql_rule';
+import type { CreateESQLRuleData } from '../application/esql_rule/methods/create/types/create_esql_rule_data';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,

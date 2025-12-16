@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import type { ESQLParams } from '@kbn/response-ops-rule-params';
-import type { ESQLRuleResponseV1 } from '../../../../rule/response';
+import type { ESQLRuleResponseV1 } from '../../../response';
 import type {
   createESQLRuleParamsSchema as createESQLRuleParamsSchemaV1,
   createESQLBodySchema as createESQLBodySchemaV1,
@@ -15,6 +14,6 @@ import type {
 export type CreateESQLRuleRequestParams = TypeOf<typeof createESQLRuleParamsSchemaV1>;
 export type CreateESQLRuleRequestBody = TypeOf<typeof createESQLBodySchemaV1>;
 
-export interface CreateESQLRuleResponse<Params extends ESQLParams = never> {
+export interface CreateESQLRuleResponse {
   body: ESQLRuleResponseV1;
 }

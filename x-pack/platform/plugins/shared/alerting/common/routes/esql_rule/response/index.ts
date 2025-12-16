@@ -5,46 +5,8 @@
  * 2.0.
  */
 
-export {
-  actionParamsSchema,
-  mappedParamsSchema,
-  ruleExecutionStatusSchema,
-  ruleLastRunSchema,
-  monitoringSchema,
-  ruleResponseSchema,
-  ruleSnoozeScheduleSchema,
-  notifyWhenSchema,
-  scheduleIdsSchema,
-} from './schemas/latest';
-
-export type { RuleResponse, RuleSnoozeSchedule, RuleLastRun, Monitoring } from './types/latest';
-
-export {
-  actionParamsSchema as actionParamsSchemaV1,
-  mappedParamsSchema as mappedParamsSchemaV1,
-  ruleExecutionStatusSchema as ruleExecutionStatusSchemaV1,
-  ruleLastRunSchema as ruleLastRunSchemaV1,
-  monitoringSchema as monitoringSchemaV1,
-  ruleResponseSchema as ruleResponseSchemaV1,
-  ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
-  notifyWhenSchema as notifyWhenSchemaV1,
-  scheduleIdsSchema as scheduleIdsSchemaV1,
-  alertDelaySchema as alertDelaySchemaV1,
-  artifactsSchema as artifactsSchemaV1,
-} from './schemas/v1';
-
-export type {
-  RuleResponse as RuleResponseV1,
-  RuleSnoozeSchedule as RuleSnoozeScheduleV1,
-  RuleLastRun as RuleLastRunV1,
-  Monitoring as MonitoringV1,
-} from './types/v1';
-
 export type { ESQLRuleResponse as ESQLRuleResponseV1 } from './types/v1';
-export { esqlRuleResponseSchema } from './schemas/v1';
+export { esqlRuleResponseSchema as esqlRuleResponseSchemaV1 } from './schemas/v1';
 
-export { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
-export { ruleParamsSchema } from '@kbn/response-ops-rule-params';
-
-export type { RuleParamsV1 } from '@kbn/response-ops-rule-params';
-export type { RuleParams } from '@kbn/response-ops-rule-params';
+export type { ESQLRuleResponse } from './types/latest';
+export { esqlRuleResponseSchema } from './schemas/latest';

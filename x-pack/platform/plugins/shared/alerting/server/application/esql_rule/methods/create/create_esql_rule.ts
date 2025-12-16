@@ -6,22 +6,11 @@
  */
 import { type ESQLParams } from '@kbn/response-ops-rule-params';
 import { v4 as uuidv4 } from 'uuid';
-import type { SanitizedRule } from '../../../types';
-import type { RulesClientContext } from '../../../rules_client';
-import type { CreateRuleData } from './create';
-import { createRule } from './create';
-
-export interface CreateESQLRuleData {
-  name: string;
-  tags: string[];
-  schedule: string;
-  enabled: boolean;
-  esql: string;
-  lookbackWindow: string;
-  timeField: string;
-  group_key: string[];
-  parentId?: string;
-}
+import type { SanitizedRule } from '../../../../types';
+import type { RulesClientContext } from '../../../../rules_client';
+import type { CreateRuleData } from '../../../rule/methods/create';
+import { createRule } from '../../../rule/methods/create';
+import type { CreateESQLRuleData } from './types';
 
 export async function createESQLRule(
   context: RulesClientContext,
