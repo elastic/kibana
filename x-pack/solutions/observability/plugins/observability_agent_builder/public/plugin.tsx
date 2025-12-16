@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
 import type {
   ObservabilityAgentBuilderPluginPublicSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -24,11 +23,7 @@ export class ObservabilityAgentBuilderPlugin
       ObservabilityAgentBuilderPluginStartDependencies
     >
 {
-  private readonly logger: Logger;
-
-  constructor(initContext: PluginInitializerContext) {
-    this.logger = initContext.logger.get();
-  }
+  constructor(initContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<

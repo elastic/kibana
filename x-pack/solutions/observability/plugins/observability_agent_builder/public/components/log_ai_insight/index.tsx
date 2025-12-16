@@ -25,7 +25,7 @@ export function createLogAIInsight(
     });
     return (
       <KibanaReactContextProvider>
-        <LogEntryAiInsight onechat={plugins.onechat} {...props} />
+        <LogEntryAiInsight {...props} />
       </KibanaReactContextProvider>
     );
   };

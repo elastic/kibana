@@ -10,8 +10,7 @@ import { AiInsight } from '@kbn/ai-insights';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../hooks/use_kibana';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
@@ -28,12 +27,11 @@ export interface LogAiInsightDocument {
 
 export interface LogAiInsightProps {
   doc: LogAiInsightDocument | undefined;
-  onechat?: OnechatPluginStart;
 }
 
-export function LogEntryAiInsight({ doc, onechat }: LogAiInsightProps) {
+export function LogEntryAiInsight({ doc }: LogAiInsightProps) {
   const {
-    services: { http },
+    services: { http, onechat },
   } = useKibana();
 
   const { getLicense } = useLicense();

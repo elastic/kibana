@@ -9,20 +9,15 @@ import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { useKibana } from './use_kibana';
 
 interface UseLicenseReturnValue {
   getLicense: () => ILicense | null;
   hasAtLeast: (level: LicenseType) => boolean | undefined;
 }
 
-interface KibanaServices {
-  licensing: LicensingPluginStart;
-}
-
 export const useLicense = (): UseLicenseReturnValue => {
-  const { services } = useKibana<KibanaServices>();
+  const { services } = useKibana();
   const license = useObservable<ILicense | null>(
     services.licensing?.license$ ?? new Observable(),
     null
