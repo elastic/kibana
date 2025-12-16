@@ -161,6 +161,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       documentLevelSecurity: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level`,
       e5Model: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-e5`,
       elasticInferenceService: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis`,
+      elasticInferenceServicePricing: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis#pricing`,
       elser: `${ELASTIC_DOCS}solutions/search/semantic-search/semantic-search-semantic-text`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: isServerless
@@ -204,6 +205,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
       customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
       elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
+      elasticCloud: `${ELASTIC_WEBSITE_URL}cloud/`,
     },
     searchGettingStarted: {
       visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,

@@ -136,6 +136,18 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -286,18 +298,6 @@
           {
             "plugin": "monitoring",
             "path": "x-pack/platform/plugins/private/monitoring/public/components/logs/logs.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
             "plugin": "ml",
@@ -773,6 +773,18 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -923,18 +935,6 @@
           {
             "plugin": "monitoring",
             "path": "x-pack/platform/plugins/private/monitoring/public/components/logs/logs.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
             "plugin": "ml",
@@ -1410,6 +1410,18 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
+            "plugin": "onechat",
+            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -1560,18 +1572,6 @@
           {
             "plugin": "monitoring",
             "path": "x-pack/platform/plugins/private/monitoring/public/components/logs/logs.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
             "plugin": "ml",
