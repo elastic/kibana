@@ -32,7 +32,7 @@ import type { ScoutFileInfo } from '../../..';
 import {
   datasources,
   generateTestRunId,
-  getTestIDForTitle,
+  computeTestID,
   ScoutEventsReport,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
@@ -157,7 +157,7 @@ export class ScoutJestReporter extends BaseReporter {
         type: test.result.ancestorTitles.length <= 1 ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.result.fullName),
+        id: computeTestID(path.relative(REPO_ROOT, test.filePath), test.result.fullName),
         title: test.result.title,
         tags: [],
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.filePath)),

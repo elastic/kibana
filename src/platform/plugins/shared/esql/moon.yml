@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/esql-editor'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core'
-  - '@kbn/data-views-plugin'
   - '@kbn/i18n'
   - '@kbn/config-schema'
   - '@kbn/esql-utils'
