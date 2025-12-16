@@ -25,9 +25,8 @@ export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
       path: `/internal/rule/esql/{id?}`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
-        access: 'public',
+        access: 'internal',
         summary: `Create an ESQL rule`,
-        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {
