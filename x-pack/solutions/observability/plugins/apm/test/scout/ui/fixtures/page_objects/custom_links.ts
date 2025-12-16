@@ -7,7 +7,7 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT } from '../constants';
+import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class CustomLinksPage {
   public saveButton: Locator;
@@ -17,9 +17,7 @@ export class CustomLinksPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/custom-links`);
-    return await this.page
-      .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    return await waitForApmSettingsHeaderLink(this.page);
   }
 
   async getCreateCustomLinkButton() {

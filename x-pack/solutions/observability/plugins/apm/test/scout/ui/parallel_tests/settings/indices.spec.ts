@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
 test.describe('Indices', { tag: ['@ess'] }, () => {
   test('Viewer should not be able to modify settings', async ({
@@ -42,9 +42,7 @@ test.describe('Indices', { tag: ['@ess'] }, () => {
     await expect(applyButton).toBeEnabled();
 
     await indicesPage.clickApplyChanges();
-    await page
-      .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await waitForApmSettingsHeaderLink(page);
 
     await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
   });

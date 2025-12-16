@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
 test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -52,9 +52,7 @@ test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Navigate to Overview tab
     await page.getByTestId('overviewTab').click();
-    await page
-      .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await waitForApmSettingsHeaderLink(page);
 
     // Verify transaction type is still 'Worker'
     await expect(transactionTypeFilter).toHaveValue('Worker');

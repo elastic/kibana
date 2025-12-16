@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
 const timeRange = {
   rangeFrom: testData.OPBEANS_START_DATE,
@@ -79,9 +79,7 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       });
 
       await page.goto(`${baseUrl}?${urlParams.toString()}`);
-      await page
-        .getByTestId('apmSettingsHeaderLink')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+      await waitForApmSettingsHeaderLink(page);
 
       await expect(page).toHaveURL(/.*environment=production.*/);
       await expect(storageExplorerPage.pageTitle).toBeVisible();

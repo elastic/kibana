@@ -6,7 +6,7 @@
  */
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
 test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceGroupsPage } }) => {
@@ -21,7 +21,7 @@ test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { serviceGroupsPage },
   }) => {
-    const serviceGroupName = 'go services';
+    const GO_SERVICE_GROUP_NAME = 'go services';
 
     await test.step('shows no service groups initially', async () => {
       // If there are no service groups, the page shows this heading
@@ -31,7 +31,7 @@ test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('creates a service group', async () => {
-      await serviceGroupsPage.createNewServiceGroup(serviceGroupName);
+      await serviceGroupsPage.createNewServiceGroup(GO_SERVICE_GROUP_NAME);
 
       // open the service picker and filter by agent name
       await serviceGroupsPage.typeInTheSearchBar('agent.name:"go"');
@@ -41,9 +41,9 @@ test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
       await page.getByText('Save group').click();
 
       // Make sure the toast is visible and contains the correct text and then close it
-      await expect(page.getByTestId('euiToastHeader__title')).toBeVisible();
+      await expect(page.getByTestId('euiToastHeader')).toBeVisible();
       await expect(
-        page.getByTestId('euiToastHeader__title').getByText(`Created "${serviceGroupName}" group`)
+        page.getByTestId('euiToastHeader').getByText(`Created "${GO_SERVICE_GROUP_NAME}" group`)
       ).toBeVisible();
       await page.getByTestId('toastCloseButton').click();
 
@@ -53,7 +53,7 @@ test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('shows created group in the list', async () => {
       const card = page.getByTestId('serviceGroupCard');
-      await expect(card).toContainText(serviceGroupName);
+      await expect(card).toContainText(GO_SERVICE_GROUP_NAME);
       await expect(card).toContainText('2 services');
     });
 
@@ -69,9 +69,7 @@ test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
       await page.getByTestId('apmDeleteGroupButton').click();
 
       // after deletion there should be no service groups
-      await page
-        .getByTestId('apmSettingsHeaderLink')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+      await waitForApmSettingsHeaderLink(page);
       await expect(
         page.getByRole('heading', { name: 'No service groups', level: 2 })
       ).toBeVisible();

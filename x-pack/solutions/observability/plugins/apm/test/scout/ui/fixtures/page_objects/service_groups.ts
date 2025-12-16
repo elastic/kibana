@@ -7,7 +7,7 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT } from '../constants';
+import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class ServiceGroupsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -16,9 +16,7 @@ export class ServiceGroupsPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/service-groups?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return await this.page
-      .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    return await waitForApmSettingsHeaderLink(this.page);
   }
 
   async typeInTheSearchBar(text: string) {

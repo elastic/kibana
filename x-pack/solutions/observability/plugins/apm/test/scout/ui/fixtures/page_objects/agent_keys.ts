@@ -6,16 +6,14 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT } from '../constants';
+import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class AgentKeysPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-keys`);
-    await this.page
-      .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await waitForApmSettingsHeaderLink(this.page);
     this.page.getByRole('heading', { name: 'Settings', level: 1 });
 
     return this.page;
