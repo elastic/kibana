@@ -18,6 +18,7 @@ import {
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
+  scheduleEnsureSecurityLabsUpToDateTask,
   getTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
@@ -164,6 +165,31 @@ export class DocumentationManager implements DocumentationManagerAPI {
     return {
       inferenceIds: idsToUpdate,
     };
+  }
+
+  async updateSecurityLabsAll(options?: {
+    forceUpdate?: boolean;
+  }): Promise<{ inferenceIds: string[] }> {
+    const { forceUpdate } = options ?? {};
+    const idsToUpdate =
+      (await this.docInstallClient.getPreviouslyInstalledSecurityLabsInferenceIds()) ?? [];
+    if (idsToUpdate.length === 0) {
+      return { inferenceIds: [] };
+    }
+    this.logger.info(
+      `Updating Security Labs content to latest version for Inference IDs: ${idsToUpdate}`
+    );
+    await Promise.all(
+      idsToUpdate.map((inferenceId) =>
+        scheduleEnsureSecurityLabsUpToDateTask({
+          taskManager: this.taskManager,
+          logger: this.logger,
+          inferenceId,
+          forceUpdate,
+        })
+      )
+    );
+    return { inferenceIds: idsToUpdate };
   }
 
   async uninstall(options: DocUninstallOptions): Promise<void> {

@@ -74,6 +74,8 @@ export const registerInstallationRoutes = ({
             resourceType: ResourceTypes.securityLabs,
             status: securityLabsStatus.status,
             version: securityLabsStatus.version,
+            latestVersion: securityLabsStatus.latestVersion,
+            isUpdateAvailable: securityLabsStatus.isUpdateAvailable,
             failureReason: securityLabsStatus.failureReason,
           },
         });

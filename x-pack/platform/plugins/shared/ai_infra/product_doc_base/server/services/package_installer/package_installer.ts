@@ -323,6 +323,7 @@ export class PackageInstaller {
     await this.uninstallSecurityLabs({ inferenceId: effectiveInferenceId });
 
     let zipArchive: ZipArchive | undefined;
+    let selectedVersion: string | undefined;
     try {
       // Ensure ELSER is deployed
       await ensureDefaultElserDeployed({
@@ -330,7 +331,7 @@ export class PackageInstaller {
       });
 
       // Determine version to install
-      let selectedVersion = version;
+      selectedVersion = version;
       if (!selectedVersion) {
         const availableVersions = await fetchSecurityLabsVersions({
           artifactRepositoryUrl: this.artifactRepositoryUrl,
@@ -341,6 +342,11 @@ export class PackageInstaller {
         // Select the latest version
         selectedVersion = availableVersions.sort().reverse()[0];
       }
+
+      await this.productDocClient.setSecurityLabsInstallationStarted({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
 
       const artifactFileName = getSecurityLabsArtifactName({
         version: selectedVersion,
@@ -383,6 +389,12 @@ export class PackageInstaller {
         inferenceId: effectiveInferenceId,
       });
 
+      await this.productDocClient.setSecurityLabsInstallationSuccessful({
+        version: selectedVersion,
+        indexName,
+        inferenceId: effectiveInferenceId,
+      });
+
       this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
     } catch (e) {
       let message = e.message;
@@ -397,6 +409,11 @@ export class PackageInstaller {
         );
       }
       this.log.error(`Error during Security Labs installation: ${message}`);
+      await this.productDocClient.setSecurityLabsInstallationFailed({
+        version: selectedVersion,
+        failureReason: message,
+        inferenceId: effectiveInferenceId,
+      });
       throw e;
     } finally {
       zipArchive?.close();
@@ -414,6 +431,9 @@ export class PackageInstaller {
       },
       { ignore: [404] }
     );
+    if (inferenceId) {
+      await this.productDocClient.setSecurityLabsUninstalled(inferenceId);
+    }
     this.log.info(`Security Labs content uninstalled from index [${indexName}]`);
   }
 
@@ -425,21 +445,47 @@ export class PackageInstaller {
   }: {
     inferenceId?: string;
   }): Promise<SecurityLabsStatusResponse> {
-    const indexName = getSecurityLabsIndexName(inferenceId);
-
     try {
+      const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
+      const status = await this.productDocClient.getSecurityLabsInstallationStatus({
+        inferenceId: effectiveInferenceId,
+      });
+
+      // Compute latest version (best-effort) for UX and auto-update checks.
+      let repoLatestVersion: string | undefined;
+      try {
+        const versions = await fetchSecurityLabsVersions({
+          artifactRepositoryUrl: this.artifactRepositoryUrl,
+        });
+        if (versions.length > 0) {
+          repoLatestVersion = versions.slice().sort().reverse()[0];
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      const installedVersion = status.version;
+      const isUpdateAvailable =
+        status.status === 'installed' &&
+        Boolean(installedVersion) &&
+        Boolean(repoLatestVersion) &&
+        installedVersion !== repoLatestVersion;
+
+      // If we have a saved-object based status, return it (augmented with update info).
+      // (Backwards compatibility: if not found, fall back to index existence checks below.)
+      if (status.status !== 'uninstalled' || status.version || status.failureReason) {
+        return { ...status, latestVersion: repoLatestVersion, isUpdateAvailable };
+      }
+
+      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
       const exists = await this.esClient.indices.exists({ index: indexName });
-      if (!exists) {
-        return { status: 'uninstalled' };
-      }
+      if (!exists) return { status: 'uninstalled' };
 
-      // Check if index has documents
       const countResponse = await this.esClient.count({ index: indexName });
-      if (countResponse.count === 0) {
-        return { status: 'uninstalled' };
-      }
+      if (countResponse.count === 0) return { status: 'uninstalled' };
 
-      return { status: 'installed' };
+      // Unknown version (legacy install), but installed.
+      return { status: 'installed', latestVersion: repoLatestVersion };
     } catch (error) {
       this.log.error(`Error checking Security Labs status: ${error.message}`);
       return {
@@ -447,6 +493,32 @@ export class PackageInstaller {
         failureReason: error.message,
       };
     }
+  }
+
+  /**
+   * Ensure Security Labs content is up to date, if currently installed.
+   */
+  async ensureSecurityLabsUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
+    const { inferenceId, forceUpdate } = params;
+    const status = await this.productDocClient.getSecurityLabsInstallationStatus({ inferenceId });
+    if (status.status !== 'installed') {
+      return;
+    }
+
+    const availableVersions = await fetchSecurityLabsVersions({
+      artifactRepositoryUrl: this.artifactRepositoryUrl,
+    });
+    if (availableVersions.length === 0) {
+      return;
+    }
+    const latest = availableVersions.sort().reverse()[0];
+    const installedVersion = status.version;
+
+    if (!forceUpdate && installedVersion && installedVersion === latest) {
+      return;
+    }
+
+    await this.installSecurityLabs({ version: latest, inferenceId });
   }
 }
 

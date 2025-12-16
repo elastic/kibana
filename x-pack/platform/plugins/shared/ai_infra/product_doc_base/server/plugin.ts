@@ -116,6 +116,9 @@ export class ProductDocBasePlugin
     documentationManager.updateAll().catch((err) => {
       this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
     });
+    documentationManager.updateSecurityLabsAll().catch((err) => {
+      this.logger.error(`Error scheduling Security Labs update task: ${err.message}`);
+    });
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),

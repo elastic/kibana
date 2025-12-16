@@ -53,5 +53,7 @@ export interface SecurityLabsInstallStatusResponse {
   resourceType: 'security_labs';
   status: InstallationStatus;
   version?: string;
+  latestVersion?: string;
+  isUpdateAvailable?: boolean;
   failureReason?: string;
 }

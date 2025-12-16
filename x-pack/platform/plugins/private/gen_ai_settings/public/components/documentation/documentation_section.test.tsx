@@ -88,7 +88,7 @@ describe('DocumentationSection', () => {
       renderComponent(mockProductDocBase);
 
       await waitFor(() => {
-        expect(screen.getByText('Elastic documents')).toBeInTheDocument();
+        expect(screen.getByText('Elastic documentation')).toBeInTheDocument();
         expect(screen.getByText('Security labs')).toBeInTheDocument();
       });
     });
@@ -258,6 +258,42 @@ describe('DocumentationSection', () => {
       });
 
       fireEvent.click(screen.getByTestId('documentation-install-security_labs'));
+
+      await waitFor(() => {
+        expect(mockProductDocBase.installation.install).toHaveBeenCalledWith({
+          inferenceId: '.elser-2-elasticsearch',
+          resourceType: ResourceTypes.securityLabs,
+        });
+      });
+    });
+
+    it('should show update action when Security Labs has an update available and call install on click', async () => {
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'installed',
+              isUpdateAvailable: true,
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'installed',
+            perProducts: {},
+          });
+        });
+
+      renderComponent(mockProductDocBase, true);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-update-security_labs')).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-uninstall-security_labs')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('documentation-update-security_labs'));
 
       await waitFor(() => {
         expect(mockProductDocBase.installation.install).toHaveBeenCalledWith({

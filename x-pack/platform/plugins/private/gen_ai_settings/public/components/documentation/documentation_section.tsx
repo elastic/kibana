@@ -137,6 +137,10 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       (securityLabsStatusResponse && 'status' in securityLabsStatusResponse
         ? securityLabsStatusResponse.status
         : 'uninstalled') ?? 'uninstalled';
+    const securityLabsUpdateAvailable =
+      securityLabsStatusResponse &&
+      'isUpdateAvailable' in securityLabsStatusResponse &&
+      Boolean(securityLabsStatusResponse.isUpdateAvailable);
 
     return [
       {
@@ -151,6 +155,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         id: SECURITY_LABS_ID,
         name: i18n.SECURITY_LABS_NAME,
         status: securityLabsStatus,
+        updateAvailable: securityLabsUpdateAvailable,
         isTechPreview: false,
         isStubbed: false,
         icon: 'logoSecurity',
@@ -271,6 +276,40 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
       // Installed - show uninstall button
       if (item.status === 'installed') {
+        if (item.updateAvailable) {
+          return wrapWithPrivilegeTooltip(
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="flexEnd"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="refresh"
+                  onClick={hasManagePrivilege ? () => handleInstall(item.id) : undefined}
+                  isDisabled={!hasManagePrivilege}
+                  data-test-subj={`documentation-update-${item.id}`}
+                >
+                  {i18n.ACTION_UPDATE}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="returnKey"
+                  onClick={hasManagePrivilege ? () => handleUninstall(item.id) : undefined}
+                  isDisabled={!hasManagePrivilege}
+                  data-test-subj={`documentation-uninstall-${item.id}`}
+                >
+                  {i18n.ACTION_UNINSTALL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+
         return wrapWithPrivilegeTooltip(
           <EuiButtonEmpty
             size="xs"
@@ -341,6 +380,11 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
             {item.isTechPreview && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge label={i18n.TECH_PREVIEW} size="s" alignment="middle" />
+              </EuiFlexItem>
+            )}
+            {item.updateAvailable && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">{i18n.UPDATE_AVAILABLE}</EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
