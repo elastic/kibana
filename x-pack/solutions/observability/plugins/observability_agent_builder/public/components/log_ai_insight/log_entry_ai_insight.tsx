@@ -19,19 +19,19 @@ import {
 } from '../../../common';
 import { useLicense } from '../../hooks/use_license';
 
-export interface LogAIInsightDocument {
+export interface LogAiInsightDocument {
   fields: {
     field: string;
     value: unknown[];
   }[];
 }
 
-export interface LogAIInsightProps {
-  doc: LogAIInsightDocument | undefined;
+export interface LogAiInsightProps {
+  doc: LogAiInsightDocument | undefined;
   onechat?: OnechatPluginStart;
 }
 
-export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProps) {
+export function LogEntryAiInsight({ doc, onechat }: LogAiInsightProps) {
   const {
     services: { http },
   } = useKibana();
@@ -45,6 +45,8 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [context, setSummaryContext] = useState('');
+  const [error, setError] = useState<string | undefined>(undefined);
+
   const { index, id } = useMemo(() => {
     return {
       index: doc?.fields.find((field) => field.field === '_index')?.value[0],
@@ -54,6 +56,7 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
 
   const fetchAiInsights = async () => {
     setIsLoading(true);
+    setError(undefined);
     try {
       const response = await http?.post<{ summary: string; context: string }>(
         '/internal/observability_agent_builder/ai_insights/log',
@@ -67,8 +70,7 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
       setSummary(response?.summary ?? '');
       setSummaryContext(response?.context ?? '');
     } catch (e) {
-      setSummary('');
-      setSummaryContext('');
+      setError(e instanceof Error ? e.message : 'Failed to load AI insight');
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +114,7 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
         content={summary}
         isLoading={isLoading}
         onOpen={fetchAiInsights}
+        error={error}
         license={license}
         onStartConversation={() => {
           onechat?.openConversationFlyout({
@@ -126,4 +129,4 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
 }
 
 // eslint-disable-next-line import/no-default-export
-export default LogEntryAgentBuilderAiInsight;
+export default LogEntryAiInsight;
