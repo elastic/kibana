@@ -53,6 +53,8 @@ export const getDataViewAndSavedSearchCallback =
           timeFieldName: json.index.timeFieldName,
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('No data view found in Discover session', error);
         throw new Error('No data view found in Discover session');
       }
     }
