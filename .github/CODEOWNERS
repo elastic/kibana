@@ -943,6 +943,7 @@ x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generati
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
+x-pack/platform/packages/shared/kbn-es-snapshot-loader @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-team @elastic/obs-exploration-team
@@ -1513,7 +1514,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/obs-ai-team
 
-# Observability Agent
+# Observability Agent Builder
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.ai_agent.index.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_agent.index.ts @elastic/obs-ai-team
@@ -1722,7 +1723,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/functional/test_suites/cypress @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/functional/services/infra_source_configuration_form.ts @elastic/obs-presentation-team
 /src/platform/test/functional/services/selectable.ts @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/observability_onboarding_api_integration @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.feature_flags.ts @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality @elastic/obs-onboarding-team
@@ -2310,10 +2310,12 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
 # Connector Specs
-src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts @kibanamachine
-src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts @kibanamachine
+src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
+src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
+src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
@@ -2641,6 +2643,7 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_kpis @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/components/attacks @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/rules @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/user_info @elastic/security-threat-hunting-investigations
