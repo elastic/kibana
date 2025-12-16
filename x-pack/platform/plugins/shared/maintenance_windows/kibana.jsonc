@@ -21,6 +21,7 @@
       "kibanaUtils",
       "unifiedSearch"
     ],
+    "optionalPlugins": ["spaces", "serverless"],
     "extraPublicDirs": ["common"]
   }
 }
