@@ -10,7 +10,7 @@
 import { Builder } from '../../builder';
 import { parse } from '../../../parser';
 import { BasicPrettyPrinter } from '../../../pretty_print';
-import { EsqlQuery } from '../../../query';
+import { EsqlQuery } from '../../../composer/query';
 import type {
   ESQLAstItem,
   ESQLAstRerankCommand,
