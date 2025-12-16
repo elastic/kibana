@@ -19,6 +19,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 
+import { Loading } from '../../../../../../../components';
+
 export interface CategoryFacet {
   count: number;
   id: string;
@@ -147,7 +149,7 @@ export function CategoryFacets({
       {isLoading ? (
         <>
           <EuiSpacer size="m" />
-          {/* <Loading size="l" /> */}
+          <Loading size="l" />
           <EuiSpacer size="m" />
         </>
       ) : (
