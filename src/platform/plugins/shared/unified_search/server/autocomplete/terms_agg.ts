@@ -59,7 +59,6 @@ export async function termsAggSuggestions(
 }
 
 async function getBody(
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   { timeout, terminate_after }: Record<string, any>,
   field: FieldSpec | string,
   query: string,
