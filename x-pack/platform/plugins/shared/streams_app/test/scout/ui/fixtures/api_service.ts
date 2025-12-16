@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
@@ -13,9 +11,8 @@ import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
 import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import type { KbnClient, ScoutLogger } from '../../../../../../common';
-import { measurePerformanceAsync } from '../../../../../../common';
-import type { ScoutSpaceParallelFixture } from '../../scout_space';
+import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { measurePerformanceAsync } from '@kbn/scout';
 
 export interface StreamsApiService {
   enable: () => Promise<void>;
@@ -45,7 +42,7 @@ export const getStreamsApiService = ({
 }: {
   kbnClient: KbnClient;
   log: ScoutLogger;
-  scoutSpace?: ScoutSpaceParallelFixture;
+  scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): StreamsApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
