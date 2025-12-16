@@ -31,7 +31,15 @@ const createMockSavedSearch = (viewMode: VIEW_MODE, columns: string[] | undefine
   return {
     viewMode,
     columns,
-  } as SavedSearch;
+    searchSource: {
+      getField: jest.fn((field: string) => {
+        if (field === 'query') {
+          return { language: 'kuery' }; // Default to non-ES|QL query
+        }
+        return undefined;
+      }),
+    },
+  } as unknown as SavedSearch;
 };
 
 const columns = ['field1', 'field2'];
