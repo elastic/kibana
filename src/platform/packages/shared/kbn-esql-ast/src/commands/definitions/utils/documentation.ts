@@ -29,29 +29,17 @@ export const buildFunctionDocumentation = (
 ${detail}
 
 # ${declarationLabel}
-${signatures
-  .map(
-    ({ declaration, license }) => `
 \`\`\`typescript
-${declaration}${license || ''}
+${signatures.map(({ declaration, license }) => `${declaration}${license || ''}`).join('\n')}
 \`\`\`
-`
-  )
-  .join('\n\n')}
 
 ${
   examples?.length
     ? `\
 # ${examplesLabel}
-${examples
-  .map(
-    (i) => `
 \`\`\`esql
-${i}
+${examples.join('\n')}
 \`\`\`
-`
-  )
-  .join('\n\n')}
 `
     : ''
 }`;
