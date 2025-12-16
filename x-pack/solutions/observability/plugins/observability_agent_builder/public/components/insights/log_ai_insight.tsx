@@ -54,7 +54,7 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     };
   }, [doc]);
 
-  if (!index || !id) {
+  if (typeof index !== 'string' || typeof id !== 'string') {
     return null;
   }
 
