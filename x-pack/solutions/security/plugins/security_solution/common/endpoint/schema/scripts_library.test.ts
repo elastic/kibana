@@ -9,7 +9,7 @@
 import { Readable } from 'stream';
 import type { CreateScriptRequestBody } from '../../api/endpoint/scripts_library';
 import {
-  PatchUpdateRequestSchema,
+  PatchUpdateScriptRequestSchema,
   CreateScriptRequestSchema,
 } from '../../api/endpoint/scripts_library';
 import type { HapiReadableStream } from '../../../server/types';
@@ -260,7 +260,7 @@ describe('Scripts library schemas', () => {
 
     it('should accept full payload', () => {
       expect(
-        PatchUpdateRequestSchema.body.validate({
+        PatchUpdateScriptRequestSchema.body.validate({
           name: 'foo',
           platform: ['linux'],
           requiresInput: true,
@@ -286,17 +286,17 @@ describe('Scripts library schemas', () => {
       ${'example'}          | ${{ example: 'some example' }}
       ${'pathToExecutable'} | ${{ pathToExecutable: '/some/path' }}
     `('should accept partial updates with only `$title`', ({ bodyPayload }) => {
-      expect(PatchUpdateRequestSchema.body.validate(bodyPayload)).toBeTruthy();
+      expect(PatchUpdateScriptRequestSchema.body.validate(bodyPayload)).toBeTruthy();
     });
 
     it('should error if no updates are provided', () => {
-      expect(() => PatchUpdateRequestSchema.body.validate({})).toThrow(
+      expect(() => PatchUpdateScriptRequestSchema.body.validate({})).toThrow(
         'At least one field must be defined for update'
       );
     });
 
     it('should error if only `version` is provided', () => {
-      expect(() => PatchUpdateRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
+      expect(() => PatchUpdateScriptRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
         'At least one field must be defined for update'
       );
     });
