@@ -6,7 +6,7 @@
  */
 
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs';
 import { getCps } from '../kibana_services';
 
 /**
@@ -28,7 +28,6 @@ export function initializeProjectRoutingManager({
   }
 
   const initialProjectRouting = cpsManager.getProjectRouting();
-  const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(initialProjectRouting);
 
   if (initialProjectRouting) {
     onProjectRoutingChange(initialProjectRouting);
@@ -36,15 +35,12 @@ export function initializeProjectRoutingManager({
 
   const cpsProjectRoutingSubscription = cpsManager
     .getProjectRouting$()
-    .subscribe((cpsProjectRouting: ProjectRouting | undefined) => {
-      if (cpsProjectRouting !== projectRouting$.value) {
-        projectRouting$.next(cpsProjectRouting);
-        onProjectRoutingChange(cpsProjectRouting);
-      }
+    .pipe(distinctUntilChanged())
+    .subscribe((cpsProjectRouting: ProjectRouting) => {
+      onProjectRoutingChange(cpsProjectRouting);
     });
 
   return () => {
     cpsProjectRoutingSubscription?.unsubscribe();
-    projectRouting$.complete();
   };
 }

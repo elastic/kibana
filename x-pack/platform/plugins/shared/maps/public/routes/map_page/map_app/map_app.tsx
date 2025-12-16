@@ -49,7 +49,7 @@ import {
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
-import { initializeProjectRoutingManager } from '../../use_project_routing';
+import { initializeProjectRoutingManager } from '../../project_routing_manager';
 import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
