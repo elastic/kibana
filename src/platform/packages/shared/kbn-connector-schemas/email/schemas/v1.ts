@@ -47,8 +47,8 @@ export const ParamsSchemaProps = {
   cc: z.array(z.string().max(512)).max(100).default([]),
   bcc: z.array(z.string().max(512)).max(100).default([]),
   subject: z.string().max(1024),
-  message: z.string().max(10240),
-  messageHTML: z.string().max(10240).nullable().default(null),
+  message: z.string(), // we trim in the code, so no need to limit here
+  messageHTML: z.string().nullable().default(null), // we trim in the code, so no need to limit here
   // kibanaFooterLink isn't intended for users to set, this is here to be able to programmatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: z

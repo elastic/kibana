@@ -673,11 +673,16 @@ Object {
           "type": "boolean",
         },
         "host": Object {
-          "default": null,
-          "type": Array [
-            "string",
-            "null",
+          "anyOf": Array [
+            Object {
+              "maxLength": 512,
+              "type": "string",
+            },
+            Object {
+              "type": "null",
+            },
           ],
+          "default": null,
         },
         "oauthTokenUrl": Object {
           "default": null,
@@ -708,6 +713,7 @@ Object {
         },
         "service": Object {
           "default": "other",
+          "maxLength": 512,
           "type": "string",
         },
         "tenantId": Object {
@@ -799,15 +805,19 @@ Object {
         "bcc": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
         "cc": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
         "kibanaFooterLink": Object {
@@ -839,13 +849,16 @@ Object {
           ],
         },
         "subject": Object {
+          "maxLength": 1024,
           "type": "string",
         },
         "to": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
       },
