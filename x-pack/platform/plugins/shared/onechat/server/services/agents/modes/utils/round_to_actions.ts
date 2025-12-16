@@ -34,7 +34,7 @@ export const roundToActions = ({
       ])
     );
     // interrupted tool call won't have results
-    if (index < toolCalls.length || toolCall.results.length) {
+    if (index < toolCalls.length - 1 || toolCall.results.length) {
       actions.push(
         executeToolAction([
           {
