@@ -10,41 +10,39 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/common';
-import { timeRangeSchema } from '../../utils/tool_schemas';
-import { buildApmToolResources } from '../../utils/build_apm_tool_resources';
-import { getApmToolAvailability } from '../../utils/get_apm_tool_availability';
-import { getApmServiceList } from '../../../routes/assistant_functions/get_apm_service_list';
-import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../../types';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import type {
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../types';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+
+export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
 const getServicesSchema = z.object({
-  ...timeRangeSchema.shape,
-  serviceEnvironment: z
+  ...timeRangeSchemaRequired,
+  environment: z
     .string()
     .min(1)
     .optional()
     .describe('Optionally filter the services by the environments that they are running in.'),
   healthStatus: z
-    .array(
-      z.enum([
-        ServiceHealthStatus.unknown,
-        ServiceHealthStatus.healthy,
-        ServiceHealthStatus.warning,
-        ServiceHealthStatus.critical,
-      ])
-    )
+    .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
     .describe('Optionally filter the services by their health status.'),
 });
 
 export function createGetServicesTool({
   core,
-  plugins,
+  dataRegistry,
   logger,
 }: {
-  core: CoreSetup<APMPluginStartDependencies>;
-  plugins: APMPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }): StaticToolRegistration<typeof getServicesSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
@@ -57,36 +55,37 @@ export function createGetServicesTool({
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
-        return getApmToolAvailability({ core, plugins, request, logger });
+        return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (args, context) => {
-      const { request, esClient, logger: scopedLogger } = context;
+    handler: async ({ start, end, environment, healthStatus }, context) => {
+      const { request } = context;
 
       try {
-        const { apmEventClient, randomSampler, mlClient, apmAlertsClient } =
-          await buildApmToolResources({
-            core,
-            plugins,
-            request,
-            esClient,
-            logger: scopedLogger,
-          });
+        const response = await dataRegistry.getData('servicesItems', {
+          request,
+          environment,
+          start,
+          end,
+        });
 
-        const services = await getApmServiceList({
-          apmEventClient,
-          apmAlertsClient,
-          randomSampler,
-          mlClient,
-          logger: scopedLogger,
-          arguments: args,
+        const services = (response?.items ?? []).filter((item) => {
+          if (!healthStatus) {
+            return true;
+          }
+
+          return healthStatus.includes(item.healthStatus ?? 'unknown');
         });
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { services },
+              data: {
+                services,
+                maxCountExceeded: response?.maxCountExceeded ?? false,
+                serviceOverflowCount: response?.serviceOverflowCount ?? 0,
+              },
             },
           ],
         };
