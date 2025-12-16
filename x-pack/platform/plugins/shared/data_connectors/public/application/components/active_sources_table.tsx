@@ -1,0 +1,289 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState, useMemo } from 'react';
+import {
+  EuiBasicTable,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButton,
+  EuiSpacer,
+  EuiTablePagination,
+} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { ActiveSource } from '../../types/connector';
+import { getConnectorIcon } from '../../utils/get_connector_icon';
+import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
+
+interface ActiveSourcesTableProps {
+  sources: ActiveSource[];
+  isLoading?: boolean;
+  onReconnect?: (source: ActiveSource) => void;
+  onEdit?: (source: ActiveSource) => void;
+  onDelete?: (source: ActiveSource) => void;
+}
+
+const ActionsCell: React.FC<{
+  source: ActiveSource;
+  onReconnect?: (source: ActiveSource) => void;
+  onEdit?: (source: ActiveSource) => void;
+  onDelete?: (source: ActiveSource) => void;
+  disabled?: boolean;
+}> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
+  const button = (
+    <EuiButtonIcon
+      iconType="boxesHorizontal"
+      aria-label={i18n.translate('xpack.dataConnectors.activeSources.actionsLabel', {
+        defaultMessage: 'Actions',
+      })}
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      disabled={disabled}
+      data-test-subj={`actionsButton-${source.id}`}
+    />
+  );
+
+  const items = [
+    <EuiContextMenuItem
+      key="delete"
+      icon="trash"
+      disabled
+      onClick={() => {
+        setIsPopoverOpen(false);
+        onDelete?.(source);
+      }}
+    >
+      {i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
+        defaultMessage: 'Delete',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="reconnect"
+      icon="link"
+      disabled
+      onClick={() => {
+        setIsPopoverOpen(false);
+        onReconnect?.(source);
+      }}
+    >
+      {i18n.translate('xpack.dataConnectors.activeSources.reconnectAction', {
+        defaultMessage: 'Reconnect',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="edit"
+      icon="pencil"
+      disabled
+      onClick={() => {
+        setIsPopoverOpen(false);
+        onEdit?.(source);
+      }}
+    >
+      {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
+        defaultMessage: 'Edit',
+      })}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel items={items} />
+    </EuiPopover>
+  );
+};
+
+export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
+  sources,
+  isLoading = false,
+  onReconnect,
+  onEdit,
+  onDelete,
+}) => {
+  const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
+  const [activePage, setActivePage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const handleBulkDelete = () => {
+    selectedItems.forEach((source) => onDelete?.(source));
+    setSelectedItems([]);
+  };
+
+  const handleBulkClone = () => {
+    // TODO: Implement bulk clone functionality
+    // For now, just clear selection
+    setSelectedItems([]);
+  };
+
+  const handleChangeItemsPerPage = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setActivePage(0); // Reset to first page when changing page size
+  };
+
+  const paginatedSources = useMemo(() => {
+    const start = activePage * itemsPerPage;
+    return sources.slice(start, start + itemsPerPage);
+  }, [sources, activePage, itemsPerPage]);
+
+  const pageCount = Math.ceil(sources.length / itemsPerPage);
+
+  const columns: Array<EuiBasicTableColumn<ActiveSource>> = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.dataConnectors.activeSources.nameColumn', {
+        defaultMessage: 'Name',
+      }),
+      render: (name: string, source: ActiveSource) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={getConnectorIcon(name, source.type)} size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">{name}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'type',
+      name: i18n.translate('xpack.dataConnectors.activeSources.typeColumn', {
+        defaultMessage: 'Type',
+      }),
+      render: (type: string) => <EuiText size="s">{type}</EuiText>,
+    },
+    {
+      field: 'connectedAs',
+      name: i18n.translate('xpack.dataConnectors.activeSources.connectedAsColumn', {
+        defaultMessage: 'Connected as',
+      }),
+      render: (connectedAs: string) => <EuiText size="s">{connectedAs}</EuiText>,
+    },
+    {
+      field: 'createdAt',
+      name: i18n.translate('xpack.dataConnectors.activeSources.createdAtColumn', {
+        defaultMessage: 'Created at',
+      }),
+      render: (createdAt: string) => {
+        const date = new Date(createdAt);
+        return (
+          <EuiText size="s">
+            {date.toLocaleDateString()} {date.toLocaleTimeString()}
+          </EuiText>
+        );
+      },
+    },
+    {
+      name: i18n.translate('xpack.dataConnectors.activeSources.actionsColumn', {
+        defaultMessage: 'Actions',
+      }),
+      width: '80px',
+      render: (source: ActiveSource) => (
+        <ActionsCell
+          source={source}
+          onReconnect={onReconnect}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          disabled={selectedItems.length > 0}
+        />
+      ),
+    },
+  ];
+
+  const selection = {
+    selectable: () => true,
+    onSelectionChange: (items: ActiveSource[]) => setSelectedItems(items),
+    selected: selectedItems,
+  };
+
+  return (
+    <>
+      {selectedItems.length > 0 && (
+        <>
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {i18n.translate('xpack.dataConnectors.activeSources.selectedCount', {
+                  defaultMessage: 'Sources selected: {count}',
+                  values: { count: selectedItems.length },
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="copy"
+                onClick={handleBulkClone}
+                disabled
+                data-test-subj="bulkCloneButton"
+              >
+                {i18n.translate('xpack.dataConnectors.activeSources.cloneSelected', {
+                  defaultMessage: 'Clone selected',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="danger"
+                iconType="trash"
+                onClick={handleBulkDelete}
+                disabled
+                data-test-subj="bulkDeleteButton"
+              >
+                {i18n.translate('xpack.dataConnectors.activeSources.deleteSelected', {
+                  defaultMessage: 'Delete selected',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiBasicTable
+        items={paginatedSources}
+        itemId="id"
+        columns={columns}
+        loading={isLoading}
+        selection={selection}
+        tableCaption={i18n.translate('xpack.dataConnectors.activeSources.tableCaption', {
+          defaultMessage: 'Active data sources',
+        })}
+        data-test-subj="activeSourcesTable"
+      />
+      {sources.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiTablePagination
+            aria-label={i18n.translate('xpack.dataConnectors.activeSources.paginationLabel', {
+              defaultMessage: 'Active sources pagination',
+            })}
+            pageCount={pageCount}
+            activePage={activePage}
+            onChangePage={setActivePage}
+            itemsPerPage={itemsPerPage}
+            itemsPerPageOptions={PAGINATION_ITEMS_PER_PAGE_OPTIONS}
+            onChangeItemsPerPage={handleChangeItemsPerPage}
+            data-test-subj="activeSourcesPagination"
+          />
+        </>
+      )}
+    </>
+  );
+};
