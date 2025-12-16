@@ -30,6 +30,7 @@ import type {
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
+  StreamsPartitioningSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
 } from './types';
 
@@ -601,6 +602,28 @@ const streamsProcessingSimulationSamplesFetchLatencySchema: RootSchema<StreamsPr
     },
   };
 
+const streamsPartitioningSamplesFetchLatencySchema: RootSchema<StreamsPartitioningSamplesFetchLatencyProps> =
+  {
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'The time (in milliseconds) it took to fetch partitioning preview samples',
+      },
+    },
+  };
+
 const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
   stream_name: {
     type: 'keyword',
@@ -696,5 +719,6 @@ export {
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
   streamsProcessingSimulationSamplesFetchLatencySchema,
+  streamsPartitioningSamplesFetchLatencySchema,
   streamsTabVisitedSchema,
 };
