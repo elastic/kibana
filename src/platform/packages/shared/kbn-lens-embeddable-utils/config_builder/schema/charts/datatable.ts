@@ -245,7 +245,6 @@ const datatableStateSplitMetricsByOptionsSchema = schema.object({
 function validateSorting({
   metrics,
   rows,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   split_metrics_by,
 }: {
   metrics: Array<{}>;
