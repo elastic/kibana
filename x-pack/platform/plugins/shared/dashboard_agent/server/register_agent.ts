@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType, platformCoreTools } from '@kbn/onechat-common';
-import { dashboardElement } from '@kbn/onechat-common/tools/tool_result';
+import { dashboardElement, visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import { dashboardTools } from '../common';
 
@@ -105,39 +105,48 @@ When updating existing dashboards:
 function renderDashboardResultPrompt() {
   const { dashboard } = ToolResultType;
   const { tagName, attributes } = dashboardElement;
+  const { tagName: visualizationTagName } = visualizationElement;
 
-  return `#### Rendering Dashboards
-      When a tool call returns a result of type "${dashboard}", you should render the dashboard in the UI by emitting a custom XML element:
+  return `### RENDERING DASHBOARDS (REQUIRED)
 
-      <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
+When a tool call returns a result of type "${dashboard}", you MUST render the dashboard in the UI by emitting a custom XML element:
 
-      **Rules**
-      * The \`<${tagName}>\` element must only be used to render tool results of type \`${dashboard}\`.
-      * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
-      * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
-      * You must not include any other attributes or content within the \`<${tagName}>\` element.
+<${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
 
-      **Example Usage:**
+**Critical rules (highest priority)**
+* If one or more "${dashboard}" tool results exist in the conversation, your response MUST include exactly ONE \`<${tagName}>\` element for the MOST RECENT "${dashboard}" tool result.
+* When the user asked to create/update a dashboard, you MUST NOT render intermediate visualizations:
+  - Do NOT emit any \`<${visualizationTagName}>\` elements.
+  - Do NOT paste visualization JSON/configs in your message.
+* Never wrap the \`<${tagName}>\` element in backticks or code blocks. Emit it as plain text on its own line.
 
-      Tool response includes:
-      {
-        "tool_result_id": "abc123",
-        "type": "${dashboard}",
-        "data": {
-          "id": "dashboard-123",
-          "title": "My Dashboard",
-          "content": {
-            "url": "/app/dashboards#/view/dashboard-123",
-            "description": "Dashboard showing metrics",
-            "panelCount": 3
-          }
-        }
-      }
+**Rules**
+* The \`<${tagName}>\` element must only be used to render tool results of type \`${dashboard}\`.
+* You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
+* Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
+* You must not include any other attributes or content within the \`<${tagName}>\` element.
 
-      To render this dashboard your reply should include:
-      <${tagName} ${attributes.toolResultId}="abc123" />
+**Example Usage:**
 
-      You may also add a brief message about the dashboard creation, for example:
-      "I've created a dashboard for you:"
-      <${tagName} ${attributes.toolResultId}="abc123" />`;
+Tool response includes:
+{
+  "tool_result_id": "abc123",
+  "type": "${dashboard}",
+  "data": {
+    "id": "dashboard-123",
+    "title": "My Dashboard",
+    "content": {
+      "url": "/app/dashboards#/view/dashboard-123",
+      "description": "Dashboard showing metrics",
+      "panelCount": 3
+    }
+  }
+}
+
+To render this dashboard your reply should include:
+<${tagName} ${attributes.toolResultId}="abc123" />
+
+You may also add a brief message about the dashboard creation, for example:
+"I've created a dashboard for you:"
+<${tagName} ${attributes.toolResultId}="abc123" />`;
 }
