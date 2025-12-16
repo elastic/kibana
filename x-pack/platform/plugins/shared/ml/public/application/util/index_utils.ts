@@ -44,7 +44,7 @@ export const getDataViewAndSavedSearchCallback =
           ss.tabs![0].attributes.kibanaSavedObjectMeta.searchSourceJSON
         );
         if (!json.index) {
-          throw new Error('No data view found in saved search');
+          throw new Error('No data view found in Discover session');
         }
         resp.dataView = await deps.dataViewsService.create({
           id: undefined,
@@ -53,7 +53,7 @@ export const getDataViewAndSavedSearchCallback =
           timeFieldName: json.index.timeFieldName,
         });
       } catch (error) {
-        throw new Error('No data view found in saved search');
+        throw new Error('No data view found in Discover session');
       }
     }
     resp.savedSearch = ss;
