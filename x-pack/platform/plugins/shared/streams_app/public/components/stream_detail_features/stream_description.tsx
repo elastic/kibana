@@ -204,7 +204,6 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                 <EuiFlexItem grow={false}>
                   <ConnectorListButton
                     buttonProps={{
-                      fill: true,
                       size: 'm',
                       iconType: 'sparkles',
                       children: GENERATE_DESCRIPTION_BUTTON_LABEL,
