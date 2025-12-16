@@ -23,8 +23,10 @@ import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { FeatureClient } from '../lib/streams/feature/feature_client';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
+import type { TaskClient } from '../lib/tasks/task_client';
+import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 
-type GetScopedClients = ({
+export type GetScopedClients = ({
   request,
 }: {
   request: KibanaRequest;
@@ -43,6 +45,7 @@ export interface RouteHandlerScopedClients {
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
+  taskClient: TaskClient<StreamsTaskType>;
 }
 
 export interface RouteDependencies {
