@@ -7,7 +7,6 @@
 
 export {
   transformRuleToRuleResponse,
-  transformESQLRuleToResponse,
   transformRuleActions,
   transformRuleLastRun,
   transformMonitoring,
@@ -15,7 +14,6 @@ export {
 } from './transform_rule_to_rule_response/latest';
 export {
   transformRuleToRuleResponse as transformRuleToRuleResponseV1,
-  transformESQLRuleToResponse as transformESQLRuleToResponseV1,
   transformRuleActions as transformRuleActionsV1,
   transformRuleLastRun as transformRuleLastRunV1,
   transformMonitoring as transformMonitoringV1,

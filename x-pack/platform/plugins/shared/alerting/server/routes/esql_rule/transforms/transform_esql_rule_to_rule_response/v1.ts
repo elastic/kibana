@@ -6,7 +6,7 @@
  */
 
 import { type ESQLParamsV1 } from '@kbn/response-ops-rule-params';
-import type { ESQLRuleResponseV1 } from '../../../../../common/routes/rule/response';
+import type { ESQLRuleResponseV1 } from '../../../../../common/routes/esql_rule/response';
 import type { Rule } from '../../../../application/rule/types';
 import {
   transformRuleActionsV1,
@@ -23,6 +23,7 @@ export const transformESQLRuleToResponse = (rule: Rule<ESQLParamsV1>): ESQLRuleR
   rule_type_id: rule.alertTypeId,
   consumer: rule.consumer,
   schedule: rule.schedule,
+  internal: rule.internal ?? false,
   actions: transformRuleActionsV1(rule.actions, rule.systemActions ?? []),
   params: rule.params,
   ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
@@ -70,4 +71,5 @@ export const transformESQLRuleToResponse = (rule: Rule<ESQLParamsV1>): ESQLRuleR
     : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
   ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
+  ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
 });

@@ -18,7 +18,7 @@ export type UpdateESQLRuleData = Omit<
   esql: string;
   lookbackWindow: string;
   timeField: string;
-  group_key: string[];
+  groupKey: string[];
   parentId?: string;
 };
 
@@ -34,7 +34,7 @@ export async function updateESQLRule(
     esql,
     lookbackWindow,
     timeField,
-    group_key: groupKey,
+    groupKey: groupKey,
     parentId,
     schedule,
     ...restOfRuleData
@@ -51,7 +51,7 @@ export async function updateESQLRule(
     timeWindowSize,
     timeWindowUnit,
     timeField,
-    group_key: groupKey,
+    groupKey,
     ...(parentId && { parentId }),
   };
 

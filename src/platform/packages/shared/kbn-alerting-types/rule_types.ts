@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
-
 export type RuleTypeSolution = 'observability' | 'security' | 'stack';
 export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
@@ -219,8 +218,13 @@ export interface Dashboard {
   id: string;
 }
 
+export interface RuleArtifact {
+  id: string;
+}
+
 export interface Artifacts {
   dashboards?: Dashboard[];
+  rules?: RuleArtifact[];
   investigation_guide?: {
     blob: string;
   };
@@ -263,6 +267,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   alertDelay?: AlertDelay | null;
   flapping?: Flapping | null;
   artifacts?: Artifacts | null;
+  internal?: boolean;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

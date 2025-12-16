@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { validateDurationV1 } from '../../../../../../common/routes/rule/validation';
 
 export const createESQLRuleDataSchema = schema.object({
+  id: schema.maybe(schema.string()),
   name: schema.string(),
   tags: schema.arrayOf(schema.string()),
   schedule: schema.string({ validate: validateDurationV1 }),
@@ -16,6 +17,18 @@ export const createESQLRuleDataSchema = schema.object({
   esql: schema.string(),
   lookbackWindow: schema.string({ validate: validateDurationV1 }),
   timeField: schema.string(),
-  group_key: schema.arrayOf(schema.string()),
+  groupKey: schema.arrayOf(schema.string()),
+  track: schema.maybe(
+    schema.object({
+      recovery: schema.maybe(
+        schema.object({
+          enabled: schema.boolean(),
+          schedule: schema.maybe(schema.string({ validate: validateDurationV1 })),
+          lookbackWindow: schema.maybe(schema.string({ validate: validateDurationV1 })),
+          recoveryQuery: schema.maybe(schema.string()),
+        })
+      ),
+    })
+  ),
   parentId: schema.maybe(schema.string()),
 });

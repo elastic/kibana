@@ -34,9 +34,21 @@ export const createESQLBodySchema = schema.object({
     defaultValue: [],
     meta: { description: 'The tags for the rule.' },
   }),
-  group_key: schema.arrayOf(schema.string(), {
+  groupKey: schema.arrayOf(schema.string(), {
     meta: { description: 'Fields to group alerts by.' },
   }),
+  track: schema.maybe(
+    schema.object({
+      recovery: schema.maybe(
+        schema.object({
+          enabled: schema.boolean(),
+          schedule: schema.maybe(schema.string({ validate: validateDurationV1 })),
+          lookbackWindow: schema.maybe(schema.string({ validate: validateDurationV1 })),
+          recoveryQuery: schema.maybe(schema.string()),
+        })
+      ),
+    })
+  ),
   esql: schema.string({
     meta: {
       description: 'The ESQL query to execute for the rule.',
