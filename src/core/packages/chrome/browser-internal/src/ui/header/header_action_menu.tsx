@@ -8,11 +8,15 @@
  */
 
 import type { FC } from 'react';
-import React, { useRef, useLayoutEffect, useState } from 'react';
+import React, { useRef, useLayoutEffect, useState, lazy, Suspense } from 'react';
 import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { AppMenu } from '@kbn/core-chrome-app-menu-components';
+
+const AppMenu = lazy(async () => {
+  const { AppMenu: AppMenuComponent } = await import('@kbn/core-chrome-app-menu-components');
+  return { default: AppMenuComponent };
+});
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };
@@ -72,7 +76,11 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter, config })
   }, [config]);
 
   if (menuConfig) {
-    return <AppMenu config={menuConfig} />;
+    return (
+      <Suspense>
+        <AppMenu config={menuConfig} />
+      </Suspense>
+    );
   }
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;
