@@ -67,8 +67,10 @@ export async function upsertDataStream({ esClient, name, logger }: DataStreamMan
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);
   } catch (error: any) {
-    logger.error(`Error creating data stream: ${error.message}`);
-    throw error;
+    if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+      logger.error(`Error creating data stream: ${error.message}`);
+      throw error;
+    }
   }
 }
 
