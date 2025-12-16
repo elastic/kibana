@@ -643,61 +643,64 @@ FROM remote_cluster:metrics-*
 ---
 
 #### Workload Resources Table
-Table showing per-node status, kubelet version, and resource utilization.
+Table showing per-workload resource usage, aggregated by workload name, type, and namespace.
 
 ```esql
 FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name == "<cluster_name>"
-  AND k8s.node.name IS NOT NULL
+  AND k8s.namespace.name IS NOT NULL
   AND (
-    k8s.node.condition_ready IS NOT NULL
-    OR k8s.kubelet.version IS NOT NULL
-    OR k8s.node.cpu.usage IS NOT NULL
-    OR k8s.node.memory.usage IS NOT NULL
-    OR k8s.node.allocatable_cpu IS NOT NULL
-    OR k8s.node.allocatable_memory IS NOT NULL
-    OR k8s.pod.uid IS NOT NULL
+    k8s.deployment.name IS NOT NULL
+    OR k8s.statefulset.name IS NOT NULL
+    OR k8s.daemonset.name IS NOT NULL
+    OR k8s.job.name IS NOT NULL
+    OR k8s.cronjob.name IS NOT NULL
+  )
+  AND (
+    k8s.pod.cpu.usage IS NOT NULL
+    OR k8s.pod.memory.usage IS NOT NULL
   )
 | STATS
-    condition_ready = MAX(k8s.node.condition_ready),
-    kubelet_version = MAX(k8s.kubelet.version),
-    sum_cpu_usage = SUM(k8s.node.cpu.usage),
-    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu),
-    sum_memory_usage = SUM(k8s.node.memory.usage),
-    sum_allocatable_memory = SUM(k8s.node.allocatable_memory),
+    sum_cpu_usage = SUM(k8s.pod.cpu.usage),
+    sum_memory_usage = SUM(k8s.pod.memory.usage),
     pod_count = COUNT_DISTINCT(k8s.pod.uid)
-  BY k8s.node.name
-| EVAL status = CASE(
-    condition_ready > 0, "Ready",
-    condition_ready == 0, "NotReady",
+  BY k8s.deployment.name, k8s.statefulset.name, k8s.daemonset.name, k8s.job.name, k8s.cronjob.name, k8s.namespace.name
+| EVAL workload_name = COALESCE(k8s.deployment.name, k8s.statefulset.name, k8s.daemonset.name, k8s.job.name, k8s.cronjob.name)
+| EVAL workload_type = CASE(
+    k8s.deployment.name IS NOT NULL, "Deployment",
+    k8s.statefulset.name IS NOT NULL, "StatefulSet",
+    k8s.daemonset.name IS NOT NULL, "DaemonSet",
+    k8s.job.name IS NOT NULL, "Job",
+    k8s.cronjob.name IS NOT NULL, "CronJob",
     "Unknown"
   )
-| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
-| EVAL memory_utilization = sum_memory_usage / TO_DOUBLE(sum_allocatable_memory)
-| EVAL pod_utilization = TO_DOUBLE(pod_count) / 110.0
-| KEEP k8s.node.name, status, kubelet_version, cpu_utilization, memory_utilization, pod_utilization
-| WHERE k8s.node.name != ""
+| EVAL avg_cpu_usage = sum_cpu_usage / TO_DOUBLE(pod_count)
+| EVAL avg_memory_usage = sum_memory_usage / TO_DOUBLE(pod_count)
+| KEEP workload_name, workload_type, k8s.namespace.name, avg_cpu_usage, avg_memory_usage
+| WHERE workload_name IS NOT NULL
+| SORT workload_name ASC, k8s.namespace.name ASC
 ```
 
-**Visualization**: Table (EuiDataGrid or similar)
+**Visualization**: Table (EuiDataGrid)
 **Metrics Used**:
-- `k8s.node.condition_ready` (from k8sclusterreceiver)
-- `k8s.kubelet.version` (from k8sclusterreceiver)
-- `k8s.node.cpu.usage`, `k8s.node.memory.usage` (from kubeletstatsreceiver)
-- `k8s.node.allocatable_cpu`, `k8s.node.allocatable_memory` (from k8sclusterreceiver)
+- `k8s.pod.cpu.usage`, `k8s.pod.memory.usage` (from kubeletstatsreceiver)
+- `k8s.deployment.name`, `k8s.statefulset.name`, `k8s.daemonset.name`, `k8s.job.name`, `k8s.cronjob.name` (from k8sclusterreceiver)
+- `k8s.namespace.name` (from k8sclusterreceiver)
 - `k8s.pod.uid` (from k8sclusterreceiver)
 
 **Output Columns**:
 | Column | Description |
 |--------|-------------|
-| `k8s.node.name` | Node name |
-| `status` | Ready/NotReady/Unknown based on condition_ready |
-| `kubelet_version` | Kubelet version |
-| `cpu_utilization` | CPU usage as ratio (Lens formats to percent) |
-| `memory_utilization` | Memory usage as ratio (Lens formats to percent) |
-| `pod_utilization` | Pod count / 110 (fallback max) as ratio (Lens formats to percent) |
+| `workload_name` | Workload name (deployment, statefulset, daemonset, job, or cronjob) |
+| `workload_type` | Type of workload (Deployment, StatefulSet, DaemonSet, Job, CronJob) |
+| `k8s.namespace.name` | Kubernetes namespace |
+| `avg_cpu_usage` | Average CPU usage per pod in cores |
+| `avg_memory_usage` | Average memory usage per pod in bytes |
 
-**Note**: Uses fallback of 110 pods/node for pod utilization since `k8s.node.allocatable_pods` is not available in OTel data.
+**Notes**: 
+- Aggregates by workload instead of by node. Uses COALESCE to determine the workload name from the available workload type fields.
+- The query includes `SORT` to ensure consistent ordering for client-side pagination.
+- Client-side pagination is used (all results are fetched and paginated in the browser). For clusters with many workloads, consider adding server-side pagination in the future.
 
 ---
 
