@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+} from '@kbn/core/server';
+import { registerRoutes } from './routes';
+import { registerDataSources } from './data_sources';
 import type {
   DataConnectorsServerSetup,
   DataConnectorsServerSetupDependencies,
@@ -13,6 +21,7 @@ import type {
   DataConnectorsServerStartDependencies,
 } from './types';
 import { registerUISettings } from './register';
+import { setupSavedObjects } from './saved_objects';
 
 export class DataConnectorsServerPlugin
   implements
@@ -23,13 +32,38 @@ export class DataConnectorsServerPlugin
       DataConnectorsServerStartDependencies
     >
 {
-  constructor(context: PluginInitializerContext) {}
-  setup(core: CoreSetup): DataConnectorsServerSetup {
-    const { uiSettings } = core;
+  private readonly logger: Logger;
+
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+  }
+
+  setup(
+    core: CoreSetup<DataConnectorsServerStartDependencies>,
+    plugins: DataConnectorsServerSetupDependencies
+  ): DataConnectorsServerSetup {
+    const { savedObjects, uiSettings } = core;
+    const { dataSourcesRegistry } = plugins;
+
+    // Register WorkplaceAI-owned data sources
+    registerDataSources(dataSourcesRegistry);
+
     registerUISettings({ uiSettings });
+
+    // Register saved objects type
+    setupSavedObjects(savedObjects);
+
+    // Register HTTP routes
+    const router = core.http.createRouter();
+    registerRoutes(router, this.logger, core.getStartServices);
+
     return {};
   }
-  start(core: CoreStart): DataConnectorsServerStart {
+
+  start(
+    core: CoreStart,
+    plugins: DataConnectorsServerStartDependencies
+  ): DataConnectorsServerStart {
     return {};
   }
 }

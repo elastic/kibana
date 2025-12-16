@@ -38,6 +38,7 @@ import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
+import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
 
 import type { SelectionMode } from './components/types';
 
@@ -92,6 +93,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToChangePrivilege, setAgentToChangePrivilege] = useState<Agent | undefined>(
     undefined
   );
+  const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
@@ -220,6 +222,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
         onMigrateAgentClick={() => setAgentToMigrate(agent)}
         onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
+        onViewAgentJsonClick={() => setAgentToViewJson(agent)}
       />
     );
   };
@@ -454,6 +457,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToChangePrivilege(undefined);
               refreshAgents();
             }}
+          />
+        </EuiPortal>
+      )}
+      {agentToViewJson && (
+        <EuiPortal>
+          <AgentDetailsJsonFlyout
+            agent={agentToViewJson}
+            onClose={() => setAgentToViewJson(undefined)}
           />
         </EuiPortal>
       )}

@@ -9,16 +9,12 @@
 
 import type { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
 import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
-import type {
-  ESQLFieldWithMetadata,
-  ICommandCallbacks,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import type { ICommandCallbacks } from '@kbn/esql-ast/src/commands/registry/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/commands/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
-
+import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../query_columns_service';
-import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';

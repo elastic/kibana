@@ -58,7 +58,7 @@ export const EPM_API_ROUTES = {
   PACKAGES_DATASTREAM_ASSETS: `${EPM_API_ROOT}/packages/{pkgName}/{pkgVersion}/datastream_assets`,
   ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/rollback`,
   ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/rollback/available_check`,
-
+  BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/_bulk_rollback/available_check`,
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
 
@@ -106,6 +106,7 @@ export const CLOUD_CONNECTOR_API_ROUTES = {
   CREATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
   UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
+  USAGE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}/usage`,
 };
 
 // Kubernetes Manifest API routes

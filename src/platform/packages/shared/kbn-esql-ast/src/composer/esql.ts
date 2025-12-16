@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as synth from '../synth';
+import * as synth from './synth';
 import { ComposerQuery } from './composer_query';
 import { DoubleParameterHole, ParameterHole } from './parameter_hole';
 import { processTemplateHoles, removeNopCommands, validateParamName } from './util';
@@ -24,7 +24,6 @@ import type {
 } from './types';
 import type { ESQLSource } from '../types';
 import { isSource } from '../ast/is';
-import { Builder } from '../builder';
 
 const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQueryTagHole[]) => {
   const tagOrGeneratorWithParams = (initialParamValues?: Record<string, unknown>) =>
@@ -166,7 +165,7 @@ const createFromSourceAndMetadataCommandStarter =
       }
     });
     const metadataFieldsNodes = metadataFields.map((field) => {
-      return Builder.expression.column(field);
+      return synth.col(field);
     });
 
     return metadataFieldsNodes.length

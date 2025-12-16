@@ -14,7 +14,7 @@ import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
-  upsertQuery: (feature: Feature) => Promise<void>;
+  upsertFeature: (feature: Feature) => Promise<void>;
   identifyFeatures: (
     connectorId: string,
     to: string,
@@ -144,7 +144,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         },
       });
     },
-    upsertQuery: async (feature) => {
+    upsertFeature: async (feature) => {
       await streamsRepositoryClient.fetch(
         'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
         {

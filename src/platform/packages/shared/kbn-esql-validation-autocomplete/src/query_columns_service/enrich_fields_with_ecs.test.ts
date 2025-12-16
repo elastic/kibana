@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
-import { type ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLColumnData } from '@kbn/esql-ast/src/commands/registry/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { type ECSMetadata, enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 
 describe('enrichFieldsWithECSInfo', () => {

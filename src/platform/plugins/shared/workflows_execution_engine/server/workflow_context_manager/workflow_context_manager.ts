@@ -29,8 +29,8 @@ export interface ContextManagerInit {
   stackFrames: StackFrame[];
   // New properties for internal actions
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
-  fakeRequest?: KibanaRequest;
-  coreStart?: CoreStart; // For using Kibana's internal HTTP client
+  fakeRequest: KibanaRequest;
+  coreStart: CoreStart; // For using Kibana's internal HTTP client
   dependencies: ContextDependencies;
 }
 
@@ -39,8 +39,8 @@ export class WorkflowContextManager {
   private workflowExecutionState: WorkflowExecutionState;
   private esClient: ElasticsearchClient;
   private templateEngine: WorkflowTemplatingEngine;
-  private fakeRequest?: KibanaRequest;
-  private coreStart?: CoreStart;
+  private fakeRequest: KibanaRequest;
+  private coreStart: CoreStart;
   private dependencies: ContextDependencies;
 
   private stackFrames: StackFrame[];
@@ -208,14 +208,14 @@ export class WorkflowContextManager {
   /**
    * Get the fake request from task manager for Kibana API authentication
    */
-  public getFakeRequest(): KibanaRequest | undefined {
+  public getFakeRequest(): KibanaRequest {
     return this.fakeRequest;
   }
 
   /**
    * Get CoreStart for accessing Kibana's internal services
    */
-  public getCoreStart(): CoreStart | undefined {
+  public getCoreStart(): CoreStart {
     return this.coreStart;
   }
 

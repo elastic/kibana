@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { ConversationRound } from '@kbn/onechat-common';
 import { css } from '@emotion/react';
 
@@ -28,7 +29,15 @@ export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="rawResponseFlyoutTitle" size="m">
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="rawResponseFlyoutTitle"
+      size="m"
+      ownFocus={false}
+      css={css`
+        z-index: ${euiThemeVars.euiZFlyout + 4};
+      `}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="rawResponseFlyoutTitle">{rawResponseFlyoutTitle}</h2>

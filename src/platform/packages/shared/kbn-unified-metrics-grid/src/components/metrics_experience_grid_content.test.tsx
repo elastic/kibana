@@ -96,6 +96,10 @@ describe('MetricsExperienceGridContent', () => {
       fetchParams,
       onBrushEnd: jest.fn(),
       onFilter: jest.fn(),
+      actions: {
+        openInNewTab: jest.fn(),
+        updateESQLQuery: jest.fn(),
+      },
       histogramCss: { name: '', styles: '' },
     };
 

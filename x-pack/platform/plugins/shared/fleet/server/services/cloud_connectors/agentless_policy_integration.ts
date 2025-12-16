@@ -15,6 +15,7 @@ import { extractAndCreateCloudConnectorSecrets } from '../secrets/cloud_connecto
 import {
   updatePackagePolicyWithCloudConnectorSecrets,
   getCloudConnectorNameFromPackagePolicy,
+  extractAccountType,
 } from './integration_helpers';
 import { incrementCloudConnectorPackageCount } from './lifecycle';
 
@@ -141,11 +142,15 @@ export async function createAndIntegrateCloudConnector(params: {
     providedCloudConnectorName ||
     getCloudConnectorNameFromPackagePolicy(updatedPackagePolicy, cloudProvider, policyName);
 
+  // Extract account type from package policy vars
+  const accountType = extractAccountType(cloudProvider, updatedPackagePolicy);
+
   try {
     const cloudConnector = await cloudConnectorService.create(soClient, {
       name: cloudConnectorName,
       vars: cloudConnectorVars,
       cloudProvider,
+      accountType,
     });
 
     logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
