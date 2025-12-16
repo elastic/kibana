@@ -112,7 +112,6 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
         }
       );
     } else {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
       // Remove 'where' if it exists (some processors have it, some don't)
       const { where, ...restWithoutWhere } = rest;
