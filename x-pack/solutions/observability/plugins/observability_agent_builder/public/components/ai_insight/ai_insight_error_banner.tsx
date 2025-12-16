@@ -20,20 +20,20 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
       announceOnMount
       color="danger"
       iconType="alert"
-      title={i18n.translate('xpack.observability.aiInsight.errorTitle', {
+      title={i18n.translate('xpack.observabilityAgentBuilder.aiInsight.errorTitle', {
         defaultMessage: 'Failed to generate AI insight',
       })}
       data-test-subj="AiInsightErrorBanner"
     >
       <p>
-        {i18n.translate('xpack.observability.aiInsight.errorMessage', {
+        {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.errorMessage', {
           defaultMessage: 'The AI insight could not be generated: {error}',
           values: { error },
         })}
       </p>
       {onRetry && (
         <EuiButton size="s" onClick={onRetry} data-test-subj="AiInsightErrorBannerRetryButton">
-          {i18n.translate('xpack.observability.aiInsight.retryButton', {
+          {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.retryButton', {
             defaultMessage: 'Try again',
           })}
         </EuiButton>
