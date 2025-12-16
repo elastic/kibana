@@ -413,6 +413,13 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Getting selections string for Options List: ${controlId}`);
     await this.optionsListWaitForLoading(controlId);
     const controlButton = await this.testSubjects.find(`optionsList-control-${controlId}`);
+    if (await this.testSubjects.descendantExists('optionsListSelections', controlButton)) {
+      const selections = await this.testSubjects.findDescendant(
+        'optionsListSelections',
+        controlButton
+      );
+      return await selections.getVisibleText();
+    }
     return await controlButton.getVisibleText();
   }
 
