@@ -102,6 +102,13 @@ describe('EisUpdateCallout', () => {
     expect(panel).not.toBeInTheDocument();
   });
 
+  it('does not render callout when user is not on cloud', () => {
+    renderEisUpdateCallout({ isCloudEnabled: false });
+
+    const panel = screen.queryByTestId(dataId);
+    expect(panel).not.toBeInTheDocument();
+  });
+
   it('does not render callout when user does not have update privileges', () => {
     renderEisUpdateCallout({ hasUpdatePrivileges: false });
 
