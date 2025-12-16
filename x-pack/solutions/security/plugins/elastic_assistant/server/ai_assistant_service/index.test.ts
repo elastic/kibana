@@ -144,6 +144,7 @@ describe('AI Assistant Service', () => {
         installSecurityLabs: jest.fn(),
         update: jest.fn(),
         updateAll: jest.fn(),
+        updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
         uninstall: jest.fn(),
         uninstallSecurityLabs: jest.fn(),
         getSecurityLabsStatus: jest.fn(),

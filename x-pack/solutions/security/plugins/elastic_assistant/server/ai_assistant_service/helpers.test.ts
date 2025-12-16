@@ -18,6 +18,7 @@ const mockProductDocManager = {
   uninstallSecurityLabs: jest.fn(),
   update: jest.fn(),
   updateAll: jest.fn(),
+  updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
   getSecurityLabsStatus: jest.fn(),
 };
 
