@@ -97,7 +97,8 @@ export const bucketTermsOperationSchema = schema.object({
       meta: {
         description: 'Fields to be used for the terms',
       },
-    })
+    }),
+    { minSize: 1, maxSize: 4 }
   ),
   /**
    * Size of the terms

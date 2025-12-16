@@ -91,7 +91,9 @@
     "@kbn/presentation-util",
     "@kbn/discover-utils",
     "@kbn/react-query",
-    "@kbn/maintenance-windows-plugin"
+    "@kbn/router-utils",
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/actions-types"
   ],
   "exclude": ["target/**/*"]
 }

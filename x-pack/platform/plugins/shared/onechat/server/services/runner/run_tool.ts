@@ -17,6 +17,7 @@ import type {
 import { createErrorResult } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
 import { getToolResultId } from '@kbn/onechat-server/tools';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import { ToolCallSource } from '../../telemetry';
 import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
 import type { RunnerManager } from './runner';
@@ -115,9 +116,12 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
-  const { request, elasticsearch, modelProvider, toolsService, resultStore, logger } = manager.deps;
+  const { request, elasticsearch, spaces, modelProvider, toolsService, resultStore, logger } =
+    manager.deps;
+  const spaceId = getCurrentSpaceId({ request, spaces });
   return {
     request,
+    spaceId,
     logger,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider,

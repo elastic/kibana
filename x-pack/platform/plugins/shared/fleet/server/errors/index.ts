@@ -18,7 +18,7 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError } from './utils';
+export { isESClientError, rethrowIfInstanceOrWrap } from './utils';
 export {
   FleetError as FleetError,
   FleetVersionConflictError,
@@ -97,6 +97,16 @@ export class AgentlessAgentDeleteError extends FleetError {
 export class AgentlessAgentUpgradeError extends FleetError {
   constructor(message: string) {
     super(`Error upgrading agentless agent in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentListNotFoundError extends FleetError {
+  constructor(message: string) {
+    super(`Error listing agentless agents API not found in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentListError extends FleetError {
+  constructor(message: string) {
+    super(`Error listing agentless agents in Fleet, ${message}`);
   }
 }
 export class AgentlessAgentConfigError extends FleetError {

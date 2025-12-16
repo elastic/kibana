@@ -15,6 +15,7 @@ import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
+import { transformOptionsIn } from './transform_options_in';
 import { isSearchSourceReference } from '../out/transform_references_out';
 
 export const transformDashboardIn = (
@@ -39,7 +40,9 @@ export const transformDashboardIn = (
       query,
       references: incomingReferences,
       tags,
-      timeRange,
+      time_range,
+      refresh_interval,
+      project_routing,
       ...rest
     } = dashboardState;
 
@@ -83,13 +86,15 @@ export const transformDashboardIn = (
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
-      optionsJSON: JSON.stringify(options ?? {}),
+      optionsJSON: transformOptionsIn(options),
       panelsJSON,
+      ...(refresh_interval && { refreshInterval: refresh_interval }),
       ...(sections?.length && { sections }),
-      ...(timeRange
-        ? { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }
+      ...(time_range
+        ? { timeFrom: time_range.from, timeTo: time_range.to, timeRestore: true }
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
+      ...(project_routing !== undefined && { projectRouting: project_routing }),
     };
     return {
       attributes,

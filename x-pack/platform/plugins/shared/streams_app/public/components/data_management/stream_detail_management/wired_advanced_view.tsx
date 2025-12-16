@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { Streams } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
@@ -28,6 +29,15 @@ export function WiredAdvancedView({
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
 
+  const { onPageReady } = usePerformanceContext();
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !contentPacks?.enabled && !significantEvents?.enabled) {
+      onPageReady();
+    }
+  }, [definition, contentPacks?.enabled, significantEvents?.enabled, onPageReady]);
+
   return (
     <>
       {contentPacks?.enabled && (
@@ -37,7 +47,7 @@ export function WiredAdvancedView({
         </>
       )}
 
-      {significantEvents?.available && (
+      {significantEvents?.enabled && (
         <>
           <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />

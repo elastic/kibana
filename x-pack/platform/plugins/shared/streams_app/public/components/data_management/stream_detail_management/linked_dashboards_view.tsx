@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { Streams } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -22,29 +23,44 @@ import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachme
 import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useDashboardsFetch } from '../../../hooks/use_dashboards_fetch';
+import { useAttachmentsFetch } from '../../../hooks/use_attachments_fetch';
+
+const DASHBOARD_FILTERS = {
+  attachmentTypes: ['dashboard' as const],
+};
 
 export function LinkedDashboardsView({ definition }: { definition: Streams.all.GetResponse }) {
   const context = useKibana();
-  const dashboardsFetch = useDashboardsFetch(definition.stream.name);
+  const { onPageReady } = usePerformanceContext();
+  const attachmentsFetch = useAttachmentsFetch({
+    streamName: definition.stream.name,
+    filters: DASHBOARD_FILTERS,
+  });
   const dashboardsLocator =
     context.dependencies.start.share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
 
-  if (dashboardsFetch.loading) {
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (attachmentsFetch.value && !attachmentsFetch.loading) {
+      onPageReady();
+    }
+  }, [attachmentsFetch.value, attachmentsFetch.loading, onPageReady]);
+
+  if (attachmentsFetch.loading) {
     return <EuiLoadingSpinner />;
   }
 
-  if (selectedDashboard === null && dashboardsFetch.value?.dashboards.length) {
-    setSelectedDashboard(dashboardsFetch.value.dashboards[0].id);
+  if (selectedDashboard === null && attachmentsFetch.value?.attachments.length) {
+    setSelectedDashboard(attachmentsFetch.value.attachments[0].id);
   }
 
-  return dashboardsFetch.value && dashboardsFetch.value.dashboards.length ? (
+  return attachmentsFetch.value && attachmentsFetch.value.attachments.length ? (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <DashboardSelector
-            dashboards={dashboardsFetch.value.dashboards}
+            dashboards={attachmentsFetch.value.attachments}
             onSelect={setSelectedDashboard}
             selectedDashboard={selectedDashboard}
           />

@@ -10,5 +10,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/storybook",
+    "@kbn/index-management-shared-types",
+    "@kbn/index-lifecycle-management-common-shared"
   ]
 }

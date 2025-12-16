@@ -61,11 +61,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Disables ESQL-based risk scoring
-   */
-  disableESQLRiskScoring: false,
-
-  /**
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: true,
@@ -73,7 +68,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enable privmon modifier in risk scoring calculation
    */
-  enableRiskScorePrivmonModifier: false,
+  enableRiskScorePrivmonModifier: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -83,7 +78,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
-  entityDetailsHighlightsEnabled: false,
+  entityDetailsHighlightsEnabled: true,
 
   /**
    * Enables the experimental Threat Hunting home experience.
@@ -198,6 +193,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Kubernetes Dashboard in Security Solution
    */
   kubernetesEnabled: false,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Gap Auto Fill Scheduler feature.
+   */
+  gapAutoFillSchedulerEnabled: false,
+  /**
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
+   */
+  linuxDnsEvents: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

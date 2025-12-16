@@ -98,6 +98,7 @@ const createRestrictedRole = async (roleName) => {
               uptime: ['all'],
               observabilityCasesV3: ['all'],
               [SECURITY_FEATURE_ID]: ['all'],
+              rules: ['all'],
               securitySolutionCasesV3: ['all'],
               securitySolutionTimeline: ['all'],
               securitySolutionNotes: ['all'],

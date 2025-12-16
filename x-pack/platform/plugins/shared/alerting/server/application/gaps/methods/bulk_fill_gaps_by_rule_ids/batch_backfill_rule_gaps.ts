@@ -12,6 +12,7 @@ import type { BulkGapFillError } from './utils';
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
 import { processGapsBatch } from './process_gaps_batch';
+import { backfillInitiator } from '../../../../../common/constants';
 
 interface BatchBackfillRuleGapsParams {
   rule: { id: string; name: string };
@@ -46,14 +47,18 @@ export const batchBackfillRuleGaps = async (
         gapsBatch: Gap[],
         processingLimitsByRuleId: Record<string, number>
       ) => {
-        const { processedGapsCount } = await processGapsBatch(context, {
-          rule,
+        const { processedGapsCount, hasErrors, results } = await processGapsBatch(context, {
           range,
           gapsBatch,
           maxGapsCountToProcess: processingLimitsByRuleId[rule.id],
+          initiator: backfillInitiator.USER,
         });
         if (processedGapsCount > 0) {
           hasBeenBackfilled = true;
+        }
+        if (hasErrors) {
+          const errorMessage = results[0]?.error;
+          throw new Error(errorMessage ?? "Can't schedule gap fill");
         }
 
         return { [rule.id]: processedGapsCount };

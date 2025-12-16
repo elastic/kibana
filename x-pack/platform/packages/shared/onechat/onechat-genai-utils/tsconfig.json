@@ -28,5 +28,8 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/esql-ast",
+    "@kbn/utility-types",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows",
   ]
 }

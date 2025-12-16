@@ -57,6 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         // open Infrastructure popover and navigate to some link inside the panel
+        await solutionNavigation.sidenav.expandMore();
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
         // open first link in popover to open a panel
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
@@ -94,6 +95,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await expectNoPageReload();
       });
 
+      it('shows cases in sidebar navigation', async () => {
+        await solutionNavigation.expectExists();
+
+        await solutionNavigation.sidenav.expectLinkExists({
+          deepLinkId: 'observability-overview:cases',
+        });
+      });
+
+      it('navigates to cases app', async () => {
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+        expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
+
+        await testSubjects.click('createNewCaseBtn');
+        expect(await browser.getCurrentUrl()).contain('app/observability/cases/create');
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+        await testSubjects.click('configure-case-button');
+        expect(await browser.getCurrentUrl()).contain('app/observability/cases/configure');
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observability-overview:cases',
+        });
+      });
+
       it('renders a feedback callout', async () => {
         await solutionNavigation.sidenav.feedbackCallout.reset();
         await solutionNavigation.sidenav.openPanel('applications');
@@ -102,19 +134,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-      });
-
-      it('renders tour', async () => {
-        await solutionNavigation.sidenav.tour.reset();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-more');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectHidden();
-        await browser.refresh();
-        await solutionNavigation.sidenav.tour.expectHidden();
       });
 
       it('opens panel on legacy management landing page', async () => {

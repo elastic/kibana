@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "*.ts",
+    ".storybook/**/*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -36,7 +42,6 @@
     "@kbn/i18n-react",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/test-jest-helpers",
     "@kbn/core-application-browser",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-button-exit-full-screen",
@@ -90,9 +95,14 @@
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/presentation-util",
+    "@kbn/security-plugin-types-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/content-management-access-control-public",
+    "@kbn/content-management-access-control-server",
     "@kbn/react-query",
     "@kbn/core-http-server",
-    "@kbn/core-chrome-layout-utils"
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

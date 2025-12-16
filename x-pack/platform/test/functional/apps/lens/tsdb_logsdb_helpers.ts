@@ -451,6 +451,12 @@ export function setupScenarioRunner(
           );
         });
 
+        beforeEach(async () => {
+          await lens.switchDataPanelIndexPattern(dataViewName);
+          await lens.removeLayer();
+          await lens.ensureLayerTabIsActive();
+        });
+
         after(async () => {
           for (const { index, create, mode: indexMode } of indexes) {
             if (create) {
@@ -466,12 +472,6 @@ export function setupScenarioRunner(
             // no need to cleant he specific downsample index as everything linked to the stream
             // is cleaned up automatically
           }
-        });
-
-        beforeEach(async () => {
-          await lens.switchDataPanelIndexPattern(dataViewName);
-          await lens.removeLayer();
-          await lens.ensureLayerTabIsActive();
         });
 
         testingFn(indexes);

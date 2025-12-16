@@ -8,6 +8,7 @@
  */
 
 import type { Page } from '@playwright/test';
+import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 
 /**
@@ -40,6 +41,19 @@ export type ScoutPage = Page & {
    * @returns A Promise that resolves once the the element with the css selector is focused, or an error occurs.
    */
   keyTo: (selector: string, key: string, maxElementsToTraverse?: number) => Promise<void>;
+
+  /**
+   * Performs an accessibility (a11y) scan of the current page using axe-core.
+   * Use this in tests to collect formatted violation summaries (one string per violation).
+   *
+   * @param options - Optional accessibility scan configuration (e.g. selectors to include, exclude, timeout).
+   * @returns A Promise resolving to an object with a 'violations' array containing
+   *          human-readable formatted strings for each detected violation (empty if none).
+   */
+  checkA11y: (options?: RunA11yScanOptions) => Promise<{
+    violations: string[];
+  }>;
+
   /**
    * Types text into an input field character by character with a specified delay between each character.
    * @param selector - The css selector for the input element.
