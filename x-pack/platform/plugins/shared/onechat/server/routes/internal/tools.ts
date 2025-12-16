@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
+import { ToolType, validateToolId } from '@kbn/onechat-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
-import { ToolType, validateToolId } from '@kbn/onechat-common';
 import type {
   BulkDeleteToolResponse,
   BulkDeleteToolResult,
@@ -105,8 +105,13 @@ export function registerInternalToolsRoutes({
       },
     },
     wrapHandler(async (ctx, request, response) => {
-      const { connector_id: connectorId, tools, namespace, tags, skip_existing: skipExisting } =
-        request.body;
+      const {
+        connector_id: connectorId,
+        tools,
+        namespace,
+        tags,
+        skip_existing: skipExisting,
+      } = request.body;
       const { tools: toolService } = getInternalServices();
       const [, { actions }] = await coreSetup.getStartServices();
       const registry = await toolService.getRegistry({ request });
