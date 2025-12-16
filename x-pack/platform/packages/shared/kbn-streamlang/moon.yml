@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-ast'
   - '@kbn/tinymath'
+  - '@kbn/datemath'
 tags:
   - shared-common
   - package
