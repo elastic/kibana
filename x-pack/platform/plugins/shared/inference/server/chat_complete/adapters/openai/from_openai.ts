@@ -34,7 +34,8 @@ export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompleti
 }
 
 export function tokenCountFromOpenAI(
-  completionUsage: OpenAI.CompletionUsage
+  completionUsage: OpenAI.CompletionUsage,
+  model?: string
 ): ChatCompletionTokenCountEvent {
   return {
     type: ChatCompletionEventType.ChatCompletionTokenCount,
@@ -44,5 +45,6 @@ export function tokenCountFromOpenAI(
       total: completionUsage.total_tokens,
       cached: completionUsage.prompt_tokens_details?.cached_tokens,
     },
+    ...(model ? { model } : {}),
   };
 }

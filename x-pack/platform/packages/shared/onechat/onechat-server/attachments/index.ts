@@ -20,3 +20,9 @@ export type {
   WorkflowAttachmentBoundedTool,
   StaticEsqlAttachmentBoundedTool,
 } from './tools';
+export type {
+  AttachmentStateManager,
+  AttachmentUpdateInput,
+  ResolvedAttachmentRef,
+} from './attachment_state_manager';
+export { createAttachmentStateManager } from './attachment_state_manager';

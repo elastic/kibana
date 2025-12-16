@@ -244,6 +244,47 @@ export class OneChatPageObject extends FtrService {
   }
 
   /**
+   * Get the current conversation title text
+   */
+  async getConversationTitle(): Promise<string> {
+    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    return await titleElement.getVisibleText();
+  }
+
+  /**
+   * Rename a conversation by hovering over the title, clicking the pencil icon,
+   * entering the new name, and submitting
+   */
+  async renameConversation(newTitle: string): Promise<string> {
+    // Hover over the conversation title to reveal the pencil icon
+    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    await titleElement.moveMouseTo();
+
+    // Click the pencil icon to enter edit mode
+    const renameButton = await this.testSubjects.find('agentBuilderConversationRenameButton');
+    await renameButton.click();
+
+    // Wait for the inline edit input to appear and clear + type new name
+    const inputElement = await this.testSubjects.find('renameConversationInputField');
+    await inputElement.clearValueWithKeyboard();
+    await inputElement.type(newTitle);
+
+    // Click the save button (checkmark icon)
+    const saveButton = await this.testSubjects.find('renameConversationSaveButton');
+    await saveButton.click();
+
+    // Wait for the title to update
+    await this.retry.try(async () => {
+      const updatedTitle = await this.getConversationTitle();
+      if (updatedTitle !== newTitle) {
+        throw new Error(`Title not yet updated: expected "${newTitle}", got "${updatedTitle}"`);
+      }
+    });
+
+    return newTitle;
+  }
+
+  /**
    * Get the thinking details text
    */
   async getThinkingDetails() {

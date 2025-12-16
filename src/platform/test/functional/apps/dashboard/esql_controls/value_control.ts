@@ -73,7 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       const valuesQueryEditorValue = await esql.getEsqlEditorQuery();
-      expect(valuesQueryEditorValue).to.contain('FROM logstash-* | STATS BY geo.dest');
+      expect(valuesQueryEditorValue).to.contain(
+        'FROM logstash-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY geo.dest'
+      );
 
       // create the control
       await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');

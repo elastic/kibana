@@ -140,6 +140,7 @@ export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
      * The token count structure
      */
     tokens: ChatCompletionTokenCount;
+    model?: string;
   }
 >;
 
