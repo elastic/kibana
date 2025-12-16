@@ -379,29 +379,6 @@ describe('<TableSection />', () => {
   });
 
   describe('enforced groups', () => {
-    it('should include enforcedGroups in groupingSettings', () => {
-      expect(groupingSettings.enforcedGroups).toBeDefined();
-      expect(Array.isArray(groupingSettings.enforcedGroups)).toBe(true);
-    });
-
-    it('should enforce ALERT_ATTACK_IDS as the enforced group', () => {
-      expect(groupingSettings.enforcedGroups).toEqual([ALERT_ATTACK_IDS]);
-    });
-
-    it('should pass enforcedGroups setting to GroupedAlertsTable', async () => {
-      render(
-        <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(GroupedAlertsTable).toHaveBeenCalled();
-        const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
-        expect(props.settings.enforcedGroups).toEqual([ALERT_ATTACK_IDS]);
-      });
-    });
-
     it('should pass all grouping settings including enforcedGroups', async () => {
       render(
         <TestProviders>
@@ -419,13 +396,6 @@ describe('<TableSection />', () => {
           enforcedGroups: [ALERT_ATTACK_IDS],
         });
       });
-    });
-
-    it('should have enforcedGroups that matches the groupingOptions key', () => {
-      const enforcedGroupKey = groupingSettings.enforcedGroups?.[0];
-      const groupingOptionKey = groupingOptions[0]?.key;
-      expect(enforcedGroupKey).toBe(groupingOptionKey);
-      expect(enforcedGroupKey).toBe(ALERT_ATTACK_IDS);
     });
   });
 });
