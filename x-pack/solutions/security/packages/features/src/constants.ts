@@ -53,8 +53,6 @@ export const RULES_FEATURE_ID_V2 = 'securitySolutionRulesV2' as const;
 // Rules API privileges
 export const RULES_API_READ = 'rules-read' as const;
 export const RULES_API_ALL = 'rules-all' as const;
-export const ALERTS_API_READ = 'alerts-read' as const;
-export const ALERTS_API_ALL = 'alerts-all' as const;
 export const EXCEPTIONS_API_READ = 'exceptions-read' as const;
 export const EXCEPTIONS_API_ALL = 'exceptions-all' as const;
 export const LISTS_API_READ = 'lists-read' as const;
@@ -80,6 +78,24 @@ export const EXCEPTIONS_UI_READ_PRIVILEGES =
   `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_READ}` as const;
 export const EXCEPTIONS_UI_EDIT_PRIVILEGES =
   `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_EDIT}` as const;
+
+export const ALERTS_FEATURE_ID = 'securitySolutionAlertsV1' as const;
+
+// Alerts API privileges
+export const ALERTS_API_READ = 'alerts-read' as const;
+export const ALERTS_API_ALL = 'alerts-all' as const;
+
+// Rules UI privileges
+export const ALERTS_UI_READ = 'read_alerts' as const;
+export const ALERTS_UI_EDIT = 'edit_alerts' as const;
+export const ALERTS_UI_DETECTIONS = 'detections' as const;
+export const ALERTS_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
+export const ALERTS_UI_READ_PRIVILEGE = `${ALERTS_FEATURE_ID}.${ALERTS_UI_READ}` as const;
+export const ALERTS_UI_EDIT_PRIVILEGE = `${ALERTS_FEATURE_ID}.${ALERTS_UI_EDIT}` as const;
+export const ALERTS_UI_DETECTIONS_PRIVILEGE =
+  `${ALERTS_FEATURE_ID}.${ALERTS_UI_DETECTIONS}` as const;
+export const ALERTS_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
+  `${ALERTS_FEATURE_ID}.${ALERTS_UI_EXTERNAL_DETECTIONS}` as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

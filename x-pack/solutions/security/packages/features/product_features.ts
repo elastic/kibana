@@ -19,3 +19,4 @@ export { getTimelineFeature } from './src/timeline';
 export { getNotesFeature } from './src/notes';
 export { getSiemMigrationsFeature } from './src/siem_migrations';
 export { getRulesFeature, getRulesV2Feature } from './src/rules';
+export { getAlertsFeature } from './src/alerts';
