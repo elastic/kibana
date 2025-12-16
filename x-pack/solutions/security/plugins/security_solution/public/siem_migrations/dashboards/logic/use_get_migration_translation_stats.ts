@@ -6,7 +6,7 @@
  */
 
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { GetAllTranslationStatsDashboardMigrationResponse } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH } from '../../../../common/siem_migrations/dashboards/constants';

@@ -40,6 +40,7 @@ export interface BaseToolbarProps {
   optionMatcher?: EuiSelectableProps['optionMatcher'];
   hasArrow?: boolean;
   disabled?: boolean;
+  fullWidth?: boolean;
 }
 
 export interface ToolbarSingleSelectorProps {
@@ -68,6 +69,7 @@ export const ToolbarSelector = ({
   singleSelection,
   hasArrow = true,
   disabled = false,
+  fullWidth = false,
 }: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -208,6 +210,7 @@ export const ToolbarSelector = ({
             onClick={togglePopover}
             onBlur={enableLabelPopover}
             hasArrow={hasArrow}
+            fullWidth={fullWidth}
             isDisabled={disabled}
           />
         </EuiToolTip>

@@ -6,12 +6,27 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../asset_image';
 import { CreateStepButton } from './create_step_button';
 
 export const RootStreamEmptyPrompt = () => {
+  const router = useStreamsAppRouter();
+  const {
+    path: { key: streamName },
+  } = useStreamsAppParams('/{key}/management/{tab}');
+
   return (
     <EuiEmptyPrompt
       aria-live="polite"
@@ -36,47 +51,62 @@ export const RootStreamEmptyPrompt = () => {
           )}
         </p>
       }
+      actions={
+        <EuiButton
+          href={router.link('/{key}/management/{tab}', {
+            path: {
+              key: streamName,
+              tab: 'partitioning',
+            },
+          })}
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.button',
+            {
+              defaultMessage: 'Open stream partitioning',
+            }
+          )}
+        </EuiButton>
+      }
     />
   );
 };
 
-export const NoStepsEmptyPrompt = () => {
+export const NoStepsEmptyPrompt: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <EuiEmptyPrompt
       aria-live="polite"
-      titleSize="xs"
-      icon={<AssetImage type="extractFields" />}
+      icon={
+        children ? undefined : (
+          <div css={{ height: 200 }}>
+            <AssetImage type="extractFields" height={200} />
+          </div>
+        )
+      }
       title={
         <h2>
           {i18n.translate('xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.title', {
-            defaultMessage: 'Transform your data before indexing by:',
+            defaultMessage: 'Extract useful fields from your data',
           })}
         </h2>
       }
+      titleSize="xs"
       body={
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="s">
           <EuiFlexItem>
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
-                {
-                  defaultMessage: 'Create conditions to focus on specific data in your stream.',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
+            <EuiText size="m">
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
                 {
                   defaultMessage:
-                    'Create processors to extract meaningful fields so you can filter and analyze your data effectively.',
+                    'Transform your data before indexing with conditions and processors.',
                 }
               )}
             </EuiText>
           </EuiFlexItem>
           <EuiSpacer size="m" />
+          {children && <EuiFlexItem>{children}</EuiFlexItem>}
+          <EuiHorizontalRule />
           <EuiFlexItem>
             <CreateStepButton mode="prominent" />
           </EuiFlexItem>

@@ -54,6 +54,8 @@ export interface DocLinks {
     readonly beatsAndLogstashConfiguration: string;
     readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
+    readonly cloudConnect: string;
+    readonly connectToAutoops: string;
   };
   readonly console: {
     readonly guide: string;
@@ -91,6 +93,7 @@ export interface DocLinks {
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
+    readonly elasticTraining: string;
   };
   readonly metricbeat: {
     readonly base: string;
@@ -119,6 +122,7 @@ export interface DocLinks {
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
     readonly connectorsGithub: string;
+    readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsGoogleDrive: string;
     readonly connectorsGmail: string;
@@ -149,6 +153,7 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly e5Model: string;
     readonly elasticInferenceService: string;
+    readonly elasticInferenceServicePricing: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -302,6 +307,7 @@ export interface DocLinks {
   readonly server: {
     readonly protocol: string;
     readonly publicBaseUrl: string;
+    readonly troubleshootServerNotReady: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
@@ -368,6 +374,7 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLMultiValueControls: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -499,6 +506,7 @@ export interface DocLinks {
     kibanaPrivileges: string;
     mappingRoles: string;
     mappingRolesFieldRules: string;
+    roles: string;
     runAsPrivilege: string;
     enableElasticSearchSecurityFeatures: string;
   }>;
@@ -704,6 +712,10 @@ export interface DocLinks {
     readonly mcpServer: string;
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
+  };
+  readonly indexManagement: {
+    readonly componentTemplate: string;
+    readonly indexAlias: string;
   };
 }
 

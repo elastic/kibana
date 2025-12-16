@@ -64,7 +64,12 @@ describe('WorkflowExecuteModal', () => {
   describe('Basic rendering', () => {
     it('renders the modal with correct title', () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       expect(getByText('Run Workflow')).toBeInTheDocument();
@@ -72,7 +77,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('renders all trigger type buttons', () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       expect(getByText('Alert')).toBeInTheDocument();
@@ -82,7 +92,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('renders trigger descriptions', () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       expect(getByText('Manual trigger description')).toBeInTheDocument();
@@ -92,7 +107,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('renders the execute button', () => {
       const { getByTestId } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       expect(getByTestId('executeWorkflowButton')).toBeInTheDocument();
@@ -102,7 +122,12 @@ describe('WorkflowExecuteModal', () => {
   describe('Trigger selection', () => {
     it('defaults to alert trigger when no definition is provided', () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       const alertButton = getByText('Alert').closest('button');
@@ -114,7 +139,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('switches to manual trigger when clicked', async () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       const manualButton = getByText('Manual').closest('button');
@@ -130,7 +160,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('switches to index trigger when clicked', async () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       const indexButton = getByText('Index').closest('button');
@@ -148,7 +183,12 @@ describe('WorkflowExecuteModal', () => {
   describe('Form rendering based on trigger type', () => {
     it('renders alert form when alert trigger is selected', () => {
       renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       // Alert trigger is selected by default, so event form should be called
@@ -159,7 +199,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('renders manual form when manual trigger is selected', async () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       // Initially, event form should be called (alert is default)
@@ -179,7 +224,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('renders index form when index trigger is selected', async () => {
       const { getByText } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       // Initially, event form should be called (alert is default)
@@ -202,9 +252,10 @@ describe('WorkflowExecuteModal', () => {
     it('auto-runs and closes modal when workflow has no alerts and no inputs', () => {
       renderWithProviders(
         <WorkflowExecuteModal
+          isTestRun={false}
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'manual', enabled: true }],
+            triggers: [{ type: 'manual' }],
           }}
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
@@ -218,9 +269,10 @@ describe('WorkflowExecuteModal', () => {
     it('does not auto-run when workflow has alert triggers', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
+          isTestRun={false}
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'alert', enabled: true }],
+            triggers: [{ type: 'alert' }],
           }}
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
@@ -235,6 +287,7 @@ describe('WorkflowExecuteModal', () => {
     it('does not auto-run when workflow has inputs', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
+          isTestRun={false}
           definition={{
             ...baseWorkflowDefinition,
             inputs: [{ name: 'test-input', type: 'string', required: true }],
@@ -254,9 +307,10 @@ describe('WorkflowExecuteModal', () => {
     it('selects alert trigger when definition has alert triggers', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
+          isTestRun={false}
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'alert', enabled: true }],
+            triggers: [{ type: 'alert' }],
           }}
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
@@ -273,9 +327,10 @@ describe('WorkflowExecuteModal', () => {
     it('selects manual trigger when definition has inputs', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
+          isTestRun={false}
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'manual', enabled: true }],
+            triggers: [{ type: 'manual' }],
             inputs: [{ name: 'test-input', type: 'string', required: true }],
           }}
           onClose={mockOnClose}
@@ -294,7 +349,12 @@ describe('WorkflowExecuteModal', () => {
   describe('Form submission', () => {
     it('renders the execute button', () => {
       const { getByTestId } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       const executeButton = getByTestId('executeWorkflowButton');
@@ -303,7 +363,12 @@ describe('WorkflowExecuteModal', () => {
 
     it('disables execute button when there are errors', () => {
       const { getByTestId } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       const executeButton = getByTestId('executeWorkflowButton');
@@ -314,7 +379,12 @@ describe('WorkflowExecuteModal', () => {
   describe('Modal close functionality', () => {
     it('calls onClose when modal close button is clicked', () => {
       const { container } = renderWithProviders(
-        <WorkflowExecuteModal definition={null} onClose={mockOnClose} onSubmit={mockOnSubmit} />
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
       );
 
       // Find and click the close button (EUI modal close button)

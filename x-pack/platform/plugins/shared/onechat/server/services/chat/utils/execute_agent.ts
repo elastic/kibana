@@ -8,11 +8,12 @@
 import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  RoundInput,
+  RawRoundInput,
   Conversation,
   ChatAgentEvent,
   AgentCapabilities,
 } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
 
 export const executeAgent$ = ({
@@ -24,15 +25,17 @@ export const executeAgent$ = ({
   nextInput,
   abortSignal,
   defaultConnectorId,
+  browserApiTools,
 }: {
   agentId: string;
   request: KibanaRequest;
   capabilities?: AgentCapabilities;
   agentService: AgentsServiceStart;
   conversation: Conversation;
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
+  browserApiTools?: BrowserApiToolMetadata[];
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     agentService
@@ -43,8 +46,9 @@ export const executeAgent$ = ({
         defaultConnectorId,
         agentParams: {
           nextInput,
-          conversation: conversation.rounds,
+          conversation,
           capabilities,
+          browserApiTools,
         },
         onEvent: (event) => {
           observer.next(event);

@@ -12,7 +12,7 @@ import * as api from '../apis/bulk_get_cases';
 import { useBulkGetCasesQuery } from './use_bulk_get_cases';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '../utils/test';
 import type { PropsWithChildren } from 'react';
 import React from 'react';

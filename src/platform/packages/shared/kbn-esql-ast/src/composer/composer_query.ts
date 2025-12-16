@@ -8,10 +8,10 @@
  */
 
 import { printTree } from 'tree-dump';
-import * as synth from '../synth';
+import * as synth from './synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { composerQuerySymbol, processTemplateHoles, validateParamName } from './util';
-import { Builder } from '../builder';
+import { Builder } from '../ast/builder';
 import type {
   ESQLAstExpression,
   ESQLAstHeaderCommand,
@@ -29,7 +29,7 @@ import type {
   QueryCommandTag,
   QueryCommandTagParametrized,
 } from './types';
-import { Walker } from '../walker';
+import { Walker } from '../ast/walker';
 import {
   isBinaryExpression,
   isBooleanLiteral,
@@ -42,8 +42,9 @@ import {
   isProperNode,
   isStringLiteral,
 } from '../ast/is';
-import { replaceProperties } from '../walker/helpers';
-import { resolveItem } from '../visitor/utils';
+import { replaceProperties } from '../ast/walker/helpers';
+import { resolveItem } from '../ast/visitor/utils';
+import { printAst } from '../shared/debug';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -1140,6 +1141,12 @@ export class ComposerQuery {
    * ```
    */
   public toString(): string {
+    return this.dump({ ast: false });
+  }
+
+  public dump(options: ComposerQueryDumpOptions = {}): string {
+    const showAst = options.ast ?? true;
+
     return (
       'ComposerQuery' +
       printTree('', [
@@ -1169,7 +1176,19 @@ export class ComposerQuery {
             )
           );
         },
+        showAst ? () => '' : null,
+        showAst
+          ? (tab) =>
+              'ast' + printTree(tab, [(tab2) => printAst(this.ast, { location: false }, tab2)])
+          : null,
       ])
     );
   }
+}
+
+export interface ComposerQueryDumpOptions {
+  /**
+   * Whether to include the AST dump in the output. Default is `true`.
+   */
+  ast?: boolean;
 }

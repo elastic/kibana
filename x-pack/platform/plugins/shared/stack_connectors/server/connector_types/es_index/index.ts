@@ -7,8 +7,6 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
@@ -18,72 +16,54 @@ import type {
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import {
   AlertHistoryEsIndexConnectorId,
-  ALERT_HISTORY_PREFIX,
   buildAlertHistoryDocument,
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/es_index';
+import type {
+  ActionParamsType,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/es_index';
 
 export type ESIndexConnectorType = ConnectorType<
   ConnectorTypeConfigType,
-  {},
+  ConnectorTypeSecretsType,
   ActionParamsType,
   unknown
 >;
 export type ESIndexConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
-  {},
+  ConnectorTypeSecretsType,
   ActionParamsType
 >;
 
 // config definition
 
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-const ConfigSchema = schema.object({
-  index: schema.string(),
-  refresh: schema.boolean({ defaultValue: false }),
-  executionTimeField: schema.nullable(schema.string()),
-});
-
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-// see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
-// - timeout not added here, as this seems to be a generic thing we want to do
-//   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
-const ParamsSchema = schema.object({
-  documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-  indexOverride: schema.nullable(
-    schema.string({
-      validate: (pattern) => {
-        if (!pattern.startsWith(ALERT_HISTORY_PREFIX)) {
-          return `index must start with "${ALERT_HISTORY_PREFIX}"`;
-        }
-      },
-    })
-  ),
-});
-
-export const ConnectorTypeId = '.index';
 // connector type definition
 export function getConnectorType(): ESIndexConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'basic',
-    name: i18n.translate('xpack.stackConnectors.esIndex.title', {
-      defaultMessage: 'Index',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: {
+        schema: SecretsSchema,
+      },
       config: {
         schema: ConfigSchema,
       },

@@ -6,22 +6,27 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn } from '@kbn/onechat-server';
+import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AttachmentServiceSetup } from './services/attachments';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -29,6 +34,13 @@ export interface OnechatStartDependencies {
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
+}
+
+export interface AttachmentsSetup {
+  /**
+   * Register an attachment type to be available in onechat.
+   */
+  registerType: AttachmentServiceSetup['registerType'];
 }
 
 /**
@@ -67,19 +79,29 @@ export interface AgentsSetup {
  */
 export interface OnechatPluginSetup {
   /**
-   * Agents setup contract, can be used to register built-in agents.
+   * Agents setup contract, which can be used to register built-in agents.
    */
   agents: AgentsSetup;
   /**
-   * Tools setup contract, can be used to register built-in tools.
+   * Tools setup contract, which can be used to register built-in tools.
    */
   tools: ToolsSetup;
+  /**
+   * Attachments setup contract, which can be used to register attachment types.
+   */
+  attachments: AttachmentsSetup;
 }
 
 /**
  * Start contract of the onechat plugin.
  */
 export interface OnechatPluginStart {
+  /**
+   * Agents service, to execute agents.
+   */
+  agents: {
+    runAgent: RunAgentFn;
+  };
   /**
    * Tools service, to manage or execute tools.
    */

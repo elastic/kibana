@@ -1068,7 +1068,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for AWS and allow to select cloud connector in ess  aws environnement', async () => {
+    it('should render setup technology selector for AWS and allow to select cloud connector in ess aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1125,7 +1125,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and allow to select cloud connector in cloud GCP environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in cloud GCP environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1242,7 +1242,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in serverless gcp environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in serverless gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1303,7 +1303,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in serverless azure environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in serverless azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {

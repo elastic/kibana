@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { PieToolbar } from './toolbar';
-export { PartitionFlyoutToolbar } from './flyout_toolbar';
+export { PartitionStyleSettings } from './style_settings';
+export { PartitionLegendSettings } from './legend_settings';

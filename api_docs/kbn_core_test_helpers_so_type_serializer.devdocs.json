@@ -134,6 +134,95 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+        "id": "def-common.ModelVersionSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelVersionSummary",
+        "description": [],
+        "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.modelVersionHash",
+            "type": "string",
+            "tags": [],
+            "label": "modelVersionHash",
+            "description": [],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.changeTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "changeTypes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.hasTransformation",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasTransformation",
+            "description": [],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.newMappings",
+            "type": "Array",
+            "tags": [],
+            "label": "newMappings",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.schemas",
+            "type": "Object",
+            "tags": [],
+            "label": "schemas",
+            "description": [],
+            "signature": [
+              "{ create: string | false; forwardCompatibility: string | false; }"
+            ],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
         "id": "def-common.SavedObjectTypeMigrationInfo",
         "type": "Interface",
         "tags": [],

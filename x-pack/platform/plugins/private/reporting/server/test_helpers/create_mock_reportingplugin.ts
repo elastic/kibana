@@ -33,6 +33,7 @@ import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { ReportingCore } from '..';
 
 import type { ReportingInternalSetup, ReportingInternalStart } from '../core';
@@ -58,6 +59,7 @@ export const createMockPluginSetup = (
       put: jest.fn(),
       delete: jest.fn(),
     },
+    licensing: licensingMock.createSetup(),
     security: securityMock.createSetup(),
     taskManager: taskManagerMock.createSetup(),
     logger: loggingSystemMock.createLogger(),
@@ -75,7 +77,8 @@ const savedObjectsClient = savedObjectsClientMock.create();
 const createMockReportingStore = async (config: ReportingConfigType) => {
   const mockConfigSchema = createMockConfigSchema(config);
   const mockContext = coreMock.createPluginInitializerContext(mockConfigSchema);
-  const mockCore = new ReportingCore(coreSetupMock, logger, mockContext);
+  const exportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
+  const mockCore = new ReportingCore(coreSetupMock, logger, exportTypesRegistry, mockContext);
   return new ReportingStore(mockCore, logger);
 };
 
@@ -129,7 +132,8 @@ export const createMockReportingCore = async (
   const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
   context.config = { get: () => config } as any;
 
-  const core = new ReportingCore(coreMock.createSetup(), logger, context);
+  const exportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
+  const core = new ReportingCore(coreMock.createSetup(), logger, exportTypesRegistry, context);
 
   core.pluginSetup(setupDepsMock);
   await core.pluginSetsUp();

@@ -78,9 +78,12 @@ const formRowCSS = css`
 `;
 
 const pageHeaderCSS = css`
-  max-width: 1248px;
-  margin: auto;
   border-bottom: none;
+
+  .euiPageHeaderContent {
+    max-width: 1248px;
+    margin: auto;
+  }
 `;
 
 const betaBadgeCSS = ({ euiTheme }: Theme) => css`
@@ -308,6 +311,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
           {

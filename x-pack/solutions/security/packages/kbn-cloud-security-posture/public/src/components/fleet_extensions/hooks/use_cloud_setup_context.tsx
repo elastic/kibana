@@ -7,6 +7,7 @@
 import { useContext, useMemo } from 'react';
 import semverGte from 'semver/functions/gte';
 import { i18n } from '@kbn/i18n';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   GCP_PROVIDER_TEST_SUBJ,
@@ -74,6 +75,11 @@ const isCloudConnectorEnabledForProvider = ({
 }) => {
   const providerConfig = config.providers[provider];
   const cloudConnectorEnabledVersion = providerConfig.cloudConnectorEnabledVersion;
+  const allowedProviders = [AWS_PROVIDER, AZURE_PROVIDER];
+
+  if (!allowedProviders.includes(provider)) {
+    return false;
+  }
 
   return !!(
     cloudConnectorsFeatureEnabled &&
@@ -86,10 +92,12 @@ const buildCloudSetupState = ({
   config,
   packageInfo,
   cloudConnectorsFeatureEnabled,
+  cloud,
 }: {
   config: CloudSetupConfig;
   packageInfo: PackageInfo;
   cloudConnectorsFeatureEnabled: boolean;
+  cloud: CloudSetup;
 }): CloudSetupContextValue => {
   const getProviderDetails = (provider: CloudProviders) => {
     const providerConfig = config.providers[provider];
@@ -219,7 +227,8 @@ export function useCloudSetup(): CloudSetupContextValue {
         config: context.config,
         packageInfo: context.packageInfo,
         cloudConnectorsFeatureEnabled,
+        cloud: context.cloud,
       }),
-    [context.config, context.packageInfo, cloudConnectorsFeatureEnabled]
+    [context.config, context.packageInfo, cloudConnectorsFeatureEnabled, context.cloud]
   );
 }

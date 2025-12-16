@@ -26,7 +26,7 @@ const getMockPackageInfo = (): PackageInfo => {
   return {
     name: TEMPLATE_NAME,
     title: 'Cloud Security Posture Management',
-    version: '1.5.0',
+    version: '3.1.0',
     description: 'Test package',
     type: 'integration',
     categories: [],
@@ -34,7 +34,7 @@ const getMockPackageInfo = (): PackageInfo => {
     format_version: '1.0.0',
     release: 'ga',
     owner: { github: 'elastic/security-team' },
-    latestVersion: '1.5.0',
+    latestVersion: '3.1.0',
     assets: {},
     policy_templates: [
       {
@@ -171,12 +171,14 @@ const mockConfig: CloudSetupConfig = {
       type: CLOUDBEAT_GCP,
       enabled: true,
       enableOrganization: true,
+      cloudConnectorEnabledVersion: undefined,
       getStartedPath: '/gcp/start',
     },
     azure: {
       type: CLOUDBEAT_AZURE,
       enableOrganization: true,
       getStartedPath: '/azure/start',
+      cloudConnectorEnabledVersion: '3.1.0',
     },
   },
 };
@@ -263,5 +265,192 @@ describe('useCloudSetup', () => {
         expect.objectContaining({ value: AZURE_PROVIDER }),
       ])
     );
+  });
+
+  describe('Cloud Connector Enablement', () => {
+    const mockConfigWithCloudConnectors: CloudSetupConfig = {
+      ...mockConfig,
+      providers: {
+        aws: {
+          ...mockConfig.providers.aws,
+          cloudConnectorEnabledVersion: '1.0.0',
+        },
+        gcp: {
+          ...mockConfig.providers.gcp,
+          cloudConnectorEnabledVersion: undefined, // cloud connector that supported
+        },
+        azure: {
+          ...mockConfig.providers.azure,
+          cloudConnectorEnabledVersion: '1.0.0',
+        },
+      },
+    };
+
+    beforeEach(() => {
+      // Enable cloud connectors feature
+      mockCore.uiSettings.get.mockReturnValue(true);
+    });
+
+    it('disables all cloud connectors when feature flag is off', () => {
+      mockCore.uiSettings.get.mockReturnValue(false);
+      mockCloud.cloudHost = 'us-east-1.aws.elastic-cloud.com';
+
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isAwsCloudConnectorEnabled).toBe(false);
+      expect(result.current.isGcpCloudConnectorEnabled).toBe(false);
+      expect(result.current.isAzureCloudConnectorEnabled).toBe(false);
+    });
+
+    it(' enables AWS cloud connector on GCP host', () => {
+      mockCloud.cloudHost = 'us-central1.gcp.elastic-cloud.com';
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isAwsCloudConnectorEnabled).toBe(true);
+    });
+
+    it(' enables AWS cloud connector on AWS host', () => {
+      mockCloud.cloudHost = 'us-central1.gcp.elastic-cloud.com';
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isAwsCloudConnectorEnabled).toBe(true);
+    });
+
+    it(' enables AWS cloud connector on Azure host', () => {
+      mockCloud.cloudHost = 'westeurope.azure.elastic-cloud.com';
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isAwsCloudConnectorEnabled).toBe(true);
+    });
+
+    it('disables GCP cloud connector (not enabled yet) on any host', () => {
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isGcpCloudConnectorEnabled).toBe(false);
+    });
+    it('enables Azure cloud connector on GCP host', () => {
+      mockCloud.cloudHost = 'us-central1.gcp.elastic-cloud.com';
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isAzureCloudConnectorEnabled).toBe(true);
+    });
+
+    it('enables Azure cloud connector on Azure host', () => {
+      mockCloud.cloudHost = 'westeurope.azure.elastic-cloud.com';
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isAzureCloudConnectorEnabled).toBe(true);
+    });
+
+    it('enables Azure cloud connector on AWS host', () => {
+      mockCloud.cloudHost = 'us-east-1.aws.elastic-cloud.com';
+      const customWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+        <CloudSetupContext.Provider
+          value={{
+            config: mockConfigWithCloudConnectors,
+            uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
+            packageInfo,
+            packagePolicy,
+          }}
+        >
+          {children}
+        </CloudSetupContext.Provider>
+      );
+
+      const { result } = renderHook(() => useCloudSetup(), { wrapper: customWrapper });
+      expect(result.current.isAzureCloudConnectorEnabled).toBe(true);
+    });
   });
 });

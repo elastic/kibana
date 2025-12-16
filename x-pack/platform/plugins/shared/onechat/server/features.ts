@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { ApiPrivileges } from '@kbn/core-security-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   ONECHAT_APP_ID,
@@ -27,13 +28,22 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: ['kibana', ONECHAT_APP_ID],
-        api: [apiPrivileges.readOnechat, apiPrivileges.manageOnechat],
+        api: [
+          apiPrivileges.readOnechat,
+          apiPrivileges.manageOnechat,
+          ApiPrivileges.manage('llm_product_doc'),
+        ],
         catalogue: [ONECHAT_FEATURE_ID],
         savedObject: {
           all: [],
           read: [],
         },
-        ui: [uiPrivileges.show, uiPrivileges.showManagement],
+        ui: [
+          uiPrivileges.show,
+          uiPrivileges.showManagement,
+          uiPrivileges.manageTools,
+          uiPrivileges.manageAgents,
+        ],
       },
       read: {
         app: ['kibana', ONECHAT_APP_ID],

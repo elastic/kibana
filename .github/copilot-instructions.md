@@ -277,7 +277,7 @@ yarn start --no-base-path   # Disable basePath
 yarn es serverless --projectType=oblt          # Observability
 yarn es serverless --projectType=security      # Security
 yarn es serverless --projectType=es            # Elasticsearch
-yarn es serverless --projectType=workplace_ai  # Workplace AI
+yarn es serverless --projectType=workplaceai  # Workplace AI
 
 # 2. THEN: Start Kibana in MATCHING serverless mode
 # Kibana uses --serverless flag (NOT --projectType)
@@ -286,7 +286,7 @@ yarn serverless              # Generic (uses config or defaults to 'es')
 yarn serverless-oblt         # Matches ES projectType=oblt
 yarn serverless-security     # Matches ES projectType=security
 yarn serverless-es           # Matches ES projectType=es
-yarn serverless-workplace-ai # Matches ES projectType=workplace_ai
+yarn serverless-workplace-ai # Matches ES projectType=workplaceai
 
 # Login: elastic_serverless / changeme (or system_indices_superuser / changeme)
 # Note: Cannot use basePath in serverless mode

@@ -22,17 +22,15 @@ interface UseLayoutWidthArgs {
 /**
  * Hook for handling layout width changes.
  *
- * @param isCollapsed - Whether the side nav is collapsed.
- * @param isSidePanelOpen - Whether the side panel is open.
- * @param setWidth - Callback to set the width of the navigation component.
+ * @param isCollapsed - whether the side nav is collapsed.
+ * @param isSidePanelOpen - whether the side panel is open.
+ * @param setWidth - callback to set the width of the navigation component.
  */
 export const useLayoutWidth = ({ isCollapsed, isSidePanelOpen, setWidth }: UseLayoutWidthArgs) => {
   useEffect(() => {
-    setWidth(isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH);
-    if (isSidePanelOpen) {
-      setWidth(
-        isCollapsed ? COLLAPSED_WIDTH + SIDE_PANEL_WIDTH : EXPANDED_WIDTH + SIDE_PANEL_WIDTH
-      );
-    }
+    const baseWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+    const width = isSidePanelOpen ? baseWidth + SIDE_PANEL_WIDTH : baseWidth;
+
+    setWidth(width);
   }, [isCollapsed, isSidePanelOpen, setWidth]);
 };

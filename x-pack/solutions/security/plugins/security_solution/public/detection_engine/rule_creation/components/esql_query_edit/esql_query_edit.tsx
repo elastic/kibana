@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import type { DataViewBase } from '@kbn/es-query';
 import { debounceAsync } from '@kbn/securitysolution-utils';
 import type { FieldConfig } from '../../../../shared_imports';

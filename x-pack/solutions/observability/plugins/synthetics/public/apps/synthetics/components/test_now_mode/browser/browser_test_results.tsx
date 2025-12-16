@@ -52,7 +52,9 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
   }, [onDone, expectedSummariesLoaded, testRunId]);
 
   if (retriesExceeded) {
-    return <EuiCallOut title={FAILED_TO_SCHEDULE} color="danger" iconType="alert" />;
+    return (
+      <EuiCallOut announceOnMount title={FAILED_TO_SCHEDULE} color="danger" iconType="alert" />
+    );
   }
 
   return (
@@ -91,6 +93,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
 
             {(isStepsLoadingFailed || isDownMonitor) && (
               <EuiCallOut
+                announceOnMount
                 data-test-subj="monitorTestRunErrorCallout"
                 style={{
                   marginTop: euiTheme.base,

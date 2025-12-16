@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchServiceStart,
+  Logger,
+  UiSettingsServiceStart,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
@@ -13,7 +18,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
-  registerBuiltinTools,
   createBuiltinProviderFn,
   type BuiltinToolRegistry,
 } from './builtin';
@@ -21,7 +25,6 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
-import { getToolTypeInfo } from './utils';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
@@ -32,6 +35,8 @@ export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export class ToolsService {
@@ -44,7 +49,6 @@ export class ToolsService {
 
   setup(deps: ToolsServiceSetupDeps): ToolsServiceSetup {
     this.setupDeps = deps;
-    registerBuiltinTools({ registry: this.builtinRegistry });
 
     return {
       register: (reg) => {
@@ -59,7 +63,13 @@ export class ToolsService {
     };
   }
 
-  start({ getRunner, elasticsearch, spaces }: ToolsServiceStartDeps): ToolsServiceStart {
+  start({
+    getRunner,
+    elasticsearch,
+    spaces,
+    uiSettings,
+    savedObjects,
+  }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({ workflowsManagement });
@@ -85,12 +95,14 @@ export class ToolsService {
         request,
         builtinProvider,
         persistedProvider,
+        uiSettings,
+        savedObjects,
       });
     };
 
     return {
       getRegistry,
-      getToolTypeInfo: () => getToolTypeInfo(toolTypes),
+      getToolDefinitions: () => toolTypes,
     };
   }
 }

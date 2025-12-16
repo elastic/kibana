@@ -17,7 +17,7 @@ import { EuiFocusTrap, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 import { getInputComponentForType } from '../value_inputs_factory';
-import { isPlaceholderColumn } from '../../utils';
+import { getCellValue, isPlaceholderColumn } from '../../utils';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
 export type OnCellValueChange = (docId: string, update: any) => void;
@@ -38,7 +38,7 @@ export const getValueInputPopover =
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.id as string;
-    const cellValue = row.flattened[columnId]?.toString() ?? '';
+    const cellValue = getCellValue(row.flattened[columnId]) ?? '';
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -83,10 +83,20 @@ export const getValueInputPopover =
             return;
           }
 
-          dataTableRef?.current?.closeCellPopover();
-          if (columns.length > colIndex) {
+          const dataTable = dataTableRef?.current;
+          if (!dataTable) return;
+
+          dataTable.closeCellPopover();
+
+          // Calculate next cell position
+          const nextColIndex = colIndex + 1;
+          const nextRowIndex = nextColIndex > columns.length ? rowIndex + 1 : rowIndex;
+          const finalColIndex = nextColIndex > columns.length ? 1 : nextColIndex;
+
+          // Only navigate if there's a next row available
+          if (nextRowIndex < rows.length) {
             requestAnimationFrame(() => {
-              dataTableRef?.current?.openCellPopover({ rowIndex, colIndex: colIndex + 1 });
+              dataTable.openCellPopover({ rowIndex: nextRowIndex, colIndex: finalColIndex });
             });
           }
         }

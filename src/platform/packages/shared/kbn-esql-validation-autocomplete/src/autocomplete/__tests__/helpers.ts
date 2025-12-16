@@ -7,25 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
-import { withAutoSuggest, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
-import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import type {
-  Location,
-  ESQLFieldWithMetadata,
-  ISuggestionItem,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
-import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
-import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import type { FunctionParameterType, FunctionReturnType, FunctionDefinition } from '@kbn/esql-ast';
+import { withAutoSuggest, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { getSafeInsertText } from '@kbn/esql-ast/src/commands/definitions/utils';
+import type { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/time_series_agg_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/scalar_functions';
+import {
+  operatorsDefinitions,
+  logicalOperators,
+  arithmeticOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '@kbn/esql-ast/src/commands/definitions/all_operators';
 import type { LicenseType } from '@kbn/licensing-types';
+import {
+  type ESQLCallbacks,
+  type ESQLFieldWithMetadata,
+  type EsqlFieldType,
+  esqlFieldTypes,
+} from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { getLocationFromCommandOrOptionName } from '../../shared/types';
+import { getLocationFromCommandOrOptionName } from '@kbn/esql-ast/src/commands/registry/location';
+import { NOT_SUGGESTED_TYPES } from '../../query_columns_service';
 import * as autocomplete from '../autocomplete';
-import type { ESQLCallbacks } from '../../shared/types';
 import {
   joinIndices,
   timeseriesIndices,
@@ -43,7 +52,7 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
 
 export const fields: TestField[] = [
-  ...fieldTypes.map((type) => ({
+  ...esqlFieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
     userDefined: false as const,
@@ -130,6 +139,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    excludeOperatorGroups,
     timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
@@ -139,6 +149,10 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    /** Exclude specific operator groups (e.g., ['in', 'nullCheck']) */
+    excludeOperatorGroups?: Array<
+      'logical' | 'comparison' | 'arithmetic' | 'pattern' | 'in' | 'nullCheck'
+    >;
     timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
@@ -168,7 +182,43 @@ export function getFunctionSignaturesByReturnType(
     list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
-    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+    // Build set of operator names to exclude based on excludeOperatorGroups
+    const excludedOperatorNames = new Set<string>();
+
+    if (excludeOperatorGroups) {
+      const operatorGroupMap: Record<string, FunctionDefinition[]> = {
+        logical: logicalOperators,
+        comparison: comparisonFunctions,
+        arithmetic: arithmeticOperators,
+        pattern: patternMatchOperators,
+        in: inOperators,
+        nullCheck: nullCheckOperators,
+      };
+
+      for (const groupName of excludeOperatorGroups) {
+        const group = operatorGroupMap[groupName];
+
+        if (group) {
+          for (const op of group) {
+            excludedOperatorNames.add(op.name);
+          }
+        }
+      }
+    }
+
+    list.push(
+      ...operatorsDefinitions.filter(({ name }) => {
+        if (skipAssign && (name === '=' || name === ':')) {
+          return false;
+        }
+
+        if (excludedOperatorNames.has(name)) {
+          return false;
+        }
+
+        return true;
+      })
+    );
   }
 
   const deduped = Array.from(new Set(list));
@@ -252,6 +302,15 @@ export function getFunctionSignaturesByReturnType(
           label: name.toUpperCase(),
         };
       }
+
+      const hasNoArguments = signatures.every((sig) => sig.params.length === 0);
+      if (hasNoArguments) {
+        return {
+          text: `${name.toUpperCase()}()`,
+          label: name.toUpperCase(),
+        };
+      }
+
       return {
         text: customParametersSnippet
           ? `${name.toUpperCase()}(${customParametersSnippet})`
@@ -262,7 +321,7 @@ export function getFunctionSignaturesByReturnType(
 }
 
 export function getFieldNamesByType(
-  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
+  _requestedType: Readonly<EsqlFieldType | 'any' | Array<EsqlFieldType | 'any'>>
 ) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
@@ -410,3 +469,21 @@ export const attachTriggerCommand = (
         text: s,
       } as ISuggestionItem)
     : withAutoSuggest(s as ISuggestionItem);
+
+export const attachParameterHelperCommand = (
+  s: string | PartialSuggestionWithText
+): PartialSuggestionWithText => {
+  const command = {
+    id: 'editor.action.triggerParameterHints',
+    title: '',
+  };
+  return typeof s === 'string'
+    ? {
+        text: s,
+        command,
+      }
+    : {
+        ...s,
+        command,
+      };
+};

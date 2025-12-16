@@ -6,16 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
-import {
-  modeDescription,
-  ENRICH_MODES,
-} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
+import { getFunctionDefinition } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { modeDescription, ENRICH_MODES } from '@kbn/esql-ast/src/commands/registry/enrich/util';
 import { getHoverItem } from '..';
 import { policies, setupTestbed } from './fixtures';
 
 const assertGetHoverItem = async (statement: string, triggerString: string, expected: string[]) => {
   const kit = setupTestbed(statement, triggerString);
+
   const { contents } = await getHoverItem(statement, kit.offset, kit.callbacks);
   const result = contents.map(({ value }) => value).sort();
 
@@ -71,38 +69,38 @@ describe('getHoverItem()', () => {
       await assertGetHoverItem(`from a | eval round(numberField)`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval round(numberField,)`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval round(numberField, )`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
       await assertGetHoverItem(`from a | eval round(numberField)`, 'round', [
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
@@ -110,18 +108,41 @@ round (
 
     test('nested function name', async () => {
       await assertGetHoverItem(`from a | stats avg(round(numberField))`, 'round', [
-        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
         getFunctionDefinition('round')!.description,
         `\`\`\`none
-round (
-  number: double | integer | long | unsigned_long,  
-  decimals?: integer | long
-): double | integer | long | unsigned_long
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
 \`\`\``,
       ]);
-      await assertGetHoverItem(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', [
-        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
+      await assertGetHoverItem(
+        `from a | stats avg(nonExistentFn(numberField))`,
+        'nonExistentFn',
+        []
+      );
+    });
+  });
+
+  describe('columns', () => {
+    test('column name type is displayed on hover', async () => {
+      await assertGetHoverItem(`from a | eval newField = doubleField + 10`, 'doubleField', [
+        '**doubleField**: double',
       ]);
+    });
+
+    test('column name type is displayed on hover for columns inside functions', async () => {
+      await assertGetHoverItem(`from a | eval newField = max(doubleField)`, 'doubleField', [
+        '**doubleField**: double',
+      ]);
+    });
+
+    test('no hover info for non-existent fields in expressions', async () => {
+      await assertGetHoverItem(
+        `from a | eval newField = nonExistentField + 10`,
+        'nonExistentField',
+        []
+      );
     });
   });
 });

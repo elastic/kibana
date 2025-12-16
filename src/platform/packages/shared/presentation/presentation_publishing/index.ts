@@ -57,6 +57,13 @@ export {
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
 export {
+  apiPublishesProjectRouting,
+  type PublishesProjectRouting,
+  apiPublishesProjectRoutingOverrides,
+  type ProjectRoutingOverrides,
+  type PublishesProjectRoutingOverrides,
+} from './interfaces/fetch/publishes_project_routing';
+export {
   apiHasAppContext,
   type EmbeddableAppContext,
   type HasAppContext,

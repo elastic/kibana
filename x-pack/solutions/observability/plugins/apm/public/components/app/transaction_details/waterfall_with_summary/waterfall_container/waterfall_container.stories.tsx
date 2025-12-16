@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFilePicker, EuiForm } from '@elastic/eui';
-import { apm, dedot } from '@kbn/apm-synthtrace-client';
+import { apm, dedot } from '@kbn/synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { StoryFn, Meta } from '@storybook/react';
 import { noop } from 'lodash';

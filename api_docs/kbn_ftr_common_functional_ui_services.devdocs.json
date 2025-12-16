@@ -12134,9 +12134,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
+          ") => Promise<",
           "default",
-          "; kibanaServer: ({ getService }: ",
+          ">; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -12224,9 +12224,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
+          ") => Promise<",
           "default",
-          "; kibanaServer: ({ getService }: ",
+          ">; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -12701,9 +12701,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -12791,9 +12791,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -12939,9 +12939,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13029,9 +13029,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13167,9 +13167,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13257,9 +13257,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13414,9 +13414,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13504,9 +13504,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",

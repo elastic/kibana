@@ -34,10 +34,10 @@ import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -100,8 +100,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     discoverFeatureFlags,
   } = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
-
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -149,9 +150,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
-      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+      dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const {
@@ -272,9 +273,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onAddBreakdownField = useCallback(
     (field: DataViewField | undefined) => {
-      stateContainer.appState.update({ breakdownField: field?.name });
+      dispatch(updateAppState({ appState: { breakdownField: field?.name } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onFieldEdited: (options: {
@@ -291,9 +292,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (!editedDataView.isPersisted()) {
         await stateContainer.actions.updateAdHocDataViewId(editedDataView);
       }
+      if (editedDataView?.id) {
+        // `tab.uiState.fieldListExistingFieldsInfo` needs to be reset when user edits fields,
+        // otherwise the edited field would be shown under "Empty" section in the sidebar
+        // when switching to a tab with the same data view id.
+        dispatch(
+          internalStateActions.resetAffectedFieldListExistingFieldsInfoUiState({
+            dataViewId: editedDataView.id,
+          })
+        );
+      }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn]
+    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -387,7 +398,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
-  const dispatch = useInternalStateDispatch();
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
   const onInitialStateChange = useCallback(
@@ -410,27 +420,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '40px' : undefined)}
           }
         `,
       ]}
     >
-      <h1
-        id="savedSearchTitle"
-        className="euiScreenReaderOnly"
-        data-test-subj="discoverSavedSearchTitle"
-      >
-        {discoverSession?.title
-          ? i18n.translate('discover.pageTitleWithSavedSearch', {
-              defaultMessage: 'Discover - {savedSearchTitle}',
-              values: {
-                savedSearchTitle: discoverSession.title,
-              },
-            })
-          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-              defaultMessage: 'Discover - Search not yet saved',
-            })}
-      </h1>
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
@@ -440,7 +434,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
-      <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
+      <EuiPageBody css={styles.pageBody}>
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
@@ -546,11 +540,11 @@ const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') =
 const componentStyles = {
   dscPage: ({ euiTheme }: UseEuiTheme) =>
     css({
-      overflow: 'hidden',
+      overflow: 'visible',
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
-  savedSearchTitle: css({
+  pageBody: css({
     overflow: 'hidden',
   }),
   sidebarContainer: css({

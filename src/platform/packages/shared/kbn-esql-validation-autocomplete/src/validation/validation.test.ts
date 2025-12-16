@@ -6,17 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { EsqlFieldType } from '@kbn/esql-types';
 import type {
-  FieldType,
   SupportedDataType,
   FunctionDefinition,
   ESQLMessage,
   EditorError,
 } from '@kbn/esql-ast';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
-import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { getFunctionSignatures } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/scalar_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/aggregation_functions';
 import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
 import { join } from 'path';
@@ -77,7 +77,7 @@ function getLiteralType(typeString: 'time_duration') {
   return `1 ${literals[typeString]}`;
 }
 
-export const fieldNameFromType = (type: FieldType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: EsqlFieldType) => `${camelCase(type)}Field`;
 
 function getFieldName(
   typeString: string,
@@ -268,7 +268,7 @@ describe('validation logic', () => {
 
         await expectErrors('f', [expect.any(String)]);
         await expectErrors('from ', [
-          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
         ]);
       });
 
@@ -277,10 +277,10 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors('from index,', [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
           ]);
           await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
           ]);
 
           await expectErrors(`from assignment = 1`, [
@@ -305,8 +305,7 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors(`from index (metadata _id)`, [
-            "SyntaxError: extraneous input ')' expecting <EOF>",
-            "SyntaxError: token recognition error at: '('",
+            "SyntaxError: mismatched input '(' expecting <EOF>",
           ]);
         });
 
@@ -354,6 +353,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
         '"t" is not a valid JOIN index. Please use a "lookup" mode index.',
       ]);
+
+      testErrorsAndWarnings(
+        'FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField',
+        ['JOIN ON clause must be a comma separated list of fields or a single expression']
+      );
     });
 
     describe('drop', () => {
@@ -803,10 +807,7 @@ describe('validation logic', () => {
           excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))
         )
       )) {
-        const { errors } = await validateQuery(
-          testCase.query,
-          {} // ignoreOnMissingCallbacks is now automatic
-        );
+        const { errors } = await validateQuery(testCase.query, {});
         // Verify no callback-dependent errors are present
         const errorCodes = errors.map((e) => e.code);
         expect(

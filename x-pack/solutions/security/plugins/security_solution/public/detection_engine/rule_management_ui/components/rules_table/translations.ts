@@ -42,3 +42,63 @@ export const RULE_UPDATES_TAB = i18n.translate(
     defaultMessage: 'Rule Updates',
   }
 );
+
+export const SELECTED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.selectedRules',
+  {
+    defaultMessage: 'Selected rules',
+  }
+);
+
+// Gap status column
+export const GAP_STATUS_HEADER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.header',
+  {
+    defaultMessage: 'Gap fill status',
+  }
+);
+
+export const GAP_STATUS_IN_PROGRESS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+
+export const GAP_STATUS_UNFILLED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.unfilled',
+  {
+    defaultMessage: 'Unfilled',
+  }
+);
+
+export const GAP_STATUS_FILLED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.filled',
+  {
+    defaultMessage: 'Filled',
+  }
+);
+
+export const gapStatusTooltipInProgress = (duration: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.tooltip.inProgress',
+    {
+      defaultMessage: 'In progress: {duration}',
+      values: { duration },
+    }
+  );
+
+export const gapStatusTooltipUnfilled = (duration: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.tooltip.unfilled',
+    {
+      defaultMessage: 'Unfilled: {duration}',
+      values: { duration },
+    }
+  );
+
+export const gapStatusTooltipFilled = (duration: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.columns.gapStatus.tooltip.filled', {
+    defaultMessage: 'Filled: {duration}',
+    values: { duration },
+  });

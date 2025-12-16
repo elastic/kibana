@@ -9,6 +9,7 @@ import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { RiskScoresPreviewResponse } from '../../../common/api/entity_analytics';
 import type { EntityType } from '../../../common/search_strategy';
+import type { ITelemetryEventsSender } from '../telemetry/sender';
 import type {
   AfterKeys,
   EntityAfterKey,
@@ -24,6 +25,7 @@ export interface EntityAnalyticsRoutesDeps {
   logger: Logger;
   config: ConfigType;
   getStartServices: StartServicesAccessor<StartPlugins>;
+  telemetrySender: ITelemetryEventsSender;
   ml: SetupPlugins['ml'];
 }
 
@@ -85,6 +87,10 @@ export interface RiskEngineConfiguration {
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
   enableResetToZero: boolean;
+  filters?: Array<{
+    entity_types: string[];
+    filter: string;
+  }>;
 }
 
 export interface CalculateScoresParams {
@@ -100,6 +106,7 @@ export interface CalculateScoresParams {
   alertSampleSizePerShard?: number;
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  filters?: Array<{ entity_types: string[]; filter: string }>;
 }
 
 export interface CalculateAndPersistScoresParams {

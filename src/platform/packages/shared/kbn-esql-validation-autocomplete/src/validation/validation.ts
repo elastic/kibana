@@ -9,19 +9,15 @@
 
 import type { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
 import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
-import type {
-  ESQLFieldWithMetadata,
-  ICommandCallbacks,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import type { ICommandCallbacks } from '@kbn/esql-ast/src/commands/registry/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/commands/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
-
+import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
-import { QueryColumns } from '../shared/resources_helpers';
-import type { ESQLCallbacks } from '../shared/types';
+import { QueryColumns } from '../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
-import type { ReferenceMaps, ValidationResult } from './types';
-import { getSubqueriesToValidate } from './helpers';
+import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
+import { getSubqueriesToValidate } from './subqueries';
 
 /**
  * ES|QL validation public API
@@ -29,12 +25,18 @@ import { getSubqueriesToValidate } from './helpers';
  * The astProvider is optional, but if not provided the default one from '@kbn/esql-validation-autocomplete' will be used.
  * This is useful for async loading the ES|QL parser and reduce the bundle size, or to swap grammar version.
  * As for the callbacks, while optional, the validation function will selectively ignore some errors types based on each callback missing.
+ *
+ * @param queryString - The query string to validate
+ * @param callbacks - Optional callbacks for resource retrieval.
+ * @param options.invalidateColumnsCache - Invalidates the columns metadata cache before validation. Has no effect if 'getColumnsFor' callback is not provided.
+ *
  */
 export async function validateQuery(
   queryString: string,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  options?: ValidationOptions
 ): Promise<ValidationResult> {
-  return validateAst(queryString, callbacks);
+  return validateAst(queryString, callbacks, options);
 }
 
 function shouldValidateCallback<K extends keyof ESQLCallbacks>(
@@ -52,7 +54,8 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
  */
 async function validateAst(
   queryString: string,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  options?: ValidationOptions
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
@@ -74,7 +77,12 @@ async function validateAst(
 
   const sourceQuery = queryString.split('|')[0];
   const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
-    ? await new QueryColumns(EsqlQuery.fromSrc(sourceQuery).ast, sourceQuery, callbacks).asMap()
+    ? await new QueryColumns(
+        EsqlQuery.fromSrc(sourceQuery).ast,
+        sourceQuery,
+        callbacks,
+        options
+      ).asMap()
     : new Map();
 
   if (shouldValidateCallback(callbacks, 'getColumnsFor') && sourceFields.size > 0) {
@@ -114,9 +122,15 @@ async function validateAst(
    */
   const subqueries = getSubqueriesToValidate(rootCommands);
   for (const subquery of subqueries) {
-    const subqueryUpToThisCommand = { ...subquery, commands: subquery.commands.slice(0, -1) };
+    const currentCommand = subquery.commands[subquery.commands.length - 1];
+
+    const subqueryForColumns =
+      currentCommand.name === 'join'
+        ? subquery
+        : { ...subquery, commands: subquery.commands.slice(0, -1) };
+
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryUpToThisCommand, queryString, callbacks).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
@@ -127,15 +141,10 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
     };
 
-    const commandMessages = validateCommand(
-      subquery.commands[subquery.commands.length - 1],
-      references,
-      rootCommands,
-      {
-        ...callbacks,
-        hasMinimumLicenseRequired,
-      }
-    );
+    const commandMessages = validateCommand(currentCommand, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
     messages.push(...commandMessages);
   }
 

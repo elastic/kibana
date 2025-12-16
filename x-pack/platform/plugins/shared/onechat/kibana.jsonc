@@ -14,6 +14,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "aiAssistantManagementSelection",
       "data",
       "dataViews",
       "uiActions",
@@ -25,6 +26,7 @@
       "licensing",
       "management",
       "share",
+      "spaces",
       "stackConnectors",
       "licensing",
       "triggersActionsUi"
@@ -35,8 +37,9 @@
     "optionalPlugins": [
       "cloud",
       "licenseManagement",
-      "spaces",
-      "workflowsManagement"
+      "workflowsExtensions",
+      "workflowsManagement",
+      "usageCollection"
     ],
     "extraPublicDirs": []
   }

@@ -219,7 +219,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('page loading error', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/236363
+        describe.skip('page loading error', () => {
           before(async () => {
             // manually navigate to index detail page for an index that doesn't exist
             await browser.navigateTo(
@@ -227,7 +228,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 spaceCreated.id
               )}/app/elasticsearch/indices/index_details/${indexDoesNotExistName}/data`
             );
-            await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
           });
           it('has page load error section', async () => {
             await pageObjects.searchIndexDetailsPage.expectPageLoadErrorExists();

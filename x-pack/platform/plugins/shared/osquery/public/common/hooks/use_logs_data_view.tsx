@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { DataView } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../lib/kibana';

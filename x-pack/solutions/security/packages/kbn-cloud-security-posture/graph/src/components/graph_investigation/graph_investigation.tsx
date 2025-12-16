@@ -40,11 +40,13 @@ const useGraphPopovers = ({
   searchFilters,
   setSearchFilters,
   nodeDetailsClickHandler,
+  onOpenNetworkPreview,
 }: {
   dataViewId: string;
   searchFilters: Filter[];
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   nodeDetailsClickHandler?: (node: NodeProps) => void;
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -82,10 +84,18 @@ const useGraphPopovers = ({
 
   const createIpClickHandler = useCallback(
     (ips: string[]) => (e: React.MouseEvent<HTMLElement>) => {
-      setCurrentIps(ips);
-      openPopoverCallback(ipPopover.onIpClick, e);
+      if (!onOpenNetworkPreview) return;
+
+      // For single IP, open preview panel directly
+      if (ips.length === 1) {
+        onOpenNetworkPreview(ips[0], GRAPH_SCOPE_ID);
+      } else {
+        // For multiple IPs, show popover
+        setCurrentIps(ips);
+        openPopoverCallback(ipPopover.onIpClick, e);
+      }
     },
-    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick]
+    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick, onOpenNetworkPreview]
   );
 
   const createCountryClickHandler = useCallback(
@@ -176,6 +186,12 @@ export interface GraphInvestigationProps {
   onOpenEventPreview?: (node: NodeViewModel) => void;
 
   /**
+   * Callback when IP address is clicked to open network preview panel.
+   * If not provided, multi-IP popover will be shown.
+   */
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
+
+  /**
    * Whether to show investigate in timeline action button. Defaults value is false.
    */
   showInvestigateInTimeline?: boolean;
@@ -208,6 +224,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     showToggleSearch = false,
     onInvestigateInTimeline,
     onOpenEventPreview,
+    onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
@@ -311,6 +328,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       searchFilters,
       setSearchFilters,
       nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+      onOpenNetworkPreview,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>

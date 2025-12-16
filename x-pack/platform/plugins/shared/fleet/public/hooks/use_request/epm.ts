@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { useState } from 'react';
 
@@ -39,6 +39,7 @@ import type {
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
   BulkRollbackPackagesRequest,
+  RollbackAvailableCheckResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -378,6 +379,19 @@ export const sendGetBulkRollbackInfoPackagesForRq = (taskId: string) => {
     method: 'get',
     version: API_VERSIONS.public.v1,
   });
+};
+
+export const useGetRollbackAvailableCheck = (pkgName: string) => {
+  const response = useQuery<RollbackAvailableCheckResponse, RequestError>(
+    ['get-rollback-available-check', pkgName],
+    () =>
+      sendRequestForRq<RollbackAvailableCheckResponse>({
+        path: epmRouteService.getRollbackAvailableCheckPath(pkgName),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      })
+  );
+  return response.data ?? { isAvailable: false };
 };
 
 /**

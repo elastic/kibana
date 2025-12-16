@@ -5,19 +5,52 @@
  * 2.0.
  */
 
-import type { StreamlangDSL } from '../../../../types/streamlang';
 import type {
-  RenameProcessor,
-  SetProcessor,
-  GrokProcessor,
+  AppendProcessor,
+  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
+  GrokProcessor,
   ManualIngestPipelineProcessor,
-  AppendProcessor,
+  RenameProcessor,
+  SetProcessor,
+  DropDocumentProcessor,
+  ReplaceProcessor,
 } from '../../../../types/processors';
+import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'drop_document',
+      where: {
+        field: 'https.status_code',
+        eq: 200,
+      },
+    } as DropDocumentProcessor,
+    // Convert a field to a different type
+    {
+      action: 'convert',
+      from: 'http.status_code',
+      type: 'string',
+      to: 'http.status_code_str',
+      where: {
+        field: 'http.error',
+        eq: 404,
+      },
+    } as ConvertProcessor,
+    // Replace a string pattern
+    {
+      action: 'replace',
+      from: 'message',
+      pattern: 'error',
+      replacement: 'warning',
+      to: 'clean_message',
+      where: {
+        field: 'log_level',
+        eq: 'ERROR',
+      },
+    } as ReplaceProcessor,
     // Rename a field
     {
       action: 'rename',
@@ -68,7 +101,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     } as SetProcessor,
     // Multiple steps under a condition (where block)
     {
-      where: {
+      condition: {
         field: 'attributes.env',
         eq: 'prod',
         steps: [
@@ -82,7 +115,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     },
     // Nested conditionals
     {
-      where: {
+      condition: {
         or: [
           { field: 'attributes.a', eq: 1 }, // condition A
           { field: 'attributes.b', eq: 2 }, // condition B
@@ -94,7 +127,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
             value: 'prod-env',
           } as SetProcessor,
           {
-            where: {
+            condition: {
               field: 'attributes.department',
               eq: 'legal',
               steps: [
@@ -155,7 +188,7 @@ export const notConditionsTestDSL: StreamlangDSL = {
       },
     } as SetProcessor,
     {
-      where: {
+      condition: {
         not: {
           or: [
             { field: 'attributes.a', eq: 1 },

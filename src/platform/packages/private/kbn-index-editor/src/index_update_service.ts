@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkRequest,
+  BulkResponse,
+  SecurityHasPrivilegesResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type {
+  DatatableColumn,
+  DatatableColumnMeta,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
@@ -44,13 +52,22 @@ import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { IndicesAutocompleteResult } from '@kbn/esql-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import {
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+  type IndicesAutocompleteResult,
+} from '@kbn/esql-types';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
+import { RowsVirtualIndexes } from './utils/rows_virtual_indexes';
 
 const DOCS_PER_FETCH = 1000;
 
@@ -59,6 +76,7 @@ const MAX_COLUMN_PLACEHOLDERS = 4;
 interface DocUpdate {
   id: string;
   value: Record<string, any>;
+  atIndex?: number;
 }
 
 type BulkUpdateOperations = Array<{ type: 'add-doc'; payload: DocUpdate } | DeleteDocAction>;
@@ -80,11 +98,13 @@ function isDocDelete(update: unknown): update is DeleteDocAction {
 
 interface ColumnAddition {
   name: string;
+  fieldType?: DatatableColumnMeta['esType'];
 }
 
 interface ColumnUpdate {
   name: string;
   previousName?: string;
+  fieldType?: DatatableColumnMeta['esType'];
 }
 
 interface DeleteDocAction {
@@ -96,7 +116,7 @@ type Action =
   | { type: 'add-doc'; payload: DocUpdate }
   | DeleteDocAction
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
-  | { type: 'add-column' }
+  | { type: 'add-column'; payload: ColumnAddition }
   | { type: 'edit-column'; payload: ColumnUpdate }
   | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'recalculate-column-placeholders' }
@@ -125,7 +145,15 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
+  public userCanResetIndex: boolean = false;
   private indexHasNewFields: boolean = false;
+  private esqlUnsupportedFieldTypes: Set<string> = new Set<string>();
+
+  /**
+   * Keeps track of the placement position of newly added rows inside the table
+   * This is updated when rows are added/deleted
+   */
+  private newRowsVirtualIndexes = new RowsVirtualIndexes();
 
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
@@ -189,7 +217,11 @@ export class IndexUpdateService {
   private readonly _error$ = new BehaviorSubject<IndexEditorError | null>(null);
   public readonly error$: Observable<IndexEditorError | null> = this._error$.asObservable();
 
-  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<boolean>(false);
+  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<{
+    isActive: boolean;
+    onExitCallback?: () => void;
+  }>({ isActive: false });
+
   public readonly exitAttemptWithUnsavedChanges$ =
     this._exitAttemptWithUnsavedChanges$.asObservable();
 
@@ -279,6 +311,12 @@ export class IndexUpdateService {
     scan((acc: BulkUpdateOperations, action: Action) => {
       switch (action.type) {
         case 'add-doc':
+          if (action.payload.atIndex !== undefined) {
+            this.newRowsVirtualIndexes.addRowVirtualIndex(
+              action.payload.id,
+              action.payload.atIndex
+            );
+          }
           return [...acc, action];
         case 'delete-doc':
           // if a doc is deleted we need to remove any pending updates to it
@@ -293,11 +331,17 @@ export class IndexUpdateService {
           if (isDeletingAnySavedColumn) {
             updatedAcc.push(action);
           }
-          const newTotalHits = this._totalHits$.getValue() - idsToDelete.size;
-          this._totalHits$.next(newTotalHits > 1 ? newTotalHits : 1);
+          // Remove virtual indexes for deleted rows
+          action.payload.ids.forEach((id) => {
+            const index = this._rows$.getValue().findIndex((row) => row.id === id);
+            this.newRowsVirtualIndexes.deleteVirtualIndexByRowId(id);
+            this.newRowsVirtualIndexes.updateVirtualIndexesAfterDeletion(index);
+          });
+
           return updatedAcc;
         case 'saved':
-          // Clear the buffer after save
+          // Clear the buffer and new rows virtual indexes after save
+          this.newRowsVirtualIndexes.clear();
           return [];
         case 'discard-unsaved-changes':
           return [];
@@ -315,7 +359,11 @@ export class IndexUpdateService {
                 ...docUpdate.payload.value,
                 [action.payload.name]: docUpdate.payload.value[action.payload.previousName],
               };
-              delete newValue[action.payload.previousName];
+
+              if (action.payload.previousName !== action.payload.name) {
+                delete newValue[action.payload.previousName];
+              }
+
               return { ...docUpdate, payload: { ...docUpdate.payload, value: newValue } };
             }
             return docUpdate;
@@ -402,9 +450,12 @@ export class IndexUpdateService {
       const unsavedFields = pendingColumnsToBeSaved
         .filter((column) => !dataView.fields.getByName(column.name))
         .map((column) => {
+          const type = esFieldTypeToKibanaFieldType(column.fieldType ?? KBN_FIELD_TYPES.UNKNOWN);
+
           return dataView.fields.create({
             name: column.name,
-            type: KBN_FIELD_TYPES.UNKNOWN,
+            type,
+            esTypes: column.fieldType ? [column.fieldType] : undefined,
             aggregatable: true,
             searchable: true,
           });
@@ -414,12 +465,15 @@ export class IndexUpdateService {
         .concat(unsavedFields)
         .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
         .map((field) => {
+          const type = this.esqlUnsupportedFieldTypes.has(field.type)
+            ? KBN_FIELD_TYPES.UNKNOWN
+            : field.type;
           const datatableColumn: DatatableColumn = {
             name: field.name,
             id: field.name,
             isNull: field.isNull,
             meta: {
-              type: field.type as DatatableColumnType,
+              type: type as DatatableColumnType,
               params: {
                 id: field.name,
               },
@@ -443,10 +497,13 @@ export class IndexUpdateService {
 
     const esqlQuery = esql`FROM ${indexName}`.print();
 
-    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, {
-      allowNoIndex: true,
+    const newDataView = await getESQLAdHocDataview({
+      dataViewsService: this.data.dataViews,
+      query: esqlQuery,
+      options: {
+        allowNoIndex: true,
+      },
     });
-
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
 
@@ -455,17 +512,20 @@ export class IndexUpdateService {
 
   private listenForUpdates() {
     this._subscription.add(
-      this.bufferState$
+      combineLatest([this.bufferState$, this._pendingColumnsToBeSaved$])
         .pipe(
-          map((actions) =>
-            actions.some((action) => {
+          map(([bufferState, pendingColumnsToBeSaved]) => {
+            const hasCellEditions = bufferState.some((action) => {
               if (action.type === 'add-doc') {
                 // Only consider rows with at least one value
                 return Object.keys(action.payload.value).length > 0;
               }
               return action.type === 'delete-doc';
-            })
-          )
+            });
+            const hasColumnAdditions =
+              pendingColumnsToBeSaved.filter((col) => !isPlaceholderColumn(col.name)).length > 0;
+            return hasColumnAdditions || hasCellEditions;
+          })
         )
         .subscribe(this._hasUnsavedChanges$)
     );
@@ -488,20 +548,31 @@ export class IndexUpdateService {
             return v;
           });
 
-        // created docs that are not saved yet should be rendered first
+        // created docs that are not saved yet should be inserted at their virtual indexes
         Array.from(savingDocs.entries())
           .filter((arg): arg is [id: string, v: PendingDocUpdate] => {
             const [id, v] = arg;
             return v.type === 'add-doc' && id.startsWith(ROW_PLACEHOLDER_PREFIX);
           })
+          .sort(([idA], [idB]) => {
+            const indexA = this.newRowsVirtualIndexes.getRowVirtualIndex(idA);
+            const indexB = this.newRowsVirtualIndexes.getRowVirtualIndex(idB);
+            return (indexA ?? 0) - (indexB ?? 0);
+          })
           .forEach(([id, v]) => {
-            resultRows.unshift({ id, flattened: v.update, raw: v.update });
+            const atIndex = this.newRowsVirtualIndexes.getRowVirtualIndex(id);
+            if (atIndex !== undefined) {
+              resultRows.splice(atIndex, 0, { id, flattened: v.update, raw: v.update });
+            }
           });
 
         // If no rows left, add a placeholder row
         if (resultRows.length === 0) {
-          resultRows.push(this.buildPlaceholderRow());
+          const newRow = this.buildPlaceholderRow();
+          resultRows.push(newRow);
+          this.newRowsVirtualIndexes.addRowVirtualIndex(newRow.id, 0);
         }
+        this._totalHits$.next(resultRows.length);
         this._rows$.next(resultRows);
       })
     );
@@ -510,17 +581,35 @@ export class IndexUpdateService {
     this._subscription.add(
       this._flush$
         .pipe(
-          withLatestFrom(this.bufferState$),
-          map(([, updates]) => updates),
+          withLatestFrom(this.bufferState$, this._pendingColumnsToBeSaved$),
           skipWhile(() => !this.isIndexCreated()),
-          filter((updates) => updates.length > 0),
-          map((updates) => ({ updates, startTime: Date.now() })),
+          map(([, updates, newColumns]) => ({
+            updates,
+            newColumns,
+            startTime: Date.now(),
+          })),
+          filter(({ updates, newColumns }) => updates.length > 0 || newColumns.length > 0),
           tap(() => {
             this._isSaving$.next(true);
           }),
           // Save updates
-          exhaustMap(({ updates, startTime }) => {
-            return from(this.bulkUpdate(updates)).pipe(
+          exhaustMap(({ updates, newColumns, startTime }) => {
+            // First update index mapping for new columns
+            const newFieldsMapping = newColumns
+              .filter((col) => !isPlaceholderColumn(col.name) && col.fieldType)
+              .reduce<Record<string, { type: DatatableColumnMeta['esType'] }>>((acc, col) => {
+                acc[col.name] = { type: col.fieldType! }; // Field type is defined due to the filter above
+                return acc;
+              }, {});
+
+            const updateMappingPromise =
+              Object.keys(newFieldsMapping).length > 0
+                ? this.updateIndexMappings(newFieldsMapping)
+                : Promise.resolve();
+
+            return from(updateMappingPromise).pipe(
+              // Then save all updates using a bulk request (this code will not execute if updateMapping fails)
+              switchMap(() => from(this.bulkUpdate(updates))),
               catchError((errors) => {
                 return of({
                   bulkOperations: [],
@@ -714,7 +803,21 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: (response) => {
-            const { documents_found: total, values, columns } = response.rawResponse;
+            const { values, columns } = response.rawResponse;
+
+            // Populate unsupported ES|QL field types
+            columns.forEach((col) => {
+              if (col.type === 'unsupported' && col.original_types?.length) {
+                this.esqlUnsupportedFieldTypes.add(col.original_types[0]);
+              }
+            });
+
+            // Populate unsupported ES|QL field types
+            columns.forEach((col) => {
+              if (col.type === 'unsupported' && col.original_types?.length) {
+                this.esqlUnsupportedFieldTypes.add(col.original_types[0]);
+              }
+            });
 
             const columnNames = columns.map(({ name }) => name);
             const resultRows: DataTableRecord[] = values
@@ -732,7 +835,6 @@ export class IndexUpdateService {
             }
 
             this._docs$.next(resultRows);
-            this._totalHits$.next(total ?? 0);
             this._isFetching$.next(false);
           },
           error: (error) => {
@@ -752,12 +854,18 @@ export class IndexUpdateService {
               return this.completeWithPlaceholders(0);
             }
             if (action.type === 'add-column') {
-              return [...acc, { name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}` }];
+              return [
+                ...acc,
+                {
+                  name: action.payload.name,
+                  fieldType: action.payload.fieldType,
+                },
+              ];
             }
             if (action.type === 'edit-column') {
               return acc.map((column) =>
                 column.name === action.payload.previousName
-                  ? { ...column, name: action.payload.name }
+                  ? { ...column, name: action.payload.name, fieldType: action.payload.fieldType }
                   : column
               );
             }
@@ -765,10 +873,7 @@ export class IndexUpdateService {
               return acc.filter((column) => column.name !== action.payload.name);
             }
             if (action.type === 'saved') {
-              // Filter out columns that were saved with a value.
-              return acc.filter((column) =>
-                action.payload.updates.every((update) => update.value[column.name] === undefined)
-              );
+              return acc.filter((column) => isPlaceholderColumn(column.name));
             }
             if (action.type === 'new-row-added') {
               // Filter out columns that were populated when adding a new row
@@ -789,6 +894,18 @@ export class IndexUpdateService {
         )
         .subscribe(this._pendingColumnsToBeSaved$)
     );
+
+    // Checks if user can reset the given index
+    this._subscription.add(
+      this.indexName$
+        .pipe(
+          filter((indexName) => indexName !== null),
+          switchMap((indexName) => from(this.fetchUserCanResetIndex(indexName!)))
+        )
+        .subscribe((result) => {
+          this.userCanResetIndex = result;
+        })
+    );
   }
 
   private summarizeSavingUpdates(savingDocs: PendingSave, updates: BulkUpdateOperations) {
@@ -807,7 +924,7 @@ export class IndexUpdateService {
     return { newRowsCount, newColumnsCount, cellsEditedCount };
   }
 
-  private completeWithPlaceholders(currentColumnsCount: number) {
+  private completeWithPlaceholders(currentColumnsCount: number): ColumnAddition[] {
     const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - currentColumnsCount;
     return missingPlaceholders > 0
       ? times(missingPlaceholders, () => ({
@@ -820,12 +937,8 @@ export class IndexUpdateService {
     const docId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     return {
       id: docId,
-      raw: {
-        _id: docId,
-      },
-      flattened: {
-        _id: docId,
-      },
+      raw: {},
+      flattened: {},
     };
   }
 
@@ -847,9 +960,24 @@ export class IndexUpdateService {
   }
 
   /** Adds an empty document */
-  public addEmptyRow() {
+  public addEmptyRow(atIndex: number) {
+    // This is for the case when there is only one empty placeholder row in the table, and the user adds a new row.
+    // We need to push an extra row to replace the one we show if there are no rows.
+    const rows = this._rows$.getValue();
+    if (
+      rows.length === 1 &&
+      rows[0].id.startsWith(ROW_PLACEHOLDER_PREFIX) &&
+      Object.keys(rows[0].flattened).length === 0
+    ) {
+      this.addAction('add-doc', {
+        id: `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`,
+        value: {},
+        atIndex: 0,
+      });
+    }
+
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
-    this.addAction('add-doc', { id: newDocId, value: {} });
+    this.addAction('add-doc', { id: newDocId, value: {}, atIndex });
 
     this.telemetry.trackEditInteraction({ actionType: 'add_row' });
   }
@@ -875,6 +1003,23 @@ export class IndexUpdateService {
     this.telemetry.trackEditInteraction({ actionType: 'delete_row' });
   }
 
+  /** Reset index to original state */
+  public async resetIndexMapping() {
+    if (this.isIndexCreated()) {
+      await this.http.post<BulkResponse>(`${LOOKUP_INDEX_RECREATE_ROUTE}/${this.getIndexName()}`);
+
+      // Refresh dataview fields
+      const dataView = await firstValueFrom(this.dataView$);
+      await this.data.dataViews.refreshFields(dataView, false, true);
+
+      // Clean all unsaved changes that might be in memory
+      this.discardUnsavedChanges();
+      this._docs$.next([]);
+    } else {
+      this.discardUnsavedChanges();
+    }
+  }
+
   /**
    * Sends a bulk update request to an index.
    * @param updates
@@ -883,6 +1028,10 @@ export class IndexUpdateService {
     bulkOperations: Exclude<BulkRequest['operations'], undefined>;
     bulkResponse: BulkResponse;
   }> {
+    const indexName = this.getIndexName();
+    if (!indexName) {
+      throw new Error('Index name is not set');
+    }
     const deletingDocIds: string[] = updates
       .filter(isDocDelete)
       .map((v) => v.payload.ids)
@@ -926,8 +1075,10 @@ export class IndexUpdateService {
     ];
 
     if (!operations.length) {
-      // nothing to send
-      throw new Error('empty operations');
+      return {
+        bulkResponse: { errors: false, items: [], took: 0 },
+        bulkOperations: [],
+      };
     }
 
     const body = JSON.stringify({
@@ -935,7 +1086,7 @@ export class IndexUpdateService {
     });
 
     const bulkResponse = await this.http.post<BulkResponse>(
-      `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+      `${LOOKUP_INDEX_UPDATE_ROUTE}/${encodeURIComponent(indexName)}`,
       {
         body,
       }
@@ -947,14 +1098,42 @@ export class IndexUpdateService {
     };
   }
 
-  public addNewColumn() {
-    this.addAction('add-column');
+  private async updateIndexMappings(
+    newFields: Record<string, { type: DatatableColumnMeta['esType'] }>
+  ): Promise<void> {
+    const indexName = this.getIndexName();
+    if (!indexName) {
+      throw new Error('Index name is not set');
+    }
+    const body = JSON.stringify({
+      properties: newFields,
+    });
+
+    try {
+      await this.http.put(
+        `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/${encodeURIComponent(indexName)}`,
+        {
+          body,
+        }
+      );
+    } catch (error) {
+      this.notifications.toasts.addError(error, {
+        title: i18n.translate('indexEditor.indexManagement.updateMappingErrorTitle', {
+          defaultMessage: 'Error updating index mapping',
+        }),
+      });
+      throw error;
+    }
+  }
+
+  public addNewColumn(name: string, fieldType: string) {
+    this.addAction('add-column', { name, fieldType });
 
     this.telemetry.trackEditInteraction({ actionType: 'add_column' });
   }
 
-  public editColumn(name: string, previousName: string) {
-    this.addAction('edit-column', { name, previousName });
+  public editColumn(name: string, previousName: string, fieldType: string) {
+    this.addAction('edit-column', { name, previousName, fieldType });
 
     this.telemetry.trackEditInteraction({ actionType: 'edit_column' });
   }
@@ -965,8 +1144,8 @@ export class IndexUpdateService {
     this.telemetry.trackEditInteraction({ actionType: 'delete_column' });
   }
 
-  public setExitAttemptWithUnsavedChanges(value: boolean) {
-    this._exitAttemptWithUnsavedChanges$.next(value);
+  public setExitAttemptWithUnsavedChanges(isActive: boolean, onExitCallback?: () => void) {
+    this._exitAttemptWithUnsavedChanges$.next({ isActive, onExitCallback });
   }
 
   public discardUnsavedChanges() {
@@ -1008,12 +1187,15 @@ export class IndexUpdateService {
     this._indexName$.complete();
 
     this.data.dataViews.clearInstanceCache();
+    this.newRowsVirtualIndexes.clear();
   }
 
   public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
-      await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+      await this.http.post(
+        `${LOOKUP_INDEX_CREATE_ROUTE}/${encodeURIComponent(this.getIndexName()!)}`
+      );
 
       this.setIndexCreated(true);
       this.flush({ exitAfterFlush });
@@ -1059,16 +1241,32 @@ export class IndexUpdateService {
     return lookupIndexesResult.indices.some((index) => index.name === indexName);
   }
 
-  public exit() {
+  private async fetchUserCanResetIndex(indexName: string): Promise<boolean> {
+    const lookupIndexesResult = await this.http.get<SecurityHasPrivilegesResponse['index']>(
+      LOOKUP_INDEX_PRIVILEGES_ROUTE,
+      {
+        query: {
+          indexName,
+        },
+      }
+    );
+    return (
+      (lookupIndexesResult[indexName]?.delete_index || lookupIndexesResult['*']?.delete_index) &&
+      (lookupIndexesResult[indexName]?.create_index || lookupIndexesResult['*']?.create_index)
+    );
+  }
+
+  public exit(onExitCallback?: () => void) {
     const hasUnsavedChanges = this._hasUnsavedChanges$.getValue();
     const unsavedColumns = this._pendingColumnsToBeSaved$
       .getValue()
       .filter((col) => !isPlaceholderColumn(col.name));
 
     if (hasUnsavedChanges || unsavedColumns.length > 0) {
-      this.setExitAttemptWithUnsavedChanges(true);
+      this.setExitAttemptWithUnsavedChanges(true, onExitCallback);
     } else {
       this.destroy();
+      onExitCallback?.();
     }
   }
 }

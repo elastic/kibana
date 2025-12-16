@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -38,6 +38,7 @@ import type {
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
+  PublishesProjectRouting,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
@@ -50,12 +51,10 @@ import { type TracksOverlays } from '@kbn/presentation-util';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardLocatorParams } from '../../common';
-import type { DashboardState, GridData } from '../../server/content_management';
-import type {
-  LoadDashboardReturn,
-  SaveDashboardReturn,
-} from '../services/dashboard_content_management_service/types';
+import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
+import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 
@@ -87,7 +86,9 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+  validateLoadedSavedObject?: (
+    result: DashboardReadResponseBody
+  ) => 'valid' | 'invalid' | 'redirected';
 
   fullScreenMode?: boolean;
   isEmbeddedExternally?: boolean;
@@ -115,6 +116,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &
+  PublishesProjectRouting &
   PublishesViewMode &
   PublishesWritableViewMode &
   PublishesPauseFetch &
@@ -154,16 +156,20 @@ export type DashboardApi = CanExpandPanels &
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
     setQuery: (query?: Query | undefined) => void;
+    setProjectRouting: (projectRouting?: ProjectRouting) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+    accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
+    changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+    createdBy?: string;
+    user?: DashboardUser;
+    isAccessControlEnabled?: boolean;
   };
 
 export interface DashboardInternalApi {
-  controlGroupReload$: Subject<void>;
-  panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
@@ -176,4 +182,9 @@ export interface DashboardInternalApi {
     controlGroupInput: ControlsGroupState | undefined;
     controlGroupReferences: Reference[];
   };
+}
+
+export interface DashboardUser {
+  uid: string;
+  hasGlobalAccessControlPrivilege: boolean;
 }

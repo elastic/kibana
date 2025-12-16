@@ -342,7 +342,7 @@ exports[`LoginPage page renders as expected 1`] = `
                 >
                   <label
                     aria-invalid="false"
-                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel-focused"
+                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
                     for="generated-id"
                     id="generated-id-label"
                   >
@@ -531,7 +531,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                 >
                   <label
                     aria-invalid="false"
-                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel-focused"
+                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
                     for="generated-id"
                     id="generated-id-label"
                   >
