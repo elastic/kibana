@@ -89,8 +89,12 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   isFirstStepInLevel,
   isLastStepInLevel,
 }) => {
-  const { reorderStep, duplicateProcessor, filterDocumentsByCondition } =
-    useStreamEnrichmentEvents();
+  const {
+    reorderStep,
+    duplicateProcessor,
+    filterSimulationByCondition,
+    clearSimulationConditionFilter,
+  } = useStreamEnrichmentEvents();
   const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
   const canDuplicate = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
@@ -104,6 +108,9 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     snapshot.can({ type: 'step.delete', id: stepRef.id })
   );
 
+  const selectedConditionId = useInteractiveModeSelector(
+    (snapshot) => snapshot.context.selectedConditionId
+  );
   const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
@@ -148,10 +155,27 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
         }),
       };
 
-  const handleDelete = useDiscardConfirm(() => stepRef.send({ type: 'step.delete' }), {
-    enabled: canDelete,
-    ...deletePromptOptions,
-  });
+  const handleDelete = useDiscardConfirm(
+    () => {
+      stepRef.send({ type: 'step.delete' });
+
+      if (selectedConditionId === step.customIdentifier) {
+        clearSimulationConditionFilter();
+      }
+    },
+    {
+      enabled: canDelete,
+      ...deletePromptOptions,
+    }
+  );
+
+  const handleConditionFilter = () => {
+    if (selectedConditionId === step.customIdentifier) {
+      clearSimulationConditionFilter();
+    } else {
+      filterSimulationByCondition(step.customIdentifier);
+    }
+  };
 
   const isConditionFilteringEnabled = useConditionFilteringEnabled(step.customIdentifier);
 
@@ -262,7 +286,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
             disabled={!isConditionFilteringEnabled}
             onClick={() => {
               togglePopover(false);
-              filterDocumentsByCondition(step.customIdentifier);
+              handleConditionFilter();
             }}
           >
             {previewConditionOnlyText}

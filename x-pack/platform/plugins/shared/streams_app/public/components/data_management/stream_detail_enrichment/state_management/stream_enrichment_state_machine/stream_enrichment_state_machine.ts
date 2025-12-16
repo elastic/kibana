@@ -56,7 +56,7 @@ import {
   getDataSourcesUrlState,
   getUpsertFields,
   selectDataSource,
-  spawnDataSource
+  spawnDataSource,
 } from './utils';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
@@ -154,15 +154,6 @@ export const streamEnrichmentMachine = setup({
       nextStreamlangDSL: params.dsl,
       hasChanges: hasChanges(params.dsl, context.previousStreamlangDSL),
     })),
-    sendConditionFilterToSimulator: ({ context }, params: { conditionId: string }) => {
-      context.simulatorRef?.send({
-        type: 'simulation.filterByCondition',
-        conditionId: params.conditionId,
-      });
-    },
-    sendClearConditionFilterToSimulator: ({ context }) => {
-      context.simulatorRef?.send({ type: 'simulation.clearConditionFilter' });
-    },
     /* Mode machine spawning */
     spawnInteractiveMode: assign(({ context, spawn, self }) => {
       const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
@@ -254,31 +245,25 @@ export const streamEnrichmentMachine = setup({
 
     sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
-    /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
-    setAutomaticFilteringForEditedStep: enqueueActions(
-      ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
-        const stepUnderEdit = context.stepRefs
-          .find((stepRef) => isStepUnderEdit(stepRef.getSnapshot()))
-          ?.getSnapshot().context.step;
 
-        if (stepUnderEdit?.parentId) {
-          enqueue({
-            type: 'sendConditionFilterToSimulator',
-            params: { conditionId: stepUnderEdit.parentId },
-          });
-        } else {
-          enqueue('sendClearConditionFilterToSimulator');
-        }
-      }
-    ),
-    /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
-    resetDeletedConditionFilter: enqueueActions(({ context, enqueue }, params: { id: string }) => {
-      const currentConditionId = context.simulatorRef?.getSnapshot().context.selectedConditionId;
-
-      if (currentConditionId === params.id) {
-        enqueue('sendClearConditionFilterToSimulator');
-      }
-    }),
+    filterByCondition: ({ context }, params: { conditionId: string }) => {
+      context.interactiveModeRef?.send({
+        type: 'step.filterByCondition',
+        conditionId: params.conditionId,
+      });
+      context.simulatorRef.send({
+        type: 'simulation.filterByCondition',
+        conditionId: params.conditionId,
+      });
+    },
+    clearConditionFilter: ({ context }) => {
+      context.interactiveModeRef?.send({
+        type: 'step.clearConditionFilter',
+      });
+      context.simulatorRef.send({
+        type: 'simulation.clearConditionFilter',
+      });
+    },
   },
   guards: {
     /* Staged changes are determined by comparing previous and next DSL */
@@ -451,24 +436,6 @@ export const streamEnrichmentMachine = setup({
             'dataSource.dataChange': {
               actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
             },
-            'simulation.filterByCondition': {
-              actions: [
-                {
-                  type: 'sendConditionFilterToSimulator',
-                  params: ({ event }: { event: SimulationFilterByConditionEvent }) => event,
-                },
-                {
-                  type: 'sendStepsEventToSimulator',
-                },
-              ],
-            },
-            'simulation.clearConditionFilter': {
-              actions: [
-                {
-                  type: 'sendClearConditionFilterToSimulator',
-                },
-              ],
-            },
           },
           states: {
             displayingSimulation: {
@@ -566,6 +533,24 @@ export const streamEnrichmentMachine = setup({
                     },
                     'simulation.updateSteps': {
                       actions: forwardTo('simulator'),
+                    },
+                    'simulation.filterByCondition': {
+                      actions: [
+                        {
+                          type: 'filterByCondition',
+                          params: ({ event }) => ({ conditionId: event.conditionId }),
+                        },
+                      ],
+                    },
+                    'simulation.clearConditionFilter': {
+                      actions: [
+                        {
+                          type: 'clearConditionFilter',
+                        },
+                      ],
+                    },
+                    'step.delete': {
+                      actions: [{ type: 'deleteStep', params: ({ event }) => ({ id: event.id }) }],
                     },
                     // Forward step events to interactive mode machine
                     'step.*': {

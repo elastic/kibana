@@ -38,6 +38,7 @@ import {
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
+import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
@@ -57,10 +58,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import {
-  selectDraftProcessor,
-  selectIsInteractiveMode,
-} from './state_management/stream_enrichment_state_machine/selectors';
+import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 
 export const ProcessorOutcomePreview = () => {
@@ -111,7 +109,8 @@ const formatter = getPercentageFormatter();
 const formatRateToPercentage = (rate?: number) => (rate ? formatter.format(rate) : undefined);
 
 const PreviewDocumentsGroupBy = () => {
-  const { changePreviewDocsFilter, clearConditionFilter } = useStreamEnrichmentEvents();
+  const { changePreviewDocsFilter, clearSimulationConditionFilter: clearConditionFilter } =
+    useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);

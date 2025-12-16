@@ -8,26 +8,28 @@
 import { useMemo } from 'react';
 import { collectDescendantProcessorIdsForCondition } from '../state_management/simulation_state_machine';
 import {
+  useInteractiveModeSelector,
   useSimulatorSelector,
-  useStreamEnrichmentSelector,
 } from '../state_management/stream_enrichment_state_machine';
-import { useStepsProcessingSummary } from './use_steps_processing_summary';
 
+/**
+ * Determine if condition filtering is enabled for a given condition block.
+ * The filtering on a condition is enabled either if the condition is currently
+ * selected or it has at least one new descendant processor in the current simulation.
+ */
 export function useConditionFilteringEnabled(conditionId: string) {
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
-  const simulatorSteps = stepRefs.map((ref) => ref.getSnapshot()?.context.step);
-  const hasActiveConditionFilter = useSimulatorSelector(
-    (snapshot) => snapshot.context.selectedConditionId !== undefined
+  const stepRefs = useInteractiveModeSelector((state) => state.context.stepRefs);
+  const isConditionSelected = useSimulatorSelector(
+    (snapshot) => snapshot.context.selectedConditionId === conditionId
   );
-  const stepsProcessingSummaryMap = useStepsProcessingSummary();
 
-  const successfulProcessorsForCondition = useMemo(() => {
-    return collectDescendantProcessorIdsForCondition(simulatorSteps, conditionId).filter(
-      (processorId) => {
-        return stepsProcessingSummaryMap?.get(processorId) === 'successful';
-      }
-    );
-  }, [simulatorSteps, conditionId, stepsProcessingSummaryMap]);
+  const newProcessorsForCondition = useMemo(() => {
+    const newSteps = stepRefs
+      .filter((ref) => ref.getSnapshot()?.context.isNew)
+      .map((ref) => ref.getSnapshot()?.context.step);
 
-  return hasActiveConditionFilter || successfulProcessorsForCondition.length !== 0;
+    return collectDescendantProcessorIdsForCondition(newSteps, conditionId);
+  }, [stepRefs, conditionId]);
+
+  return isConditionSelected || newProcessorsForCondition.length !== 0;
 }

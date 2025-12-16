@@ -140,9 +140,6 @@ export const simulationMachine = setup({
     hasSteps: (_, params: StepsEventParams) => !isEmpty(params.steps),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
-    isConditionFilterActive: ({ context }, params: { conditionId: string }) =>
-      context.selectedConditionId === params.conditionId,
-    hasActiveConditionFilter: ({ context }) => Boolean(context.selectedConditionId),
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmAJw1DAJgAs544cOWAHPoeGAjABoQAT0SvzAX39PCmx8IjIQqnCaTlgwPHklJBA1DXDtPQQAVgB2Tx8EV30cyxobfXNDEstLVztDQOD0UM1yZqjaTjowFC4wAH1YKRVYRO1UlE0MxFz8xGtXGgcsh2M5OVtXV0sjHMaQSLCSNsoj4hiwbt6B2Bw0FSw4MeSJqeTM2e9fStLcnP1XE4snZbA59odWhDol0en1BncHk9XElVOpJul3jM8l9soCzH5XHJlkS5NVwe0zicWtDLrCbgjHqNzCiUmi3qAPtiCtssqVLFVDMsbOZ9FkReTTq0VJwePwAMKELAYNDEWA0DAqCD4MAAUR0DxQdEmWC8OuIOAARo8IAqlSrRopxmyMRysXNCnUHDQ-DUtqT9DsVhLqcdpdxeHxbcrVerNdq9QajXgTQIULcrZAo-bnqi0iRptkub4csYcjQcnJzOYciZrHJXMYssGOmQw7LI4ro2rCOwINIc6y81pMYX3YTajRin45PZjI2qmCggcKVKZRGszG4ngAMo9ggsAevF26N04uq5GjGBy1HK31y5KyWZuUoZgFT0JgsMCH535kefApqz5ORciyLJCQqVwSybJcoWOV93z7R4pB-IcCwA4sy0bEUcgcKC5Esetn0hYYaCQ+Jv2RJ00P-ItCjAuQljWUkZxAup9GI6IUAgR4qRbGgADNeCwCA1TQHAVFQ9E-1dQp1kYqtRRrMDCKJMc7CyJYslLLJ9AIgFLBgppJS4niwD4s5BOE0T1WIcTJMdF5f2HWTCXWMoRVyQwVPWBwx35cx8XKQwKkMUkGlgldoj7C1CAwYgjRYOVPxgWBSB0IZtRoHABKkdgAAppWEOBYB7ZLmBgAQwFi+LugAFXQMAAEoLM0MjqrihKUCSlKnkc3NpJck85PcxSvJ8tScQsUpBUqPDgTkYor042gcFgOJ2H3KAACUwAARwwFBODQMBiDwNKpPZYatiKGh+RybT6wbMVLHdfQKhoGcHByPxymBa8VvONaNq23aDqOsATrOi6qKcmjXMWr1inMRbDPrRaPDPKxDEvRaAXMQF7BewGYni4huqgbcouOCASDAGhuq4QgAGt6bg4htrJ6QAEE6DwHtLuPTJLEbMw1gDXkKxKBwCPdb6cbnQE6hFCocnFSKTM6MmKapzWyGkdgexoB58AEns0BodnOeIYgeb5gX+sHQaCxFzSTFRyXSUcWWcVwxj-oDPDRSyesYKXYhCD7eBknZ6jnZHYx3TWO6xWcEOfRcSw9g1kNzm4x446uzI8MCwm3FLGWbF0sdqxxkOHBRytwIegGc-4mLOsSqByq-aOBqLxBcLdlGibAh71kMd0LBx2aq2MUVtjWCLjNz7L1ukUH9sO47TvOwuhd8CxFm0wUK35ZZCTo4FTH+DYjBR96HFWEn2G1lhddz-eZOuuoylyb6G7GDRhsSeOJRT6EvOxNWfhdIAjDv4IAA */
@@ -210,20 +207,11 @@ export const simulationMachine = setup({
     ],
     'simulation.filterByCondition': [
       {
-        guard: {
-          type: 'isConditionFilterActive',
-          params: ({ event }) => ({ conditionId: event.conditionId }),
-        },
-        target: '.assertingRequirements',
-        actions: [{ type: 'clearConditionFilter' }],
-      },
-      {
         target: '.assertingRequirements',
         actions: [{ type: 'applyConditionFilter', params: ({ event }) => event }],
       },
     ],
     'simulation.clearConditionFilter': {
-      guard: 'hasActiveConditionFilter',
       target: '.assertingRequirements',
       actions: [{ type: 'clearConditionFilter' }],
     },

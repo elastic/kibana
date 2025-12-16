@@ -45,6 +45,11 @@ export const WhereBlockSummary = ({
       gutterSize="s"
       css={css`
         position: relative;
+        // Pointer events are disabled in order to "pass-through" hover events
+        // and let the background condition container handle them.
+        // Pointer events are selectively re-enabled on child elements
+        // that require interaction.
+        pointer-events: none;
       `}
       alignItems="center"
     >
@@ -75,6 +80,9 @@ export const WhereBlockSummary = ({
               )}
             >
               <EuiButtonEmpty
+                css={css`
+                  pointer-events: all;
+                `}
                 onClick={handleTitleClick}
                 color="text"
                 size="xs"
@@ -99,6 +107,7 @@ export const WhereBlockSummary = ({
           css={css`
             // Facilitates text truncation for the condition summary
             flex-shrink: 0;
+            pointer-events: all;
           `}
         >
           <EuiFlexGroup gutterSize="none">

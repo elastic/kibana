@@ -60,13 +60,20 @@ export const WhereBlock = (props: StepConfigurationProps) => {
       (ref) => ref.getSnapshot().context.step.parentId === step.customIdentifier
     )
   );
-  const { filterDocumentsByCondition } = useStreamEnrichmentEvents();
+  const { filterSimulationByCondition, clearSimulationConditionFilter } =
+    useStreamEnrichmentEvents();
   const hasChildren = childSteps.length > 0;
 
   const filteringEnabled = useConditionFilteringEnabled(step.customIdentifier);
 
   const onClick = filteringEnabled
-    ? () => filterDocumentsByCondition(step.customIdentifier)
+    ? () => {
+        if (isSelected) {
+          clearSimulationConditionFilter();
+        } else {
+          filterSimulationByCondition(step.customIdentifier);
+        }
+      }
     : undefined;
 
   // Only gather these for the summary if the block is collapsed
@@ -110,7 +117,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
         {/* The button that catches clicks on the empty
         space around the condition content in order to toggle
         filtering by the condition */}
-        {!isUnderEdit && (
+        {filteringEnabled && !isUnderEdit && (
           <button
             onClick={onClick}
             css={css`
@@ -119,7 +126,15 @@ export const WhereBlock = (props: StepConfigurationProps) => {
               left: 0;
               height: 100%;
               width: 100%;
-              cursor: default;
+              cursor: pointer;
+              border-radius: calc(${euiTheme.border.radius.medium} * 2);
+
+              &:hover {
+                background-color: ${!isSelected
+                  ? euiTheme.colors.backgroundBaseSubdued
+                  : 'inherit'};
+                transition: background-color 50ms ease-in-out;
+              }
             `}
           />
         )}

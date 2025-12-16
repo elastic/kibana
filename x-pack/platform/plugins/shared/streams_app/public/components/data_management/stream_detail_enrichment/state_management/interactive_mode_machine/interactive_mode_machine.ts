@@ -6,53 +6,53 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import type { MachineImplementationsFrom } from 'xstate5';
-import {
-  assign,
-  setup,
-  stopChild,
-  enqueueActions,
-  type ActorRefFrom,
-  type SnapshotFrom,
-  assertEvent,
-} from 'xstate5';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
-  type StreamlangProcessorDefinition,
-  convertUIStepsToDSL,
   convertStepsForUI,
+  convertUIStepsToDSL,
+  type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
-import type { StreamlangDSL, StreamlangConditionBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { stepMachine } from '../steps_state_machine';
+import type { MachineImplementationsFrom } from 'xstate5';
+import {
+  assertEvent,
+  assign,
+  enqueueActions,
+  setup,
+  stopChild,
+  type ActorRefFrom,
+  type SnapshotFrom,
+} from 'xstate5';
 import { getDefaultGrokProcessor, stepConverter } from '../../utils';
+import { selectPreviewRecords } from '../simulation_state_machine/selectors';
+import { stepMachine } from '../steps_state_machine';
+import type { StepParentActor } from '../steps_state_machine/types';
+import { hasErrorsInParentSnapshot } from '../stream_enrichment_state_machine/selectors';
 import {
   collectDescendantIds,
   findInsertIndex,
   insertAtIndex,
   reorderSteps,
 } from '../stream_enrichment_state_machine/utils';
-import type {
-  InteractiveModeContext,
-  InteractiveModeInput,
-  InteractiveModeEvent,
-  InteractiveModeMachineDeps,
-} from './types';
-import {
-  getStepsForSimulation,
-  spawnStep,
-  getActiveDataSourceSamplesFromParent,
-  type StepSpawner,
-} from './utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
-import { selectPreviewRecords } from '../simulation_state_machine/selectors';
-import { hasErrorsInParentSnapshot } from '../stream_enrichment_state_machine/selectors';
-import type { StepParentActor } from '../steps_state_machine/types';
 import {
   createNotifySuggestionFailureNotifier,
   createSuggestPipelineActor,
 } from './suggest_pipeline_actor';
+import type {
+  InteractiveModeContext,
+  InteractiveModeEvent,
+  InteractiveModeInput,
+  InteractiveModeMachineDeps,
+} from './types';
+import {
+  getActiveDataSourceSamplesFromParent,
+  getStepsForSimulation,
+  spawnStep,
+  type StepSpawner,
+} from './utils';
 
 export type InteractiveModeActorRef = ActorRefFrom<typeof interactiveModeMachine>;
 export type InteractiveModeSnapshot = SnapshotFrom<typeof interactiveModeMachine>;
@@ -223,7 +223,7 @@ export const interactiveModeMachine = setup({
         return;
       }
 
-      const { simulationMode } = context;
+      const { simulationMode, selectedConditionId } = context;
 
       if (simulationMode === 'partial' && selectWhetherAnyProcessorBeforePersisted(context)) {
         // Send reset to simulator via parent
@@ -237,9 +237,29 @@ export const interactiveModeMachine = setup({
         steps: getStepsForSimulation({
           stepRefs: context.stepRefs,
           simulationMode,
+          selectedConditionId,
         }),
       });
     }),
+    storeConditionFilter: assign((_, params: { conditionId: string | undefined }) => {
+      return {
+        selectedConditionId: params.conditionId,
+      };
+    }),
+    // setAutomaticFilteringForEditedStep: enqueueActions(({ context, enqueue }) => {
+    //   const stepUnderEdit = context.stepRefs
+    //     .find((stepRef) => isStepUnderEdit(stepRef.getSnapshot()))
+    //     ?.getSnapshot().context.step;
+
+    //   if (stepUnderEdit?.parentId) {
+    //     enqueue({
+    //       type: 'sendConditionFilterToSimulator',
+    //       params: { conditionId: stepUnderEdit.parentId },
+    //     });
+    //   } else {
+    //     enqueue({ type: 'sendClearConditionFilterToSimulator' });
+    //   }
+    // }),
     /* Pipeline suggestion actions */
     overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
       // Clean-up existing step refs
@@ -479,6 +499,22 @@ export const interactiveModeMachine = setup({
               actions: [
                 { type: 'overwriteSteps', params: ({ event }) => event },
                 { type: 'sendStepsToSimulator' },
+              ],
+            },
+            'step.filterByCondition': {
+              actions: [
+                { type: 'storeConditionFilter', params: ({ event }) => event },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
+            },
+            'step.clearConditionFilter': {
+              actions: [
+                { type: 'storeConditionFilter', params: () => ({ conditionId: undefined }) },
+                {
+                  type: 'sendStepsToSimulator',
+                },
               ],
             },
           },

@@ -10,11 +10,11 @@ import {
   isConditionBlock,
   type StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
-import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_machine';
-import type { InteractiveModeContext } from './types';
-import { isStepUnderEdit } from '../steps_state_machine';
 import type { DataSourceSimulationMode } from '../data_source_state_machine';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
+import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_machine';
+import { isStepUnderEdit } from '../steps_state_machine';
+import type { InteractiveModeContext } from './types';
 
 export type StepSpawner = (
   src: 'stepMachine',
@@ -49,7 +49,11 @@ export const spawnStep = (
 export function getStepsForSimulation({
   stepRefs,
   simulationMode,
-}: Pick<InteractiveModeContext, 'stepRefs'> & { simulationMode: DataSourceSimulationMode }) {
+  selectedConditionId,
+}: Pick<InteractiveModeContext, 'stepRefs'> & {
+  simulationMode: DataSourceSimulationMode;
+  selectedConditionId?: string;
+}) {
   let newStepSnapshots = stepRefs
     .map((procRef) => procRef.getSnapshot())
     .filter(
@@ -57,6 +61,21 @@ export function getStepsForSimulation({
         isConditionBlock(snapshot.context.step) ||
         (simulationMode === 'partial' ? snapshot.context.isNew : true)
     );
+
+  // Truncate to the selected condition subtree (and everything before it)
+  if (selectedConditionId) {
+    const conditionAndDescendants = collectDescendantIds(selectedConditionId, stepRefs);
+
+    conditionAndDescendants.add(selectedConditionId);
+
+    const lastIndex = newStepSnapshots.findLastIndex((snapshot) =>
+      conditionAndDescendants.has(snapshot.context.step.customIdentifier)
+    );
+
+    if (lastIndex !== -1) {
+      newStepSnapshots = newStepSnapshots.slice(0, lastIndex + 1);
+    }
+  }
 
   // Find if any processor is currently being edited
   const editingProcessorIndex = newStepSnapshots.findIndex(
@@ -98,4 +117,18 @@ export function getActiveDataSourceSamplesFromParent(
     dataSourceId: activeDataSourceSnapshot.context.dataSource.id,
     document: doc,
   }));
+}
+
+function collectDescendantIds(id: string, stepRefs: StepActorRef[]): Set<string> {
+  const ids = new Set<string>();
+  function collect(currentId: string) {
+    stepRefs
+      .filter((step) => step.getSnapshot().context.step.parentId === currentId)
+      .forEach((child) => {
+        ids.add(child.id);
+        collect(child.id);
+      });
+  }
+  collect(id);
+  return ids;
 }
