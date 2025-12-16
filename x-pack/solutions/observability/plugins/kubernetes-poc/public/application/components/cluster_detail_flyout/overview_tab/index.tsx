@@ -9,6 +9,7 @@ export { DiskSizeCard } from './disk_size_card';
 export { MemoryTotalCard } from './memory_total_card';
 export { NamespacesCard } from './namespaces_card';
 export { PodsCard } from './pods_card';
+export { ContainersCard } from './containers_card';
 export { MemoryUtilChart } from './memory_util_chart';
 export { PodsUtilChart } from './pods_util_chart';
 export { CpuUtilChart } from './cpu_util_chart';

@@ -11,30 +11,30 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import { useEsqlQuery } from '../../../../hooks/use_esql_query';
 
-interface NamespacesCardProps {
+interface ContainersCardProps {
   clusterName: string;
   timeRange: TimeRange;
   height?: number;
 }
 
-interface NamespacesData {
-  total_namespaces: number;
-  healthy_namespaces: number;
-  unhealthy_namespaces: number;
+interface ContainersData {
+  total_containers: number;
+  healthy_containers: number;
+  unhealthy_containers: number;
 }
 
 /**
- * ES|QL query for namespace counts by health status.
- * Namespace phase 1 = Active (healthy), other values = unhealthy.
+ * ES|QL query for container counts by health status.
+ * Containers with ready > 0 are healthy, <= 0 are unhealthy.
  */
-const getNamespacesEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
+const getContainersEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name == "${clusterName}"
-  AND k8s.namespace.name IS NOT NULL
-  AND k8s.namespace.phase IS NOT NULL
+  AND k8s.container.name IS NOT NULL
+  AND k8s.container.ready IS NOT NULL
 | STATS
-    total_namespaces = COUNT_DISTINCT(k8s.namespace.name),
-    healthy_namespaces = COUNT_DISTINCT(k8s.namespace.name) WHERE k8s.namespace.phase == 1,
-    unhealthy_namespaces = COUNT_DISTINCT(k8s.namespace.name) WHERE k8s.namespace.phase != 1`;
+    total_containers = COUNT_DISTINCT(k8s.container.name),
+    healthy_containers = COUNT_DISTINCT(k8s.container.name) WHERE k8s.container.ready > 0,
+    unhealthy_containers = COUNT_DISTINCT(k8s.container.name) WHERE k8s.container.ready <= 0`;
 
 interface MetricItemProps {
   value: number;
@@ -64,24 +64,24 @@ const MetricItem: React.FC<MetricItemProps> = ({ value, label, color, isLoading 
   );
 };
 
-export const NamespacesCard: React.FC<NamespacesCardProps> = ({
+export const ContainersCard: React.FC<ContainersCardProps> = ({
   clusterName,
   timeRange,
   height = 120,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const query = useMemo(() => getNamespacesEsql(clusterName), [clusterName]);
+  const query = useMemo(() => getContainersEsql(clusterName), [clusterName]);
 
-  const { data, loading } = useEsqlQuery<NamespacesData>({
+  const { data, loading } = useEsqlQuery<ContainersData>({
     query,
     timeRange,
   });
 
   // Get the first row of results (single aggregation result)
-  const namespacesData = data?.[0];
-  const totalNamespaces = namespacesData?.total_namespaces ?? 0;
-  const healthyNamespaces = namespacesData?.healthy_namespaces ?? 0;
-  const unhealthyNamespaces = namespacesData?.unhealthy_namespaces ?? 0;
+  const containersData = data?.[0];
+  const totalContainers = containersData?.total_containers ?? 0;
+  const healthyContainers = containersData?.healthy_containers ?? 0;
+  const unhealthyContainers = containersData?.unhealthy_containers ?? 0;
 
   return (
     <div
@@ -92,14 +92,14 @@ export const NamespacesCard: React.FC<NamespacesCardProps> = ({
       }}
     >
       <EuiText size="m" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.namespacesLabel', {
-          defaultMessage: 'Namespaces',
+        {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.containersLabel', {
+          defaultMessage: 'Containers',
         })}
       </EuiText>
       <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexEnd" style={{ flex: 1 }}>
         <EuiFlexItem>
           <MetricItem
-            value={totalNamespaces}
+            value={totalContainers}
             label={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
               defaultMessage: 'Total',
             })}
@@ -108,7 +108,7 @@ export const NamespacesCard: React.FC<NamespacesCardProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <MetricItem
-            value={healthyNamespaces}
+            value={healthyContainers}
             label={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.healthyLabel', {
               defaultMessage: 'Healthy',
             })}
@@ -118,7 +118,7 @@ export const NamespacesCard: React.FC<NamespacesCardProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <MetricItem
-            value={unhealthyNamespaces}
+            value={unhealthyContainers}
             label={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.unhealthyLabel', {
               defaultMessage: 'Unhealthy',
             })}
