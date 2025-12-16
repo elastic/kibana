@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
+import { OnechatNavControl } from './onechat_nav_control';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
+
+jest.mock('../../application/hooks/use_ui_privileges', () => ({
+  useUiPrivileges: jest.fn(),
+}));
+
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseUiPrivileges = useUiPrivileges as jest.MockedFunction<typeof useUiPrivileges>;
+
+describe('OnechatNavControl', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('toggles the flyout when the nav button is clicked', () => {
+    const toggleConversationFlyout = jest.fn();
+    const openChat$ = new BehaviorSubject(AIChatExperience.Assistant);
+
+    mockUseUiPrivileges.mockReturnValue({ show: true } as any);
+    mockUseKibana.mockReturnValue({
+      services: {
+        onechat: {
+          toggleConversationFlyout,
+          openConversationFlyout: jest.fn(),
+        },
+        aiAssistantManagementSelection: {
+          openChat$,
+          completeOpenChat: jest.fn(),
+        },
+      },
+    } as any);
+
+    render(
+      <IntlProvider locale="en">
+        <OnechatNavControl />
+      </IntlProvider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Agent Builder' }));
+    expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  it('toggles the flyout on Cmd/Ctrl+; keyboard shortcut', () => {
+    const toggleConversationFlyout = jest.fn();
+    const openChat$ = new BehaviorSubject(AIChatExperience.Assistant);
+
+    mockUseUiPrivileges.mockReturnValue({ show: true } as any);
+    mockUseKibana.mockReturnValue({
+      services: {
+        onechat: {
+          toggleConversationFlyout,
+          openConversationFlyout: jest.fn(),
+        },
+        aiAssistantManagementSelection: {
+          openChat$,
+          completeOpenChat: jest.fn(),
+        },
+      },
+    } as any);
+
+    render(
+      <IntlProvider locale="en">
+        <OnechatNavControl />
+      </IntlProvider>
+    );
+
+    // Provide both ctrlKey and metaKey so the assertion is platform-independent
+    fireEvent.keyDown(window, { key: ';', code: 'Semicolon', ctrlKey: true, metaKey: true });
+    expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
+  });
+});
