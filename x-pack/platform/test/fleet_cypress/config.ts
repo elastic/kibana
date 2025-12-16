@@ -46,7 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'enableOtelIntegrations',
           'subfeaturePrivileges',
         ])}`,
-          `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+        `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enableAgentStatusAlerting: false,
         })}`,
 
