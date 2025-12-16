@@ -254,8 +254,10 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
 
     const trustedDevicesVisible =
       useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
-    
-    const endpointExceptionsVisible = useIsExperimentalFeatureEnabled('endpointExceptionsMovedUnderManagement') && canReadEndpointExceptions;
+
+    const endpointExceptionsVisible =
+      useIsExperimentalFeatureEnabled('endpointExceptionsMovedUnderManagement') &&
+      canReadEndpointExceptions;
 
     if (loading) {
       return <EuiSkeletonText lines={4} />;
