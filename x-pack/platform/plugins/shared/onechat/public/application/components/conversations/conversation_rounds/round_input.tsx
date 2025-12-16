@@ -30,9 +30,10 @@ const labels = {
 interface RoundInputProps {
   input: string;
   attachments?: Attachment[];
+  roundId: string;
 }
 
-export const RoundInput = ({ input, attachments }: RoundInputProps) => {
+export const RoundInput = ({ roundId, input, attachments }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
 
@@ -77,7 +78,12 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <RoundResponseActions content={input} isVisible={isHovering} />
+        <RoundResponseActions
+          type="input"
+          content={input}
+          isVisible={isHovering}
+          roundId={roundId}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

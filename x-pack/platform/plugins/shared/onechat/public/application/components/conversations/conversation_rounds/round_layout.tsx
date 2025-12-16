@@ -62,7 +62,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     >
       {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <RoundInput input={input.message} attachments={input.attachments} />
+        <RoundInput roundId={rawRound.id} input={input.message} attachments={input.attachments} />
       </EuiFlexItem>
 
       {/* Thinking */}
@@ -78,6 +78,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       <EuiFlexItem grow={false}>
         <EuiFlexItem>
           <RoundResponse
+            roundId={rawRound.id}
             hasError={isErrorCurrentRound}
             response={response}
             steps={steps}

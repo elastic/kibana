@@ -15,6 +15,7 @@ import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
 
 export interface RoundResponseProps {
+  roundId: string;
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
@@ -22,6 +23,7 @@ export interface RoundResponseProps {
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
+  roundId,
   hasError,
   response: { message },
   steps,
@@ -47,7 +49,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
     </EuiFlexItem>
     {!isLoading && !hasError && (
       <EuiFlexItem grow={false}>
-        <RoundResponseActions content={message} isVisible />
+        <RoundResponseActions roundId={roundId} type="response" content={message} isVisible />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>
