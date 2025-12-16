@@ -79,9 +79,3 @@ export {
   toTableListViewSavedObject,
   type VisualizeUserContent,
 } from './utils/to_table_list_view_saved_object';
-export {
-  getCustomColumn,
-  getCustomSortingOptions,
-  getNoItemsMessage,
-  getVisualizationListingTableStyles,
-} from './visualize_app/utils';

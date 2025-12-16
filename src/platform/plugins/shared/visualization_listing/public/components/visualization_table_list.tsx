@@ -19,13 +19,15 @@ import type { TableListTabParentProps } from '@kbn/content-management-tabbed-tab
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import {
   toTableListViewSavedObject,
+  type VisualizationsStart,
+  type VisualizeUserContent,
+} from '@kbn/visualizations-plugin/public';
+import {
   getCustomColumn,
   getCustomSortingOptions,
   getNoItemsMessage,
   getVisualizationListingTableStyles,
-  type VisualizationsStart,
-  type VisualizeUserContent,
-} from '@kbn/visualizations-plugin/public';
+} from '@kbn/visualization-listing-components';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';

@@ -34,6 +34,12 @@ import {
   SAVED_OBJECTS_PER_PAGE_SETTING,
   VisualizeConstants,
 } from '@kbn/visualizations-common';
+import {
+  getNoItemsMessage,
+  getCustomColumn,
+  getCustomSortingOptions,
+  getVisualizationListingTableStyles,
+} from '@kbn/visualization-listing-components';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import {
   deleteListItems,
@@ -43,12 +49,6 @@ import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_fo
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import type { VisualizeServices } from '../types';
-import {
-  getNoItemsMessage,
-  getCustomColumn,
-  getCustomSortingOptions,
-  getVisualizationListingTableStyles,
-} from '../utils';
 import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import {
   toTableListViewSavedObject,

@@ -204,7 +204,8 @@ pageLoadAssetSize:
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
-  visualizations: 85240
+  visualizationListing: 5148
+  visualizations: 57689
   watcher: 10485
   workflowsExtensions: 61264
   workflowsManagement: 8497

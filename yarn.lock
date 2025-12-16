@@ -9394,6 +9394,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/visualization-listing-components@link:src/platform/packages/shared/kbn-visualization-listing-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/visualization-listing-plugin@link:src/platform/plugins/shared/visualization_listing":
   version "0.0.0"
   uid ""
