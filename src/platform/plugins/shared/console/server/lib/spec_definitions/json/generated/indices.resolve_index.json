@@ -19,7 +19,7 @@
         "time_series",
         "logsdb",
         "lookup"
-      ],
+      ]
     },
     "methods": [
       "GET"
