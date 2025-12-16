@@ -10,13 +10,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ConvertToEsqlModal, type Layer } from './convert_to_esql_modal';
 import userEvent from '@testing-library/user-event';
+import { IconChartBarAnnotations, IconChartBarReferenceLine } from '@kbn/chart-icons';
+import { layerTypes } from '../../..';
 
 const mockLayers: Layer[] = [
   {
     id: '1',
     icon: 'layers',
     name: 'Layer 1',
-    typology: 'Visualization',
+    type: layerTypes.DATA,
     query: `FROM datacommerce
       | WHERE order_status == "completed"
       | STATS avg_order_value = AVG(order_total) BY customer_region
@@ -27,7 +29,7 @@ const mockLayers: Layer[] = [
     id: '2',
     icon: 'layers',
     name: 'Layer 2',
-    typology: 'Visualization',
+    type: layerTypes.DATA,
     query: `FROM datacommerce
       | STATS total_sales = SUM(sales_amount) BY product_category
       | SORT total_sales DESC
@@ -36,9 +38,17 @@ const mockLayers: Layer[] = [
   },
   {
     id: '3',
-    icon: 'annotation',
+    icon: IconChartBarAnnotations,
     name: 'Layer 3',
-    typology: 'Annotation',
+    type: layerTypes.ANNOTATIONS,
+    query: '',
+    isConvertibleToEsql: false,
+  },
+  {
+    id: '4',
+    icon: IconChartBarReferenceLine,
+    name: 'Layer 4',
+    type: layerTypes.REFERENCELINE,
     query: '',
     isConvertibleToEsql: false,
   },
@@ -99,8 +109,8 @@ describe('ConvertToEsqlModal', () => {
     it('disables selection for non-convertible layers', () => {
       renderComponent();
 
-      const checkbox = screen.getByTestId('checkboxSelectRow-3'); // Layer 3 (annotation)
-      expect(checkbox).toBeDisabled();
+      expect(screen.getByTestId('checkboxSelectRow-3')).toBeDisabled(); // Layer 3 (annotation)
+      expect(screen.getByTestId('checkboxSelectRow-4')).toBeDisabled(); // Layer 4 (reference line)
     });
 
     it('expands row to show query when expand button is clicked', async () => {
@@ -121,7 +131,7 @@ describe('ConvertToEsqlModal', () => {
       const collapseButton = screen.getByRole('button', { name: /collapse/i });
       await userEvent.click(collapseButton);
 
-      const codeBlocks = screen.queryAllByText(/FROM datacommerce/); // improve this
+      const codeBlocks = screen.queryAllByText(/FROM datacommerce/, { selector: 'code' });
       expect(codeBlocks).toHaveLength(0);
     });
 
