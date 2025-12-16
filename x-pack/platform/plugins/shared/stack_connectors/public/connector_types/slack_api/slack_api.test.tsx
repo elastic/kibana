@@ -280,10 +280,15 @@ describe('Slack action params validation', () => {
       });
     });
 
-    it('should not fail when channelNames is set', async () => {
+    it.each([
+      ['channelIds', undefined],
+      ['channels', undefined],
+      ['channelIds', []],
+      ['channels', []],
+    ])('should not fail when channelNames is set and %s is %s', async (key, value) => {
       const actionParams = {
         subAction: 'postMessage',
-        subActionParams: { text: 'some text', channelNames: ['#test'] },
+        subActionParams: { text: 'some text', channelNames: ['#test'], [key]: value },
       };
 
       expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
@@ -294,10 +299,15 @@ describe('Slack action params validation', () => {
       });
     });
 
-    it('should not fail when channelIds is set', async () => {
+    it.each([
+      ['channelNames', undefined],
+      ['channels', undefined],
+      ['channelNames', []],
+      ['channels', []],
+    ])('should not fail when channelIds is set and %s is %s', async (key, value) => {
       const actionParams = {
         subAction: 'postMessage',
-        subActionParams: { text: 'some text', channelIds: ['channel-id'] },
+        subActionParams: { text: 'some text', channelIds: ['channel-id'], [key]: value },
       };
 
       expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
@@ -308,10 +318,15 @@ describe('Slack action params validation', () => {
       });
     });
 
-    it('should not fail when channels is set', async () => {
+    it.each([
+      ['channelIds', undefined],
+      ['channelNames', undefined],
+      ['channelIds', []],
+      ['channelNames', []],
+    ])('should not fail when channels is set and %s is %s', async (key, value) => {
       const actionParams = {
         subAction: 'postMessage',
-        subActionParams: { text: 'some text', channels: ['my-channel'] },
+        subActionParams: { text: 'some text', channels: ['my-channel'], [key]: value },
       };
 
       expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({

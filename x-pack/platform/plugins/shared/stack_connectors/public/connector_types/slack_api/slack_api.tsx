@@ -36,34 +36,21 @@ import { deserializer } from './form_deserializer';
 const DEFAULT_PARAMS = { subAction: 'postMessage' as const, subActionParams: { text: undefined } };
 
 const getChannelErrors = (channels?: string[], channelIds?: string[], channelNames?: string[]) => {
-  const isDefinedAndEmptyArray = (arr?: string[]) => {
-    if (arr && arr.length === 0) {
+  const isUndefinedOrEmptyArray = (arr?: string[]) => {
+    if (!arr || arr.length === 0) {
       return true;
     }
 
     return false;
   };
 
-  const allChannels = [channels, channelIds, channelNames];
-  const allUndefined = allChannels.every((channelVariable) => !Boolean(channelVariable));
+  const isChannelNamesEmpty = isUndefinedOrEmptyArray(channelNames);
+  const isChannelIdsEmpty = isUndefinedOrEmptyArray(channelIds);
+  const isChannelsEmpty = isUndefinedOrEmptyArray(channels);
 
-  const isChannelNamesEmpty = isDefinedAndEmptyArray(channelNames);
-  const isChannelIdsEmpty = isDefinedAndEmptyArray(channelIds);
-  const isChannelsEmpty = isDefinedAndEmptyArray(channels);
+  const allEmpty = isChannelNamesEmpty && isChannelIdsEmpty && isChannelsEmpty;
 
-  if (allUndefined) {
-    return [CHANNEL_REQUIRED];
-  }
-
-  if (isChannelNamesEmpty) {
-    return [CHANNEL_REQUIRED];
-  }
-
-  if (isChannelNamesEmpty && isChannelIdsEmpty) {
-    return [CHANNEL_REQUIRED];
-  }
-
-  if (isChannelIdsEmpty && isChannelsEmpty) {
+  if (allEmpty) {
     return [CHANNEL_REQUIRED];
   }
 
@@ -73,6 +60,10 @@ const getChannelErrors = (channels?: string[], channelIds?: string[], channelNam
     channelNames.some((channelName) => !channelName.startsWith('#'))
   ) {
     return [CHANNEL_NAME_ERROR];
+  }
+
+  if (!allEmpty) {
+    return [];
   }
 
   return [];
