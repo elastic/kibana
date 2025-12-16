@@ -43,9 +43,15 @@ ${
   examples?.length
     ? `\
 **${examplesLabel}**
+${examples
+  .map(
+    (i) => `
 \`\`\`esql
-${examples.map((i) => i).join('')}
+${i}
 \`\`\`
+`
+  )
+  .join('\n\n')}
 `
     : ''
 }`;
