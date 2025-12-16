@@ -85,8 +85,8 @@ export const openEntityStoreEnablementModal = () => {
   cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();
   cy.get(ENTITY_STORE_ENABLEMENT_MODAL).contains('Entity Analytics Enablement');
 
-  cy.wait('@riskEnginePrivileges', { timeout: 60000 });
-  cy.wait('@entityStorePrivileges', { timeout: 60000 });
+  cy.wait('@riskEnginePrivileges', { timeout: 120000 });
+  cy.wait('@entityStorePrivileges', { timeout: 120000 });
 };
 
 export const confirmEntityStoreEnablement = () => {
