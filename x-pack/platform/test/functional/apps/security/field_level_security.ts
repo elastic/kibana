@@ -126,6 +126,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should support case-sensitive fields', async function () {
+      await PageObjects.security.forceLogout();
+      await PageObjects.security.login();
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('a_casesenstive_fields_role', {
