@@ -418,7 +418,7 @@ export class DiscoverPlugin
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
         const [
-          { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME },
+          { addControlsFromSavedSession },
           { apiPublishesEditablePauseFetch, apiHasUniqueId },
           { apiPublishesESQLVariables },
         ] = await Promise.all([
@@ -442,15 +442,10 @@ export class DiscoverPlugin
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {},
-              references: [
-                ...savedObject.references,
-                {
-                  name: SAVED_OBJECT_REF_NAME,
-                  type: SEARCH_EMBEDDABLE_TYPE,
-                  id: savedObject.id,
-                },
-              ],
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: [],
             },
           },
           {
