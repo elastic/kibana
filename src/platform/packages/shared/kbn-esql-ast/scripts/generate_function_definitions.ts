@@ -361,7 +361,7 @@ const ${getDefinitionName(name)}: FunctionDefinition = {
  */
 
 import { i18n } from '@kbn/i18n';
-import { Location } from '../../commands/registry/types';
+import { Location } from '../../registry/types';
 import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
 
 

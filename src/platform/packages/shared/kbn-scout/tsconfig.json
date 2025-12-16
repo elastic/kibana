@@ -30,9 +30,9 @@
     "@kbn/scout-reporting",
     "@kbn/synthtrace",
     "@kbn/synthtrace-client",
-    "@kbn/projects-solutions-groups",
     "@kbn/zod",
     "@kbn/core-http-common",
-    "@kbn/axe-config"
+    "@kbn/axe-config",
+    "@kbn/peggy"
   ]
 }
