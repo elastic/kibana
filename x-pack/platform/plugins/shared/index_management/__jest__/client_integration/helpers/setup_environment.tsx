@@ -29,6 +29,8 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/m
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { EuiThemeProvider } from '@elastic/eui';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
@@ -63,15 +65,25 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
 });
 
+const applicationService = applicationServiceMock.createStartContract();
+// Add cloudConnect capabilities for EisCloudConnectPromoCallout component
+applicationService.capabilities = {
+  ...applicationService.capabilities,
+  cloudConnect: {
+    show: true,
+    configure: true,
+  },
+};
+
 const appDependencies = {
   services,
   history,
   url: sharePluginMock.createStartContract().url,
   core: {
-    getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
+    getUrlForApp: applicationService.getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),
     http: httpServiceMock.createSetupContract(),
-    application: applicationServiceMock.createStartContract(),
+    application: applicationService,
     chrome: chromeServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
   },
@@ -79,6 +91,7 @@ const appDependencies = {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     isFleetEnabled: false,
     share: sharePluginMock.createStartContract(),
+    cloud: cloudMock.createSetup(),
   },
   // Default stateful configuration
   config: {
@@ -109,6 +122,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   settings: settingsServiceMock.createStartContract(),
   theme: themeServiceMock.createStartContract(),
   chrome: chromeServiceMock.createStartContract(),
+  application: applicationService,
   kibanaVersion: {
     get: () => kibanaVersion,
   },
@@ -135,15 +149,17 @@ export const WithAppDependencies =
     );
     return (
       <KibanaReactContextProvider>
-        <AppContextProvider value={mergedDependencies}>
-          <MappingsEditorProvider>
-            <ComponentTemplatesProvider value={componentTemplatesMockDependencies(httpSetup)}>
-              <GlobalFlyoutProvider>
-                <Comp {...props} />
-              </GlobalFlyoutProvider>
-            </ComponentTemplatesProvider>
-          </MappingsEditorProvider>
-        </AppContextProvider>
+        <EuiThemeProvider>
+          <AppContextProvider value={mergedDependencies}>
+            <MappingsEditorProvider>
+              <ComponentTemplatesProvider value={componentTemplatesMockDependencies(httpSetup)}>
+                <GlobalFlyoutProvider>
+                  <Comp {...props} />
+                </GlobalFlyoutProvider>
+              </ComponentTemplatesProvider>
+            </MappingsEditorProvider>
+          </AppContextProvider>
+        </EuiThemeProvider>
       </KibanaReactContextProvider>
     );
   };
