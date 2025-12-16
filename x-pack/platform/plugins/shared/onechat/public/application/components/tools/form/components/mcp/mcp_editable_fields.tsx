@@ -224,8 +224,8 @@ export const McpEditableFields = ({
                   // Update the tool ID and description
                   if (selectedMcpTool.value) {
                     const { name, description = '' } = selectedMcpTool.value;
-                    setValue('toolId', name);
-                    setValue('description', description);
+                    setValue('toolId', name, { shouldValidate: true });
+                    setValue('description', description, { shouldValidate: true });
                   }
                 }}
                 isLoading={!!connectorId && isLoadingMcpTools}
