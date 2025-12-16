@@ -89,6 +89,7 @@ export interface DocLinks {
     readonly notebooksExamples: string;
     readonly customerEngineerRequestForm: string;
     readonly elasticCommunity: string;
+    readonly elasticCloud: string;
   };
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
@@ -712,6 +713,7 @@ export interface DocLinks {
     readonly mcpServer: string;
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
+    readonly learnMore: string;
   };
   readonly indexManagement: {
     readonly componentTemplate: string;
