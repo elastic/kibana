@@ -27,7 +27,9 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
 
   [SuggestionCategory.USER_DEFINED_COLUMN]: 300,
   [SuggestionCategory.RECOMMENDED_FIELD]: 310,
+  [SuggestionCategory.LOOKUP_COMMON_FIELD]: 315,
   [SuggestionCategory.ECS_FIELD]: 330,
+  [SuggestionCategory.LOOKUP_INDEX_FIELD]: 350,
   [SuggestionCategory.TIME_FIELD]: 350,
   [SuggestionCategory.FIELD]: 350,
 
