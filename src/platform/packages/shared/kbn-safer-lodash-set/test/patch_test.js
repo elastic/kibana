@@ -134,6 +134,18 @@ setAndSetWithFunctions.forEach(([set, testName]) => {
     });
     t.end();
   });
+
+  test(`${testName}: constructor.prototype pollution protection`, (t) => {
+    const constructorPrototypeTestCases = [
+      [['constructor', 'prototype'], 'foo'],
+      [['a', 'constructor', 'prototype'], 'foo'],
+      [['a', 'b', 'constructor', 'prototype'], 'polluted'],
+    ];
+    constructorPrototypeTestCases.forEach(([path, value]) => {
+      t.throws(() => set({}, path, value), /Illegal access of constructor\.prototype/);
+    });
+    t.end();
+  });
 });
 
 /**

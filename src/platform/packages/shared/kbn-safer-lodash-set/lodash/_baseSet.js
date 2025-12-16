@@ -43,6 +43,10 @@ function baseSet(object, path, value, customizer) {
       throw new Error('Illegal access of function prototype')
     }
 
+    if (key == 'prototype' && index > 0 && path[index - 1] == 'constructor') {
+      throw new Error('Illegal access of constructor.prototype')
+    }
+
     if (index != lastIndex) {
       var objValue = hasOwnProperty.call(nested, key) ? nested[key] : undefined
       newValue = customizer ? customizer(objValue, key, nested) : undefined;
