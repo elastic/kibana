@@ -519,7 +519,7 @@ describe('xy_suggestions', () => {
     `);
   });
 
-  test('Suggest multiple splits', () => {
+  test('Does not suggest multiple splits in formBased', () => {
     const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
@@ -534,6 +534,26 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
+    });
+
+    expect(suggestions).toHaveLength(0);
+  });
+  test('Suggest multiple splits in textBased', () => {
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('price'),
+          numCol('quantity'),
+          dateCol('date'),
+          strCol('product'),
+          strCol('city'),
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
     });
 
     expect(suggestions).toHaveLength(10);
