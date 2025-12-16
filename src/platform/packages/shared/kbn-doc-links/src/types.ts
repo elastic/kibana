@@ -54,6 +54,8 @@ export interface DocLinks {
     readonly beatsAndLogstashConfiguration: string;
     readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
+    readonly cloudConnect: string;
+    readonly connectToAutoops: string;
   };
   readonly console: {
     readonly guide: string;
@@ -151,6 +153,7 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly e5Model: string;
     readonly elasticInferenceService: string;
+    readonly elasticInferenceServicePricing: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;

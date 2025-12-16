@@ -57,9 +57,15 @@ When the user asks to create a dashboard:
 - NEVER invent index names or field names - only use indices/fields you found via ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}
 - ALWAYS call ${dashboardTools.createDashboard} to complete the request - visualizations alone are NOT sufficient
 
+
 ## Updating a Dashboard
 
-Use ${dashboardTools.updateDashboard} to modify existing dashboards. Create new visualization configs with ${platformCoreTools.createVisualization} if adding panels.`,
+When updating existing dashboards:
+- Use ${dashboardTools.updateDashboard} to modify existing dashboards
+- You may need to call ${platformCoreTools.createVisualization} for new panels to add
+- ALWAYS pass \`panels\` containing the full set of visualization configs you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
+- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel at the top
+`,
       },
       answer: {
         instructions: renderDashboardResultPrompt(),

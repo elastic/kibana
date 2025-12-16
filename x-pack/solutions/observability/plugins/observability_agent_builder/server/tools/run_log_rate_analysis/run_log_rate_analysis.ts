@@ -9,9 +9,15 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import type {
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
 
@@ -42,16 +48,41 @@ const logRateAnalysisSchema = z.object({
 });
 
 export function createRunLogRateAnalysisTool({
+  core,
   logger,
 }: {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
   logger: Logger;
 }): StaticToolRegistration<typeof logRateAnalysisSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
     id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Analyzes log rate changes by comparing a baseline time window to a deviation time window. Identifies significant spikes or dips in log volume and correlates them with specific field values.`,
+    description: `Analyzes which log fields or message patterns correlate with changes in log throughput (spikes or drops).
+
+When to use:
+- Log volume suddenly increased or decreased and you want to know WHY
+- Identifying which services, hosts, or error types are driving a spike
+- Correlating throughput changes to specific log categories or field values
+- Answering "what changed?" when looking at log rate anomalies
+
+How it works:
+Compares a baseline time window to a deviation window and performs statistical correlation analysis to find fields/patterns associated with the change.
+
+Do NOT use for:
+- Understanding the sequence of events for a specific error (use get_correlated_logs)
+- Getting a general overview of log types (use get_log_categories)
+- Investigating individual log entries or transactions`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery },
       context

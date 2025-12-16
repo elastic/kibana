@@ -247,6 +247,9 @@ describe('mappingFromFieldMap', () => {
                 maintenance_window_ids: {
                   type: 'keyword',
                 },
+                maintenance_window_names: {
+                  type: 'keyword',
+                },
                 instance: {
                   properties: {
                     id: {
