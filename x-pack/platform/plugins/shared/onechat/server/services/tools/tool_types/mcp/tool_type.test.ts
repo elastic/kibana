@@ -167,8 +167,6 @@ describe('MCP tool_type', () => {
         const params = { query: 'test query' };
         const context = {
           logger: mockLogger,
-          actions: mockActions,
-          request: mockRequest,
         };
 
         const result = await handler(params, context as any);
@@ -212,8 +210,6 @@ describe('MCP tool_type', () => {
         const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
-          actions: mockActions,
-          request: mockRequest,
         } as any);
 
         expect(result).toEqual({
@@ -242,8 +238,6 @@ describe('MCP tool_type', () => {
         const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
-          actions: mockActions,
-          request: mockRequest,
         } as any);
 
         expect(result).toEqual({
@@ -271,8 +265,6 @@ describe('MCP tool_type', () => {
         const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
-          actions: mockActions,
-          request: mockRequest,
         } as any);
 
         expect(result).toEqual({
@@ -302,8 +294,6 @@ describe('MCP tool_type', () => {
         const handler = await dynamicProps.getHandler();
         const result = await handler({}, {
           logger: mockLogger,
-          actions: mockActions,
-          request: mockRequest,
         } as any);
 
         expect(result).toEqual({

@@ -120,7 +120,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     request,
     elasticsearch,
     spaces,
-    actions,
     modelProvider,
     toolsService,
     resultStore,
@@ -133,7 +132,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     logger,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider,
-    actions,
     runner: manager.getRunner(),
     toolProvider: createToolProvider({
       registry: await toolsService.getRegistry({ request }),

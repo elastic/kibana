@@ -9,7 +9,6 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/onechat-server/tools';
 import type {
   ModelProvider,
@@ -99,7 +98,6 @@ export const createToolHandlerContext = (
     esClient: mockEsClient,
     logger: mockLogger,
     spaceId: 'default',
-    actions: actionsMock.createStart(),
     modelProvider: additionalContext.modelProvider ?? createMockModelProvider(),
     toolProvider: additionalContext.toolProvider ?? createMockToolProvider(),
     runner: additionalContext.runner ?? createMockScopedRunner(),

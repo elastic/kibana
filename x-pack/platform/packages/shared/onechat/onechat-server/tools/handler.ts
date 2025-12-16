@@ -9,7 +9,6 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type {
   ToolEventEmitter,
@@ -63,11 +62,6 @@ export interface ToolHandlerContext {
    * Can be used to access the inference APIs or chatModel.
    */
   modelProvider: ModelProvider;
-  /**
-   * Actions plugin start contract for executing connectors.
-   * Can be used to call connector sub-actions.
-   */
-  actions: ActionsPluginStart;
   /**
    * Tool provider that can be used to list or execute tools.
    */
