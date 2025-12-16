@@ -129,7 +129,12 @@ function checkUrlAvailability(host: string): Promise<boolean> {
 }
 
 if (require.main === module) {
-  checkEuiAvailability().then((exitCode) => {
-    process.exit(exitCode);
-  });
+  checkEuiAvailability()
+    .then((exitCode) => {
+      process.exit(exitCode);
+    })
+    .catch((error) => {
+      console.error('Unexpected error:', error);
+      process.exit(1);
+    });
 }
