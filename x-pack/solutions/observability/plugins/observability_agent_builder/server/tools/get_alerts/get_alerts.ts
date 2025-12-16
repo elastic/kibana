@@ -24,7 +24,9 @@ import type {
 import { getRelevantAlertFields } from './get_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
+import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
 export const OBSERVABILITY_GET_ALERTS_TOOL_ID = 'observability.get_alerts';
 
@@ -101,6 +103,12 @@ export function createGetAlertsTool({
     description: `Retrieves Observability alerts within a specified time range. Supports filtering by status (active/recovered) and KQL queries to find specific alert instances.`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       {
         start = DEFAULT_TIME_RANGE.start,
@@ -109,19 +117,31 @@ export function createGetAlertsTool({
         includeRecovered,
         query,
       },
-      handlerinfo
+      { request }
     ) => {
       try {
         const [coreStart, pluginStart] = await core.getStartServices();
-        const alertsClient = await pluginStart.ruleRegistry.getRacClientWithRequest(
-          handlerinfo.request
-        );
+        const { inference, ruleRegistry } = pluginStart;
+
+        const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+
+        const connectorId = await getDefaultConnectorId({
+          coreStart,
+          inference,
+          request,
+          logger,
+        });
+
+        const boundInferenceClient = inference.getClient({
+          request,
+          bindTo: { connectorId },
+        });
 
         const selectedFields = await getRelevantAlertFields({
           coreStart,
           pluginStart,
-          request: handlerinfo.request,
-          modelProvider: handlerinfo.modelProvider,
+          request,
+          inferenceClient: boundInferenceClient,
           logger,
           query,
         });
