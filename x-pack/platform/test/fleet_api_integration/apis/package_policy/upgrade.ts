@@ -25,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   function withTestPackage(name: string, version: string) {
     const pkgRoute = `/api/fleet/epm/packages/${name}/${version}`;
@@ -1283,15 +1284,17 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          const installation = await getInstallationInfo(
-            supertest,
-            'integration_to_input',
-            '3.0.0'
-          );
-          expectIdArraysEqual(
-            installation.installed_es.filter((asset: any) => asset.type !== 'knowledge_base'),
-            expectedAssets
-          );
+          await retry.tryForTime(10000, async () => {
+            const installation = await getInstallationInfo(
+              supertest,
+              'integration_to_input',
+              '3.0.0'
+            );
+            expectIdArraysEqual(
+              installation.installed_es.filter((asset: any) => asset.type !== 'knowledge_base'),
+              expectedAssets
+            );
+          });
 
           const expectedComponentTemplates = expectedAssets.filter(
             (expectedAsset) =>

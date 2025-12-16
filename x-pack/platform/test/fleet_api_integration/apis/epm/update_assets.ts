@@ -343,7 +343,9 @@ export default function (providerContext: FtrProviderContext) {
           ...res.attributes,
           installed_kibana: sortBy(res.attributes.installed_kibana, ['id']),
           package_assets: sortBy(res.attributes.package_assets, ['id']),
-          installed_es: sortBy(res.attributes.installed_es, ['id']),
+          installed_es: sortBy(res.attributes.installed_es, ['id']).filter(
+            (asset) => asset.type !== 'knowledge_base'
+          ),
         }).eql({
           installed_kibana_space_id: 'default',
           installed_kibana: sortBy(
@@ -476,10 +478,6 @@ export default function (providerContext: FtrProviderContext) {
               {
                 id: 'metrics-all_assets.test_metrics@custom',
                 type: 'component_template',
-              },
-              {
-                id: 'all_assets-README.md',
-                type: 'knowledge_base',
               },
             ],
             'id'
