@@ -27,7 +27,7 @@ export function registerGetSearchSecretsRoute(router: IRouter<SecretsRequestHand
       try {
         const { name, description } = request.query;
         const { secretClient } = await context.secrets;
-        const secretsResponse = await secretClient.searchSecrets({ name, description });
+        const secretsResponse = await secretClient.search({ name, description });
         return response.ok({
           body: secretsResponse,
         });

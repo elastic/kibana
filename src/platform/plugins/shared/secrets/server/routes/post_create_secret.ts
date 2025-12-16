@@ -26,7 +26,7 @@ export function registerPostCreateSecretRoute(router: IRouter<SecretsRequestHand
     async (context, request, response) => {
       try {
         const { secretClient } = await context.secrets;
-        const createdSecret = await secretClient.createSecret(request.body);
+        const createdSecret = await secretClient.create(request.body);
         return response.ok({ body: createdSecret });
       } catch (error) {
         return response.customError({

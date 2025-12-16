@@ -9,8 +9,17 @@
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SECRET_SAVED_OBJECT_INDEX, SECRET_SAVED_OBJECT_TYPE } from './constants';
+import { schema } from '@kbn/config-schema';
+import { SECRET_SAVED_OBJECT_TYPE } from './constants';
 import { secretMappings } from './mappings';
+
+const SECRET_SCHEMA_V1 = schema.object({
+  name: schema.string(),
+  description: schema.string(),
+  secret: schema.string(),
+  createdAt: schema.string(),
+  updatedAt: schema.string(),
+});
 
 export function setupSecretsSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -18,14 +27,22 @@ export function setupSecretsSavedObjects(
 ) {
   savedObjects.registerType({
     name: SECRET_SAVED_OBJECT_TYPE,
-    indexPattern: SECRET_SAVED_OBJECT_INDEX,
     mappings: secretMappings,
     hidden: true,
-    namespaceType: 'agnostic',
+    namespaceType: 'multiple-isolated',
+    modelVersions: {
+      1: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SECRET_SCHEMA_V1.extends({}, { unknowns: 'ignore' }),
+          create: SECRET_SCHEMA_V1,
+        },
+      },
+    },
   });
   encryptedSavedObjects.registerType({
     type: SECRET_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secret']),
-    attributesToIncludeInAAD: new Set(['name', 'description']),
+    attributesToIncludeInAAD: new Set(['createdAt']),
   });
 }

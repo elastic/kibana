@@ -16,20 +16,27 @@ import type { SecretsRequestHandlerContext } from '../types';
 export function registerGetSecretByIdRoute(router: IRouter<SecretsRequestHandlerContext>) {
   router.get(
     {
-      path: '/api/secrets/{id}',
+      path: '/api/secrets/{name}',
       options: SECRET_ROUTE_OPTIONS,
       security: SECRET_READ_SECURITY,
       validate: {
         params: schema.object({
-          id: schema.string(),
+          name: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        const { id } = request.params;
+        const { name } = request.params;
         const { secretClient } = await context.secrets;
-        const secretsResponse = await secretClient.getSecret(id);
+        const secretsResponse = await secretClient.get(name);
+        if (!secretsResponse) {
+          return response.notFound({
+            body: {
+              message: 'Secret not found',
+            },
+          });
+        }
         return response.ok({
           body: secretsResponse,
         });
@@ -37,7 +44,7 @@ export function registerGetSecretByIdRoute(router: IRouter<SecretsRequestHandler
         return response.customError({
           statusCode: 500,
           body: {
-            message: 'Failed to search secrets',
+            message: 'Failed to get secret',
           },
         });
       }

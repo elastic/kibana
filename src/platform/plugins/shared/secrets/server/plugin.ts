@@ -63,7 +63,9 @@ export class SecretsServerPlugin
     return {
       getSecretClientWithRequest: (request: KibanaRequest) => {
         return new SecretClient({
-          soClient: core.savedObjects.getScopedClient(request),
+          soClient: core.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [SECRET_SAVED_OBJECT_TYPE],
+          }),
           esoClient: plugins.encryptedSavedObjects.getClient({
             includedHiddenTypes: [SECRET_SAVED_OBJECT_TYPE],
           }),
@@ -79,15 +81,18 @@ export class SecretsServerPlugin
     core: CoreSetup<SecretsServerPluginStartDeps>,
     plugins: SecretsServerPluginSetupDeps
   ): IContextProvider<SecretsRequestHandlerContext, 'secrets'> => {
+    const logger = this.logger;
     return async function secretsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
       return {
         secretClient: new SecretClient({
-          soClient: savedObjects.getScopedClient(request),
+          soClient: savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [SECRET_SAVED_OBJECT_TYPE],
+          }),
           esoClient: encryptedSavedObjects.getClient({
             includedHiddenTypes: [SECRET_SAVED_OBJECT_TYPE],
           }),
-          logger: this.logger,
+          logger,
         }),
       };
     };

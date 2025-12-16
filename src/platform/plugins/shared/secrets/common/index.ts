@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SECRET_SAVED_OBJECT_TYPE = 'secret';
+export {
+  SecretAttributes,
+  SecretDto,
+  CreateSecretCommand,
+  SearchSecretsParams,
+  SearchSecretsResponseDto,
+} from './types';
+export { SECRETS_FEATURE_ID } from './constants';
+export { CreateSecretCommandSchema, SearchSecretsParamsSchema } from './types';

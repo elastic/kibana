@@ -8352,6 +8352,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/secrets-plugin@link:src/platform/plugins/shared/secrets":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-ai-prompts@link:x-pack/solutions/security/packages/security-ai-prompts":
   version "0.0.0"
   uid ""
