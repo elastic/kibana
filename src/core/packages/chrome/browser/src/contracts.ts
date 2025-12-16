@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -22,7 +23,6 @@ import type {
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
