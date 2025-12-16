@@ -70,7 +70,7 @@ describe('NotionConnector', () => {
         },
       };
       mockClient.post.mockResolvedValue(mockResponse);
-      
+
       await NotionConnector.actions.searchPageOrDSByTitle.handler(mockContext, {
         query: 'Projects',
         queryObjectType: 'data_source',
