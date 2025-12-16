@@ -132,7 +132,11 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
                   id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.description"
                   defaultMessage="Learn more about field mapping in"
                 />{' '}
-                <EuiLink href={docLinks.elasticsearchMapping} target="_blank">
+                <EuiLink
+                  data-test-subj="enterpriseSearchSchemaFieldDetailsOurDocumentationLink"
+                  href={docLinks.elasticsearchMapping}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.link"
                     defaultMessage="our documentation."
@@ -144,6 +148,13 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
         )}
         <EuiBasicTable
           css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.tableCaption',
+            {
+              defaultMessage: 'Indices for {fieldName}',
+              values: { fieldName: schemaField.name },
+            }
+          )}
           columns={columns}
           items={schemaField.indices}
           responsiveBreakpoint={false}
@@ -308,6 +319,7 @@ export const SearchApplicationSchema: React.FC = () => {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
               <EuiButtonEmpty
+                data-test-subj="enterpriseSearchColumnsMoreInfoButton"
                 size="s"
                 color="primary"
                 iconType={icon}
@@ -368,7 +380,12 @@ export const SearchApplicationSchema: React.FC = () => {
               />
             </p>
             {!onlyShowConflicts && (
-              <EuiButton color="danger" fill onClick={toggleOnlyShowConflicts}>
+              <EuiButton
+                data-test-subj="enterpriseSearchSearchApplicationSchemaViewConflictsButton"
+                color="danger"
+                fill
+                onClick={toggleOnlyShowConflicts}
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.button"
                   defaultMessage="View conflicts"
@@ -428,6 +445,7 @@ export const SearchApplicationSchema: React.FC = () => {
                 <EuiPopoverFooter>
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiButtonEmpty
+                      data-test-subj="enterpriseSearchSearchApplicationSchemaClearAllButton"
                       color="danger"
                       iconType="eraser"
                       size="s"
@@ -448,6 +466,12 @@ export const SearchApplicationSchema: React.FC = () => {
         </EuiFlexGroup>
 
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.schema.tableCaption',
+            {
+              defaultMessage: 'Search application schema fields',
+            }
+          )}
           items={filteredSchemaFields}
           columns={columns}
           loading={isLoadingSearchApplicationSchema}
@@ -477,7 +501,12 @@ export const SearchApplicationSchema: React.FC = () => {
                 }
               )}
             </p>
-            <EuiButton fill color="danger" onClick={() => setSelectedEsFieldTypes(esFieldTypes)}>
+            <EuiButton
+              data-test-subj="enterpriseSearchSearchApplicationSchemaClearFiltersButton"
+              fill
+              color="danger"
+              onClick={() => setSelectedEsFieldTypes(esFieldTypes)}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.clearFilters',
                 {
