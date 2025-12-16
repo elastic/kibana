@@ -16,7 +16,7 @@ import type { ObservabilityAgentBuilderServerRouteRepository } from '@kbn/observ
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/common';
+} from '@kbn/observability-agent-builder-plugin/public';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
