@@ -123,4 +123,25 @@ export class DependencyDetailsPage {
     await this.getServiceInUpstreamServicesTable(serviceName).click();
   }
   // #endregion
+
+  // #region Operations Tab
+  async expectOperationsTableVisible() {
+    await expect(this.page.getByTestId('apmDependencyDetailOperationsListTable')).toBeVisible();
+  }
+
+  async expectOperationInOperationsTable(operationName: string) {
+    await expect(
+      this.page
+        .getByTestId(`apmDependencyDetailOperationsListTable`)
+        .getByRole('link', { name: operationName })
+    ).toBeVisible();
+  }
+
+  async clickOperationInOperationsTable(operationName: string) {
+    await this.page
+      .getByTestId(`apmDependencyDetailOperationsListTable`)
+      .getByRole('link', { name: operationName })
+      .click();
+  }
+  // #endregion
 }
