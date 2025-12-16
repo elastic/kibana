@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +15,6 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiToolTip,
-  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
@@ -24,8 +23,8 @@ import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import { TryAIAgentContextMenuItem } from './try_ai_agent_context_menu_item';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
-import { robotIconType } from './robot_icon';
 import { useAssistantContext } from '../../../..';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
@@ -60,15 +59,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
     const [isAIAgentModalVisible, setIsAIAgentModalVisible] = useState(false);
 
-    useEffect(() => {
-      if (isAIAgentModalVisible) {
-        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-          action: 'confirmation_shown',
-          source: 'security_settings_menu',
-        });
-      }
-    }, [isAIAgentModalVisible, analytics]);
-
     const onButtonClick = useCallback(() => {
       setPopover(!isPopoverOpen);
     }, [isPopoverOpen]);
@@ -77,28 +67,37 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       setPopover(false);
     }, []);
 
-    const handleOpenAIAgentModal = useCallback(() => {
-      setIsAIAgentModalVisible(true);
-      closePopover();
-      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-        action: 'step_reached',
-        source: 'security_settings_menu',
-      });
-    }, [closePopover, analytics]);
+    const [telemetrySource, setTelemetrySource] = useState<string | undefined>();
+
+    const handleOpenAIAgentModal = useCallback(
+      (source: 'security_ab_tour' | 'security_settings_menu') => {
+        setTelemetrySource(source);
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+          action: 'confirmation_shown',
+          source,
+        });
+        setIsAIAgentModalVisible(true);
+        closePopover();
+      },
+      [analytics, closePopover]
+    );
+
     const handleCancelAIAgent = useCallback(() => {
       setIsAIAgentModalVisible(false);
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'canceled',
-        source: 'security_settings_menu',
+        source: telemetrySource,
       });
-    }, [analytics]);
+      setTelemetrySource(undefined);
+    }, [analytics, telemetrySource]);
     const handleConfirmAIAgent = useCallback(async () => {
       try {
+        await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
         analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
           action: 'confirmed',
-          source: 'security_settings_menu',
+          source: telemetrySource,
         });
-        await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
+        setTelemetrySource(undefined);
         setIsAIAgentModalVisible(false);
         window.location.reload();
       } catch (error) {
@@ -113,7 +112,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
           error_stack: error instanceof Error ? error.stack : undefined,
         });
       }
-    }, [settings.client, toasts, analytics]);
+    }, [settings.client, analytics, telemetrySource, toasts]);
 
     const handleNavigateToSettings = useCallback(() => {
       if (assistantAvailability.hasSearchAILakeConfigurations) {
@@ -199,55 +198,13 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         ...(assistantAvailability.isAiAgentsEnabled
           ? [
-              <EuiContextMenuItem key="try-ai-agent">
-                {!assistantAvailability.hasAgentBuilderManagePrivilege ? (
-                  <EuiToolTip
-                    display="block"
-                    content={i18n.AI_AGENT_MANAGE_PRIVILEGE_REQUIRED}
-                    anchorClassName="euiToolTipAnchor-try-ai-agent"
-                  >
-                    <span
-                      tabIndex={0}
-                      css={css`
-                        display: block;
-                        width: 100%;
-                      `}
-                    >
-                      <EuiButton
-                        aria-label={i18n.TRY_AI_AGENT}
-                        onClick={handleOpenAIAgentModal}
-                        iconType={robotIconType}
-                        color="accent"
-                        size="s"
-                        fullWidth
-                        isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
-                        data-test-subj="try-ai-agent"
-                        css={css`
-                          font-weight: 500;
-                        `}
-                      >
-                        {i18n.TRY_AI_AGENT}
-                      </EuiButton>
-                    </span>
-                  </EuiToolTip>
-                ) : (
-                  <EuiButton
-                    aria-label={i18n.TRY_AI_AGENT}
-                    onClick={handleOpenAIAgentModal}
-                    iconType={robotIconType}
-                    color="accent"
-                    size="s"
-                    fullWidth
-                    isDisabled={!assistantAvailability.hasAgentBuilderManagePrivilege}
-                    data-test-subj="try-ai-agent"
-                    css={css`
-                      font-weight: 500;
-                    `}
-                  >
-                    {i18n.TRY_AI_AGENT}
-                  </EuiButton>
-                )}
-              </EuiContextMenuItem>,
+              <TryAIAgentContextMenuItem
+                analytics={analytics}
+                handleOpenAIAgentModal={handleOpenAIAgentModal}
+                hasAgentBuilderManagePrivilege={
+                  assistantAvailability.hasAgentBuilderManagePrivilege
+                }
+              />,
             ]
           : []),
       ],
@@ -270,19 +227,18 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       );
     }, [assistantAvailability, isDisabled]);
 
+    const onContinueTour = useCallback(() => {
+      handleOpenAIAgentModal('security_ab_tour');
+    }, [handleOpenAIAgentModal]);
+
     return (
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
           <AgentBuilderTourStep
+            analytics={analytics}
             isDisabled={isAgentUpgradeDisabled}
             storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
-            onContinue={() => {
-              analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-                action: 'step_reached',
-                source: 'security_ab_tour',
-              });
-              handleOpenAIAgentModal();
-            }}
+            onContinue={onContinueTour}
           >
             <EuiPopover
               button={
