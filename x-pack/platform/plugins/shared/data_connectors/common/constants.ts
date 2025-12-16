@@ -16,3 +16,6 @@ export const DATA_CONNECTORS_FULL_TITLE = i18n.translate('xpack.dataConnectors.a
 export const DATA_CONNECTORS_SHORT_TITLE = i18n.translate('xpack.dataConnectors.app.shortTitle', {
   defaultMessage: 'Connectors',
 });
+
+// Pagination constants
+export const PAGINATION_ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];

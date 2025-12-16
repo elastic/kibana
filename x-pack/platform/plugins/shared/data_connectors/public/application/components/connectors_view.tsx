@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorCard } from './connector_card';
 import { useConnectors } from '../hooks/use_connectors';
 import type { Connector } from '../../types/connector';
+import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
 
 export const ConnectorsView: React.FC = () => {
   const { popularConnectors, allConnectors, isLoading } = useConnectors();
@@ -113,28 +114,21 @@ export const ConnectorsView: React.FC = () => {
                 ))}
               </EuiFlexGrid>
 
-              {allConnectors.length > 10 && (
+              {allConnectors.length > 0 && (
                 <>
                   <EuiSpacer size="l" />
-                  <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiTablePagination
-                        aria-label={i18n.translate(
-                          'xpack.dataConnectors.connectors.paginationLabel',
-                          {
-                            defaultMessage: 'Connector pagination',
-                          }
-                        )}
-                        pageCount={pageCount}
-                        activePage={activePage}
-                        onChangePage={setActivePage}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={[10, 25, 50, 100]}
-                        onChangeItemsPerPage={handleChangeItemsPerPage}
-                        data-test-subj="connectorsPagination"
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiTablePagination
+                    aria-label={i18n.translate('xpack.dataConnectors.connectors.paginationLabel', {
+                      defaultMessage: 'Connector pagination',
+                    })}
+                    pageCount={pageCount}
+                    activePage={activePage}
+                    onChangePage={setActivePage}
+                    itemsPerPage={itemsPerPage}
+                    itemsPerPageOptions={PAGINATION_ITEMS_PER_PAGE_OPTIONS}
+                    onChangeItemsPerPage={handleChangeItemsPerPage}
+                    data-test-subj="connectorsPagination"
+                  />
                 </>
               )}
             </>
