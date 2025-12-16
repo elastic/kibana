@@ -92,7 +92,7 @@ async function fetchIndicesCall(
   }
 
   // uses the _metering/stats API to get the number of documents and size of the index
-  // this API is only available in ES3
+  // this API is only available in ES3 (serverless)
   if (config.isSizeAndDocCountEnabled) {
     const { indices: indicesStats } =
       await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({

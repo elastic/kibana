@@ -106,6 +106,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
             indexManagement.extensionsService.addBadge(followerBadgeExtension);
             // note this isn't disabled if license changes
+            // todo need to fix
             indexManagement.indexDataEnricher.add(ccrDataEnricher);
           }
         } else {
