@@ -93,7 +93,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // View cluster details shows timed out
         await testSubjects.click('searchResponseWarningsViewDetails');
-        await testSubjects.click('viewDetailsContextMenu');
+
+        // If both requests have already completed, it will show a context menu first, otherwise it
+        // will go directly to the details
+        if (await testSubjects.exists('viewDetailsContextMenu')) {
+          await testSubjects.click('viewDetailsContextMenu');
+        }
+
         await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
         const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
         expect(txt).to.contain('Results may be incomplete or empty.');
