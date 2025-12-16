@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createIlmApiClient } from '@kbn/index-lifecycle-management-common-shared';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
@@ -35,7 +35,7 @@ export const StreamDetailGeneralData = ({
   data: ReturnType<typeof useDataStreamStats>;
 }) => {
   const {
-    core,
+    core: { http, notifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -44,8 +44,6 @@ export const StreamDetailGeneralData = ({
     services: { telemetryClient },
   } = useKibana();
 
-  const { notifications } = core;
-
   const { timeState } = useTimefilter();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -53,7 +51,10 @@ export const StreamDetailGeneralData = ({
 
   const { signal } = useAbortController();
 
-  const getIlmPolicies = () => createIlmApiClient(core).getPolicies({ signal });
+  const getIlmPolicies = () =>
+    http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
+      signal,
+    });
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {
