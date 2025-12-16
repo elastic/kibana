@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskPriority, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
@@ -78,7 +78,7 @@ export class TaskClient<TaskType extends string> {
           } satisfies TaskParams<TParams>,
           state: {},
           scope: ['streams'],
-          priority: 1,
+          priority: TaskPriority.Normal,
         },
         {
           request,
