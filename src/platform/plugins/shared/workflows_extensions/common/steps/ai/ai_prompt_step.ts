@@ -28,14 +28,22 @@ export const InputSchema = z.object({
   temperature: z.number().min(0).max(1).optional(),
 });
 
+function getStructuredOutputSchema(contentSchema: z.ZodType) {
+  return z.object({
+    content: contentSchema,
+  });
+}
+
+const stringOutputSchema = z.object({
+  content: z.string(),
+  response_metadata: z.record(z.string(), z.any()),
+});
+
 /**
  * Output schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
  */
-export const OutputSchema = z.object({
-  content: z.any(),
-  response_metadata: z.record(z.string(), z.any()).optional(),
-});
+export const OutputSchema = z.union([stringOutputSchema, getStructuredOutputSchema(z.unknown())]);
 
 export type AiPromptStepInputSchema = typeof InputSchema;
 export type AiPromptStepOutputSchema = typeof OutputSchema;
@@ -54,14 +62,9 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
   outputSchema: OutputSchema,
   dynamicOutputSchema: (input) => {
     if (input.outputSchema) {
-      return z.object({
-        content: convertJsonSchemaToZod(input.outputSchema), // zodSchema,
-      });
+      return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
     }
 
-    return z.object({
-      content: z.string(),
-      response_metadata: z.record(z.string(), z.any()).optional(),
-    });
+    return stringOutputSchema;
   },
 };
