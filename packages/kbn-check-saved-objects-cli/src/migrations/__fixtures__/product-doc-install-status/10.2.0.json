@@ -32,17 +32,7 @@
       "installation_status": "installed",
       "last_installation_date": 1733896800000,
       "index_name": ".kibana_ai_product_doc_security",
-      "inference_id": ".elser-2-elasticsearch",
-      "resource_type": "product_doc"
-    },
-    {
-      "product_name": "security",
-      "product_version": "2025.12.11",
-      "installation_status": "installed",
-      "last_installation_date": 1733896800000,
-      "index_name": ".kibana_ai_security_labs",
-      "inference_id": ".elser-2-elasticsearch",
-      "resource_type": "security_labs"
+      "inference_id": ".elser-2-elasticsearch"
     }
   ]
 }

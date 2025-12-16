@@ -124,6 +124,8 @@ export class ProductDocBasePlugin
         install: documentationManager.install.bind(documentationManager),
         update: documentationManager.update.bind(documentationManager),
         updateAll: documentationManager.updateAll.bind(documentationManager),
+        updateSecurityLabsAll:
+          documentationManager.updateSecurityLabsAll.bind(documentationManager),
         uninstall: documentationManager.uninstall.bind(documentationManager),
         getStatus: documentationManager.getStatus.bind(documentationManager),
         getStatuses: documentationManager.getStatuses.bind(documentationManager),

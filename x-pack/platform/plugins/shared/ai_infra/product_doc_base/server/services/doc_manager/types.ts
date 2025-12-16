@@ -67,6 +67,12 @@ export interface DocumentationManagerAPI {
   }: {
     inferenceId: string;
   }): Promise<SecurityLabsStatusResponse>;
+
+  /**
+   * Update Security Labs content for all previously installed inference IDs to the latest version.
+   * No-op if Security Labs content is not currently installed.
+   */
+  updateSecurityLabsAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
 }
 
 /**
