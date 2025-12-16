@@ -45,7 +45,7 @@ export async function autocomplete(
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(0, cursorPosition);
 
-  if (!callbacks?.getByType || withinQuotes(innerText)) {
+  if (!callbacks?.getByType) {
     return [];
   }
 
@@ -96,6 +96,10 @@ export async function autocomplete(
     }
 
     case CaretPosition.ON_KEYWORD: {
+      if (withinQuotes(innerText)) {
+        return [];
+      }
+
       return [onCompleteItem];
     }
 

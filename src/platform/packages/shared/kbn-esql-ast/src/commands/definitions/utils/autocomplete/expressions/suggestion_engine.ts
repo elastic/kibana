@@ -19,6 +19,7 @@ import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils
 import { getPosition, type ExpressionPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
 import type {
+  ExpressionComputedMetadata,
   ExpressionContext,
   ExpressionContextOptions,
   SuggestForExpressionParams,
@@ -120,7 +121,7 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
 }
 
 /** Computes derived state from the expression context */
-function computeDerivedState(ctx: ExpressionContext) {
+function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata {
   const { expressionRoot, innerText, cursorPosition, context } = ctx;
   const position: ExpressionPosition = getPosition(innerText, expressionRoot);
   const expressionType = getExpressionType(expressionRoot, context?.columns);
