@@ -1691,6 +1691,7 @@
     "@kbn/scout-reporting": "link:src/platform/packages/private/kbn-scout-reporting",
     "@kbn/scout-security": "link:x-pack/solutions/security/packages/kbn-scout-security",
     "@kbn/security-api-integration-helpers": "link:x-pack/platform/test/security_api_integration/packages/helpers",
+    "@kbn/security-labs-artifact-builder": "link:x-pack/packages/ai-infra/security-labs-artifact-builder",
     "@kbn/security-solution-test-api-clients": "link:x-pack/solutions/security/packages/test-api-clients",
     "@kbn/serverless-storybook-config": "link:src/platform/packages/shared/serverless/storybook/config",
     "@kbn/set-map": "link:packages/kbn-set-map",
