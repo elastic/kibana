@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActiveSource } from '../../types/connector';
 import { getConnectorIcon } from '../../utils/get_connector_icon';
 import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
+import { AgentAvatarGroup } from './agent_avatar_group';
 
 interface ActiveSourcesTableProps {
   sources: ActiveSource[];
@@ -188,6 +189,13 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
           </EuiText>
         );
       },
+    },
+    {
+      field: 'usedBy',
+      name: i18n.translate('xpack.dataConnectors.activeSources.usedByColumn', {
+        defaultMessage: 'Used by',
+      }),
+      render: (agents: ActiveSource['usedBy']) => <AgentAvatarGroup agents={agents} />,
     },
     {
       name: i18n.translate('xpack.dataConnectors.activeSources.actionsColumn', {
