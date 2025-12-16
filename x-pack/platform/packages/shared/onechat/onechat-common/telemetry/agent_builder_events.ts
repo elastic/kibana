@@ -31,13 +31,11 @@ export const AGENT_BUILDER_EVENT_TYPES = {
 } as const;
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
-export type OptInStep = 'initial' | 'confirmation_modal' | 'final';
 export type OptInAction = 'step_reached' | 'confirmation_shown' | 'confirmed' | 'canceled';
 
 export interface ReportOptInActionParams {
   action: OptInAction;
   source: OptInSource;
-  step?: OptInStep;
 }
 
 export interface ReportOptOutParams {
@@ -142,14 +140,6 @@ const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour)',
         optional: false,
-      },
-    },
-    step: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Step in the opt-in flow (initial|confirmation_modal|final). Only present when action is step_reached or canceled',
-        optional: true,
       },
     },
   },

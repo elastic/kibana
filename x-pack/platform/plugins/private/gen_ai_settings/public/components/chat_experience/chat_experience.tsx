@@ -14,6 +14,11 @@ import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_ag
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
+import {
+  clearPendingReloadFlag,
+  getIsReloadNavigation,
+  getPendingReloadFlag,
+} from '../../utils/pending_reload';
 
 const TELEMETRY_SOURCE = 'stack_management' as const;
 
@@ -54,56 +59,31 @@ export const ChatExperience: React.FC = () => {
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   const savedValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
   const hasTrackedInitialStep = useRef(false);
-  /**
-   * One-shot guard to prevent `step_reached` from firing twice when a save triggers
-   * a full page reload.
-   *
-   * React may re-run this effect right before unload, and it will run again after
-   * the component remounts post-reload. A ref lets us treat “just reloaded due to save”
-   * as a one-time signal: skip the first check after reload, then reset.
-   */
-  const didJustReloadFromSaveRef = useRef<boolean | null>(null);
 
   useEffect(() => {
-    // If a save is about to trigger `window.location.reload()`, we set this flag just-in-time.
-    // We must check it on every effect run because the flag can be set shortly before unload.
-    const pendingReloadStorageFlag = (() => {
-      try {
-        return sessionStorage.getItem('gen_ai_settings:pending_reload');
-      } catch {
-        return null;
+    if (hasTrackedInitialStep.current) return;
+    if (!field) return;
+    // No saved value indicates Classic (or unknown, which we treat as Classic).
+    if (savedValue) return;
+
+    /**
+     * Saving can trigger a full page reload (`gen_ai_settings_app.tsx` sets a sessionStorage flag).
+     * Without this guard, `step_reached` could be reported twice: once before the reload and again
+     * after remount. We skip reporting while the flag is present, and only clear it on a reload
+     * navigation to avoid a race where the post-reload page misses the flag.
+     */
+    const pendingReload = getPendingReloadFlag();
+    if (pendingReload) {
+      if (getIsReloadNavigation()) {
+        clearPendingReloadFlag();
       }
-    })();
-    if (didJustReloadFromSaveRef.current === null) {
-      didJustReloadFromSaveRef.current = pendingReloadStorageFlag === '1';
-      if (pendingReloadStorageFlag === '1') {
-        try {
-          sessionStorage.removeItem('gen_ai_settings:pending_reload');
-        } catch {
-          // ignore
-        }
-      }
+      return;
     }
-    const shouldSkipInitialStepDueToReload =
-      didJustReloadFromSaveRef.current === true || pendingReloadStorageFlag === '1';
-    // no saved value indicates setting is classic
-    if (
-      !hasTrackedInitialStep.current &&
-      field &&
-      !savedValue &&
-      // prevents double tracking when reloading from save
-      !shouldSkipInitialStepDueToReload
-    ) {
-      reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-        action: 'step_reached',
-        source: TELEMETRY_SOURCE,
-        step: 'initial',
-      });
-      hasTrackedInitialStep.current = true;
-    }
-    if (didJustReloadFromSaveRef.current === true) {
-      didJustReloadFromSaveRef.current = false;
-    }
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+      action: 'step_reached',
+      source: TELEMETRY_SOURCE,
+    });
+    hasTrackedInitialStep.current = true;
   }, [analytics, field, savedValue, unsavedChanges]);
 
   // Show confirmation modal for AI Agents selection
@@ -137,7 +117,6 @@ export const ChatExperience: React.FC = () => {
     reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
       action: 'canceled',
       source: TELEMETRY_SOURCE,
-      step: 'confirmation_modal',
     });
     // Clear the unsaved change by passing undefined
     handleFieldChange(AI_CHAT_EXPERIENCE_TYPE, undefined);

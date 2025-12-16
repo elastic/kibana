@@ -146,7 +146,6 @@ describe('ChatExperience', () => {
       expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'step_reached',
         source: 'stack_management',
-        step: 'initial',
       });
     });
   });
@@ -163,7 +162,7 @@ describe('ChatExperience', () => {
     expect(reportEvent).not.toHaveBeenCalled();
   });
 
-  it('returns cleared pending reload flag on initial render', async () => {
+  it('returns uncleared pending reload flag on initial render when navigation is not a reload', async () => {
     sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
 
     setup({ savedValue: undefined, hasField: true });
@@ -171,6 +170,24 @@ describe('ChatExperience', () => {
     await act(async () => {
       await Promise.resolve();
     });
+
+    expect(sessionStorage.getItem('gen_ai_settings:pending_reload')).toBe('1');
+  });
+
+  it('returns cleared pending reload flag on initial render when navigation is a reload', async () => {
+    const originalGetEntriesByType = performance.getEntriesByType;
+    // @ts-expect-error JSDOM typing differs from real browser PerformanceEntry types.
+    performance.getEntriesByType = jest.fn(() => [{ type: 'reload' }]);
+
+    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
+
+    setup({ savedValue: undefined, hasField: true });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    performance.getEntriesByType = originalGetEntriesByType;
 
     expect(sessionStorage.getItem('gen_ai_settings:pending_reload')).toBeNull();
   });
@@ -186,7 +203,6 @@ describe('ChatExperience', () => {
       expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'step_reached',
         source: 'stack_management',
-        step: 'initial',
       });
     });
   });

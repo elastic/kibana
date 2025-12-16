@@ -83,7 +83,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'step_reached',
         source: 'security_settings_menu',
-        step: 'initial',
       });
     }, [closePopover, analytics]);
     const handleCancelAIAgent = useCallback(() => {
@@ -91,7 +90,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'canceled',
         source: 'security_settings_menu',
-        step: 'confirmation_modal',
       });
     }, [analytics]);
     const handleConfirmAIAgent = useCallback(async () => {
@@ -282,7 +280,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
               analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
                 action: 'step_reached',
                 source: 'security_ab_tour',
-                step: 'initial',
               });
               handleOpenAIAgentModal();
             }}

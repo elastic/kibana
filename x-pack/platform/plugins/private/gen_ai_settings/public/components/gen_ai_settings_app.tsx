@@ -34,6 +34,7 @@ import { GoToSpacesButton } from './go_to_spaces_button';
 import { useGenAiConnectors } from '../hooks/use_genai_connectors';
 import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 import { useSettingsContext } from '../contexts/settings_context';
+import { setPendingReloadFlag } from '../utils/pending_reload';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
@@ -251,12 +252,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       });
     }
     if (needsReload) {
-      try {
-        // Used by `ChatExperience` to avoid firing `step_reached` both before and after reload.
-        sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
-      } catch (e) {
-        // best effort: sessionStorage may be unavailable in some environments
-      }
+      // Used by `ChatExperience` to avoid firing `step_reached` both before and after reload.
+      setPendingReloadFlag();
       window.location.reload();
     }
   }

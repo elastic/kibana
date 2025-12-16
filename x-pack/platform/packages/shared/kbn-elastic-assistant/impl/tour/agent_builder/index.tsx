@@ -72,7 +72,6 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
     analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
       action: 'step_reached',
       source: 'security_ab_tour',
-      step: 'initial',
     });
     onContinue?.();
   }, [finishTour, onContinue, analytics]);
