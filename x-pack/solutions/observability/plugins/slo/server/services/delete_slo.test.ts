@@ -43,7 +43,7 @@ describe('DeleteSLO', () => {
   });
 
   describe('happy path', () => {
-    it('removes all resources associatde to the slo', async () => {
+    it('removes all resources associated to the slo', async () => {
       const slo = createSLO({
         id: 'irrelevant',
         indicator: createAPMTransactionErrorRateIndicator(),
