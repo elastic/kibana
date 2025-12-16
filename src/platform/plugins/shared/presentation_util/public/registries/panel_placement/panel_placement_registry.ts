@@ -8,13 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GetPanelSettings } from './types';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PanelSettingsGetter } from './types';
 
-const registry = new Map<string, GetPanelSettings<object>>();
+const registry = new Map<string, PanelSettingsGetter<object>>();
 
-export const registerDashboardPanelSettings = <SerializedState extends object = object>(
+export const registerPanelPlacementSettings = <SerializedState extends object = object>(
   embeddableType: string,
-  getPanelSettings: GetPanelSettings<SerializedState>
+  getPanelSettings: PanelSettingsGetter<SerializedState>
 ) => {
   if (registry.has(embeddableType)) {
     throw new Error(
@@ -24,12 +25,17 @@ export const registerDashboardPanelSettings = <SerializedState extends object = 
       })
     );
   }
-  registry.set(embeddableType, getPanelSettings as GetPanelSettings<object>);
+  registry.set(embeddableType, getPanelSettings as PanelSettingsGetter<object>);
 };
 
 /**
- * Use getPanelPlacementSetting to access registry
+ * Use getPanelPlacementSettings to access registry
  */
-export const getRegistryItem = (embeddableType: string) => {
-  return registry.get(embeddableType);
+export const getPanelPlacementSettings = async <SerializedState extends object = object>(
+  embeddableType: string,
+  serializedState?: SerializedPanelState<SerializedState>
+) => {
+  const panelSettingsGetter = registry.get(embeddableType);
+  if (!panelSettingsGetter) return undefined;
+  return await panelSettingsGetter(serializedState);
 };
