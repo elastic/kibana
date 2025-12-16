@@ -39,7 +39,6 @@ export const transformElasticHitsToListItem = ({
   return hits.map((hit) => {
     const { _id, _source } = hit;
     const {
-      /* eslint-disable @typescript-eslint/naming-convention */
       created_at,
       deserializer,
       serializer,
@@ -49,7 +48,6 @@ export const transformElasticHitsToListItem = ({
       list_id,
       tie_breaker_id,
       meta,
-      /* eslint-enable @typescript-eslint/naming-convention */
     } = _source!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
     // @ts-expect-error _source is optional
     const value = findSourceValue(hit._source);
