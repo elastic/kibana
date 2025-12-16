@@ -148,7 +148,7 @@ export const getMcpToolType = ({
       return {
         getHandler: () => {
           return async (params, context) => {
-            const { logger, actions: contextActions, request: contextRequest } = context;
+            const { logger } = context;
 
             logger.debug(
               `Executing MCP tool: connector=${config.connector_id}, tool=${config.tool_name}`
@@ -156,8 +156,8 @@ export const getMcpToolType = ({
 
             try {
               const result = await executeMcpTool({
-                actions: contextActions,
-                request: contextRequest,
+                actions,
+                request,
                 connectorId: config.connector_id,
                 toolName: config.tool_name,
                 toolArguments: params,
