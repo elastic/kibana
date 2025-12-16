@@ -78,8 +78,8 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     if (telemetryData) {
       telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
         pathway: telemetryData.pathway,
-        attachmentType: telemetryData.attachmentType,
-        attachmentCount: telemetryData.attachmentCount,
+        attachment_type: telemetryData.attachmentType,
+        attachment_count: telemetryData.attachmentCount,
       });
     }
     onClick();

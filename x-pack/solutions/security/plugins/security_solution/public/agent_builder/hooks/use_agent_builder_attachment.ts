@@ -48,9 +48,9 @@ export const useAgentBuilderAttachment = ({
     try {
       if (!onechat?.openConversationFlyout) {
         telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
-          errorType: 'invocation_error',
-          errorMessage: 'onechat service or openConversationFlyout not available',
-          context: 'invocation',
+          error_type: 'invocation_error',
+          error_message: 'onechat service or openConversationFlyout not available',
+          agent_id: THREAT_HUNTING_AGENT_ID,
         });
         return;
       }
@@ -76,9 +76,10 @@ export const useAgentBuilderAttachment = ({
       });
     } catch (error) {
       telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
-        errorType: 'invocation_error',
-        errorMessage: error instanceof Error ? error.message : String(error),
-        context: 'invocation',
+        error_type: 'invocation_error',
+        error_message: error instanceof Error ? error.message : String(error),
+        error_stack: error instanceof Error ? error.stack : undefined,
+        agent_id: THREAT_HUNTING_AGENT_ID,
       });
     }
   }, [attachmentType, attachmentData, attachmentPrompt, onechat, telemetry]);

@@ -190,13 +190,13 @@ class ChatServiceImpl implements ChatService {
                           .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
 
                       analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, {
-                        conversationId: effectiveConversationId,
-                        responseLength: round.response?.message?.length,
-                        roundNumber: currentRoundCount,
-                        agentId: normalizedAgentId,
-                        toolsUsed: toolsInvoked,
-                        toolCount: toolsInvoked.length > 0 ? toolsInvoked.length : undefined,
-                        toolsInvoked: toolsInvoked.length > 0 ? toolsInvoked : undefined,
+                        conversation_id: effectiveConversationId,
+                        response_length: round.response?.message?.length,
+                        round_number: currentRoundCount,
+                        agent_id: normalizedAgentId,
+                        tools_used: toolsInvoked,
+                        tool_count: toolsInvoked.length > 0 ? toolsInvoked.length : undefined,
+                        tools_invoked: toolsInvoked.length > 0 ? toolsInvoked : undefined,
                       });
                     }
                   }

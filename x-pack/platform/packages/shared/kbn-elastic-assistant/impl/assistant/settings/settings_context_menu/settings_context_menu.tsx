@@ -110,9 +110,9 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
           });
         }
         analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
-          errorType: 'opt_in_error',
-          errorMessage: error instanceof Error ? error.message : String(error),
-          context: 'opt_in',
+          error_type: 'opt_in_error',
+          error_message: error instanceof Error ? error.message : String(error),
+          error_stack: error instanceof Error ? error.stack : undefined,
         });
       }
     }, [settings.client, toasts, analytics]);

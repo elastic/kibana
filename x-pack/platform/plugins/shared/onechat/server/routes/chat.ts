@@ -439,13 +439,13 @@ export function registerChatRoutes({
           // Only track if this is an agent conversation (not default assistant)
           if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
             coreSetup.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageSent, {
-              conversationId: payload.conversation_id || 'new',
-              messageLength: payload.input?.length,
-              hasAttachments: attachments.length > 0,
-              attachmentCount: attachments.length > 0 ? attachments.length : undefined,
-              attachmentTypes:
+              conversation_id: payload.conversation_id || 'new',
+              message_length: payload.input?.length,
+              has_attachments: attachments.length > 0,
+              attachment_count: attachments.length > 0 ? attachments.length : undefined,
+              attachment_types:
                 attachments.length > 0 ? attachments.map((a) => a.type || 'unknown') : undefined,
-              agentId: normalizedAgentId,
+              agent_id: normalizedAgentId,
             });
           }
         } catch (error) {
