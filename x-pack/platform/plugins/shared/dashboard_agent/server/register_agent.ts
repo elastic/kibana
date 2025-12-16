@@ -41,11 +41,25 @@ When the user asks to create a dashboard:
    - Example: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
    - Pass \`esql\` if you have a pre-generated query (improves performance)
    - Pass \`chartType\` (Metric, Gauge, Tagcloud, or XY) to skip chart type detection
+   - After ${platformCoreTools.createVisualization} returns, extract \`data.visualization\` - this is the panel configuration you must pass to ${dashboardTools.createDashboard}
+     - Example result structure:
+       \`\`\`
+       {
+         "type": "visualization",
+         "tool_result_id": "...",
+         "data": {
+           "query": "...",
+           "visualization": "<VISUALIZATION_CONFIG>",
+           "chart_type": "...",
+           "esql": "..."
+         }
+       }
+       \`\`\`
 
-3. **Create the dashboard** - Extract \`data.visualization\` from each result, then call ${dashboardTools.createDashboard} with:
+3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
    - \`title\`: Dashboard title
    - \`description\`: Dashboard description
-   - \`panels\`: Array of visualization configs
+   - \`panels\`: Array of visualization configs (each one extracted from \`data.visualization\`)
    - \`markdownContent\`: A markdown summary that will be displayed at the top of the dashboard
      - This should describe what the dashboard shows and provide helpful context
      - Use markdown formatting (headers, lists, bold text) to make it readable
@@ -55,7 +69,7 @@ When the user asks to create a dashboard:
 **CRITICAL RULES:**
 - NEVER call ${platformCoreTools.createVisualization} without first discovering what data exists
 - NEVER invent index names or field names - only use indices/fields you found via ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}
-- ALWAYS call ${dashboardTools.createDashboard} to complete the request - visualizations alone are NOT sufficient
+- Only when creating a dashboard (i.e. the user asked for a dashboard): ALWAYS call ${dashboardTools.createDashboard} to complete the request
 
 
 ## Updating a Dashboard
