@@ -28,9 +28,9 @@ export const InputSchema = z.object({
   temperature: z.number().min(0).max(1).optional(),
 });
 
-function getStructuredOutputSchema(contentSchema: z.ZodType) {
+function getStructuredOutputSchema(responseSchema: z.ZodType) {
   return z.object({
-    response: contentSchema,
+    response: responseSchema,
   });
 }
 
