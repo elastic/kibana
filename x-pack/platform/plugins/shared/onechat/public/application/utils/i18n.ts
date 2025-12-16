@@ -65,6 +65,7 @@ export const labels = {
     // Tool types
     esqlLabel: i18n.translate('xpack.onechat.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
     builtinLabel: i18n.translate('xpack.onechat.tools.builtinLabel', { defaultMessage: 'System' }),
+    mcpLabel: i18n.translate('xpack.onechat.tools.mcpLabel', { defaultMessage: 'MCP' }),
     searchLabel: i18n.translate('xpack.onechat.tools.searchLabel', { defaultMessage: 'Search' }),
     indexTypeLabel: i18n.translate('xpack.onechat.tools.indexTypeLabel', {
       defaultMessage: 'Index',
