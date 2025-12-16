@@ -186,6 +186,17 @@ export enum ProductFeatureRulesKey {
   exceptions = 'exceptions',
 }
 
+export enum ProductFeatureAlertsKey {
+  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  detections = 'detections',
+
+  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
+  externalDetections = 'external_detections',
+
+  // TODO remove. This is here to make the types work.
+  foo123 = 'foo123',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -196,6 +207,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureTimelineKey,
   ...ProductFeatureNotesKey,
   ...ProductFeatureRulesKey,
+  ...ProductFeatureAlertsKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -206,7 +218,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineKey
   | ProductFeatureNotesKey
-  | ProductFeatureRulesKey;
+  | ProductFeatureRulesKey
+  | ProductFeatureAlertsKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
