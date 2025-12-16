@@ -19,3 +19,7 @@ export interface RenameConversationResponse {
   id: string;
   title: string;
 }
+
+export interface ForkConversationResponse {
+  id: string;
+}

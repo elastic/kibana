@@ -11,6 +11,7 @@ import type {
   ListConversationsResponse,
   DeleteConversationResponse,
   RenameConversationResponse,
+  ForkConversationResponse,
 } from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
@@ -53,6 +54,15 @@ export class ConversationsService {
       `${internalApiPath}/conversations/${conversationId}/_rename`,
       {
         body: JSON.stringify({ title }),
+      }
+    );
+  }
+
+  async fork({ conversationId, roundId }: { conversationId: string; roundId: string }) {
+    return await this.http.post<ForkConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}/_fork`,
+      {
+        body: JSON.stringify({ round_id: roundId }),
       }
     );
   }
