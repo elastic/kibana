@@ -70,3 +70,4 @@ export {
   isConversationIdSetEvent,
   isPromptRequestEvent,
 } from './events';
+export type { RoundState } from './round_state';

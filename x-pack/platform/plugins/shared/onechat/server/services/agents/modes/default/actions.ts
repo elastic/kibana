@@ -45,9 +45,7 @@ export interface ExecuteToolAction {
 
 export interface ToolPromptAction {
   type: AgentActionType.ToolPrompt;
-  tool_id: string;
   tool_call_id: string;
-  tool_params: Record<string, unknown>;
   prompt: PromptRequest;
 }
 
@@ -138,7 +136,7 @@ export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAct
   };
 }
 
-export function toolPromptAction(toolCallId: string, prompt: ToolPrompt): ToolPromptAction {
+export function toolPromptAction(toolCallId: string, prompt: PromptRequest): ToolPromptAction {
   return {
     type: AgentActionType.ToolPrompt,
     tool_call_id: toolCallId,

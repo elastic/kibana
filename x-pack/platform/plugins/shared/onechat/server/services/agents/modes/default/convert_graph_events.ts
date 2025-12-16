@@ -11,38 +11,39 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { ToolResultEvent, ConversationRound, ChatAgentEvent } from '@kbn/onechat-common/chat';
+import type { ChatAgentEvent, ConversationRound, ToolResultEvent } from '@kbn/onechat-common/chat';
 import { isToolCallStep } from '@kbn/onechat-common/chat';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
-  matchGraphName,
-  matchEvent,
-  matchName,
-  hasTag,
-  createTextChunkEvent,
-  createMessageEvent,
-  createToolCallEvent,
   createBrowserToolCallEvent,
-  createToolResultEvent,
-  createReasoningEvent,
-  createThinkingCompleteEvent,
+  createMessageEvent,
   createPromptRequestEvent,
+  createReasoningEvent,
+  createTextChunkEvent,
+  createThinkingCompleteEvent,
+  createToolCallEvent,
+  createToolResultEvent,
   extractTextContent,
+  hasTag,
+  matchEvent,
+  matchGraphName,
+  matchName,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
+import { AgentPromptRequestSourceType } from '@kbn/onechat-common/agents';
 import type { StateType } from './state';
-import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
+import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
+import type { ToolCallResult } from './actions';
 import {
-  isToolCallAction,
   isAnswerAction,
-  isStructuredAnswerAction,
   isExecuteToolAction,
+  isStructuredAnswerAction,
+  isToolCallAction,
   isToolPromptAction,
 } from './actions';
-import type { ToolCallResult } from './actions';
 import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
 
@@ -198,6 +199,10 @@ export const convertGraphEvents = ({
             return of(
               createPromptRequestEvent({
                 prompt: nextAction.prompt,
+                source: {
+                  type: AgentPromptRequestSourceType.toolCall,
+                  tool_call_id: nextAction.tool_call_id,
+                },
               })
             );
           }

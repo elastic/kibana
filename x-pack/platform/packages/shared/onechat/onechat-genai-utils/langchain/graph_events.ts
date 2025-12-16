@@ -18,7 +18,7 @@ import type {
 } from '@kbn/onechat-common/chat/events';
 import { ChatEventType } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
+import type { PromptRequestSource, PromptRequest } from '@kbn/onechat-common/agents/prompts';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -61,13 +61,16 @@ export const createToolCallEvent = (data: {
 
 export const createPromptRequestEvent = ({
   prompt,
+  source,
 }: {
   prompt: PromptRequest;
+  source: PromptRequestSource;
 }): PromptRequestEvent => {
   return {
     type: ChatEventType.promptRequest,
     data: {
       prompt,
+      source,
     },
   };
 };

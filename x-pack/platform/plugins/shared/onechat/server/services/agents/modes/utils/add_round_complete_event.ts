@@ -20,7 +20,7 @@ import type {
   ToolProgressEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
+import type { RoundState } from '@kbn/onechat-common/chat/round_state';
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -32,11 +32,13 @@ import {
   isToolProgressEvent,
   isPromptRequestEvent,
   isReasoningEvent,
+  isToolCallStep,
 } from '@kbn/onechat-common';
 import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
 import type { ModelProvider, ModelProviderStats } from '@kbn/onechat-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
+import { isFinalStateEvent } from '../default/events';
 
 type SourceEvents = ConvertedEvents;
 
@@ -83,6 +85,8 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
               });
 
+          round.state = buildRoundState({ round, events });
+
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
@@ -113,6 +117,7 @@ const resumeRound = ({
   endTime?: Date;
   modelProvider: ModelProvider;
 }): ConversationRound => {
+  // resuming / replaying tool events for the pending step
   const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
   // TODO: another way to detect interrupted step?
   if (isToolCallStep(lastStep) && lastStep.results.length === 0) {
@@ -160,6 +165,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     id: previous.id,
     status: next.status,
     pending_prompt: next.pending_prompt,
+    state: undefined, // state is recomputed after the merge
     input: previous.input,
     steps: [...previous.steps, ...next.steps],
     trace_id: traceId,
@@ -235,6 +241,7 @@ const createRound = ({
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
     pending_prompt: promptRequest ? promptRequest.data.prompt : undefined,
+    state: undefined,
     input,
     steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
@@ -294,6 +301,47 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     input_tokens: inputTokens,
     output_tokens: outputTokens,
   };
+};
+
+const buildRoundState = ({
+  round,
+  events,
+}: {
+  round: ConversationRound;
+  events: SourceEvents[];
+}): RoundState | undefined => {
+  const finalGraphState = events.find(isFinalStateEvent)!.data.state;
+  const promptRequestEvents = events.filter(isPromptRequestEvent).map((event) => event.data);
+
+  if (promptRequestEvents.length === 0) {
+    return undefined;
+  }
+
+  const promptRequest = promptRequestEvents[0];
+  const toolCallId = promptRequest.source.tool_call_id;
+  const toolCall = round.steps
+    .filter(isToolCallStep)
+    .find((step) => step.tool_call_id === toolCallId);
+
+  if (!toolCall) {
+    throw new Error(`Could not find tool call with id ${toolCallId} in round steps`);
+  }
+
+  const state: RoundState = {
+    version: 1,
+    agent: {
+      currentCycle: finalGraphState.currentCycle ?? 0,
+      errorCount: finalGraphState.errorCount ?? 0,
+      node: {
+        step: 'execute_tool',
+        toolCallId,
+        toolId: toolCall!.tool_id,
+        toolParams: toolCall!.params,
+      },
+    },
+  };
+
+  return state;
 };
 
 const mergeModelUsage = (

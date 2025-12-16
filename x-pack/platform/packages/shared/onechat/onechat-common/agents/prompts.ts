@@ -9,6 +9,17 @@ export enum AgentPromptType {
   confirmation = 'confirmation',
 }
 
+export enum AgentPromptRequestSourceType {
+  toolCall = 'tool_call',
+}
+
+export interface ToolCallPromptRequestSource {
+  type: AgentPromptRequestSourceType.toolCall;
+  tool_call_id: string;
+}
+
+export type PromptRequestSource = ToolCallPromptRequestSource;
+
 export enum ConfirmationStatus {
   /**
    * the confirmation for the given ID wasn't prompted to the user yet

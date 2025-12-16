@@ -26,6 +26,9 @@ export {
   type ConfirmationPrompt,
   type ConfirmationPromptResponse,
   type PromptRequest,
+  type ToolCallPromptRequestSource,
+  type PromptRequestSource,
   AgentPromptType,
+  AgentPromptRequestSourceType,
   isConfirmationPrompt,
 } from './prompts';
