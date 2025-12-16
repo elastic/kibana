@@ -18,8 +18,11 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 
 import type { BreadcrumbService } from './application/services/breadcrumbs';
+import type { PublicApiService } from './services';
 
-export type { IndexLifecycleManagementPluginStart } from '@kbn/index-lifecycle-management-common-shared';
+export interface IndexLifecycleManagementPluginStart {
+  apiService: PublicApiService;
+}
 
 export interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;
