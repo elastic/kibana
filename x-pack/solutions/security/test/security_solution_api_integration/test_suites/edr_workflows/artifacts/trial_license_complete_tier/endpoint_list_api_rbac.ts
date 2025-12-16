@@ -6,7 +6,7 @@
  */
 
 import type TestAgent from 'supertest/lib/agent';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
@@ -41,12 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     let t1AnalystSupertest: TestAgent;
     let endpointPolicyManagerSupertest: TestAgent;
-    let endpointOpsAnalystSupertest: TestAgent;
 
     before(async () => {
       t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
       endpointPolicyManagerSupertest = await utils.createSuperTest(ROLE.endpoint_policy_manager);
-      endpointOpsAnalystSupertest = await utils.createSuperTest(ROLE.endpoint_operations_analyst);
 
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
