@@ -103,7 +103,7 @@ export async function bulkUpdate(
       errors: acc.errors || res.errors,
       items: [...acc.items, ...res.items],
     }),
-    { took: 0, errors: false, items: [] } as BulkResponse
+    { took: 0, errors: false, items: [] }
   );
 
   return {
