@@ -29,7 +29,7 @@ export const getAddRowControl = (
       requestAnimationFrame(() => {
         // Need to focus another cell first to ensure the add control can be focused again
         dataTableRef.current?.setFocusedCell({
-          rowIndex: 0,
+          rowIndex: props.rowIndex,
           colIndex: 0,
         });
         dataTableRef.current?.setFocusedCell({
