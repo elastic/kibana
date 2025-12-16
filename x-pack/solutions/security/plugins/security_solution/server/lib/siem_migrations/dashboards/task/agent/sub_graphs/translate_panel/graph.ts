@@ -74,12 +74,12 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     .addConditionalEdges('validation', validationRouter, [
       'fixQueryErrors',
       'ecsMapping',
-      'extractColumnsFromEsql',
+      'selectIndexPattern',
     ])
-    .addEdge('extractColumnsFromEsql', 'selectIndexPattern')
     .addEdge('selectIndexPattern', 'getIndexMapping')
     .addEdge('getIndexMapping', 'correctColumnsFromMapping')
-    .addEdge('correctColumnsFromMapping', 'translationResult')
+    .addEdge('correctColumnsFromMapping', 'extractColumnsFromEsql')
+    .addEdge('extractColumnsFromEsql', 'translationResult')
     .addEdge('translationResult', END);
 
   const graph = translateDashboardPanelGraph.compile();
@@ -101,5 +101,5 @@ const validationRouter = (state: TranslateDashboardPanelState) => {
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
-  return 'extractColumnsFromEsql';
+  return 'selectIndexPattern';
 };
