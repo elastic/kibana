@@ -11,7 +11,7 @@ import {
   createESQLBodySchemaV1,
   type CreateESQLRuleResponseV1,
   type CreateESQLRuleRequestBodyV1,
-} from '../../../../common/routes/rule/apis/esql';
+} from '../../../../common/routes/esql_rule/apis/create';
 import { esqlRuleResponseSchema } from '../../../../common/routes/rule/response';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../constants';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../lib';

@@ -6,7 +6,7 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 import type { ESQLParams } from '@kbn/response-ops-rule-params';
-import type { ESQLRuleResponseV1 } from '../../../response';
+import type { ESQLRuleResponseV1 } from '../../../../rule/response';
 import type {
   createESQLRuleParamsSchema as createESQLRuleParamsSchemaV1,
   createESQLBodySchema as createESQLBodySchemaV1,

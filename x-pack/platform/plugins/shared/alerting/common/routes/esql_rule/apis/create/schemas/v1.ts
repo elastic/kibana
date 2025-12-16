@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateRuleId, validateDurationV1 } from '../../../validation';
+import { validateRuleId, validateDurationV1 } from '../../../../rule/validation';
 
 export const createESQLRuleParamsSchema = schema.object({
   id: schema.maybe(
