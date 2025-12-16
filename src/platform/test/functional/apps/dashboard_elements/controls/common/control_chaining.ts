@@ -232,15 +232,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Chains pinned and unpinned controls with the same behavior', async () => {
+      await dashboardControls.clearControlSelections(controlIds[0]);
+
       await dashboardControls.unpinExistingControl(controlIds[2]);
       await dashboardControls.unpinExistingControl(controlIds[0]);
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       await dashboardControls.optionsListPopoverSelectOption('meow');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
-
-      await dashboardControls.clearControlSelections(controlIds[0]);
-      await dashboardControls.clearControlSelections(controlIds[1]);
 
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
       const optionsCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
