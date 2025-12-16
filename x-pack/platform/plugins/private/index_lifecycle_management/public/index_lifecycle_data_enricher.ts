@@ -21,6 +21,7 @@ export const indexLifecycleDataEnricher = async (
   return indicesList.map((index: Index) => {
     return {
       ...index,
+      // simply appends ilm data if it exists
       ilm: { ...(ilmIndicesData[index.name] || {}) },
     };
   });
