@@ -50,6 +50,9 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .success(),
       serviceNoInfraDataInstance
         .transaction({ transactionName: 'GET /banana 🍌' })
+        .overrides({
+          'host.name': undefined,
+        })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
