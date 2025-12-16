@@ -70,16 +70,26 @@ export const createModelProvider = ({
 
   const getModel = async (connectorId: string): Promise<ScopedModel> => {
     const completionCallback: InferenceCompleteCallbackHandler = (event) => {
+      // Prefer model from provider response, fallback to connector-based model
+      let modelName: string | undefined = event.model;
+      if (!modelName && connector) {
+        try {
+          modelName = getConnectorModel(connector);
+        } catch (e) {
+          // ignore errors
+        }
+      }
+
       completedCalls.push({
         connectorId,
         tokens: event.tokens,
+        model: modelName,
       });
 
       if (trackingService && connector) {
         try {
           const provider = getConnectorProvider(connector);
-          const model = getConnectorModel(connector);
-          trackingService.trackLLMUsage(provider, model);
+          trackingService.trackLLMUsage(provider, modelName);
         } catch (e) {
           // ignore errors
         }
