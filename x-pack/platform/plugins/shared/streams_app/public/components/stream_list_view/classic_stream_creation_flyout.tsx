@@ -11,7 +11,6 @@ import type {
   TemplateListItem as IndexTemplate,
 } from '@kbn/index-management-shared-types';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
 import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -49,23 +48,6 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       return hasDataStream && hasWildcardPattern;
     });
   }, [indexManagement.apiService, signal]);
-
-  const getIlmPolicy = useCallback(
-    async (policyName: string) => {
-      try {
-        const policies = await core.http.get<PolicyFromES[]>(
-          '/api/index_lifecycle_management/policies',
-          {
-            signal,
-          }
-        );
-        return policies.find((policy) => policy.name === policyName) ?? null;
-      } catch (error) {
-        return null;
-      }
-    },
-    [core.http, signal]
-  );
 
   const handleCreate = useCallback(
     async (streamName: string) => {
@@ -163,7 +145,6 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       hasErrorLoadingTemplates={!!templatesListFetch.error}
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}
-      getIlmPolicy={getIlmPolicy}
       showDataRetention={false}
     />
   );
