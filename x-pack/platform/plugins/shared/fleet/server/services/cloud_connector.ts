@@ -48,8 +48,12 @@ export interface CloudConnectorServiceInterface {
   ): Promise<CloudConnector>;
   getList(
     soClient: SavedObjectsClientContract,
-    options?: CloudConnectorListOptions
+    options?: Omit<CloudConnectorListOptions, 'fields'>
   ): Promise<CloudConnector[]>;
+  getList(
+    soClient: SavedObjectsClientContract,
+    options: CloudConnectorListOptions & { fields: string[] }
+  ): Promise<Partial<CloudConnector>[]>;
   getById(soClient: SavedObjectsClientContract, cloudConnectorId: string): Promise<CloudConnector>;
   update(
     soClient: SavedObjectsClientContract,
@@ -167,7 +171,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (excludeId && c.id === excludeId) {
         return false;
       }
-      return CloudConnectorService.normalizeName(c.name).toLowerCase() === normalizedNameLower;
+      // c.name is guaranteed to exist since we requested the 'name' field
+      return (
+        c.name && CloudConnectorService.normalizeName(c.name).toLowerCase() === normalizedNameLower
+      );
     });
 
     if (duplicateConnectorName) {
@@ -242,10 +249,20 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     }
   }
 
+  // Overload signatures
+  async getList(
+    soClient: SavedObjectsClientContract,
+    options?: Omit<CloudConnectorListOptions, 'fields'>
+  ): Promise<CloudConnector[]>;
+  async getList(
+    soClient: SavedObjectsClientContract,
+    options: CloudConnectorListOptions & { fields: string[] }
+  ): Promise<Partial<CloudConnector>[]>;
+  // Implementation
   async getList(
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
-  ): Promise<CloudConnector[]> {
+  ): Promise<CloudConnector[] | Partial<CloudConnector>[]> {
     const logger = this.getLogger('getList');
     logger.debug('Getting cloud connectors list');
 
@@ -279,10 +296,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       logger.debug('Successfully retrieved cloud connectors list');
 
+      // When using fields filter (internal queries), return partial objects
+      // When fetching all fields, include computed packagePolicyCount
       return cloudConnectors.saved_objects.map((savedObject) => ({
         id: savedObject.id,
         ...savedObject.attributes,
-        packagePolicyCount: countMap.get(savedObject.id) || 0,
+        ...(shouldComputeCounts && { packagePolicyCount: countMap.get(savedObject.id) || 0 }),
       }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list', error.message);

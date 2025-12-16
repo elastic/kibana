@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IntegrationCountBadge } from './integration_count_badge';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
@@ -20,6 +20,9 @@ const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction
   typeof useCloudConnectorUsage
 >;
 
+// EuiToolTip has a 250ms delay for "long" - we need fake timers
+const TOOLTIP_DELAY_MS = 300;
+
 describe('IntegrationCountBadge', () => {
   const renderBadge = (cloudConnectorId: string, count: number) => {
     return render(
@@ -31,11 +34,16 @@ describe('IntegrationCountBadge', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
     mockUseCloudConnectorUsage.mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: false,
-    } as ReturnType<typeof useCloudConnectorUsage>);
+    } as unknown as ReturnType<typeof useCloudConnectorUsage>);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('badge rendering', () => {
@@ -69,7 +77,13 @@ describe('IntegrationCountBadge', () => {
       mockUseCloudConnectorUsage.mockReturnValue({
         data: {
           items: [
-            { id: 'policy-1', name: 'Policy 1', policy_ids: ['agent-1'], created_at: '', updated_at: '' },
+            {
+              id: 'policy-1',
+              name: 'Policy 1',
+              policy_ids: ['agent-1'],
+              created_at: '',
+              updated_at: '',
+            },
           ],
           total: 1,
           page: 1,
@@ -83,8 +97,14 @@ describe('IntegrationCountBadge', () => {
       const badge = container.querySelector('.euiBadge');
       expect(badge).toBeInTheDocument();
 
-      // Trigger hover
-      fireEvent.mouseEnter(badge!.parentElement!.parentElement!);
+      // Trigger hover on the tooltip anchor (EuiToolTip's wrapper)
+      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
+      fireEvent.mouseOver(tooltipAnchor!);
+
+      // Advance past the tooltip delay
+      act(() => {
+        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
+      });
 
       // Wait for tooltip to appear
       await waitFor(() => {
@@ -102,10 +122,15 @@ describe('IntegrationCountBadge', () => {
       } as ReturnType<typeof useCloudConnectorUsage>);
 
       const { container } = renderBadge('connector-1', 2);
-      const badge = container.querySelector('.euiBadge');
 
-      // Trigger hover
-      fireEvent.mouseEnter(badge!.parentElement!.parentElement!);
+      // Trigger hover on the tooltip anchor
+      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
+      fireEvent.mouseOver(tooltipAnchor!);
+
+      // Advance past the tooltip delay
+      act(() => {
+        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
+      });
 
       await waitFor(() => {
         expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -120,10 +145,15 @@ describe('IntegrationCountBadge', () => {
       } as ReturnType<typeof useCloudConnectorUsage>);
 
       const { container } = renderBadge('connector-1', 2);
-      const badge = container.querySelector('.euiBadge');
 
-      // Trigger hover
-      fireEvent.mouseEnter(badge!.parentElement!.parentElement!);
+      // Trigger hover on the tooltip anchor
+      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
+      fireEvent.mouseOver(tooltipAnchor!);
+
+      // Advance past the tooltip delay
+      act(() => {
+        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
+      });
 
       await waitFor(() => {
         expect(screen.getByText('Failed to load integrations')).toBeInTheDocument();
@@ -134,8 +164,20 @@ describe('IntegrationCountBadge', () => {
       mockUseCloudConnectorUsage.mockReturnValue({
         data: {
           items: [
-            { id: 'policy-1', name: 'CSPM Policy', policy_ids: ['agent-1'], created_at: '', updated_at: '' },
-            { id: 'policy-2', name: 'Asset Inventory', policy_ids: ['agent-2'], created_at: '', updated_at: '' },
+            {
+              id: 'policy-1',
+              name: 'CSPM Policy',
+              policy_ids: ['agent-1'],
+              created_at: '',
+              updated_at: '',
+            },
+            {
+              id: 'policy-2',
+              name: 'Asset Inventory',
+              policy_ids: ['agent-2'],
+              created_at: '',
+              updated_at: '',
+            },
           ],
           total: 2,
           page: 1,
@@ -146,10 +188,15 @@ describe('IntegrationCountBadge', () => {
       } as ReturnType<typeof useCloudConnectorUsage>);
 
       const { container } = renderBadge('connector-1', 2);
-      const badge = container.querySelector('.euiBadge');
 
-      // Trigger hover
-      fireEvent.mouseEnter(badge!.parentElement!.parentElement!);
+      // Trigger hover on the tooltip anchor
+      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
+      fireEvent.mouseOver(tooltipAnchor!);
+
+      // Advance past the tooltip delay
+      act(() => {
+        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
+      });
 
       await waitFor(() => {
         expect(screen.getByText('CSPM Policy')).toBeInTheDocument();
@@ -178,15 +225,60 @@ describe('IntegrationCountBadge', () => {
       } as ReturnType<typeof useCloudConnectorUsage>);
 
       const { container } = renderBadge('connector-1', 15);
-      const badge = container.querySelector('.euiBadge');
 
-      // Trigger hover
-      fireEvent.mouseEnter(badge!.parentElement!.parentElement!);
+      // Trigger hover on the tooltip anchor
+      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
+      fireEvent.mouseOver(tooltipAnchor!);
+
+      // Advance past the tooltip delay
+      act(() => {
+        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
+      });
 
       await waitFor(() => {
         expect(screen.getByText('+5 more')).toBeInTheDocument();
       });
     });
   });
-});
 
+  describe('hook options', () => {
+    it('calls useCloudConnectorUsage with staleTime: 0 for fresh data on hover', async () => {
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: {
+          items: [
+            {
+              id: 'policy-1',
+              name: 'Test Policy',
+              policy_ids: ['agent-1'],
+              created_at: '',
+              updated_at: '',
+            },
+          ],
+          total: 1,
+          page: 1,
+          perPage: 10,
+        },
+        isLoading: false,
+        isError: false,
+      } as ReturnType<typeof useCloudConnectorUsage>);
+
+      const { container } = renderBadge('connector-123', 1);
+
+      // Trigger hover on the tooltip anchor
+      const tooltipAnchor = container.querySelector('.euiToolTipAnchor');
+      fireEvent.mouseOver(tooltipAnchor!);
+
+      // Advance past the tooltip delay
+      act(() => {
+        jest.advanceTimersByTime(TOOLTIP_DELAY_MS);
+      });
+
+      await waitFor(() => {
+        // Verify the hook is called with the correct parameters including staleTime: 0
+        expect(mockUseCloudConnectorUsage).toHaveBeenCalledWith('connector-123', 1, 10, {
+          staleTime: 0,
+        });
+      });
+    });
+  });
+});

@@ -2053,7 +2053,6 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
         });
         expect((createCall as any).created_at).toBeDefined();
         expect((createCall as any).updated_at).toBeDefined();
@@ -2109,7 +2108,6 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
         });
         expect((createCall as any).created_at).toBeDefined();
         expect((createCall as any).updated_at).toBeDefined();
