@@ -713,6 +713,7 @@ export interface DocLinks {
     readonly mcpServer: string;
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
+    readonly learnMore: string;
   };
   readonly indexManagement: {
     readonly componentTemplate: string;

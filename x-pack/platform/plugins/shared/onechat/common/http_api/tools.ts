@@ -90,3 +90,24 @@ export interface ListWorkflowsResponse {
 export interface GetToolTypeInfoResponse {
   toolTypes: ToolTypeInfo[];
 }
+
+/**
+ * Tool health status returned by the health API.
+ */
+export type ToolHealthStatus = 'healthy' | 'failed' | 'unknown';
+
+export interface ToolHealthState {
+  toolId: string;
+  status: ToolHealthStatus;
+  lastCheck: string;
+  errorMessage?: string;
+  consecutiveFailures: number;
+}
+
+export interface GetToolHealthResponse {
+  health: ToolHealthState | null;
+}
+
+export interface ListToolHealthResponse {
+  results: ToolHealthState[];
+}

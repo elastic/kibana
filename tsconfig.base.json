@@ -1040,8 +1040,6 @@
       "@kbn/esql-utils/*": ["src/platform/packages/shared/kbn-esql-utils/*"],
       "@kbn/esql-ux-example-plugin": ["examples/esql_ux_example"],
       "@kbn/esql-ux-example-plugin/*": ["examples/esql_ux_example/*"],
-      "@kbn/esql-validation-autocomplete": ["src/platform/packages/shared/kbn-esql-validation-autocomplete"],
-      "@kbn/esql-validation-autocomplete/*": ["src/platform/packages/shared/kbn-esql-validation-autocomplete/*"],
       "@kbn/esql-validation-example-plugin": ["examples/esql_validation_example"],
       "@kbn/esql-validation-example-plugin/*": ["examples/esql_validation_example/*"],
       "@kbn/eui-provider-dev-warning": ["src/platform/test/plugin_functional/plugins/eui_provider_dev_warning"],
