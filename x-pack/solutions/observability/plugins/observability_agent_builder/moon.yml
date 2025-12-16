@@ -53,6 +53,8 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/discover-shared-plugin'
   - '@kbn/i18n'
+  - '@kbn/licensing-types'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod
