@@ -91,12 +91,14 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     );
   });
 
-  it('should return a correct APM deeplink when groupBy and instanceId are provided', () => {
+  it('should return a correct APM deeplink when instanceId is provided and groupings is non-empty', () => {
     const url = convertSliApmParamsToApmAppDeeplinkUrl(
       buildSlo({
         indicator: buildApmLatencyIndicator(DEFAULT_PARAMS),
-        groupBy: 'label.project_id',
         instanceId: 'bf6689b383749812f35c7a408f57d113',
+        groupings: {
+          'label.project_id': 'bf6689b383749812f35c7a408f57d113',
+        },
       })
     );
 
@@ -105,12 +107,14 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     );
   });
 
-  it('should use instanceId as service name when groupBy is service.name (string format)', () => {
+  it('should return a correct APM deeplink when groupings has only service.name', () => {
     const url = convertSliApmParamsToApmAppDeeplinkUrl(
       buildSlo({
         indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
-        groupBy: 'service.name',
         instanceId: 'cart-service',
+        groupings: {
+          'service.name': 'cart-service',
+        },
       })
     );
 
@@ -119,31 +123,33 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     );
   });
 
-  it('should use instanceId as service name when groupBy is service.name (array format)', () => {
+  it('should return a correct APM deeplink when groupings has multiple fields including service.name', () => {
     const url = convertSliApmParamsToApmAppDeeplinkUrl(
       buildSlo({
         indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
-        groupBy: ['service.name'],
-        instanceId: 'cart-service',
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/cart-service/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
-    );
-  });
-
-  it('should handle multi-field groupBy with comma-separated instanceId', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
-        groupBy: ['service.name', 'label.project_id'],
         instanceId: 'cart-service,project-123',
+        groupings: {
+          'service.name': 'cart-service',
+          'label.project_id': 'project-123',
+        },
       })
     );
 
     expect(url).toMatchInlineSnapshot(
       `"/app/apm/services/cart-service/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12++and+label.project_id+%3A+%22project-123%22"`
+    );
+  });
+
+  it('should return a correct APM deeplink when instanceId is "*" and groupings is empty', () => {
+    const url = convertSliApmParamsToApmAppDeeplinkUrl(
+      buildSlo({
+        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
+        instanceId: '*',
+      })
+    );
+
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/*/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
     );
   });
 });
