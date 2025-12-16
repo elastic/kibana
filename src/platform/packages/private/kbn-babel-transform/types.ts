@@ -7,26 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface ExportInfo {
-  /** Absolute path to the source file containing the export */
-  path: string;
-  /** Whether this is a named or default export */
-  type: 'named' | 'default';
-  /** The local name of the export in the source file */
-  localName: string;
-  /** The name the export was originally exported as (may differ from localName for re-exports) */
-  importedName: string;
-}
+import type { BarrelIndex } from '@kbn/babel-plugin-transform-barrels';
 
-export interface BarrelFileEntry {
-  /** Map of export name to export info */
-  exports: Record<string, ExportInfo>;
-}
-
-export interface BarrelIndex {
-  /** Map of absolute barrel file path to its exports */
-  [barrelFilePath: string]: BarrelFileEntry;
-}
+export type { BarrelIndex, BarrelFileEntry, ExportInfo } from '@kbn/babel-plugin-transform-barrels';
 
 export interface TransformConfig {
   disableSourceMaps?: boolean;
@@ -46,7 +29,7 @@ export interface WorkerTask {
 
 export interface WorkerResult {
   code: string;
-  map?: any;
+  map?: unknown;
 }
 
 export type Transform = (path: string, source: string) => Promise<WorkerResult>;

@@ -1,7 +1,18 @@
-'use strict';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
 
 const path = require('path');
 const { createImportDeclaration } = require('./ast_utils');
+
+/**
+ * @typedef {import('./ast_utils').ImportSpecifierInfo} ImportSpecifierInfo
+ */
 
 /**
  * Transform a barrel import to direct imports.
@@ -14,7 +25,7 @@ const { createImportDeclaration } = require('./ast_utils');
  *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').ImportDeclaration>} nodePath
  * @param {import('@babel/core').PluginPass} state
- * @param {import('@babel/types')} t
+ * @param {typeof import('@babel/types')} t
  * @param {import('./types').BarrelIndex} barrelIndex
  */
 function transformImportDeclaration(nodePath, state, t, barrelIndex) {
@@ -43,7 +54,7 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   const { exports } = barrelEntry;
 
   // Collect new imports grouped by target path
-  /** @type {Map<string, Array<{localName: string, importedName: string, isDefault: boolean}>>} */
+  /** @type {Map<string, ImportSpecifierInfo[]>} */
   const newImports = new Map();
 
   /** @type {Array<import('@babel/types').ImportSpecifier | import('@babel/types').ImportDefaultSpecifier | import('@babel/types').ImportNamespaceSpecifier>} */
@@ -52,7 +63,8 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   for (const specifier of node.specifiers) {
     if (specifier.type === 'ImportSpecifier') {
       // import { Foo } from './barrel' or import { Foo as Bar } from './barrel'
-      const importedName = specifier.imported.name || specifier.imported.value;
+      const imported = specifier.imported;
+      const importedName = imported.type === 'Identifier' ? imported.name : imported.value;
       const localName = specifier.local.name;
 
       const exportInfo = exports[importedName];
@@ -64,8 +76,8 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
           newImports.set(targetPath, []);
         }
 
-        newImports.get(targetPath).push({
-          localName: localName,
+        newImports.get(targetPath)?.push({
+          localName,
           importedName: exportInfo.localName,
           isDefault: exportInfo.type === 'default',
         });
@@ -76,7 +88,7 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
     } else if (specifier.type === 'ImportDefaultSpecifier') {
       // import Foo from './barrel'
       const localName = specifier.local.name;
-      const exportInfo = exports['default'];
+      const exportInfo = exports.default;
 
       if (exportInfo) {
         const targetPath = exportInfo.path;
@@ -85,8 +97,8 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
           newImports.set(targetPath, []);
         }
 
-        newImports.get(targetPath).push({
-          localName: localName,
+        newImports.get(targetPath)?.push({
+          localName,
           importedName: 'default',
           isDefault: true,
         });
@@ -106,10 +118,13 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   }
 
   // Build new import declarations
+  /** @type {import('@babel/types').ImportDeclaration[]} */
   const newNodes = [];
 
   for (const [targetPath, specifiers] of newImports) {
     // Convert absolute path to relative from current file
+    // The barrel index stores absolute paths for reliable lookups,
+    // but import statements need relative paths from the current file
     const relativePath = absoluteToRelative(targetPath, currentFileDir);
 
     const importNode = createImportDeclaration(t, specifiers, relativePath);
@@ -168,6 +183,11 @@ function resolveToBarrelPath(importSource, fromDir, barrelIndex) {
 /**
  * Convert an absolute path to a relative path from a directory.
  *
+ * The barrel index stores absolute paths for reliable lookups across the codebase.
+ * However, import statements in source code must use relative paths from the
+ * current file's location. This function converts an absolute target path to
+ * a relative path suitable for use in an import statement.
+ *
  * @param {string} absolutePath - Absolute target path
  * @param {string} fromDir - Directory to make relative from
  * @returns {string} - Relative path (always starts with ./ or ../)
@@ -187,4 +207,3 @@ function absoluteToRelative(absolutePath, fromDir) {
 }
 
 module.exports = { transformImportDeclaration };
-

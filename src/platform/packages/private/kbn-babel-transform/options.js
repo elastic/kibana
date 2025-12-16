@@ -15,7 +15,7 @@ const cwd = process.cwd();
 /** @type {string | undefined} */
 let barrelPluginPath;
 try {
-  barrelPluginPath = require.resolve('@kbn/babel-plugin-transform-barrels');
+  barrelPluginPath = require.resolve('@kbn/babel-plugin-transform-barrels/plugin');
 } catch (e) {
   // Plugin not available yet (during bootstrap), will be skipped
 }

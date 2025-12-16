@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Information about a single export from a barrel file.
+ */
 export interface ExportInfo {
   /** Absolute path to the source file containing the export */
   path: string;
@@ -18,19 +21,28 @@ export interface ExportInfo {
   importedName: string;
 }
 
+/**
+ * Entry for a single barrel file in the index.
+ */
 export interface BarrelFileEntry {
   /** Map of export name to export info */
   exports: Record<string, ExportInfo>;
 }
 
+/**
+ * Index of all barrel files and their exports.
+ * Keys are absolute paths to barrel files (index.ts/js files).
+ * Values contain the exports from that barrel file.
+ */
 export interface BarrelIndex {
-  /** Map of absolute barrel file path to its exports */
   [barrelFilePath: string]: BarrelFileEntry;
 }
 
+/**
+ * Plugin options passed to the Babel plugin.
+ */
 export interface PluginOptions {
+  /** Pre-built barrel index, if not provided the plugin is a no-op */
   barrelIndex?: BarrelIndex;
 }
-
-export function buildBarrelIndex(repoRoot: string): Promise<BarrelIndex>;
 

@@ -1,10 +1,24 @@
-'use strict';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * @typedef {Object} ImportSpecifierInfo
+ * @property {string} localName - The local binding name
+ * @property {string} importedName - The imported name from the module
+ * @property {boolean} isDefault - Whether this is a default import
+ */
 
 /**
  * Create an import declaration AST node.
  *
- * @param {import('@babel/types')} t - Babel types
- * @param {Array<{localName: string, importedName: string, isDefault: boolean}>} specifiers
+ * @param {typeof import('@babel/types')} t - Babel types
+ * @param {ImportSpecifierInfo[]} specifiers - Import specifiers to create
  * @param {string} sourcePath - The import source path
  * @returns {import('@babel/types').ImportDeclaration}
  */
@@ -36,4 +50,3 @@ function isTypeOnlyImport(specifier) {
 }
 
 module.exports = { createImportDeclaration, isTypeOnlyImport };
-
