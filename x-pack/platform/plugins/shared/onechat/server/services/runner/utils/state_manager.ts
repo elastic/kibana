@@ -5,12 +5,22 @@
  * 2.0.
  */
 
+import type { Conversation } from '@kbn/onechat-common';
 import type { ConversationStateManager, ToolStateManager } from '@kbn/onechat-server/runner';
 
-export const createConversationStateManager = (): ConversationStateManager => {
+export const createConversationStateManager = (
+  conversation?: Conversation | undefined
+): ConversationStateManager => {
   const toolCallStateMap = new Map<string, unknown>();
 
-  // TODO: prefill it when we figured out the state
+  // prefill tool state map with last round's tool state
+  const lastRound = conversation ? conversation.rounds[conversation.rounds.length - 1] : undefined;
+  if (lastRound && lastRound.state) {
+    const nodeState = lastRound.state.agent.node;
+    if (nodeState.step === 'execute_tool') {
+      toolCallStateMap.set(nodeState.tool_call_id, nodeState.tool_state);
+    }
+  }
 
   return {
     getToolStateManager: ({ toolId, toolCallId }): ToolStateManager => {

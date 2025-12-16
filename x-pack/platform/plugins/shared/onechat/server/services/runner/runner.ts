@@ -181,7 +181,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const { request, defaultConnectorId, ...otherParams } = params;
       const resultStore = createResultStore(params.agentParams.conversation?.rounds);
 
-      const stateManager = createConversationStateManager();
+      const stateManager = createConversationStateManager(params.agentParams.conversation);
       const promptManager = createPromptManager();
       initPromptManager({
         promptManager,

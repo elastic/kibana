@@ -57,7 +57,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, promptManager, attachments, events }
+  { logger, request, modelProvider, toolProvider, stateManager, attachments, events }
 ) => {
   ensureValidInput({ input: nextInput, conversation });
 
@@ -166,7 +166,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput, pendingRound, startTime, modelProvider }),
+    addRoundCompleteEvent({
+      userInput: processedInput,
+      pendingRound,
+      startTime,
+      modelProvider,
+      stateManager,
+    }),
     evictInternalEvents(),
     shareReplay()
   );

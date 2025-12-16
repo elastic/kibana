@@ -85,8 +85,8 @@ export const createAgentGraph = ({
     }
 
     if (lastRound?.state) {
-      restoredState.currentCycle = lastRound.state.agent.errorCount;
-      restoredState.errorCount = lastRound.state.agent.errorCount;
+      restoredState.currentCycle = lastRound.state.agent.current_cycle;
+      restoredState.errorCount = lastRound.state.agent.error_count;
     }
 
     return { ...restoredState, mainActions: [...actions] };

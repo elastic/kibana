@@ -11,16 +11,17 @@ export interface RoundState {
 }
 
 export interface AgentState {
-  currentCycle: number;
-  errorCount: number;
+  current_cycle: number;
+  error_count: number;
   node: AgentNodeState;
 }
 
 export interface ExecuteToolNodeState {
   step: 'execute_tool';
-  toolId: string;
-  toolCallId: string;
-  toolParams: Record<string, unknown>;
+  tool_call_id: string;
+  tool_id: string;
+  tool_params: Record<string, unknown>;
+  tool_state: unknown | undefined;
 }
 
 /** All possible node states */

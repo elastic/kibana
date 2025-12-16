@@ -35,7 +35,11 @@ import {
   isToolCallStep,
 } from '@kbn/onechat-common';
 import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
-import type { ModelProvider, ModelProviderStats } from '@kbn/onechat-server/runner';
+import type {
+  ConversationStateManager,
+  ModelProvider,
+  ModelProviderStats,
+} from '@kbn/onechat-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';
@@ -54,11 +58,13 @@ export const addRoundCompleteEvent = ({
   startTime,
   endTime,
   modelProvider,
+  stateManager,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
   startTime: Date;
   modelProvider: ModelProvider;
+  stateManager: ConversationStateManager;
   endTime?: Date;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
@@ -85,7 +91,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
               });
 
-          round.state = buildRoundState({ round, events });
+          round.state = buildRoundState({ round, events, stateManager });
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
@@ -306,9 +312,11 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
 const buildRoundState = ({
   round,
   events,
+  stateManager,
 }: {
   round: ConversationRound;
   events: SourceEvents[];
+  stateManager: ConversationStateManager;
 }): RoundState | undefined => {
   const finalGraphState = events.find(isFinalStateEvent)!.data.state;
   const promptRequestEvents = events.filter(isPromptRequestEvent).map((event) => event.data);
@@ -327,16 +335,21 @@ const buildRoundState = ({
     throw new Error(`Could not find tool call with id ${toolCallId} in round steps`);
   }
 
+  const toolState = stateManager
+    .getToolStateManager({ toolId: toolCall.tool_id, toolCallId })
+    .getState();
+
   const state: RoundState = {
     version: 1,
     agent: {
-      currentCycle: finalGraphState.currentCycle ?? 0,
-      errorCount: finalGraphState.errorCount ?? 0,
+      current_cycle: finalGraphState.currentCycle ?? 0,
+      error_count: finalGraphState.errorCount ?? 0,
       node: {
         step: 'execute_tool',
-        toolCallId,
-        toolId: toolCall!.tool_id,
-        toolParams: toolCall!.params,
+        tool_call_id: toolCallId,
+        tool_id: toolCall.tool_id,
+        tool_params: toolCall.params,
+        tool_state: toolState,
       },
     },
   };
