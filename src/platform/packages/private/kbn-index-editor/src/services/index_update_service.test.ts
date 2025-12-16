@@ -11,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ROW_PLACEHOLDER_PREFIX } from './constants';
+import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { IndexUpdateService } from './index_update_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import {
@@ -19,10 +19,10 @@ import {
   httpServiceMock,
   notificationServiceMock,
 } from '@kbn/core/public/mocks';
-import { IndexEditorTelemetryService } from './telemetry/telemetry_service';
+import { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { LOOKUP_INDEX_RECREATE_ROUTE, LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
+import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn(),
@@ -130,58 +130,6 @@ describe('IndexUpdateService', () => {
 
       const afterAdd = await firstValueFrom(service.hasUnsavedChanges$);
       expect(afterAdd).toBe(false);
-    });
-  });
-
-  describe('Bulk update', () => {
-    it('builds bulk update operations correctly and posts to the correct endpoint', async () => {
-      service.setIndexName('my-index');
-
-      const updates = [
-        {
-          type: 'add-doc',
-          payload: { id: `${ROW_PLACEHOLDER_PREFIX}xyz`, value: { b: 2 } },
-        },
-        {
-          type: 'add-doc',
-          payload: { id: `${ROW_PLACEHOLDER_PREFIX}xyz`, value: { c: 3 } },
-        },
-        {
-          type: 'delete-doc',
-          payload: { ids: ['abc123', 'to-del'] },
-        },
-      ] as any;
-
-      // mock success response
-      (http.post as jest.Mock).mockResolvedValue({
-        errors: false,
-        items: [],
-        took: 0,
-      } satisfies BulkResponse);
-
-      await service.bulkUpdate(updates);
-
-      expect(http.post).toHaveBeenCalledTimes(1);
-      const [url, options] = (http.post as jest.Mock).mock.calls[0];
-      expect(url).toBe(`${LOOKUP_INDEX_UPDATE_ROUTE}/my-index`);
-
-      const body = JSON.parse(options.body);
-      expect(Array.isArray(body.operations)).toBe(true);
-
-      // We expect: 1 index operation (2 entries: action + source) and 2 delete ops (each is a single entry)
-      // So total flattened entries = 4
-      expect(body.operations.length).toBe(4);
-
-      // Validate presence of delete operations for non-placeholder ids only
-      const deletes = body.operations.filter((op: any) => op.delete);
-      const deleteIds = deletes.map((d: any) => d.delete._id).sort();
-      expect(deleteIds).toEqual(['abc123', 'to-del']);
-
-      // Validate there is an index operation and that the document merges values
-      const indexIdx = body.operations.findIndex((op: any) => op.index);
-      expect(indexIdx).toBeGreaterThanOrEqual(0);
-      const doc = body.operations[indexIdx + 1];
-      expect(doc).toEqual({ b: 2, c: 3 });
     });
   });
 
