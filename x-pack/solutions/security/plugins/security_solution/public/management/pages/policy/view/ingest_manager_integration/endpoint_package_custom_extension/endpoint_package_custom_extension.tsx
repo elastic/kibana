@@ -228,7 +228,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       props,
       trustedDevicesVisible,
       canReadEventFilters,
-      canReadEndpointExceptions,
+      endpointExceptionsVisible,
       canReadHostIsolationExceptions,
       canReadBlocklist,
     ]);
