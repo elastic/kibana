@@ -24,18 +24,18 @@ export const InputSchema = z.object({
   prompt: z.string(),
   connectorId: z.string().optional(),
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  outputSchema: z.any().optional(),
+  responseSchema: z.any().optional(),
   temperature: z.number().min(0).max(1).optional(),
 });
 
 function getStructuredOutputSchema(contentSchema: z.ZodType) {
   return z.object({
-    content: contentSchema,
+    response: contentSchema,
   });
 }
 
 const stringOutputSchema = z.object({
-  content: z.string(),
+  response: z.string(),
   response_metadata: z.record(z.string(), z.any()),
 });
 
@@ -61,8 +61,8 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   dynamicOutputSchema: (input) => {
-    if (input.outputSchema) {
-      return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
+    if (input.responseSchema) {
+      return getStructuredOutputSchema(convertJsonSchemaToZod(input.responseSchema));
     }
 
     return stringOutputSchema;

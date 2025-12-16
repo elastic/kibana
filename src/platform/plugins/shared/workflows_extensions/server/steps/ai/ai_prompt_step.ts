@@ -42,14 +42,14 @@ export const aiPromptStepDefinition = (
         },
       ];
 
-      if (context.input.outputSchema) {
+      if (context.input.responseSchema) {
         const runnable = chatModel.withStructuredOutput({
           type: 'object',
           properties: {
             // withStructuredOutput fails if outputSchema is not an object.
             // for example, if the user expects an array, we wrap it into an object here
             // and then unwrap it below
-            response: context.input.outputSchema,
+            response: context.input.responseSchema,
           },
         });
 
@@ -62,7 +62,7 @@ export const aiPromptStepDefinition = (
           // so we only return the content here, but looking ahead we might have response_metadata returned,
           // so we keep the same output structure with potential response_metadata addition in the future.
           output: {
-            content: modelResponse.response,
+            response: modelResponse.response,
           },
         };
       }
@@ -73,7 +73,7 @@ export const aiPromptStepDefinition = (
 
       return {
         output: {
-          content: modelResponse.content,
+          response: modelResponse.content,
           response_metadata: modelResponse.response_metadata,
         },
       };
