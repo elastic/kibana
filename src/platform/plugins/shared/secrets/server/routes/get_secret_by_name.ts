@@ -13,7 +13,7 @@ import { SECRET_ROUTE_OPTIONS } from './route_constants';
 import { SECRET_READ_SECURITY } from './route_security';
 import type { SecretsRequestHandlerContext } from '../types';
 
-export function registerGetSecretByIdRoute(router: IRouter<SecretsRequestHandlerContext>) {
+export function registerGetSecretByNameRoute(router: IRouter<SecretsRequestHandlerContext>) {
   router.get(
     {
       path: '/api/secrets/{name}',

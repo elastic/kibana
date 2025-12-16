@@ -26,14 +26,15 @@ export const CreateSecretCommandSchema = z.object({
   description: z.string(),
   secret: z.string(),
 });
-
 export type CreateSecretCommand = z.infer<typeof CreateSecretCommandSchema>;
+
+export const UpdateSecretCommandSchema = CreateSecretCommandSchema.partial();
+export type UpdateSecretCommand = z.infer<typeof UpdateSecretCommandSchema>;
 
 export const SearchSecretsParamsSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
 });
-
 export type SearchSecretsParams = z.infer<typeof SearchSecretsParamsSchema>;
 
 export interface SearchSecretsResponseDto {
@@ -41,4 +42,12 @@ export interface SearchSecretsResponseDto {
   page: number;
   size: number;
   total: number;
+}
+
+export interface ISecretClient {
+  create(command: CreateSecretCommand): Promise<SecretDto>;
+  get(name: string): Promise<SecretDto | null>;
+  search(params: SearchSecretsParams): Promise<SearchSecretsResponseDto>;
+  update(name: string, updates: Partial<SecretAttributes>): Promise<Partial<SecretDto>>;
+  delete(name: string): Promise<void>;
 }

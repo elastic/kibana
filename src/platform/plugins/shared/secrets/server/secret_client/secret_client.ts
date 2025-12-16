@@ -16,8 +16,8 @@ import type {
   SearchSecretsResponseDto,
   SecretAttributes,
   SecretDto,
+  ISecretClient,
 } from '../../common/types';
-import type { ISecretClient } from './types';
 
 export interface SecretClientConstructorOptions {
   soClient: SavedObjectsClientContract;
@@ -40,21 +40,26 @@ export class SecretClient implements ISecretClient {
 
   async create(command: CreateSecretCommand): Promise<SecretDto> {
     const createdAtDate = new Date();
-    const savedObject = await this.soClient.create<SecretAttributes>(SECRET_SAVED_OBJECT_TYPE, {
-      name: command.name,
-      description: command.description,
-      secret: command.secret,
-      updatedAt: createdAtDate.toISOString(),
-      createdAt: createdAtDate.toISOString(),
-    });
+    try {
+      const savedObject = await this.soClient.create<SecretAttributes>(SECRET_SAVED_OBJECT_TYPE, {
+        name: command.name,
+        description: command.description,
+        secret: command.secret,
+        updatedAt: createdAtDate.toISOString(),
+        createdAt: createdAtDate.toISOString(),
+      });
 
-    // Don't return the encrypted value
-    const { secret, ...safeAttributes } = savedObject.attributes;
-    return {
-      id: savedObject.id,
-      ...safeAttributes,
-      secret: '[ENCRYPTED]',
-    };
+      // Don't return the encrypted value
+      const { secret, ...safeAttributes } = savedObject.attributes;
+      return {
+        id: savedObject.id,
+        ...safeAttributes,
+        secret: '[ENCRYPTED]',
+      };
+    } catch (error) {
+      this.logger.error(`Error creating secret: ${error.message}`, { error });
+      throw error;
+    }
   }
 
   async get(name: string): Promise<SecretDto | null> {
@@ -65,7 +70,6 @@ export class SecretClient implements ISecretClient {
     });
 
     if (response.saved_objects.length === 0) {
-      this.logger.error(`Secret not found with name: ${name}`);
       return null;
     }
 
@@ -115,14 +119,21 @@ export class SecretClient implements ISecretClient {
     };
   }
 
-  async update(id: string, updates: Partial<SecretAttributes>): Promise<Partial<SecretDto>> {
-    const soClient = this.soClient;
-    const savedObject = await soClient.update<SecretAttributes>(SECRET_SAVED_OBJECT_TYPE, id, {
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    });
+  async update(name: string, updates: Partial<SecretAttributes>): Promise<Partial<SecretDto>> {
+    const savedObject = await this.get(name);
+    if (!savedObject) {
+      throw new Error(`Secret not found with name: ${name}`);
+    }
+    const updatedSavedObject = await this.soClient.update<SecretAttributes>(
+      SECRET_SAVED_OBJECT_TYPE,
+      savedObject.id,
+      {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      }
+    );
 
-    const { secret, ...safeAttributes } = savedObject.attributes;
+    const { secret, ...safeAttributes } = updatedSavedObject.attributes;
     return {
       id: savedObject.id,
       ...safeAttributes,
@@ -130,7 +141,11 @@ export class SecretClient implements ISecretClient {
     };
   }
 
-  async delete(id: string): Promise<void> {
-    await this.soClient.delete(SECRET_SAVED_OBJECT_TYPE, id);
+  async delete(name: string): Promise<void> {
+    const savedObject = await this.get(name);
+    if (!savedObject) {
+      throw new Error(`Secret not found with name: ${name}`);
+    }
+    await this.soClient.delete(SECRET_SAVED_OBJECT_TYPE, savedObject.id);
   }
 }

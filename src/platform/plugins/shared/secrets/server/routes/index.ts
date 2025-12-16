@@ -10,11 +10,15 @@
 import type { IRouter } from '@kbn/core/server';
 import { registerGetSearchSecretsRoute } from './get_search_secrets';
 import { registerPostCreateSecretRoute } from './post_create_secret';
-import { registerGetSecretByIdRoute } from './get_secret_by_id';
+import { registerGetSecretByNameRoute } from './get_secret_by_name';
 import type { SecretsRequestHandlerContext } from '../types';
+import { registerDeleteSecretRoute } from './delete_secret';
+import { registerUpdateSecretRoute } from './put_update_secret';
 
 export function registerRoutes(router: IRouter<SecretsRequestHandlerContext>) {
   registerGetSearchSecretsRoute(router);
   registerPostCreateSecretRoute(router);
-  registerGetSecretByIdRoute(router);
+  registerGetSecretByNameRoute(router);
+  registerUpdateSecretRoute(router);
+  registerDeleteSecretRoute(router);
 }

@@ -13,7 +13,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { ISecretClient } from './secret_client/types';
+import type { ISecretClient } from '../common/types';
 
 export type SecretsRequestHandlerContext = CustomRequestHandlerContext<{
   secrets: {
