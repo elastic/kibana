@@ -199,7 +199,13 @@ export function GeneratedEventPreview({
           <EuiSuperSelect
             options={options}
             valueOfSelected={
-              options.find((option) => option.value.name === query.feature?.name)?.value
+              query.feature
+                ? options.find(
+                    (option) =>
+                      option.value.name === query.feature?.name &&
+                      option.value.type === query.feature?.type
+                  )?.value
+                : ALL_DATA_OPTION.value
             }
             onBlur={() => {
               setTouched((prev) => ({ ...prev, feature: true }));
