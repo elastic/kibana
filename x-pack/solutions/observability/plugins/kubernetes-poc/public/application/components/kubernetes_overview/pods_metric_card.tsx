@@ -42,9 +42,6 @@ export const PodsMetricCard: React.FC<PodsMetricCardProps> = ({ timeRange, heigh
           layerId: 'layer_0',
           layerType: 'data',
           metricAccessor: 'metric_0',
-          subtitle: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.totalLabel', {
-            defaultMessage: 'Total',
-          }),
         },
         query: {
           esql: PODS_ESQL,

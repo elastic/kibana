@@ -45,9 +45,6 @@ export const DeploymentsMetricCard: React.FC<DeploymentsMetricCardProps> = ({
           layerId: 'layer_0',
           layerType: 'data',
           metricAccessor: 'metric_0',
-          subtitle: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.totalLabel', {
-            defaultMessage: 'Total',
-          }),
         },
         query: {
           esql: DEPLOYMENTS_ESQL,

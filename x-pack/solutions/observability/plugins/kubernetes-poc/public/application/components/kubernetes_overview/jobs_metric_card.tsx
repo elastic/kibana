@@ -11,31 +11,27 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
-interface ServicesMetricCardProps {
+interface JobsMetricCardProps {
   timeRange: TimeRange;
   height?: number;
 }
 
 /**
- * ES|QL query for total service count across all clusters
- * Note: k8s.service.name might not be available in OTel data, using k8s.namespace.name as fallback
+ * ES|QL query for total job count across all clusters
  */
-const SERVICES_ESQL = `FROM remote_cluster:metrics-*
+const JOBS_ESQL = `FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
-  AND k8s.service.name IS NOT NULL
-| STATS service_count = COUNT_DISTINCT(k8s.service.name)`;
+  AND k8s.job.name IS NOT NULL
+| STATS job_count = COUNT_DISTINCT(k8s.job.name)`;
 
-export const ServicesMetricCard: React.FC<ServicesMetricCardProps> = ({
-  timeRange,
-  height = 100,
-}) => {
+export const JobsMetricCard: React.FC<JobsMetricCardProps> = ({ timeRange, height = 100 }) => {
   const { plugins } = usePluginContext();
   const LensComponent = plugins.lens.EmbeddableComponent;
 
   const attributes: TypedLensByValueInput['attributes'] = useMemo(
     () => ({
-      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.servicesLabel', {
-        defaultMessage: 'Services',
+      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.jobsLabel', {
+        defaultMessage: 'Jobs',
       }),
       description: '',
       visualizationType: 'lnsMetric',
@@ -46,12 +42,9 @@ export const ServicesMetricCard: React.FC<ServicesMetricCardProps> = ({
           layerId: 'layer_0',
           layerType: 'data',
           metricAccessor: 'metric_0',
-          subtitle: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.totalLabel', {
-            defaultMessage: 'Total',
-          }),
         },
         query: {
-          esql: SERVICES_ESQL,
+          esql: JOBS_ESQL,
         },
         filters: [],
         datasourceStates: {
@@ -60,14 +53,14 @@ export const ServicesMetricCard: React.FC<ServicesMetricCardProps> = ({
               layer_0: {
                 index: 'esql-query-index',
                 query: {
-                  esql: SERVICES_ESQL,
+                  esql: JOBS_ESQL,
                 },
                 columns: [
                   {
                     columnId: 'metric_0',
-                    fieldName: 'service_count',
-                    label: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.servicesLabel', {
-                      defaultMessage: 'Services',
+                    fieldName: 'job_count',
+                    label: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.jobsLabel', {
+                      defaultMessage: 'Jobs',
                     }),
                     customLabel: true,
                     meta: {
@@ -86,7 +79,7 @@ export const ServicesMetricCard: React.FC<ServicesMetricCardProps> = ({
 
   return (
     <LensComponent
-      id="servicesMetric"
+      id="jobsMetric"
       attributes={attributes}
       timeRange={timeRange}
       style={{ height: `${height}px`, width: '100%' }}

@@ -11,20 +11,20 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
-interface NamespacesMetricCardProps {
+interface ReplicasetsMetricCardProps {
   timeRange: TimeRange;
   height?: number;
 }
 
 /**
- * ES|QL query for total namespace count across all clusters
+ * ES|QL query for total replicaset count across all clusters
  */
-const NAMESPACES_ESQL = `FROM remote_cluster:metrics-*
+const REPLICASETS_ESQL = `FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
-  AND k8s.namespace.name IS NOT NULL
-| STATS namespace_count = COUNT_DISTINCT(k8s.namespace.name)`;
+  AND k8s.replicaset.name IS NOT NULL
+| STATS replicaset_count = COUNT_DISTINCT(k8s.replicaset.name)`;
 
-export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
+export const ReplicasetsMetricCard: React.FC<ReplicasetsMetricCardProps> = ({
   timeRange,
   height = 100,
 }) => {
@@ -33,8 +33,8 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
 
   const attributes: TypedLensByValueInput['attributes'] = useMemo(
     () => ({
-      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.namespacesLabel', {
-        defaultMessage: 'Namespaces',
+      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.replicasetsLabel', {
+        defaultMessage: 'ReplicaSets',
       }),
       description: '',
       visualizationType: 'lnsMetric',
@@ -47,7 +47,7 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
           metricAccessor: 'metric_0',
         },
         query: {
-          esql: NAMESPACES_ESQL,
+          esql: REPLICASETS_ESQL,
         },
         filters: [],
         datasourceStates: {
@@ -56,16 +56,16 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
               layer_0: {
                 index: 'esql-query-index',
                 query: {
-                  esql: NAMESPACES_ESQL,
+                  esql: REPLICASETS_ESQL,
                 },
                 columns: [
                   {
                     columnId: 'metric_0',
-                    fieldName: 'namespace_count',
+                    fieldName: 'replicaset_count',
                     label: i18n.translate(
-                      'xpack.kubernetesPoc.kubernetesOverview.namespacesLabel',
+                      'xpack.kubernetesPoc.kubernetesOverview.replicasetsLabel',
                       {
-                        defaultMessage: 'Namespaces',
+                        defaultMessage: 'ReplicaSets',
                       }
                     ),
                     customLabel: true,
@@ -85,7 +85,7 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
 
   return (
     <LensComponent
-      id="namespacesMetric"
+      id="replicasetsMetric"
       attributes={attributes}
       timeRange={timeRange}
       style={{ height: `${height}px`, width: '100%' }}

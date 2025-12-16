@@ -11,20 +11,20 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
-interface NamespacesMetricCardProps {
+interface StatefulsetsMetricCardProps {
   timeRange: TimeRange;
   height?: number;
 }
 
 /**
- * ES|QL query for total namespace count across all clusters
+ * ES|QL query for total statefulset count across all clusters
  */
-const NAMESPACES_ESQL = `FROM remote_cluster:metrics-*
+const STATEFULSETS_ESQL = `FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
-  AND k8s.namespace.name IS NOT NULL
-| STATS namespace_count = COUNT_DISTINCT(k8s.namespace.name)`;
+  AND k8s.statefulset.name IS NOT NULL
+| STATS statefulset_count = COUNT_DISTINCT(k8s.statefulset.name)`;
 
-export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
+export const StatefulsetsMetricCard: React.FC<StatefulsetsMetricCardProps> = ({
   timeRange,
   height = 100,
 }) => {
@@ -33,8 +33,8 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
 
   const attributes: TypedLensByValueInput['attributes'] = useMemo(
     () => ({
-      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.namespacesLabel', {
-        defaultMessage: 'Namespaces',
+      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.statefulsetsLabel', {
+        defaultMessage: 'StatefulSets',
       }),
       description: '',
       visualizationType: 'lnsMetric',
@@ -47,7 +47,7 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
           metricAccessor: 'metric_0',
         },
         query: {
-          esql: NAMESPACES_ESQL,
+          esql: STATEFULSETS_ESQL,
         },
         filters: [],
         datasourceStates: {
@@ -56,16 +56,16 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
               layer_0: {
                 index: 'esql-query-index',
                 query: {
-                  esql: NAMESPACES_ESQL,
+                  esql: STATEFULSETS_ESQL,
                 },
                 columns: [
                   {
                     columnId: 'metric_0',
-                    fieldName: 'namespace_count',
+                    fieldName: 'statefulset_count',
                     label: i18n.translate(
-                      'xpack.kubernetesPoc.kubernetesOverview.namespacesLabel',
+                      'xpack.kubernetesPoc.kubernetesOverview.statefulsetsLabel',
                       {
-                        defaultMessage: 'Namespaces',
+                        defaultMessage: 'StatefulSets',
                       }
                     ),
                     customLabel: true,
@@ -85,7 +85,7 @@ export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
 
   return (
     <LensComponent
-      id="namespacesMetric"
+      id="statefulsetsMetric"
       attributes={attributes}
       timeRange={timeRange}
       style={{ height: `${height}px`, width: '100%' }}
