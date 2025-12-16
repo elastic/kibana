@@ -201,7 +201,7 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 19665
+  visTypeTimeseries: 20000
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
