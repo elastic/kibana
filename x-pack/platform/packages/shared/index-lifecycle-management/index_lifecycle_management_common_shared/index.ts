@@ -8,3 +8,4 @@
 export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
 export type * from './src/policies';
 export type * from './src/locator';
+export * from './src/api_client';

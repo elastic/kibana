@@ -13,5 +13,3 @@ import { IndexLifecycleManagementPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IndexLifecycleManagementPlugin(initializerContext);
 };
-
-export type { IndexLifecycleManagementPluginStart } from './types';

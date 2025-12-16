@@ -11,6 +11,7 @@ import type {
   TemplateListItem as IndexTemplate,
 } from '@kbn/index-management-shared-types';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
+import { createIlmApiClient } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
 import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -29,7 +30,6 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       start: {
         share,
         indexManagement,
-        indexLifecycleManagement,
         streams: { streamsRepositoryClient },
       },
     },
@@ -53,13 +53,13 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   const getIlmPolicy = useCallback(
     async (policyName: string) => {
       try {
-        const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
+        const policies = await createIlmApiClient(core).getPolicies({ signal });
         return policies.find((policy) => policy.name === policyName) ?? null;
       } catch (error) {
         return null;
       }
     },
-    [indexLifecycleManagement.apiService, signal]
+    [core, signal]
   );
 
   const handleCreate = useCallback(

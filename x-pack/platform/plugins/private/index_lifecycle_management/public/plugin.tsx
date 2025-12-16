@@ -14,31 +14,20 @@ import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
-import type {
-  ClientConfigType,
-  IndexLifecycleManagementPluginStart,
-  SetupDependencies,
-  StartDependencies,
-} from './types';
+import type { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 import { IlmLocatorDefinition } from './locator';
-import { PublicApiService } from './services';
 
 export class IndexLifecycleManagementPlugin
-  implements
-    Plugin<void, IndexLifecycleManagementPluginStart, SetupDependencies, StartDependencies>
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private breadcrumbService = new BreadcrumbService();
-  private apiService?: PublicApiService;
 
   public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
     const {
       ui: { enabled: isIndexLifecycleManagementUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
-
-    // Initialize apiService regardless of UI enabled state, as it's used by other plugins
-    this.apiService = new PublicApiService(coreSetup.http);
 
     if (isIndexLifecycleManagementUiEnabled) {
       const {
@@ -125,11 +114,7 @@ export class IndexLifecycleManagementPlugin
     }
   }
 
-  public start(): IndexLifecycleManagementPluginStart {
-    return {
-      apiService: this.apiService!,
-    };
-  }
+  public start() {}
 
   public stop() {}
 }

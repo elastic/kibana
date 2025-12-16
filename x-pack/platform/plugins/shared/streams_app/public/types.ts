@@ -17,7 +17,6 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
-import type { IndexLifecycleManagementPluginStart } from '@kbn/index-lifecycle-management-plugin/public';
 import type { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
@@ -58,7 +57,6 @@ export interface StreamsAppStartDependencies {
   discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  indexLifecycleManagement: IndexLifecycleManagementPluginStart;
   indexManagement: IndexManagementPluginStart;
   ingestPipelines: IngestPipelinesPluginStart;
   licensing: LicensingPluginStart;
