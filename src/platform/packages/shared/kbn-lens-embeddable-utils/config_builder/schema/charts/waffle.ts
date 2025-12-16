@@ -76,7 +76,6 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
 
 function validateGroupings({
   metrics,
-
   group_by,
 }: {
   metrics: Array<{}>;
