@@ -34,7 +34,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.map',
-    handlerHash: '9907b8bf653ce5b51a9187a89259ecadf13dd86b069c5c24e478135d5f4152f3',
+    handlerHash: 'bd3e22adbb7a0ddaf0822f9acd96bd2f5c5f0b6e4381f7363feb1680a0825298',
   },
   {
     id: 'data.set',
