@@ -62,9 +62,7 @@ export interface ReportMessageReceivedParams {
   response_length?: number;
   round_number?: number;
   agent_id?: string;
-  tools_used?: string[];
-  tool_count?: number;
-  tools_invoked?: string[];
+  tools_invoked: string[];
 }
 
 export interface ReportConverseErrorParams {
@@ -271,27 +269,6 @@ const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
-    tools_used: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'Tool ID used (normalized: built-in tools keep ID, custom tools become "custom")',
-        },
-      },
-      _meta: {
-        description: 'Tool IDs used in the response (normalized)',
-        optional: true,
-      },
-    },
-    tool_count: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of tools used',
-        optional: true,
-      },
-    },
     tools_invoked: {
       type: 'array',
       items: {
@@ -304,7 +281,7 @@ const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom")',
-        optional: true,
+        optional: false,
       },
     },
   },

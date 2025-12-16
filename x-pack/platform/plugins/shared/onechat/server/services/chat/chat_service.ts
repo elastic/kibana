@@ -181,24 +181,20 @@ class ChatServiceImpl implements ChatService {
                   // Track MessageReceived event for Agent Builder
                   if (analytics) {
                     const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
-                    // Only track if this is an agent conversation (not default assistant)
-                    if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
-                      const round = event.data.round;
-                      const toolsInvoked =
-                        round.steps
-                          ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
-                          .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
+                    const round = event.data.round;
+                    const toolsInvoked =
+                      round.steps
+                        ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
+                        .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
 
-                      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, {
-                        conversation_id: effectiveConversationId,
-                        response_length: round.response?.message?.length,
-                        round_number: currentRoundCount,
-                        agent_id: normalizedAgentId,
-                        tools_used: toolsInvoked,
-                        tool_count: toolsInvoked.length > 0 ? toolsInvoked.length : undefined,
-                        tools_invoked: toolsInvoked.length > 0 ? toolsInvoked : undefined,
-                      });
-                    }
+                    console.log('MessageReceived ==>', JSON.stringify({ round }, null, 2));
+                    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, {
+                      conversation_id: effectiveConversationId,
+                      response_length: round.response?.message?.length,
+                      round_number: currentRoundCount,
+                      agent_id: normalizedAgentId,
+                      tools_invoked: toolsInvoked,
+                    });
                   }
                 }
               } catch (error) {
