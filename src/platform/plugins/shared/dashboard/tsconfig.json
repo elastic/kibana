@@ -8,7 +8,7 @@
     ".storybook/**/*.ts",
     "common/**/*",
     "public/**/*",
-    "server/**/*", "../presentation_util/public/plugin_constants.ts",
+    "server/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
