@@ -19,10 +19,14 @@ import type { monaco } from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
 import { Global, type GlobalProps } from '@emotion/react';
 
+const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
+const parameterHintsWidgetModifierClassName = 'kibanaCodeEditor__parameterHintsWidgetModifier';
+
 /**
- *
+ * @description helps reposition widgets of interest in the code editor,
+ * so they are placed without layering over the header.
  */
-export const RepositionWidgets: FC<
+export const EditorWidgetsCustomizations: FC<
   PropsWithChildren<{
     editor: monaco.editor.IStandaloneCodeEditor | null;
     enableSuggestWidgetRepositioning: boolean;
@@ -35,10 +39,11 @@ export const RepositionWidgets: FC<
   const headerOffset = useRef(
     'var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))'
   );
-  const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
-  const parameterHintsWidgetModifierClassName = 'kibanaCodeEditor__parameterHintsWidgetModifier';
 
-  // Only for widgets known to support the "onDidShow" and "onDidHide" events
+  /**
+   * @description Repositioning handlers for widgets of interest, only for widgets known to support the "onDidShow" and "onDidHide" events,
+   * See {@link https://github.com/elastic/kibana/issues/223981 | GitHub issue #223981} for the rationale behind this bug fix implementation
+   */
   const registerRepositionHandlers = useCallback(
     (
       widget: monaco.editor.IContribution['widget'] | undefined,
@@ -86,72 +91,36 @@ export const RepositionWidgets: FC<
   );
 
   /**
-   * handle repositioning for widgets that do not support the "onDidShow" and "onDidHide" events
-   * Informed by https://github.com/microsoft/vscode/blob/dc1486be9efc0dd9df05c36bdc49bc1f1c940f4a/src/vs/editor/contrib/parameterHints/browser/parameterHints.ts#L46-L53
+   * See {@link https://github.com/elastic/kibana/pull/245600 | GitHub issue #245600} for the rationale behind this bug fix implementation
    */
-  const registerRepositionHandlersForLegacyWidgets = useCallback(
-    (
-      widget: monaco.editor.IContribution['widget'] | undefined,
-      domNodeGetter: () => HTMLElement | null,
-      modifierClassName: string
-    ) => {
-      if (
-        widget &&
-        widget.model &&
-        widget.model.onChangedHints &&
-        enableSuggestWidgetRepositioning
-      ) {
-        let $widgetNode: HTMLElement | null = null;
+  const customizeParameterHintsWidget = useCallback(() => {
+    const parameterHintsWidget = editor?.getContribution('editor.controller.parameterHints')?.widget
+      ?.value;
+    const $parameterHintsWidget = parameterHintsWidget?.getDomNode();
 
-        // Add the modifier className to the global style modifier class names record
-        setGlobalStyleModifierClassNamesRecord((prev) => ({
-          ...prev,
-          [`.${modifierClassName}`]: {
-            // @ts-expect-error -- the handling of showing and hiding of the widgets by monaco
-            // happens through style attributes hence the need for the important modifier
-            visibility: 'hidden !important',
-          },
-        }));
+    if (parameterHintsWidget) {
+      // Add the modifier className to the global style modifier class names record
+      setGlobalStyleModifierClassNamesRecord((prev) => ({
+        ...prev,
+        [`.${parameterHintsWidgetModifierClassName}`]: {
+          zIndex: `${euiTheme.levels.header} !important`,
+        },
+      }));
 
-        // add a className that hides the widget by default so we might be able to correctly position the widget,
-        // then make it visible after the fact
-        ($widgetNode = domNodeGetter(widget))?.classList?.add(modifierClassName);
-
-        let originalTopPosition: string | null = null;
-
-        widget.model.onChangedHints(() => {
-          if (widget.visible) {
-            originalTopPosition = $widgetNode.style.top;
-            $widgetNode.style.top = `max(${originalTopPosition || 0}, calc(${
-              headerOffset.current
-            } + ${euiTheme.size.m}))`;
-            $widgetNode.classList.remove(modifierClassName);
-          } else {
-            $widgetNode.classList.add(modifierClassName);
-            $widgetNode.style.top = originalTopPosition ?? '';
-          }
-        });
-      }
-    },
-    [enableSuggestWidgetRepositioning, euiTheme.size.m]
-  );
+      $parameterHintsWidget.classList.add(parameterHintsWidgetModifierClassName);
+    }
+  }, [editor, euiTheme.levels.header]);
 
   // setup the repositioning handlers for widgets of interest
   useEffect(() => {
-    // See {@link https://github.com/elastic/kibana/issues/223981 | GitHub issue #223981} for the rationale behind this bug fix implementation
     registerRepositionHandlers(
       editor?.getContribution('editor.contrib.suggestController')?.widget?.value,
       (widget: monaco.editor.IContribution['widget']) => widget.element?.domNode,
       suggestWidgetModifierClassName
     );
 
-    // See {@link https://github.com/elastic/kibana/pull/245600 | GitHub issue #245600} for the rationale behind this bug fix implementation
-    registerRepositionHandlersForLegacyWidgets(
-      editor?.getContribution('editor.controller.parameterHints')?.widget?.value,
-      (widget: monaco.editor.IContribution['widget']) => widget.getDomNode(),
-      parameterHintsWidgetModifierClassName
-    );
-  }, [editor, registerRepositionHandlers, registerRepositionHandlersForLegacyWidgets]);
+    customizeParameterHintsWidget();
+  }, [editor, registerRepositionHandlers, customizeParameterHintsWidget]);
 
   return (
     <React.Fragment>
