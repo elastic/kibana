@@ -42,7 +42,6 @@ describe('getErrorMarks', () => {
         id: 1,
         error: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         serviceColor: 'red',
-        withLink: true,
       },
       {
         type: 'errorMark',
@@ -51,7 +50,6 @@ describe('getErrorMarks', () => {
         id: 2,
         error: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         serviceColor: 'blue',
-        withLink: true,
       },
     ]);
   });
@@ -83,7 +81,6 @@ describe('getErrorMarks', () => {
         id: 1,
         error: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         serviceColor: '',
-        withLink: true,
       },
       {
         type: 'errorMark',
@@ -92,7 +89,6 @@ describe('getErrorMarks', () => {
         id: 2,
         error: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         serviceColor: '',
-        withLink: true,
       },
     ]);
   });
