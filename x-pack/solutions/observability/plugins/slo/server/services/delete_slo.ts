@@ -12,8 +12,7 @@ import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
-  getCustomSLOPipelineId,
-  getCustomSLOSummaryPipelineId,
+  getCustomSLOWildcardPipelineId,
   getWildcardPipelineId,
 } from '../../common/constants';
 import { retryTransientEsErrors } from '../utils/retry';
@@ -48,8 +47,7 @@ export class DeleteSLO {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     const wildcardPipelineId = getWildcardPipelineId(slo.id, slo.revision);
-    const customSLOPipelineId = getCustomSLOPipelineId(slo.id);
-    const customSLOSummaryPipelineId = getCustomSLOSummaryPipelineId(slo.id);
+    const customWildcardPipelineId = getCustomSLOWildcardPipelineId(slo.id);
 
     await Promise.all([
       this.transformManager.uninstall(rollupTransformId),
@@ -62,13 +60,7 @@ export class DeleteSLO {
       ),
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: customSLOPipelineId },
-          { ignore: [404], signal: this.abortController.signal }
-        )
-      ),
-      retryTransientEsErrors(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: customSLOSummaryPipelineId },
+          { id: customWildcardPipelineId },
           { ignore: [404], signal: this.abortController.signal }
         )
       ),

@@ -13,6 +13,9 @@ import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getCustomSLOPipelineId,
+  getCustomSLOSummaryPipelineId,
+  getWildcardPipelineId,
 } from '@kbn/slo-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
@@ -71,6 +74,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await transformHelper.assertNotFound(getSLOTransformId(id, 1));
       await transformHelper.assertNotFound(getSLOSummaryTransformId(id, 1));
+
+      // Expect standard pipeline to be deleted
+      const wildcardPipelineId = getWildcardPipelineId(id, 1);
+      try {
+        await esClient.ingest.getPipeline({ id: wildcardPipelineId });
+        throw new Error('Standard wildcard pipeline should have been deleted');
+      } catch (err: any) {
+        expect(err.meta?.statusCode).eql(404);
+      }
+
       // expect summary and rollup documents to be deleted
       await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await esClient.search({
@@ -112,6 +125,55 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
         return true;
       });
+    });
+
+    it('deletes custom pipelines when deleting SLO', async () => {
+      const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      expect(response).property('id');
+      const id = response.id;
+
+      // Create custom pipelines for this SLO
+      const customSLOPipelineId = getCustomSLOPipelineId(id);
+      const customSLOSummaryPipelineId = getCustomSLOSummaryPipelineId(id);
+
+      await esClient.ingest.putPipeline({
+        id: customSLOPipelineId,
+        processors: [{ set: { field: 'custom.test', value: 'rollup custom works!' } }],
+      });
+
+      await esClient.ingest.putPipeline({
+        id: customSLOSummaryPipelineId,
+        processors: [{ set: { field: 'custom.summary_test', value: 'summary custom works!' } }],
+      });
+
+      // Verify pipelines exist
+      const rollupPipelineBefore = await esClient.ingest.getPipeline({
+        id: customSLOPipelineId,
+      });
+      expect(rollupPipelineBefore).property(customSLOPipelineId);
+
+      const summaryPipelineBefore = await esClient.ingest.getPipeline({
+        id: customSLOSummaryPipelineId,
+      });
+      expect(summaryPipelineBefore).property(customSLOSummaryPipelineId);
+
+      // Delete the SLO
+      await sloApi.delete(id, adminRoleAuthc);
+
+      // Verify custom pipelines are deleted
+      try {
+        await esClient.ingest.getPipeline({ id: customSLOPipelineId });
+        throw new Error('Custom SLO pipeline should have been deleted');
+      } catch (err: any) {
+        expect(err.meta?.statusCode).eql(404);
+      }
+
+      try {
+        await esClient.ingest.getPipeline({ id: customSLOSummaryPipelineId });
+        throw new Error('Custom SLO summary pipeline should have been deleted');
+      } catch (err: any) {
+        expect(err.meta?.statusCode).eql(404);
+      }
     });
   });
 }

@@ -64,18 +64,7 @@ exports[`DeleteSLO happy path removes all resources associated to the slo 4`] = 
     ],
     Array [
       Object {
-        "id": ".slo-irrelevant@custom",
-      },
-      Object {
-        "ignore": Array [
-          404,
-        ],
-        "signal": AbortSignal {},
-      },
-    ],
-    Array [
-      Object {
-        "id": ".slo-summary-irrelevant@custom",
+        "id": ".slo-*irrelevant@custom",
       },
       Object {
         "ignore": Array [
@@ -86,10 +75,6 @@ exports[`DeleteSLO happy path removes all resources associated to the slo 4`] = 
     ],
   ],
   "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
     Object {
       "type": "return",
       "value": Promise {},
