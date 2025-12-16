@@ -31,6 +31,7 @@ const getNamespacesEsql = (clusterName: string) => `FROM remote_cluster:metrics-
 | WHERE k8s.cluster.name == "${clusterName}"
   AND k8s.namespace.name IS NOT NULL
   AND k8s.namespace.phase IS NOT NULL
+  AND cloud.provider IS NOT NULL
 | STATS
     total_namespaces = COUNT_DISTINCT(k8s.namespace.name),
     healthy_namespaces = COUNT_DISTINCT(k8s.namespace.name) WHERE k8s.namespace.phase == 1,

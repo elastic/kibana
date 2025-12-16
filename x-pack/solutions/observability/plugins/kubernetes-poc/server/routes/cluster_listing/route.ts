@@ -24,6 +24,7 @@ FROM remote_cluster:metrics-*
   AND cloud.provider IS NOT NULL
   AND (
     k8s.node.name IS NOT NULL
+    OR k8s.namespace.name IS NOT NULL
     OR k8s.pod.uid IS NOT NULL
     OR k8s.pod.phase IS NOT NULL
     OR k8s.node.cpu.usage IS NOT NULL
@@ -39,8 +40,8 @@ FROM remote_cluster:metrics-*
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0 AND k8s.node.condition_ready IS NOT NULL,
     total_namespaces = COUNT_DISTINCT(k8s.namespace.name),
     total_pods = COUNT_DISTINCT(k8s.pod.uid),
-    running_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 1,
-    failed_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 3,
+    running_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 2,
+    failed_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 4,
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_memory_usage = SUM(k8s.node.memory.usage),
     sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu),
