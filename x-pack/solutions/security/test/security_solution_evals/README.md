@@ -57,8 +57,10 @@ The evaluation suite will automatically enable the Agent Builder feature if it's
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --stateful --config-dir security_entity_analytics
 ```
+
+The `security_entity_analytics` configuration extends the default `--stateful` config and enables the `securitySolution.naturalLanguageThreatHunting.enabled` feature flag at the server level, which is useful for running evaluation tests that require this feature to be enabled.
 
 ### Run Evaluations
 

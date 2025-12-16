@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { platformCoreTools } from '@kbn/onechat-common/tools';
 import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 
@@ -44,7 +43,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   'observability.agent',
-  `${internalNamespaces.security}.entity_analytics.agent`,
   'platform.dashboard.dashboard_agent',
   `${internalNamespaces.security}.agent`,
 ];

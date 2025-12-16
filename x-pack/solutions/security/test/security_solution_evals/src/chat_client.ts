@@ -24,13 +24,13 @@ export interface Step {
 }
 
 interface Options {
-  agentId?: string;
+  agentId: string;
 }
 
 interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
-  options?: Options;
+  options: Options;
 }
 
 type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
@@ -47,10 +47,8 @@ export class SiemEntityAnalyticsEvaluationChatClient {
     private readonly connectorId: string
   ) {}
 
-  converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
-    this.log.info('Calling converse for security.entity_analytics.agent');
-
-    const { agentId = 'security.entity_analytics.agent' } = options;
+  converse: ConverseFunction = async ({ messages, conversationId, options: { agentId } }) => {
+    this.log.info('Calling converse for ' + agentId);
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;

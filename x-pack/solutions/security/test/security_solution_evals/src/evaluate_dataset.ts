@@ -50,6 +50,7 @@ export type EvaluateDataset = ({
   dataset: {
     name: string;
     description: string;
+    agentId: string;
     examples: DatasetExample[];
   };
 }) => Promise<void>;
@@ -200,12 +201,13 @@ export function createEvaluateDataset({
   chatClient: SiemEntityAnalyticsEvaluationChatClient;
 }): EvaluateDataset {
   return async function evaluateDataset({
-    dataset: { name, description, examples },
+    dataset: { name, description, examples, agentId },
   }: {
     dataset: {
       name: string;
       description: string;
       examples: DatasetExample[];
+      agentId: string;
     };
   }) {
     const dataset = {
@@ -220,6 +222,7 @@ export function createEvaluateDataset({
         task: async ({ input }) => {
           const response = await chatClient.converse({
             messages: [{ message: input.question }],
+            options: { agentId },
           });
 
           return {

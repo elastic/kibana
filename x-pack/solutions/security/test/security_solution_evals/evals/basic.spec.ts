@@ -7,10 +7,17 @@
 
 import { dataViewRouteHelpersFactory } from '@kbn/test-suites-security-solution-apis/test_suites/entity_analytics/utils';
 import { createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
+
 import { evaluate } from '../src/evaluate';
+import {
+  createEntityAnalyticsTestAgent,
+  deleteEntityAnalyticsTestAgent,
+} from '../src/helpers/agent';
+
+const AGENT_ID = 'test_agent';
 
 evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecurity' }, () => {
-  evaluate.beforeAll(async ({ log, esArchiverLoad, supertest, kbnClient }) => {
+  evaluate.beforeAll(async ({ log, esArchiverLoad, supertest, kbnClient, apiServices }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await createAlertsIndex(supertest, log);
     await esArchiverLoad(
@@ -18,11 +25,13 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecur
     );
     const dataView = dataViewRouteHelpersFactory(supertest);
     await dataView.create('security-solution', 'ecs_compliant,auditbeat-*');
+    await createEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
   });
 
-  evaluate.afterAll(async ({ kbnClient, supertest }) => {
+  evaluate.afterAll(async ({ kbnClient, supertest, log, apiServices }) => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     await dataView.delete('security-solution');
+    await deleteEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
     await kbnClient.savedObjects.cleanStandardList();
   });
 
@@ -32,6 +41,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecur
         dataset: {
           name: 'entity-analytics: basic-security-questions',
           description: 'Basic questions to test the SIEM Entity Analytics agent',
+          agentId: AGENT_ID,
           examples: [
             {
               input: {

@@ -17,6 +17,12 @@ import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
 import { dataGeneratorFactory } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils';
 import { deleteAllAlerts, createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
 import { evaluate } from '../src/evaluate';
+import {
+  createEntityAnalyticsTestAgent,
+  deleteEntityAnalyticsTestAgent,
+} from '../src/helpers/agent';
+
+const AGENT_ID = 'test_agent';
 
 evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svlSecurity' }, () => {
   const userId = uuidv4();
@@ -29,11 +35,13 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
     );
     const dataView = dataViewRouteHelpersFactory(supertest);
     await dataView.create('security-solution', 'ecs_compliant,auditbeat-*');
+    await createEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
   });
 
-  evaluate.afterAll(async ({ kbnClient, supertest }) => {
+  evaluate.afterAll(async ({ kbnClient, supertest, log }) => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     await dataView.delete('security-solution');
+    await deleteEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
     await kbnClient.savedObjects.cleanStandardList();
   });
 
@@ -44,6 +52,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
           name: 'entity-analytics: risk score without data',
           description:
             'Questions to test the SIEM Entity Analytics agent - risk score without data',
+          agentId: AGENT_ID,
           examples: [
             {
               input: {
@@ -142,6 +151,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
         dataset: {
           name: 'entity-analytics: risk score',
           description: 'Questions to test the SIEM Entity Analytics agent - risk score',
+          agentId: AGENT_ID,
           examples: [
             {
               input: {

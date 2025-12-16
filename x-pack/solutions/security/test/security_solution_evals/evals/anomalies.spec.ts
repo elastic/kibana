@@ -17,6 +17,12 @@ import {
   waitForAllJobsToStart,
 } from '../src/helpers/ml';
 import { evaluate } from '../src/evaluate';
+import {
+  createEntityAnalyticsTestAgent,
+  deleteEntityAnalyticsTestAgent,
+} from '../src/helpers/agent';
+
+const AGENT_ID = 'test_agent';
 
 evaluate.describe(
   'SIEM Entity Analytics Agent - ML Security Prompts Tests',
@@ -75,11 +81,13 @@ evaluate.describe(
       );
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.create('security-solution', indexPattern);
+      await createEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
     });
 
-    evaluate.afterAll(async ({ kbnClient, supertest }) => {
+    evaluate.afterAll(async ({ kbnClient, supertest, log }) => {
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.delete('security-solution');
+      await deleteEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
       await kbnClient.savedObjects.cleanStandardList();
     });
 
@@ -90,6 +98,7 @@ evaluate.describe(
             name: 'entity-analytics:anomalies without data',
             description:
               'Questions to test the SIEM Entity Analytics agent - anomalies without data',
+            agentId: AGENT_ID,
             examples: [
               {
                 input: {
@@ -470,6 +479,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics: anomalies',
             description: 'Questions to test the SIEM Entity Analytics agent - anomalies',
+            agentId: AGENT_ID,
             examples: [
               // Flaky test, it needs v3_windows_anomalous_service enabled to work
               // {
