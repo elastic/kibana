@@ -17,7 +17,7 @@ import type {
   EuiTableActionsColumnType,
   CriteriaWithPagination,
 } from '@elastic/eui';
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -966,50 +966,38 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     dispatch({ type: 'onItemsDeleted' });
   }, [deleteItems, entityName, fetchItems, isDeletingItems, notifyError, selectedItems]);
 
-  const renderCreateButton = useCallback(
-    (options?: { fill?: boolean }) => {
-      if (createItem) {
-        return (
-          <EuiButton
-            onClick={() => createItem()}
-            data-test-subj="newItemButton"
-            iconType="plusInCircleFilled"
-            fill={options?.fill ?? true}
-          >
-            <FormattedMessage
-              id="contentManagement.tableList.listing.createNewItemButtonLabel"
-              defaultMessage="Create {entityName}"
-              values={{ entityName }}
-            />
-          </EuiButton>
-        );
-      }
-    },
-    [createItem, entityName]
-  );
+  const renderCreateButton = useCallback(() => {
+    if (createItem) {
+      return (
+        <EuiButton
+          onClick={() => createItem()}
+          data-test-subj="newItemButton"
+          iconType="plusInCircleFilled"
+          fill
+        >
+          <FormattedMessage
+            id="contentManagement.tableList.listing.createNewItemButtonLabel"
+            defaultMessage="Create {entityName}"
+            values={{ entityName }}
+          />
+        </EuiButton>
+      );
+    }
+  }, [createItem, entityName]);
 
   const renderNoItemsMessage = useCallback(() => {
     if (emptyPrompt) {
       return emptyPrompt;
     } else {
       return (
-        <EuiEmptyPrompt
-          title={
-            <h1>
-              {
-                <FormattedMessage
-                  id="contentManagement.tableList.listing.noAvailableItemsMessage"
-                  defaultMessage="No {entityNamePlural} available."
-                  values={{ entityNamePlural }}
-                />
-              }
-            </h1>
-          }
-          actions={renderCreateButton()}
+        <FormattedMessage
+          id="contentManagement.tableList.listing.noAvailableItemsMessage"
+          defaultMessage="No {entityNamePlural} available."
+          values={{ entityNamePlural }}
         />
       );
     }
-  }, [emptyPrompt, entityNamePlural, renderCreateButton]);
+  }, [emptyPrompt, entityNamePlural]);
 
   const renderFetchError = useCallback(() => {
     return (

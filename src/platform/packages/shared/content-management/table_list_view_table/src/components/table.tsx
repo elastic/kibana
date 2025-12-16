@@ -19,14 +19,7 @@ import type {
   Search,
   EuiTableSelectionType,
 } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiInMemoryTable,
-  useEuiTheme,
-  EuiCode,
-  EuiText,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, useEuiTheme, EuiCode, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
@@ -78,7 +71,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   customSortingOptions?: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
-  renderCreateButton: (options?: { fill?: boolean }) => React.ReactElement | undefined;
+  renderCreateButton: () => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
@@ -86,7 +79,6 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
-  emptyPrompt?: JSX.Element;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -118,7 +110,6 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
-  emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
@@ -292,29 +283,21 @@ export function Table<T extends UserContentCommonSchema>({
     searchQuery.error,
   ]);
 
-  const hasQueryOrFilters = Boolean(
-    searchQuery.text || tableFilter.favorites || tableFilter.createdBy.length > 0
-  );
+  const hasQueryOrFilters = Boolean(searchQuery.text || tableFilter.createdBy.length > 0);
 
-  const emptyPromptTitle = (
-    <FormattedMessage
-      id="contentManagement.tableList.listing.noItemsTitle"
-      defaultMessage="No {entityNamePlural} to display"
-      values={{ entityNamePlural }}
+  const noItemsMessage = tableFilter.favorites ? (
+    <FavoritesEmptyState
+      emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
+      entityName={entityName}
+      entityNamePlural={entityNamePlural}
     />
-  );
-
-  const emptyPromptBody = (
+  ) : (
     <FormattedMessage
       id="contentManagement.tableList.listing.noMatchedItemsMessage"
       defaultMessage="No {entityNamePlural} matched your search."
       values={{ entityNamePlural }}
     />
   );
-
-  const emptyPromptActions = useMemo(() => {
-    return renderCreateButton({ fill: !hasQueryOrFilters });
-  }, [renderCreateButton, hasQueryOrFilters]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
@@ -388,26 +371,7 @@ export function Table<T extends UserContentCommonSchema>({
           columns={tableColumns}
           pagination={pagination}
           loading={isFetchingItems}
-          noItemsMessage={
-            (items?.length ?? 0) === 0 && !hasQueryOrFilters && emptyPrompt ? (
-              emptyPrompt
-            ) : tableFilter.favorites ? (
-              <FavoritesEmptyState
-                emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
-                entityName={entityName}
-                entityNamePlural={entityNamePlural}
-              />
-            ) : hasQueryOrFilters ? (
-              emptyPromptBody
-            ) : (
-              <EuiEmptyPrompt
-                title={<h3>{emptyPromptTitle}</h3>}
-                titleSize="xs"
-                body={emptyPromptBody}
-                actions={emptyPromptActions}
-              />
-            )
-          }
+          noItemsMessage={noItemsMessage}
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}
