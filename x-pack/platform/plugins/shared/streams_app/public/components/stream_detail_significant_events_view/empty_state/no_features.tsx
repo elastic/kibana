@@ -5,9 +5,9 @@
  * 2.0.
  */
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AssetImage } from '../../asset_image';
-import { useAIFeatures } from '../add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 
 export function NoFeaturesEmptyState({
   onFeatureIdentificationClick,
@@ -24,8 +24,6 @@ export function NoFeaturesEmptyState({
   onFeatureIdentificationClick: () => void;
   onManualEntryClick: () => void;
 }) {
-  const aiFeatures = useAIFeatures();
-
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiSpacer size="m" />
@@ -43,30 +41,31 @@ export function NoFeaturesEmptyState({
             'Feature identification generates logical subsets of the data in that stream. This is useful for generating better significant events.',
         })}
       </EuiText>
-      <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiButton
-          iconType="sparkles"
-          fill
-          onClick={onFeatureIdentificationClick}
-          disabled={!aiFeatures?.genAiConnectors?.selectedConnector}
-          data-test-subj="significant_events_identify_features_button"
-        >
-          {i18n.translate(
-            'xpack.streams.significantEvents.noFeatures.featureIdentificationButtonLabel',
-            {
-              defaultMessage: 'Identify features',
-            }
-          )}
-        </EuiButton>
-        <EuiButtonEmpty
-          onClick={onManualEntryClick}
-          data-test-subj="significant_events_manual_entry_no_features_button"
-        >
-          {i18n.translate('xpack.streams.significantEvents.noFeatures.manualEntryButtonLabel', {
-            defaultMessage: 'Manual entry',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <ConnectorListButton
+            buttonProps={{
+              iconType: 'sparkles',
+              onClick: onFeatureIdentificationClick,
+              'data-test-subj': 'significant_events_identify_features_button',
+              children: i18n.translate(
+                'xpack.streams.significantEvents.noFeatures.featureIdentificationButtonLabel',
+                {
+                  defaultMessage: 'Identify features',
+                }
+              ),
+            }}
+          />
+          <EuiButtonEmpty
+            onClick={onManualEntryClick}
+            data-test-subj="significant_events_manual_entry_no_features_button"
+          >
+            {i18n.translate('xpack.streams.significantEvents.noFeatures.manualEntryButtonLabel', {
+              defaultMessage: 'Manual entry',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
