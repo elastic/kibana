@@ -17,7 +17,7 @@ import { groupBy, mapValues, uniqBy } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function getConfigPath() {
-  return Path.resolve(REPO_ROOT, 'src/platform/packages/shared/kbn-esql-ast/src/validation');
+  return Path.resolve(REPO_ROOT, 'src/platform/packages/shared/kbn-esql-language/src/validation');
 }
 
 function getSetupPath() {
