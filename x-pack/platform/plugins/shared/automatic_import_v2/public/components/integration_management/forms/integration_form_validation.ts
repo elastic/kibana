@@ -20,16 +20,17 @@ export const requiredField = (message: string) => ({
   isRequired: true,
 });
 
-const titleToPackageName = (title: string): string => {
-  return title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+const titleToPackageName = (integrationTitle: string): string => {
+  return integrationTitle.toLowerCase().replace(/[^a-z0-9]/g, '_');
 };
 
 const createUniqueTitleValidator = (packageNames: Set<string> | undefined) => ({
   validator: ({ value }: { value: string }) => {
+    const streamlinedTitle = titleToPackageName(value);
     if (!packageNames || !value) {
       return undefined;
     }
-    if (packageNames.has(value)) {
+    if (packageNames.has(streamlinedTitle)) {
       return { message: i18n.TITLE_ALREADY_EXISTS };
     }
     return undefined;
