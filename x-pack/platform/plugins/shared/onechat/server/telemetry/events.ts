@@ -139,12 +139,12 @@ export const MESSAGE_RECEIVED_EVENT: EventTypeOpts<MessageReceivedEventPropertie
         type: 'keyword',
         _meta: {
           description:
-            'Tool ID invoked (normalized: built-in tools keep ID, custom tools become "Custom")',
+            'Tool ID invoked (normalized: built-in tools keep ID, custom tools become "custom")',
         },
       },
       _meta: {
         description:
-          'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "Custom")',
+          'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom")',
         optional: true,
       },
     },

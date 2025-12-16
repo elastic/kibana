@@ -29,9 +29,9 @@ export function normalizeAgentIdForTelemetry(agentId?: string): string | undefin
 /**
  * Normalizes tool IDs for telemetry to protect user privacy.
  * Built-in tools (from AGENT_BUILDER_BUILTIN_TOOLS) are reported with their actual ID,
- * custom/user-created tools are reported as 'Custom'.
+ * custom/user-created tools are reported as 'custom'.
  */
 export function normalizeToolIdForTelemetry(toolId: string): string {
-  return BUILTIN_TOOL_IDS.has(toolId) ? toolId : 'Custom';
+  return BUILTIN_TOOL_IDS.has(toolId) ? toolId : 'custom';
 }
 
