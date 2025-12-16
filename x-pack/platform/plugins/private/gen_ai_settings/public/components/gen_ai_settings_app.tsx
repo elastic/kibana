@@ -361,8 +361,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   <ChatExperience />
                 </EuiFlexItem>
               )}
-              {!isAgentExperience && <EuiSpacer size="l" />}
-              {!isAgentExperience && <EuiSpacer size="l" />}
+              {!isAgentExperience && showAiAssistantsVisibilitySetting && <EuiSpacer size="l" />}
+              {!isAgentExperience && showAiAssistantsVisibilitySetting && <EuiSpacer size="l" />}
               {showAiAssistantsVisibilitySetting && (
                 <EuiFlexItem>
                   <AIAssistantVisibility />
