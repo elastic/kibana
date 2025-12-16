@@ -9,9 +9,8 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { ObservabilityAgentBuilderPlugin } from './plugin';
 
 export {
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
 } from '../common/constants';
