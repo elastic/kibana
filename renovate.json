@@ -2813,7 +2813,7 @@
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true,
-      "allowVersions": "<3.0.0"
+      "allowedVersions": "<3.0.0"
     },
     {
       "groupName": "mapbox and maplibre",
