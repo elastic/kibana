@@ -93,6 +93,9 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/stack-connectors-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/connector-schemas",
+    "@kbn/mcp-client",
     "@kbn/react-kibana-context-theme"
   ]
 }

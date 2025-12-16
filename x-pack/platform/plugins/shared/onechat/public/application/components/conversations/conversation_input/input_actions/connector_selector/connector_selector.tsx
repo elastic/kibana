@@ -82,11 +82,21 @@ const ConnectorOption: React.FC<{
   connectorName: string;
   searchValue: string;
 }> = ({ connectorId, connectorName, searchValue }) => {
+  const { euiTheme } = useEuiTheme();
   if (!connectorId) {
     return null;
   }
+
+  const fontWeightStyles = css`
+    h4 {
+      font-weight: ${euiTheme.font.weight.regular};
+    }
+    .euiSelectableListItem-isFocused & h4 {
+      font-weight: ${euiTheme.font.weight.semiBold};
+    }
+  `;
   return (
-    <EuiText size="s">
+    <EuiText size="s" css={fontWeightStyles}>
       <h4>
         <EuiHighlight search={searchValue}>{connectorName}</EuiHighlight>
       </h4>
@@ -227,6 +237,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
           id: connectorListId,
           css: selectorListStyles,
           rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
+          onFocusBadge: false,
         }}
       >
         {(list) => <div>{list}</div>}
