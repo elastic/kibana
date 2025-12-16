@@ -18,16 +18,18 @@ import {
   EuiMarkdownFormat,
   useEuiTheme,
 } from '@elastic/eui';
+import type { ILicense } from '@kbn/licensing-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 
 export interface AiInsightProps {
   title: string;
-  description?: string;
+  description: string;
+  license: ILicense | undefined | null;
   content?: string;
   onStartConversation?: () => void;
   onOpen: () => void;
-  startButtonLabel?: string;
   isLoading?: boolean;
   error?: string;
 }
@@ -36,14 +38,22 @@ export function AiInsight({
   title,
   description,
   content,
+  license,
   onStartConversation,
   onOpen,
-  startButtonLabel,
   isLoading,
   error,
 }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const { services } = useKibana();
+
+  const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
+  const hasAgentBuilderAccess = services.application?.capabilities?.agentBuilder?.show === true;
+
+  if (!hasAgentBuilderAccess || !hasEnterpriseLicense) {
+    return null;
+  }
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
@@ -102,9 +112,7 @@ export function AiInsight({
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <StartConversationButton onClick={onStartConversation}>
-                  {startButtonLabel}
-                </StartConversationButton>
+                <StartConversationButton onClick={onStartConversation} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
