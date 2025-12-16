@@ -39,7 +39,8 @@ import { checkandInitPrivilegeMonitoringResourcesNoContext } from '../../../priv
 
 const getTaskName = (): string => TYPE;
 
-export const getDataViewRefreshTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
+export const getDataViewRefreshTaskId = (namespace: string): string =>
+  `${TYPE}:${namespace}:${VERSION}`;
 
 export const registerEntityStoreDataViewRefreshTask = ({
   getStartServices,
