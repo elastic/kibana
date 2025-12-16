@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { Streams } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -30,6 +31,7 @@ const DASHBOARD_FILTERS = {
 
 export function LinkedDashboardsView({ definition }: { definition: Streams.all.GetResponse }) {
   const context = useKibana();
+  const { onPageReady } = usePerformanceContext();
   const attachmentsFetch = useAttachmentsFetch({
     streamName: definition.stream.name,
     filters: DASHBOARD_FILTERS,
@@ -37,6 +39,13 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
   const dashboardsLocator =
     context.dependencies.start.share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (attachmentsFetch.value && !attachmentsFetch.loading) {
+      onPageReady();
+    }
+  }, [attachmentsFetch.value, attachmentsFetch.loading, onPageReady]);
 
   if (attachmentsFetch.loading) {
     return <EuiLoadingSpinner />;
