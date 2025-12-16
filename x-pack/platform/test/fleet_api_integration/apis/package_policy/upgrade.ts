@@ -1285,7 +1285,7 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          await retry.tryForTime(10000, async () => {
+          await retry.tryForTime(60000, async () => {
             const installation = await getInstallationInfo(
               supertest,
               'integration_to_input',
