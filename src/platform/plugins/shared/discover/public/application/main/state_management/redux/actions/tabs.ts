@@ -284,8 +284,6 @@ export const updateTabs: InternalStateThunkActionCreator<
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();
       }
-
-      dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
     }
 
     dispatch(
