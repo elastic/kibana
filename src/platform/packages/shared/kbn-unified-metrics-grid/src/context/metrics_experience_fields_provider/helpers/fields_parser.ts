@@ -95,7 +95,7 @@ export interface RowMappings {
 }
 
 /**
- * Creates a map of metric field name → sample row.
+ * Creates a map of metric field name → sample rows.
  * @param rows - The rows to use for the sample rows.
  * @param fieldSpecs - The field specs to use for the sample rows.
  * @returns The sample rows by metric field name.

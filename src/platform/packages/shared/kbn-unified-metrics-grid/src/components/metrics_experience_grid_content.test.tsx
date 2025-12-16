@@ -173,7 +173,7 @@ describe('MetricsExperienceGridContent', () => {
     });
 
     const { getByText } = render(
-      <MetricsExperienceGridContent {...defaultProps} fields={cpuFields} />,
+      <MetricsExperienceGridContent {...defaultProps} fields={allFieldsSomeWithCpu} />,
       {
         wrapper: IntlProvider,
       }

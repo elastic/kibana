@@ -12,7 +12,7 @@ import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { MetricField, Dimension, DimensionValueFilters } from '../types';
+import type { MetricField, Dimension } from '../types';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
@@ -27,7 +27,6 @@ export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
   'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
-  filters?: DimensionValueFilters;
   dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
@@ -49,7 +48,6 @@ export const MetricsGrid = ({
   fetchParams,
   discoverFetch$,
   searchTerm,
-  filters = {},
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -157,7 +155,6 @@ export const MetricsGrid = ({
                   metric={metric}
                   size="s"
                   dimensions={dimensions}
-                  filters={filters}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
@@ -198,7 +195,6 @@ interface ChartItemProps
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
-  filters: DimensionValueFilters;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
@@ -217,7 +213,6 @@ const ChartItem = React.memo(
         index,
         size,
         dimensions,
-        filters,
         services,
         onBrushEnd,
         onFilter,
@@ -245,10 +240,9 @@ const ChartItem = React.memo(
           ? createESQLQuery({
               metric,
               dimensions,
-              filters,
             })
           : '';
-      }, [metric, dimensions, filters]);
+      }, [metric, dimensions]);
 
       const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
       const chartLayers = useChartLayers({ dimensions, metric, color });
