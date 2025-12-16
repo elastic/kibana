@@ -7,19 +7,22 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 import type { StreamNameValidator, IlmPolicyFetcher } from '../../utils';
 
-const MOCK_TEMPLATES: TemplateDeserialized[] = [
+const MOCK_TEMPLATES: IndexTemplate[] = [
   {
     name: 'behavioral_analytics-events-default',
     ilmPolicy: { name: 'profiling-60-days' },
     indexPatterns: ['behavioral_analytics-events-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'ilm-history-7',
@@ -27,6 +30,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['ilm-history-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-activemq.audit',
@@ -34,6 +40,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 14, unit: 'd' },
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-activemq.log',
@@ -41,6 +50,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-akamai.siem',
@@ -48,6 +60,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-apache.access',
@@ -57,6 +72,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexMode: 'standard',
     composedOf: ['logs@mappings', 'logs@settings', 'ecs@mappings'],
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-apache.error',
@@ -64,6 +82,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-apache.error-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-apm.app@template',
@@ -71,6 +92,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-apm.error@template',
@@ -78,6 +102,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-auditd.log',
@@ -85,6 +112,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-auditd.log-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-auditd.log-and-more-text-here-to-make-it-longer',
@@ -92,6 +122,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-auditd.log-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-auditd_manager.auditd',
@@ -99,6 +132,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-auditd_manager.auditd-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-cloud_security_posture.findings',
@@ -106,6 +142,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-cloud_security_posture.scores',
@@ -113,6 +152,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 90, unit: 'd' },
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-cloud_security_posture.vulnerabilities',
@@ -120,6 +162,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-docker.container_logs',
@@ -127,6 +172,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-docker.container_logs-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-elastic_agent',
@@ -134,6 +182,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-elastic_agent-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-elastic_agent.apm_server',
@@ -149,6 +200,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
       'ecs@mappings',
     ],
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-elastic_agent.auditbeat',
@@ -156,6 +210,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-elastic_agent.auditbeat-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-elastic_agent.cloud_defend',
@@ -163,6 +220,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     indexPatterns: ['logs-elastic_agent.cloud_defend-*'],
     allowAutoCreate: 'NO_OVERWRITE',
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-elastic_agent.cloudbeat',
@@ -170,6 +230,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 90, unit: 'd' },
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'logs-infinite-retention',
@@ -179,6 +242,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
     lifecycle: { enabled: true, infiniteDataRetention: true },
     composedOf: ['logs@mappings'],
     _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'multi-pattern-template',
@@ -199,6 +265,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
       'logs-elastic_agent.apm_server@package',
     ],
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
   {
     name: 'very-long-pattern-template',
@@ -219,6 +288,9 @@ const MOCK_TEMPLATES: TemplateDeserialized[] = [
       'logs-elastic_agent.apm_server@package',
     ],
     _kbnMeta: { type: 'managed', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
   },
 ];
 
@@ -410,11 +482,7 @@ const createMockValidator = (
 ): StreamNameValidator => {
   const onValidateAction = action('onValidate');
 
-  return async (
-    streamName: string,
-    selectedTemplate: TemplateDeserialized,
-    signal?: AbortSignal
-  ) => {
+  return async (streamName: string, selectedTemplate: IndexTemplate, signal?: AbortSignal) => {
     // Log the validation call to Storybook actions panel
     onValidateAction({ streamName, template: selectedTemplate.name });
     action('onValidate:start')({
@@ -488,14 +556,18 @@ const createMockValidator = (
 };
 
 export const Default: Story = {
-  render: () => (
+  args: {
+    showDataRetention: true,
+  },
+  render: (args) => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
-      onCreate={action('onCreate')}
+      onCreate={async (name) => action('onCreate')(name)}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
       getIlmPolicy={createMockIlmPolicyFetcher()}
+      showDataRetention={args.showDataRetention}
     />
   ),
 };
@@ -514,7 +586,7 @@ export const WithValidation: Story = {
     return (
       <CreateClassicStreamFlyout
         onClose={action('onClose')}
-        onCreate={action('onCreate')}
+        onCreate={async (name) => action('onCreate')(name)}
         onCreateTemplate={action('onCreateTemplate')}
         onRetryLoadTemplates={action('onRetryLoadTemplates')}
         templates={MOCK_TEMPLATES}
@@ -543,7 +615,7 @@ export const WithSlowValidation: Story = {
     return (
       <CreateClassicStreamFlyout
         onClose={action('onClose')}
-        onCreate={action('onCreate')}
+        onCreate={async (name) => action('onCreate')(name)}
         onCreateTemplate={action('onCreateTemplate')}
         onRetryLoadTemplates={action('onRetryLoadTemplates')}
         templates={MOCK_TEMPLATES}
@@ -558,7 +630,7 @@ export const EmptyState: Story = {
   render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
-      onCreate={action('onCreate')}
+      onCreate={async (name) => action('onCreate')(name)}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={[]}
@@ -570,7 +642,7 @@ export const ErrorState: Story = {
   render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
-      onCreate={action('onCreate')}
+      onCreate={async (name) => action('onCreate')(name)}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={[]}

@@ -80,7 +80,8 @@
       "savedObjectsTaggingOss",
       "automaticImport",
       "serverless",
-      "onechat"
+      "onechat",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",

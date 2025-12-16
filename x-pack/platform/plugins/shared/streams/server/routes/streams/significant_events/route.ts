@@ -13,8 +13,9 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map } from 'rxjs';
+import { from as fromRxjs, map, catchError } from 'rxjs';
 import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
+import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -211,6 +212,9 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
+    // Get connector info for error enrichment
+    const connector = await inferenceClient.getConnectorById(params.query.connectorId);
+
     const definition = await streamsClient.getStream(params.path.name);
 
     const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
@@ -238,7 +242,10 @@ const generateSignificantEventsRoute = createServerRoute({
         type: 'generated_queries' as const,
         queries,
         tokensUsed,
-      }))
+      })),
+      catchError((error: Error) => {
+        throw createConnectorSSEError(error, connector);
+      })
     );
   },
 });

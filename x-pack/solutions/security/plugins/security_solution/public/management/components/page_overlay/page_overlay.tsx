@@ -33,9 +33,7 @@ const OverlayRootContainer = styled.div`
 
   border-left: 1px solid ${({ theme: { eui } }) => eui.euiColorLightestShade};
 
-  z-index: ${({ theme: { eui } }) =>
-    eui.euiZFlyout +
-    3}; // we need to have this response div rendered above the timeline flyout (with z-index at 1002)
+  z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
 
   background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
 

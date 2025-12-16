@@ -57,11 +57,10 @@ export const EisTokenCostTour = ({
   const { euiTheme } = useEuiTheme();
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}Tour`,
-    isCloudEnabled,
   });
   const dataId = `${promoId}-eis-costs-tour`;
 
-  if (!isPromoVisible || !isReady) {
+  if (!isPromoVisible || !isReady || !isCloudEnabled) {
     return children;
   }
 

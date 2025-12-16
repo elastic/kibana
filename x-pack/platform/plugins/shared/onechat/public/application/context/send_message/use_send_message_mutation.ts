@@ -67,7 +67,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setPendingMessage,
     removePendingMessage,
   } = usePendingMessageState({ conversationId });
-  const subscribeToChatEvents = useSubscribeToChatEvents({
+  const { subscribeToChatEvents, unsubscribeFromChatEvents } = useSubscribeToChatEvents({
     setAgentReasoning,
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
@@ -118,6 +118,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationActions.invalidateConversation();
       messageControllerRef.current = null;
       setAgentReasoning(null);
+      if (isResponseLoading) {
+        setIsResponseLoading(false);
+      }
     },
     onSuccess: () => {
       removePendingMessage();
@@ -127,7 +130,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       }
     },
     onError: (err) => {
-      setIsResponseLoading(false);
       reportConverseError(err, { connectorId });
       setError(err);
       const steps = conversation?.rounds?.at(-1)?.steps;
@@ -176,12 +178,15 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     },
     canCancel,
     cancel,
-    // Cleaning only makes sense in the context of an error state on a new conversation round
-    // The user can click "New" to clear the pending round and error
     cleanConversation: () => {
-      conversationActions.removeOptimisticRound();
-      removeError();
-      removePendingMessage();
+      // Cleaning the conversation only happens when we are on "/new" and the user wants to back out of a pending or errored conversation and return to an empty conversation state
+      if (isLoading) {
+        // Conversation round is pending, unsubscribe from chat events and resolve mutation
+        unsubscribeFromChatEvents();
+      } else if (Boolean(error)) {
+        removeError();
+        removePendingMessage();
+      }
     },
   };
 };

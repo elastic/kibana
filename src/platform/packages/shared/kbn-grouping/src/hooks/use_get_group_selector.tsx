@@ -16,6 +16,7 @@ import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption, Action, GroupMap, GroupSettings } from './types';
 import { defaultGroup } from './types';
 import { GroupSelector, isNoneGroup } from '..';
+import { validateEnforcedGroups, ensureEnforcedGroupsInFront } from '../helpers';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {
@@ -105,6 +106,9 @@ export const useGetGroupSelector = ({
   onOpenTracker,
   settings,
 }: UseGetGroupSelectorArgs) => {
+  // Validate enforced groups configuration
+  validateEnforcedGroups(settings, maxGroupingLevels);
+
   const {
     activeGroups: selectedGroups,
     options,
@@ -131,8 +135,22 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId, onOptionsChange]
   );
 
+  // Automatically add enforced groups to activeGroups if they're not already present
+  // Enforced groups should always be in front of the array
+  useEffect(() => {
+    const enforcedGroups = groupSettings?.enforcedGroups;
+    if (enforcedGroups && enforcedGroups.length > 0) {
+      const newGroups = ensureEnforcedGroupsInFront(selectedGroups, enforcedGroups);
+      // Only update if order changed
+      if (JSON.stringify(newGroups) !== JSON.stringify(selectedGroups)) {
+        setSelectedGroups(newGroups);
+      }
+    }
+  }, [groupSettings?.enforcedGroups, selectedGroups, setSelectedGroups]);
+
   const onChange = useCallback(
     (groupSelection: string) => {
+      const enforcedGroups = groupSettings?.enforcedGroups ?? [];
       let newSelectedGroups: string[] = [];
       let sendTelemetry = true;
       // Simulate a toggle behavior when maxGroupingLevels is 1
@@ -158,6 +176,8 @@ export const useGetGroupSelector = ({
         }
       }
 
+      // Ensure enforced groups are always included and placed in front
+      newSelectedGroups = ensureEnforcedGroupsInFront(newSelectedGroups, enforcedGroups);
       setSelectedGroups(newSelectedGroups);
 
       if (sendTelemetry) {
@@ -174,7 +194,15 @@ export const useGetGroupSelector = ({
         groupByFields: newSelectedGroups,
       });
     },
-    [groupingId, maxGroupingLevels, onGroupChange, selectedGroups, setSelectedGroups, tracker]
+    [
+      groupingId,
+      maxGroupingLevels,
+      onGroupChange,
+      selectedGroups,
+      setSelectedGroups,
+      tracker,
+      groupSettings?.enforcedGroups,
+    ]
   );
 
   useEffect(() => {

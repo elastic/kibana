@@ -106,6 +106,9 @@ interface OwnProps {
     aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
     groupingLevel?: number
   ) => void;
+
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -136,6 +139,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
   onAggregationsChange,
+  emptyGroupingComponent,
 }) => {
   const {
     services: { uiSettings },

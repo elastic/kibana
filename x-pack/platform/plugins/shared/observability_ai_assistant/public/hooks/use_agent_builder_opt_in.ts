@@ -59,14 +59,9 @@ export interface UseAgentBuilderOptInResult {
 export const useAgentBuilderOptIn = ({
   navigateFromConversationApp = false,
 }: UseAgentBuilderOptInParams = {}): UseAgentBuilderOptInResult => {
-  const {
-    application,
-    notifications,
-    settings,
-    plugins: {
-      start: { onechat },
-    },
-  } = useKibana().services;
+  const { application, notifications, settings, plugins } = useKibana().services;
+
+  const onechat = plugins?.start?.onechat;
 
   const { hasAgentBuilderAccess, isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
 

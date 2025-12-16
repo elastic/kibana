@@ -17,6 +17,7 @@ import type {
   LogsSharedClientStartDeps,
 } from './types';
 import { createLogEventsRenderer } from './components/log_events';
+
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   private logViews: LogViewsService;
 
@@ -83,7 +84,9 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       };
     }
 
-    const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
+    const LogAIAssistant = createLogAIAssistant({
+      observabilityAIAssistant,
+    });
 
     discoverShared.features.registry.register({
       id: 'observability-logs-ai-assistant',

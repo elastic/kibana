@@ -15,12 +15,16 @@ import { StreamFeaturesFlyout } from './stream_features/stream_features_flyout';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
 import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface StreamConfigurationProps {
   definition: Streams.all.Definition;
 }
 
 export function StreamFeatureConfiguration({ definition }: StreamConfigurationProps) {
+  const {
+    core: { notifications },
+  } = useKibana();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { identifyFeatures, abort } = useStreamFeaturesApi(definition);
   const aiFeatures = useAIFeatures();
@@ -73,6 +77,17 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                         )
                           .then((data) => {
                             setFeatures(data.features);
+                          })
+                          .catch((error) => {
+                            if (error.name === 'AbortError') {
+                              return;
+                            }
+                            notifications.toasts.addError(error, {
+                              title: i18n.translate(
+                                'xpack.streams.streamDetailView.featureIdentification.errorTitle',
+                                { defaultMessage: 'Failed to identify features' }
+                              ),
+                            });
                           })
                           .finally(() => {
                             setIsLoading(false);

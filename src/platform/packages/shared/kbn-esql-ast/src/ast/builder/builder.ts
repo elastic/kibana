@@ -203,6 +203,7 @@ export namespace Builder {
 
     export const column = (
       nameOrTemplate: string | string[] | ColumnTemplate,
+      qualifier?: string | ESQLIdentifier,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLColumn => {
       if (typeof nameOrTemplate === 'string') {
@@ -216,6 +217,14 @@ export namespace Builder {
             ),
           }
         : nameOrTemplate;
+
+      if (qualifier) {
+        const qualifierNode =
+          typeof qualifier === 'string' ? Builder.identifier(qualifier) : qualifier;
+        template.qualifier = qualifierNode;
+        template.args = [qualifierNode, ...(template.args ?? [])];
+      }
+
       const node: ESQLColumn = {
         ...template,
         ...Builder.parserFields(fromParser),

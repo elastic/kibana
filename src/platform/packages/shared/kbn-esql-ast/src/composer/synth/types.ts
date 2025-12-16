@@ -31,6 +31,13 @@ export type SynthTemplateHole =
   | SynthColumnShorthand
 
   /**
+   * A shorthand for a qualified column name, which is a tuple where
+   * the first element is the qualifier (e.g., index name) and the second
+   * element is the column name represented as a `SynthColumnShorthand`.
+   */
+  | SynthQualifiedColumnShorthand
+
+  /**
    * If a number is provided, it will be converted to the right AST node type:
    *
    * - integer for integers
@@ -62,6 +69,16 @@ export type SynthTemplateHole =
  * For example, `['user', 'name']` represents the column `user.name`.
  */
 export type SynthColumnShorthand = string[];
+
+/**
+ * A developer-friendly way to specify qualified column names in ESQL queries.
+ * The first element in the tuple is the qualifier (e.g., index name), and the
+ * second element is the column name represented as a `SynthColumnShorthand`.
+ *
+ * For example, `['index', ['user', 'name']]` represents the column
+ * `[index].[user.name]`.
+ */
+export type SynthQualifiedColumnShorthand = [string, SynthColumnShorthand];
 
 export type SynthTaggedTemplate<N extends ESQLProperNode> = (
   template: TemplateStringsArray,

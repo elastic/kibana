@@ -20,11 +20,12 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { css } from '@emotion/react';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 import { SelectTemplateStep, NameAndConfirmStep } from './steps';
 import {
   type StreamNameValidator,
@@ -60,11 +61,13 @@ interface CreateClassicStreamFlyoutProps {
    * Callback when the stream is created.
    * Receives the stream name which can be used to create the classic stream.
    */
-  onCreate: (streamName: string) => void;
+  onCreate: (streamName: string) => Promise<void>;
   /** Callback to navigate to create template flow */
   onCreateTemplate: () => void;
   /** Available index templates to select from */
-  templates: TemplateDeserialized[];
+  templates: IndexTemplate[];
+  /** Whether templates are currently being loaded */
+  isLoadingTemplates?: boolean;
   /** Whether there was an error loading templates */
   hasErrorLoadingTemplates?: boolean;
   /** Callback to retry loading templates */
@@ -80,6 +83,13 @@ interface CreateClassicStreamFlyoutProps {
    * If provided, ILM policy details will be displayed in the template details section.
    */
   getIlmPolicy?: IlmPolicyFetcher;
+  /**
+   * Whether to show data retention information.
+   * If false, data retention details (ILM policies and retention periods) will be hidden
+   * in both the template selection step and the confirmation step.
+   * @default true
+   */
+  showDataRetention?: boolean;
 }
 
 export const CreateClassicStreamFlyout = ({
@@ -87,23 +97,25 @@ export const CreateClassicStreamFlyout = ({
   onCreate,
   onCreateTemplate,
   templates,
+  isLoadingTemplates = false,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
   onValidate,
   getIlmPolicy,
+  showDataRetention = true,
 }: CreateClassicStreamFlyoutProps) => {
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
     ClassicStreamStep.SELECT_TEMPLATE
   );
 
   const [formState, dispatch] = useReducer(formReducer, initialFormState);
-  const { selectedTemplate, selectedIndexPattern, streamNameParts, validation } = formState;
+  const { selectedTemplate, selectedIndexPattern, streamNameParts, validation, isSubmitting } =
+    formState;
 
   // Derive props from validation state
   const validationError = validation.validationError;
   const conflictingIndexPattern = validation.conflictingIndexPattern;
   const isValidating = validation.isValidating;
-  const isSubmitting = validation.mode === 'create';
 
   const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 
@@ -197,6 +209,15 @@ export const CreateClassicStreamFlyout = ({
   const renderCurrentStepContent = () => {
     switch (currentStep) {
       case ClassicStreamStep.SELECT_TEMPLATE:
+        if (isLoadingTemplates) {
+          return (
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
         return (
           <SelectTemplateStep
             templates={templates}
@@ -205,6 +226,7 @@ export const CreateClassicStreamFlyout = ({
             onCreateTemplate={onCreateTemplate}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
             onRetryLoadTemplates={onRetryLoadTemplates}
+            showDataRetention={showDataRetention}
           />
         );
 
@@ -222,6 +244,7 @@ export const CreateClassicStreamFlyout = ({
             validationError={validationError}
             conflictingIndexPattern={conflictingIndexPattern}
             getIlmPolicy={getIlmPolicy}
+            showDataRetention={showDataRetention}
           />
         );
       }

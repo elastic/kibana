@@ -39,9 +39,9 @@ export const getGraph = async ({
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds.join(
-      ', '
-    )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+    `Fetching graph for [originEventIds: ${originEventIds
+      .map((e) => e.id)
+      .join(', ')}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
   const results = await fetchGraph({
@@ -56,6 +56,5 @@ export const getGraph = async ({
     esQuery,
   });
 
-  // Convert results into set of nodes and edges
   return parseRecords(logger, results.records, nodesLimit);
 };

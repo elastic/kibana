@@ -409,6 +409,216 @@ describe('Group Selector Hooks', () => {
         type: ActionType.updateGroupSettings,
       });
     });
+
+    describe('enforced groups', () => {
+      it('throws error when "none" is in enforcedGroups', () => {
+        const settings = {
+          enforcedGroups: ['none'],
+        };
+        expect(() =>
+          renderHook(() =>
+            useGetGroupSelector({
+              ...defaultArgs,
+              settings,
+            })
+          )
+        ).toThrow("'none' cannot be in enforcedGroups");
+      });
+
+      it('throws error when enforcedGroups are used with maxGroupingLevels === 1', () => {
+        const settings = {
+          enforcedGroups: ['group1'],
+        };
+        expect(() =>
+          renderHook(() =>
+            useGetGroupSelector({
+              ...defaultArgs,
+              maxGroupingLevels: 1,
+              settings,
+            })
+          )
+        ).toThrow('enforcedGroups cannot be used when maxGroupingLevels is 1 (toggle mode)');
+      });
+
+      it('throws error when enforcedGroups.length > maxGroupingLevels', () => {
+        const settings = {
+          enforcedGroups: ['group1', 'group2', 'group3'],
+        };
+        expect(() =>
+          renderHook(() =>
+            useGetGroupSelector({
+              ...defaultArgs,
+              maxGroupingLevels: 2,
+              settings,
+            })
+          )
+        ).toThrow('enforcedGroups.length (3) must be <= maxGroupingLevels (2)');
+      });
+
+      it('automatically adds enforced groups to activeGroups on initialization', () => {
+        const settings = {
+          enforcedGroups: ['kibana.alert.rule.name'],
+        };
+        renderHook(() =>
+          useGetGroupSelector({
+            ...defaultArgs,
+            settings,
+            groupingState: {
+              groupById: {
+                [groupingId]: {
+                  ...defaultGroup,
+                  activeGroups: ['none'],
+                  settings,
+                },
+              },
+            },
+          })
+        );
+
+        // useEffect runs after render, check that it was called
+        expect(dispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            payload: expect.objectContaining({
+              id: groupingId,
+              activeGroups: ['kibana.alert.rule.name'],
+            }),
+            type: ActionType.updateActiveGroups,
+          })
+        );
+      });
+
+      it('places enforced groups in front of existing groups', () => {
+        const settings = {
+          enforcedGroups: ['kibana.alert.rule.name'],
+        };
+        const testGroup = {
+          [groupingId]: {
+            ...defaultGroup,
+            options: defaultGroupingOptions,
+            activeGroups: ['user.name', 'host.name'],
+            settings,
+          },
+        };
+        renderHook(() =>
+          useGetGroupSelector({
+            ...defaultArgs,
+            settings,
+            groupingState: {
+              groupById: testGroup,
+            },
+          })
+        );
+
+        // useEffect should reorder groups
+        expect(dispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            payload: expect.objectContaining({
+              id: groupingId,
+              activeGroups: ['kibana.alert.rule.name', 'user.name', 'host.name'],
+            }),
+            type: ActionType.updateActiveGroups,
+          })
+        );
+      });
+
+      it('ensures enforced groups are in front when group changes', () => {
+        const settings = {
+          enforcedGroups: ['kibana.alert.rule.name'],
+        };
+        const testGroup = {
+          [groupingId]: {
+            ...defaultGroup,
+            options: defaultGroupingOptions,
+            activeGroups: ['kibana.alert.rule.name'],
+          },
+        };
+        const { result } = renderHook(() =>
+          useGetGroupSelector({
+            ...defaultArgs,
+            settings,
+            groupingState: {
+              groupById: testGroup,
+            },
+          })
+        );
+
+        act(() => result.current.props.onGroupChange('user.name'));
+
+        expect(dispatch).toHaveBeenCalledWith({
+          payload: {
+            id: groupingId,
+            activeGroups: ['kibana.alert.rule.name', 'user.name'],
+          },
+          type: ActionType.updateActiveGroups,
+        });
+      });
+
+      it('maintains enforced groups order when multiple enforced groups exist', () => {
+        const settings = {
+          enforcedGroups: ['kibana.alert.rule.name', 'host.name'],
+        };
+        const testGroup = {
+          [groupingId]: {
+            ...defaultGroup,
+            options: defaultGroupingOptions,
+            activeGroups: ['kibana.alert.rule.name', 'host.name'],
+          },
+        };
+        const { result } = renderHook(() =>
+          useGetGroupSelector({
+            ...defaultArgs,
+            settings,
+            groupingState: {
+              groupById: testGroup,
+            },
+          })
+        );
+
+        act(() => result.current.props.onGroupChange('user.name'));
+
+        expect(dispatch).toHaveBeenCalledWith({
+          payload: {
+            id: groupingId,
+            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
+          },
+          type: ActionType.updateActiveGroups,
+        });
+      });
+
+      it('replaces "none" with enforced groups when only "none" is selected', () => {
+        const settings = {
+          enforcedGroups: ['kibana.alert.rule.name'],
+        };
+        const testGroup = {
+          [groupingId]: {
+            ...defaultGroup,
+            options: defaultGroupingOptions,
+            activeGroups: ['none'],
+            settings,
+          },
+        };
+        renderHook(() =>
+          useGetGroupSelector({
+            ...defaultArgs,
+            settings,
+            groupingState: {
+              groupById: testGroup,
+            },
+          })
+        );
+
+        // useEffect should replace 'none' with enforced groups
+        expect(dispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            payload: expect.objectContaining({
+              id: groupingId,
+              activeGroups: ['kibana.alert.rule.name'],
+            }),
+            type: ActionType.updateActiveGroups,
+          })
+        );
+      });
+    });
   });
 
   describe('useGetGroupSelectorStateless', () => {

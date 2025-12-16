@@ -120,4 +120,9 @@ export const dashboardClient = {
     cache.delete(id);
     return updateResponse;
   },
+  invalidateCache: async (id: string) => {
+    if (cache.has(id)) {
+      cache.delete(id);
+    }
+  },
 };

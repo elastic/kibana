@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { SynthQualifiedColumnShorthand } from '../synth';
 import { ComposerQuery } from '../composer_query';
 import { esql } from '../esql';
 
@@ -16,7 +16,6 @@ describe('various dynamic query construction scenarios', () => {
     const value = 42;
     const query = esql`FROM index | WHERE ${[field]} > ${value} | LIMIT 10`;
 
-    // console.log(query + '');
     expect(query).toBeInstanceOf(ComposerQuery);
     expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
     expect(query.ast).toMatchObject({
@@ -24,6 +23,23 @@ describe('various dynamic query construction scenarios', () => {
       commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
     });
     expect(query.toRequest().params).toEqual([]);
+  });
+
+  test('can inline a qualified field name', () => {
+    const field: SynthQualifiedColumnShorthand = ['index', ['field']];
+    const query = esql`FROM index | WHERE ${field} > 42 | LIMIT 10`;
+
+    expect(query.print()).toBe('FROM index | WHERE [index].[field] > 42 | LIMIT 10');
+  });
+
+  test('can inline a qualified field name with multiple parts', () => {
+    const fields: SynthQualifiedColumnShorthand = ['index', ['field', 'subfield']];
+
+    const query = esql`FROM index | WHERE ${fields} IS NOT NULL | LIMIT 10`;
+
+    expect(query.print()).toBe(
+      'FROM index | WHERE [index].[field.subfield] IS NOT NULL | LIMIT 10'
+    );
   });
 
   test('can inline a list sources', () => {

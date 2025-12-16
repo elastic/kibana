@@ -27,6 +27,10 @@ export const createGetDocViewer =
       'observability-logs-ai-assistant'
     );
 
+    const logsAIInsightFeature = services.discoverShared.features.registry.getById(
+      'observability-logs-ai-insight'
+    );
+
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
 
     const indexes = {
@@ -92,6 +96,7 @@ export const createGetDocViewer =
                 {...props}
                 ref={setLogsOverviewApi}
                 renderAIAssistant={logsAIAssistantFeature?.render}
+                renderAIInsight={logsAIInsightFeature?.render}
                 renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
                 renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
                 indexes={indexes}

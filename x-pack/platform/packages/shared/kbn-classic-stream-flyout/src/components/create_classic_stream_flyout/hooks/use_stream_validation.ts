@@ -6,7 +6,7 @@
  */
 
 import { useCallback, type Dispatch } from 'react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
 import { validateStreamName, type StreamNameValidator } from '../../../utils';
 import { useAbortController } from './use_abort_controller';
@@ -18,8 +18,8 @@ const DEFAULT_VALIDATION_DEBOUNCE_MS = 300;
 interface UseStreamValidationParams {
   formState: FormState;
   dispatch: Dispatch<FormAction>;
-  onCreate: (streamName: string) => void;
-  selectedTemplate: TemplateDeserialized | undefined;
+  onCreate: (streamName: string) => Promise<void>;
+  selectedTemplate: IndexTemplate | undefined;
   onValidate?: StreamNameValidator;
   debounceMs?: number;
 }
@@ -168,7 +168,13 @@ export const useStreamValidation = ({
     const isValid = await runValidation(streamName, controller, isCreateValidationAborted);
 
     if (isValid && !isCreateValidationAborted(controller)) {
-      onCreate(streamName);
+      dispatch({ type: 'START_SUBMITTING' });
+      // Swallow errors from onCreate - errors are handled by the callback itself
+      await onCreate(streamName)
+        .catch(() => {})
+        .finally(() => {
+          dispatch({ type: 'STOP_SUBMITTING' });
+        });
     }
   }, [
     cancelDebouncedValidationTimer,

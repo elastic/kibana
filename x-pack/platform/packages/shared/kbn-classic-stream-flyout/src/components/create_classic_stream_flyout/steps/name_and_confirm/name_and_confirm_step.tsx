@@ -20,6 +20,7 @@ export const NameAndConfirmStep = ({
   validationError = null,
   conflictingIndexPattern,
   getIlmPolicy,
+  showDataRetention = true,
 }: NameAndConfirmStepProps) => {
   const indexPatterns = template.indexPatterns ?? [];
 
@@ -38,7 +39,11 @@ export const NameAndConfirmStep = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <ConfirmTemplateDetailsSection template={template} getIlmPolicy={getIlmPolicy} />
+        <ConfirmTemplateDetailsSection
+          template={template}
+          getIlmPolicy={getIlmPolicy}
+          showDataRetention={showDataRetention}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

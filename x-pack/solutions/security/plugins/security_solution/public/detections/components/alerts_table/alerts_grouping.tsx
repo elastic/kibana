@@ -110,6 +110,9 @@ export interface AlertsTableComponentProps {
 
   /** Optional array of custom controls to display in the toolbar alongside the group selector */
   additionalToolbarControls?: JSX.Element[];
+
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -263,6 +266,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       onGroupToggle,
       unit: defaultUnit,
       multiValueFields: multiValueFieldsToFlatten,
+      emptyGroupingComponent: props.emptyGroupingComponent,
     },
     defaultGroupingOptions: groupingOptions,
     fields,
@@ -408,6 +412,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
           onAggregationsChange={props.onAggregationsChange}
           additionalToolbarControls={props.additionalToolbarControls}
+          emptyGroupingComponent={props.emptyGroupingComponent}
         />
       );
     },

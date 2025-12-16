@@ -377,4 +377,25 @@ describe('<TableSection />', () => {
       });
     });
   });
+
+  describe('enforced groups', () => {
+    it('should pass all grouping settings including enforcedGroups', async () => {
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(GroupedAlertsTable).toHaveBeenCalled();
+        const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+        expect(props.settings).toMatchObject({
+          hideNoneOption: true,
+          hideCustomFieldOption: true,
+          hideOptionsTitle: true,
+          enforcedGroups: [ALERT_ATTACK_IDS],
+        });
+      });
+    });
+  });
 });

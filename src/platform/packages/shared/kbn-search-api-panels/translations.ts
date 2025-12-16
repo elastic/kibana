@@ -19,6 +19,13 @@ export const EIS_PROMO_TOUR_TITLE = i18n.translate('searchApiPanels.eisPromotion
   defaultMessage: 'Elastic Inference Service endpoints available',
 });
 
+export const EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE = i18n.translate(
+  'searchApiPanels.eisPromotion.cloudConnect.tour.title',
+  {
+    defaultMessage: 'Elastic Inference Service now available for self-managed clusters',
+  }
+);
+
 export const EIS_COSTS_TOUR_TITLE = i18n.translate('searchApiPanels.eisCosts.tour.title', {
   defaultMessage: 'Elastic Inference Service (EIS) now available',
 });
@@ -41,6 +48,14 @@ export const EIS_PROMO_TOUR_DESCRIPTION = i18n.translate(
   'searchApiPanels.eisPromotion.tour.description',
   {
     defaultMessage: 'Use GPUs for inference tasks through the Elastic Inference Service endpoints.',
+  }
+);
+
+export const EIS_CLOUD_CONNECT_PROMO_DESCRIPTION = i18n.translate(
+  'searchApiPanels.eisPromotion.cloudConnect.tour.description',
+  {
+    defaultMessage:
+      'Connect your self-managed cluster to Elastic Cloud and use GPUs for inference tasks through the Elastic Inference Service.',
   }
 );
 
@@ -76,6 +91,12 @@ export const EIS_TOUR_CTA = i18n.translate('searchApiPanels.eis.tour.cta', {
 export const EIS_UPDATE_CALLOUT_CTA = i18n.translate('searchApiPanels.eisUpdate.callout.cta', {
   defaultMessage: 'Update to ELSER on EIS',
 });
+export const EIS_CLOUD_CONNECT_PROMO_TOUR_CTA = i18n.translate(
+  'searchApiPanels.eisPromotion.cloudConnect.tour.cta',
+  {
+    defaultMessage: 'Connect your cluster',
+  }
+);
 
 // DISMISS BUTTON
 

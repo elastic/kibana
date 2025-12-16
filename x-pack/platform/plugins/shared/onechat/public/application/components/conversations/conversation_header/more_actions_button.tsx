@@ -20,7 +20,11 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useHasActiveConversation, useAgentId } from '../../../hooks/use_conversation';
+import {
+  useHasActiveConversation,
+  useAgentId,
+  useHasPersistedConversation,
+} from '../../../hooks/use_conversation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
@@ -110,6 +114,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
+  const hasPersistedConversation = useHasPersistedConversation();
   const agentId = useAgentId();
   const isAgentReadOnly = useIsAgentReadOnly(agentId);
   const { createOnechatUrl } = useNavigation();
@@ -130,7 +135,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   };
 
   const menuItems = [
-    ...(hasActiveConversation
+    ...(hasPersistedConversation
       ? [
           <MenuSectionTitle
             key="conversation-title"
