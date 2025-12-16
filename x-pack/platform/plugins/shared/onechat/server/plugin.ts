@@ -25,6 +25,7 @@ import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
+import { registerTaskDefinitions } from './task_manager/task_definitions';
 
 export class OnechatPlugin
   implements
@@ -69,6 +70,8 @@ export class OnechatPlugin
       workflowsManagement: setupDeps.workflowsManagement,
       trackingService: this.trackingService,
     });
+
+    registerTaskDefinitions({ taskManager: setupDeps.taskManager });
 
     registerFeatures({ features: setupDeps.features });
 

@@ -10,6 +10,10 @@ import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -27,6 +31,7 @@ export interface OnechatSetupDependencies {
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface OnechatStartDependencies {
@@ -34,6 +39,7 @@ export interface OnechatStartDependencies {
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AttachmentsSetup {
