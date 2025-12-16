@@ -8,7 +8,7 @@
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { EventOutcome, StatusCode } from '@kbn/apm-types';
+import type { AgentName, EventOutcome, StatusCode } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { Transaction } from '@kbn/apm-types';
@@ -221,7 +221,7 @@ export async function getUnifiedTraceItems({
       serviceName: event[SERVICE_NAME],
       type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
       sync: event[SPAN_SYNC],
-      agentName: event[AGENT_NAME],
+      agentName: event[AGENT_NAME] as AgentName | undefined,
       spanLinksCount: {
         incoming: incomingSpanLinksCountById[id] ?? 0,
         outgoing:
