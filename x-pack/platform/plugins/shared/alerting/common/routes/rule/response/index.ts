@@ -40,9 +40,6 @@ export type {
   Monitoring as MonitoringV1,
 } from './types/v1';
 
-export type { ESQLRuleResponse as ESQLRuleResponseV1 } from './types/v1';
-export { esqlRuleResponseSchema } from './schemas/v1';
-
 export { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
 export { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 
