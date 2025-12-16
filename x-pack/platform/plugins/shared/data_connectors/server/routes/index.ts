@@ -206,6 +206,18 @@ export function registerRoutes(
         const savedObjectsClient = coreContext.savedObjects.client;
         const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
 
+        const workflowIds: string[] = [];
+        for (const workflowInfo of dataConnectorTypeDef.generateWorkflows(stackConnector.id)) {
+          if (workflowInfo.shouldGenerateABTool) {
+            const workflow = await workflowManagement.management.createWorkflow(
+              { yaml: workflowInfo.content },
+              spaceId,
+              request
+            );
+            workflowIds.push(workflow.id);
+          }
+        }
+
         const now = new Date().toISOString();
         const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
           name,
@@ -214,7 +226,7 @@ export function registerRoutes(
           features: [],
           createdAt: now,
           updatedAt: now,
-          workflowIds: [],
+          workflowIds,
           toolIds: [],
           kscIds: [stackConnector.id],
         });
