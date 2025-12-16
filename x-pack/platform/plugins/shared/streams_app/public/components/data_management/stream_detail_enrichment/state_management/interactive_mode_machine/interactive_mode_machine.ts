@@ -51,6 +51,7 @@ import {
   getActiveDataSourceSamplesFromParent,
   getStepsForSimulation,
   spawnStep,
+  hasIncompleteConditions,
   type StepSpawner,
 } from './utils';
 
@@ -228,6 +229,17 @@ export const interactiveModeMachine = setup({
 
       if (simulationMode === 'partial' && selectWhetherAnyProcessorBeforePersisted(context)) {
         // Send reset to simulator via parent
+        context.parentRef.send({ type: 'simulation.reset' });
+        return;
+      }
+
+      const steps = getStepsForSimulation({
+        stepRefs: context.stepRefs,
+        simulationMode,
+      });
+
+      // Check for incomplete conditions (e.g., range with empty values) - don't simulate if conditions are invalid
+      if (hasIncompleteConditions(steps)) {
         context.parentRef.send({ type: 'simulation.reset' });
         return;
       }
