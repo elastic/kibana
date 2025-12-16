@@ -7,6 +7,7 @@
 
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common';
+import { onechatMocks } from '@kbn/onechat-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
@@ -18,6 +19,7 @@ import { createAlertAttachmentType } from './alert';
 
 describe('createAlertAttachmentType', () => {
   const attachmentType = createAlertAttachmentType();
+  const formatContext = onechatMocks.attachments.createFormatContextMock();
 
   describe('validate', () => {
     it('returns valid when alert data is valid', async () => {
@@ -62,7 +64,7 @@ describe('createAlertAttachmentType', () => {
         data: { alert: 'test alert content' },
       };
 
-      const formatted = await attachmentType.format(attachment);
+      const formatted = await attachmentType.format(attachment, formatContext);
       const representation = await formatted.getRepresentation();
 
       expect(representation.type).toBe('text');
@@ -76,7 +78,7 @@ describe('createAlertAttachmentType', () => {
         data: { invalid: 'data' },
       };
 
-      expect(() => attachmentType.format(attachment)).toThrow(
+      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
         'Invalid alert attachment data for attachment test-id'
       );
     });

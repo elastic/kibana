@@ -29,7 +29,8 @@ export const registerLookupIndexRoutes = (
           indexName: schema.string(),
         }),
         body: schema.object({
-          operations: schema.arrayOf(schema.any()),
+          // maxSize is added here to prevent DoS vulnerabilities https://github.com/elastic/kibana/pull/245533,
+          operations: schema.arrayOf(schema.any(), { maxSize: 1000 }),
         }),
       },
       security: {
