@@ -14,7 +14,6 @@ import { ESQLLang, type ESQLDependencies } from './language';
 
 // Mock the getHoverItem and suggest functions
 jest.mock('@kbn/esql-ast', () => ({
-  ...jest.requireActual('@kbn/esql-ast'),
   getHoverItem: jest.fn(),
   suggest: jest.fn(),
 }));
