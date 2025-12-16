@@ -20,7 +20,7 @@ export interface TypeProps {
   mode: ToolFormMode;
 }
 
-export const Type = ({ mode }: TypeProps) => {
+export const TypeSection = ({ mode }: TypeProps) => {
   const {
     formState: { errors },
     control,

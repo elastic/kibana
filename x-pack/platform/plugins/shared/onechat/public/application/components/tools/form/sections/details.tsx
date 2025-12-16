@@ -17,7 +17,7 @@ import type { ToolFormData } from '../types/tool_form_types';
 export interface DetailsProps {
   mode: ToolFormMode;
 }
-export const Details = ({ mode }: DetailsProps) => {
+export const DetailsSection = ({ mode }: DetailsProps) => {
   const {
     control,
     formState: { errors },

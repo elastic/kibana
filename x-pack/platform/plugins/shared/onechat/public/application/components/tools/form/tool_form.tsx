@@ -9,9 +9,9 @@ import { EuiForm, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Type } from './sections/type';
-import { Labels } from './sections/labels';
-import { Details } from './sections/details';
+import { TypeSection } from './sections/type';
+import { LabelsSection } from './sections/labels';
+import { DetailsSection } from './sections/details';
 import type { ToolFormData } from './types/tool_form_types';
 
 export enum ToolFormMode {
@@ -55,13 +55,13 @@ export const ToolForm = ({ mode, formId, saveTool }: ToolFormProps) => {
     >
       {!isViewMode && (
         <>
-          <Type mode={mode} />
+          <TypeSection mode={mode} />
           <EuiHorizontalRule />
         </>
       )}
-      <Details mode={mode} />
+      <DetailsSection mode={mode} />
       <EuiHorizontalRule />
-      <Labels mode={mode} />
+      <LabelsSection mode={mode} />
       <EuiHorizontalRule />
     </EuiForm>
   );

@@ -10,8 +10,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiForm, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFormContext } from 'react-hook-form';
-import { OrganizationSection } from './sections/organization_section';
-import { SourceSection } from './sections/source_section';
+import { OrganizationSection } from './sections/organization';
+import { SourceSection } from './sections/source';
 import type { BulkImportMcpToolsFormData } from './types';
 
 const formStyles = ({ euiTheme }: UseEuiTheme) => css`
