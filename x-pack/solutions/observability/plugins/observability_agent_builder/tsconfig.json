@@ -40,7 +40,8 @@
     "@kbn/discover-shared-plugin",
     "@kbn/i18n",
     "@kbn/licensing-types",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/observability-nav-icons"
   ],
   "exclude": ["target/**/*"]
 }

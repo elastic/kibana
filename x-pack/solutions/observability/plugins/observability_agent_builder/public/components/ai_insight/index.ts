@@ -13,4 +13,3 @@ export {
 } from './ai_insight';
 export { AiInsightErrorBanner, type AiInsightErrorBannerProps } from './ai_insight_error_banner';
 export { StartConversationButton } from './start_conversation_button';
-export { RobotIcon, robotIconType } from './robot_icon';

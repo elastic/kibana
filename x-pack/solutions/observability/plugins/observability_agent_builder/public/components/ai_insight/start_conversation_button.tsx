@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { robotIconType } from './robot_icon';
+import { robotIconType } from '@kbn/observability-nav-icons';
 
 export function StartConversationButton(props: React.ComponentProps<typeof EuiButton>) {
   return (

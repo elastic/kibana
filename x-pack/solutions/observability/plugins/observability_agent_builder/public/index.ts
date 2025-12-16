@@ -24,7 +24,5 @@ export type {
 
 export type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
 
-export { RobotIcon, robotIconType } from './components/ai_insight';
-
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ObservabilityAgentBuilderPlugin(initializerContext);
