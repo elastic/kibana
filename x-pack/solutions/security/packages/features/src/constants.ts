@@ -49,6 +49,7 @@ export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as co
 export const SECURITY_SOLUTION_RULES_APP_ID = 'securitySolutionRules' as const;
 export const RULES_FEATURE_ID_V1 = 'securitySolutionRulesV1' as const;
 export const RULES_FEATURE_ID_V2 = 'securitySolutionRulesV2' as const;
+export const RULES_FEATURE_ID_V3 = 'securitySolutionRulesV3' as const;
 
 // Rules API privileges
 export const RULES_API_READ = 'rules-read' as const;
@@ -65,19 +66,19 @@ export const USERS_API_READ = 'users-read' as const;
 export const RULES_UI_READ = 'read_rules' as const;
 export const RULES_UI_DETECTIONS = 'detections' as const;
 export const RULES_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
-export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID_V2}.${RULES_UI_READ}` as const;
+export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID_V3}.${RULES_UI_READ}` as const;
 export const RULES_UI_EDIT = 'edit_rules' as const;
-export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID_V2}.${RULES_UI_EDIT}` as const;
+export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID_V3}.${RULES_UI_EDIT}` as const;
 export const RULES_UI_DETECTIONS_PRIVILEGE =
-  `${RULES_FEATURE_ID_V2}.${RULES_UI_DETECTIONS}` as const;
+  `${RULES_FEATURE_ID_V3}.${RULES_UI_DETECTIONS}` as const;
 export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
-  `${RULES_FEATURE_ID_V2}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
+  `${RULES_FEATURE_ID_V3}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 export const EXCEPTIONS_UI_READ = 'readExceptions' as const;
 export const EXCEPTIONS_UI_EDIT = 'editExceptions' as const;
 export const EXCEPTIONS_UI_READ_PRIVILEGES =
-  `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_READ}` as const;
+  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_READ}` as const;
 export const EXCEPTIONS_UI_EDIT_PRIVILEGES =
-  `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_EDIT}` as const;
+  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_EDIT}` as const;
 
 export const ALERTS_FEATURE_ID = 'securitySolutionAlertsV1' as const;
 

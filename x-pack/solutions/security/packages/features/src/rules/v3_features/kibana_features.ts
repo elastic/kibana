@@ -18,12 +18,12 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+
 import {
-  ALERTS_API_ALL,
-  ALERTS_API_READ,
   APP_ID,
-  EXCEPTIONS_API_ALL,
   EXCEPTIONS_API_READ,
+  EXCEPTIONS_UI_READ,
   INITIALIZE_SECURITY_SOLUTION,
   LEGACY_NOTIFICATIONS_ID,
   LISTS_API_ALL,
@@ -31,15 +31,12 @@ import {
   LISTS_API_SUMMARY,
   RULES_API_ALL,
   RULES_API_READ,
-  RULES_FEATURE_ID_V1,
   RULES_FEATURE_ID_V3,
   RULES_UI_EDIT,
   RULES_UI_READ,
+  SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
-  EXCEPTIONS_SUBFEATURE_ALL,
-  SECURITY_SOLUTION_RULES_APP_ID,
-  ALERTS_FEATURE_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -61,26 +58,14 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   consumers: [SERVER_APP_ID],
 }));
 
-export const getRulesBaseKibanaFeature = (
+export const getRulesV3BaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
-  deprecated: {
-    notice: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
-      {
-        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
-        values: {
-          currentId: RULES_FEATURE_ID_V1,
-          latestId: RULES_FEATURE_ID_V3,
-        },
-      }
-    ),
-  },
-  id: RULES_FEATURE_ID_V1,
+  id: RULES_FEATURE_ID_V3,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesTitle',
     {
-      defaultMessage: 'Rules, Alerts, and Exceptions',
+      defaultMessage: 'Rules and Exceptions',
     }
   ),
   order: 1100,
@@ -93,28 +78,14 @@ export const getRulesBaseKibanaFeature = (
   },
   privileges: {
     all: {
-      replacedBy: {
-        default: [
-          { feature: RULES_FEATURE_ID_V3, privileges: ['all'] },
-          { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
-        ],
-        minimal: [
-          {
-            feature: RULES_FEATURE_ID_V3,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
-          },
-          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
-        ],
-      },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
-        all: params.savedObjects,
-        read: params.savedObjects,
+        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
       },
       alerting: {
         rule: { all: alertingFeatures },
-        alert: { all: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
@@ -123,10 +94,6 @@ export const getRulesBaseKibanaFeature = (
       api: [
         RULES_API_ALL,
         RULES_API_READ,
-        ALERTS_API_ALL,
-        ALERTS_API_READ,
-        EXCEPTIONS_API_ALL,
-        EXCEPTIONS_API_READ,
         LISTS_API_ALL,
         LISTS_API_READ,
         LISTS_API_SUMMARY,
@@ -136,39 +103,24 @@ export const getRulesBaseKibanaFeature = (
       ],
     },
     read: {
-      replacedBy: {
-        default: [
-          { feature: RULES_FEATURE_ID_V3, privileges: ['read'] },
-          { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
-        ],
-        minimal: [
-          {
-            feature: RULES_FEATURE_ID_V3,
-            privileges: ['minimal_read'],
-          },
-          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
-        ],
-      },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: params.savedObjects,
+        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
       },
       alerting: {
         rule: { read: alertingFeatures },
-        alert: { read: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ],
+      ui: [RULES_UI_READ, EXCEPTIONS_UI_READ],
       api: [
         RULES_API_READ,
-        ALERTS_API_READ,
-        EXCEPTIONS_API_READ,
         LISTS_API_READ,
         USERS_API_READ,
+        EXCEPTIONS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
         'rac',
       ],
