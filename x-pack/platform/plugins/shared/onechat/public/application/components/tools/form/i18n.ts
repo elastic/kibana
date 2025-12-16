@@ -280,6 +280,12 @@ export const i18nMessages = {
             defaultMessage: 'Error',
           }
         ),
+        mcpHealthStatusLoading: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.mcpHealthStatusLoading',
+          {
+            defaultMessage: 'Loading',
+          }
+        ),
       },
     },
   },

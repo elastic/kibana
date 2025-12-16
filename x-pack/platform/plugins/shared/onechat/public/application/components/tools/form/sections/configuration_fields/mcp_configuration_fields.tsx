@@ -8,10 +8,9 @@
 import {
   EuiFlexGroup,
   EuiHealth,
-  EuiSkeletonLoading,
-  EuiSkeletonText,
   EuiSpacer,
   EuiSplitPanel,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -21,12 +20,6 @@ import { i18nMessages } from '../../i18n';
 import { ToolFormMode } from '../../tool_form';
 import { McpEditableFields } from '../../components/mcp/mcp_editable_fields';
 import { McpReadOnlyFields } from '../../components/mcp/mcp_readonly_fields';
-
-const skeletonTextStyles = css`
-  display: inline-block;
-  width: 56px;
-  vertical-align: middle;
-`;
 
 export interface McpConfigurationProps {
   mode: ToolFormMode;
@@ -51,25 +44,22 @@ export const McpConfiguration = ({ mode }: McpConfigurationProps) => {
             <EuiTitle size="xs">
               <h4>{i18nMessages.configuration.form.mcp.mcpToolDetailsTitle}</h4>
             </EuiTitle>
-            {!isCreatingTool && (
-              <EuiSkeletonLoading
-                isLoading={!mcpHealthStatus}
-                loadingContent={
-                  <EuiHealth color="warning">
-                    <EuiSkeletonText lines={1} size="s" css={skeletonTextStyles} />
-                  </EuiHealth>
-                }
-                loadedContent={
-                  <EuiHealth
-                    color={mcpHealthStatus === McpToolHealthStatus.Healthy ? 'success' : 'danger'}
-                  >
-                    {mcpHealthStatus === McpToolHealthStatus.Healthy
-                      ? i18nMessages.configuration.form.mcp.mcpHealthStatusHealthy
-                      : i18nMessages.configuration.form.mcp.mcpHealthStatusError}
-                  </EuiHealth>
-                }
-              />
-            )}
+            {!isCreatingTool &&
+              (mcpHealthStatus ? (
+                <EuiHealth
+                  color={mcpHealthStatus === McpToolHealthStatus.Healthy ? 'success' : 'danger'}
+                >
+                  {mcpHealthStatus === McpToolHealthStatus.Healthy
+                    ? i18nMessages.configuration.form.mcp.mcpHealthStatusHealthy
+                    : i18nMessages.configuration.form.mcp.mcpHealthStatusError}
+                </EuiHealth>
+              ) : (
+                <EuiHealth color="subdued">
+                  <EuiTextColor color="subdued">
+                    {i18nMessages.configuration.form.mcp.mcpHealthStatusLoading}
+                  </EuiTextColor>
+                </EuiHealth>
+              ))}
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
