@@ -7,7 +7,7 @@
       "pretty": "__flag__",
       "local": "__flag__",
       "master_timeout": [
-        "to 30s",
+        "30s",
         "-1",
         "0"
       ]
