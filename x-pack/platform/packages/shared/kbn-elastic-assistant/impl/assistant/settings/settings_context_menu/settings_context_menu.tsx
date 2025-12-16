@@ -31,15 +31,7 @@ import { KNOWLEDGE_BASE_TAB } from '../const';
 import * as i18n from './translations';
 import { AgentBuilderTourStep } from '../../../tour/agent_builder';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../tour/const';
-
-// Event type constants - these match the event types registered in Security Solution
-const AGENT_BUILDER_EVENT_TYPES = {
-  OptInStepReached: 'Agent Builder Opt-In Step Reached',
-  OptInConfirmationShown: 'Agent Builder Opt-In Confirmation Shown',
-  OptInConfirmed: 'Agent Builder Opt-In Confirmed',
-  OptInCancelled: 'Agent Builder Opt-In Cancelled',
-  OptOut: 'Agent Builder Opt-Out',
-} as const;
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 
 interface Params {
   isDisabled?: boolean;
@@ -71,7 +63,8 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     // Track confirmation modal shown
     useEffect(() => {
       if (isAIAgentModalVisible) {
-        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown, {
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+          action: 'confirmation_shown',
           source: 'security_settings_menu',
         });
       }
@@ -89,15 +82,17 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       setIsAIAgentModalVisible(true);
       closePopover();
       // Track opt-in step reached (initial step)
-      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
-        step: 'initial',
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'step_reached',
         source: 'security_settings_menu',
+        step: 'initial',
       });
     }, [closePopover, analytics]);
     const handleCancelAIAgent = useCallback(() => {
       setIsAIAgentModalVisible(false);
       // Track opt-in cancelled at confirmation modal step
-      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInCancelled, {
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'cancelled',
         source: 'security_settings_menu',
         step: 'confirmation_modal',
       });
@@ -105,7 +100,8 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const handleConfirmAIAgent = useCallback(async () => {
       try {
         // Track opt-in confirmed
-        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInConfirmed, {
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+          action: 'confirmed',
           source: 'security_settings_menu',
         });
         await settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
@@ -289,9 +285,10 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
               onContinue={() => {
                 // Track opt-in step reached from tour
-                analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
-                  step: 'initial',
+                analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+                  action: 'step_reached',
                   source: 'security_ab_tour',
+                  step: 'initial',
                 });
                 handleOpenAIAgentModal();
               }}

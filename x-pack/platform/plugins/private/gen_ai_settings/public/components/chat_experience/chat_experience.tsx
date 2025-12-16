@@ -51,7 +51,8 @@ const trackChatExperienceTelemetry = (
   currentValue: AIChatExperience | undefined
 ): void => {
   if (newValue === AIChatExperience.Agent) {
-    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown, {
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+      action: 'confirmation_shown',
       source: TELEMETRY_SOURCE,
     });
   } else if (newValue === AIChatExperience.Classic && currentValue === AIChatExperience.Agent) {
@@ -77,9 +78,10 @@ export const ChatExperience: React.FC = () => {
   // Track initial step reached when component mounts (user views the opt-in settings)
   useEffect(() => {
     if (!hasTrackedInitialStep.current && currentValue !== AIChatExperience.Agent) {
-      reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
-        step: 'initial',
+      reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'step_reached',
         source: TELEMETRY_SOURCE,
+        step: 'initial',
       });
       hasTrackedInitialStep.current = true;
     }
@@ -105,7 +107,8 @@ export const ChatExperience: React.FC = () => {
   );
 
   const handleConfirmAgent = useCallback(() => {
-    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInConfirmed, {
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+      action: 'confirmed',
       source: TELEMETRY_SOURCE,
     });
     setConfirmModalOpen(false);
@@ -114,7 +117,8 @@ export const ChatExperience: React.FC = () => {
 
   const handleCancelAgent = useCallback(() => {
     setConfirmModalOpen(false);
-    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInCancelled, {
+    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+      action: 'cancelled',
       source: TELEMETRY_SOURCE,
       step: 'confirmation_modal',
     });

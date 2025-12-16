@@ -23,11 +23,7 @@ import type { AgentBuilderTourState } from './step_config';
 import { agentBuilderTourStep1, tourDefaultConfig } from './step_config';
 import { AGENT_BUILDER_TOUR_CONTINUE, AGENT_BUILDER_TOUR_SKIP } from './translations';
 import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
-
-// Event type constants - these match the event types registered in Security Solution
-const AGENT_BUILDER_EVENT_TYPES = {
-  OptInStepReached: 'Agent Builder Opt-In Step Reached',
-} as const;
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 
 interface Props {
   children?: EuiTourStepProps['children'];
@@ -73,9 +69,10 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
   const handleContinue = useCallback(() => {
     finishTour();
     // Track opt-in step reached from tour
-    analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInStepReached, {
-      step: 'initial',
+    analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+      action: 'step_reached',
       source: 'security_ab_tour',
+      step: 'initial',
     });
     onContinue?.();
   }, [finishTour, onContinue, analytics]);

@@ -12,10 +12,7 @@ import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core/public';
  */
 const TELEMETRY_PREFIX = 'Agent Builder';
 export const AGENT_BUILDER_EVENT_TYPES = {
-  OptInStepReached: `${TELEMETRY_PREFIX} Opt-In Step Reached`,
-  OptInConfirmationShown: `${TELEMETRY_PREFIX} Opt-In Confirmation Shown`,
-  OptInConfirmed: `${TELEMETRY_PREFIX} Opt-In Confirmed`,
-  OptInCancelled: `${TELEMETRY_PREFIX} Opt-In Cancelled`,
+  OptInAction: `${TELEMETRY_PREFIX} Opt-In Action`,
   OptOut: `${TELEMETRY_PREFIX} Opt-Out`,
   AddToChatClicked: `${TELEMETRY_PREFIX} Add to Chat Clicked`,
   MessageSent: `${TELEMETRY_PREFIX} Message Sent`,
@@ -25,6 +22,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
 export type OptInStep = 'initial' | 'confirmation_modal' | 'final';
+export type OptInAction = 'step_reached' | 'confirmation_shown' | 'confirmed' | 'cancelled';
 export type AttachmentType = 'alert' | 'entity' | 'rule' | 'attack_discovery' | 'other';
 export type Pathway =
   | 'alerts_flyout'
@@ -35,22 +33,10 @@ export type Pathway =
   | 'other';
 export type ErrorContext = 'opt_in' | 'message_send' | 'tool_execution' | 'invocation' | 'other';
 
-export interface ReportOptInStepReachedParams {
-  step: OptInStep;
+export interface ReportOptInActionParams {
+  action: OptInAction;
   source: OptInSource;
-}
-
-export interface ReportOptInConfirmationShownParams {
-  source: OptInSource;
-}
-
-export interface ReportOptInConfirmedParams {
-  source: OptInSource;
-}
-
-export interface ReportOptInCancelledParams {
-  source: OptInSource;
-  step: OptInStep;
+  step?: OptInStep;
 }
 
 export interface ReportOptOutParams {
@@ -92,10 +78,7 @@ export interface ReportAgentBuilderErrorParams {
 }
 
 export interface AgentBuilderTelemetryEventsMap {
-  [AGENT_BUILDER_EVENT_TYPES.OptInStepReached]: ReportOptInStepReachedParams;
-  [AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown]: ReportOptInConfirmationShownParams;
-  [AGENT_BUILDER_EVENT_TYPES.OptInConfirmed]: ReportOptInConfirmedParams;
-  [AGENT_BUILDER_EVENT_TYPES.OptInCancelled]: ReportOptInCancelledParams;
+  [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
   [AGENT_BUILDER_EVENT_TYPES.MessageSent]: ReportMessageSentParams;
@@ -104,10 +87,7 @@ export interface AgentBuilderTelemetryEventsMap {
 }
 
 export type AgentBuilderTelemetryEvent =
-  | EventTypeOpts<ReportOptInStepReachedParams>
-  | EventTypeOpts<ReportOptInConfirmationShownParams>
-  | EventTypeOpts<ReportOptInConfirmedParams>
-  | EventTypeOpts<ReportOptInCancelledParams>
+  | EventTypeOpts<ReportOptInActionParams>
   | EventTypeOpts<ReportOptOutParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportMessageSentParams>
@@ -116,68 +96,24 @@ export type AgentBuilderTelemetryEvent =
 
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
-  | typeof AGENT_BUILDER_EVENT_TYPES.OptInStepReached
-  | typeof AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown
-  | typeof AGENT_BUILDER_EVENT_TYPES.OptInConfirmed
-  | typeof AGENT_BUILDER_EVENT_TYPES.OptInCancelled
+  | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
   | typeof AGENT_BUILDER_EVENT_TYPES.MessageSent
   | typeof AGENT_BUILDER_EVENT_TYPES.MessageReceived
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentBuilderError;
 
-const optInStepReachedEvent: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.OptInStepReached,
+const optInActionEvent: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
   schema: {
-    step: {
-      type: 'keyword',
-      _meta: {
-        description: 'Step in the opt-in flow (initial|confirmation_modal|final)',
-        optional: false,
-      },
-    },
-    source: {
+    action: {
       type: 'keyword',
       _meta: {
         description:
-          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour)',
+          'Action taken in the opt-in flow (step_reached|confirmation_shown|confirmed|cancelled)',
         optional: false,
       },
     },
-  },
-};
-
-const optInConfirmationShownEvent: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.OptInConfirmationShown,
-  schema: {
-    source: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour)',
-        optional: false,
-      },
-    },
-  },
-};
-
-const optInConfirmedEvent: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.OptInConfirmed,
-  schema: {
-    source: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour)',
-        optional: false,
-      },
-    },
-  },
-};
-
-const optInCancelledEvent: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.OptInCancelled,
-  schema: {
     source: {
       type: 'keyword',
       _meta: {
@@ -189,8 +125,9 @@ const optInCancelledEvent: AgentBuilderTelemetryEvent = {
     step: {
       type: 'keyword',
       _meta: {
-        description: 'Step where cancellation occurred (initial|confirmation_modal|final)',
-        optional: false,
+        description:
+          'Step in the opt-in flow (initial|confirmation_modal|final). Only present when action is step_reached or cancelled',
+        optional: true,
       },
     },
   },
@@ -411,10 +348,7 @@ const agentBuilderErrorEvent: AgentBuilderTelemetryEvent = {
 };
 
 export const agentBuilderTelemetryEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
-  optInStepReachedEvent,
-  optInConfirmationShownEvent,
-  optInConfirmedEvent,
-  optInCancelledEvent,
+  optInActionEvent,
   optOutEvent,
   addToChatClickedEvent,
   messageSentEvent,
