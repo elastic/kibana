@@ -253,18 +253,3 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Implementation examples:**
 - [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_recommended_fields.ts)
-
----
-
-## Cell actions integration
-
-### Trigger & metadata: `DISCOVER_CELL_ACTIONS_TRIGGER`, `DiscoverCellAction`
-
-**Changes:** Standardizes how cell actions receive context (`instanceId`, `dataSource`, `dataView`, `query`, `filters`, `timeRange`).
-
-**Use when:** Build cell‑action plugins or cross‑app actions.
-
-**Returns:** `CellAction`
-
-**Implementation examples:**
-- See [types.ts](./types.ts) for `DISCOVER_CELL_ACTIONS_TRIGGER` and `DiscoverCellAction` definitions
