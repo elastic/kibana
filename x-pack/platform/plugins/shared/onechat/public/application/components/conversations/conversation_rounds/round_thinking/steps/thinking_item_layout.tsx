@@ -38,13 +38,21 @@ const labels = {
 interface AccordionProps {
   children: ReactNode;
   accordionContent: ToolCallStep['params'];
+  textColor?: string;
 }
-const Accordion = ({ children, accordionContent }: AccordionProps) => {
+const Accordion = ({ children, accordionContent, textColor }: AccordionProps) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionId',
   });
   return (
-    <EuiAccordion id={accordionId} arrowDisplay="right" buttonContent={children}>
+    <EuiAccordion
+      css={css`
+        color: ${textColor};
+      `}
+      id={accordionId}
+      arrowDisplay="right"
+      buttonContent={children}
+    >
       <>
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
@@ -67,11 +75,13 @@ interface ThinkingItemLayoutProps {
   children: ReactNode;
   icon?: ReactNode;
   accordionContent?: ToolCallStep['params']; // potentially to be extended in the future to accomodate other types of content
+  textColor?: string;
 }
 export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
   children,
   icon,
   accordionContent,
+  textColor,
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -93,9 +103,18 @@ export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
       )}
       <EuiFlexItem>
         {accordionContent ? (
-          <Accordion accordionContent={accordionContent}>{children}</Accordion>
+          <Accordion textColor={textColor} accordionContent={accordionContent}>
+            {children}
+          </Accordion>
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+          <EuiFlexGroup
+            css={css`
+              color: ${textColor};
+            `}
+            direction="column"
+            gutterSize="l"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>{children}</EuiFlexItem>
           </EuiFlexGroup>
         )}

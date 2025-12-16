@@ -11,6 +11,7 @@ import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 
 const mockFlyoutRef = {
   close: jest.fn(),
@@ -93,6 +94,7 @@ describe('useAgentBuilderAttachment', () => {
         },
       ],
       sessionTag: 'security',
+      agentId: THREAT_HUNTING_AGENT_ID,
     });
   });
 
