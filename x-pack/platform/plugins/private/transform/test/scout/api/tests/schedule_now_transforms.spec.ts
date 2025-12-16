@@ -49,27 +49,30 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
     expect(scheduleResponse[transformId].error).toBeUndefined();
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformViewer();
+  apiTest(
+    'should return 200 with success:false for unauthorized user',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformViewer();
 
-    const reqBody: ScheduleNowTransformsRequestSchema = [{ id: transformId }];
-    const { statusCode, body } = await apiClient.post(
-      'internal/transform/schedule_now_transforms',
-      {
-        headers: {
-          ...COMMON_HEADERS,
-          ...cookieHeader,
-        },
-        body: reqBody,
-        responseType: 'json',
-      }
-    );
-    const scheduleResponse = body as ScheduleNowTransformsResponseSchema;
+      const reqBody: ScheduleNowTransformsRequestSchema = [{ id: transformId }];
+      const { statusCode, body } = await apiClient.post(
+        'internal/transform/schedule_now_transforms',
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...cookieHeader,
+          },
+          body: reqBody,
+          responseType: 'json',
+        }
+      );
+      const scheduleResponse = body as ScheduleNowTransformsResponseSchema;
 
-    expect(statusCode).toBe(200);
-    expect(scheduleResponse[transformId].success).toBe(false);
-    expect(typeof scheduleResponse[transformId].error).toBe('object');
-  });
+      expect(statusCode).toBe(200);
+      expect(scheduleResponse[transformId].success).toBe(false);
+      expect(typeof scheduleResponse[transformId].error).toBe('object');
+    }
+  );
 
   // single transform schedule with invalid transformId
   apiTest(

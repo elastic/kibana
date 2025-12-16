@@ -61,25 +61,28 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
     expect(stopResponse[transformId].error).toBeUndefined();
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformViewer();
+  apiTest(
+    'should return 200 with success:false for unauthorized user',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformViewer();
 
-    const reqBody: StopTransformsRequestSchema = [
-      { id: transformId, state: TRANSFORM_STATE.STARTED },
-    ];
-    const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
-      headers: {
-        ...COMMON_HEADERS,
-        ...cookieHeader,
-      },
-      body: reqBody,
-      responseType: 'json',
-    });
-    const stopResponse = body as StopTransformsResponseSchema;
+      const reqBody: StopTransformsRequestSchema = [
+        { id: transformId, state: TRANSFORM_STATE.STARTED },
+      ];
+      const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...cookieHeader,
+        },
+        body: reqBody,
+        responseType: 'json',
+      });
+      const stopResponse = body as StopTransformsResponseSchema;
 
-    expect(statusCode).toBe(200);
+      expect(statusCode).toBe(200);
 
-    expect(stopResponse[transformId].success).toBe(false);
-    expect(typeof stopResponse[transformId].error).toBe('object');
-  });
+      expect(stopResponse[transformId].success).toBe(false);
+      expect(typeof stopResponse[transformId].error).toBe('object');
+    }
+  );
 });

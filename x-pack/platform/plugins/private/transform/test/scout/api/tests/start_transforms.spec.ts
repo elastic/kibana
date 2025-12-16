@@ -46,25 +46,28 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
     expect(startResponse[transformId].error).toBeUndefined();
   });
 
-  apiTest('should return 200 with success:false for unauthorized user', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformViewer();
+  apiTest(
+    'should return 200 with success:false for unauthorized user',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asTransformViewer();
 
-    const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
-    const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
-      headers: {
-        ...COMMON_HEADERS,
-        ...cookieHeader,
-      },
-      body: reqBody,
-      responseType: 'json',
-    });
-    const startResponse = body as StartTransformsResponseSchema;
+      const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
+      const { statusCode, body } = await apiClient.post('internal/transform/start_transforms', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...cookieHeader,
+        },
+        body: reqBody,
+        responseType: 'json',
+      });
+      const startResponse = body as StartTransformsResponseSchema;
 
-    expect(statusCode).toBe(200);
+      expect(statusCode).toBe(200);
 
-    expect(startResponse[transformId].success).toBe(false);
-    expect(typeof startResponse[transformId].error).toBe('object');
-  });
+      expect(startResponse[transformId].success).toBe(false);
+      expect(typeof startResponse[transformId].error).toBe('object');
+    }
+  );
 
   // single transform start with invalid transformId
   apiTest(
