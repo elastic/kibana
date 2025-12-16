@@ -28,7 +28,7 @@ export const buildFunctionDocumentation = (
 ) => `
 ${detail}
 
-**${declarationLabel}**
+# ${declarationLabel}
 ${signatures
   .map(
     ({ declaration, license }) => `
@@ -42,7 +42,7 @@ ${declaration}${license || ''}
 ${
   examples?.length
     ? `\
-**${examplesLabel}**
+# ${examplesLabel}
 ${examples
   .map(
     (i) => `

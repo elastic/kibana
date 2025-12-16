@@ -346,10 +346,11 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       overflow: auto;
     }
 
-    .suggest-details .rendered-markdown > p > strong {
+    .suggest-details .rendered-markdown h1 {
       display: block;
       margin-top: ${theme.euiTheme.size.m};
       font-size: ${theme.euiTheme.size.base};
+      font-weight: ${theme.euiTheme.font.weight.bold};
     }
 
     .suggest-details [data-code] {

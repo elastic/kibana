@@ -254,11 +254,11 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const labels = [];
 
   if (fn.preview) {
-    labels.push(`_[${techPreviewLabel}]_`);
+    labels.push(`**[${techPreviewLabel}]**`);
   }
 
   if (fn.license) {
-    labels.push(`_[${fn.license}]_`);
+    labels.push(`**[${fn.license}]**`);
   }
 
   if (labels.length > 0) {
