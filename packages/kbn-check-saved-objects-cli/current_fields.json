@@ -950,6 +950,11 @@
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
+  "oauth_state": [
+    "connectorId",
+    "expiresAt",
+    "state"
+  ],
   "observability-onboarding-state": [
     "progress",
     "state",
