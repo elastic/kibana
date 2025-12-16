@@ -61,7 +61,7 @@ interface CreateClassicStreamFlyoutProps {
    * Callback when the stream is created.
    * Receives the stream name which can be used to create the classic stream.
    */
-  onCreate: (streamName: string) => void;
+  onCreate: (streamName: string) => Promise<void>;
   /** Callback to navigate to create template flow */
   onCreateTemplate: () => void;
   /** Available index templates to select from */
@@ -109,13 +109,13 @@ export const CreateClassicStreamFlyout = ({
   );
 
   const [formState, dispatch] = useReducer(formReducer, initialFormState);
-  const { selectedTemplate, selectedIndexPattern, streamNameParts, validation } = formState;
+  const { selectedTemplate, selectedIndexPattern, streamNameParts, validation, isSubmitting } =
+    formState;
 
   // Derive props from validation state
   const validationError = validation.validationError;
   const conflictingIndexPattern = validation.conflictingIndexPattern;
   const isValidating = validation.isValidating;
-  const isSubmitting = validation.mode === 'create';
 
   const selectedTemplateData = templates.find((t) => t.name === selectedTemplate);
 

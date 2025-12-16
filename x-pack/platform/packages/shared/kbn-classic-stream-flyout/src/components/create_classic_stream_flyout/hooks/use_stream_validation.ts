@@ -18,7 +18,7 @@ const DEFAULT_VALIDATION_DEBOUNCE_MS = 300;
 interface UseStreamValidationParams {
   formState: FormState;
   dispatch: Dispatch<FormAction>;
-  onCreate: (streamName: string) => void;
+  onCreate: (streamName: string) => Promise<void>;
   selectedTemplate: IndexTemplate | undefined;
   onValidate?: StreamNameValidator;
   debounceMs?: number;
@@ -168,7 +168,13 @@ export const useStreamValidation = ({
     const isValid = await runValidation(streamName, controller, isCreateValidationAborted);
 
     if (isValid && !isCreateValidationAborted(controller)) {
-      onCreate(streamName);
+      dispatch({ type: 'START_SUBMITTING' });
+      // Swallow errors from onCreate - errors are handled by the callback itself
+      await onCreate(streamName)
+        .catch(() => {})
+        .finally(() => {
+          dispatch({ type: 'STOP_SUBMITTING' });
+        });
     }
   }, [
     cancelDebouncedValidationTimer,
