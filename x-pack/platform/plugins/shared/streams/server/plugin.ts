@@ -142,14 +142,6 @@ export class StreamsPlugin
         coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
       ]);
 
-      const streamsClient = await streamsService.getClientWithRequest({
-        request,
-        assetClient,
-        attachmentClient,
-        queryClient,
-        featureClient,
-      });
-
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const soClient = coreStart.savedObjects.getScopedClient(request);
       const inferenceClient = pluginsStart.inference.getClient({ request });
@@ -160,6 +152,14 @@ export class StreamsPlugin
         pluginsStart.taskManager,
         this.logger
       );
+
+      const streamsClient = await streamsService.getClientWithRequest({
+        request,
+        assetClient,
+        attachmentClient,
+        queryClient,
+        featureClient,
+      });
 
       return {
         scopedClusterClient,

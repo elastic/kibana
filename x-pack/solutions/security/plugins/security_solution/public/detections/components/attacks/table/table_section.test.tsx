@@ -19,6 +19,7 @@ import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
+import { groupingOptions, groupingSettings } from './grouping_configs';
 
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -42,13 +43,6 @@ describe('<TableSection />', () => {
     mockGroupedAlertsTable.mockImplementation((props) => (
       <div data-test-subj="mock-grouped-alerts-table">{props.additionalToolbarControls}</div>
     ));
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should render correctly', async () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -57,16 +51,37 @@ describe('<TableSection />', () => {
     (useListsConfig as jest.Mock).mockReturnValue({
       loading: false,
     });
+  });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should render correctly', async () => {
     const { getByTestId } = render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
     await waitFor(() => {
       expect(getByTestId(TABLE_SECTION_TEST_ID)).toBeInTheDocument();
       expect(getByTestId('mock-grouped-alerts-table')).toBeInTheDocument();
+    });
+  });
+
+  it('should pass groupingOptions and groupingSettings to GroupedAlertsTable', async () => {
+    render(
+      <TestProviders>
+        <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(GroupedAlertsTable).toHaveBeenCalled();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.defaultGroupingOptions).toEqual(groupingOptions);
+      expect(props.settings).toEqual(groupingSettings);
     });
   });
 
@@ -80,18 +95,9 @@ describe('<TableSection />', () => {
       return <div data-test-subj="mock-grouped-alerts-table" />;
     });
 
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-      },
-    ]);
-    (useListsConfig as jest.Mock).mockReturnValue({
-      loading: false,
-    });
-
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -131,18 +137,9 @@ describe('<TableSection />', () => {
       return <div data-test-subj="mock-grouped-alerts-table" />;
     });
 
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-      },
-    ]);
-    (useListsConfig as jest.Mock).mockReturnValue({
-      loading: false,
-    });
-
     render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
       </TestProviders>
     );
 
@@ -181,14 +178,15 @@ describe('<TableSection />', () => {
       loading: false,
     });
 
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(queryByTestId('mock-grouped-alerts-table')).toBeInTheDocument();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.loading).toBe(true);
     });
   });
 
@@ -202,14 +200,15 @@ describe('<TableSection />', () => {
       loading: true,
     });
 
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
-        <TableSection dataView={dataView} />
+        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(queryByTestId('mock-grouped-alerts-table')).toBeInTheDocument();
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.loading).toBe(true);
     });
   });
 
@@ -228,7 +227,7 @@ describe('<TableSection />', () => {
     it('should render the show anonymized switch', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -240,7 +239,7 @@ describe('<TableSection />', () => {
     it('should render the switch as unchecked by default', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -255,7 +254,7 @@ describe('<TableSection />', () => {
     it('should toggle the switch state when clicked', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -282,7 +281,7 @@ describe('<TableSection />', () => {
     it('should pass the switch in additionalToolbarControls to GroupedAlertsTable', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -300,7 +299,7 @@ describe('<TableSection />', () => {
     it('should pass showAnonymized=false to useGetDefaultGroupTitleRenderers by default', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -315,7 +314,7 @@ describe('<TableSection />', () => {
     it('should pass showAnonymized=true to useGetDefaultGroupTitleRenderers when switch is toggled on', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
@@ -345,7 +344,7 @@ describe('<TableSection />', () => {
     it('should update showAnonymized back to false when switch is toggled off', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
         </TestProviders>
       );
 
