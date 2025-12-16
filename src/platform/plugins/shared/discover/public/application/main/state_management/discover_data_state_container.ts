@@ -359,23 +359,28 @@ export function getDataStateContainer({
           const currentTab = getCurrentTab();
           const query = currentTab.appState.query;
           const isEsqlQuery = isOfAggregateQueryType(query);
-
-          if (isEsqlQuery) {
-            const esqlQueryColumns = await getESQLQueryColumns({
-              esqlQuery: query.esql,
-              search: services.data.search.search,
-              variables: currentTab.esqlVariables,
-              signal: abortController.signal,
-              timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
-            });
-            dataSubjects.documents$.next({
-              ...dataSubjects.documents$.getValue(),
-              esqlQueryColumns,
-            });
-          }
-
           const isEsqlQueryWithTransformationalCommand =
             isEsqlQuery && hasTransformationalCommand(query.esql);
+
+          if (isEsqlQuery) {
+            try {
+              const esqlQueryColumns = await getESQLQueryColumns({
+                esqlQuery: query.esql,
+                search: services.data.search.search,
+                variables: currentTab.esqlVariables,
+                signal: abortController.signal,
+                timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+              });
+              dataSubjects.documents$.next({
+                ...dataSubjects.documents$.getValue(),
+                esqlQueryColumns,
+              });
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.warn('Error fetching ES|QL query columns', e);
+            }
+          }
+
           if (!isEsqlQueryWithTransformationalCommand) {
             // Trigger the chart fetch for classic or ESQL without transformational commands, in the case of transformational
             // commands we need to wait for the documents result.
