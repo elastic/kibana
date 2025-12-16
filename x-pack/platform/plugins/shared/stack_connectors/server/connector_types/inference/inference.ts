@@ -17,6 +17,8 @@ import type {
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
+import { isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import { trace } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
 import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
@@ -214,6 +216,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);
+      if (response.statusCode === 429) {
+        throw createTaskRunError(new Error(error), TaskErrorSource.USER);
+      }
+
       throw new Error(error);
     }
 
@@ -249,6 +255,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
+      if (isUserError(e)) {
+        // Bubble up user errors as-is
+        throw e;
+      }
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
     }

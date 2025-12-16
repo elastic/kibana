@@ -13,7 +13,7 @@ import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
-
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
@@ -107,6 +107,22 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([`data: [insufficient_quota]\n\n`]),
+        statusCode: 429,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletion({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 
@@ -341,6 +357,22 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([`data: [insufficient_quota]\n\n`]),
+        statusCode: 429,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletionStream({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
 
     it('responds with a readable stream', async () => {
