@@ -59,13 +59,13 @@ export const transformApiTest = apiTest.extend<{
 
   samlAuth: async ({ samlAuth }, use) => {
     const asTransformPowerUser = async () =>
-      samlAuth.getSessionCookieForCustomRole(TRANSFORM_USERS.transformPowerUser);
+      samlAuth.asInteractiveUserWithCustomRole(TRANSFORM_USERS.transformPowerUser);
 
     const asTransformViewer = async () =>
-      samlAuth.getSessionCookieForCustomRole(TRANSFORM_USERS.transformViewerUser);
+      samlAuth.asInteractiveUserWithCustomRole(TRANSFORM_USERS.transformViewerUser);
 
     const asTransformUnauthorizedUser = async () =>
-      samlAuth.getSessionCookieForCustomRole(TRANSFORM_USERS.transformUnauthorizedUser);
+      samlAuth.asInteractiveUserWithCustomRole(TRANSFORM_USERS.transformUnauthorizedUser);
 
     const extendedSamlAuth: TransformSamlAuthFixture = {
       ...samlAuth,

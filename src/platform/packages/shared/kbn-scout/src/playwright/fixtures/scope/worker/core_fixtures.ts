@@ -49,18 +49,46 @@ export interface SamlAuth {
   session: SamlSessionManager;
   customRoleName: string;
   setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
+
   /**
-   * Gets session credentials for a predefined role.
-   * @param role - A predefined role name (e.g., 'admin', 'viewer', 'editor').
-   * @returns A Promise that resolves to session credentials with both raw cookie value and formatted header.
+   * Generates a SAML session cookie for an interactive user with the specified built-in role.
+   *
+   * This method is ideal for testing internal APIs that are typically accessed via the UI.
+   * It authenticates as an interactive user and returns session credentials including cookie
+   * headers that can be used in API requests.
+   *
+   * @param role - The name of a built-in Kibana role (e.g., 'admin', 'editor', 'viewer')
+   * @returns Promise resolving to credentials with cookieValue and cookieHeader properties
+   *
+   * @example
+   * const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+   * const response = await apiClient.get('internal/endpoint', {
+   *   headers: { ...cookieHeader }
+   * });
    */
-  getSessionCookie(role: string): Promise<RoleSessionCredentials>;
+  asInteractiveUser(role: string): Promise<RoleSessionCredentials>;
+
   /**
-   * Gets session credentials for a custom role.
-   * @param role - A role object that defines the Kibana and ES privileges. Role will be re-created if it doesn't exist.
-   * @returns A Promise that resolves to session credentials with both raw cookie value and formatted header.
+   * Generates a SAML session cookie for an interactive user with a custom role definition.
+   *
+   * This method is ideal for testing internal APIs with specific permission requirements.
+   * It creates or reuses a custom role, authenticates as an interactive user with that role,
+   * and returns session credentials including cookie headers for API requests.
+   *
+   * @param role - A custom Kibana or Elasticsearch role descriptor with specific permissions
+   * @returns Promise resolving to credentials with cookieValue and cookieHeader properties
+   *
+   * @example
+   * const customRole = {
+   *   kibana: [{ base: ['read'], spaces: ['*'] }],
+   *   elasticsearch: { indices: [{ names: ['logs-*'], privileges: ['read'] }] }
+   * };
+   * const { cookieHeader } = await samlAuth.asInteractiveUserWithCustomRole(customRole);
+   * const response = await apiClient.get('internal/endpoint', {
+   *   headers: { ...cookieHeader }
+   * });
    */
-  getSessionCookieForCustomRole(
+  asInteractiveUserWithCustomRole(
     role: KibanaRole | ElasticsearchRoleDescriptor
   ): Promise<RoleSessionCredentials>;
 }
@@ -215,17 +243,17 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         customRoleHash = newRoleHash;
       };
 
-      const getSessionCookie = async (role: string): Promise<RoleSessionCredentials> => {
+      const asInteractiveUser = async (role: string): Promise<RoleSessionCredentials> => {
         const cookieValue = await session.getInteractiveUserSessionCookieWithRoleScope(role);
         const cookieHeader = { Cookie: `sid=${cookieValue}` };
         return { cookieValue, cookieHeader };
       };
 
-      const getSessionCookieForCustomRole = async (
+      const asInteractiveUserWithCustomRole = async (
         role: KibanaRole | ElasticsearchRoleDescriptor
       ): Promise<RoleSessionCredentials> => {
         await setCustomRole(role);
-        return await getSessionCookie(customRoleName);
+        return await asInteractiveUser(customRoleName);
       };
 
       // Hide the announcements (including the sidenav tour) in the default space
@@ -235,8 +263,8 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         session,
         customRoleName,
         setCustomRole,
-        getSessionCookie,
-        getSessionCookieForCustomRole,
+        asInteractiveUser,
+        asInteractiveUserWithCustomRole,
       });
 
       // Delete custom role when worker completes (if it was created)
