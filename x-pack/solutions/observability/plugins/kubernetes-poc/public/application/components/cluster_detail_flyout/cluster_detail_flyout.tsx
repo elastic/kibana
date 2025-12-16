@@ -28,9 +28,11 @@ import {
   MemoryUtilChart,
   PodsUtilChart,
   CpuUtilChart,
+  VolumeUtilChart,
   NetworkTrafficChart,
   NodesCard,
   SlosCard,
+  SloBurnRateCard,
   WorkloadResourcesTable,
   ClusterHealthPanel,
 } from './overview_tab';
@@ -144,27 +146,50 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
 
           <EuiSpacer size="s" />
 
-          {/* Row 2: Memory util & Pods util (50/50) */}
-          <EuiFlexGroup gutterSize="s">
-            <EuiPanel hasBorder paddingSize="s">
-              <MemoryUtilChart
-                clusterName={cluster.clusterName}
-                timeRange={timeRange}
-                height={250}
-              />
-            </EuiPanel>
-            <EuiPanel hasBorder paddingSize="s">
-              <PodsUtilChart clusterName={cluster.clusterName} timeRange={timeRange} height={250} />
-            </EuiPanel>
+          {/* Charts Row 1: CPU util (larger) | Memory util + Volume util stacked */}
+          <EuiFlexGroup gutterSize="s" alignItems="stretch">
+            {/* Left: CPU util - takes more space */}
+            <EuiFlexItem grow={3}>
+              <EuiPanel hasBorder paddingSize="s" style={{ height: '100%' }}>
+                <CpuUtilChart
+                  clusterName={cluster.clusterName}
+                  timeRange={timeRange}
+                  height={280}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            {/* Right: Memory util + Volume util stacked */}
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
+                <EuiFlexItem>
+                  <EuiPanel hasBorder paddingSize="s" style={{ height: '100%' }}>
+                    <MemoryUtilChart
+                      clusterName={cluster.clusterName}
+                      timeRange={timeRange}
+                      height={130}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiPanel hasBorder paddingSize="s" style={{ height: '100%' }}>
+                    <VolumeUtilChart
+                      clusterName={cluster.clusterName}
+                      timeRange={timeRange}
+                      height={130}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="s" />
 
-          {/* Row 3: CPU util | Network Traffic | SLOs */}
+          {/* Charts Row 2: Pods util | Network Traffic (50/50) */}
           <EuiFlexGroup gutterSize="s" alignItems="stretch">
             <EuiFlexItem grow={1}>
               <EuiPanel hasBorder paddingSize="s" style={{ height: '100%' }}>
-                <CpuUtilChart
+                <PodsUtilChart
                   clusterName={cluster.clusterName}
                   timeRange={timeRange}
                   height={250}
@@ -180,9 +205,20 @@ export const ClusterDetailFlyout: React.FC<ClusterDetailFlyoutProps> = ({
                 />
               </EuiPanel>
             </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+
+          {/* SLOs Section: SLOs Summary | Burn Rate */}
+          <EuiFlexGroup gutterSize="s" alignItems="stretch">
             <EuiFlexItem grow={1}>
               <EuiPanel hasBorder paddingSize="s" style={{ height: '100%' }}>
-                <SlosCard height={250} />
+                <SlosCard height={120} />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiPanel hasBorder paddingSize="s" style={{ height: '100%' }}>
+                <SloBurnRateCard height={120} />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
