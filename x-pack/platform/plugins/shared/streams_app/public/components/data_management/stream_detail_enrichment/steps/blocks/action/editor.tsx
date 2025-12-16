@@ -102,8 +102,8 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
     snapshot.can({ type: 'step.save' })
   );
 
-  const isFormValid = methods.formState.isValid;
-  const canSave = canSaveStateMachine && isFormValid;
+  const hasConditionError = !!methods.formState.errors.where;
+  const canSave = canSaveStateMachine && !hasConditionError;
 
   const hasStepChanges = useSelector(
     stepRef,
