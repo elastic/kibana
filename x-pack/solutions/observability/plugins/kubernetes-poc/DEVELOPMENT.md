@@ -332,9 +332,10 @@ FROM remote_cluster:metrics-*
 
 ---
 
-#### CPU Usage by Cluster (Line Chart)
-Shows CPU utilization percentage over time for each cluster as a multi-series line chart.
+#### CPU Usage by Cluster (Line Chart with Change Point Annotations)
+Shows CPU utilization percentage over time for each cluster as a multi-series line chart with change point annotations.
 
+**Main Query** (for time series data):
 ```esql
 TS remote_cluster:metrics-*
 | WHERE k8s.cluster.name IS NOT NULL
@@ -344,14 +345,31 @@ TS remote_cluster:metrics-*
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
   BY timestamp = TBUCKET(1 minute), k8s.cluster.name
-| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
-| KEEP timestamp, k8s.cluster.name, cpu_utilization
+| EVAL value = sum_cpu_usage / sum_allocatable_cpu
+| KEEP timestamp, k8s.cluster.name, value
 ```
 
-**Visualization**: `lnsXY` line chart with `splitAccessor` for cluster breakdown (use percent formatter on Y-axis)
+**Change Point Detection Query** (for annotations):
+```esql
+TS remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL
+  AND k8s.node.name IS NOT NULL
+  AND (k8s.node.cpu.usage IS NOT NULL OR k8s.node.allocatable_cpu IS NOT NULL)
+| STATS
+    sum_cpu_usage = SUM(k8s.node.cpu.usage),
+    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
+  BY timestamp = TBUCKET(1 minute)
+| EVAL value = sum_cpu_usage / sum_allocatable_cpu
+| CHANGE_POINT value ON timestamp AS type, pvalue
+| WHERE type IS NOT NULL
+| KEEP timestamp, type, pvalue
+```
+
+**Visualization**: Custom `@elastic/charts` line chart with `LineAnnotation` for change points
 **Metrics Used**: `k8s.node.cpu.usage` (from kubeletstatsreceiver), `k8s.node.allocatable_cpu` (from k8sclusterreceiver)
 **Dimensions**: `k8s.cluster.name`, `k8s.node.name`, `timestamp` (bucketed by 1 minute via TBUCKET)
-**Output**: `cpu_utilization` - CPU usage as ratio of allocatable (Lens formats to percent)
+**Output**: `value` - CPU usage as ratio of allocatable
+**Change Point Output**: `type` (spike, dip, step_change, trend_change, distribution_change), `pvalue` (statistical significance)
 
 ---
 
@@ -791,6 +809,64 @@ Verify **only the files you changed in this commit**:
 - **k8sclusterreceiver**: Collects cluster-level metrics (deployments, pods, nodes, etc.) from the Kubernetes API
 - **kubeletstatsreceiver**: Collects resource utilization metrics (CPU, memory, filesystem, network) from the Kubelet stats API
 - **kube-state-metrics**: Required component for `k8sclusterreceiver` to collect cluster-level metrics
+
+## Change Point Detection with CHANGE_POINT
+
+The plugin uses the ES|QL `CHANGE_POINT` command to detect anomalies in time series data and display them as annotations on line charts.
+
+### CHANGE_POINT Syntax
+
+```esql
+CHANGE_POINT value [ON key] [AS type_name, pvalue_name]
+```
+
+**Parameters**:
+- `value`: The column with the metric to analyze for change points (must be numeric)
+- `key`: The column to order values by (defaults to `@timestamp` if not specified)
+- `type_name`: Output column name for change point type (defaults to `type`)
+- `pvalue_name`: Output column name for p-value (defaults to `pvalue`)
+
+### Change Point Types
+
+| Type | Description |
+|------|-------------|
+| `spike` | Sudden increase in value |
+| `dip` | Sudden decrease in value |
+| `step_change` | Sustained shift to a new level |
+| `trend_change` | Change in the direction or rate of change |
+| `distribution_change` | Change in the statistical distribution |
+| `stationary` | No significant change detected |
+| `non_stationary` | Data is naturally varying (no anomaly) |
+
+### Example Query
+
+```esql
+TS remote_cluster:metrics-*
+| WHERE k8s.cluster.name == "my-cluster"
+  AND k8s.node.name IS NOT NULL
+  AND k8s.node.cpu.usage IS NOT NULL
+| STATS value = SUM(k8s.node.cpu.usage) BY timestamp = TBUCKET(1 minute)
+| CHANGE_POINT value ON timestamp AS type, pvalue
+| WHERE type IS NOT NULL
+| KEEP timestamp, value, type, pvalue
+```
+
+### Implementation Pattern
+
+The plugin uses a two-query approach:
+1. **Main Query**: Fetches time series data for visualization
+2. **Change Point Query**: Detects anomalies using `CHANGE_POINT` and filters for significant changes
+
+Change points are rendered as vertical dashed lines with markers using `@elastic/charts` `LineAnnotation` component.
+
+### Impact Classification
+
+Change points are classified by impact based on p-value:
+- **High** (p-value < 0.01): Highly significant change (red marker)
+- **Medium** (p-value < 0.05): Moderately significant change (yellow marker)
+- **Low** (p-value >= 0.05): Less significant change (gray marker)
+
+---
 
 ## Finding ES|QL Documentation via Semantic Code Search
 

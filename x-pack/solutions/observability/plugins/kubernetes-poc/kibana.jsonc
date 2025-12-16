@@ -10,6 +10,7 @@
     "server": true,
     "configPath": ["xpack", "kubernetes_poc"],
     "requiredPlugins": [
+      "charts",
       "data",
       "dataViews",
       "lens",

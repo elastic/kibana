@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -20,6 +21,7 @@ export interface KubernetesPocPluginSetupDeps {
 }
 
 export interface KubernetesPocPluginStartDeps {
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;

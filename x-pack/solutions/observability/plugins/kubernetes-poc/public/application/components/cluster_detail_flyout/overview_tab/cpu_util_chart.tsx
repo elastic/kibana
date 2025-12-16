@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { TimeSeriesChart } from '../../time_series_chart';
+import { useTimeSeriesWithChangePoints } from '../../../../hooks/use_time_series_with_change_points';
 
 interface CpuUtilChartProps {
   clusterName: string;
@@ -19,7 +18,12 @@ interface CpuUtilChartProps {
 }
 
 /**
- * ES|QL query for CPU utilization percentage over time.
+ * ES|QL query for CPU utilization percentage over time with change point detection.
+ *
+ * The query:
+ * 1. Aggregates CPU usage and allocatable CPU by 1-minute buckets
+ * 2. Calculates CPU utilization as a ratio
+ * 3. Applies CHANGE_POINT to detect anomalies in the time series
  */
 const getCpuUtilEsql = (clusterName: string) => `TS remote_cluster:metrics-*
 | WHERE k8s.cluster.name == "${clusterName}" 
@@ -29,136 +33,40 @@ const getCpuUtilEsql = (clusterName: string) => `TS remote_cluster:metrics-*
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
   BY timestamp = TBUCKET(1 minute)
-| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
-| KEEP timestamp, cpu_utilization`;
+| EVAL value = sum_cpu_usage / sum_allocatable_cpu
+| CHANGE_POINT value ON timestamp AS type, pvalue
+| KEEP timestamp, value, type, pvalue`;
 
 export const CpuUtilChart: React.FC<CpuUtilChartProps> = ({
   clusterName,
   timeRange,
   height = 200,
 }) => {
-  const { plugins } = usePluginContext();
-  const LensComponent = plugins.lens.EmbeddableComponent;
+  const query = useMemo(() => getCpuUtilEsql(clusterName), [clusterName]);
 
-  const esql = useMemo(() => getCpuUtilEsql(clusterName), [clusterName]);
+  const { data, changePoints, loading } = useTimeSeriesWithChangePoints({
+    query,
+    timeRange,
+  });
 
-  const attributes: TypedLensByValueInput['attributes'] = useMemo(
-    () => ({
-      title: 'CPU util',
-      description: '',
-      visualizationType: 'lnsXY',
-      type: 'lens',
-      references: [],
-      state: {
-        visualization: {
-          layerId: 'layer_0',
-          layerType: 'data',
-          axisTitlesVisibilitySettings: {
-            x: false,
-            yLeft: false,
-            yRight: false,
-          },
-          gridlinesVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          labelsOrientation: {
-            x: 0,
-            yLeft: 0,
-            yRight: 0,
-          },
-          tickLabelsVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          preferredSeriesType: 'line',
-          layers: [
-            {
-              layerId: 'layer_0',
-              accessors: ['metric_0'],
-              xAccessor: 'date_0',
-              seriesType: 'line',
-              layerType: 'data',
-              palette: {
-                name: 'default',
-                type: 'palette',
-              },
-            },
-          ],
-          legend: {
-            isVisible: false,
-          },
-          yLeftExtent: {
-            mode: 'dataBounds',
-          },
-          curveType: 'LINEAR',
-        },
-        query: {
-          esql,
-        },
-        filters: [],
-        datasourceStates: {
-          textBased: {
-            layers: {
-              layer_0: {
-                index: 'esql-query-index',
-                query: {
-                  esql,
-                },
-                columns: [
-                  {
-                    columnId: 'date_0',
-                    fieldName: 'timestamp',
-                    meta: {
-                      type: 'date',
-                    },
-                  },
-                  {
-                    columnId: 'metric_0',
-                    fieldName: 'cpu_utilization',
-                    label: 'CPU Utilization',
-                    customLabel: true,
-                    meta: {
-                      type: 'number',
-                    },
-                    params: {
-                      format: {
-                        id: 'percent',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    }),
-    [esql]
-  );
+  // Format value as percentage
+  const valueFormatter = useCallback((value: number) => `${(value * 100).toFixed(1)}%`, []);
 
   return (
-    <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
-      <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.cpuUtilTitle', {
-          defaultMessage: 'CPU util',
-        })}
-      </EuiText>
-      <LensComponent
-        id={`cpuUtil-${clusterName}`}
-        attributes={attributes}
-        timeRange={timeRange}
-        style={{ height: `${height - 32}px`, width: '100%' }}
-        viewMode="view"
-        noPadding
-        withDefaultActions={false}
-        disableTriggers
-        showInspector={false}
-        syncCursor={false}
-        syncTooltips={false}
-      />
-    </div>
+    <TimeSeriesChart
+      id={`cpuUtil-${clusterName}`}
+      title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.cpuUtilTitle', {
+        defaultMessage: 'CPU util',
+      })}
+      data={data}
+      changePoints={changePoints}
+      loading={loading}
+      height={height}
+      seriesName={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.cpuUtilSeriesName', {
+        defaultMessage: 'CPU Utilization',
+      })}
+      valueFormatter={valueFormatter}
+      yMin={0}
+    />
   );
 };

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import {
+  GroupedTimeSeriesChart,
+  type GroupedDataPoint,
+  extractChangePoints,
+  type FormattedChangePoint,
+} from '../time_series_chart';
+import { useEsqlQuery } from '../../../hooks/use_esql_query';
 
 interface CpuUsageTrendCardProps {
   timeRange: TimeRange;
@@ -18,7 +22,7 @@ interface CpuUsageTrendCardProps {
 }
 
 /**
- * ES|QL query for CPU usage by cluster over time
+ * ES|QL query for CPU usage by cluster over time with change point detection
  * Calculates CPU utilization as a ratio of usage to allocatable CPU
  * Uses TS command with TBUCKET for time series aggregation
  *
@@ -34,147 +38,109 @@ const CPU_USAGE_BY_CLUSTER_ESQL = `TS remote_cluster:metrics-*
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
   BY timestamp = TBUCKET(1 minute), k8s.cluster.name
-| EVAL cpu_utilization = sum_cpu_usage / sum_allocatable_cpu
-| KEEP timestamp, k8s.cluster.name, cpu_utilization`;
+| EVAL value = sum_cpu_usage / sum_allocatable_cpu
+| KEEP timestamp, k8s.cluster.name, value`;
 
 /**
- * Card displaying CPU usage by cluster as a line chart using Lens
+ * ES|QL query for change point detection on CPU usage (aggregated across all clusters)
+ * This detects significant changes in overall CPU usage patterns
+ */
+const CPU_CHANGE_POINT_ESQL = `TS remote_cluster:metrics-*
+| WHERE k8s.cluster.name IS NOT NULL
+  AND k8s.node.name IS NOT NULL
+  AND (k8s.node.cpu.usage IS NOT NULL OR k8s.node.allocatable_cpu IS NOT NULL)
+| STATS 
+    sum_cpu_usage = SUM(k8s.node.cpu.usage),
+    sum_allocatable_cpu = SUM(k8s.node.allocatable_cpu)
+  BY timestamp = TBUCKET(1 minute)
+| EVAL value = sum_cpu_usage / sum_allocatable_cpu
+| CHANGE_POINT value ON timestamp AS type, pvalue
+| WHERE type IS NOT NULL
+| KEEP timestamp, type, pvalue`;
+
+interface CpuUsageRow {
+  timestamp: string | number;
+  'k8s.cluster.name': string;
+  value: number | null;
+}
+
+interface ChangePointRow {
+  timestamp: string | number;
+  type: string | null;
+  pvalue: number | null;
+}
+
+/**
+ * Card displaying CPU usage by cluster as a line chart with change point annotations
  */
 export const CpuUsageTrendCard: React.FC<CpuUsageTrendCardProps> = ({
   timeRange,
   height = 316,
 }) => {
-  const { plugins } = usePluginContext();
-  const LensComponent = plugins.lens.EmbeddableComponent;
+  // Fetch CPU usage data
+  const { data: cpuData, loading: cpuLoading } = useEsqlQuery<CpuUsageRow>({
+    query: CPU_USAGE_BY_CLUSTER_ESQL,
+    timeRange,
+  });
 
-  const attributes: TypedLensByValueInput['attributes'] = useMemo(
-    () => ({
-      title: 'CPU util trend by cluster',
-      description: '',
-      visualizationType: 'lnsXY',
-      type: 'lens',
-      references: [],
-      state: {
-        visualization: {
-          layerId: 'layer_0',
-          layerType: 'data',
-          axisTitlesVisibilitySettings: {
-            x: false,
-            yLeft: false,
-            yRight: false,
-          },
-          gridlinesVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          labelsOrientation: {
-            x: 0,
-            yLeft: 0,
-            yRight: 0,
-          },
-          tickLabelsVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          preferredSeriesType: 'line',
-          layers: [
-            {
-              layerId: 'layer_0',
-              accessors: ['metric_0'],
-              xAccessor: 'date_0',
-              splitAccessor: 'breakdown_0', // Split by cluster name
-              seriesType: 'line',
-              layerType: 'data',
-              palette: {
-                name: 'default',
-                type: 'palette',
-              },
-            },
-          ],
-          legend: {
-            isVisible: true,
-            position: 'bottom',
-          },
-          yLeftExtent: {
-            mode: 'dataBounds',
-          },
-          curveType: 'LINEAR',
-        },
-        query: {
-          esql: CPU_USAGE_BY_CLUSTER_ESQL,
-        },
-        filters: [],
-        datasourceStates: {
-          textBased: {
-            layers: {
-              layer_0: {
-                index: 'esql-query-index',
-                query: {
-                  esql: CPU_USAGE_BY_CLUSTER_ESQL,
-                },
-                columns: [
-                  {
-                    columnId: 'date_0',
-                    fieldName: 'timestamp',
-                    meta: {
-                      type: 'date',
-                    },
-                  },
-                  {
-                    columnId: 'metric_0',
-                    fieldName: 'cpu_utilization',
-                    label: 'CPU Utilization',
-                    customLabel: true,
-                    meta: {
-                      type: 'number',
-                    },
-                    params: {
-                      format: {
-                        id: 'percent',
-                      },
-                    },
-                  },
-                  {
-                    columnId: 'breakdown_0',
-                    fieldName: 'k8s.cluster.name',
-                    label: 'Cluster',
-                    customLabel: true,
-                    meta: {
-                      type: 'string',
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    }),
-    []
-  );
+  // Fetch change points
+  const { data: changePointData } = useEsqlQuery<ChangePointRow>({
+    query: CPU_CHANGE_POINT_ESQL,
+    timeRange,
+  });
+
+  // Transform data for the chart
+  const chartData = useMemo<GroupedDataPoint[]>(() => {
+    if (!cpuData) return [];
+
+    return cpuData
+      .map((row) => {
+        const timestamp =
+          typeof row.timestamp === 'string'
+            ? new Date(row.timestamp).getTime()
+            : (row.timestamp as number);
+
+        return {
+          timestamp,
+          value: row.value,
+          group: row['k8s.cluster.name'],
+        };
+      })
+      .sort((a, b) => a.timestamp - b.timestamp);
+  }, [cpuData]);
+
+  // Extract change points
+  const changePoints = useMemo<Record<string, FormattedChangePoint[]>>(() => {
+    if (!changePointData) return {};
+
+    const points = extractChangePoints(
+      changePointData.map((row) => ({
+        timestamp: row.timestamp,
+        type: row.type,
+        pvalue: row.pvalue,
+      }))
+    );
+
+    // Return as global change points (not per-cluster)
+    return { global: points };
+  }, [changePointData]);
+
+  // Format value as percentage
+  const valueFormatter = useCallback((value: number) => `${(value * 100).toFixed(1)}%`, []);
 
   return (
-    <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
-      <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterOverview.cpuUtilTrendByClusterTitle', {
-          defaultMessage: 'CPU util trend by cluster',
-        })}
-      </EuiText>
-      <LensComponent
-        id="cpuUsageTrendChart"
-        attributes={attributes}
-        timeRange={timeRange}
-        style={{ height: `${height - 32}px`, width: '100%' }}
-        viewMode="view"
-        noPadding
-        withDefaultActions={false}
-        disableTriggers
-        showInspector={false}
-        syncCursor={false}
-        syncTooltips={false}
-      />
-    </div>
+    <GroupedTimeSeriesChart
+      id="cpuUsageTrendChart"
+      title={i18n.translate('xpack.kubernetesPoc.clusterOverview.cpuUtilTrendByClusterTitle', {
+        defaultMessage: 'CPU util trend by cluster',
+      })}
+      data={chartData}
+      changePoints={changePoints}
+      loading={cpuLoading}
+      height={height}
+      valueFormatter={valueFormatter}
+      showLegend
+      yMin={0}
+    />
   );
 };

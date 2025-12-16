@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { TimeSeriesChart } from '../../time_series_chart';
+import { useTimeSeriesWithChangePoints } from '../../../../hooks/use_time_series_with_change_points';
 
 interface PodsUtilChartProps {
   clusterName: string;
@@ -19,9 +18,12 @@ interface PodsUtilChartProps {
 }
 
 /**
- * ES|QL query for pod utilization percentage over time.
- * Uses FROM instead of TS because COUNT_DISTINCT on keyword fields is not supported in time series mode.
- * Uses fallback of 110 pods/node (Kubernetes default) since k8s.node.allocatable_pods is not available.
+ * ES|QL query for pod utilization percentage over time with change point detection.
+ *
+ * The query:
+ * 1. Uses FROM instead of TS because COUNT_DISTINCT on keyword fields is not supported in time series mode
+ * 2. Calculates pod utilization using fallback of 110 pods/node (Kubernetes default)
+ * 3. Applies CHANGE_POINT to detect anomalies in the time series
  */
 const getPodsUtilEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
 | WHERE k8s.cluster.name == "${clusterName}" 
@@ -32,136 +34,41 @@ const getPodsUtilEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
     node_count = COUNT_DISTINCT(k8s.node.name)
   BY timestamp = BUCKET(@timestamp, 1 minute)
 | EVAL max_pods = node_count * 110
-| EVAL pod_utilization = TO_DOUBLE(pod_count) / TO_DOUBLE(max_pods)
-| KEEP timestamp, pod_utilization`;
+| EVAL value = TO_DOUBLE(pod_count) / TO_DOUBLE(max_pods)
+| CHANGE_POINT value ON timestamp AS type, pvalue
+| KEEP timestamp, value, type, pvalue
+| SORT timestamp ASC`;
 
 export const PodsUtilChart: React.FC<PodsUtilChartProps> = ({
   clusterName,
   timeRange,
   height = 200,
 }) => {
-  const { plugins } = usePluginContext();
-  const LensComponent = plugins.lens.EmbeddableComponent;
+  const query = useMemo(() => getPodsUtilEsql(clusterName), [clusterName]);
 
-  const esql = useMemo(() => getPodsUtilEsql(clusterName), [clusterName]);
+  const { data, changePoints, loading } = useTimeSeriesWithChangePoints({
+    query,
+    timeRange,
+  });
 
-  const attributes: TypedLensByValueInput['attributes'] = useMemo(
-    () => ({
-      title: 'Pods util',
-      description: '',
-      visualizationType: 'lnsXY',
-      type: 'lens',
-      references: [],
-      state: {
-        visualization: {
-          layerId: 'layer_0',
-          layerType: 'data',
-          axisTitlesVisibilitySettings: {
-            x: false,
-            yLeft: false,
-            yRight: false,
-          },
-          gridlinesVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          labelsOrientation: {
-            x: 0,
-            yLeft: 0,
-            yRight: 0,
-          },
-          tickLabelsVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          preferredSeriesType: 'line',
-          layers: [
-            {
-              layerId: 'layer_0',
-              accessors: ['metric_0'],
-              xAccessor: 'date_0',
-              seriesType: 'line',
-              layerType: 'data',
-              palette: {
-                name: 'default',
-                type: 'palette',
-              },
-            },
-          ],
-          legend: {
-            isVisible: false,
-          },
-          yLeftExtent: {
-            mode: 'dataBounds',
-          },
-          curveType: 'LINEAR',
-        },
-        query: {
-          esql,
-        },
-        filters: [],
-        datasourceStates: {
-          textBased: {
-            layers: {
-              layer_0: {
-                index: 'esql-query-index',
-                query: {
-                  esql,
-                },
-                columns: [
-                  {
-                    columnId: 'date_0',
-                    fieldName: 'timestamp',
-                    meta: {
-                      type: 'date',
-                    },
-                  },
-                  {
-                    columnId: 'metric_0',
-                    fieldName: 'pod_utilization',
-                    label: 'Pod Utilization',
-                    customLabel: true,
-                    meta: {
-                      type: 'number',
-                    },
-                    params: {
-                      format: {
-                        id: 'percent',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    }),
-    [esql]
-  );
+  // Format value as percentage
+  const valueFormatter = useCallback((value: number) => `${(value * 100).toFixed(1)}%`, []);
 
   return (
-    <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
-      <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.podsUtilTitle', {
-          defaultMessage: 'Pods util',
-        })}
-      </EuiText>
-      <LensComponent
-        id={`podsUtil-${clusterName}`}
-        attributes={attributes}
-        timeRange={timeRange}
-        style={{ height: `${height - 32}px`, width: '100%' }}
-        viewMode="view"
-        noPadding
-        withDefaultActions={false}
-        disableTriggers
-        showInspector={false}
-        syncCursor={false}
-        syncTooltips={false}
-      />
-    </div>
+    <TimeSeriesChart
+      id={`podsUtil-${clusterName}`}
+      title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.podsUtilTitle', {
+        defaultMessage: 'Pods util',
+      })}
+      data={data}
+      changePoints={changePoints}
+      loading={loading}
+      height={height}
+      seriesName={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.podsUtilSeriesName', {
+        defaultMessage: 'Pod Utilization',
+      })}
+      valueFormatter={valueFormatter}
+      yMin={0}
+    />
   );
 };

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { TimeSeriesChart } from '../../time_series_chart';
+import { useTimeSeriesWithChangePoints } from '../../../../hooks/use_time_series_with_change_points';
 
 interface MemoryUtilChartProps {
   clusterName: string;
@@ -19,142 +18,62 @@ interface MemoryUtilChartProps {
 }
 
 /**
- * ES|QL query for memory usage over time for the cluster.
+ * ES|QL query for memory usage over time with change point detection.
+ *
+ * The query:
+ * 1. Aggregates memory usage by 1-minute buckets
+ * 2. Applies CHANGE_POINT to detect anomalies in the time series
  */
 const getMemoryUtilEsql = (clusterName: string) => `TS remote_cluster:metrics-*
 | WHERE k8s.cluster.name == "${clusterName}" 
   AND k8s.node.name IS NOT NULL
   AND k8s.node.memory.usage IS NOT NULL
-| STATS memory_usage_bytes = SUM(k8s.node.memory.usage)
-  BY timestamp = TBUCKET(1 minute)`;
+| STATS value = SUM(k8s.node.memory.usage)
+  BY timestamp = TBUCKET(1 minute)
+| CHANGE_POINT value ON timestamp AS type, pvalue
+| KEEP timestamp, value, type, pvalue`;
 
 export const MemoryUtilChart: React.FC<MemoryUtilChartProps> = ({
   clusterName,
   timeRange,
   height = 200,
 }) => {
-  const { plugins } = usePluginContext();
-  const LensComponent = plugins.lens.EmbeddableComponent;
+  const query = useMemo(() => getMemoryUtilEsql(clusterName), [clusterName]);
 
-  const esql = useMemo(() => getMemoryUtilEsql(clusterName), [clusterName]);
+  const { data, changePoints, loading } = useTimeSeriesWithChangePoints({
+    query,
+    timeRange,
+  });
 
-  const attributes: TypedLensByValueInput['attributes'] = useMemo(
-    () => ({
-      title: 'Memory util',
-      description: '',
-      visualizationType: 'lnsXY',
-      type: 'lens',
-      references: [],
-      state: {
-        visualization: {
-          layerId: 'layer_0',
-          layerType: 'data',
-          axisTitlesVisibilitySettings: {
-            x: false,
-            yLeft: false,
-            yRight: false,
-          },
-          gridlinesVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          labelsOrientation: {
-            x: 0,
-            yLeft: 0,
-            yRight: 0,
-          },
-          tickLabelsVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          preferredSeriesType: 'line',
-          layers: [
-            {
-              layerId: 'layer_0',
-              accessors: ['metric_0'],
-              xAccessor: 'date_0',
-              seriesType: 'line',
-              layerType: 'data',
-              palette: {
-                name: 'default',
-                type: 'palette',
-              },
-            },
-          ],
-          legend: {
-            isVisible: false,
-          },
-          yLeftExtent: {
-            mode: 'dataBounds',
-          },
-          curveType: 'LINEAR',
-        },
-        query: {
-          esql,
-        },
-        filters: [],
-        datasourceStates: {
-          textBased: {
-            layers: {
-              layer_0: {
-                index: 'esql-query-index',
-                query: {
-                  esql,
-                },
-                columns: [
-                  {
-                    columnId: 'date_0',
-                    fieldName: 'timestamp',
-                    meta: {
-                      type: 'date',
-                    },
-                  },
-                  {
-                    columnId: 'metric_0',
-                    fieldName: 'memory_usage_bytes',
-                    label: 'Memory Usage',
-                    customLabel: true,
-                    meta: {
-                      type: 'number',
-                    },
-                    params: {
-                      format: {
-                        id: 'bytes',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    }),
-    [esql]
-  );
+  // Format value as bytes (simplified - in production use a proper bytes formatter)
+  const valueFormatter = useCallback((value: number) => {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let unitIndex = 0;
+    let scaledValue = value;
+
+    while (scaledValue >= 1024 && unitIndex < units.length - 1) {
+      scaledValue /= 1024;
+      unitIndex++;
+    }
+
+    return `${scaledValue.toFixed(1)} ${units[unitIndex]}`;
+  }, []);
 
   return (
-    <div style={{ paddingTop: '8px', paddingLeft: '8px' }}>
-      <EuiText size="s" style={{ fontWeight: 700 }}>
-        {i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryUtilTitle', {
-          defaultMessage: 'Memory util',
-        })}
-      </EuiText>
-      <LensComponent
-        id={`memoryUtil-${clusterName}`}
-        attributes={attributes}
-        timeRange={timeRange}
-        style={{ height: `${height - 32}px`, width: '100%' }}
-        viewMode="view"
-        noPadding
-        withDefaultActions={false}
-        disableTriggers
-        showInspector={false}
-        syncCursor={false}
-        syncTooltips={false}
-      />
-    </div>
+    <TimeSeriesChart
+      id={`memoryUtil-${clusterName}`}
+      title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryUtilTitle', {
+        defaultMessage: 'Memory util',
+      })}
+      data={data}
+      changePoints={changePoints}
+      loading={loading}
+      height={height}
+      seriesName={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryUtilSeriesName', {
+        defaultMessage: 'Memory Usage',
+      })}
+      valueFormatter={valueFormatter}
+      yMin={0}
+    />
   );
 };
