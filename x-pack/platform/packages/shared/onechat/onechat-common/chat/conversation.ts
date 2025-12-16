@@ -181,6 +181,10 @@ export interface RoundModelUsageStats {
    * Total number of output tokens received this round.
    */
   output_tokens: number;
+  /**
+   * Model identifier from the provider response, if available.
+   */
+  model?: string;
 }
 
 /**
