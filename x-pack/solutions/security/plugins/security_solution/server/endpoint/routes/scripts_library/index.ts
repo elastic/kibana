@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerDeleteScriptRoute } from './delete_script';
 import { registerGetScriptRoute } from './get_script';
 import { registerDownloadScriptRoute } from './download_script';
 import { registerPatchUpdateScriptRoute } from './update_script';
@@ -25,5 +26,6 @@ export const registerScriptsLibraryRoutes = (
     registerPatchUpdateScriptRoute(router, endpointContext);
     registerDownloadScriptRoute(router, endpointContext);
     registerGetScriptRoute(router, endpointContext);
+    registerDeleteScriptRoute(router, endpointContext);
   }
 };
