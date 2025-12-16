@@ -53,7 +53,7 @@ pageLoadAssetSize:
   embeddable: 18432
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
-  enterpriseSearch: 38000
+  enterpriseSearch: 41839
   esql: 20000
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -119,9 +119,10 @@ pageLoadAssetSize:
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
-  observabilityAIAssistant: 52556
-  observabilityAIAssistantApp: 16012
-  observabilityAiAssistantManagement: 6438
+  observabilityAgentBuilder: 5727
+  observabilityAIAssistant: 54556
+  observabilityAIAssistantApp: 18012
+  observabilityAiAssistantManagement: 7438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
@@ -200,7 +201,7 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 19665
+  visTypeTimeseries: 20000
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342

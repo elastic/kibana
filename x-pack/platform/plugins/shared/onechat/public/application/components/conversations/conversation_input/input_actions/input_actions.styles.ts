@@ -28,6 +28,12 @@ export const useSelectorListStyles = ({ listId }: { listId: string }) => {
       }
       & .euiSelectableListItem__content {
         block-size: 100%;
+        gap: ${euiTheme.size.s};
+        .euiSelectableListItem__icon,
+        .euiSelectableListItem__prepend,
+        .euiSelectableListItem__append {
+          margin: 0;
+        }
       }
       & .euiSelectableListItem__text {
         text-decoration: none;
