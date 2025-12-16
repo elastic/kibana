@@ -7,7 +7,7 @@
 
 import { expect, spaceTest } from '@kbn/scout-security';
 
-spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess'] }, () => {
+spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess', '@svlSecurity'] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
     await apiServices.entityAnalytics.deleteEntityStoreEngines();
     await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
