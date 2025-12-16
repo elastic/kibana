@@ -27,7 +27,9 @@ const ErrorSampleAiInsightLazy = dynamic(() =>
   import('./error_sample_ai_insight').then((m) => ({ default: m.ErrorSampleAiInsight }))
 );
 
-const LogAiInsightLazy = dynamic(() => import('./log_ai_insight'));
+const LogAiInsightLazy = dynamic(() =>
+  import('./log_ai_insight').then((m) => ({ default: m.LogAiInsight }))
+);
 
 export function createAlertAIInsight(
   core: CoreStart,

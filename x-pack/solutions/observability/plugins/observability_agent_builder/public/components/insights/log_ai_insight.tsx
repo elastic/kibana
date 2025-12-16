@@ -110,6 +110,3 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     </>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default LogAiInsight;
