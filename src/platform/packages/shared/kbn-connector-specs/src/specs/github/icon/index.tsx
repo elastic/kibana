@@ -9,10 +9,10 @@
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
-import type { ConnectorIconProps } from '../../types';
+import type { ConnectorIconProps } from '../../../types';
 
-import githubIcon from './github.svg';
+import icon from './github.png';
 
 export default (props: ConnectorIconProps) => {
-  return <EuiIcon type={githubIcon} {...props} />;
+  return <EuiIcon type={icon} {...props} />;
 };
