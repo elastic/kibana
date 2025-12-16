@@ -9,7 +9,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { DashboardCollectorData } from './dashboard_telemetry';
+import type { DashboardCollectorData } from './types';
 import { collectDashboardTelemetry } from './dashboard_telemetry';
 
 export function registerDashboardUsageCollector(
@@ -25,6 +25,16 @@ export function registerDashboardUsageCollector(
       return await collectDashboardTelemetry(taskManager);
     },
     schema: {
+      access_mode: {
+        DYNAMIC_KEY: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'The number of dashboards that have an applied access mode.',
+            },
+          },
+        },
+      },
       panels: {
         total: { type: 'long' },
         by_reference: { type: 'long' },
