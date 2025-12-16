@@ -9,6 +9,7 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { ToolType } from '@kbn/onechat-common';
 import React, { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { McpToolHealthStatus } from '../../types/mcp';
 import { useToolHealth } from '../../../../../hooks/tools/use_tools_health';
 import { useToolsActions } from '../../../../../context/tools_provider';
 import { useGetConnector, useListMcpTools } from '../../../../../hooks/tools/use_mcp_connectors';
@@ -17,7 +18,6 @@ import { McpHealthBanner } from './mcp_health_banner';
 import { useEditMcpServerFlyout } from '../../hooks/use_edit_mcp_server_flyout';
 import { i18nMessages } from '../../i18n';
 import type { McpConfigurationFieldsProps } from '../../types/mcp';
-import { McpHealthStatus } from '../../types/mcp';
 import type { McpToolFormData } from '../../types/tool_form_types';
 
 export const McpReadOnlyFields = ({
@@ -62,29 +62,29 @@ export const McpReadOnlyFields = ({
 
     // MCP connector deleted
     if (isLoadingConnectorError) {
-      setMcpHealthStatus(McpHealthStatus.ConnectorNotFound);
+      setMcpHealthStatus(McpToolHealthStatus.ConnectorNotFound);
       return;
     }
 
     // MCP tools not found
     if (isLoadingMcpToolsError) {
-      setMcpHealthStatus(McpHealthStatus.ListToolsFailed);
+      setMcpHealthStatus(McpToolHealthStatus.ListToolsFailed);
       return;
     }
 
     // MCP tool not found
     if (!mcpTools.find((tool) => tool.name === mcpToolName)) {
-      setMcpHealthStatus(McpHealthStatus.ToolNotFound);
+      setMcpHealthStatus(McpToolHealthStatus.ToolNotFound);
       return;
     }
 
     // MCP tool is unhealthy; treat no health data as healthy
     if (toolHealth && toolHealth.status !== 'healthy') {
-      setMcpHealthStatus(McpHealthStatus.ToolUnhealthy);
+      setMcpHealthStatus(McpToolHealthStatus.ToolUnhealthy);
       return;
     }
 
-    setMcpHealthStatus(McpHealthStatus.Healthy);
+    setMcpHealthStatus(McpToolHealthStatus.Healthy);
   }, [
     mcpToolName,
     mcpTools,

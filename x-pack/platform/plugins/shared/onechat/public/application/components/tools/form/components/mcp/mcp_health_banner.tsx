@@ -9,8 +9,11 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiText } from '@elasti
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { McpUnhealthyStatus } from '../../types/mcp';
-import { McpHealthStatus } from '../../types/mcp';
+import {
+  McpToolHealthStatus,
+  type McpToolUnhealthyStatus,
+  mcpUnhealthyStatusIconMap,
+} from '../../types/mcp';
 
 const mcpHealthI18nMessages = {
   toolNotFound: {
@@ -81,7 +84,6 @@ const mcpHealthI18nMessages = {
 interface StatusMessageConfig {
   title: string;
   description: string;
-  iconType: string;
 }
 
 interface ActionButtonConfig {
@@ -90,31 +92,27 @@ interface ActionButtonConfig {
   onClick?: () => void;
 }
 
-const healthStatusMessages: Record<McpUnhealthyStatus, StatusMessageConfig> = {
-  [McpHealthStatus.ToolNotFound]: {
+const healthStatusMessages: Record<McpToolUnhealthyStatus, StatusMessageConfig> = {
+  [McpToolHealthStatus.ToolNotFound]: {
     title: mcpHealthI18nMessages.toolNotFound.title,
     description: mcpHealthI18nMessages.toolNotFound.description,
-    iconType: 'magnifyWithExclamation',
   },
-  [McpHealthStatus.ConnectorNotFound]: {
+  [McpToolHealthStatus.ConnectorNotFound]: {
     title: mcpHealthI18nMessages.connectorNotFound.title,
     description: mcpHealthI18nMessages.connectorNotFound.description,
-    iconType: 'unlink',
   },
-  [McpHealthStatus.ListToolsFailed]: {
+  [McpToolHealthStatus.ListToolsFailed]: {
     title: mcpHealthI18nMessages.listToolsFailed.title,
     description: mcpHealthI18nMessages.listToolsFailed.description,
-    iconType: 'unlink',
   },
-  [McpHealthStatus.ToolUnhealthy]: {
+  [McpToolHealthStatus.ToolUnhealthy]: {
     title: mcpHealthI18nMessages.toolUnhealthy.title,
     description: mcpHealthI18nMessages.toolUnhealthy.description,
-    iconType: 'unlink',
   },
 };
 
 export interface McpHealthBannerProps {
-  status: McpHealthStatus;
+  status: McpToolHealthStatus;
   onCreateNewTool?: () => void;
   onDeleteTool?: () => void;
   onViewConnectors?: () => void;
@@ -152,18 +150,19 @@ export const McpHealthBanner = ({
     onClick: onViewMcpServer,
   };
 
-  const healthStatusButtons: Record<McpUnhealthyStatus, ActionButtonConfig[]> = {
-    [McpHealthStatus.ToolNotFound]: [deleteToolButton, createNewToolButton],
-    [McpHealthStatus.ConnectorNotFound]: [deleteToolButton, viewConnectorsButton],
-    [McpHealthStatus.ListToolsFailed]: [viewMcpServerButton],
-    [McpHealthStatus.ToolUnhealthy]: [viewMcpServerButton],
+  const healthStatusButtons: Record<McpToolUnhealthyStatus, ActionButtonConfig[]> = {
+    [McpToolHealthStatus.ToolNotFound]: [deleteToolButton, createNewToolButton],
+    [McpToolHealthStatus.ConnectorNotFound]: [deleteToolButton, viewConnectorsButton],
+    [McpToolHealthStatus.ListToolsFailed]: [viewMcpServerButton],
+    [McpToolHealthStatus.ToolUnhealthy]: [viewMcpServerButton],
   };
 
-  if (status === McpHealthStatus.Healthy) {
+  if (status === McpToolHealthStatus.Healthy) {
     return null;
   }
 
-  const { title, description, iconType } = healthStatusMessages[status];
+  const { title, description } = healthStatusMessages[status];
+  const iconType = mcpUnhealthyStatusIconMap[status];
   const actionButtons = healthStatusButtons[status].filter((button) => button.onClick);
 
   return (

@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
+import { McpToolHealthStatus } from '../../types/mcp';
 import { i18nMessages } from '../../i18n';
 import { ToolFormMode } from '../../tool_form';
-import { McpHealthStatus } from '../../types/mcp';
 import { McpEditableFields } from '../../components/mcp/mcp_editable_fields';
 import { McpReadOnlyFields } from '../../components/mcp/mcp_readonly_fields';
 
@@ -32,7 +32,7 @@ export interface McpConfigurationProps {
   mode: ToolFormMode;
 }
 export const McpConfiguration = ({ mode }: McpConfigurationProps) => {
-  const [mcpHealthStatus, setMcpHealthStatus] = useState<McpHealthStatus>();
+  const [mcpHealthStatus, setMcpHealthStatus] = useState<McpToolHealthStatus>();
 
   const isCreatingTool = mode === ToolFormMode.Create;
 
@@ -61,9 +61,9 @@ export const McpConfiguration = ({ mode }: McpConfigurationProps) => {
                 }
                 loadedContent={
                   <EuiHealth
-                    color={mcpHealthStatus === McpHealthStatus.Healthy ? 'success' : 'danger'}
+                    color={mcpHealthStatus === McpToolHealthStatus.Healthy ? 'success' : 'danger'}
                   >
-                    {mcpHealthStatus === McpHealthStatus.Healthy
+                    {mcpHealthStatus === McpToolHealthStatus.Healthy
                       ? i18nMessages.configuration.form.mcp.mcpHealthStatusHealthy
                       : i18nMessages.configuration.form.mcp.mcpHealthStatusError}
                   </EuiHealth>

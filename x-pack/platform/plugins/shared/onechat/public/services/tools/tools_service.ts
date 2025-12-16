@@ -26,6 +26,7 @@ import type {
   GetConnectorResponse,
   GetToolHealthResponse,
   ListToolHealthResponse,
+  ListMcpToolsHealthResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -132,5 +133,9 @@ export class ToolsService {
 
   async getToolHealth({ toolId }: { toolId: string }) {
     return await this.http.get<GetToolHealthResponse>(`${internalApiPath}/tools/${toolId}/_health`);
+  }
+
+  async listMcpToolsHealth() {
+    return await this.http.get<ListMcpToolsHealthResponse>(`${internalApiPath}/tools/_mcp_health`);
   }
 }

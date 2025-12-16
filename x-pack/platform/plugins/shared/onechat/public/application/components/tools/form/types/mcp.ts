@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum McpHealthStatus {
+export enum McpToolHealthStatus {
   Healthy = 'healthy',
   ToolNotFound = 'tool_not_found',
   ConnectorNotFound = 'connector_not_found',
@@ -13,9 +13,16 @@ export enum McpHealthStatus {
   ToolUnhealthy = 'tool_unhealthy',
 }
 
-export type McpUnhealthyStatus = Exclude<McpHealthStatus, McpHealthStatus.Healthy>;
+export type McpToolUnhealthyStatus = Exclude<McpToolHealthStatus, McpToolHealthStatus.Healthy>;
+
+export const mcpUnhealthyStatusIconMap: Record<McpToolUnhealthyStatus, string> = {
+  [McpToolHealthStatus.ToolNotFound]: 'magnifyWithExclamation',
+  [McpToolHealthStatus.ConnectorNotFound]: 'unlink',
+  [McpToolHealthStatus.ListToolsFailed]: 'unlink',
+  [McpToolHealthStatus.ToolUnhealthy]: 'warning',
+};
 
 export interface McpConfigurationFieldsProps {
-  mcpHealthStatus?: McpHealthStatus;
-  setMcpHealthStatus: (status: McpHealthStatus) => void;
+  mcpHealthStatus?: McpToolHealthStatus;
+  setMcpHealthStatus: (status: McpToolHealthStatus) => void;
 }

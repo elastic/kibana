@@ -28,6 +28,11 @@ export const labels = {
     readOnly: i18n.translate('xpack.onechat.tools.readOnly', {
       defaultMessage: 'Read-only',
     }),
+    toolsTableCaption: (toolsCount: number) =>
+      i18n.translate('xpack.onechat.tools.toolsTableCaption', {
+        defaultMessage: 'Available tools for AI agents: {toolsCount} tools',
+        values: { toolsCount },
+      }),
     newIndexSearchToolTitle: i18n.translate('xpack.onechat.tools.newIndexSearchTool.title', {
       defaultMessage: 'New index search tool',
     }),
@@ -76,6 +81,54 @@ export const labels = {
     dataStreamTypeLabel: i18n.translate('xpack.onechat.tools.dataStreamTypeLabel', {
       defaultMessage: 'Data stream',
     }),
+
+    // MCP tool health status
+    mcpHealthStatus: {
+      toolNotFound: {
+        title: i18n.translate('xpack.onechat.tools.mcpHealthStatus.toolNotFound.title', {
+          defaultMessage: 'Tool not found on MCP server',
+        }),
+        description: i18n.translate(
+          'xpack.onechat.tools.mcpHealthStatus.toolNotFound.description',
+          {
+            defaultMessage: 'It may have been removed or renamed.',
+          }
+        ),
+      },
+      connectorNotFound: {
+        title: i18n.translate('xpack.onechat.tools.mcpHealthStatus.connectorNotFound.title', {
+          defaultMessage: 'MCP connector unavailable',
+        }),
+        description: i18n.translate(
+          'xpack.onechat.tools.mcpHealthStatus.connectorNotFound.description',
+          {
+            defaultMessage: 'Check your MCP server connection',
+          }
+        ),
+      },
+      listToolsFailed: {
+        title: i18n.translate('xpack.onechat.tools.mcpHealthStatus.listToolsFailed.title', {
+          defaultMessage: "Can't retrieve tools from MCP server",
+        }),
+        description: i18n.translate(
+          'xpack.onechat.tools.mcpHealthStatus.listToolsFailed.description',
+          {
+            defaultMessage: 'Check your MCP server connection',
+          }
+        ),
+      },
+      toolUnhealthy: {
+        title: i18n.translate('xpack.onechat.tools.mcpHealthStatus.toolUnhealthy.title', {
+          defaultMessage: 'Tool execution failed',
+        }),
+        description: i18n.translate(
+          'xpack.onechat.tools.mcpHealthStatus.toolUnhealthy.description',
+          {
+            defaultMessage: 'Check your MCP server connection',
+          }
+        ),
+      },
+    },
 
     // Actions
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {

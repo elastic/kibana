@@ -6,15 +6,14 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { ToolHealthState } from '../../../../common/http_api/tools';
+import type { ToolHealthState, McpToolHealthState } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
+const EMPTY_MCP_HEALTH_STATES: readonly McpToolHealthState[] = [];
+
 const EMPTY_HEALTH_STATES: readonly ToolHealthState[] = [];
 
-/**
- * Hook to fetch health statuses for all tools in the current space.
- */
 export const useToolsHealth = () => {
   const { toolsService } = useOnechatServices();
 
@@ -37,9 +36,6 @@ export interface UseToolHealthOptions {
   enabled?: boolean;
 }
 
-/**
- * Hook to fetch health status for a specific tool.
- */
 export const useToolHealth = ({ toolId }: UseToolHealthOptions) => {
   const { toolsService } = useOnechatServices();
 
@@ -51,6 +47,24 @@ export const useToolHealth = ({ toolId }: UseToolHealthOptions) => {
 
   return {
     toolHealth: data?.health,
+    isLoading,
+    error,
+    isError,
+    refetch,
+  };
+};
+
+export const useMcpToolsHealth = ({ enabled = true }: { enabled?: boolean } = {}) => {
+  const { toolsService } = useOnechatServices();
+
+  const { data, isLoading, error, isError, refetch } = useQuery({
+    queryKey: queryKeys.tools.health.mcp(),
+    queryFn: () => toolsService.listMcpToolsHealth(),
+    enabled,
+  });
+
+  return {
+    mcpHealthStates: data?.results ?? EMPTY_MCP_HEALTH_STATES,
     isLoading,
     error,
     isError,
