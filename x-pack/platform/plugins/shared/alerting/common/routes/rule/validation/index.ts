@@ -6,6 +6,7 @@
  */
 
 export { validateDuration } from './validate_duration/latest';
+export { validateRuleId } from './validate_rule_id/latest';
 export { validateHours } from './validate_hours/latest';
 export { validateTimezone } from './validate_timezone/latest';
 export { validateSnoozeSchedule } from './validate_snooze_schedule/latest';

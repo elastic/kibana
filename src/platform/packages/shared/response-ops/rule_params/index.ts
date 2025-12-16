@@ -18,7 +18,11 @@ export {
 export type { RuleParams } from './latest';
 export type { RuleParamsWithDefaultValue } from './latest';
 
+export type { ESQLParams } from './esql/latest';
+
 export type {
   RuleParams as RuleParamsV1,
   RuleParamsWithDefaultValue as RuleParamsWithDefaultValueV1,
 } from './v1';
+
+export type { ESQLParams as ESQLParamsV1 } from './esql/v1';

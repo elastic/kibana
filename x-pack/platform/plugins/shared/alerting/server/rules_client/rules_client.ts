@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ESQLParamsV1 } from '@kbn/response-ops-rule-params';
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
@@ -100,6 +100,10 @@ import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
+import { createESQLRule } from '../application/esql_rule/methods/create/create_esql_rule';
+import type { CreateESQLRuleData } from '../application/esql_rule/methods/create/types/create_esql_rule_data';
+import { updateESQLRule } from '../application/esql_rule/methods/update/update_esql_rule';
+import { type UpdateESQLRuleData } from '../application/esql_rule/methods/update/types/update_esql_rule_data';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -258,4 +262,15 @@ export class RulesClient {
 
   public getRuleTypesByQuery = (params: GetRuleTypesByQueryParams) =>
     getRuleTypesByQuery(this.context, params);
+
+  public async createESQLRule(ruleData: CreateESQLRuleData): Promise<SanitizedRule<ESQLParamsV1>> {
+    return createESQLRule(this.context, ruleData);
+  }
+
+  public async updateESQLRule(
+    ruleId: string,
+    ruleData: UpdateESQLRuleData
+  ): Promise<SanitizedRule<ESQLParamsV1>> {
+    return updateESQLRule(this.context, ruleId, ruleData);
+  }
 }

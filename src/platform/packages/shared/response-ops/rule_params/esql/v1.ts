@@ -19,11 +19,12 @@ const ESQLParamsSchemaProperties = {
   timeWindowUnit: schema.string({
     validate: validateTimeWindowUnits,
   }),
+  group_key: schema.arrayOf(schema.string()),
   timeField: schema.string({
     minLength: 1,
   }),
   esqlQuery: schema.object({ esql: schema.string({ minLength: 1 }) }),
-  parentId: schema.string({ minLength: 1 }),
+  parentId: schema.maybe(schema.string({ minLength: 1 })),
 };
 
 export type ESQLParams = TypeOf<typeof ESQLParamsSchema>;

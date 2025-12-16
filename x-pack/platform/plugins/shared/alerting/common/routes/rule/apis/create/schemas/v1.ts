@@ -10,7 +10,12 @@ import {
   ruleParamsSchemaWithDefaultValueV1,
   createRuleParamsExamplesV1,
 } from '@kbn/response-ops-rule-params';
-import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
+import {
+  validateDurationV1,
+  validateHoursV1,
+  validateTimezoneV1,
+  validateRuleId,
+} from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { artifactsSchemaV1 } from '../../../request';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
@@ -198,6 +203,7 @@ export { createRuleParamsExamplesV1 };
 export const createParamsSchema = schema.object({
   id: schema.maybe(
     schema.string({
+      validate: validateRuleId,
       meta: {
         description: 'The identifier for the rule. If it is omitted, an ID is randomly generated.',
       },
