@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
 /**
  * Checks if a stream name has unfilled wildcards (contains *)
@@ -83,7 +83,7 @@ export interface StreamNameValidationResult {
  */
 export type StreamNameValidator = (
   streamName: string,
-  selectedTemplate: TemplateDeserialized,
+  selectedTemplate: IndexTemplate,
   signal?: AbortSignal
 ) => Promise<{
   errorType: 'duplicate' | 'higherPriority' | null;
@@ -97,7 +97,7 @@ export type StreamNameValidator = (
  */
 export const validateStreamName = async (
   streamName: string,
-  selectedTemplate: TemplateDeserialized,
+  selectedTemplate: IndexTemplate,
   onValidate?: StreamNameValidator,
   signal?: AbortSignal
 ): Promise<StreamNameValidationResult> => {

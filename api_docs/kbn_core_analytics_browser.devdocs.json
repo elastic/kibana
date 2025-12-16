@@ -688,6 +688,26 @@
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts"
               },
               {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/public/application/hooks/use_report_error.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attach_events_ebt.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/case_view/use_case_page_view_ebt.ts"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/operators/continue_conversation.ts"
               },
@@ -710,22 +730,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attach_events_ebt.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/case_view/use_case_page_view_ebt.ts"
               },
               {
                 "plugin": "ml",
@@ -810,10 +814,6 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/usage/event_tracker.ts"
-              },
-              {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/public/application/hooks/use_report_error.ts"
               },
               {
                 "plugin": "cloudConnect",
