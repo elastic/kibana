@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { RouteOptions } from '../../..';
+import type { RouteOptions } from '../..';
 import {
   createESQLRuleParamsSchemaV1,
+  createESQLBodySchemaV1,
   type CreateESQLRuleResponseV1,
   type CreateESQLRuleRequestBodyV1,
-} from '../../../../../common/routes/rule/apis/esql';
-import { createESQLBodySchemaV1 } from './schemas';
-import { esqlRuleResponseSchema } from '../../../../../common/routes/rule/response';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
-import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
-import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
-import { transformESQLRuleToResponseV1 } from '../../transforms';
+} from '../../../../common/routes/rule/apis/esql';
+import { esqlRuleResponseSchema } from '../../../../common/routes/rule/response';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../constants';
+import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../lib';
+import { validateInternalRuleType } from '../../lib/validate_internal_rule_type';
+import { transformESQLRuleToResponseV1 } from '../transforms';
 
 export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
   const { router, licenseState } = routeOptions;
