@@ -11,6 +11,7 @@ import type {
   EuiBasicTableColumn,
   EuiConfirmModalProps,
   EuiTableSelectionType,
+  IconType,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -28,15 +29,37 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { LensLayerType } from '@kbn/lens-common';
+import { layerTypes } from '../../..';
+
+type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
 
 export interface Layer {
   id: string;
-  icon: string;
+  icon: IconType;
   name: string;
-  typology: string;
+  type: LayerType;
   query: string;
   isConvertibleToEsql: boolean;
 }
+
+const typeLabels: Record<LayerType, (count: number) => string> = {
+  data: (count: number) =>
+    i18n.translate('xpack.lens.config.visualizationDescription', {
+      defaultMessage: '{count, plural, one {Visualization} other {Visualizations}}',
+      values: { count },
+    }),
+  annotations: (count: number) =>
+    i18n.translate('xpack.lens.config.annotationDescription', {
+      defaultMessage: '{count, plural, one {Annotation} other {Annotations}}',
+      values: { count },
+    }),
+  referenceLine: (count: number) =>
+    i18n.translate('xpack.lens.config.referenceLineDescription', {
+      defaultMessage: '{count, plural, one {Reference line} other {Reference lines}}',
+      values: { count },
+    }),
+};
 
 export const ConvertToEsqlModal: React.FunctionComponent<{
   layers: Layer[];
@@ -93,9 +116,10 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
       truncateText: true,
     },
     {
-      field: 'typology',
+      field: 'type',
       name: 'Typology',
       truncateText: true,
+      render: (type: LayerType) => typeLabels[type](1),
     },
     {
       align: 'right',
@@ -114,7 +138,6 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
 
         return (
-          // Add tooltip?
           <EuiButtonIcon
             onClick={() => toggleDetails(layer)}
             aria-label={
@@ -135,16 +158,24 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   ];
 
   const selection: EuiTableSelectionType<Layer> = {
-    selectable: (layer: Layer) => layer.isConvertibleToEsql,
+    selectable: (layer: Layer) => {
+      return layer.type === layerTypes.DATA && layer.isConvertibleToEsql;
+    },
     selectableMessage: (selectable: boolean, layer: Layer) => {
-      // TODO: Add message with the typologies that cannot be switched yet
       return !selectable
-        ? i18n.translate('xpack.lens.config.cannotBeSwitchedAriaLabel', {
-            defaultMessage: '{layerName} cannot be switched to query mode',
-            values: {
-              layerName: layer.name,
-            },
-          })
+        ? layer.type === layerTypes.DATA
+          ? i18n.translate('xpack.lens.config.cannotBeSwitchedAriaLabel', {
+              defaultMessage: '{layerName} cannot be switched to query mode',
+              values: {
+                layerName: layer.name,
+              },
+            })
+          : i18n.translate('xpack.lens.config.cannotBeSwitchedAriaLabel', {
+              defaultMessage: '{layerTypes} cannot be switched to query mode',
+              values: {
+                layerTypes: typeLabels[layer.type](2),
+              },
+            })
         : i18n.translate('xpack.lens.config.selectLayerAriaLabel', {
             defaultMessage: 'Select {layerName} for conversion to query mode',
             values: {
