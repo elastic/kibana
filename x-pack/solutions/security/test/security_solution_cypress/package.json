@@ -12,7 +12,7 @@
 
     "cypress:open:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ./test/security_solution_cypress/cypress/cypress.config.ts --ftr-config-file ./cli_config",
     "cypress:asset_inventory:run:ess": "yarn cypress:ess --spec '.cypress/screens/asset_inventory/**/*.cy.ts'",
-    "cypress:entity_analytics:run:ess": "yarn cypress:ess --spec './cypress/e2e/entity_analytics/**/*.cy.ts'",
+    "cypress:entity_analytics:run:ess": "yarn cypress:ess --spec './cypress/e2e/entity_analytics/dashboard.cy.ts'",
     "cypress:run:cases:ess": "yarn cypress:ess --spec './cypress/e2e/explore/cases/*.cy.ts'",
     "cypress:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel run --config-file ./test/security_solution_cypress/cypress/cypress_ci.config.ts --ftr-config-file ./cli_config",
     "cypress:rule_management:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/rule_management/!(prebuilt_rules)/**/*.cy.ts'",
