@@ -14,7 +14,7 @@ import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { FeatureEventsSparkline } from './feature_events_sparkline';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 
 export const FeatureEventsData = ({
   feature,
@@ -75,7 +75,7 @@ export const FeatureEventsData = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <FeatureEventsSparkline
+      <FeatureEventsSparklineLast24hrs
         feature={feature}
         definition={definition}
         hideAxis={false}
