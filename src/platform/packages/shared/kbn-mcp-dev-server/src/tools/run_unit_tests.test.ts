@@ -8,10 +8,7 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import execa from 'execa';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
 // Use var for proper hoisting in Jest mocks
 // eslint-disable-next-line no-var
@@ -141,7 +138,9 @@ describe('runUnitTestsTool', () => {
       // Mock fs.readFileSync for coverage files
       (mockedFs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
         if (filePath.includes('coverage-summary.json')) {
-          return JSON.stringify(coverageSummary || { total: { lines: {}, statements: {}, functions: {}, branches: {} } });
+          return JSON.stringify(
+            coverageSummary || { total: { lines: {}, statements: {}, functions: {}, branches: {} } }
+          );
         }
         if (filePath.includes('coverage-final.json')) {
           return JSON.stringify(coverageFinal || {});
@@ -352,7 +351,8 @@ describe('runUnitTestsTool', () => {
         });
 
         const parsedResult = parseToolResultJsonContent(result);
-        const failureMessage = parsedResult.results[0].testSuites[0].assertions[0].failureMessages[0];
+        const failureMessage =
+          parsedResult.results[0].testSuites[0].assertions[0].failureMessages[0];
         expect(failureMessage.length).toBeLessThan(longMessage.length);
         expect(failureMessage).toContain('... [truncated]');
       });
@@ -418,12 +418,7 @@ describe('runUnitTestsTool', () => {
       it('filters out ignored file extensions', async () => {
         setupMocks({
           changedFiles: {
-            modified: [
-              'src/file.ts',
-              'src/file.json',
-              'src/file.md',
-              'src/file.png',
-            ],
+            modified: ['src/file.ts', 'src/file.json', 'src/file.md', 'src/file.png'],
             untracked: [],
           },
         });
@@ -614,4 +609,3 @@ describe('runUnitTestsTool', () => {
     });
   });
 });
-

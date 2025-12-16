@@ -8,10 +8,7 @@
  */
 
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import {
-  parseToolResultJsonContent,
-  extractToolResultTextContent,
-} from './test_utils';
+import { parseToolResultJsonContent, extractToolResultTextContent } from './test_utils';
 
 describe('test_utils', () => {
   describe('parseToolResultJsonContent', () => {
@@ -34,9 +31,7 @@ describe('test_utils', () => {
         content: [],
       };
 
-      expect(() => parseToolResultJsonContent(result)).toThrow(
-        'Tool result has no content'
-      );
+      expect(() => parseToolResultJsonContent(result)).toThrow('Tool result has no content');
     });
 
     it('throws error when content is undefined', () => {
@@ -44,9 +39,7 @@ describe('test_utils', () => {
         content: undefined as any,
       };
 
-      expect(() => parseToolResultJsonContent(result)).toThrow(
-        'Tool result has no content'
-      );
+      expect(() => parseToolResultJsonContent(result)).toThrow('Tool result has no content');
     });
 
     it('throws error when content type is not text', () => {
@@ -60,9 +53,7 @@ describe('test_utils', () => {
         ],
       };
 
-      expect(() => parseToolResultJsonContent(result)).toThrow(
-        "Expected content type 'text'"
-      );
+      expect(() => parseToolResultJsonContent(result)).toThrow("Expected content type 'text'");
     });
 
     it('throws error when text property is missing', () => {
@@ -104,9 +95,7 @@ describe('test_utils', () => {
         ],
       };
 
-      expect(() => parseToolResultJsonContent(result)).toThrow(
-        'Failed to parse JSON content'
-      );
+      expect(() => parseToolResultJsonContent(result)).toThrow('Failed to parse JSON content');
     });
 
     it('includes error message in JSON parse error', () => {
@@ -171,9 +160,7 @@ describe('test_utils', () => {
         content: [],
       };
 
-      expect(() => extractToolResultTextContent(result)).toThrow(
-        'Tool result has no content'
-      );
+      expect(() => extractToolResultTextContent(result)).toThrow('Tool result has no content');
     });
 
     it('throws error when content is undefined', () => {
@@ -181,9 +168,7 @@ describe('test_utils', () => {
         content: undefined as any,
       };
 
-      expect(() => extractToolResultTextContent(result)).toThrow(
-        'Tool result has no content'
-      );
+      expect(() => extractToolResultTextContent(result)).toThrow('Tool result has no content');
     });
 
     it('throws error when content type is not text', () => {
@@ -197,9 +182,7 @@ describe('test_utils', () => {
         ],
       };
 
-      expect(() => extractToolResultTextContent(result)).toThrow(
-        "Expected content type 'text'"
-      );
+      expect(() => extractToolResultTextContent(result)).toThrow("Expected content type 'text'");
     });
 
     it('throws error when text property is missing', () => {
@@ -232,4 +215,3 @@ describe('test_utils', () => {
     });
   });
 });
-
