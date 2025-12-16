@@ -6,6 +6,7 @@
  */
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginPublicSetup {}
@@ -19,4 +20,5 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {}
 export interface ObservabilityAgentBuilderPluginStartDependencies {
   discoverShared: DiscoverSharedPublicStart;
   onechat: OnechatPluginStart;
+  licensing: LicensingPluginStart;
 }

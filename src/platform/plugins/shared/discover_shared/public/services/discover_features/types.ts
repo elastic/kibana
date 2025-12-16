@@ -59,7 +59,7 @@ export interface ObservabilityLogsAiInsightFeatureRenderDeps {
 }
 export interface ObservabilityLogsAIInsightFeature {
   id: 'observability-logs-ai-insight';
-  render: (deps: ObservabilityLogsAIInsightFeatureRenderDeps) => JSX.Element;
+  render: (deps: ObservabilityLogsAiInsightFeatureRenderDeps) => JSX.Element;
 }
 
 export interface ObservabilityCreateSLOFeature {

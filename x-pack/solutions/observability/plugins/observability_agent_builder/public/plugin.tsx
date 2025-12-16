@@ -8,22 +8,18 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type {
-  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginPublicSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginPublicStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
 import { createLogAIInsight, createLogsAIInsightRenderer } from './components/log_ai_insight';
-import {
-  OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
-  OBSERVABILITY_AGENT_FEATURE_FLAG,
-} from '../common';
 
 export class ObservabilityAgentBuilderPlugin
   implements
     Plugin<
-      ObservabilityAgentBuilderPluginSetup,
-      ObservabilityAgentBuilderPluginStart,
+      ObservabilityAgentBuilderPluginPublicSetup,
+      ObservabilityAgentBuilderPluginPublicStart,
       ObservabilityAgentBuilderPluginSetupDependencies,
       ObservabilityAgentBuilderPluginStartDependencies
     >
@@ -37,26 +33,25 @@ export class ObservabilityAgentBuilderPlugin
   public setup(
     core: CoreSetup<
       ObservabilityAgentBuilderPluginStartDependencies,
-      ObservabilityAgentBuilderPluginStart
+      ObservabilityAgentBuilderPluginPublicStart
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
-  ): ObservabilityAgentBuilderPluginSetup {
+  ): ObservabilityAgentBuilderPluginPublicSetup {
     return {};
   }
 
   public start(
     core: CoreStart,
     plugins: ObservabilityAgentBuilderPluginStartDependencies
-  ): ObservabilityAgentBuilderPluginStart {
-    const isObservabilityAgentEnabled = core.featureFlags.getBooleanValue(
-      OBSERVABILITY_AGENT_FEATURE_FLAG,
-      OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
-    );
-
-    if (plugins.onechat && isObservabilityAgentEnabled) {
-      const LogAIInsight = createLogAIInsight({
-        onechat: plugins.onechat,
-      });
+  ): ObservabilityAgentBuilderPluginPublicStart {
+    if (plugins.onechat) {
+      const LogAIInsight = createLogAIInsight(
+        {
+          onechat: plugins.onechat,
+        },
+        core,
+        plugins
+      );
 
       plugins.discoverShared.features.registry.register({
         id: 'observability-logs-ai-insight',

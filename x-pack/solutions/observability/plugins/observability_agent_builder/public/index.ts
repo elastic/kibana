@@ -17,8 +17,8 @@ export {
 } from '../common/constants';
 
 export type {
-  ObservabilityAgentBuilderPluginSetup,
-  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginPublicSetup,
+  ObservabilityAgentBuilderPluginPublicStart,
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';

@@ -7,6 +7,9 @@
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AiInsight } from '@kbn/ai-insights';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { explainLogMessageButtonLabel, explainLogMessageDescription } from './translations';
@@ -14,6 +17,7 @@ import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
 } from '../../../common';
+import { useLicense } from '../../hooks/use_license';
 
 export interface LogAIInsightDocument {
   fields: {
@@ -31,6 +35,12 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
   const {
     services: { http },
   } = useKibana();
+
+  const { getLicense } = useLicense();
+  const license = getLicense();
+
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
@@ -91,6 +101,9 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
     ];
   }, [summary, context, index, id]);
 
+  if (!onechat || !isAgentChatExperienceEnabled) {
+    return null;
+  }
   return (
     <>
       <AiInsight
@@ -99,6 +112,7 @@ export function LogEntryAgentBuilderAiInsight({ doc, onechat }: LogAIInsightProp
         content={summary}
         isLoading={isLoading}
         onOpen={fetchAiInsights}
+        license={license}
         onStartConversation={() => {
           onechat?.openConversationFlyout({
             attachments,

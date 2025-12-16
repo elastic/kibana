@@ -14,7 +14,7 @@ export const explainLogMessageButtonLabel = i18n.translate(
 );
 
 export const explainLogMessageDescription = i18n.translate(
-  'xpack.observability.agentBuilder.explainLogMessageDescription',
+  'xpack.observabilityAgentBuilder.aiInsight.explainLogMessageDescription',
   {
     defaultMessage: 'Get helpful insights from our Elastic AI Agent',
   }

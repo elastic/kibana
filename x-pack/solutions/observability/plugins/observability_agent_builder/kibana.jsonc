@@ -18,7 +18,8 @@
       "dataViews",
       "metricsDataAccess",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "licensing"
     ],
     "optionalPlugins": ["ml", "spaces"],
     "requiredBundles": ["kibanaReact"],
