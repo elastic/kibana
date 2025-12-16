@@ -30,12 +30,15 @@ import {
   type ESQLControlState,
   type ControlWidthOptions,
   type ESQLControlVariable,
+  TIMEFIELD_ROUTE,
 } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,
   appendStatsByToQuery,
 } from '@kbn/esql-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ServiceDeps } from '../../../kibana_services';
 import { ESQLLangEditor } from '../../../create_editor';
 import { ControlWidth, ControlLabel, ControlSelectionType } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -77,6 +80,8 @@ export function ValueControlForm({
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
   const theme = useEuiTheme();
+  const kibana = useKibana<ServiceDeps>();
+  const { core } = kibana.services;
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
@@ -213,25 +218,39 @@ export function ValueControlForm({
     [isMounted, search, timeRange, esqlVariables]
   );
 
+  const setSuggestedQuery = useCallback(async () => {
+    const indexPattern = getIndexPatternFromESQLQuery(queryString);
+    const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
+    const response = (await core.http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch the timefield', error);
+      return undefined;
+    })) as { timeField?: string } | undefined;
+
+    const timeField = response?.timeField;
+    const timeFilter = Boolean(timeField)
+      ? ` | WHERE ${timeField} <= ?_tend and ${timeField} > ?_tstart`
+      : '';
+    const queryForValues = `FROM ${indexPattern}${timeFilter} | STATS BY ${valuesRetrieval}`;
+    onValuesQuerySubmit(queryForValues);
+  }, [queryString, core.http, valuesRetrieval, onValuesQuerySubmit]);
+
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
       if (initialState?.esqlQuery) {
         onValuesQuerySubmit(initialState.esqlQuery);
       } else if (valuesRetrieval) {
-        const queryForValues = `FROM ${getIndexPatternFromESQLQuery(
-          queryString
-        )} | STATS BY ${valuesRetrieval}`;
-        onValuesQuerySubmit(queryForValues);
+        setSuggestedQuery();
       }
     }
   }, [
-    initialState?.esqlQuery,
-    controlFlyoutType,
-    onValuesQuerySubmit,
-    queryString,
     selectedValues?.length,
-    valuesRetrieval,
+    controlFlyoutType,
+    initialState?.esqlQuery,
     variableName,
+    valuesRetrieval,
+    onValuesQuerySubmit,
+    setSuggestedQuery,
   ]);
 
   useEffect(() => {

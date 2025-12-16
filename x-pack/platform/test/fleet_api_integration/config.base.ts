@@ -109,6 +109,9 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
             appenders: ['default'],
           },
         ])}`,
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
+          'fleet:agent-status-change-task',
+        ])} `,
       ],
     },
   };
