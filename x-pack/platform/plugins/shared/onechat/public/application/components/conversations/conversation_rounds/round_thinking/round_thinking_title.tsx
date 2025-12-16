@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -27,9 +27,6 @@ const thinkingCompletedLabel = i18n.translate(
     defaultMessage: 'Completed reasoning',
   }
 );
-const showButtonLabel = i18n.translate('xpack.onechat.conversation.thinking.show', {
-  defaultMessage: 'Show',
-});
 
 interface RoundThinkingTitleProps {
   isLoading: boolean;
@@ -48,7 +45,12 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
     // While this round is loading, show the agent reasoning as the button label if available
     // Otherwise fallback to default thinking label.
     // Agent reasoning can be reasoning directly from the agent or individual tool call progression
-    thinkingButtonLabel = agentReasoning ?? defaultThinkingLabel;
+    thinkingButtonLabel = agentReasoning
+      ? i18n.translate('xpack.onechat.conversation.thinking.reasoningInProgress', {
+          defaultMessage: '{reasoning}…',
+          values: { reasoning: agentReasoning },
+        })
+      : defaultThinkingLabel;
   }
 
   return (
@@ -56,9 +58,15 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
       direction="row"
       justifyContent="spaceBetween"
       responsive={false}
+      data-test-subj="agentBuilderThinkingToggle"
+      onClick={hasSteps ? onShow : undefined}
       alignItems="center"
       css={css`
         min-height: ${MIN_HEIGHT};
+        cursor: ${hasSteps ? 'pointer' : 'default'};
+        &:hover {
+          text-decoration: ${hasSteps ? 'underline' : 'none'};
+        }
       `}
     >
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
@@ -68,14 +76,8 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
         <EuiText size="s" color="subdued" css={clampTextStyles}>
           <p>{thinkingButtonLabel}</p>
         </EuiText>
+        {hasSteps && <EuiIcon type="arrowRight" color="subdued" size="m" />}
       </EuiFlexGroup>
-      {hasSteps && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="text" onClick={onShow} data-test-subj="agentBuilderThinkingToggle">
-            {showButtonLabel}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };

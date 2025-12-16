@@ -9,12 +9,12 @@
 import { camelCase } from 'lodash';
 import type { FunctionParameterType, FunctionReturnType, FunctionDefinition } from '@kbn/esql-ast';
 import { withAutoSuggest, FunctionDefinitionTypes } from '@kbn/esql-ast';
-import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import type { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
-import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
-import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { getSafeInsertText } from '@kbn/esql-ast/src/commands/definitions/utils';
+import type { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/time_series_agg_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/scalar_functions';
 import {
   operatorsDefinitions,
   logicalOperators,
@@ -23,7 +23,7 @@ import {
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
-} from '@kbn/esql-ast/src/definitions/all_operators';
+} from '@kbn/esql-ast/src/commands/definitions/all_operators';
 import type { LicenseType } from '@kbn/licensing-types';
 import {
   type ESQLCallbacks,
@@ -32,7 +32,7 @@ import {
   esqlFieldTypes,
 } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import { getLocationFromCommandOrOptionName } from '@kbn/esql-ast/src/commands_registry/location';
+import { getLocationFromCommandOrOptionName } from '@kbn/esql-ast/src/commands/registry/location';
 import { NOT_SUGGESTED_TYPES } from '../../query_columns_service';
 import * as autocomplete from '../autocomplete';
 import {
@@ -469,3 +469,21 @@ export const attachTriggerCommand = (
         text: s,
       } as ISuggestionItem)
     : withAutoSuggest(s as ISuggestionItem);
+
+export const attachParameterHelperCommand = (
+  s: string | PartialSuggestionWithText
+): PartialSuggestionWithText => {
+  const command = {
+    id: 'editor.action.triggerParameterHints',
+    title: '',
+  };
+  return typeof s === 'string'
+    ? {
+        text: s,
+        command,
+      }
+    : {
+        ...s,
+        command,
+      };
+};
