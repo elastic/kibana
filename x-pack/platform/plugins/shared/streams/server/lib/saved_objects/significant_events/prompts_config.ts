@@ -12,6 +12,9 @@ export const streamsPromptsSOType = 'stream-prompts';
 export const streamsPromptsSOAttributesV1 = schema.object({
   featurePromptOverride: schema.maybe(schema.string()),
   significantEventsPromptOverride: schema.maybe(schema.string()),
+});
+
+export const streamsPromptsSOAttributesV2 = streamsPromptsSOAttributesV1.extends({
   descriptionPromptOverride: schema.maybe(schema.string()),
 });
 
@@ -35,6 +38,13 @@ export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
         schemas: {
           forwardCompatibility: streamsPromptsSOAttributesV1.extends({}, { unknowns: 'ignore' }),
           create: streamsPromptsSOAttributesV1,
+        },
+      },
+      '2': {
+        changes: [],
+        schemas: {
+          forwardCompatibility: streamsPromptsSOAttributesV2.extends({}, { unknowns: 'ignore' }),
+          create: streamsPromptsSOAttributesV2,
         },
       },
     },
