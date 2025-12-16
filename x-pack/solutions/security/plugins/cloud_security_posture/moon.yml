@@ -90,7 +90,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - test/scout/**/*
+    - test/scout_cspm_agentless/**/*
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
