@@ -50,7 +50,6 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/chart-expressions-common'
   - '@kbn/observability-utils-common'
-  - '@kbn/observability-plugin'
 tags:
   - plugin
   - prod

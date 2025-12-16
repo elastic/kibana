@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -19,7 +18,9 @@ export const createSearchClient =
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => {
     const { uiSettings } = await requestContext.core;
 
-    const excludedDataTiers = await uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
+    const excludedDataTiers = await uiSettings.client.get<DataTier[]>(
+      'observability:searchExcludedDataTiers'
+    );
 
     const excludedQuery = excludedDataTiers.length
       ? excludeTiersQuery(excludedDataTiers)
