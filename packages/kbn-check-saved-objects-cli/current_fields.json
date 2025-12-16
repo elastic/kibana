@@ -22,6 +22,7 @@
     "actions.actionRef",
     "actions.actionTypeId",
     "actions.group",
+    "actions.params",
     "alertTypeId",
     "artifacts",
     "artifacts.investigation_guide",
@@ -94,6 +95,10 @@
     "tags"
   ],
   "api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt"
+  ],
+  "api_key_to_invalidate": [
     "apiKeyId",
     "createdAt"
   ],
