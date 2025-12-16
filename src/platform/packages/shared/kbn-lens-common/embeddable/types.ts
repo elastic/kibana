@@ -394,6 +394,8 @@ export type LensInternalApi = Simplify<
       updateBlockingError: (newBlockingError: Error | undefined) => void;
       resetAllMessages: () => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
+      updateEditingState: (inProgress: boolean) => void;
+      isEditingInProgress: () => boolean;
     }
 >;
 

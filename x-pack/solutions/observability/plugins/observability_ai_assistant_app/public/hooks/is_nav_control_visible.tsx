@@ -69,10 +69,8 @@ export function useIsNavControlVisible({
   const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
-    const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
-      AI_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    );
+    const chatExperience$ =
+      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
     const appSubscription = combineLatest([
       currentAppId$,
