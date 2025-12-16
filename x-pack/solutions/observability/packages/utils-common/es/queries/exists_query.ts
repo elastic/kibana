@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export {
-  OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-  OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
-  OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
-} from './constants';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
+export function existsQuery(field: string): QueryDslQueryContainer[] {
+  return [{ exists: { field } }];
+}
