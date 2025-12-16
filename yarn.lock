@@ -4587,10 +4587,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-insights@link:x-pack/platform/packages/shared/ai-insights":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-security-labs-content@link:x-pack/solutions/security/packages/ai-security-labs-content":
   version "0.0.0"
   uid ""
@@ -6592,10 +6588,6 @@
   uid ""
 
 "@kbn/esql-ux-example-plugin@link:examples/esql_ux_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
 
