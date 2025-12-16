@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useForm,
   useFormContext,
@@ -13,8 +13,11 @@ import {
   type FormConfig,
   type FormHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { IntegrationFormSchema } from './integration_form_validation';
+import { IntegrationFormSchema, createIntegrationFormSchema } from './integration_form_validation';
 import type { IntegrationFormData } from './types';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import { getInstalledPackages } from '../../../../common/lib/api';
+import * as i18n from './translations';
 
 export interface IntegrationFormProviderProps {
   children?: React.ReactNode;
@@ -27,6 +30,35 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   initialValue,
   onSubmit,
 }) => {
+  const { http, notifications } = useKibana().services;
+  const [packageNames, setPackageNames] = useState<Set<string>>();
+
+  // Load installed package names for duplicate validation
+  useEffect(() => {
+    const abortController = new AbortController();
+    const deps = { http, abortSignal: abortController.signal };
+    (async () => {
+      try {
+        const packagesResponse = await getInstalledPackages(deps);
+        if (abortController.signal.aborted) return;
+        if (packagesResponse?.items?.length) {
+          setPackageNames(new Set(packagesResponse.items.map((pkg) => pkg.id)));
+        }
+      } catch (e) {
+        if (!abortController.signal.aborted) {
+          notifications?.toasts.addError(e, {
+            title: i18n.PACKAGE_NAMES_FETCH_ERROR,
+          });
+        }
+      }
+    })();
+    return () => {
+      abortController.abort();
+    };
+  }, [http, notifications]);
+
+  const schema = useMemo(() => createIntegrationFormSchema(packageNames), [packageNames]);
+
   const handleSubmit: FormConfig<IntegrationFormData>['onSubmit'] = useCallback(
     async (formData: IntegrationFormData, isValid: boolean) => {
       if (!isValid) {
@@ -45,7 +77,7 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
       connectorId: '',
       ...initialValue,
     },
-    schema: IntegrationFormSchema,
+    schema,
     onSubmit: handleSubmit,
     options: {
       stripEmptyFields: false,

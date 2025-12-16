@@ -40,3 +40,15 @@ export const CONNECTOR_REQUIRED = i18n.translate(
     defaultMessage: 'Please select a connector',
   }
 );
+export const PACKAGE_NAMES_FETCH_ERROR = i18n.translate(
+  'xpack.automaticImportV2.forms.integration.packageNamesFetchError',
+  {
+    defaultMessage: 'Failed to fetch installed packages',
+  }
+);
+export const TITLE_ALREADY_EXISTS = i18n.translate(
+  'xpack.automaticImportV2.forms.integration.titleAlreadyExists',
+  {
+    defaultMessage: 'An integration with this name already exists',
+  }
+);

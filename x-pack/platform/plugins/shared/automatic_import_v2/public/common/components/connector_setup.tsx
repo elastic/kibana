@@ -87,20 +87,22 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
     setSelectedActionType(null);
   }, []);
 
-  const getIconForActionType = useCallback(
-    (actionTypeId: string) => {
-      try {
-        return actionTypeRegistry?.get(actionTypeId)?.iconClass ?? 'plugs';
-      } catch {
-        return 'plugs';
-      }
-    },
-    [actionTypeRegistry]
-  );
+  const getIconForActionType = (actionTypeId: string) => {
+    try {
+      return actionTypeRegistry?.get(actionTypeId)?.iconClass ?? 'plugs';
+    } catch {
+      return 'plugs';
+    }
+  };
 
   if (isLoadingTypes) {
     return (
-      <EuiFlyout aria-label="Create AI Connector" onClose={onClose} size="s">
+      <EuiFlyout
+        aria-label="Create AI Connector"
+        onClose={onClose}
+        size="s"
+        data-test-subj="connectorSetupFlyout"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>Create AI Connector</h2>
@@ -108,7 +110,7 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '200px' }}>
-            <EuiLoadingSpinner size="xl" />
+            <EuiLoadingSpinner size="xl" data-test-subj="connectorSetupLoading" />
           </EuiFlexGroup>
         </EuiFlyoutBody>
       </EuiFlyout>
@@ -117,7 +119,12 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
 
   return (
     <>
-      <EuiFlyout onClose={onClose} size="s">
+      <EuiFlyout
+        onClose={onClose}
+        size="s"
+        aria-label="Create AI Connector"
+        data-test-subj="connectorSetupFlyout"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>Create AI Connector</h2>
@@ -157,7 +164,7 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
               </EuiFlexItem>
             ))}
             {(!actionTypes || actionTypes.length === 0) && (
-              <EuiText color="subdued" textAlign="center">
+              <EuiText color="subdued" textAlign="center" data-test-subj="noConnectorTypes">
                 No AI connector types available
               </EuiText>
             )}

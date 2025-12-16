@@ -149,6 +149,7 @@ export const IntegrationDetails = React.memo(() => {
                     isInvalid={field.errors.length > 0}
                     error={field.errors.map((e) => e.message)}
                     fullWidth
+                    data-test-subj="integrationTitleFormRow"
                   >
                     <EuiFieldText
                       value={field.value as string}
@@ -156,6 +157,7 @@ export const IntegrationDetails = React.memo(() => {
                       isInvalid={field.errors.length > 0}
                       fullWidth
                       css={styles.form}
+                      data-test-subj="integrationTitleInput"
                     />
                   </EuiFormRow>
                 )}
@@ -168,6 +170,7 @@ export const IntegrationDetails = React.memo(() => {
                     isInvalid={field.errors.length > 0}
                     error={field.errors.map((e) => e.message)}
                     fullWidth
+                    data-test-subj="integrationDescriptionFormRow"
                   >
                     <EuiFieldText
                       value={field.value as string}
@@ -175,6 +178,7 @@ export const IntegrationDetails = React.memo(() => {
                       fullWidth
                       isInvalid={field.errors.length > 0}
                       css={styles.form}
+                      data-test-subj="integrationDescriptionInput"
                     />
                   </EuiFormRow>
                 )}
@@ -187,6 +191,7 @@ export const IntegrationDetails = React.memo(() => {
                     fullWidth
                     isInvalid={!!logoError}
                     error={logoError}
+                    data-test-subj="integrationLogoFormRow"
                   >
                     <EuiFilePicker
                       id="logoFilePicker"

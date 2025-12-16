@@ -20,7 +20,25 @@ export const requiredField = (message: string) => ({
   isRequired: true,
 });
 
-export const IntegrationFormSchema: FormSchema<IntegrationFormData> = {
+const titleToPackageName = (title: string): string => {
+  return title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+};
+
+const createUniqueTitleValidator = (packageNames: Set<string> | undefined) => ({
+  validator: ({ value }: { value: string }) => {
+    if (!packageNames || !value) {
+      return undefined;
+    }
+    if (packageNames.has(value)) {
+      return { message: i18n.TITLE_ALREADY_EXISTS };
+    }
+    return undefined;
+  },
+});
+
+export const createIntegrationFormSchema = (
+  packageNames: Set<string> | undefined
+): FormSchema<IntegrationFormData> => ({
   title: {
     label: 'Integration name',
     validations: [
@@ -31,6 +49,7 @@ export const IntegrationFormSchema: FormSchema<IntegrationFormData> = {
           message: i18n.TITLE_MAX_LENGTH,
         }),
       },
+      createUniqueTitleValidator(packageNames),
     ],
   },
   description: {
@@ -54,4 +73,6 @@ export const IntegrationFormSchema: FormSchema<IntegrationFormData> = {
     label: 'AI Connector',
     validations: [requiredField(i18n.CONNECTOR_REQUIRED)],
   },
-};
+});
+
+export const IntegrationFormSchema = createIntegrationFormSchema(undefined);

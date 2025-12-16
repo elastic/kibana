@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButton,
@@ -26,9 +25,8 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { ConnectorSetup } from './connector_setup';
+import * as i18n from './translations';
 
-const ADD_CONNECTOR = 'Add connector';
-const CONNECTOR_PLACEHOLDER = 'Select a connector';
 const ELASTIC_LLM_CONNECTOR_ID = 'Elastic-Managed-LLM';
 
 /**
@@ -125,29 +123,26 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
     [connectors]
   );
 
-  const handleAddConnectorClick = useCallback(() => {
+  const handleAddConnectorClick = () => {
     setIsPopoverOpen(false);
     setIsConnectorModalVisible(true);
-  }, []);
+  };
 
-  const handleManageConnectorsClick = useCallback(() => {
+  const handleManageConnectorsClick = () => {
     setIsPopoverOpen(false);
     application.navigateToApp('management', {
       path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
     });
-  }, [application]);
+  };
 
-  const handleConnectorCreated = useCallback(
-    (connector: ActionConnector) => {
-      setIsConnectorModalVisible(false);
-      refetch();
-    },
-    [refetch]
-  );
-
-  const handleCloseModal = useCallback(() => {
+  const handleConnectorCreated = useCallback(() => {
     setIsConnectorModalVisible(false);
-  }, []);
+    refetch();
+  }, [refetch]);
+
+  const handleCloseModal = () => {
+    setIsConnectorModalVisible(false);
+  };
 
   return (
     <>
@@ -173,7 +168,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
           const selectedOrDefaultConnector = connectors?.find(
             (connector) => connector.id === selectedOrDefaultConnectorId
           );
-          const buttonLabel = selectedOrDefaultConnector?.name ?? CONNECTOR_PLACEHOLDER;
+          const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.SELECT_CONNECTOR_PLACEHOLDER;
 
           const panels: EuiContextMenuPanelDescriptor[] = [
             {
@@ -187,7 +182,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
                   onValueChange={onChangeConnector}
                   onAddConnectorClick={handleAddConnectorClick}
                   onManageConnectorsClick={handleManageConnectorsClick}
-                  defaultConnectorId={defaultConnectorId}
+                  defaultConnectorId={settingsDefaultConnectorId}
                   renderOption={(option) => (
                     <EuiFlexGroup
                       justifyContent="spaceBetween"
@@ -229,7 +224,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
               isDisabled={isDisabled || isLoading}
             >
               {isLoading ? (
-                <EuiLoadingSpinner size="s" />
+                <EuiLoadingSpinner size="s" data-test-subj="connectorSelectorLoading" />
               ) : (
                 displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel
               )}
@@ -238,7 +233,11 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
           if (!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0) {
             return (
-              <EuiFlexGroup direction="column" alignItems="flexEnd">
+              <EuiFlexGroup
+                direction="column"
+                alignItems="flexEnd"
+                data-test-subj="connectorSelectorNoConnectors"
+              >
                 <EuiFlexItem>
                   <EuiButtonEmpty
                     data-test-subj="addNewConnectorButton"
@@ -247,7 +246,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
                     size="xs"
                     onClick={handleAddConnectorClick}
                   >
-                    {ADD_CONNECTOR}
+                    {i18n.ADD_CONNECTOR_BUTTON_LABEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -255,7 +254,11 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
           }
 
           return (
-            <EuiFlexGroup direction="column" alignItems="flexEnd">
+            <EuiFlexGroup
+              direction="column"
+              alignItems="flexEnd"
+              data-test-subj="connectorSelectorWrapper"
+            >
               <EuiFlexItem>
                 <EuiInputPopover
                   input={input}
@@ -265,6 +268,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
                   anchorPosition="downRight"
                   fullWidth={fullWidth}
                   panelMinWidth={300}
+                  data-test-subj="connectorSelectorPopover"
                 >
                   <EuiContextMenu initialPanelId={0} panels={panels} />
                 </EuiInputPopover>
