@@ -23,18 +23,26 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
+      // this should be used to identify individual templates, not the _id as we are storing revisions for all the templates.
+      template_id: {
+        type: 'keyword',
+      },
+      name: {
+        type: 'keyword',
+      },
+      // this is used as template version, as every change results in a new snapshot.
       created_at: {
         type: 'date',
       },
       owner: {
         type: 'keyword',
       },
-      updated_at: {
-        type: 'date',
-      },
       // yaml template definition
       definition: {
         type: 'text',
+      },
+      deleted_at: {
+        type: 'date',
       },
     },
   },

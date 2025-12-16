@@ -32,7 +32,22 @@ export class TemplatesService {
     // eslint-disable-next-line no-console
     console.log('world', findResult.saved_objects);
   }
+
+  async getTemplate() {}
+
+  async createTemplate() {}
+
+  async updateTemplate() {}
+
+  async deleteTemplate() {}
 }
+
+// TODO:
+// 1. add crud methods for yaml persistence
+// 2. add yaml editor for persistence
+// 3. add new fields to a case - templateFields and templateId
+// 4. add validate method to check case fields against the template
+// 5. add case rendering based on the template
 
 // Routes
 
@@ -63,6 +78,34 @@ export const postTemplateRoute = createCasesRoute({
 export const getTemplatesRoute = createCasesRoute({
   method: 'get',
   path: `${CASES_INTERNAL_URL}/templates`,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
+  routerOptions: {
+    access: 'public',
+  },
+  handler: async ({ context, request, response }) => {
+    const templates: Template[] = [{ name: 'Template 1', definition: `` }];
+
+    try {
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
+
+      casesClient.templates.getAllTemplates();
+
+      return response.ok({
+        body: templates,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to get templates`,
+        error,
+      });
+    }
+  },
+});
+
+export const getTemplateRoute = createCasesRoute({
+  method: 'get',
+  path: `${CASES_INTERNAL_URL}/templates/{template_id}`,
   security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',

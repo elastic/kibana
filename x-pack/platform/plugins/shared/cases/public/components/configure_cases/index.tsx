@@ -644,7 +644,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         onCloseFlyout={onCloseTemplatesV2Flyout}
         onSaveField={() => {}}
         renderHeader={() => (
-          <span>{observableTypeToEdit ? i18n.EDIT_OBSERVABLE_TYPE : i18n.ADD_OBSERVABLE_TYPE}</span>
+          <span>{observableTypeToEdit ? i18n.EDIT_TEMPLATE : i18n.CREATE_TEMPLATE}</span>
         )}
       >
         {({ onChange }) => <TemplateFormV2 onChange={onChange} initialValue={null} />}

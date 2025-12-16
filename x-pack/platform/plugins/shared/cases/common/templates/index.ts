@@ -6,10 +6,28 @@
  */
 
 export interface Template {
+  /*
+   * Template identifier, can be shared across multiple SO's as we are storing all the changes made to the template
+   */
+  template_id: string;
+
+  /**
+   * Display name
+   */
   name: string;
 
   /**
    * Yaml definition for the template
    */
   definition: string;
+
+  /**
+   * Creation date, effectively a version of the template
+   */
+  created_at: Date;
+
+  /**
+   * Deletion date, used to indicate soft-deletion
+   */
+  deleted_at: Date | null;
 }

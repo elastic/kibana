@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,8 +14,14 @@ import {
   EuiSpacer,
   EuiDescribedFormGroup,
   EuiButtonEmpty,
+  useEuiTheme,
+  EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
+import { CodeEditor } from '@kbn/code-editor';
+import { css } from '@emotion/react';
+import { load as parseYaml } from 'js-yaml';
 import { CASES_INTERNAL_URL } from '../../../common/constants';
 import type { Template } from '../../../common/templates';
 import type { FormState } from '../configure_cases/flyout';
@@ -34,6 +41,35 @@ const fetchTemplates = async () => {
   return KibanaServices.get().http.fetch<Template[]>(`${CASES_INTERNAL_URL}/templates`);
 };
 
+const fetchTemplate = async (templateId: string) => {
+  return KibanaServices.get().http.fetch<Template>(`${CASES_INTERNAL_URL}/templates/${templateId}`);
+};
+
+const createTemplate = async (template: Omit<Template, 'id'>) => {
+  return KibanaServices.get().http.post<Template>(`${CASES_INTERNAL_URL}/templates`, {
+    body: JSON.stringify(template),
+  });
+};
+
+const updateTemplate = async ({
+  templateId,
+  template,
+}: {
+  templateId: string;
+  template: Partial<Template>;
+}) => {
+  return KibanaServices.get().http.patch<Template>(
+    `${CASES_INTERNAL_URL}/templates/${templateId}`,
+    {
+      body: JSON.stringify(template),
+    }
+  );
+};
+
+const deleteTemplate = async (templateId: string) => {
+  return KibanaServices.get().http.delete(`${CASES_INTERNAL_URL}/templates/${templateId}`);
+};
+
 // Hooks
 
 const useTemplates = () =>
@@ -41,6 +77,46 @@ const useTemplates = () =>
     queryFn: fetchTemplates,
     queryKey: ['templates'],
   });
+
+const useTemplate = (templateId: string) =>
+  useQuery({
+    queryFn: () => fetchTemplate(templateId),
+    queryKey: ['templates', templateId],
+    enabled: !!templateId,
+  });
+
+const useCreateTemplate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createTemplate,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+};
+
+const useUpdateTemplate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTemplate,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+};
+
+const useDeleteTemplate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteTemplate,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+};
 
 // Components
 
@@ -108,8 +184,60 @@ export interface TemplateForm {
   initialValue: FormData | null;
 }
 
+const styles = {
+  editorContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      height: '75vh',
+      width: '100%',
+      padding: euiTheme.size.xs,
+    }),
+};
+
+const sample = `# This is an example template
+fields:
+  - name: severity
+    type: select
+    options:
+      - low
+      - moderate
+      - high
+      - critical
+`;
+
+console.log('parsed', parseYaml(sample));
+
+// on save, persist version timestamp as well
+// store each template as separate SO's with the same template_id (for reference)
+// so that we can do audit and rollbacks
 export const TemplateForm = ({ onChange, initialValue }: TemplateForm) => {
-  return <>{`TODO TemplateForm`}</>;
+  const euiTheme = useEuiTheme();
+
+  const [code, setCode] = useState(sample);
+  const [name, setName] = useState('');
+
+  return (
+    <div css={{ width: '100%', height: '100%', overflowY: 'scroll' }}>
+      <EuiFormRow fullWidth>
+        <EuiFieldText
+          placeholder="Template display name"
+          value={name}
+          onChange={(e) => setName(e.currentTarget.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="xs" />
+      <div css={styles.editorContainer(euiTheme)}>
+        <CodeEditor
+          onChange={setCode}
+          fullWidth
+          height={'100%'}
+          transparentBackground
+          languageId="yaml"
+          value={code}
+        />
+      </div>
+    </div>
+  );
 };
 
 TemplateForm.displayName = 'TemplateForm ';
