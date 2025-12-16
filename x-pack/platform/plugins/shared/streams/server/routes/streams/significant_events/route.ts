@@ -104,6 +104,10 @@ const readSignificantEventsRoute = createServerRoute({
       from: dateFromString,
       to: dateFromString,
       bucketSize: z.string(),
+      query: z
+        .string()
+        .optional()
+        .describe('Query string to filter significant events on metadata fields'),
     }),
   }),
 
@@ -135,7 +139,7 @@ const readSignificantEventsRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize } = params.query;
+    const { from, to, bucketSize, query } = params.query;
 
     return await readSignificantEventsFromAlertsIndices(
       {
@@ -143,6 +147,7 @@ const readSignificantEventsRoute = createServerRoute({
         from,
         to,
         bucketSize,
+        query,
       },
       { assetClient, scopedClusterClient }
     );
@@ -155,7 +160,6 @@ const generateSignificantEventsRoute = createServerRoute({
     path: z.object({ name: z.string() }),
     query: z.object({
       connectorId: z.string(),
-      currentDate: dateFromString.optional(),
       from: dateFromString,
       to: dateFromString,
       sampleDocsSize: z
