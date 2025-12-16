@@ -43,7 +43,7 @@ const sortOptions = [
   {
     value: 'dataIndex',
     text: i18n.translate('xpack.lens.heatmap.sortOrder.original', {
-      defaultMessage: 'Original order',
+      defaultMessage: 'Query order',
     }),
   },
 ];
