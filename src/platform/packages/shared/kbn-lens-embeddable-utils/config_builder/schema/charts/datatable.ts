@@ -283,7 +283,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     rows: schema.maybe(
       schema.arrayOf(mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsSchema), {
         minSize: 1,
-        maxSize: 1000,
+        maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
       })
     ),
@@ -295,7 +295,7 @@ export const datatableStateSchemaNoESQL = schema.object(
         mergeAllBucketsWithChartDimensionSchema(datatableStateSplitMetricsByOptionsSchema),
         {
           minSize: 1,
-          maxSize: 1000,
+          maxSize: 20,
           meta: { description: 'Array of operations to split the metric columns by' },
         }
       )
@@ -339,8 +339,8 @@ export const datatableStateSchemaESQL = schema.object(
     rows: schema.maybe(
       schema.arrayOf(schema.allOf([datatableStateRowsOptionsSchema, esqlColumnSchema]), {
         minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'AArray of operations to split the datatable rows by' },
+        maxSize: 50,
+        meta: { description: 'Array of operations to split the datatable rows by' },
       })
     ),
     /**
@@ -349,7 +349,7 @@ export const datatableStateSchemaESQL = schema.object(
     split_metrics_by: schema.maybe(
       schema.arrayOf(esqlColumnSchema, {
         minSize: 1,
-        maxSize: 1000,
+        maxSize: 20,
         meta: { description: 'Array of operations to split the metric columns by' },
       })
     ),
