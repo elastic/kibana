@@ -70,6 +70,9 @@
           },
           "group": {
             "type": "keyword"
+          },
+          "params": {
+            "type": "flattened"
           }
         },
         "type": "nested"
@@ -316,6 +319,17 @@
     }
   },
   "api_key_pending_invalidation": {
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      }
+    }
+  },
+  "api_key_to_invalidate": {
+    "dynamic": false,
     "properties": {
       "apiKeyId": {
         "type": "keyword"

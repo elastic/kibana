@@ -18,7 +18,7 @@ import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { dashboardClient } from '../../dashboard_client';
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { getLastSavedState } from '../default_dashboard_state';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 export async function loadDashboardApi({
@@ -64,8 +64,7 @@ export async function loadDashboardApi({
     creationOptions,
     incomingEmbeddables,
     initialState: {
-      ...DEFAULT_DASHBOARD_STATE,
-      ...readResult?.data,
+      ...getLastSavedState(readResult),
       ...unsavedChanges,
       ...overrideState,
     },
