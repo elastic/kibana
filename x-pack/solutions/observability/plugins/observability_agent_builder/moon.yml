@@ -48,6 +48,11 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/logging'
   - '@kbn/ai-assistant-common'
+  - '@kbn/ai-insights'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/discover-shared-plugin'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod
@@ -58,6 +63,7 @@ fileGroups:
   src:
     - common/**/*
     - server/**/*
+    - public/**/*
     - '!target/**/*'
 tasks:
   jest:
