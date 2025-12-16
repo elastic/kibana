@@ -19,5 +19,5 @@ export async function waitForChartToLoad(page: ScoutPage, testId: string) {
   const chart = page.getByTestId(testId);
 
   await chart.waitFor();
-  chart.getByTestId('loading').waitFor({ state: 'hidden' });
+  await chart.getByTestId('loading').waitFor({ state: 'hidden' });
 }
