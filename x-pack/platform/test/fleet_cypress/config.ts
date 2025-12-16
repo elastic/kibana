@@ -46,9 +46,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'enableOtelIntegrations',
           'subfeaturePrivileges',
         ])}`,
-        `--xpack.fleet.experimentalFeatures=${JSON.stringify({
-          enableAgentStatusAlerting: false,
-        })}`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),
