@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './search_configs';
+require('@kbn/setup-node-env');
+require('@kbn/es-snapshot-loader/scripts/cli').runCli();
