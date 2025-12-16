@@ -436,18 +436,16 @@ export function registerChatRoutes({
         // Track MessageSent event for Agent Builder
         try {
           const normalizedAgentId = normalizeAgentIdForTelemetry(payload.agent_id);
-          // Only track if this is an agent conversation (not default assistant)
-          if (normalizedAgentId && normalizedAgentId !== oneChatDefaultAgentId) {
-            coreSetup.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageSent, {
-              conversation_id: payload.conversation_id || 'new',
-              message_length: payload.input?.length,
-              has_attachments: attachments.length > 0,
-              attachment_count: attachments.length > 0 ? attachments.length : undefined,
-              attachment_types:
-                attachments.length > 0 ? attachments.map((a) => a.type || 'unknown') : undefined,
-              agent_id: normalizedAgentId,
-            });
-          }
+
+          coreSetup.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageSent, {
+            conversation_id: payload.conversation_id || 'new',
+            message_length: payload.input?.length,
+            has_attachments: attachments.length > 0,
+            attachment_count: attachments.length > 0 ? attachments.length : undefined,
+            attachment_types:
+              attachments.length > 0 ? attachments.map((a) => a.type || 'unknown') : undefined,
+            agent_id: normalizedAgentId,
+          });
         } catch (error) {
           // Don't fail the request if telemetry fails
           logger.debug('Failed to report MessageSent telemetry event', { error });

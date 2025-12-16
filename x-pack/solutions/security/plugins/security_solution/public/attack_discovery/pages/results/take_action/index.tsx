@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
@@ -213,10 +214,10 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
-    telemetry?.reportEvent('Agent Builder Add to Chat Clicked', {
+    telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
       pathway: 'attack_discovery',
-      attachmentType: 'alert',
-      attachmentCount: attackDiscoveries.length,
+      attachment_type: 'alert',
+      attachment_count: attackDiscoveries.length,
     });
     openAgentBuilderFlyout();
   }, [closePopover, openAgentBuilderFlyout, telemetry, attackDiscoveries.length]);

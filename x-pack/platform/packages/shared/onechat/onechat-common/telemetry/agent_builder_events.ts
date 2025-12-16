@@ -10,22 +10,22 @@ import type { EventTypeOpts } from '@kbn/core/public';
 /**
  * Event type constants for Agent Builder telemetry events.
  */
-const TELEMETRY_PREFIX = 'Agent Builder';
+const TELEMETRY_PREFIX = 'agent_builder';
 export const AGENT_BUILDER_EVENT_TYPES = {
-  OptInAction: `${TELEMETRY_PREFIX} Opt-In Action`,
-  OptOut: `${TELEMETRY_PREFIX} Opt-Out`,
-  AddToChatClicked: `${TELEMETRY_PREFIX} Add to Chat Clicked`,
-  MessageSent: `${TELEMETRY_PREFIX} Message Sent`,
-  MessageReceived: `${TELEMETRY_PREFIX} Message Received`,
-  AgentBuilderError: `${TELEMETRY_PREFIX} Error`,
+  OptInAction: `${TELEMETRY_PREFIX}_opt_in_action`,
+  OptOut: `${TELEMETRY_PREFIX}_opt_out`,
+  AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
+  MessageSent: `${TELEMETRY_PREFIX}_message_sent`,
+  MessageReceived: `${TELEMETRY_PREFIX}_message_received`,
+  AgentBuilderError: `${TELEMETRY_PREFIX}_error`,
   /**
    * Legacy onechat event name for errors during conversation.
    *
    * NOTE:
-   * - This event name is intentionally NOT prefixed with "Agent Builder".
+   * - This event name is intentionally NOT prefixed with "Agent Builder" / "agent_builder".
    * - It remains for backwards compatibility with existing onechat telemetry.
    * - Solutions should use `AgentBuilderError` instead so all solution event IDs
-   *   stay under the Agent Builder prefix.
+   *   stay under the agent_builder prefix.
    */
   ONECHAT_CONVERSE_ERROR: 'onechat_converse_error',
 } as const;
@@ -84,7 +84,7 @@ export interface ReportConverseErrorParams {
  * NOTE:
  * This intentionally shares a schema with the legacy onechat `ONECHAT_CONVERSE_ERROR` event so
  * solutions can optionally provide richer context (conversation_id/agent_id/connector_id) when
- * available, while keeping the event ID under the Agent Builder prefix.
+ * available, while keeping the event ID under the agent_builder prefix.
  */
 export type ReportAgentBuilderErrorParams = ReportConverseErrorParams;
 
