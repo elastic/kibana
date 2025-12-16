@@ -270,3 +270,12 @@ export const RollbackAvailableCheckResponseSchema = schema.object({
 });
 
 export type RollbackAvailableCheckResponse = TypeOf<typeof RollbackAvailableCheckResponseSchema>;
+
+export const BulkRollbackAvailableCheckResponseSchema = schema.recordOf(
+  schema.string(),
+  RollbackAvailableCheckResponseSchema
+);
+
+export type BulkRollbackAvailableCheckResponse = TypeOf<
+  typeof BulkRollbackAvailableCheckResponseSchema
+>;
