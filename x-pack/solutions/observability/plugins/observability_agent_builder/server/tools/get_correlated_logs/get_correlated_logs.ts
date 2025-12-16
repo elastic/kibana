@@ -25,6 +25,7 @@ import {
 import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
 import type { LogSequence } from './types';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 
 export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_correlated_logs';
 
@@ -155,6 +156,12 @@ Do NOT use for:
 - Analyzing why log volume changed (use run_log_rate_analysis)`,
     schema: getCorrelatedLogsSchema,
     tags: ['observability', 'logs'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       {
         start = DEFAULT_TIME_RANGE.start,
