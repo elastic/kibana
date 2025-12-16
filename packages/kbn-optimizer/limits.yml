@@ -53,7 +53,7 @@ pageLoadAssetSize:
   embeddable: 18432
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
-  enterpriseSearch: 38000
+  enterpriseSearch: 41839
   esql: 20000
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -115,17 +115,17 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 18999
+  navigation: 15639
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
-  observabilityAIAssistant: 52556
-  observabilityAIAssistantApp: 16012
-  observabilityAiAssistantManagement: 6438
+  observabilityAIAssistant: 54556
+  observabilityAIAssistantApp: 18012
+  observabilityAiAssistantManagement: 7438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 28638
+  onechat: 88464
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
