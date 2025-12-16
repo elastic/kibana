@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
@@ -14,7 +14,7 @@ import {
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(
-  slo: SLOWithSummaryResponse | SLODefinitionResponse
+  slo: SLOWithSummaryResponse
 ): string | undefined {
   if (
     !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
@@ -28,7 +28,6 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
       params: { environment, filter, service, transactionName, transactionType },
     },
     timeWindow: { duration },
-    groupBy,
   } = slo;
 
   const qs = new URLSearchParams('comparisonEnabled=true');
@@ -54,18 +53,12 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     kueryParams.push(filter);
   }
 
-  const groupByFields = [groupBy].flat().filter((field) => field && field !== ALL_VALUE);
-  const hasInstanceId = 'instanceId' in slo && slo.instanceId !== ALL_VALUE;
-  const instanceIdValues = hasInstanceId ? slo.instanceId.split(',') : [];
+  const groupings = slo.groupings ?? {};
 
-  const serviceNameIndex = groupByFields.indexOf('service.name');
-  const isGroupedByServiceName = serviceNameIndex !== -1;
-
-  // Add kuery filters for each groupBy field
-  if (hasInstanceId && groupByFields.length === instanceIdValues.length) {
-    groupByFields.forEach((field, index) => {
-      if (field !== 'service.name') {
-        kueryParams.push(`${field} : "${instanceIdValues[index]}"`);
+  if ('instanceId' in slo && slo.instanceId !== ALL_VALUE) {
+    Object.entries(groupings).forEach(([field, value]) => {
+      if (field !== 'service.name' && value != null) {
+        kueryParams.push(`${field} : "${value}"`);
       }
     });
   }
@@ -74,8 +67,7 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     qs.append('kuery', kueryParams.join(' and '));
   }
 
-  const serviceName =
-    isGroupedByServiceName && hasInstanceId ? instanceIdValues[serviceNameIndex] : service;
+  const serviceName = groupings['service.name'] ?? service;
 
   return `/app/apm/services/${serviceName}/overview?${qs.toString()}`;
 }
