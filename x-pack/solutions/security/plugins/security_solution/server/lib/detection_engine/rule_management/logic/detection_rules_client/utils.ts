@@ -171,7 +171,6 @@ export const applyPatchRuleWithReadPrivileges = async (
   existingRule: RuleResponse,
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient
 ): Promise<BulkEditResult<RuleParams>> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_source } = await applyRulePatch({
     prebuiltRuleAssetClient,
     existingRule,
