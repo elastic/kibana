@@ -9,10 +9,12 @@ import React from 'react';
 import { render, act, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { IntegrationFormProvider, useIntegrationForm } from './integration_form';
 import type { IntegrationFormData } from './types';
-import { mockExistingPackageNames, createMockServices } from '../../../../__jest__/fixtures/mocks';
+
+const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
 
 jest.mock('../../../../common/lib/api', () => ({
   getInstalledPackages: jest.fn(() =>
@@ -22,10 +24,9 @@ jest.mock('../../../../common/lib/api', () => ({
   ),
 }));
 
-const mockServices = createMockServices();
+const mockServices = coreMock.createStart();
 
-// Test only a simplified form that uses the useIntegrationForm hook while focusing
-// on form specific functionality.
+// Test component that uses fields and exposes form state
 const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) => void }> = ({
   onSubmitResult,
 }) => {
@@ -123,7 +124,6 @@ const fillAllRequiredFields = async (getByTestId: (id: string) => HTMLElement) =
   await waitForAsync(400);
 };
 
-// Tests begins here
 describe('IntegrationFormProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();

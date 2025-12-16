@@ -9,15 +9,13 @@ import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { IntegrationDetails } from './integration_details';
 import { IntegrationFormProvider } from '../../forms/integration_form';
 import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../forms/constants';
-import {
-  mockExistingPackageNames,
-  createMockServices,
-} from '../../../../../__jest__/fixtures/mocks';
 
-// Mock the API to return existing package names for duplicate validation
+const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
+
 jest.mock('../../../../../common/lib/api', () => ({
   getInstalledPackages: jest.fn(() =>
     Promise.resolve({
@@ -26,7 +24,7 @@ jest.mock('../../../../../common/lib/api', () => ({
   ),
 }));
 
-const mockServices = createMockServices();
+const mockServices = coreMock.createStart();
 
 const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const mockOnSubmit = jest.fn();

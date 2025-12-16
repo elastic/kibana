@@ -7,51 +7,93 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorSelector } from './connector_selector';
 import { ConnectorSetup } from './connector_setup';
-import {
-  mockConnectors,
-  mockActionTypes,
-  createMockServices,
-  createTestProviders,
-} from '../../../__jest__/fixtures/mocks';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
+
+const mockConnectors = [
+  {
+    id: 'connector-1',
+    name: 'My OpenAI Connector',
+    actionTypeId: '.gen-ai',
+    isPreconfigured: false,
+    isMissingSecrets: false,
+  },
+  {
+    id: 'connector-2',
+    name: 'My Bedrock Connector',
+    actionTypeId: '.bedrock',
+    isPreconfigured: true,
+    isMissingSecrets: false,
+  },
+  {
+    id: 'Elastic-Managed-LLM',
+    name: 'Elastic Managed LLM',
+    actionTypeId: '.inference',
+    isPreconfigured: true,
+    isMissingSecrets: false,
+  },
+];
+
+const mockActionTypes = [
+  { id: '.gen-ai', name: 'OpenAI', enabled: true },
+  { id: '.bedrock', name: 'Amazon Bedrock', enabled: true },
+  { id: '.gemini', name: 'Google Gemini', enabled: true },
+  { id: '.inference', name: 'Inference', enabled: true },
+];
 
 // Mock the useLoadConnectors hook
 const mockRefetch = jest.fn();
 jest.mock('../hooks/use_load_connectors', () => ({
   useLoadConnectors: jest.fn(() => ({
-    connectors: mockConnectors,
+    connectors: [],
     isLoading: false,
-    refetch: mockRefetch,
+    refetch: jest.fn(),
   })),
 }));
 const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
+
 const mockHttpGet = jest.fn();
 const mockSettingsGet = jest.fn().mockReturnValue(undefined);
 const mockGetAddConnectorFlyout = jest
   .fn()
   .mockReturnValue(<div data-test-subj="addConnectorFlyout" />);
 
-const mockServices = createMockServices({
-  http: {
-    get: mockHttpGet,
-  },
-  settings: {
-    client: {
-      get: mockSettingsGet,
+const createMockServices = () => {
+  const coreStart = coreMock.createStart();
+  return {
+    ...coreStart,
+    http: {
+      ...coreStart.http,
+      get: mockHttpGet,
     },
-  },
-  triggersActionsUi: {
-    getAddConnectorFlyout: mockGetAddConnectorFlyout,
-    actionTypeRegistry: {
-      get: jest.fn().mockReturnValue({ iconClass: 'logoOpenAI' }),
+    settings: {
+      client: {
+        get: mockSettingsGet,
+      },
     },
-  },
-});
+    triggersActionsUi: {
+      ...triggersActionsUiMock.createStart(),
+      getAddConnectorFlyout: mockGetAddConnectorFlyout,
+      actionTypeRegistry: {
+        get: jest.fn().mockReturnValue({ iconClass: 'logoOpenAI' }),
+      },
+    },
+  };
+};
 
-const TestProviders = createTestProviders(mockServices);
+const mockServices = createMockServices();
+
+const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <I18nProvider>
+    <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
+  </I18nProvider>
+);
 
 const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { form } = useForm({
@@ -85,8 +127,6 @@ const renderConnectorSetup = (props: { onClose: jest.Mock; onConnectorCreated?: 
     </TestProviders>
   );
 };
-
-// Test begins here
 
 describe('ConnectorSelector', () => {
   beforeEach(() => {
