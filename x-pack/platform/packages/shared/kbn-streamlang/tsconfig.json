@@ -17,6 +17,7 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/i18n",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/tinymath"
   ]
 }
