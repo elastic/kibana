@@ -64,9 +64,8 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
-import { sanitizeProjectRoutingForES } from '@kbn/es-query';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { ICPSManager } from '@kbn/cps-utils';
+import { getProjectRouting } from './project_routing';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -285,6 +284,9 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
+    if (combined.projectRouting !== undefined) {
+      serializableOptions.projectRouting = combined.projectRouting;
+    }
 
     return serializableOptions;
   }
@@ -310,6 +312,7 @@ export class SearchInterceptor {
       return this.runSearch(
         { id, ...request },
         {
+          projectRouting: getProjectRouting(this.deps.getCPSManager?.()),
           ...options,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
@@ -477,29 +480,6 @@ export class SearchInterceptor {
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
-
-    if (!request.id && params) {
-      const cpsManager = this.deps.getCPSManager?.();
-      if (cpsManager && cpsManager.getProjectPickerAccess() !== ProjectRoutingAccess.DISABLED) {
-        // - If params.body exists → params.body.project_routing (SearchSource, Vega with body)
-        // - If no body → params.project_routing (ESQL, enhanced search)
-        if (params.body) {
-          params.body.project_routing = sanitizeProjectRoutingForES(
-            params.body.project_routing ?? cpsManager.getProjectRouting()
-          );
-        } else {
-          params.project_routing = sanitizeProjectRoutingForES(
-            params.project_routing ?? cpsManager.getProjectRouting()
-          );
-        }
-      } else {
-        // Remove project_routing if CPS is disabled to avoid ES errors
-        delete params.project_routing;
-        if (params.body) {
-          delete params.body.project_routing;
-        }
-      }
-    }
 
     // FIXME: the dropNullColumns param shouldn't be needed during polling
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved

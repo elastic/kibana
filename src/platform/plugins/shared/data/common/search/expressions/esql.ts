@@ -239,11 +239,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             ];
 
             params.filter = buildEsQuery(undefined, input.query || [], filters, esQueryConfigs);
-
-            if (input.projectRouting) {
-              // Don't sanitize here - search_interceptor needs the raw value to distinguish explicit 'ALL' from missing value
-              params.project_routing = input.projectRouting;
-            }
           }
 
           let startTime = Date.now();

@@ -13,7 +13,7 @@ import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter, ProjectRouting, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 
 import type { Query } from '../../..';
 import { calculateBounds } from '../../..';
@@ -38,7 +38,6 @@ export interface RequestHandlerParams {
   executionContext?: KibanaExecutionContext;
   title?: string;
   description?: string;
-  projectRouting?: ProjectRouting;
 }
 
 export const handleRequest = ({
@@ -57,7 +56,6 @@ export const handleRequest = ({
   executionContext,
   title,
   description,
-  projectRouting,
 }: RequestHandlerParams) => {
   return defer(async () => {
     const forceNow = getNow?.();
@@ -108,10 +106,6 @@ export const handleRequest = ({
 
     requestSearchSource.setField('filter', filters);
     requestSearchSource.setField('query', query);
-
-    if (projectRouting) {
-      requestSearchSource.setField('projectRouting', projectRouting);
-    }
 
     return { allTimeFields, forceNow, requestSearchSource };
   }).pipe(
