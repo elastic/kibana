@@ -487,8 +487,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         lastAdvancedFormConditions,
         lastBasicFormConditions,
         getMultipleTagsUpdatedBy,
+        isProcessDescendantsSelected,
         item,
         processChanged,
+        wasProcessDescendantsSelected,
       ]
     );
 
