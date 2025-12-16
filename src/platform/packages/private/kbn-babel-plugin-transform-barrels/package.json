@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/babel-plugin-transform-barrels",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
+}
+

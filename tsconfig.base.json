@@ -136,6 +136,8 @@
       "@kbn/avc-banner/*": ["src/platform/packages/shared/kbn-avc-banner/*"],
       "@kbn/axe-config": ["src/platform/packages/shared/kbn-axe-config"],
       "@kbn/axe-config/*": ["src/platform/packages/shared/kbn-axe-config/*"],
+      "@kbn/babel-plugin-transform-barrels": ["src/platform/packages/private/kbn-babel-plugin-transform-barrels"],
+      "@kbn/babel-plugin-transform-barrels/*": ["src/platform/packages/private/kbn-babel-plugin-transform-barrels/*"],
       "@kbn/babel-preset": ["packages/kbn-babel-preset"],
       "@kbn/babel-preset/*": ["packages/kbn-babel-preset/*"],
       "@kbn/babel-register": ["src/platform/packages/shared/kbn-babel-register"],

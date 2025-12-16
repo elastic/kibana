@@ -28,25 +28,9 @@ export interface BarrelIndex {
   [barrelFilePath: string]: BarrelFileEntry;
 }
 
-export interface TransformConfig {
-  disableSourceMaps?: boolean;
-  repoRoot?: string;
+export interface PluginOptions {
   barrelIndex?: BarrelIndex;
 }
 
-export interface WorkerData {
-  config: TransformConfig;
-  barrelIndex?: BarrelIndex;
-}
+export function buildBarrelIndex(repoRoot: string): Promise<BarrelIndex>;
 
-export interface WorkerTask {
-  path: string;
-  source: string;
-}
-
-export interface WorkerResult {
-  code: string;
-  map?: any;
-}
-
-export type Transform = (path: string, source: string) => Promise<WorkerResult>;

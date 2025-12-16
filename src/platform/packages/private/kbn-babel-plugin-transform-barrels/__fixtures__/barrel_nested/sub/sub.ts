@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { workerData } from 'piscina';
-import { transformCode } from './sync_transform.js';
+export const Sub = 'sub';
 
-/** @type {import('./types').WorkerData} */
-const { config, barrelIndex } = workerData;
-
-/**
- * @param {import('./types').WorkerTask} param0
- * @returns {Promise<import('./types').WorkerResult>}
- */
-export default async ({ path, source }) => {
-  // Pass barrelIndex as part of config to transformCode
-  return transformCode(path, source, { ...config, barrelIndex });
-};

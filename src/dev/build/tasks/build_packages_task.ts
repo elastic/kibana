@@ -118,6 +118,7 @@ export const BuildPackages: Task = {
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
+      repoRoot: REPO_ROOT,
     };
 
     await withFastAsyncTransform(transformConfig, async (transform) => {

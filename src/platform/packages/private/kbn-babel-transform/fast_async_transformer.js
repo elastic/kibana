@@ -15,9 +15,18 @@ const Piscina = require('piscina');
  * @returns {Promise<void>}
  */
 async function withFastAsyncTransform(config, block) {
+  // Build barrel index ONCE before spawning workers (if repoRoot is provided)
+  // Dynamic require to avoid issues during bootstrap when package may not be linked yet
+  let barrelIndex;
+  if (config.repoRoot) {
+    const { buildBarrelIndex } = require('@kbn/babel-plugin-transform-barrels/scanner');
+    barrelIndex = await buildBarrelIndex(config.repoRoot);
+  }
+
   /** @type {import('./types').WorkerData} */
   const workerData = {
     config,
+    barrelIndex,
   };
 
   const pool = new Piscina({

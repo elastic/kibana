@@ -11,6 +11,15 @@ const NODE_PRESET = require.resolve('@kbn/babel-preset/node_preset');
 
 const cwd = process.cwd();
 
+// Try to resolve the barrel transform plugin, it may not be available during bootstrap
+/** @type {string | undefined} */
+let barrelPluginPath;
+try {
+  barrelPluginPath = require.resolve('@kbn/babel-plugin-transform-barrels');
+} catch (e) {
+  // Plugin not available yet (during bootstrap), will be skipped
+}
+
 /**
  * get the babel options for a specific path, path does not
  * exist, utit just might vary based on the file extension
@@ -20,10 +29,18 @@ const cwd = process.cwd();
  * @returns {import('@babel/core').TransformOptions}
  */
 function getBabelOptions(path, config = {}) {
+  /** @type {import('@babel/core').PluginItem[]} */
+  const plugins = [];
+
+  // Only add barrel transform plugin if it's available and barrelIndex is provided
+  if (barrelPluginPath && config.barrelIndex) {
+    plugins.push([barrelPluginPath, { barrelIndex: config.barrelIndex }]);
+  }
+
   return {
     filename: path,
     presets: [NODE_PRESET],
-    plugins: [[require.resolve('babel-plugin-transform-barrels'), { executorName: 'webpack' }]],
+    plugins,
     cwd,
     babelrc: false,
     sourceMaps: config.disableSourceMaps ? false : 'both',

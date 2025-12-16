@@ -1524,6 +1524,7 @@
     "@kbn/ambient-ui-types": "link:src/platform/packages/shared/kbn-ambient-ui-types",
     "@kbn/apm-ftr-e2e": "link:x-pack/solutions/observability/plugins/apm/ftr_e2e",
     "@kbn/axe-config": "link:src/platform/packages/shared/kbn-axe-config",
+    "@kbn/babel-plugin-transform-barrels": "link:src/platform/packages/private/kbn-babel-plugin-transform-barrels",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/babel-register": "link:src/platform/packages/shared/kbn-babel-register",
     "@kbn/babel-transform": "link:src/platform/packages/private/kbn-babel-transform",
