@@ -25,7 +25,7 @@ The validator automatically skips semantic checks that require missing callbacks
 ##### Usage
 
 ```js
-import { validateQuery } from '@kbn/esql-language';
+import { validateQuery } from '@kbn/esql-ast';
 
 // define all callbacks
 const myCallbacks = {
@@ -40,7 +40,7 @@ const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myC
 If not all callbacks are available, the validation will automatically skip semantic checks that require those callbacks:
 
 ```js
-import { validateQuery } from '@kbn/esql-language';
+import { validateQuery } from '@kbn/esql-ast';
 
 // define only the getSources callback
 const myCallbacks = {
@@ -59,7 +59,7 @@ const { errors, warnings } = await validateQuery('from index | stats 1 + avg(myC
 This is the complete logic for the ES|QL autocomplete language, it is completely independent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
 
 ```js
-import { parse, suggest } from '@kbn/esql-language';
+import { parse, suggest } from '@kbn/esql-ast';
 
 const queryString = "from index | stats 1 + avg(myColumn) ";
 const myCallbacks = {
@@ -98,7 +98,7 @@ This is an important function in order to build more features on top of the exis
 For instance to show contextual information on Hover the `getAstContext` function can be leveraged to get the correct context for the cursor position:
 
 ```js
-import { parse, getAstContext } from '@kbn/esql-language';
+import { parse, getAstContext } from '@kbn/esql-ast';
 
 const queryString = 'from index2 | stats 1 + avg(myColumn)';
 const offset = queryString.indexOf('avg');
@@ -152,11 +152,11 @@ Both the validation and autocomplete engine are covered by extensive suites of t
 
 #### Running the tests
 
-All the tests can be run using the `yarn jest:tests src/platform/packages/shared/kbn-esql-language/path/to/test/file` command at the root of the repository.
+All the tests can be run using the `yarn jest:tests src/platform/packages/shared/kbn-esql-ast/path/to/test/file` command at the root of the repository.
 
 To run all autocomplete and validation tests you can specifically run
 
-`yarn test:jest src/platform/packages/shared/kbn-esql-language/`
+`yarn test:jest src/platform/packages/shared/kbn-esql-ast/`
 
 #### Ongoing refactor
 
@@ -178,7 +178,7 @@ The newer pattern is
 
 ##### The new way
 
-Validation test logic is found in `src/platform/packages/shared/kbn-esql-language/src/validation/__tests__`.
+Validation test logic is found in `src/platform/packages/shared/kbn-esql-ast/src/validation/__tests__`.
 
 Tests are found in files named with the following convention: `validation.some-description.test.ts`.
 
@@ -211,7 +211,7 @@ testErrorsAndWarnings(`ROW var = NOT 5 LIKE "?a"`, [
 ]);
 ```
 
-and are found in `src/platform/packages/shared/kbn-esql-language/src/validation/validation.test.ts`.
+and are found in `src/platform/packages/shared/kbn-esql-ast/src/validation/validation.test.ts`.
 
 `testErrorsAndWarnings` supports `skip` and `only` modifiers e.g. `testErrorsAndWarnings.only('...')`.
 
@@ -221,13 +221,13 @@ It accepts
 2. a list of expected errors (can be empty)
 3. a list of expected warnings (can be empty or omitted)
 
-Running the tests in `validation.test.ts` populates `src/platform/packages/shared/kbn-esql-language/src/validation/esql_validation_meta_tests.json` which is then used in `src/platform/test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
+Running the tests in `validation.test.ts` populates `src/platform/packages/shared/kbn-esql-ast/src/validation/esql_validation_meta_tests.json` which is then used in `src/platform/test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
 
 #### Autocomplete
 
 ##### The new way
 
-The new tests are found in `src/platform/packages/shared/kbn-esql-language/src/autocomplete/__tests__`.
+The new tests are found in `src/platform/packages/shared/kbn-esql-ast/src/autocomplete/__tests__`.
 
 They look like this.
 
@@ -264,7 +264,7 @@ So, that allows you to customize the [trigger kind](https://microsoft.github.io/
 
 ##### The old way
 
-All the legacy autocomplete tests are found in `src/platform/packages/shared/kbn-esql-language/src/autocomplete/autocomplete.test.ts`.
+All the legacy autocomplete tests are found in `src/platform/packages/shared/kbn-esql-ast/src/autocomplete/autocomplete.test.ts`.
 
 They look like this
 
