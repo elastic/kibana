@@ -2270,7 +2270,9 @@
                     "section": "def-common.EncryptedSavedObjectsClient",
                     "text": "EncryptedSavedObjectsClient"
                   },
-                  ") => void; }"
+                  ") => void; registerApiKeyInvalidateFn: (fn?: ",
+                  "ApiKeyInvalidationFn",
+                  " | undefined) => void; }"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
                 "deprecated": false,
