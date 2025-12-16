@@ -7,6 +7,7 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
@@ -173,6 +174,7 @@ function validateConfig(
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
+  const emailValidator = z.array(z.string().max(512)).max(100);
 
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
@@ -182,6 +184,14 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
 
   if (addrs === 0) {
     throw new Error('no [to], [cc], or [bcc] entries');
+  }
+
+  try {
+    emailValidator.parse(to);
+    emailValidator.parse(cc);
+    emailValidator.parse(bcc);
+  } catch (error) {
+    throw new Error(`Invalid email addresses: ${error}`);
   }
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
