@@ -455,4 +455,41 @@ describe('scripts library client', () => {
       });
     });
   });
+
+  describe('#download()', () => {
+    it('should retrieve script metadata using ID provided', async () => {
+      await scriptsClient.download('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().get
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+
+    it('should retrieve file content using file ID from script metadata', async () => {
+      await scriptsClient.download('1-2-3');
+
+      expect(filesPluginClient.get).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+      expect(fileMock.downloadContent).toHaveBeenCalled();
+    });
+
+    it('should return script metadata and file stream', async () => {
+      const result = await scriptsClient.download('1-2-3');
+
+      expect(result).toEqual({
+        stream: expect.any(Readable),
+        fileName: 'my_script.sh',
+        mimeType: 'text/plain',
+      });
+    });
+
+    it('should throw error when script does not exist', async () => {
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(scriptsClient.download('non-existent')).rejects.toThrow(
+        'Script with id non-existent not found'
+      );
+    });
+  });
 });
