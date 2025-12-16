@@ -48,7 +48,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           enableAgentStatusAlerting: false,
         })}`,
 
-
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),
 
