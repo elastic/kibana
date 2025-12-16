@@ -7,4 +7,6 @@
 import type { ESQLParamsV1 } from '@kbn/response-ops-rule-params';
 import type { RuleResponseV1 } from '../../../rule/response';
 
-export type ESQLRuleResponse = RuleResponseV1<ESQLParamsV1>;
+export type ESQLRuleResponse = RuleResponseV1<ESQLParamsV1> & {
+  internal: boolean;
+};

@@ -15,15 +15,21 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
   const references: SavedObjectReference[] = [];
   const artifacts: Required<DenormalizedArtifacts> = {
     dashboards: [],
+    rules: [],
     investigation_guide: { blob: '' },
   };
 
-  if (ruleArtifacts && ruleArtifacts.investigation_guide) {
+  if (!ruleArtifacts) {
+    return { artifacts, references };
+  }
+
+  if (ruleArtifacts.investigation_guide) {
     artifacts.investigation_guide = {
       blob: ruleArtifacts.investigation_guide.blob,
     };
   }
-  if (ruleArtifacts && ruleArtifacts.dashboards) {
+
+  if (ruleArtifacts.dashboards) {
     ruleArtifacts.dashboards.forEach((dashboard, i) => {
       const refName = `dashboard_${i}`;
       const dashboardRef = {
@@ -34,6 +40,22 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
       references.push(dashboardRef);
 
       artifacts.dashboards.push({
+        refId: refName,
+      });
+    });
+  }
+
+  if (ruleArtifacts.rules) {
+    ruleArtifacts.rules.forEach((rule, i) => {
+      const refName = `rule_${i}`;
+      const ruleRef = {
+        id: rule.id,
+        name: refName,
+        type: 'alert',
+      };
+      references.push(ruleRef);
+
+      artifacts.rules.push({
         refId: refName,
       });
     });

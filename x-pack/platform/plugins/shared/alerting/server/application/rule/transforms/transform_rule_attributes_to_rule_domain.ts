@@ -240,6 +240,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
     ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
+    ...(esRule.internal !== undefined ? { internal: esRule.internal } : {}),
     artifacts: ruleDomainArtifacts,
   };
 

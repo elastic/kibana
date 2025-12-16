@@ -232,6 +232,7 @@ export async function createRule<Params extends RuleParams = never>(
       monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
       revision: 0,
       running: false,
+      internal: data.internal,
     },
     params: {
       legacyId,

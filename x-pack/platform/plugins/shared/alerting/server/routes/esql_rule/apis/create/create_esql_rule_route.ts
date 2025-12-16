@@ -11,6 +11,7 @@ import {
   createESQLBodySchemaV1,
   type CreateESQLRuleResponseV1,
   type CreateESQLRuleRequestBodyV1,
+  type CreateESQLRuleRequestParamsV1,
 } from '../../../../../common/routes/esql_rule/apis/create';
 import { esqlRuleResponseSchemaV1 } from '../../../../../common/routes/esql_rule/response';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
@@ -55,8 +56,12 @@ export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
           const ruleData: CreateESQLRuleRequestBodyV1 = req.body;
+          const params: CreateESQLRuleRequestParamsV1 = req.params;
 
-          const createdRule = await rulesClient.createESQLRule(ruleData);
+          const createdRule = await rulesClient.createESQLRule({
+            ...ruleData,
+            id: params.id,
+          });
 
           const response: CreateESQLRuleResponseV1 = {
             body: transformESQLRuleToResponseV1(createdRule),

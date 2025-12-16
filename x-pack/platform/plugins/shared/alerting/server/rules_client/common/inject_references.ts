@@ -85,7 +85,7 @@ export function injectReferencesIntoArtifacts(
   references?: SavedObjectReference[]
 ): Required<RuleDomain['artifacts']> {
   if (!artifacts) {
-    return { dashboards: [], investigation_guide: { blob: '' } };
+    return { dashboards: [], investigation_guide: { blob: '' }, rules: [] };
   }
   return {
     ...artifacts,
@@ -104,6 +104,19 @@ export function injectReferencesIntoArtifacts(
         }
         return {
           ...omit(dashboard, 'refId'),
+          id: reference.id,
+        };
+      }) ?? [],
+    rules:
+      artifacts.rules?.map((rule) => {
+        const reference = references?.find(
+          (ref) => ref.name === rule.refId && ref.type === 'alert'
+        );
+        if (!reference) {
+          throw new Error(`Artifacts reference "${rule.refId}" not found in rule id: ${ruleId}`);
+        }
+        return {
+          ...omit(rule, 'refId'),
           id: reference.id,
         };
       }) ?? [],
