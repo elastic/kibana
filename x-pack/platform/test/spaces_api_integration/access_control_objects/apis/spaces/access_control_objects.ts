@@ -870,6 +870,45 @@ export default function ({ getService }: FtrProviderContext) {
           'updated description'
         );
       });
+
+      it('should throw when updating write-restricted objects by owner with revoked RBAC privileges', async () => {
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+          'simple_user',
+          'changeme'
+        );
+
+        // const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+        const createResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
+        expect(createResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
+        // revoke privs
+        await createSimpleUser(['viewer']);
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+          await loginAsNotObjectOwner('simple_user', 'changeme');
+
+        expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+        const updateResponse = await supertestWithoutAuth
+          .put('/access_control_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', revokedCookie.cookieString())
+          .send({ objectId, type: ACCESS_CONTROL_TYPE })
+          .expect(403);
+        expect(updateResponse.body).to.have.property('message');
+        expect(updateResponse.body.message).to.contain(`Unable to update ${ACCESS_CONTROL_TYPE}`);
+      });
     });
 
     describe('#bulk_update', () => {
@@ -1277,6 +1316,68 @@ export default function ({ getService }: FtrProviderContext) {
           expect(res.body.saved_objects[1]).to.have.property('updated_by', obj2OwnerId);
           expect(res.body.saved_objects[1]).not.to.have.property('error');
         });
+
+        it('rejects if owner no longer has adequate RBAC privileges', async () => {
+          await createSimpleUser(['kibana_savedobjects_editor']);
+          const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+            'simple_user',
+            'changeme'
+          );
+          const firstObject = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', ownerCookie.cookieString())
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body).to.have.property('accessControl');
+          expect(firstObject.body.accessControl).to.have.property('owner', ownerProfileUid);
+          expect(firstObject.body.accessControl).to.have.property('accessMode', 'write_restricted');
+
+          const secondObject = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', ownerCookie.cookieString())
+            .send({ type: ACCESS_CONTROL_TYPE })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body).to.have.property('accessControl');
+          expect(secondObject.body.accessControl).to.have.property('owner', ownerProfileUid);
+          expect(secondObject.body.accessControl).to.have.property('accessMode', 'default');
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          // revoke privs
+          await createSimpleUser(['viewer']);
+          const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+            await loginAsNotObjectOwner('simple_user', 'changeme');
+
+          expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+          const res = await supertestWithoutAuth
+            .post('/access_control_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', revokedCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(403);
+
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.contain(`Unable to bulk_update ${ACCESS_CONTROL_TYPE}`);
+          expect(res.body.message).not.to.contain(
+            `, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
+          );
+        });
       });
     });
 
@@ -1372,6 +1473,38 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
           .expect(200);
+      });
+
+      it('throws when trying to delete write-restricted object by owner with revoked RBAC privileges', async () => {
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+          'simple_user',
+          'changeme'
+        );
+
+        const createResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
+        // revoke privs
+        await createSimpleUser(['viewer']);
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+          await loginAsNotObjectOwner('simple_user', 'changeme');
+
+        expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+        const deleteResponse = await supertestWithoutAuth
+          .delete(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', revokedCookie.cookieString())
+          .expect(403);
+        expect(deleteResponse.body).to.have.property('message');
+        expect(deleteResponse.body.message).to.contain(`Unable to delete ${ACCESS_CONTROL_TYPE}`);
       });
     });
 
@@ -1812,6 +1945,58 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ]);
           });
+
+          it('rejects if owner no longer has adequate RBAC privileges', async () => {
+            await createSimpleUser(['kibana_savedobjects_editor']);
+            const { cookie: ownerCookie, profileUid: ownerProfileUid } =
+              await loginAsNotObjectOwner('simple_user', 'changeme');
+
+            const firstObject = await supertestWithoutAuth
+              .post('/access_control_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', ownerCookie.cookieString())
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
+
+            const secondObject = await supertestWithoutAuth
+              .post('/access_control_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', ownerCookie.cookieString())
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
+
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
+
+            // revoke privs
+            await createSimpleUser(['viewer']);
+            const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+              await loginAsNotObjectOwner('simple_user', 'changeme');
+
+            expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+            const res = await supertestWithoutAuth
+              .post('/access_control_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', revokedCookie.cookieString())
+              .send({
+                objects,
+              })
+              .expect(403);
+            expect(res.body).to.have.property('message');
+            expect(res.body.message).to.contain(`Unable to bulk_delete ${ACCESS_CONTROL_TYPE}`);
+            expect(res.body.message).not.to.contain(`access control restrictions for`);
+          });
         });
       });
 
@@ -1908,6 +2093,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(success).to.be(true);
           }
         });
+
         it('does not allow non-owner to bulk delete objects marked as write-restricted', async () => {
           await activateSimpleUserProfile();
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
@@ -2158,6 +2344,51 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
+      });
+
+      it('should allow transfer ownership of write-restricted objects by owner even if other RBAC privileges are revoked', async () => {
+        const { cookie: testUserCookie, profileUid: testUserProfileUid } =
+          await loginAsNotObjectOwner('test_user', 'changeme');
+
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+          'simple_user',
+          'changeme'
+        );
+
+        const createResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
+        // revoke privs
+        await createSimpleUser(['viewer']);
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+          await loginAsNotObjectOwner('simple_user', 'changeme');
+
+        expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+        await supertestWithoutAuth
+          .put('/access_control_objects/change_owner')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', revokedCookie.cookieString())
+          .send({
+            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+            newOwnerProfileUid: testUserProfileUid,
+          })
+          .expect(200);
+
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', testUserProfileUid);
       });
 
       describe('partial bulk change ownership', () => {
@@ -2418,6 +2649,54 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
       });
 
+      it('should allow owner to change access mode even if other RBAC privileges are revoked', async () => {
+        const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+          'simple_user',
+          'changeme'
+        );
+
+        const createResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
+
+        // revoke privs
+        await createSimpleUser(['viewer']);
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+          await loginAsNotObjectOwner('simple_user', 'changeme');
+
+        expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+        await supertestWithoutAuth
+          .put('/access_control_objects/change_access_mode')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', revokedCookie.cookieString())
+          .send({
+            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+            newAccessMode: 'default',
+          })
+          .expect(200);
+
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
+      });
+
       describe('partial bulk change access mode', () => {
         it('should allow change access mode of allowed objects', async () => {
           const { cookie: ownerCookie } = await loginAsObjectOwner('test_user', 'changeme');
@@ -2469,13 +2748,6 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
       });
-    });
-
-    describe('access control and RBAC', () => {
-      // ToDo:
-      // 1. Make a user with RBAC permissions for the ACCESS_CONTROL_TYPE and create some objects in default access mode.
-      // 2. Revoke access to the ACCESS_CONTROL_TYPE (e.g. remove the Editor role from simple_user)
-      // 3. Validate that the user cannot overwrite, update, or delete any of the object that they own due to RBAC
     });
   });
 }
