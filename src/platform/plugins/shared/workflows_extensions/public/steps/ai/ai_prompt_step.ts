@@ -14,6 +14,9 @@ import type { PublicStepDefinition } from '../../step_registry/types';
 
 export const AiPromptStepDefinition: PublicStepDefinition = {
   ...AiPromptStepCommonDefinition,
+  // Simple type assertion - assumes the types are compatible
+  dynamicOutputSchema:
+    AiPromptStepCommonDefinition.dynamicOutputSchema as PublicStepDefinition['dynamicOutputSchema'],
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
       default: icon,
