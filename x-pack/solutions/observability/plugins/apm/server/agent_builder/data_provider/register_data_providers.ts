@@ -78,7 +78,7 @@ export function registerDataProviders({
         randomSampler,
         arguments: {
           serviceName,
-          serviceEnvironment,
+          serviceEnvironment: serviceEnvironment ? serviceEnvironment : ENVIRONMENT_ALL.value,
           start,
           end,
         },
