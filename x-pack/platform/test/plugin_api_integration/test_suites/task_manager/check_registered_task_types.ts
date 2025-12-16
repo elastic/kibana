@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'sampleLongRunningRecurringTask',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -223,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:bulk-delete-task',
         'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
+        'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'unusedUrlsCleanupTask',
         'workflow:resume',
