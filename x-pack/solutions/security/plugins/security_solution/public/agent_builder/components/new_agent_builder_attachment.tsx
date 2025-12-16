@@ -11,6 +11,7 @@ import React, { memo } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { onechatIconType } from '@kbn/onechat-plugin/public';
 import * as i18n from './translations';
+import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
 
 export interface NewAgentBuilderAttachmentProps {
   /**
@@ -26,6 +27,10 @@ export interface NewAgentBuilderAttachmentProps {
    * Size of the button
    */
   size?: EuiButtonEmptySizes;
+  /**
+   * Whether the button is disabled
+   */
+  disabled?: boolean;
 }
 
 /**
@@ -36,7 +41,12 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   color = 'primary',
   onClick,
   size = 'm',
+  disabled = false,
 }: NewAgentBuilderAttachmentProps) {
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  if (!isAgentBuilderEnabled) {
+    return null;
+  }
   return (
     <EuiButtonEmpty
       aria-label={i18n.ADD_TO_CHAT}
@@ -44,6 +54,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       data-test-subj={'newAgentBuilderAttachment'}
       onClick={onClick}
       size={size}
+      disabled={disabled}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
