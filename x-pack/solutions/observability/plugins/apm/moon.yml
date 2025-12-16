@@ -153,9 +153,6 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/onechat-plugin'
   - '@kbn/observability-agent-builder-plugin'
-  - '@kbn/server-route-repository-client'
-  - '@kbn/ai-assistant-common'
-  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
