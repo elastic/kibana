@@ -21,7 +21,9 @@ export const ICON_TEST_ID = `${PREFIX}DocumentIcon` as const;
 export const GROUPED_ITEMS_TYPE_TEST_ID = `${PREFIX}GroupedItemsType` as const;
 
 export const GROUPED_ITEM_TEST_ID = `${PREFIX}GroupedItem` as const;
-export const GROUPED_ITEM_TITLE_TEST_ID = `${GROUPED_ITEM_TEST_ID}Title` as const;
+export const GROUPED_ITEM_TITLE_TEST_ID_LINK = `${GROUPED_ITEM_TEST_ID}TitleLink` as const;
+export const GROUPED_ITEM_TITLE_TEST_ID_TEXT = `${GROUPED_ITEM_TEST_ID}TitleText` as const;
+export const GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID = `${GROUPED_ITEM_TEST_ID}TitleTooltip` as const;
 export const GROUPED_ITEM_TIMESTAMP_TEST_ID = `${GROUPED_ITEM_TEST_ID}Timestamp` as const;
 export const GROUPED_ITEM_ACTOR_TEST_ID = `${GROUPED_ITEM_TEST_ID}Actor` as const;
 export const GROUPED_ITEM_TARGET_TEST_ID = `${GROUPED_ITEM_TEST_ID}Target` as const;
