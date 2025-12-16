@@ -483,7 +483,6 @@ describe('AttachmentStateManager', () => {
     });
   });
 
-
   describe('hasChanges()', () => {
     it('returns false initially', () => {
       expect(manager.hasChanges()).toBe(false);
