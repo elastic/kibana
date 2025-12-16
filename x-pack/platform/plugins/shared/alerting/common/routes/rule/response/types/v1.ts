@@ -6,12 +6,13 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RuleParamsV1 } from '@kbn/response-ops-rule-params';
+import type { RuleParamsV1, ESQLParamsV1 } from '@kbn/response-ops-rule-params';
 import type {
   ruleResponseSchemaV1,
   ruleSnoozeScheduleSchemaV1,
   ruleLastRunSchemaV1,
   monitoringSchemaV1,
+  RuleResponseV1,
 } from '..';
 
 export type RuleSnoozeSchedule = TypeOf<typeof ruleSnoozeScheduleSchemaV1>;
@@ -56,3 +57,5 @@ export interface RuleResponse<Params extends RuleParamsV1 = never> {
   flapping?: RuleResponseSchemaType['flapping'];
   artifacts?: RuleResponseSchemaType['artifacts'];
 }
+
+export type ESQLRuleResponse = RuleResponseV1<ESQLParamsV1>;

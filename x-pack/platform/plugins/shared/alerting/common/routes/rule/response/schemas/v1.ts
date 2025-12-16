@@ -657,4 +657,6 @@ export const ruleResponseSchema = schema.object({
   artifacts: schema.maybe(artifactsSchema),
 });
 
+export const esqlRuleResponseSchema = ruleResponseSchema;
+
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

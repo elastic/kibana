@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { type ESQLParamsV1 } from '@kbn/response-ops-rule-params';
 import type {
   RuleResponseV1,
   RuleParamsV1,
   RuleLastRunV1,
   MonitoringV1,
+  ESQLRuleResponseV1,
 } from '../../../../../common/routes/rule/response';
 import type { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
 
@@ -102,6 +104,63 @@ export const transformFlapping = (flapping: Rule['flapping']) => {
 export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   rule: Rule<Params>
 ): RuleResponseV1<RuleParamsV1> => ({
+  id: rule.id,
+  enabled: rule.enabled,
+  name: rule.name,
+  tags: rule.tags,
+  rule_type_id: rule.alertTypeId,
+  consumer: rule.consumer,
+  schedule: rule.schedule,
+  actions: transformRuleActions(rule.actions, rule.systemActions ?? []),
+  params: rule.params,
+  ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
+  ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
+  created_by: rule.createdBy,
+  updated_by: rule.updatedBy,
+  created_at: rule.createdAt.toISOString(),
+  updated_at: rule.updatedAt.toISOString(),
+  api_key_owner: rule.apiKeyOwner,
+  ...(rule.apiKeyCreatedByUser !== undefined
+    ? { api_key_created_by_user: rule.apiKeyCreatedByUser }
+    : {}),
+  ...(rule.throttle !== undefined ? { throttle: rule.throttle } : {}),
+  mute_all: rule.muteAll,
+  ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
+  muted_alert_ids: rule.mutedInstanceIds,
+  ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
+  ...(rule.executionStatus
+    ? {
+        execution_status: {
+          status: rule.executionStatus.status,
+          ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
+          ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
+          last_execution_date: rule.executionStatus.lastExecutionDate?.toISOString(),
+          ...(rule.executionStatus.lastDuration !== undefined
+            ? { last_duration: rule.executionStatus.lastDuration }
+            : {}),
+        },
+      }
+    : {}),
+  ...(rule.monitoring ? { monitoring: transformMonitoring(rule.monitoring) } : {}),
+  ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
+  ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),
+  ...(rule.isSnoozedUntil !== undefined
+    ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
+    : {}),
+  ...(rule.lastRun !== undefined
+    ? { last_run: rule.lastRun ? transformRuleLastRun(rule.lastRun) : null }
+    : {}),
+  ...(rule.nextRun !== undefined ? { next_run: rule.nextRun?.toISOString() || null } : {}),
+  revision: rule.revision,
+  ...(rule.running !== undefined ? { running: rule.running } : {}),
+  ...(rule.viewInAppRelativeUrl !== undefined
+    ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
+    : {}),
+  ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
+  ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
+});
+
+export const transformESQLRuleToResponse = (rule: Rule<ESQLParamsV1>): ESQLRuleResponseV1 => ({
   id: rule.id,
   enabled: rule.enabled,
   name: rule.name,
