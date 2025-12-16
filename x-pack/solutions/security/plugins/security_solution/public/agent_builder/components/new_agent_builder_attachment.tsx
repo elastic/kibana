@@ -75,7 +75,6 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   const { telemetry } = useKibana().services;
 
   const handleClick = useCallback(() => {
-    // Track "Add to Chat" clicked
     if (telemetryData) {
       telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
         pathway: telemetryData.pathway,

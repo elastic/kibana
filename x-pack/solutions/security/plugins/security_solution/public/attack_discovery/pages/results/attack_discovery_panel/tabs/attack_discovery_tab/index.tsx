@@ -132,7 +132,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
               onClick={openAgentBuilderFlyout}
               telemetry={{
                 pathway: 'attack_discovery',
-                attachmentType: 'attack_discovery',
+                attachmentType: 'alert',
                 attachmentCount: 1,
               }}
             />

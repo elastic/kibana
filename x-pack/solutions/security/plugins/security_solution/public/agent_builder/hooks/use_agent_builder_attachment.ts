@@ -47,7 +47,6 @@ export const useAgentBuilderAttachment = ({
   const openAgentBuilderFlyout = useCallback(() => {
     try {
       if (!onechat?.openConversationFlyout) {
-        // Track error if onechat service is not available
         telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
           errorType: 'invocation_error',
           errorMessage: 'onechat service or openConversationFlyout not available',
@@ -76,7 +75,6 @@ export const useAgentBuilderAttachment = ({
         agentId: THREAT_HUNTING_AGENT_ID,
       });
     } catch (error) {
-      // Track error
       telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
         errorType: 'invocation_error',
         errorMessage: error instanceof Error ? error.message : String(error),

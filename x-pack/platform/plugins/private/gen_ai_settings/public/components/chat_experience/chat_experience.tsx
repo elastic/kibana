@@ -75,7 +75,6 @@ export const ChatExperience: React.FC = () => {
   const currentValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
   const hasTrackedInitialStep = useRef(false);
 
-  // Track initial step reached when component mounts (user views the opt-in settings)
   useEffect(() => {
     if (!hasTrackedInitialStep.current && currentValue !== AIChatExperience.Agent) {
       reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
@@ -93,7 +92,6 @@ export const ChatExperience: React.FC = () => {
       if (id === AI_CHAT_EXPERIENCE_TYPE) {
         const newValue = isAIChatExperience(change?.unsavedValue) ? change.unsavedValue : undefined;
 
-        // Track telemetry events
         trackChatExperienceTelemetry(analytics, newValue, currentValue);
 
         // Handle modal display logic

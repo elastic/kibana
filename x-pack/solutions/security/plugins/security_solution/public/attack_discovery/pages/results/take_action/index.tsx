@@ -213,7 +213,6 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
-    // Track "Add to Chat" clicked from context menu
     telemetry?.reportEvent('Agent Builder Add to Chat Clicked', {
       pathway: 'attack_discovery',
       attachmentType: 'alert',
