@@ -32,13 +32,14 @@ import {
   RULES_API_ALL,
   RULES_API_READ,
   RULES_FEATURE_ID_V1,
-  RULES_FEATURE_ID_V2,
+  RULES_FEATURE_ID_V3,
   RULES_UI_EDIT,
   RULES_UI_READ,
   SERVER_APP_ID,
   USERS_API_READ,
   EXCEPTIONS_SUBFEATURE_ALL,
   SECURITY_SOLUTION_RULES_APP_ID,
+  ALERTS_FEATURE_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -70,7 +71,7 @@ export const getRulesBaseKibanaFeature = (
         defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
           currentId: RULES_FEATURE_ID_V1,
-          latestId: RULES_FEATURE_ID_V2,
+          latestId: RULES_FEATURE_ID_V3,
         },
       }
     ),
@@ -93,12 +94,16 @@ export const getRulesBaseKibanaFeature = (
   privileges: {
     all: {
       replacedBy: {
-        default: [{ feature: RULES_FEATURE_ID_V2, privileges: ['all'] }],
+        default: [
+          { feature: RULES_FEATURE_ID_V3, privileges: ['all'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
+        ],
         minimal: [
           {
-            feature: RULES_FEATURE_ID_V2,
+            feature: RULES_FEATURE_ID_V3,
             privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
@@ -132,12 +137,16 @@ export const getRulesBaseKibanaFeature = (
     },
     read: {
       replacedBy: {
-        default: [{ feature: RULES_FEATURE_ID_V2, privileges: ['read'] }],
+        default: [
+          { feature: RULES_FEATURE_ID_V3, privileges: ['read'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
+        ],
         minimal: [
           {
-            feature: RULES_FEATURE_ID_V2,
+            feature: RULES_FEATURE_ID_V3,
             privileges: ['minimal_read'],
           },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
