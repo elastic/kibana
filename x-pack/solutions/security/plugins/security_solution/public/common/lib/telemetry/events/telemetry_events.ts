@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { agentBuilderTelemetryEvents } from '@kbn/onechat-common/telemetry';
 import { alertsTelemetryEvents } from './alerts_grouping';
 import { appTelemetryEvents } from './app';
 import { dataQualityTelemetryEvents } from './data_quality';
@@ -35,5 +34,4 @@ export const telemetryEvents = [
   ...appTelemetryEvents,
   ...siemMigrationsTelemetryEvents,
   ...aiValueReportTelemetryEvents,
-  ...agentBuilderTelemetryEvents,
 ];

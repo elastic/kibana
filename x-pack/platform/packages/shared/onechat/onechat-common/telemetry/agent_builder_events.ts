@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core/public';
+import type { EventTypeOpts } from '@kbn/core/public';
 
 /**
  * Event type constants for Agent Builder telemetry events.
@@ -18,21 +18,21 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   MessageSent: `${TELEMETRY_PREFIX} Message Sent`,
   MessageReceived: `${TELEMETRY_PREFIX} Message Received`,
   AgentBuilderError: `${TELEMETRY_PREFIX} Error`,
+  /**
+   * Legacy onechat event name for errors during conversation.
+   *
+   * NOTE:
+   * - This event name is intentionally NOT prefixed with "Agent Builder".
+   * - It remains for backwards compatibility with existing onechat telemetry.
+   * - Solutions should use `AgentBuilderError` instead so all solution event IDs
+   *   stay under the Agent Builder prefix.
+   */
+  ONECHAT_CONVERSE_ERROR: 'onechat_converse_error',
 } as const;
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
 export type OptInStep = 'initial' | 'confirmation_modal' | 'final';
 export type OptInAction = 'step_reached' | 'confirmation_shown' | 'confirmed' | 'cancelled';
-export type AttachmentType = 'alert' | 'entity' | 'rule' | 'other';
-export type Pathway =
-  | 'alerts_flyout'
-  | 'entity_flyout'
-  | 'rules_table'
-  | 'rule_creation'
-  | 'rule_failure'
-  | 'attack_discovery'
-  | 'other';
-export type ErrorContext = 'opt_in' | 'message_send' | 'tool_execution' | 'invocation' | 'other';
 
 export interface ReportOptInActionParams {
   action: OptInAction;
@@ -45,38 +45,56 @@ export interface ReportOptOutParams {
 }
 
 export interface ReportAddToChatClickedParams {
-  pathway: Pathway;
-  attachmentType?: AttachmentType;
-  attachmentCount?: number;
+  pathway: string;
+  attachment_type?: string;
+  attachment_count?: number;
 }
 
 export interface ReportMessageSentParams {
-  conversationId: string;
-  messageLength?: number;
-  hasAttachments: boolean;
-  attachmentCount?: number;
-  attachmentTypes?: string[];
-  agentId?: string;
+  conversation_id: string;
+  message_length?: number;
+  has_attachments: boolean;
+  attachment_count?: number;
+  attachment_types?: string[];
+  agent_id?: string;
 }
 
 export interface ReportMessageReceivedParams {
-  conversationId: string;
-  responseLength?: number;
-  roundNumber?: number;
-  agentId?: string;
-  toolsUsed?: string[];
-  toolCount?: number;
-  toolsInvoked?: string[];
+  conversation_id: string;
+  response_length?: number;
+  round_number?: number;
+  agent_id?: string;
+  tools_used?: string[];
+  tool_count?: number;
+  tools_invoked?: string[];
 }
 
-export interface ReportAgentBuilderErrorParams {
-  errorType: string;
-  errorMessage?: string;
-  context?: ErrorContext;
-  conversationId?: string;
-  agentId?: string;
-  pathway?: string;
+export interface ReportConverseErrorParams {
+  error_type: string;
+  error_message: string;
+  error_stack?: string;
+  conversation_id?: string;
+  agent_id?: string;
+  connector_id?: string;
 }
+
+/**
+ * Event used by Security Solution for Agent Builder-related errors.
+ *
+ * NOTE:
+ * This intentionally shares a schema with the legacy onechat `ONECHAT_CONVERSE_ERROR` event so
+ * solutions can optionally provide richer context (conversation_id/agent_id/connector_id) when
+ * available, while keeping the event ID under the Agent Builder prefix.
+ */
+export type ReportAgentBuilderErrorParams = ReportConverseErrorParams;
+
+/**
+ * Legacy onechat conversation error event payload.
+ *
+ * This event captures full context for errors surfaced during conversation:
+ * error details (type, message, stack) plus conversation/agent/connector IDs.
+ */
+export type ReportOnechatConverseErrorParams = ReportConverseErrorParams;
 
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
@@ -85,6 +103,7 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.MessageSent]: ReportMessageSentParams;
   [AGENT_BUILDER_EVENT_TYPES.MessageReceived]: ReportMessageReceivedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentBuilderError]: ReportAgentBuilderErrorParams;
+  [AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR]: ReportOnechatConverseErrorParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -93,7 +112,8 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportMessageSentParams>
   | EventTypeOpts<ReportMessageReceivedParams>
-  | EventTypeOpts<ReportAgentBuilderErrorParams>;
+  | EventTypeOpts<ReportAgentBuilderErrorParams>
+  | EventTypeOpts<ReportOnechatConverseErrorParams>;
 
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
@@ -102,9 +122,10 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
   | typeof AGENT_BUILDER_EVENT_TYPES.MessageSent
   | typeof AGENT_BUILDER_EVENT_TYPES.MessageReceived
-  | typeof AGENT_BUILDER_EVENT_TYPES.AgentBuilderError;
+  | typeof AGENT_BUILDER_EVENT_TYPES.AgentBuilderError
+  | typeof AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR;
 
-const optInActionEvent: AgentBuilderTelemetryEvent = {
+const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
   schema: {
     action: {
@@ -134,7 +155,7 @@ const optInActionEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const optOutEvent: AgentBuilderTelemetryEvent = {
+const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptOut,
   schema: {
     source: {
@@ -147,7 +168,7 @@ const optOutEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
+const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.AddToChatClicked,
   schema: {
     pathway: {
@@ -158,14 +179,14 @@ const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    attachmentType: {
+    attachment_type: {
       type: 'keyword',
       _meta: {
         description: 'Type of attachment (alert|entity|rule|attack_discovery|other)',
         optional: true,
       },
     },
-    attachmentCount: {
+    attachment_count: {
       type: 'integer',
       _meta: {
         description: 'Number of attachments',
@@ -175,38 +196,38 @@ const addToChatClickedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const messageSentEvent: AgentBuilderTelemetryEvent = {
+const MESSAGE_SENT_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.MessageSent,
   schema: {
-    conversationId: {
+    conversation_id: {
       type: 'keyword',
       _meta: {
         description: 'Conversation ID',
         optional: false,
       },
     },
-    messageLength: {
+    message_length: {
       type: 'integer',
       _meta: {
         description: 'Length of the message in characters',
         optional: true,
       },
     },
-    hasAttachments: {
+    has_attachments: {
       type: 'boolean',
       _meta: {
         description: 'Whether the message has attachments',
         optional: false,
       },
     },
-    attachmentCount: {
+    attachment_count: {
       type: 'integer',
       _meta: {
         description: 'Number of attachments',
         optional: true,
       },
     },
-    attachmentTypes: {
+    attachment_types: {
       type: 'array',
       items: {
         type: 'keyword',
@@ -219,7 +240,7 @@ const messageSentEvent: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
-    agentId: {
+    agent_id: {
       type: 'keyword',
       _meta: {
         description: 'ID of the agent',
@@ -229,38 +250,38 @@ const messageSentEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const messageReceivedEvent: AgentBuilderTelemetryEvent = {
+const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.MessageReceived,
   schema: {
-    conversationId: {
+    conversation_id: {
       type: 'keyword',
       _meta: {
         description: 'Conversation ID',
         optional: false,
       },
     },
-    responseLength: {
+    response_length: {
       type: 'integer',
       _meta: {
         description: 'Length of the response in characters',
         optional: true,
       },
     },
-    roundNumber: {
+    round_number: {
       type: 'integer',
       _meta: {
         description: 'Round number in the conversation',
         optional: true,
       },
     },
-    agentId: {
+    agent_id: {
       type: 'keyword',
       _meta: {
         description: 'ID of the agent',
         optional: true,
       },
     },
-    toolsUsed: {
+    tools_used: {
       type: 'array',
       items: {
         type: 'keyword',
@@ -273,14 +294,14 @@ const messageReceivedEvent: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
-    toolCount: {
+    tool_count: {
       type: 'integer',
       _meta: {
         description: 'Number of tools used',
         optional: true,
       },
     },
-    toolsInvoked: {
+    tools_invoked: {
       type: 'array',
       items: {
         type: 'keyword',
@@ -298,70 +319,70 @@ const messageReceivedEvent: AgentBuilderTelemetryEvent = {
   },
 };
 
-const agentBuilderErrorEvent: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.AgentBuilderError,
-  schema: {
-    errorType: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Type of error (e.g., network_error, tool_execution_error, message_send_error, opt_in_error)',
-        optional: false,
-      },
+const CONVERSE_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
+  error_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type/name of the error that occurred',
+      optional: false,
     },
-    errorMessage: {
-      type: 'text',
-      _meta: {
-        description: 'Error message',
-        optional: true,
-      },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'The error message describing what went wrong',
+      optional: false,
     },
-    context: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Context where error occurred (opt_in|message_send|tool_execution|invocation|other)',
-        optional: true,
-      },
+  },
+  error_stack: {
+    type: 'text',
+    _meta: {
+      description: 'The error stack trace if available',
+      optional: true,
     },
-    conversationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Conversation ID if applicable',
-        optional: true,
-      },
+  },
+  conversation_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The ID of the conversation where the error occurred',
+      optional: true,
     },
-    agentId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Agent ID if applicable',
-        optional: true,
-      },
+  },
+  agent_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The ID of the agent involved in the conversation',
+      optional: true,
     },
-    pathway: {
-      type: 'keyword',
-      _meta: {
-        description: 'Pathway where error occurred',
-        optional: true,
-      },
+  },
+  connector_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The ID of the connector used for the conversation',
+      optional: true,
     },
   },
 };
 
-export const agentBuilderTelemetryEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
-  optInActionEvent,
-  optOutEvent,
-  addToChatClickedEvent,
-  messageSentEvent,
-  messageReceivedEvent,
-  agentBuilderErrorEvent,
+const AGENT_BUILDER_ERROR_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.AgentBuilderError,
+  schema: CONVERSE_ERROR_SCHEMA,
+};
+
+const ONECHAT_CONVERSE_ERROR_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR,
+  schema: CONVERSE_ERROR_SCHEMA,
+};
+
+export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
+  OPT_IN_EVENT,
+  OPT_OUT_EVENT,
+  ADD_TO_CHAT_CLICKED_EVENT,
+  AGENT_BUILDER_ERROR_EVENT,
+  ONECHAT_CONVERSE_ERROR_EVENT,
 ];
 
-/**
- * Registers Agent Builder telemetry events with the analytics service.
- */
-export const registerAgentBuilderTelemetryEvents = (analytics: AnalyticsServiceSetup) => {
-  agentBuilderTelemetryEvents.forEach((eventConfig) => {
-    analytics.registerEventType(eventConfig);
-  });
-};
+export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
+  MESSAGE_SENT_EVENT,
+  MESSAGE_RECEIVED_EVENT,
+];

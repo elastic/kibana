@@ -24,12 +24,12 @@ export interface NewAgentBuilderAttachmentTelemetry {
     | 'entity_flyout'
     | 'rules_table'
     | 'rule_creation'
-    | 'attack_discovery'
-    | 'other';
+    | 'rule_failure'
+    | 'attack_discovery';
   /**
    * Attachment type
    */
-  attachmentType?: 'alert' | 'entity' | 'rule' | 'attack_discovery' | 'other';
+  attachmentType?: 'alert' | 'entity' | 'rule';
   /**
    * Attachment count
    */
@@ -78,8 +78,8 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     if (telemetryData) {
       telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
         pathway: telemetryData.pathway,
-        attachmentType: telemetryData.attachmentType,
-        attachmentCount: telemetryData.attachmentCount,
+        attachment_type: telemetryData.attachmentType,
+        attachment_count: telemetryData.attachmentCount,
       });
     }
     onClick();

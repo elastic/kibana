@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { agentBuilderServerEbtEvents } from '@kbn/onechat-common';
 import type { OnechatConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -31,7 +32,6 @@ import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
-import { agentBuilderServerTelemetryEvents } from './telemetry/events';
 
 export class OnechatPlugin
   implements
@@ -74,7 +74,7 @@ export class OnechatPlugin
 
     // Register server-side EBT events for Agent Builder
     this.analytics = coreSetup.analytics;
-    agentBuilderServerTelemetryEvents.forEach((eventConfig) => {
+    agentBuilderServerEbtEvents.forEach((eventConfig) => {
       coreSetup.analytics.registerEventType(eventConfig);
     });
 

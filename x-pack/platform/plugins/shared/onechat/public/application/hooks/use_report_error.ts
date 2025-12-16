@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import { useKibana } from './use_kibana';
-import { eventTypes } from '../../../common/events';
 
 const useReportEvent = () => {
   const {
@@ -43,7 +43,7 @@ export const useReportConverseError = () => {
       }: { conversationId?: string; agentId?: string; connectorId?: string }
     ) => {
       reportEvent({
-        eventType: eventTypes.ONECHAT_CONVERSE_ERROR,
+        eventType: AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR,
         eventData: {
           error_type: error?.constructor?.name || 'unknown',
           error_message: error instanceof Error ? error.message : String(error),
