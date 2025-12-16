@@ -131,6 +131,7 @@ export function getColumns({
       render: (_, { name, transactionType: type }) => {
         return (
           <TransactionDetailLink
+            data-test-subj={`transactionNameLink-${name}`}
             transactionName={name}
             href={link('/services/{serviceName}/transactions/view', {
               path: { serviceName },

@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -62,28 +63,25 @@ test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { transactionsOverviewPage },
   }) => {
-    // Set up network interception before navigation
-    const detailedStatsPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes('/internal/apm/services/') &&
-        response.url().includes('/transactions/groups/detailed_statistics') &&
-        response.request().method() === 'GET',
-      { timeout: transactionsOverviewPage.BIG_TIMEOUT }
-    );
-
     await transactionsOverviewPage.goto(
       'service-go',
       testData.OPBEANS_START_DATE,
       testData.OPBEANS_END_DATE
     );
 
-    const detailedStatsResponse = await detailedStatsPromise;
-    const requestUrl = decodeURIComponent(detailedStatsResponse.url());
+    await expect(page.getByTestId('tableSearchInput')).toBeVisible({ timeout: BIGGER_TIMEOUT });
 
-    // Verify the request URL contains the expected transaction names (alphabetically sorted by default)
-    // The first 10 transactions in alphabetical order starting with DELETE
-    expect(requestUrl).toContain(
-      'transactionNames=["DELETE /cart","DELETE /categories","DELETE /customers","DELETE /invoices","DELETE /orders","DELETE /payments","DELETE /products","DELETE /profile","DELETE /reviews","DELETE /users"]'
-    );
+    await expect(page.getByTestId('transactionNameLink-DELETE /cart')).toBeVisible({
+      timeout: BIGGER_TIMEOUT,
+    });
+    await expect(page.getByTestId('transactionNameLink-DELETE /categories')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /customers')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /invoices')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /orders')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /payments')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /products')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /profile')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /reviews')).toBeVisible();
+    await expect(page.getByTestId('transactionNameLink-DELETE /users')).toBeVisible();
   });
 });

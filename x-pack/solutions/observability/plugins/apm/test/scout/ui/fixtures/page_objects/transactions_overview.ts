@@ -6,10 +6,9 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class TransactionsOverviewPage {
-  public readonly BIG_TIMEOUT: number = 25000;
-
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto(serviceName: string, rangeFrom: string, rangeTo: string) {
@@ -17,11 +16,11 @@ export class TransactionsOverviewPage {
       `${this.kbnUrl.app(
         'apm'
       )}/services/${serviceName}/transactions?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
-      { timeout: this.BIG_TIMEOUT }
+      { timeout: BIGGER_TIMEOUT }
     );
     await this.page
       .getByTestId('apmMainTemplateHeaderServiceName')
-      .waitFor({ timeout: this.BIG_TIMEOUT });
+      .waitFor({ timeout: BIGGER_TIMEOUT });
   }
 
   getTransactionTypeFilter() {
