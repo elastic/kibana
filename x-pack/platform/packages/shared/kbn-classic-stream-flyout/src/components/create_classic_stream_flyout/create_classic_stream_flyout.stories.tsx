@@ -556,7 +556,10 @@ const createMockValidator = (
 };
 
 export const Default: Story = {
-  render: () => (
+  args: {
+    showDataRetention: true,
+  },
+  render: (args) => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
       onCreate={action('onCreate')}
@@ -564,6 +567,7 @@ export const Default: Story = {
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
       getIlmPolicy={createMockIlmPolicyFetcher()}
+      showDataRetention={args.showDataRetention}
     />
   ),
 };

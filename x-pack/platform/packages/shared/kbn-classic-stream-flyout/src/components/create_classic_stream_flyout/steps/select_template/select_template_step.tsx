@@ -109,7 +109,7 @@ export const SelectTemplateStep = ({
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTextTruncate text={option.label} width={250} />
+          {showDataRetention ? <EuiTextTruncate text={option.label} width={250} /> : option.label}
         </EuiFlexItem>
         {isManaged && (
           <EuiFlexItem grow={false}>
