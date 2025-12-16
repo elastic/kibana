@@ -15,6 +15,7 @@ import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { SettingsContextProvider } from '../contexts/settings_context';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
@@ -23,6 +24,23 @@ import {
 // Mock the context hook
 jest.mock('../contexts/enabled_features_context');
 const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
+
+jest.mock('@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal', () => {
+  return {
+    AIAgentConfirmationModal: ({
+      onConfirm,
+      onCancel,
+    }: {
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => (
+      <div data-test-subj="confirmModal">
+        <button data-test-subj="confirmModalConfirm" onClick={onConfirm} />
+        <button data-test-subj="confirmModalCancel" onClick={onCancel} />
+      </div>
+    ),
+  };
+});
 
 // Mock productDocBase
 const mockProductDocBase = {
@@ -97,10 +115,12 @@ describe('GenAiSettingsApp', () => {
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
   });
 
-  const renderComponent = (props = {}) => {
+  const renderComponent = (props = {}, servicesOverrides: Record<string, unknown> = {}) => {
     const services = {
       ...coreStart,
       productDocBase: mockProductDocBase,
+      analytics: { reportEvent: jest.fn() },
+      ...servicesOverrides,
     };
     return renderWithI18n(
       <QueryClientProvider client={new QueryClient()}>
@@ -328,6 +348,85 @@ describe('GenAiSettingsApp', () => {
 
       // Documentation section should be visible in Agent mode
       expect(await screen.findByTestId('documentationSection')).toBeInTheDocument();
+    });
+  });
+
+  it('returns opt out telemetry when saving a switch from Agent to Classic', async () => {
+    const reportEvent = jest.fn();
+    mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+    coreStart.settings.client.getAll.mockReturnValue(
+      createSettingsMock({
+        [AI_CHAT_EXPERIENCE_TYPE]: {
+          value: AIChatExperience.Classic,
+          userValue: AIChatExperience.Agent,
+          type: 'select',
+          options: [AIChatExperience.Classic, AIChatExperience.Agent],
+        },
+      }) as any
+    );
+
+    renderComponent({}, { analytics: { reportEvent } });
+
+    const chatExperienceField = await screen.findByTestId(
+      `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
+    );
+
+    // The <select> isn't guaranteed to be nested under the editField container (implementation detail
+    // of the management settings FieldRow), so locate it globally by its option values.
+    const allSelects = Array.from(document.querySelectorAll('select'));
+    const chatExperienceSelect = allSelects.find((select) => {
+      const options = Array.from(select.querySelectorAll('option'));
+      return options.some((opt) => opt.value === AIChatExperience.Agent);
+    });
+    if (!chatExperienceSelect) throw new Error('Expected chat experience select to exist');
+
+    fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Classic } });
+
+    const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
+        source: 'stack_management',
+      });
+    });
+  });
+
+  it('returns confirmed opt in telemetry when saving a switch to Agent', async () => {
+    const reportEvent = jest.fn();
+    mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+    coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+
+    renderComponent({}, { analytics: { reportEvent } });
+
+    const chatExperienceField = await screen.findByTestId(
+      `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
+    );
+
+    // The <select> isn't guaranteed to be nested under the editField container (implementation detail
+    // of the management settings FieldRow), so locate it globally by its option values.
+    const allSelects = Array.from(document.querySelectorAll('select'));
+    const chatExperienceSelect = allSelects.find((select) => {
+      const options = Array.from(select.querySelectorAll('option'));
+      return options.some((opt) => opt.value === AIChatExperience.Agent);
+    });
+    if (!chatExperienceSelect) throw new Error('Expected chat experience select to exist');
+
+    fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Agent } });
+
+    // Close modal to mirror the real flow before saving
+    fireEvent.click(await screen.findByTestId('confirmModalConfirm'));
+
+    const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenLastCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'confirmed',
+        source: 'stack_management',
+      });
     });
   });
 });

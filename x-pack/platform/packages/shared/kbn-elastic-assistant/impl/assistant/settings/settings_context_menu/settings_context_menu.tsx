@@ -89,7 +89,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
     const handleCancelAIAgent = useCallback(() => {
       setIsAIAgentModalVisible(false);
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-        action: 'cancelled',
+        action: 'canceled',
         source: 'security_settings_menu',
         step: 'confirmation_modal',
       });

@@ -32,7 +32,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
 export type OptInStep = 'initial' | 'confirmation_modal' | 'final';
-export type OptInAction = 'step_reached' | 'confirmation_shown' | 'confirmed' | 'cancelled';
+export type OptInAction = 'step_reached' | 'confirmation_shown' | 'confirmed' | 'canceled';
 
 export interface ReportOptInActionParams {
   action: OptInAction;
@@ -132,7 +132,7 @@ const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'Action taken in the opt-in flow (step_reached|confirmation_shown|confirmed|cancelled)',
+          'Action taken in the opt-in flow (step_reached|confirmation_shown|confirmed|canceled)',
         optional: false,
       },
     },
@@ -148,7 +148,7 @@ const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'Step in the opt-in flow (initial|confirmation_modal|final). Only present when action is step_reached or cancelled',
+          'Step in the opt-in flow (initial|confirmation_modal|final). Only present when action is step_reached or canceled',
         optional: true,
       },
     },

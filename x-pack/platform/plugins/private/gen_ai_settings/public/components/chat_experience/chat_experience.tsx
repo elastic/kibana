@@ -42,26 +42,6 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience => {
   );
 };
 
-/**
- * Helper function to track telemetry events for chat experience changes
- */
-const trackChatExperienceTelemetry = (
-  analytics: AnalyticsService,
-  newValue: AIChatExperience | undefined,
-  currentValue: AIChatExperience | undefined
-): void => {
-  if (newValue === AIChatExperience.Agent) {
-    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-      action: 'confirmation_shown',
-      source: TELEMETRY_SOURCE,
-    });
-  } else if (newValue === AIChatExperience.Classic && currentValue === AIChatExperience.Agent) {
-    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptOut, {
-      source: TELEMETRY_SOURCE,
-    });
-  }
-};
-
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
@@ -72,11 +52,48 @@ export const ChatExperience: React.FC = () => {
   const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
 
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
-  const currentValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
+  const savedValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
   const hasTrackedInitialStep = useRef(false);
+  /**
+   * One-shot guard to prevent `step_reached` from firing twice when a save triggers
+   * a full page reload.
+   *
+   * React may re-run this effect right before unload, and it will run again after
+   * the component remounts post-reload. A ref lets us treat “just reloaded due to save”
+   * as a one-time signal: skip the first check after reload, then reset.
+   */
+  const didJustReloadFromSaveRef = useRef<boolean | null>(null);
 
   useEffect(() => {
-    if (!hasTrackedInitialStep.current && currentValue !== AIChatExperience.Agent) {
+    // If a save is about to trigger `window.location.reload()`, we set this flag just-in-time.
+    // We must check it on every effect run because the flag can be set shortly before unload.
+    const pendingReloadStorageFlag = (() => {
+      try {
+        return sessionStorage.getItem('gen_ai_settings:pending_reload');
+      } catch {
+        return null;
+      }
+    })();
+    if (didJustReloadFromSaveRef.current === null) {
+      didJustReloadFromSaveRef.current = pendingReloadStorageFlag === '1';
+      if (pendingReloadStorageFlag === '1') {
+        try {
+          sessionStorage.removeItem('gen_ai_settings:pending_reload');
+        } catch {
+          // ignore
+        }
+      }
+    }
+    const shouldSkipInitialStepDueToReload =
+      didJustReloadFromSaveRef.current === true || pendingReloadStorageFlag === '1';
+    // no saved value indicates setting is classic
+    if (
+      !hasTrackedInitialStep.current &&
+      field &&
+      !savedValue &&
+      // prevents double tracking when reloading from save
+      !shouldSkipInitialStepDueToReload
+    ) {
       reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'step_reached',
         source: TELEMETRY_SOURCE,
@@ -84,15 +101,22 @@ export const ChatExperience: React.FC = () => {
       });
       hasTrackedInitialStep.current = true;
     }
-  }, [analytics, currentValue]);
+    if (didJustReloadFromSaveRef.current === true) {
+      didJustReloadFromSaveRef.current = false;
+    }
+  }, [analytics, field, savedValue, unsavedChanges]);
 
   // Show confirmation modal for AI Agents selection
   const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
     (id, change) => {
       if (id === AI_CHAT_EXPERIENCE_TYPE) {
         const newValue = isAIChatExperience(change?.unsavedValue) ? change.unsavedValue : undefined;
-
-        trackChatExperienceTelemetry(analytics, newValue, currentValue);
+        if (newValue === AIChatExperience.Agent) {
+          reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+            action: 'confirmation_shown',
+            source: TELEMETRY_SOURCE,
+          });
+        }
 
         // Handle modal display logic
         if (newValue === AIChatExperience.Agent) {
@@ -101,21 +125,17 @@ export const ChatExperience: React.FC = () => {
       }
       handleFieldChange(id, change);
     },
-    [handleFieldChange, analytics, currentValue]
+    [handleFieldChange, analytics]
   );
 
   const handleConfirmAgent = useCallback(() => {
-    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-      action: 'confirmed',
-      source: TELEMETRY_SOURCE,
-    });
     setConfirmModalOpen(false);
-  }, [analytics]);
+  }, []);
 
   const handleCancelAgent = useCallback(() => {
     setConfirmModalOpen(false);
     reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-      action: 'cancelled',
+      action: 'canceled',
       source: TELEMETRY_SOURCE,
       step: 'confirmation_modal',
     });

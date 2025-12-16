@@ -27,6 +27,7 @@ import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -43,9 +44,15 @@ interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
+const TELEMETRY_SOURCE = 'stack_management' as const;
+
+const isAIChatExperience = (value: unknown): value is AIChatExperience =>
+  typeof value === 'string' &&
+  (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, productDocBase } = services;
+  const { application, http, docLinks, productDocBase, analytics } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -214,8 +221,42 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   ]);
 
   async function handleSave() {
+    const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
+      ? chatExperienceField.savedValue
+      : undefined;
+    const unsavedChatExperience = isAIChatExperience(
+      unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue
+    )
+      ? (unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue as AIChatExperience)
+      : undefined;
+    const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Classic;
+    const normalizedUnsavedChatExperience = unsavedChatExperience ?? AIChatExperience.Classic;
+    const shouldTrackOptInConfirmed =
+      normalizedSavedChatExperience !== AIChatExperience.Agent &&
+      normalizedUnsavedChatExperience === AIChatExperience.Agent;
+    const shouldTrackOptOut =
+      normalizedSavedChatExperience === AIChatExperience.Agent &&
+      normalizedUnsavedChatExperience === AIChatExperience.Classic;
+
     const needsReload = await saveAll();
+    if (shouldTrackOptInConfirmed) {
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'confirmed',
+        source: TELEMETRY_SOURCE,
+      });
+    }
+    if (shouldTrackOptOut) {
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptOut, {
+        source: TELEMETRY_SOURCE,
+      });
+    }
     if (needsReload) {
+      try {
+        // Used by `ChatExperience` to avoid firing `step_reached` both before and after reload.
+        sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
+      } catch (e) {
+        // best effort: sessionStorage may be unavailable in some environments
+      }
       window.location.reload();
     }
   }
