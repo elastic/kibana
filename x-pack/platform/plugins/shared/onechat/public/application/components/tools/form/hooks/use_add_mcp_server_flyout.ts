@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/constants';
 import { useQueryClient } from '@kbn/react-query';
@@ -33,13 +33,17 @@ export const useAddMcpServerFlyout = () => {
     [queryClient]
   );
 
-  const flyout = triggersActionsUi.getAddConnectorFlyout({
-    onClose: closeFlyout,
-    onConnectorCreated: handleConnectorCreated,
-    initialConnector: {
-      actionTypeId: MCP_CONNECTOR_TYPE,
-    },
-  });
+  const flyout = useMemo(
+    () =>
+      triggersActionsUi.getAddConnectorFlyout({
+        onClose: closeFlyout,
+        onConnectorCreated: handleConnectorCreated,
+        initialConnector: {
+          actionTypeId: MCP_CONNECTOR_TYPE,
+        },
+      }),
+    [closeFlyout, handleConnectorCreated, triggersActionsUi]
+  );
 
   return {
     openFlyout,

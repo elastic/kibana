@@ -286,6 +286,148 @@ export const labels = {
         defaultMessage: 'Back to edit tool',
       }),
     },
+
+    // Bulk import MCP tools
+    bulkImportMcp: {
+      title: i18n.translate('xpack.onechat.tools.bulkImportMcp.title', {
+        defaultMessage: 'Bulk import MCP tools',
+      }),
+      description: i18n.translate('xpack.onechat.tools.bulkImportMcp.description', {
+        defaultMessage:
+          'Select an MCP server and import multiple tools at once to make them available in Agent Builder.',
+      }),
+      importToolsButton: i18n.translate('xpack.onechat.tools.bulkImportMcp.importToolsButton', {
+        defaultMessage: 'Import tools',
+      }),
+      cancelButton: i18n.translate('xpack.onechat.tools.bulkImportMcp.cancelButton', {
+        defaultMessage: 'Cancel',
+      }),
+      sourceSection: {
+        title: i18n.translate('xpack.onechat.tools.bulkImportMcp.sourceSection.title', {
+          defaultMessage: 'Source',
+        }),
+        description: i18n.translate('xpack.onechat.tools.bulkImportMcp.sourceSection.description', {
+          defaultMessage: 'Select the MCP server and preview the tools available for import.',
+        }),
+        mcpServerLabel: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.mcpServerLabel',
+          {
+            defaultMessage: 'MCP Server',
+          }
+        ),
+        addMcpServerLink: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.addMcpServerLink',
+          {
+            defaultMessage: 'Add a new MCP server',
+          }
+        ),
+        toolsToImportLabel: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.toolsToImportLabel',
+          {
+            defaultMessage: 'Tools to import',
+          }
+        ),
+        nameColumn: i18n.translate('xpack.onechat.tools.bulkImportMcp.sourceSection.nameColumn', {
+          defaultMessage: 'Name',
+        }),
+        searchPlaceholder: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.searchPlaceholder',
+          {
+            defaultMessage: 'Search tools',
+          }
+        ),
+        selectedCount: (selected: number) =>
+          i18n.translate('xpack.onechat.tools.bulkImportMcp.sourceSection.selectedCount', {
+            defaultMessage: '{selected} Selected',
+            values: { selected },
+          }),
+        clearSelection: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.clearSelection',
+          {
+            defaultMessage: 'Clear selection',
+          }
+        ),
+        selectMcpServerMessage: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.selectMcpServerMessage',
+          {
+            defaultMessage: 'Select an MCP server to see available tools.',
+          }
+        ),
+        noToolsMessage: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.noToolsMessage',
+          {
+            defaultMessage: 'No tools found on the selected MCP server.',
+          }
+        ),
+        noMatchingToolsMessage: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.noMatchingToolsMessage',
+          {
+            defaultMessage: 'No tools match your search.',
+          }
+        ),
+        loadingToolsMessage: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.loadingToolsMessage',
+          {
+            defaultMessage: 'Loading tools...',
+          }
+        ),
+        toolsErrorMessage: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.toolsErrorMessage',
+          {
+            defaultMessage: 'Failed to load tools from the selected MCP server.',
+          }
+        ),
+        tableCaption: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.sourceSection.tableCaption',
+          {
+            defaultMessage: 'MCP tools available for import',
+          }
+        ),
+      },
+      organizationSection: {
+        title: i18n.translate('xpack.onechat.tools.bulkImportMcp.organizationSection.title', {
+          defaultMessage: 'Organization',
+        }),
+        description: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.organizationSection.description',
+          {
+            defaultMessage: 'Choose how imported tools should be grouped and labeled.',
+          }
+        ),
+        namespaceLabel: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.organizationSection.namespaceLabel',
+          {
+            defaultMessage: 'Namespace',
+          }
+        ),
+        namespaceHelpText: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.organizationSection.namespaceHelpText',
+          {
+            defaultMessage: 'Minimum 1 character',
+          }
+        ),
+        labelsLabel: i18n.translate(
+          'xpack.onechat.tools.bulkImportMcp.organizationSection.labelsLabel',
+          {
+            defaultMessage: 'Labels',
+          }
+        ),
+      },
+      importSuccessToast: (count: number) =>
+        i18n.translate('xpack.onechat.tools.bulkImportMcp.importSuccessToast', {
+          defaultMessage: 'Successfully imported {count, plural, one {# tool} other {# tools}}',
+          values: { count },
+        }),
+      importErrorToast: i18n.translate('xpack.onechat.tools.bulkImportMcp.importErrorToast', {
+        defaultMessage: 'Failed to import MCP tools',
+      }),
+      noToolsSelectedError: i18n.translate(
+        'xpack.onechat.tools.bulkImportMcp.noToolsSelectedError',
+        {
+          defaultMessage: 'Please select at least one tool to import.',
+        }
+      ),
+    },
   },
   agents: {
     title: i18n.translate('xpack.onechat.agents.list.title', { defaultMessage: 'Agents' }),

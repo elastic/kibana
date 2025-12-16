@@ -35,6 +35,7 @@ import type {
   McpToolHealthStatus,
   BulkCreateMcpToolsResponse,
   BulkCreateMcpToolResult,
+  ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
 import { validateConnector } from '../../services/tools/tool_types/mcp/validate_configuration';
 import { apiPrivileges } from '../../../common/features';
@@ -228,6 +229,53 @@ export function registerInternalToolsRoutes({
         body: {
           results,
           summary,
+        },
+      });
+    })
+  );
+
+  // validate namespace for MCP tool import (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_validate_namespace`,
+      validate: {
+        query: schema.object({
+          namespace: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { namespace } = request.query;
+      const { tools: toolService } = getInternalServices();
+      const registry = await toolService.getRegistry({ request });
+
+      const allTools = await registry.list({});
+
+      // Extract namespaces from tool IDs
+      // A tool ID like "mcp.github.tool_name" has namespace "mcp.github"
+      // A tool ID like "mcp.tool_name" has namespace "mcp"
+      // A tool ID like "tool_name" has no namespace
+      const existingNamespaces = new Set<string>();
+      allTools.forEach((tool) => {
+        const lastDotIndex = tool.id.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+          const toolNamespace = tool.id.substring(0, lastDotIndex);
+          existingNamespaces.add(toolNamespace);
+        }
+      });
+
+      const conflictingNamespaces = Array.from(existingNamespaces).filter(
+        (existingNamespace) => existingNamespace === namespace
+      );
+
+      return response.ok<ValidateNamespaceResponse>({
+        body: {
+          isValid: conflictingNamespaces.length === 0,
+          conflictingNamespaces,
         },
       });
     })

@@ -22,15 +22,17 @@ import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/c
 import type { Tool } from '@kbn/mcp-client';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { McpToolHealthStatus } from '../../types/mcp';
 import { useListConnectors, useListMcpTools } from '../../../../../hooks/tools/use_mcp_connectors';
+import { useNavigation } from '../../../../../hooks/use_navigation';
+import { appPaths } from '../../../../../utils/app_paths';
 import { truncateAtSentence } from '../../../../../utils/truncate_at_sentence';
-import { McpHealthBanner } from './mcp_health_banner';
 import { useAddMcpServerFlyout } from '../../hooks/use_add_mcp_server_flyout';
 import { useEditMcpServerFlyout } from '../../hooks/use_edit_mcp_server_flyout';
 import { i18nMessages } from '../../i18n';
 import type { McpConfigurationFieldsProps } from '../../types/mcp';
+import { McpToolHealthStatus } from '../../types/mcp';
 import type { McpToolFormData } from '../../types/tool_form_types';
+import { McpHealthBanner } from './mcp_health_banner';
 
 interface McpToolOption extends Tool {
   shortDescription?: string;
@@ -46,6 +48,7 @@ export const McpEditableFields = ({
   setMcpHealthStatus,
 }: McpConfigurationFieldsProps) => {
   const euiThemeContext = useEuiTheme();
+  const { navigateToOnechatUrl } = useNavigation();
 
   const {
     openFlyout: openCreateMcpServerFlyout,
@@ -59,11 +62,17 @@ export const McpEditableFields = ({
     clearErrors,
     setValue,
   } = useFormContext<McpToolFormData>();
+
+  const handleBulkImportClick = useCallback(() => {
+    navigateToOnechatUrl(appPaths.tools.bulkImportMcp);
+  }, [navigateToOnechatUrl]);
+
   const { connectors, isLoading: isLoadingConnectors } = useListConnectors({
     type: MCP_CONNECTOR_TYPE,
   });
 
   const connectorId = useWatch({ control, name: 'connectorId' });
+
   const {
     mcpTools,
     isLoading: isLoadingMcpTools,
@@ -197,7 +206,7 @@ export const McpEditableFields = ({
           isInvalid={!!errors.mcpToolName}
           error={errors.mcpToolName?.message}
           labelAppend={
-            <EuiLink onClick={() => {}} css={mcpActionLinkStyles(euiThemeContext)}>
+            <EuiLink onClick={handleBulkImportClick} css={mcpActionLinkStyles(euiThemeContext)}>
               {i18nMessages.configuration.form.mcp.bulkImportMcpToolsButtonLabel}
             </EuiLink>
           }

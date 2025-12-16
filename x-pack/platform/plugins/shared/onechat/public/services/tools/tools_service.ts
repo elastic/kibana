@@ -27,6 +27,8 @@ import type {
   GetToolHealthResponse,
   ListToolHealthResponse,
   ListMcpToolsHealthResponse,
+  BulkCreateMcpToolsResponse,
+  ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -137,5 +139,39 @@ export class ToolsService {
 
   async listMcpToolsHealth() {
     return await this.http.get<ListMcpToolsHealthResponse>(`${internalApiPath}/tools/_mcp_health`);
+  }
+
+  async bulkCreateMcpTools({
+    connectorId,
+    tools,
+    namespace,
+    tags,
+    skipExisting = true,
+  }: {
+    connectorId: string;
+    tools: Array<{ name: string; description?: string }>;
+    namespace?: string;
+    tags?: string[];
+    skipExisting?: boolean;
+  }) {
+    return await this.http.post<BulkCreateMcpToolsResponse>(
+      `${internalApiPath}/tools/_bulk_create_mcp`,
+      {
+        body: JSON.stringify({
+          connector_id: connectorId,
+          tools,
+          namespace,
+          tags,
+          skip_existing: skipExisting,
+        }),
+      }
+    );
+  }
+
+  async validateNamespace({ namespace }: { namespace: string }) {
+    return await this.http.get<ValidateNamespaceResponse>(
+      `${internalApiPath}/tools/_validate_namespace`,
+      { query: { namespace } }
+    );
   }
 }

@@ -279,3 +279,8 @@ export interface BulkCreateMcpToolsResponse {
     failed: number;
   };
 }
+
+export interface ValidateNamespaceResponse {
+  isValid: boolean;
+  conflictingNamespaces: string[];
+}

@@ -39,5 +39,8 @@ export const queryKeys = {
       byId: (toolId: string) => ['tools', 'health', toolId],
       mcp: () => ['tools', 'health', 'mcp'] as const,
     },
+    namespace: {
+      validate: (namespace: string) => ['tools', 'namespace', 'validate', namespace] as const,
+    },
   },
 };
