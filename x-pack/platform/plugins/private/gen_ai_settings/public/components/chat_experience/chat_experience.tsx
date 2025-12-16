@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -82,6 +82,7 @@ export const ChatExperience: React.FC = () => {
 
   return (
     <>
+      <EuiSpacer size="l" />
       <FieldRowProvider
         links={docLinks.links.management}
         showDanger={(message: string) => notifications.toasts.addDanger(message)}

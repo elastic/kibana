@@ -64,6 +64,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     chatExperienceField?.defaultValue ??
     AIChatExperience.Classic;
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
+  const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
   const hasConnectorsAllPrivilege =
     application.capabilities.actions?.show === true &&
@@ -355,14 +356,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   </EuiFormRow>
                 </EuiDescribedFormGroup>
               )}
-              {showChatExperienceSetting && <EuiSpacer size="l" />}
               {showChatExperienceSetting && (
                 <EuiFlexItem>
                   <ChatExperience />
                 </EuiFlexItem>
               )}
-              {!isAgentExperience && showAiAssistantsVisibilitySetting && <EuiSpacer size="l" />}
-              {!isAgentExperience && showAiAssistantsVisibilitySetting && <EuiSpacer size="l" />}
               {showAiAssistantsVisibilitySetting && (
                 <EuiFlexItem>
                   <AIAssistantVisibility />
@@ -371,7 +369,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 
-          {isAgentExperience && showChatExperienceSetting && (
+          {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>
               <EuiSpacer size="l" />
 
