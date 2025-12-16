@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const end = new Date('2021-10-10T00:15:00.000Z').getTime() - 1;
 
   // Expected transaction names in order
-  const expectedTransactionNames = [
+  const EXPECTED_TRANSACTION_NAMES = [
     'DELETE /cart',
     'DELETE /categories',
     'DELETE /customers',
@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return expectedTransactionNames.map((transactionName) => {
+          return EXPECTED_TRANSACTION_NAMES.map((transactionName) => {
             return instance
               .transaction({ transactionName, transactionType: 'request' })
               .timestamp(timestamp)
@@ -99,14 +99,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const transactionNames = response.transactionGroups.map((group) => group.name);
 
       // Verify we have at least the expected number of transactions
-      expect(transactionNames.length >= expectedTransactionNames.length).to.be(true);
+      expect(transactionNames.length >= EXPECTED_TRANSACTION_NAMES.length).to.be(true);
 
       // Verify the order of the first 10 transactions matches expected order
-      const firstTenTransactions = transactionNames.slice(0, expectedTransactionNames.length);
-      expect(firstTenTransactions).to.eql(expectedTransactionNames);
+      const firstTenTransactions = transactionNames.slice(0, EXPECTED_TRANSACTION_NAMES.length);
+      expect(firstTenTransactions).to.eql(EXPECTED_TRANSACTION_NAMES);
 
       // Verify each transaction has the correct position (index) in the array
-      expectedTransactionNames.forEach((expectedName, index) => {
+      EXPECTED_TRANSACTION_NAMES.forEach((expectedName, index) => {
         const actualIndex = transactionNames.indexOf(expectedName);
         expect(actualIndex).to.be(index);
       });
@@ -115,11 +115,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     it('includes the correct transactionNames in the detailed statistics request', async () => {
       const mainStatistics = await fetchTransactionGroups();
       const transactionNames = mainStatistics.transactionGroups
-        .slice(0, expectedTransactionNames.length)
+        .slice(0, EXPECTED_TRANSACTION_NAMES.length)
         .map((group) => group.name);
 
       // Verify we have the expected transaction names
-      expect(transactionNames).to.eql(expectedTransactionNames);
+      expect(transactionNames).to.eql(EXPECTED_TRANSACTION_NAMES);
 
       // Now fetch detailed statistics with these transaction names
       const detailedStatisticsResponse = await apmApiClient.readUser({
@@ -150,9 +150,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       if (detailedStats.currentPeriod) {
         const statsTransactionNames = Object.keys(detailedStats.currentPeriod);
 
-        for (let i = 0; i < expectedTransactionNames.length; i++) {
-          expect(statsTransactionNames[i]).to.eql(expectedTransactionNames[i]);
-        }
+        expect(statsTransactionNames).to.eql(EXPECTED_TRANSACTION_NAMES);
       }
     });
   });
