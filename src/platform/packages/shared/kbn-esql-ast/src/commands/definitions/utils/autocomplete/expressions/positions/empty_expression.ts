@@ -387,25 +387,15 @@ async function buildSuggestionsFromHints(
 ): Promise<ISuggestionItem[]> {
   // Keep the hints that are unique by entityType + constraints
   const hints: ParameterHint[] = uniqWith(
-    paramDefinitions.filter((param) => param.hint !== undefined).map((param) => param.hint!),
+    paramDefinitions.flatMap(({ hint }) => hint ?? []),
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 
-  if (hints.length > 0) {
-    return (
-      await Promise.all(
-        hints.map((hint) => {
-          if (parametersFromHintsMap[hint.entityType]) {
-            return parametersFromHintsMap[hint.entityType](hint, ctx);
-          } else {
-            return [];
-          }
-        })
-      )
-    ).flat();
-  }
+  const results = await Promise.all(
+    hints.map((hint) => parametersFromHintsMap[hint.entityType]?.(hint, ctx) ?? [])
+  );
 
-  return [];
+  return results.flat();
 }
 
 /** Builds suggestions for constant-only literal parameters */
