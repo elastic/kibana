@@ -58,7 +58,7 @@ export const selectOriginalPreviewRecords = createSelector(
 );
 
 /**
- * Selects an subset of samples based on to be sent
+ * Selects an subset of samples be sent
  * for a simulation taking into account the currently
  * selected condition filter.
  *

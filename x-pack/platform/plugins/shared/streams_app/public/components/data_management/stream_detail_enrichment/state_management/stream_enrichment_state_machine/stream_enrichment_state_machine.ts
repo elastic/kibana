@@ -549,10 +549,7 @@ export const streamEnrichmentMachine = setup({
                         },
                       ],
                     },
-                    'step.delete': {
-                      actions: [{ type: 'deleteStep', params: ({ event }) => ({ id: event.id }) }],
-                    },
-                    // Forward step events to interactive mode machine
+                    // Forward other step events to interactive mode machine
                     'step.*': {
                       actions: forwardTo('interactiveMode'),
                     },

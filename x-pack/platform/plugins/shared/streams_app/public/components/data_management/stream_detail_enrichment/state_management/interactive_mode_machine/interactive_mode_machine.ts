@@ -246,20 +246,6 @@ export const interactiveModeMachine = setup({
         selectedConditionId: params.conditionId,
       };
     }),
-    // setAutomaticFilteringForEditedStep: enqueueActions(({ context, enqueue }) => {
-    //   const stepUnderEdit = context.stepRefs
-    //     .find((stepRef) => isStepUnderEdit(stepRef.getSnapshot()))
-    //     ?.getSnapshot().context.step;
-
-    //   if (stepUnderEdit?.parentId) {
-    //     enqueue({
-    //       type: 'sendConditionFilterToSimulator',
-    //       params: { conditionId: stepUnderEdit.parentId },
-    //     });
-    //   } else {
-    //     enqueue({ type: 'sendClearConditionFilterToSimulator' });
-    //   }
-    // }),
     /* Pipeline suggestion actions */
     overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
       // Clean-up existing step refs

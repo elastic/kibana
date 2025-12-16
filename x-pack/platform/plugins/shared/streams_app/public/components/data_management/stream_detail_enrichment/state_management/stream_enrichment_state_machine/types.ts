@@ -107,7 +107,6 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.filterByCondition'; conditionId: string }
   | { type: 'simulation.clearConditionFilter' }
-  | { type: 'step.delete'; id: string }
   // Step events forwarded to interactive mode machine
   | {
       type: 'step.addProcessor';
