@@ -59,6 +59,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.siemMigrations,
       ProductFeatureKey.aiValueReport,
       ProductFeatureKey.graphVisualization,
+      ProductFeatureKey.ruleGapsAutoFill,
     ],
   },
   [ProductLine.endpoint]: {
