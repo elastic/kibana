@@ -72,7 +72,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
-  const [query, setQuery] = useState<string>('');
 
   const identifyFeaturesCallback = useCallback(() => {
     setIsFeatureDetectionLoading(true);
@@ -92,11 +91,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     setIsFeatureDetectionFlyoutOpen,
     setDetectedFeatures,
   ]);
-
-  const { significantEvents, combinedQuery } = useFilteredSigEvents(
-    significantEventsFetchState.value ?? [],
-    query
-  );
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
