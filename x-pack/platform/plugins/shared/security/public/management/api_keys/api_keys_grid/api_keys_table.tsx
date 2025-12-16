@@ -349,6 +349,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
             </>
           )}
           <EuiBasicTable
+            tableCaption={i18n.translate('xpack.security.management.apiKeys.table.caption', {
+              defaultMessage: 'API keys list',
+            })}
             items={itemsToDisplay}
             itemId="id"
             columns={columns}
