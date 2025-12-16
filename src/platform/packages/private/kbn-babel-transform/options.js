@@ -23,6 +23,7 @@ function getBabelOptions(path, config = {}) {
   return {
     filename: path,
     presets: [NODE_PRESET],
+    plugins: [[require.resolve('babel-plugin-transform-barrels'), { executorName: 'webpack' }]],
     cwd,
     babelrc: false,
     sourceMaps: config.disableSourceMaps ? false : 'both',
