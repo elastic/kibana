@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
+import { ToolType, validateToolId } from '@kbn/onechat-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -18,7 +19,10 @@ import type {
   GetToolTypeInfoResponse,
   GetToolHealthResponse,
   ListToolHealthResponse,
+  BulkCreateMcpToolsResponse,
+  BulkCreateMcpToolResult,
 } from '../../../common/http_api/tools';
+import { validateConnector } from '../../services/tools/tool_types/mcp/validate_configuration';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 import { getToolTypeInfo } from '../../services/tools/utils';
@@ -72,6 +76,143 @@ export function registerInternalToolsRoutes({
       return response.ok<BulkDeleteToolResponse>({
         body: {
           results,
+        },
+      });
+    })
+  );
+
+  // bulk create MCP tools from connector (internal)
+  router.post(
+    {
+      path: `${internalApiPath}/tools/_bulk_create_mcp`,
+      validate: {
+        body: schema.object({
+          connector_id: schema.string(),
+          tools: schema.arrayOf(
+            schema.object({
+              name: schema.string(),
+              description: schema.maybe(schema.string()),
+            })
+          ),
+          namespace: schema.maybe(schema.string()),
+          tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+          skip_existing: schema.boolean({ defaultValue: true }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const {
+        connector_id: connectorId,
+        tools,
+        namespace,
+        tags,
+        skip_existing: skipExisting,
+      } = request.body;
+      const { tools: toolService } = getInternalServices();
+      const [, { actions }] = await coreSetup.getStartServices();
+      const registry = await toolService.getRegistry({ request });
+
+      // Validate namespace if provided (must be valid tool ID segment)
+      if (namespace) {
+        const namespaceError = validateToolId({ toolId: namespace, builtIn: false });
+        if (namespaceError) {
+          return response.badRequest({
+            body: { message: `Invalid namespace: ${namespaceError}` },
+          });
+        }
+      }
+
+      // Validate connector is MCP type
+      await validateConnector({
+        actions,
+        request,
+        connectorId,
+      });
+
+      // Precompute tool metadata (toolId, mcpToolName) once per tool
+      // MCP tool names are server-generated and typically well-formed (e.g., snake_case)
+      // We just lowercase them; validation in registry.create() handles edge cases
+      const toolsWithIds = tools.map((tool) => {
+        const toolName = tool.name.toLowerCase();
+        const toolId = namespace ? `${namespace}.${toolName}` : toolName;
+        return { toolId, mcpToolName: tool.name, description: tool.description };
+      });
+
+      // Process tools in parallel using Promise.allSettled (matches bulk delete pattern)
+      const createResults = await Promise.allSettled(
+        toolsWithIds.map(async ({ toolId, mcpToolName, description }) => {
+          // Check if tool already exists
+          const exists = await registry.has(toolId);
+          if (exists && skipExisting) {
+            return { toolId, mcpToolName, skipped: true as const };
+          }
+
+          // Create the MCP tool
+          await registry.create({
+            id: toolId,
+            type: ToolType.mcp,
+            description: description ?? '',
+            tags,
+            configuration: {
+              connector_id: connectorId,
+              tool_name: mcpToolName,
+            },
+          });
+
+          return { toolId, mcpToolName, skipped: false as const };
+        })
+      );
+
+      // Map results to response format (matches bulk delete pattern)
+      const results: BulkCreateMcpToolResult[] = createResults.map((result, index) => {
+        const { toolId, mcpToolName } = toolsWithIds[index];
+
+        if (result.status === 'rejected') {
+          return {
+            toolId,
+            mcpToolName,
+            success: false as const,
+            reason: result.reason?.toJSON?.() ?? {
+              error: { message: result.reason?.message ?? 'Unknown error' },
+            },
+          };
+        }
+
+        if (result.value.skipped) {
+          return {
+            toolId: result.value.toolId,
+            mcpToolName: result.value.mcpToolName,
+            success: true as const,
+            skipped: true as const,
+          };
+        }
+
+        return {
+          toolId: result.value.toolId,
+          mcpToolName: result.value.mcpToolName,
+          success: true as const,
+        };
+      });
+
+      // Compute summary counts
+      const summary = results.reduce(
+        (acc, r) => {
+          if (!r.success) acc.failed++;
+          else if ('skipped' in r && r.skipped) acc.skipped++;
+          else acc.created++;
+          return acc;
+        },
+        { total: results.length, created: 0, skipped: 0, failed: 0 }
+      );
+
+      return response.ok<BulkCreateMcpToolsResponse>({
+        body: {
+          results,
+          summary,
         },
       });
     })

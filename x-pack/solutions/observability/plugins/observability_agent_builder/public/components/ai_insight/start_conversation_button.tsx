@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { robotIconType } from '../icons/robot_icon';
+import { robotIconType } from '@kbn/observability-nav-icons';
 
 export function StartConversationButton(props: React.ComponentProps<typeof EuiButton>) {
   return (
@@ -19,7 +19,7 @@ export function StartConversationButton(props: React.ComponentProps<typeof EuiBu
       size="s"
       {...props}
     >
-      {i18n.translate('observabilityAgentBuilder.aiInsight.startConversationButton.label', {
+      {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.startConversationButton.label', {
         defaultMessage: 'Start conversation',
       })}
     </EuiButton>
