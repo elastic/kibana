@@ -95,6 +95,9 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/ui-theme'
   - '@kbn/ai-assistant-management-plugin'
+  - '@kbn/actions-plugin'
+  - '@kbn/connector-schemas'
+  - '@kbn/mcp-client'
   - '@kbn/react-kibana-context-theme'
 tags:
   - plugin
