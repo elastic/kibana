@@ -88,7 +88,8 @@
     "@kbn/licensing-types",
     "@kbn/utility-types-jest",
     "@kbn/zod",
-    "@kbn/connector-schemas"
+    "@kbn/connector-schemas",
+    "@kbn/onechat-plugin"
   ],
   "exclude": ["target/**/*"]
 }
