@@ -367,7 +367,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 
-          {isAgentExperience && (
+          {isAgentExperience && showChatExperienceSetting && (
             <>
               <EuiSpacer size="l" />
 
