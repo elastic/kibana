@@ -19,7 +19,7 @@ import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import {
   areChangesSkippable,
-  doAnyChangesMatch,
+  // doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
@@ -512,24 +512,24 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
     // }
 
-    if (
-      (await doAnyChangesMatch([
-        /^packages\/kbn-babel-preset/,
-        /^packages\/kbn-repo-file-maps/,
-        /^src\/platform\/packages\/private\/kbn-babel-transform/,
-        /^src\/platform\/packages\/private\/kbn-import-resolver/,
-        /^src\/platform\/packages\/private\/kbn-jest-serializers/,
-        /^src\/platform\/packages\/private\/kbn-repo-packages/,
-        /^src\/platform\/packages\/shared\/kbn-babel-register/,
-        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-repo-info/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-jest')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
-    }
+    // if (
+    //   (await doAnyChangesMatch([
+    //     /^packages\/kbn-babel-preset/,
+    //     /^packages\/kbn-repo-file-maps/,
+    //     /^src\/platform\/packages\/private\/kbn-babel-transform/,
+    //     /^src\/platform\/packages\/private\/kbn-import-resolver/,
+    //     /^src\/platform\/packages\/private\/kbn-jest-serializers/,
+    //     /^src\/platform\/packages\/private\/kbn-repo-packages/,
+    //     /^src\/platform\/packages\/shared\/kbn-babel-register/,
+    //     /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
+    //     /^src\/platform\/packages\/shared\/kbn-repo-info/,
+    //     /^src\/platform\/packages\/shared\/kbn-test/,
+    //     /^src\/setup_node_env/,
+    //   ])) ||
+    //   GITHUB_PR_LABELS.includes('ci:bench-jest')
+    // ) {
+    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
+    // }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 

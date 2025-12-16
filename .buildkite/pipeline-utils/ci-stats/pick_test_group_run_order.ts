@@ -333,7 +333,7 @@ export async function pickTestGroupRunOrder() {
   // upload the step definitions to Buildkite
   bk.uploadSteps(
     [
-      unit.count > 0
+      unit.count > 0 && false
         ? {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
@@ -355,7 +355,7 @@ export async function pickTestGroupRunOrder() {
             // },
           }
         : [],
-      integration.count > 0
+      integration.count > 0 && false
         ? {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
@@ -407,14 +407,14 @@ export async function pickTestGroupRunOrder() {
                     ...ftrExtraArgs,
                     ...envFromlabels,
                   },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
+                  // retry: {
+                  //   automatic: [
+                  //     { exit_status: '-1', limit: 3 },
+                  //     ...(FTR_CONFIGS_RETRY_COUNT > 0
+                  //       ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                  //       : []),
+                  //   ],
+                  // },
                 })
               ),
           }

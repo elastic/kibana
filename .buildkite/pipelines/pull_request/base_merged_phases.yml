@@ -1,18 +1,18 @@
 steps:
-  # - command: .buildkite/scripts/steps/build_kibana.sh
-  #   label: Build Kibana Distribution
-  #   agents:
-  #     machineType: c3d-standard-16-lssd
-  #     zones: us-central1-a,us-central1-b,us-central1-c
-  #   key: build
-  #   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-  #   timeout_in_minutes: 90
-  #   env:
-  #     KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
-  #   retry:
-  #     automatic:
-  #       - exit_status: '-1'
-  #         limit: 3
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution
+    agents:
+      machineType: c3d-standard-16-lssd
+      zones: us-central1-a,us-central1-b,us-central1-c
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 90
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   # - command: .buildkite/scripts/steps/quick_checks.sh
   #   label: 'Quick Checks'
@@ -116,7 +116,7 @@ steps:
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       JEST_CONFIGS_DEPS: 'check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build,check_types'
+      FTR_CONFIGS_DEPS: 'build'
       KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
