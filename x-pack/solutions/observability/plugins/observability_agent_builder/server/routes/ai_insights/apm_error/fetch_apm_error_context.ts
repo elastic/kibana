@@ -9,6 +9,7 @@ import dedent from 'dedent';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
+import { ENVIRONMENT_ALL } from '../../../../common/constants';
 import { termFilter } from '../../../utils/dsl_filters';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
@@ -95,7 +96,7 @@ export async function fetchApmErrorContext({
         dataRegistry.getData('apmDownstreamDependencies', {
           request,
           serviceName,
-          serviceEnvironment: environment ?? '',
+          serviceEnvironment: environment ?? ENVIRONMENT_ALL,
           start,
           end,
         }),

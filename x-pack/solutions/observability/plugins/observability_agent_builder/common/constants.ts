@@ -9,3 +9,6 @@
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';
 export const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
+
+// Environment name to "query across all environments" (i.e. don't apply an environment filter)
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';

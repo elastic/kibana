@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ENVIRONMENT_ALL } from '../../../common/constants';
 import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
@@ -64,7 +65,7 @@ export function createDownstreamDependenciesTool({
         const dependencies = await dataRegistry.getData('apmDownstreamDependencies', {
           request,
           serviceName: args.serviceName,
-          serviceEnvironment: args.serviceEnvironment ?? '',
+          serviceEnvironment: args.serviceEnvironment ?? ENVIRONMENT_ALL,
           start: args.start,
           end: args.end,
         });
