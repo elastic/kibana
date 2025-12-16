@@ -299,9 +299,7 @@ export function LensEditConfigurationFlyout({
       : [];
   }, [activeVisualization, visualization.state]);
 
-  const isSingleLayerVisualization = useMemo(() => {
-    return layerIds.length === 1;
-  }, [layerIds]);
+  const isSingleLayerVisualization = layerIds.length === 1;
 
   const showConvertToEsqlButton = useMemo(() => {
     const isDevMode = process.env.NODE_ENV === 'development';
