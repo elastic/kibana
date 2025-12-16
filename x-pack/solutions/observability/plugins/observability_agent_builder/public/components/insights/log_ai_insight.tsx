@@ -1,0 +1,112 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useCallback, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../hooks/use_kibana';
+import {
+  OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+} from '../../../common';
+import { AiInsight, type AiInsightAttachment } from '../ai_insight';
+
+export interface LogAiInsightDocument {
+  fields: {
+    field: string;
+    value: unknown[];
+  }[];
+}
+
+export interface LogAiInsightProps {
+  doc: LogAiInsightDocument | undefined;
+}
+
+const explainLogMessageButtonLabel = i18n.translate(
+  'xpack.observabilityAgentBuilder.aiInsight.explainLogMessageButtonLabel',
+  {
+    defaultMessage: 'Explain this log entry',
+  }
+);
+
+const explainLogMessageDescription = i18n.translate(
+  'xpack.observabilityAgentBuilder.aiInsight.explainLogMessageDescription',
+  {
+    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
+  }
+);
+
+export function LogAiInsight({ doc }: LogAiInsightProps) {
+  const {
+    services: { http },
+  } = useKibana();
+
+  const { index, id } = useMemo(() => {
+    return {
+      index: doc?.fields.find((field) => field.field === '_index')?.value[0] as string | undefined,
+      id: doc?.fields.find((field) => field.field === '_id')?.value[0] as string | undefined,
+    };
+  }, [doc]);
+
+  const fetchInsight = useCallback(async () => {
+    const response = await http?.post<{ summary: string; context: string }>(
+      '/internal/observability_agent_builder/ai_insights/log',
+      {
+        body: JSON.stringify({
+          index,
+          id,
+        }),
+      }
+    );
+    return {
+      summary: response?.summary ?? '',
+      context: response?.context ?? '',
+    };
+  }, [http, index, id]);
+
+  const buildAttachments = useCallback(
+    (summary: string, context: string): AiInsightAttachment[] => [
+      {
+        type: 'screen_context',
+        data: {
+          app: 'discover',
+          url: window.location.href,
+        },
+        hidden: true,
+      },
+      {
+        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+        data: {
+          summary,
+          context,
+        },
+      },
+      {
+        type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+        data: {
+          index,
+          id,
+        },
+      },
+    ],
+    [index, id]
+  );
+
+  return (
+    <>
+      <AiInsight
+        title={explainLogMessageButtonLabel}
+        description={explainLogMessageDescription}
+        fetchInsight={fetchInsight}
+        buildAttachments={buildAttachments}
+      />
+      <EuiSpacer size="s" />
+    </>
+  );
+}
+
+// eslint-disable-next-line import/no-default-export
+export default LogAiInsight;
