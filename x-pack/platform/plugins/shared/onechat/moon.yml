@@ -99,6 +99,8 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/mcp-client'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/triggers-actions-ui-plugin'
 tags:
   - plugin
   - prod
