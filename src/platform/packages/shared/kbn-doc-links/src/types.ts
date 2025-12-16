@@ -55,6 +55,7 @@ export interface DocLinks {
     readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
     readonly cloudConnect: string;
+    readonly connectToAutoops: string;
   };
   readonly console: {
     readonly guide: string;
@@ -88,6 +89,7 @@ export interface DocLinks {
     readonly notebooksExamples: string;
     readonly customerEngineerRequestForm: string;
     readonly elasticCommunity: string;
+    readonly elasticCloud: string;
   };
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
@@ -152,6 +154,7 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly e5Model: string;
     readonly elasticInferenceService: string;
+    readonly elasticInferenceServicePricing: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;

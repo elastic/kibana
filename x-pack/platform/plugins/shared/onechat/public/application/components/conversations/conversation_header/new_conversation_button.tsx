@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
@@ -24,10 +23,8 @@ export const NewConversationButton: React.FC<NewConversationButtonProps> = ({ on
   const { isEmbeddedContext, setConversationId } = useConversationContext();
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
-  const isSendingMessage = useIsSendingMessage();
   const { cleanConversation } = useSendMessage();
-  // Only disable when we are on /new and there is a message being sent
-  const isDisabled = isNewConversation && isSendingMessage;
+
   const handleClick = () => {
     // For new conversations, there isn't anywhere to navigate to, so instead we clean the conversation state
     if (isNewConversation) {
@@ -39,11 +36,7 @@ export const NewConversationButton: React.FC<NewConversationButtonProps> = ({ on
     onClose?.();
   };
 
-  const buttonProps = isDisabled
-    ? {
-        disabled: true,
-      }
-    : isEmbeddedContext
+  const buttonProps = isEmbeddedContext
     ? {}
     : {
         href: createOnechatUrl(appPaths.chat.new),
