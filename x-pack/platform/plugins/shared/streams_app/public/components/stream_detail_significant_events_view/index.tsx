@@ -263,6 +263,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {featureDetectionFlyout}
       {editFlyout(false)}
     </>
   );
