@@ -38,6 +38,7 @@
     "optionalPlugins": [
       "cloud",
       "licenseManagement",
+      "workflowsExtensions",
       "workflowsManagement",
       "usageCollection"
     ],
