@@ -90,3 +90,81 @@ export interface ListWorkflowsResponse {
 export interface GetToolTypeInfoResponse {
   toolTypes: ToolTypeInfo[];
 }
+
+/**
+ * Tool health status returned by the health API.
+ */
+export type ToolHealthStatus = 'healthy' | 'failed' | 'unknown';
+
+export interface ToolHealthState {
+  toolId: string;
+  status: ToolHealthStatus;
+  lastCheck: string;
+  errorMessage?: string;
+  consecutiveFailures: number;
+}
+
+export interface GetToolHealthResponse {
+  health: ToolHealthState | null;
+}
+
+export interface ListToolHealthResponse {
+  results: ToolHealthState[];
+}
+
+/**
+ * Request payload for bulk creating MCP tools from a connector.
+ */
+export interface BulkCreateMcpToolsRequest {
+  /** The ID of the MCP connector to create tools from */
+  connector_id: string;
+  /** Tools to create (from client's listTools call on the connector) */
+  tools: Array<{
+    /** MCP tool name */
+    name: string;
+    /** Tool description */
+    description?: string;
+  }>;
+  /** Optional namespace to prepend to tool IDs */
+  namespace?: string;
+  /** Optional tags to apply to all created tools */
+  tags?: string[];
+  /** Skip tools that already exist (default: true) */
+  skip_existing?: boolean;
+}
+
+interface BulkCreateMcpToolResultBase {
+  /** Generated tool ID */
+  toolId: string;
+  /** Original MCP tool name */
+  mcpToolName: string;
+}
+
+interface BulkCreateMcpToolSuccessResult extends BulkCreateMcpToolResultBase {
+  success: true;
+}
+
+interface BulkCreateMcpToolSkippedResult extends BulkCreateMcpToolResultBase {
+  success: true;
+  skipped: true;
+}
+
+interface BulkCreateMcpToolFailureResult extends BulkCreateMcpToolResultBase {
+  success: false;
+  reason: SerializedOnechatError;
+}
+
+export type BulkCreateMcpToolResult =
+  | BulkCreateMcpToolSuccessResult
+  | BulkCreateMcpToolSkippedResult
+  | BulkCreateMcpToolFailureResult;
+
+export interface BulkCreateMcpToolsResponse {
+  results: BulkCreateMcpToolResult[];
+  summary: {
+    total: number;
+    created: number;
+    skipped: number;
+    failed: number;
+  };
+}
