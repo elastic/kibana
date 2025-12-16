@@ -57,9 +57,16 @@ export interface InternalApplicationStart extends ApplicationStart {
    * Consumed by the chrome header.
    *
    * @internal
+   * @deprecated Use {@link currentAppMenu$} instead.
    */
   currentActionMenu$: Observable<MountPoint | undefined>;
-  currentAppMenu$?: Observable<AppMenuConfig | undefined>;
+  /**
+   * The potential action menu set by the currently mounted app.
+   * Consumed by the chrome app menu.
+   *
+   * @internal
+   */
+  currentAppMenu$: Observable<AppMenuConfig | undefined>;
 
   /**
    * The global history instance, exposed only to Core.

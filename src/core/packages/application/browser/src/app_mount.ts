@@ -203,10 +203,15 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    *    return renderApp({ element, history });
    * }
    * ```
+   * @deprecated Use {@link AppMountParameters.setAppMenu} instead.
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 
-  setAppMenu?: (config: AppMenuConfig) => void;
+  /**
+   * A function that can be used to set the mount point used to populate the application action container
+   * in the chrome app menu.
+   */
+  setAppMenu: (config: AppMenuConfig) => void;
 
   /**
    * An observable emitting {@link CoreTheme | Core's theme}.
