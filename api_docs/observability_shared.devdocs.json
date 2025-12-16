@@ -7398,6 +7398,28 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.InspectResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "InspectResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Request",
+            "text": "Request"
+          },
+          "[]"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/common/utils/get_inspect_response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.INVENTORY_LOCATOR_ID",
         "type": "string",
         "tags": [],
@@ -7827,6 +7849,31 @@
           "string[]"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES",
+        "description": [
+          "\nCombined list of all observability rule type IDs including stack rules\nsupported by observability."
+        ],
+        "signature": [
+          "(string | ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.InfraRuleType",
+            "text": "InfraRuleType"
+          },
+          ")[]"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

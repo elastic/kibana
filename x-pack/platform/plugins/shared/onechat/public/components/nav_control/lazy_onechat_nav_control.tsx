@@ -34,7 +34,7 @@ export const OnechatNavControlInitiator = ({
 
   useEffect(() => {
     const sub = coreStart.settings.client
-      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
+      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE)
       .subscribe((chatExperience) => {
         setIsAgentsExperience(chatExperience === AIChatExperience.Agent);
       });
