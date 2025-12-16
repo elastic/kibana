@@ -16,7 +16,7 @@ import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useRepairSlo({ name, onConfirm }: { name: string; onConfirm?: () => void }) {
+export function useRepairSlo({ name }: { name: string }) {
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -27,7 +27,7 @@ export function useRepairSlo({ name, onConfirm }: { name: string; onConfirm?: ()
   return useMutation<RepairResult[], ServerError, { sloId: string }>(
     ['repairSlo'],
     ({ sloId }) => {
-      return sloClient.fetch('POST /api/observability/slos/_repair 2023-10-31', {
+      return sloClient.fetch('POST /api/observability/slos/_repair', {
         params: {
           body: {
             list: [sloId],
@@ -43,6 +43,7 @@ export function useRepairSlo({ name, onConfirm }: { name: string; onConfirm?: ()
             values: { name },
           }),
         });
+        queryClient.invalidateQueries({ queryKey: [...sloKeys.all, 'health'], exact: false });
       },
       onSuccess: (response) => {
         const foundSLO = response.find((result) => result.success && result.id);
@@ -65,8 +66,6 @@ export function useRepairSlo({ name, onConfirm }: { name: string; onConfirm?: ()
         }
 
         queryClient.invalidateQueries({ queryKey: [...sloKeys.all, 'health'], exact: false });
-
-        onConfirm?.();
       },
     }
   );

@@ -13,12 +13,6 @@ const repairParamsSchema = t.type({
   }),
 });
 
-const repairStatusParamsSchema = t.type({
-  path: t.type({
-    taskId: t.string,
-  }),
-});
-
 type RepairParams = t.TypeOf<typeof repairParamsSchema.props.body>;
 
 interface RepairResult {
@@ -34,4 +28,4 @@ interface RepairStatusResponse {
 }
 
 export type { RepairParams, RepairResult, RepairStatusResponse };
-export { repairParamsSchema, repairStatusParamsSchema };
+export { repairParamsSchema };

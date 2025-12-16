@@ -119,12 +119,17 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         {links.length > 0 && (
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-              {links.map(({ transformId, transformName, status, url }) => (
+              {links.map(({ transformId, transformName, url }) => (
                 <EuiFlexItem key={transformId}>
                   <ContentWithInspectCta
                     url={url}
                     textSize="s"
-                    content={`${transformName} (${status})`}
+                    content={`${transformName} (${i18n.translate(
+                      'xpack.slo.sloDetails.healthCallout.transformStatus.unhealthy',
+                      {
+                        defaultMessage: 'unhealthy',
+                      }
+                    )})`}
                   />
                 </EuiFlexItem>
               ))}

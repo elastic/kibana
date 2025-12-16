@@ -22,6 +22,12 @@ interface RepairAction {
   enabled: boolean | undefined;
 }
 
+interface RepairResult {
+  id: string;
+  success: boolean;
+  error?: string;
+}
+
 export class RepairSLO {
   constructor(
     private logger: Logger,
@@ -31,14 +37,11 @@ export class RepairSLO {
     private summaryTransformManager: DefaultSummaryTransformManager
   ) {}
 
-  public async execute(
-    params: RepairParams
-  ): Promise<{ id: string; success: boolean; error?: string }[]> {
+  public async execute(params: RepairParams): Promise<RepairResult[]> {
     if (params.list.length > 100) {
       throw new Error('Cannot repair more than 100 SLOs at once');
     }
-    const allResults: Array<{ id: string; success: boolean; error?: string }> = [];
-
+    const allResults: Array<RepairResult> = [];
     const definitions = await this.repository.findAllByIds(params.list);
 
     let successCount = 0;
@@ -51,13 +54,14 @@ export class RepairSLO {
     });
 
     await Promise.all(
-      definitions.map(async (definition) => {
-        const repairActions = this.identifyRepairActions(health[0], definition.enabled);
+      definitions.map(async (definition, i) => {
+        const repairActions = this.identifyRepairActions(health[i], definition.enabled);
         this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
 
         if (repairActions.length === 0) {
           this.logger.debug('No repair actions needed');
           allResults.push({ id: definition.id, success: true });
+          return;
         }
 
         return headLimiter(async () => {
@@ -72,7 +76,7 @@ export class RepairSLO {
               successCount++;
               allResults.push({ id: definition.id, success: true });
             } catch (err) {
-              this.logger.error(
+              this.logger.debug(
                 `Failed to execute repair action [${action.action}] for SLO [${definition.id}] transform [${action.transformType}]: ${err}`
               );
               errorCount++;
@@ -87,7 +91,9 @@ export class RepairSLO {
       })
     );
 
-    this.logger.info(`Repairs completed: ${successCount} successful repairs, ${errorCount} errors`);
+    this.logger.debug(
+      `Repairs completed: ${successCount} successful repairs, ${errorCount} errors`
+    );
     return allResults;
   }
 
@@ -142,7 +148,7 @@ export class RepairSLO {
 
     switch (action.action) {
       case 'recreate-transform':
-        this.logger.info(
+        this.logger.debug(
           `Recreating ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
         await manager.install(slo);
@@ -153,13 +159,13 @@ export class RepairSLO {
         return manager.stop(transformId);
 
       case 'start-transform':
-        this.logger.info(
+        this.logger.debug(
           `Starting ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
         return manager.start(transformId);
 
       case 'stop-transform':
-        this.logger.info(
+        this.logger.debug(
           `Stopping ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
         return manager.stop(transformId);

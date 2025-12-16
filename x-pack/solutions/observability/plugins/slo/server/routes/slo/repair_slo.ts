@@ -13,7 +13,7 @@ import { DefaultSummaryTransformManager, DefaultTransformManager } from '../../s
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
 
 export const repairSLORoute = createSloServerRoute({
-  endpoint: 'POST /api/observability/slos/_repair 2023-10-31',
+  endpoint: 'POST /api/observability/slos/_repair',
   options: { access: 'internal' },
   security: {
     authz: {
