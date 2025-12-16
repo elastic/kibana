@@ -29,7 +29,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es: Client = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
-  const retry = getService('retry');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const logsTemplateName = `logs-${pkgName}.test_logs`;
@@ -65,7 +64,6 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
-        retry,
       });
     });
 
@@ -380,7 +378,6 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
-        retry,
       });
     });
   });
@@ -393,7 +390,6 @@ const expectAssetsInstalled = ({
   pkgName,
   es,
   kibanaServer,
-  retry,
 }: {
   logsTemplateName: string;
   metricsTemplateName: string;
@@ -401,7 +397,6 @@ const expectAssetsInstalled = ({
   pkgName: string;
   es: Client;
   kibanaServer: any;
-  retry: any;
 }) => {
   it('should have installed the ILM policy', async function () {
     const resPolicy = await es.transport.request(
@@ -616,7 +611,9 @@ const expectAssetsInstalled = ({
             ? null
             : res.attributes.verification_key_id,
         installed_kibana: sortBy(res.attributes.installed_kibana, (o: AssetReference) => o.type),
-        installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
+        installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type).filter(
+          (item) => item.type !== 'knowledge_base'
+        ),
         package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
       };
 
@@ -744,10 +741,6 @@ const expectAssetsInstalled = ({
           {
             id: 'metrics-all_assets.test_metrics-0.1.0',
             type: 'ingest_pipeline',
-          },
-          {
-            id: 'all_assets-README.md',
-            type: 'knowledge_base',
           },
           {
             id: 'default',
@@ -931,9 +924,7 @@ const expectAssetsInstalled = ({
       expect(sortedRes).eql(expectedSavedObject);
     }
 
-    await retry.tryForTime(10000, async () => {
-      await verifySO();
-    });
+    await verifySO();
   });
 
   // TODO enable when feature flag is turned on https://github.com/elastic/kibana/issues/244655

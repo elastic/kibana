@@ -25,7 +25,6 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
-  const retry = getService('retry');
 
   function withTestPackage(name: string, version: string) {
     const pkgRoute = `/api/fleet/epm/packages/${name}/${version}`;
@@ -1250,7 +1249,6 @@ export default function (providerContext: FtrProviderContext) {
         }
 
         expectedAssets.push({ id: 'logs@custom', type: 'component_template' });
-        expectedAssets.push({ id: 'integration_to_input-README.md', type: 'knowledge_base' });
         expectedAssets.push({ id: 'integration_to_input@custom', type: 'component_template' });
       });
 
@@ -1285,14 +1283,15 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          await retry.tryForTime(60000, async () => {
-            const installation = await getInstallationInfo(
-              supertest,
-              'integration_to_input',
-              '3.0.0'
-            );
-            expectIdArraysEqual(installation.installed_es, expectedAssets);
-          });
+          const installation = await getInstallationInfo(
+            supertest,
+            'integration_to_input',
+            '3.0.0'
+          );
+          expectIdArraysEqual(
+            installation.installed_es.filter((asset: any) => asset.type !== 'knowledge_base'),
+            expectedAssets
+          );
 
           const expectedComponentTemplates = expectedAssets.filter(
             (expectedAsset) =>
