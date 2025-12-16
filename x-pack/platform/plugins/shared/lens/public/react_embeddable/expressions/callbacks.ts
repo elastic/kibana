@@ -24,6 +24,7 @@ export function prepareCallbacks(
   executionContext: KibanaExecutionContext | undefined,
   onDataUpdate: (adapters: Partial<DefaultInspectorAdapters | undefined>) => void,
   dispatchRenderComplete: () => void,
+  resetLoadingReasons: () => void,
   callbacks: LensPublicCallbacks
 ) {
   const disableTriggers = apiHasDisableTriggers(parentApi) ? parentApi.disableTriggers : undefined;
@@ -36,7 +37,8 @@ export function prepareCallbacks(
       getState,
       services,
       executionContext,
-      dispatchRenderComplete
+      dispatchRenderComplete,
+      resetLoadingReasons
     ),
     onData: (_data: unknown, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       addLog(`onData$`);

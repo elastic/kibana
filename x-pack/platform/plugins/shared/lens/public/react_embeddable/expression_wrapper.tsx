@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
@@ -16,6 +16,10 @@ import type { ExecutionContextSearch } from '@kbn/es-query';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import type { UserMessage, LensInspector } from '@kbn/lens-common';
+import type {
+  ExpressionRenderError,
+  RenderErrorHandlerFnType,
+} from '@kbn/expressions-plugin/public/types';
 import {
   getOriginalRequestErrorMessages,
   isIgnorableBlockingMessage,
@@ -76,7 +80,20 @@ export function ExpressionWrapper({
   noPadding,
   abortController,
 }: ExpressionWrapperProps) {
+  const onRenderErrorStable: RenderErrorHandlerFnType = useCallback((_, error) => {
+    return isIgnorableBlockingMessage(error);
+  }, []);
+  const renderError = useCallback(
+    (errorMessage: string | null | undefined, error: ExpressionRenderError | null | undefined) => {
+      const messages = getOriginalRequestErrorMessages(error || null);
+      addUserMessages(messages);
+      onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
+      return <></>; // the embeddable will take care of displaying the messages
+    },
+    [addUserMessages, onRuntimeError]
+  );
   if (!expression) return null;
+
   return (
     <div
       className={classNames('lnsExpressionRenderer', 'eui-scrollBar', className)}
@@ -103,15 +120,8 @@ export function ExpressionWrapper({
         executionContext={executionContext}
         abortController={abortController}
         // We need to notify the expression renderer if certain errors can be ignored even when "blocking"
-        onRenderError={(_, error) => {
-          return isIgnorableBlockingMessage(error);
-        }}
-        renderError={(errorMessage, error) => {
-          const messages = getOriginalRequestErrorMessages(error || null);
-          addUserMessages(messages);
-          onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
-          return <></>; // the embeddable will take care of displaying the messages
-        }}
+        onRenderError={onRenderErrorStable}
+        renderError={renderError}
         onEvent={handleEvent}
         hasCompatibleActions={hasCompatibleActions}
         getCompatibleCellValueActions={getCompatibleCellValueActions}

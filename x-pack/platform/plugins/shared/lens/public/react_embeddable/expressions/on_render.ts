@@ -59,10 +59,12 @@ export function prepareOnRender(
   getState: GetStateType,
   { datasourceMap, visualizationMap, coreStart }: LensEmbeddableStartServices,
   executionContext: KibanaExecutionContext | undefined,
-  dispatchRenderComplete: () => void
+  dispatchRenderComplete: () => void,
+  resetLoadingReasons: () => void
 ) {
   return function onRender$(count: number) {
     addLog(`onRender$ ${count}`);
+    resetLoadingReasons();
     // for some reason onRender$ is emitting multiple times with the same render count
     // so avoid to repeat the same logic on duplicate calls
     if (count === internalApi.renderCount$.getValue()) {

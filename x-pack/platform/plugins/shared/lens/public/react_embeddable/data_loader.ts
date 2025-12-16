@@ -134,6 +134,7 @@ export function loadEmbeddableData(
     if (filteredBlockingErrors.length > 0) {
       internalApi.dispatchError();
     }
+
     return {
       blockingErrors: filteredBlockingErrors.length,
       ignoredBlockedErrors: blockingErrors.length - filteredBlockingErrors.length,
@@ -145,8 +146,6 @@ export function loadEmbeddableData(
     // No issues so far, blocking errors are handled directly by Lens from this point on
     const check = dispatchBlockingErrorIfAny();
     if (!check.blockingErrors) {
-      // remove past render
-      loadingReasons.shift();
       if (!check.ignoredBlockedErrors) {
         internalApi.dispatchRenderComplete();
       }
@@ -223,6 +222,7 @@ export function loadEmbeddableData(
       getExecutionContext(),
       onDataCallback,
       onRenderComplete,
+      () => loadingReasons.shift(),
       callbacks
     );
 
