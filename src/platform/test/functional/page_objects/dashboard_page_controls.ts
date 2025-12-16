@@ -319,7 +319,7 @@ export class DashboardPageControls extends FtrService {
   public async hideHoverActions() {
     await this.retry.try(async () => {
       await this.browser.clickMouseButton({ x: 0, y: 0 });
-      await this.testSubjects.missingOrFail('hover-actions*', {
+      await this.testSubjects.missingOrFail('*hover-actions', {
         allowHidden: true,
       });
     });
