@@ -69,7 +69,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
       {
         icon: LazyIconAgents, // Temp svg until we have icon in EUI
         link: 'agent_builder',
-        badgeType: 'techPreview',
       },
       {
         link: 'workflows',
