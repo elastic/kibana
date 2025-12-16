@@ -6686,16 +6686,10 @@
             "slo_template": {
               "properties": {
                 "usedTags": {
-                  "type": "integer",
-                  "_meta": {
-                    "description": "Total number of tags attached to a saved object."
-                  }
+                  "type": "integer"
                 },
                 "taggedObjects": {
-                  "type": "integer",
-                  "_meta": {
-                    "description": "Total number of saved objects tagged."
-                  }
+                  "type": "integer"
                 }
               }
             }
