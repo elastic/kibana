@@ -24,17 +24,18 @@ import {
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
-  getRulesV2Feature,
   getRulesFeature,
   getAlertsFeature,
 } from '@kbn/security-solution-features/product_features';
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
+import { getRulesV2Feature, getRulesV3Feature } from '@kbn/security-solution-features/src/rules';
 import type { ExperimentalFeatures } from '../../../common';
 import { ProductFeatures } from './product_features';
 import { casesProductFeatureParams } from './cases_product_feature_params';
 import {
   rulesSavedObjects,
   rulesV2SavedObjects,
+  rulesV3SavedObjects,
   securityExceptionsSavedObjects,
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
@@ -89,6 +90,10 @@ export class ProductFeaturesService {
       getRulesV2Feature({
         ...securityFeatureParams,
         savedObjects: [...rulesV2SavedObjects, ...securityExceptionsSavedObjects],
+      }),
+      getRulesV3Feature({
+        ...securityFeatureParams,
+        savedObjects: [...rulesV3SavedObjects, ...securityExceptionsSavedObjects],
       }),
     ]);
     this.productFeaturesRegistry.create('alerts', [
