@@ -155,6 +155,12 @@ interface StreamsProcessingSimulationSamplesFetchLatencyProps {
   duration_ms: number;
 }
 
+interface StreamsPartitioningSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
+  duration_ms: number;
+}
+
 interface StreamsTabVisitedProps {
   stream_name: string;
   stream_type: StreamType;
@@ -194,5 +200,6 @@ export {
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,
 };
