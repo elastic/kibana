@@ -32,7 +32,6 @@ export const versionSchema = schema.object({
         schema.string(),
         schema.object({
           total: schema.number(),
-          details: schema.recordOf(schema.string(), schema.number()),
         })
       ),
     }),
