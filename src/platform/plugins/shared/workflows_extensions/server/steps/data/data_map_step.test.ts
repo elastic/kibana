@@ -28,9 +28,19 @@ const createMockContext = (input: {
             if (value === '{{ item }}') {
               result[key] = additionalContext?.item;
             } else if (value.includes('item.')) {
-              const match = value.match(/\{\{\s*item\.(\w+)\s*\}\}/);
+              const match = value.match(/\{\{\s*item\.([\w.]+)\s*\}\}/);
               if (match && additionalContext?.item) {
-                result[key] = (additionalContext.item as Record<string, unknown>)[match[1]];
+                const path = match[1].split('.');
+                let currentValue: any = additionalContext.item;
+                for (const prop of path) {
+                  if (currentValue && typeof currentValue === 'object' && prop in currentValue) {
+                    currentValue = currentValue[prop];
+                  } else {
+                    currentValue = undefined;
+                    break;
+                  }
+                }
+                result[key] = currentValue;
               } else {
                 result[key] = value;
               }
@@ -137,20 +147,20 @@ describe('dataMapStepDefinition', () => {
       );
     });
 
-    it('should error when items is not an array', async () => {
+    it('should handle object input and return mapped object', async () => {
       const input = {
-        items: { id: 1, name: 'Not an array' },
+        items: { id: 1, name: 'Alice' },
         fields: {
           userId: '{{ item.id }}',
+          userName: '{{ item.name }}',
         },
       };
 
       const context = createMockContext(input);
       const result = await dataMapStepDefinition.handler(context);
 
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toContain('Expected items to be an array');
-      expect(context.logger.error).toHaveBeenCalled();
+      expect(result.output).toEqual({ userId: 1, userName: 'Alice' });
+      expect(context.logger.debug).toHaveBeenCalledWith('Mapping 1 item(s) with 2 fields');
     });
 
     it('should error when items is null', async () => {
@@ -165,7 +175,7 @@ describe('dataMapStepDefinition', () => {
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
-      expect(result.error?.message).toContain('Expected items to be an array');
+      expect(result.error?.message).toContain('Items cannot be null or undefined');
     });
 
     it('should error when items is undefined', async () => {
@@ -180,7 +190,7 @@ describe('dataMapStepDefinition', () => {
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
-      expect(result.error?.message).toContain('Expected items to be an array');
+      expect(result.error?.message).toContain('Items cannot be null or undefined');
     });
 
     it('should handle complex nested objects', async () => {
@@ -215,8 +225,8 @@ describe('dataMapStepDefinition', () => {
       const context = createMockContext(input);
       await dataMapStepDefinition.handler(context);
 
-      expect(context.logger.debug).toHaveBeenCalledWith('Mapping 3 items with 1 fields');
-      expect(context.logger.debug).toHaveBeenCalledWith('Successfully mapped 3 items');
+      expect(context.logger.debug).toHaveBeenCalledWith('Mapping 3 item(s) with 1 fields');
+      expect(context.logger.debug).toHaveBeenCalledWith('Successfully mapped 3 item(s)');
     });
 
     it('should handle multiple field mappings', async () => {
@@ -257,6 +267,81 @@ describe('dataMapStepDefinition', () => {
 
       expect(result.output).toHaveLength(2);
     });
+
+    it('should handle object with nested properties', async () => {
+      const input = {
+        items: {
+          user: { id: 1, profile: { name: 'Alice', email: 'alice@example.com' } },
+          metadata: { created: '2024-01-01' },
+        },
+        fields: {
+          userId: '{{ item.user.id }}',
+          name: '{{ item.user.profile.name }}',
+          email: '{{ item.user.profile.email }}',
+        },
+      };
+
+      const context = createMockContext(input);
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.output).toEqual({
+        userId: 1,
+        name: 'Alice',
+        email: 'alice@example.com',
+      });
+    });
+
+    it('should handle object with static field values', async () => {
+      const input = {
+        items: { id: 1, name: 'Product' },
+        fields: {
+          productId: '{{ item.id }}',
+          productName: '{{ item.name }}',
+          source: 'api',
+          processed: true,
+        },
+      };
+
+      const context = createMockContext(input);
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.output).toEqual({
+        productId: 1,
+        productName: 'Product',
+        source: 'api',
+        processed: true,
+      });
+    });
+
+    it('should error when items is a primitive string', async () => {
+      const input = {
+        items: 'not an object or array',
+        fields: {
+          value: '{{ item }}',
+        },
+      };
+
+      const context = createMockContext(input);
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('Expected items to be an array or object');
+    });
+
+    it('should error when items is a primitive number', async () => {
+      const input = {
+        items: 42,
+        fields: {
+          value: '{{ item }}',
+        },
+      };
+
+      const context = createMockContext(input);
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('Expected items to be an array or object');
+    });
   });
 
   describe('schema validation', () => {
@@ -279,6 +364,13 @@ describe('dataMapStepDefinition', () => {
         { userId: 1, userName: 'Alice' },
         { userId: 2, userName: 'Bob' },
       ];
+
+      const parseResult = dataMapStepDefinition.outputSchema.safeParse(output);
+      expect(parseResult.success).toBe(true);
+    });
+
+    it('should validate output schema as object', () => {
+      const output = { userId: 1, userName: 'Alice' };
 
       const parseResult = dataMapStepDefinition.outputSchema.safeParse(output);
       expect(parseResult.success).toBe(true);

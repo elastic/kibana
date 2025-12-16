@@ -20,11 +20,11 @@ export const dataMapStepDefinition: PublicStepDefinition = {
   }),
   description: i18n.translate('workflowsExtensions.dataMapStep.description', {
     defaultMessage:
-      'Iterate over a collection and reshape each item by renaming fields, removing keys, or computing new values',
+      'Transform arrays or single objects by renaming fields, removing keys, or computing new values',
   }),
   documentation: {
     details: i18n.translate('workflowsExtensions.dataMapStep.documentation.details', {
-      defaultMessage: `The ${DataMapStepTypeId} step transforms each item in an array by applying a mapping configuration. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. The output is accessible via {outputSyntax}.`,
+      defaultMessage: `The ${DataMapStepTypeId} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. The output is accessible via {outputSyntax}.`,
       values: {
         itemSyntax: '`{{ item.field }}`',
         indexSyntax: '`{{ index }}`',
@@ -106,6 +106,25 @@ export const dataMapStepDefinition: PublicStepDefinition = {
       state: "\${{ item.state }}"
       created: "\${{ item.created_at }}"
       url: "\${{ item.html_url }}"
+\`\`\``,
+
+      `## Map a single object
+\`\`\`yaml
+- name: reshape-user-profile
+  type: ${DataMapStepTypeId}
+  with:
+    items: "\${{ steps.fetch_user.output }}"
+    fields:
+      user_id: "\${{ item.id }}"
+      full_name: "\${{ item.firstName }} \${{ item.lastName }}"
+      email: "\${{ item.email }}"
+      is_active: "\${{ item.status == 'active' }}"
+
+# When items is an object, output is also an object
+- name: use-mapped-user
+  type: log
+  with:
+    message: "User: \${{ steps.reshape-user-profile.output.full_name }}"
 \`\`\``,
     ],
   },

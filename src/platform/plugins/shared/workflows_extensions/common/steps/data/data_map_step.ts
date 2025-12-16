@@ -17,7 +17,10 @@ export const InputSchema = z.object({
   fields: z.record(z.string(), z.unknown()),
 });
 
-export const OutputSchema = z.array(z.record(z.string(), z.unknown()));
+export const OutputSchema = z.union([
+  z.array(z.record(z.string(), z.unknown())),
+  z.record(z.string(), z.unknown()),
+]);
 
 export type DataMapStepInputSchema = typeof InputSchema;
 export type DataMapStepOutputSchema = typeof OutputSchema;
