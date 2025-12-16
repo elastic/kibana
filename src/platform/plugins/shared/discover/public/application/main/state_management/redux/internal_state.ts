@@ -23,7 +23,6 @@ import {
   createAction,
   isAnyOf,
 } from '@reduxjs/toolkit';
-import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
@@ -55,7 +54,6 @@ const initialState: DiscoverInternalState = {
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
-  expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
@@ -165,18 +163,15 @@ export const internalStateSlice = createSlice({
 
     setExpandedDoc: (
       state,
-      action: PayloadAction<{
+      action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         initialDocViewerTabId?: string;
       }>
     ) => {
-      state.expandedDoc = action.payload.expandedDoc;
-      state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
-    },
-
-    discardFlyoutsOnTabChange: (state) => {
-      state.expandedDoc = undefined;
-      state.initialDocViewerTabId = undefined;
+      withTab(state, action.payload, (tab) => {
+        tab.expandedDoc = action.payload.expandedDoc;
+        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      });
     },
 
     setDataRequestParams: (state, action: TabAction<Pick<TabState, 'dataRequestParams'>>) =>
@@ -271,8 +266,8 @@ export const internalStateSlice = createSlice({
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
-        state.expandedDoc = undefined;
-        state.initialDocViewerTabId = undefined;
+        tab.expandedDoc = undefined;
+        tab.initialDocViewerTabId = undefined;
       }),
 
     setESQLEditorUiState: (
@@ -450,13 +445,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
     ),
-  });
-
-  startListening({
-    actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
-    effect: () => {
-      dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
-    },
   });
 
   startListening({
