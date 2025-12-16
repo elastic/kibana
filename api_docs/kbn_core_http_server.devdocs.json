@@ -3953,6 +3953,14 @@
                 "path": "x-pack/platform/plugins/shared/data_sources_registry/server/routes.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/get.ts"
               },
@@ -4197,6 +4205,14 @@
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
+              },
+              {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
               },
@@ -4235,14 +4251,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -6825,6 +6833,10 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/create.ts"
               },
@@ -6907,6 +6919,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -7165,6 +7181,10 @@
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
@@ -7179,10 +7199,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -8917,16 +8933,16 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -9665,6 +9681,14 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/delete.ts"
               },
@@ -9697,12 +9721,12 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "infra",

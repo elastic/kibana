@@ -8,7 +8,7 @@
  */
 
 import * as commands from '..';
-import { EsqlQuery } from '../../../../query';
+import { EsqlQuery } from '../../../../composer/query';
 
 describe('commands.where', () => {
   describe('.list()', () => {
