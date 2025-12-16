@@ -7,5 +7,4 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-set +e
-node scripts/type_check --with-archive
+node scripts/type_check
