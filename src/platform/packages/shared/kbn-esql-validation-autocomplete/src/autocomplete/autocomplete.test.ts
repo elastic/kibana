@@ -14,14 +14,15 @@ import {
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
 } from '@kbn/esql-ast';
-import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/complete_items';
-import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
-import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
-import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { getSafeInsertText } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/commands/definitions/generated/scalar_functions';
+import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands/registry/complete_items';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands/registry/options/recommended_queries';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands/registry/types';
+import { Location } from '@kbn/esql-ast/src/commands/registry/types';
 import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
+  attachParameterHelperCommand,
   attachTriggerCommand,
   createCustomCallbackMocks,
   fields,
@@ -797,7 +798,9 @@ describe('autocomplete', () => {
           scalar: true,
           agg: true,
           grouping: true,
-        }).map(attachAsSnippet),
+        })
+          .map(attachAsSnippet)
+          .map(attachParameterHelperCommand),
       ].map(attachTriggerCommand)
     );
 
@@ -1045,7 +1048,7 @@ describe('autocomplete', () => {
   });
 
   describe('IN operator with lists', () => {
-    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ', ' }]);
+    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
   });
 
   describe('Replacement ranges are attached when needed', () => {

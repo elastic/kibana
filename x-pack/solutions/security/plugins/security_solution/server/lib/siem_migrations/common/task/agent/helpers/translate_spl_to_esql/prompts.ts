@@ -76,6 +76,7 @@ Go through each step and part of the splunk_query while following the below guid
   - Inside SPL language code blocks, Please add a line break before each pipe (|) character in the query.
   - Make sure the Markdown is formatted correctly and the values properly escaped.
 - Don't add any other information or explanation before or after these two outputs.
+- Always use the provided index pattern {index_pattern} in the output, do not use a different index pattern. This is very important.
 </output_format>
 
 <example_output>

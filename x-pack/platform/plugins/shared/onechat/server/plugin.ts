@@ -19,6 +19,7 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
+import { getRunAgentStepDefinition } from './step_types';
 import type { OnechatHandlerContext } from './request_handler_context';
 import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
@@ -73,6 +74,12 @@ export class OnechatPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
+    if (setupDeps.workflowsExtensions) {
+      setupDeps.workflowsExtensions.registerStepDefinition(
+        getRunAgentStepDefinition(this.serviceManager)
+      );
+    }
+
     registerOnechatHandlerContext({ coreSetup });
 
     const router = coreSetup.http.createRouter<OnechatHandlerContext>();
@@ -119,10 +126,13 @@ export class OnechatPlugin
       trackingService: this.trackingService,
     });
 
-    const { tools, runnerFactory } = startServices;
+    const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
+      agents: {
+        runAgent: agents.execute.bind(agents),
+      },
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),

@@ -13,6 +13,7 @@ import type { Readable } from 'stream';
 import { Transform, pipeline } from 'stream';
 import type { Required } from 'utility-types';
 import type { Condition } from '@kbn/streamlang';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { SynthtraceEsClientBase } from '../shared/base_client';
 import { internalKibanaHeaders } from '../shared/client_headers';
@@ -39,7 +40,7 @@ export interface StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocum
   >;
   putIngestStream<TFetchOptions extends KibanaClientFetchOptions | undefined>(
     streamName: string,
-    request: Streams.all.Definition,
+    request: { ingest: IngestUpsertRequest },
     requestOptions?: TFetchOptions
   ): Promise<
     TFetchOptions extends { ignore: number[] }

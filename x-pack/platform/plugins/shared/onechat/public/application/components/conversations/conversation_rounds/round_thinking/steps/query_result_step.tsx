@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { QueryResult } from '@kbn/onechat-common/tools/tool_result';
 import { css } from '@emotion/react';
+import { codeblockStyles } from './codeblock.styles';
 
 const labels = {
   title: i18n.translate('xpack.onechat.round.thinking.steps.queryResultStep.title', {
@@ -34,7 +35,13 @@ export const QueryResultStep: React.FC<QueryResultStepProps> = ({ result: { data
           </EuiText>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none">
-          <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
+          <EuiCodeBlock
+            language="esql"
+            isCopyable
+            paddingSize="m"
+            lineNumbers
+            css={codeblockStyles}
+          >
             {data.esql}
           </EuiCodeBlock>
         </EuiSplitPanel.Inner>

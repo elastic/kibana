@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-data-access-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-infra_services-team'
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/apm-data-access-plugin'
   description: Moon project for @kbn/apm-data-access-plugin
   channel: ''
-  owner: '@elastic/obs-ux-infra_services-team'
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/apm_data_access
 dependsOn:
@@ -23,16 +23,17 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/data-plugin'
   - '@kbn/inspector-plugin'
-  - '@kbn/observability-plugin'
   - '@kbn/observability-shared-plugin'
   - '@kbn/es-types'
   - '@kbn/apm-types'
+  - '@kbn/apm-types-shared'
   - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/security-plugin-types-server'
   - '@kbn/utility-types'
   - '@kbn/elastic-agent-utils'
   - '@kbn/observability-utils-common'
+  - '@kbn/observability-utils-server'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/metrics-data-access-plugin'
   - '@kbn/safer-lodash-set'

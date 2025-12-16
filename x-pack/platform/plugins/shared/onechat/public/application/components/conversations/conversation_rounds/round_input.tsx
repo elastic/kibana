@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { EuiPanel, useEuiTheme, euiTextBreakWord, EuiText } from '@elastic/eui';
+import {
+  EuiPanel,
+  useEuiTheme,
+  euiTextBreakWord,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { ROUNDED_BORDER_RADIUS_LARGE } from '../conversation.styles';
+import React, { useMemo, useState } from 'react';
+import { type Attachment } from '@kbn/onechat-common/attachments';
+import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
+import { AttachmentPillsRow } from '../conversation_input/attachment_pills_row';
+import { RoundResponseActions } from './round_response/round_response_actions';
 
 const labels = {
   userMessage: i18n.translate('xpack.onechat.round.userInput', {
@@ -19,37 +29,56 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
+  attachments?: Attachment[];
 }
 
-export const RoundInput = ({ input }: RoundInputProps) => {
+export const RoundInput = ({ input, attachments }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const backgroundColorStyle = {
-    background: `linear-gradient(
-          90deg,
-          ${euiTheme.colors.backgroundBasePrimary} 0%,
-          ${euiTheme.colors.backgroundBasePrimary} 70%,
-          ${euiTheme.colors.backgroundBaseSubdued} 100%
-        )`,
-  };
+  const [isHovering, setIsHovering] = useState(false);
 
   const inputContainerStyles = css`
     align-self: end;
     max-inline-size: 90%;
-    background: ${backgroundColorStyle.background};
+    background: ${euiTheme.colors.backgroundLightPrimary};
     ${euiTextBreakWord()}
+    white-space: pre-wrap;
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
   `;
 
+  const visibleAttachments = useMemo(() => {
+    if (!attachments) return [];
+    return attachments.filter((attachment) => !attachment.hidden);
+  }, [attachments]);
+
   return (
-    <EuiPanel
-      css={inputContainerStyles}
-      paddingSize="m"
-      hasShadow={false}
-      hasBorder={false}
-      aria-label={labels.userMessage}
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      alignItems="flexEnd"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
-      <EuiText size="s">{input}</EuiText>
-    </EuiPanel>
+      <EuiPanel
+        css={inputContainerStyles}
+        paddingSize="m"
+        hasShadow={false}
+        hasBorder={false}
+        aria-label={labels.userMessage}
+      >
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="m">{input}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      {visibleAttachments.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <AttachmentPillsRow attachments={visibleAttachments} justifyContent="flexEnd" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <RoundResponseActions content={input} isVisible={isHovering} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

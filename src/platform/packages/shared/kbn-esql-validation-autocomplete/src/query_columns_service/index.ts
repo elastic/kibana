@@ -8,12 +8,8 @@
  */
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '@kbn/esql-ast';
-import type {
-  ESQLColumnData,
-  ESQLFieldWithMetadata,
-  ESQLPolicy,
-} from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLColumnData, ESQLPolicy } from '@kbn/esql-ast/src/commands/registry/types';
+import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
@@ -60,8 +56,9 @@ export class QueryColumns {
     // Remove oldest entry if cache is full
     while (QueryColumns.cache.size >= QueryColumns.MAX_CACHE_SIZE) {
       const oldestKey = QueryColumns.cache.keys().next().value;
-      // @ts-expect-error upgrade typescript v5.9.3
-      QueryColumns.cache.delete(oldestKey);
+      if (oldestKey) {
+        QueryColumns.cache.delete(oldestKey);
+      }
     }
 
     // Add new entry at the end

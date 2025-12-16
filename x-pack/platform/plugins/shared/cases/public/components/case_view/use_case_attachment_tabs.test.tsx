@@ -15,10 +15,13 @@ import { TestProviders } from '../../common/mock';
 import React from 'react';
 
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 
 const platinumLicense = licensingMock.createLicense({
   license: { type: 'platinum' },
 });
+
+jest.mock('../../containers/use_get_case_file_stats');
 
 jest.mock('./use_case_observables', () => ({
   useCaseObservables: () => ({
@@ -26,6 +29,10 @@ jest.mock('./use_case_observables', () => ({
     isLoading: false,
   }),
 }));
+
+const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
+
+const fileStatsData = { total: 3 };
 
 export const caseProps: CaseViewTabsProps = {
   caseData,
@@ -43,6 +50,10 @@ export const casePropsWithEvents: CaseViewTabsProps = {
 };
 
 describe('useCaseAttachmentTabs()', () => {
+  beforeEach(() => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: fileStatsData });
+  });
+
   it('returns basic case attachment tabs', async () => {
     const { result } = renderHook(
       () => {
@@ -53,12 +64,13 @@ describe('useCaseAttachmentTabs()', () => {
       }
     );
 
-    expect(result.current.map((tab) => tab.id)).toMatchInlineSnapshot(`
+    expect(result.current.tabs.map((tab) => tab.id)).toMatchInlineSnapshot(`
       Array [
         "alerts",
         "files",
       ]
     `);
+    expect(result.current.totalAttachments).toEqual(3);
   });
 
   it('returns attachment tabs based on enable features an license', async () => {
@@ -82,7 +94,7 @@ describe('useCaseAttachmentTabs()', () => {
       }
     );
 
-    expect(result.current.map((tab) => tab.id)).toMatchInlineSnapshot(`
+    expect(result.current.tabs.map((tab) => tab.id)).toMatchInlineSnapshot(`
       Array [
         "alerts",
         "events",

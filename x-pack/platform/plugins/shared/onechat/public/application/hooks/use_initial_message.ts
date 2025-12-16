@@ -11,18 +11,18 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useSendMessage } from '../context/send_message/send_message_context';
 
 export const useSendPredefinedInitialMessage = () => {
-  const { initialMessage, resetInitialMessage } = useConversationContext();
+  const { initialMessage, autoSendInitialMessage, resetInitialMessage } = useConversationContext();
   const conversationId = useConversationId();
   const { sendMessage } = useSendMessage();
 
   const isNewConversation = !conversationId;
 
   useEffect(() => {
-    if (initialMessage && isNewConversation) {
+    if (initialMessage && isNewConversation && autoSendInitialMessage) {
       sendMessage({ message: initialMessage });
       resetInitialMessage?.();
     }
-  }, [initialMessage, isNewConversation, sendMessage, resetInitialMessage]);
+  }, [initialMessage, autoSendInitialMessage, isNewConversation, sendMessage, resetInitialMessage]);
 
   return null;
 };
