@@ -8,7 +8,6 @@
  */
 
 import type {
-  BulkRequest,
   BulkResponse,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -58,59 +57,25 @@ import {
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
   LOOKUP_INDEX_RECREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
-  LOOKUP_INDEX_UPDATE_ROUTE,
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
-import { isPlaceholderColumn } from './utils';
-import type { IndexEditorError } from './types';
-import { IndexEditorErrors } from './types';
-import { parsePrimitive } from './utils';
-import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
-import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
-import { RowsVirtualIndexes } from './utils/rows_virtual_indexes';
+import { isDocDelete, isDocUpdate, isPlaceholderColumn } from '../utils';
+import type {
+  ColumnAddition,
+  ColumnUpdate,
+  DeleteDocAction,
+  DocUpdate,
+  IndexEditorError,
+} from '../types';
+import { IndexEditorErrors } from '../types';
+import { parsePrimitive } from '../utils';
+import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from '../constants';
+import type { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
+import { RowsVirtualIndexes } from './rows_virtual_indexes';
+import { bulkUpdate, type BulkUpdateOperations } from './bulk_update_service';
 
 const DOCS_PER_FETCH = 1000;
-
 const MAX_COLUMN_PLACEHOLDERS = 4;
-
-interface DocUpdate {
-  id: string;
-  value: Record<string, any>;
-  atIndex?: number;
-}
-
-type BulkUpdateOperations = Array<{ type: 'add-doc'; payload: DocUpdate } | DeleteDocAction>;
-
-function isDocUpdate(update: unknown): update is { type: 'add-doc'; payload: DocUpdate } {
-  return (
-    typeof update === 'object' && update !== null && 'type' in update && update.type === 'add-doc'
-  );
-}
-
-function isDocDelete(update: unknown): update is DeleteDocAction {
-  return (
-    typeof update === 'object' &&
-    update !== null &&
-    'type' in update &&
-    update.type === 'delete-doc'
-  );
-}
-
-interface ColumnAddition {
-  name: string;
-  fieldType?: DatatableColumnMeta['esType'];
-}
-
-interface ColumnUpdate {
-  name: string;
-  previousName?: string;
-  fieldType?: DatatableColumnMeta['esType'];
-}
-
-interface DeleteDocAction {
-  type: 'delete-doc';
-  payload: { ids: string[] };
-}
 
 type Action =
   | { type: 'add-doc'; payload: DocUpdate }
@@ -609,12 +574,12 @@ export class IndexUpdateService {
 
             return from(updateMappingPromise).pipe(
               // Then save all updates using a bulk request (this code will not execute if updateMapping fails)
-              switchMap(() => from(this.bulkUpdate(updates))),
-              catchError((errors) => {
-                return of({
-                  bulkOperations: [],
-                  bulkResponse: { errors: true } as BulkResponse,
-                });
+              switchMap(() => {
+                const indexName = this._indexName$.getValue();
+                if (!indexName) {
+                  throw new Error('Index name is not set');
+                }
+                return from(bulkUpdate(indexName, updates, this.http));
               }),
               map((response) => {
                 return {
@@ -749,7 +714,12 @@ export class IndexUpdateService {
             });
           },
           error: () => {
-            this.setError(IndexEditorErrors.GENERIC_SAVING_ERROR);
+            this.setError(
+              IndexEditorErrors.GENERIC_SAVING_ERROR,
+              i18n.translate('indexEditor.indexUpdateService.savingGenericErrorMessageDetail', {
+                defaultMessage: 'Your changes have not been saved.',
+              })
+            );
             this._isSaving$.next(false);
           },
         })
@@ -1018,84 +988,6 @@ export class IndexUpdateService {
     } else {
       this.discardUnsavedChanges();
     }
-  }
-
-  /**
-   * Sends a bulk update request to an index.
-   * @param updates
-   */
-  public async bulkUpdate(updates: BulkUpdateOperations): Promise<{
-    bulkOperations: Exclude<BulkRequest['operations'], undefined>;
-    bulkResponse: BulkResponse;
-  }> {
-    const indexName = this.getIndexName();
-    if (!indexName) {
-      throw new Error('Index name is not set');
-    }
-    const deletingDocIds: string[] = updates
-      .filter(isDocDelete)
-      .map((v) => v.payload.ids)
-      .flat();
-
-    const indexActions = updates.filter(isDocUpdate);
-
-    // First split updates into index and delete operations
-    const groupedOperations = groupBy(
-      indexActions.map((v) => v.payload),
-      (update) =>
-        update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX) ? 'updates' : 'newDocs'
-    );
-
-    const updateOperations =
-      groupedOperations?.updates?.map((update) => [
-        { update: { _id: update.id } },
-        { doc: update.value },
-      ]) || [];
-
-    const newDocs =
-      groupedOperations?.newDocs?.reduce<Record<string, Record<string, any>>>((acc, update) => {
-        const docId = update.id || 'new-row';
-        acc[docId] = { ...acc[docId], ...update.value };
-        return acc;
-      }, {}) || {};
-
-    // Filter out new docs that have no fields defined
-    const newDocOperations = Object.entries(newDocs)
-      .filter(([, doc]) => Object.keys(doc).length > 0)
-      .map(([id, doc]) => {
-        return [{ index: {} }, doc];
-      });
-
-    const operations: BulkRequest['operations'] = [
-      ...updateOperations,
-      ...newDocOperations,
-      ...deletingDocIds.map((id) => {
-        return [{ delete: { _id: id } }];
-      }),
-    ];
-
-    if (!operations.length) {
-      return {
-        bulkResponse: { errors: false, items: [], took: 0 },
-        bulkOperations: [],
-      };
-    }
-
-    const body = JSON.stringify({
-      operations: operations.flat(),
-    });
-
-    const bulkResponse = await this.http.post<BulkResponse>(
-      `${LOOKUP_INDEX_UPDATE_ROUTE}/${encodeURIComponent(indexName)}`,
-      {
-        body,
-      }
-    );
-
-    return {
-      bulkResponse,
-      bulkOperations: operations,
-    };
   }
 
   private async updateIndexMappings(
