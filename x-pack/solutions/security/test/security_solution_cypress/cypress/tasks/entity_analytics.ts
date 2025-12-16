@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  RISK_ENGINE_STATUS_URL,
-  RISK_ENGINE_PRIVILEGES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import { ENTITY_STORE_INTERNAL_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/entity_analytics/entity_store/constants';
+import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
@@ -79,9 +75,6 @@ export const previewErrorButtonClick = () => {
 export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
 
 export const openEntityStoreEnablementModal = () => {
-  cy.intercept('GET', `**${RISK_ENGINE_PRIVILEGES_URL}`).as('riskEnginePrivileges');
-  cy.intercept('GET', `**${ENTITY_STORE_INTERNAL_PRIVILEGES_URL}`).as('entityStorePrivileges');
-
   cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();
   cy.get(ENTITY_STORE_ENABLEMENT_MODAL).contains('Entity Analytics Enablement');
 

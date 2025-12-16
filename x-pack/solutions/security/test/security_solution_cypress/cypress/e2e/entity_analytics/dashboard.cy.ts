@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RISK_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ENTITY_STORE_INTERNAL_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/entity_analytics/entity_store/constants';
 import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ENTITY_ANALYTICS_DASHBOARD_URL } from '../../urls/navigation';
@@ -32,6 +34,9 @@ describe(
   },
   () => {
     beforeEach(() => {
+      cy.intercept('GET', `**${RISK_ENGINE_PRIVILEGES_URL}`).as('riskEnginePrivileges');
+      cy.intercept('GET', `**${ENTITY_STORE_INTERNAL_PRIVILEGES_URL}`).as('entityStorePrivileges');
+
       login('admin');
       deleteEntityStoreEngines();
       deleteRiskEngineConfiguration();
