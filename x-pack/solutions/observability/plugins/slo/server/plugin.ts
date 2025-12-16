@@ -41,6 +41,7 @@ import {
   DefaultTransformManager,
   KibanaSavedObjectsSLORepository,
 } from './services';
+import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
 import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
@@ -191,6 +192,7 @@ export class SLOPlugin
           ]);
 
           const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+          const settingsRepository = new DefaultSLOSettingsRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless),
@@ -211,6 +213,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
+            settingsRepository,
             transformManager,
             summaryTransformManager,
             racClient,

@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parse, Parser, type ParseOptions, type ParseResult } from './parser';
+// Main parser API
+export { parse, Parser, type ParseOptions, type ParseResult } from './core/parser';
 
-export { TIME_SPAN_UNITS, SOURCE_COMMANDS } from './constants';
+export {
+  TIME_SPAN_UNITS,
+  TIME_DURATION_UNITS,
+  HEADER_COMMANDS,
+  SOURCE_COMMANDS,
+  DATE_PERIOD_UNITS,
+} from './core/constants';
 
-export { ESQLErrorListener } from './esql_error_listener';
+export { ESQLErrorListener } from './core/esql_error_listener';

@@ -76,6 +76,9 @@ interface OwnProps {
   tableId: TableIdLiteral;
   to: string;
 
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
+
   /**
    * If you're not using this property, multi-value fields will be transformed into a string
    * and grouped by that value. For instance, if an object has a property
@@ -103,6 +106,9 @@ interface OwnProps {
     aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
     groupingLevel?: number
   ) => void;
+
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -129,9 +135,11 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
   tableId,
   to,
+  additionalToolbarControls = [],
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
   onAggregationsChange,
+  emptyGroupingComponent,
 }) => {
   const {
     services: { uiSettings },
@@ -332,7 +340,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         activePage: pageIndex,
         data: aggs,
         groupingLevel,
-        additionalToolbarControls: [inspect],
+        additionalToolbarControls: [...additionalToolbarControls, inspect],
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage,
@@ -358,6 +366,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageSize,
       renderChildComponent,
       selectedGroup,
+      additionalToolbarControls,
     ]
   );
 };
