@@ -74,6 +74,8 @@ export interface GroupingProps<T> {
   // because if the field is a multi-value field, and we emit each value separatly the size of the field will be ignored
   // when filtering by it
   multiValueFields?: string[];
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
 }
 
 const GroupingComponent = <T,>({
@@ -98,6 +100,7 @@ const GroupingComponent = <T,>({
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
   multiValueFields,
+  emptyGroupingComponent,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -221,6 +224,10 @@ const GroupingComponent = <T,>({
     [groupCount, itemsPerPage]
   );
 
+  const emptyComponent = useMemo(() => {
+    return emptyGroupingComponent ? emptyGroupingComponent : <EmptyGroupingComponent />;
+  }, [emptyGroupingComponent]);
+
   return (
     <>
       {groupingLevel > 0 ? null : (
@@ -295,7 +302,7 @@ const GroupingComponent = <T,>({
             )}
           </span>
         ) : (
-          <EmptyGroupingComponent />
+          emptyComponent
         )}
       </div>
     </>
