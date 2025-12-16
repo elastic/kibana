@@ -23,6 +23,8 @@ export interface TraceItem {
   parentId?: string;
   serviceName: string;
   type?: string;
+  sync?: boolean;
+  agentName?: string;
   spanLinksCount: {
     incoming: number;
     outgoing: number;
