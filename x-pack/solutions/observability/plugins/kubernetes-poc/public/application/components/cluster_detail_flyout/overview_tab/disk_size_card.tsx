@@ -7,17 +7,14 @@
 
 import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useEsqlQuery } from '../../../../hooks/use_esql_query';
-import { MetricCard } from './metric_card';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 interface DiskSizeCardProps {
   clusterName: string;
   timeRange: TimeRange;
-}
-
-interface DiskSizeData {
-  total_disk_bytes: number;
+  height?: number;
 }
 
 /**
@@ -33,29 +30,86 @@ const getDiskSizeEsql = (clusterName: string) => `FROM remote_cluster:metrics-*
   BY k8s.node.name
 | STATS total_disk_bytes = SUM(disk_capacity)`;
 
-export const DiskSizeCard: React.FC<DiskSizeCardProps> = ({ clusterName, timeRange }) => {
+export const DiskSizeCard: React.FC<DiskSizeCardProps> = ({
+  clusterName,
+  timeRange,
+  height = 100,
+}) => {
+  const { plugins } = usePluginContext();
+  const LensComponent = plugins.lens.EmbeddableComponent;
+
   const query = useMemo(() => getDiskSizeEsql(clusterName), [clusterName]);
 
-  const { data, loading } = useEsqlQuery<DiskSizeData>({
-    query,
-    timeRange,
-  });
-
-  // Get the first row of results (single aggregation result)
-  const diskSizeData = data?.[0];
-  const totalDiskBytes = diskSizeData?.total_disk_bytes ?? null;
+  const attributes: TypedLensByValueInput['attributes'] = useMemo(
+    () => ({
+      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.diskSizeLabel', {
+        defaultMessage: 'Disk size',
+      }),
+      description: '',
+      visualizationType: 'lnsMetric',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          layerId: 'layer_0',
+          layerType: 'data',
+          metricAccessor: 'metric_0',
+          subtitle: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
+            defaultMessage: 'Total',
+          }),
+        },
+        query: {
+          esql: query,
+        },
+        filters: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer_0: {
+                index: 'esql-query-index',
+                query: {
+                  esql: query,
+                },
+                columns: [
+                  {
+                    columnId: 'metric_0',
+                    fieldName: 'total_disk_bytes',
+                    label: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.diskSizeLabel', {
+                      defaultMessage: 'Disk size',
+                    }),
+                    customLabel: true,
+                    meta: {
+                      type: 'number',
+                    },
+                    params: {
+                      format: {
+                        id: 'bytes',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    }),
+    [query]
+  );
 
   return (
-    <MetricCard
-      title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.diskSizeLabel', {
-        defaultMessage: 'Disk size',
-      })}
-      subtitle={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
-        defaultMessage: 'Total',
-      })}
-      value={totalDiskBytes}
-      isLoading={loading}
-      formatter="bytes"
+    <LensComponent
+      id="diskSizeMetric"
+      attributes={attributes}
+      timeRange={timeRange}
+      style={{ height: `${height}px`, width: '100%' }}
+      viewMode="view"
+      noPadding
+      withDefaultActions={false}
+      disableTriggers
+      showInspector={false}
+      syncCursor={false}
+      syncTooltips={false}
     />
   );
 };

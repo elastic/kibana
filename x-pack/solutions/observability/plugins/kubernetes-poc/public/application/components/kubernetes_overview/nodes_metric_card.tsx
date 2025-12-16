@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useEuiTheme } from '@elastic/eui';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useEsqlQuery } from '../../../hooks/use_esql_query';
-import { MetricCard } from '../cluster_detail_flyout/overview_tab/metric_card';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface NodesMetricCardProps {
   timeRange: TimeRange;
-}
-
-interface NodesData {
-  total_nodes: number;
+  height?: number;
 }
 
 /**
@@ -28,25 +24,75 @@ const NODES_ESQL = `FROM remote_cluster:metrics-*
   AND k8s.node.name IS NOT NULL
 | STATS total_nodes = COUNT_DISTINCT(k8s.node.name)`;
 
-export const NodesMetricCard: React.FC<NodesMetricCardProps> = ({ timeRange }) => {
-  const { euiTheme } = useEuiTheme();
-  const { data, loading } = useEsqlQuery<NodesData>({
-    query: NODES_ESQL,
-    timeRange,
-  });
+export const NodesMetricCard: React.FC<NodesMetricCardProps> = ({ timeRange, height = 100 }) => {
+  const { plugins } = usePluginContext();
+  const LensComponent = plugins.lens.EmbeddableComponent;
 
-  const nodesData = data?.[0];
-  const totalNodes = nodesData?.total_nodes ?? null;
+  const attributes: TypedLensByValueInput['attributes'] = useMemo(
+    () => ({
+      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.nodesLabel', {
+        defaultMessage: 'Nodes',
+      }),
+      description: '',
+      visualizationType: 'lnsMetric',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          layerId: 'layer_0',
+          layerType: 'data',
+          metricAccessor: 'metric_0',
+          subtitle: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.totalLabel', {
+            defaultMessage: 'Total',
+          }),
+        },
+        query: {
+          esql: NODES_ESQL,
+        },
+        filters: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer_0: {
+                index: 'esql-query-index',
+                query: {
+                  esql: NODES_ESQL,
+                },
+                columns: [
+                  {
+                    columnId: 'metric_0',
+                    fieldName: 'total_nodes',
+                    label: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.nodesLabel', {
+                      defaultMessage: 'Nodes',
+                    }),
+                    customLabel: true,
+                    meta: {
+                      type: 'number',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    }),
+    []
+  );
 
   return (
-    <MetricCard
-      title={i18n.translate('xpack.kubernetesPoc.kubernetesOverview.nodesLabel', {
-        defaultMessage: 'Nodes',
-      })}
-      value={totalNodes}
-      isLoading={loading}
-      formatter="number"
-      valueColor={euiTheme.colors.primary}
+    <LensComponent
+      id="nodesMetric"
+      attributes={attributes}
+      timeRange={timeRange}
+      style={{ height: `${height}px`, width: '100%' }}
+      viewMode="view"
+      noPadding
+      withDefaultActions={false}
+      disableTriggers
+      showInspector={false}
+      syncCursor={false}
+      syncTooltips={false}
     />
   );
 };

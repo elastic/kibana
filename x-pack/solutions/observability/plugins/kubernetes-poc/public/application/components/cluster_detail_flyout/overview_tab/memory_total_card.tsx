@@ -7,17 +7,14 @@
 
 import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useEsqlQuery } from '../../../../hooks/use_esql_query';
-import { MetricCard } from './metric_card';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 interface MemoryTotalCardProps {
   clusterName: string;
   timeRange: TimeRange;
-}
-
-interface MemoryTotalData {
-  total_memory_bytes: number;
+  height?: number;
 }
 
 /**
@@ -33,29 +30,86 @@ const getMemoryTotalEsql = (clusterName: string) => `FROM remote_cluster:metrics
   BY k8s.node.name
 | STATS total_memory_bytes = SUM(node_memory)`;
 
-export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({ clusterName, timeRange }) => {
+export const MemoryTotalCard: React.FC<MemoryTotalCardProps> = ({
+  clusterName,
+  timeRange,
+  height = 100,
+}) => {
+  const { plugins } = usePluginContext();
+  const LensComponent = plugins.lens.EmbeddableComponent;
+
   const query = useMemo(() => getMemoryTotalEsql(clusterName), [clusterName]);
 
-  const { data, loading } = useEsqlQuery<MemoryTotalData>({
-    query,
-    timeRange,
-  });
-
-  // Get the first row of results (single aggregation result)
-  const memoryData = data?.[0];
-  const totalMemoryBytes = memoryData?.total_memory_bytes ?? null;
+  const attributes: TypedLensByValueInput['attributes'] = useMemo(
+    () => ({
+      title: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryLabel', {
+        defaultMessage: 'Memory',
+      }),
+      description: '',
+      visualizationType: 'lnsMetric',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          layerId: 'layer_0',
+          layerType: 'data',
+          metricAccessor: 'metric_0',
+          subtitle: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
+            defaultMessage: 'Total',
+          }),
+        },
+        query: {
+          esql: query,
+        },
+        filters: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer_0: {
+                index: 'esql-query-index',
+                query: {
+                  esql: query,
+                },
+                columns: [
+                  {
+                    columnId: 'metric_0',
+                    fieldName: 'total_memory_bytes',
+                    label: i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryLabel', {
+                      defaultMessage: 'Memory',
+                    }),
+                    customLabel: true,
+                    meta: {
+                      type: 'number',
+                    },
+                    params: {
+                      format: {
+                        id: 'bytes',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    }),
+    [query]
+  );
 
   return (
-    <MetricCard
-      title={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.memoryLabel', {
-        defaultMessage: 'Memory',
-      })}
-      subtitle={i18n.translate('xpack.kubernetesPoc.clusterDetailFlyout.totalLabel', {
-        defaultMessage: 'Total',
-      })}
-      value={totalMemoryBytes}
-      isLoading={loading}
-      formatter="bytes"
+    <LensComponent
+      id="memoryTotalMetric"
+      attributes={attributes}
+      timeRange={timeRange}
+      style={{ height: `${height}px`, width: '100%' }}
+      viewMode="view"
+      noPadding
+      withDefaultActions={false}
+      disableTriggers
+      showInspector={false}
+      syncCursor={false}
+      syncTooltips={false}
     />
   );
 };

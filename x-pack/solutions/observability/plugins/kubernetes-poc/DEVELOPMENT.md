@@ -42,7 +42,7 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 
 ## Current Status
 
-**Last Updated:** 2025-12-11
+**Last Updated:** 2025-12-15
 
 ### ✅ Completed
 - [x] Plugin scaffolded with basic structure
@@ -64,6 +64,7 @@ You are an AI coding agent with expertise in monitoring Kubernetes clusters. The
 - [x] Cluster overview cards with Lens visualizations (Total Clusters, Healthy/Unhealthy Clusters, CPU Usage by Cluster)
 - [x] Add Kubernetes Cluster Detail Flyout (builds on listing page patterns)
 - [x] Add Workload Resources Table to Cluster Detail Flyout (requires backend API endpoint for per-node data with status, kubelet version, and resource utilization)
+- [x] Convert single metric cards to Lens-powered metric visualizations (MemoryTotalCard, DiskSizeCard, NamespacesCard, and all kubernetes overview metric cards)
 
 
 ### 📋 Next Steps / TODO
@@ -155,7 +156,15 @@ const attributes: TypedLensByValueInput['attributes'] = {
 **Key Column Properties**:
 - `fieldName`: The ES|QL result column name
 - `label`: Custom display label (requires `customLabel: true`)
-- `params.format.id`: Value formatter (`'percent'`, `'number'`, etc.)
+- `params.format.id`: Value formatter (`'percent'`, `'number'`, `'bytes'`, etc.)
+
+**Metric Visualization Config**:
+- `metricAccessor`: Column ID for the primary metric value
+- `maxAccessor` (optional): Column ID for the maximum value (used for progress bars)
+- `showBar` (optional): Display a progress bar (default: false)
+- `progressDirection` (optional): `'vertical'` or `'horizontal'` for progress bars
+- `color` (optional): Hex color for the metric value (e.g., `'#00BFB3'` for green)
+- `subtitle` (optional): Secondary text displayed below the metric title (e.g., "Total", "Healthy")
 
 ### Dependencies
 - **Required Plugins**: `data`, `dataViews`, `lens`, `observability`, `observabilityShared`, `unifiedSearch`

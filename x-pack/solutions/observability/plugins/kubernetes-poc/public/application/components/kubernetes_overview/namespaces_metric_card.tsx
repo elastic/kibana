@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useEuiTheme } from '@elastic/eui';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useEsqlQuery } from '../../../hooks/use_esql_query';
-import { MetricCard } from '../cluster_detail_flyout/overview_tab/metric_card';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface NamespacesMetricCardProps {
   timeRange: TimeRange;
-}
-
-interface NamespacesData {
-  namespace_count: number;
+  height?: number;
 }
 
 /**
@@ -28,25 +24,81 @@ const NAMESPACES_ESQL = `FROM remote_cluster:metrics-*
   AND k8s.namespace.name IS NOT NULL
 | STATS namespace_count = COUNT_DISTINCT(k8s.namespace.name)`;
 
-export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({ timeRange }) => {
-  const { euiTheme } = useEuiTheme();
-  const { data, loading } = useEsqlQuery<NamespacesData>({
-    query: NAMESPACES_ESQL,
-    timeRange,
-  });
+export const NamespacesMetricCard: React.FC<NamespacesMetricCardProps> = ({
+  timeRange,
+  height = 100,
+}) => {
+  const { plugins } = usePluginContext();
+  const LensComponent = plugins.lens.EmbeddableComponent;
 
-  const namespacesData = data?.[0];
-  const namespaceCount = namespacesData?.namespace_count ?? null;
+  const attributes: TypedLensByValueInput['attributes'] = useMemo(
+    () => ({
+      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.namespacesLabel', {
+        defaultMessage: 'Namespaces',
+      }),
+      description: '',
+      visualizationType: 'lnsMetric',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          layerId: 'layer_0',
+          layerType: 'data',
+          metricAccessor: 'metric_0',
+          subtitle: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.totalLabel', {
+            defaultMessage: 'Total',
+          }),
+        },
+        query: {
+          esql: NAMESPACES_ESQL,
+        },
+        filters: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer_0: {
+                index: 'esql-query-index',
+                query: {
+                  esql: NAMESPACES_ESQL,
+                },
+                columns: [
+                  {
+                    columnId: 'metric_0',
+                    fieldName: 'namespace_count',
+                    label: i18n.translate(
+                      'xpack.kubernetesPoc.kubernetesOverview.namespacesLabel',
+                      {
+                        defaultMessage: 'Namespaces',
+                      }
+                    ),
+                    customLabel: true,
+                    meta: {
+                      type: 'number',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    }),
+    []
+  );
 
   return (
-    <MetricCard
-      title={i18n.translate('xpack.kubernetesPoc.kubernetesOverview.namespacesLabel', {
-        defaultMessage: 'Namespaces',
-      })}
-      value={namespaceCount}
-      isLoading={loading}
-      formatter="number"
-      valueColor={euiTheme.colors.primary}
+    <LensComponent
+      id="namespacesMetric"
+      attributes={attributes}
+      timeRange={timeRange}
+      style={{ height: `${height}px`, width: '100%' }}
+      viewMode="view"
+      noPadding
+      withDefaultActions={false}
+      disableTriggers
+      showInspector={false}
+      syncCursor={false}
+      syncTooltips={false}
     />
   );
 };

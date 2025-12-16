@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useEuiTheme } from '@elastic/eui';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useEsqlQuery } from '../../../hooks/use_esql_query';
-import { MetricCard } from '../cluster_detail_flyout/overview_tab/metric_card';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface ServicesMetricCardProps {
   timeRange: TimeRange;
-}
-
-interface ServicesData {
-  service_count: number;
+  height?: number;
 }
 
 /**
@@ -29,25 +25,78 @@ const SERVICES_ESQL = `FROM remote_cluster:metrics-*
   AND k8s.service.name IS NOT NULL
 | STATS service_count = COUNT_DISTINCT(k8s.service.name)`;
 
-export const ServicesMetricCard: React.FC<ServicesMetricCardProps> = ({ timeRange }) => {
-  const { euiTheme } = useEuiTheme();
-  const { data, loading } = useEsqlQuery<ServicesData>({
-    query: SERVICES_ESQL,
-    timeRange,
-  });
+export const ServicesMetricCard: React.FC<ServicesMetricCardProps> = ({
+  timeRange,
+  height = 100,
+}) => {
+  const { plugins } = usePluginContext();
+  const LensComponent = plugins.lens.EmbeddableComponent;
 
-  const servicesData = data?.[0];
-  const serviceCount = servicesData?.service_count ?? null;
+  const attributes: TypedLensByValueInput['attributes'] = useMemo(
+    () => ({
+      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.servicesLabel', {
+        defaultMessage: 'Services',
+      }),
+      description: '',
+      visualizationType: 'lnsMetric',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          layerId: 'layer_0',
+          layerType: 'data',
+          metricAccessor: 'metric_0',
+          subtitle: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.totalLabel', {
+            defaultMessage: 'Total',
+          }),
+        },
+        query: {
+          esql: SERVICES_ESQL,
+        },
+        filters: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer_0: {
+                index: 'esql-query-index',
+                query: {
+                  esql: SERVICES_ESQL,
+                },
+                columns: [
+                  {
+                    columnId: 'metric_0',
+                    fieldName: 'service_count',
+                    label: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.servicesLabel', {
+                      defaultMessage: 'Services',
+                    }),
+                    customLabel: true,
+                    meta: {
+                      type: 'number',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    }),
+    []
+  );
 
   return (
-    <MetricCard
-      title={i18n.translate('xpack.kubernetesPoc.kubernetesOverview.servicesLabel', {
-        defaultMessage: 'Services',
-      })}
-      value={serviceCount}
-      isLoading={loading}
-      formatter="number"
-      valueColor={euiTheme.colors.primary}
+    <LensComponent
+      id="servicesMetric"
+      attributes={attributes}
+      timeRange={timeRange}
+      style={{ height: `${height}px`, width: '100%' }}
+      viewMode="view"
+      noPadding
+      withDefaultActions={false}
+      disableTriggers
+      showInspector={false}
+      syncCursor={false}
+      syncTooltips={false}
     />
   );
 };

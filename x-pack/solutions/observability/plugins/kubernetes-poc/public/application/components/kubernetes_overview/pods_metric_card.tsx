@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useEuiTheme } from '@elastic/eui';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useEsqlQuery } from '../../../hooks/use_esql_query';
-import { MetricCard } from '../cluster_detail_flyout/overview_tab/metric_card';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface PodsMetricCardProps {
   timeRange: TimeRange;
-}
-
-interface PodsData {
-  total_pods: number;
+  height?: number;
 }
 
 /**
@@ -28,25 +24,75 @@ const PODS_ESQL = `FROM remote_cluster:metrics-*
   AND k8s.pod.uid IS NOT NULL
 | STATS total_pods = COUNT_DISTINCT(k8s.pod.uid)`;
 
-export const PodsMetricCard: React.FC<PodsMetricCardProps> = ({ timeRange }) => {
-  const { euiTheme } = useEuiTheme();
-  const { data, loading } = useEsqlQuery<PodsData>({
-    query: PODS_ESQL,
-    timeRange,
-  });
+export const PodsMetricCard: React.FC<PodsMetricCardProps> = ({ timeRange, height = 100 }) => {
+  const { plugins } = usePluginContext();
+  const LensComponent = plugins.lens.EmbeddableComponent;
 
-  const podsData = data?.[0];
-  const totalPods = podsData?.total_pods ?? null;
+  const attributes: TypedLensByValueInput['attributes'] = useMemo(
+    () => ({
+      title: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.podsLabel', {
+        defaultMessage: 'Pods',
+      }),
+      description: '',
+      visualizationType: 'lnsMetric',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          layerId: 'layer_0',
+          layerType: 'data',
+          metricAccessor: 'metric_0',
+          subtitle: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.totalLabel', {
+            defaultMessage: 'Total',
+          }),
+        },
+        query: {
+          esql: PODS_ESQL,
+        },
+        filters: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer_0: {
+                index: 'esql-query-index',
+                query: {
+                  esql: PODS_ESQL,
+                },
+                columns: [
+                  {
+                    columnId: 'metric_0',
+                    fieldName: 'total_pods',
+                    label: i18n.translate('xpack.kubernetesPoc.kubernetesOverview.podsLabel', {
+                      defaultMessage: 'Pods',
+                    }),
+                    customLabel: true,
+                    meta: {
+                      type: 'number',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    }),
+    []
+  );
 
   return (
-    <MetricCard
-      title={i18n.translate('xpack.kubernetesPoc.kubernetesOverview.podsLabel', {
-        defaultMessage: 'Pods',
-      })}
-      value={totalPods}
-      isLoading={loading}
-      formatter="number"
-      valueColor={euiTheme.colors.primary}
+    <LensComponent
+      id="podsMetric"
+      attributes={attributes}
+      timeRange={timeRange}
+      style={{ height: `${height}px`, width: '100%' }}
+      viewMode="view"
+      noPadding
+      withDefaultActions={false}
+      disableTriggers
+      showInspector={false}
+      syncCursor={false}
+      syncTooltips={false}
     />
   );
 };
