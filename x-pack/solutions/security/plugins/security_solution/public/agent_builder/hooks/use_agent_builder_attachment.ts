@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 export interface UseAgentBuilderAttachmentParams {
@@ -59,10 +60,12 @@ export const useAgentBuilderAttachment = ({
 
     // Open the conversation flyout with attachment and prefilled message
     onechat.openConversationFlyout({
+      autoSendInitialMessage: false,
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
+      agentId: THREAT_HUNTING_AGENT_ID,
     });
   }, [attachmentType, attachmentData, attachmentPrompt, onechat]);
 

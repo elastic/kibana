@@ -15,6 +15,11 @@ export enum ProductFeatureSecurityKey {
   /** Enables AI Value Report access */
   aiValueReport = 'ai_value_report',
 
+  /**
+   * Enables rule gaps auto-fill
+   */
+  ruleGapsAutoFill = 'rule_gaps_auto_fill',
+
   /** Elastic endpoint detections, includes CSP rules which remain provisionally within siem */
   detections = 'detections',
   /**
@@ -109,6 +114,11 @@ export enum ProductFeatureSecurityKey {
 
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables graph visualization for alerts and events
+   */
+  graphVisualization = 'graph_visualization',
 }
 
 export enum ProductFeatureCasesKey {

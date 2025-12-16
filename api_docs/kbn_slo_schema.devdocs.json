@@ -580,6 +580,126 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FindSLOInstancesParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindSLOInstancesParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOInstancesParams.sloId",
+            "type": "string",
+            "tags": [],
+            "label": "sloId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOInstancesParams.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOInstancesParams.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOInstancesParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOInstancesParams.searchAfter",
+            "type": "string",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FindSLOInstancesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindSLOInstancesResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOInstancesResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              "{ instanceId: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOInstancesResponse.searchAfter",
+            "type": "string",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.Paginated",
         "type": "Interface",
         "tags": [],
@@ -6321,6 +6441,38 @@
           "; }>; }>>; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_group.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.findSLOInstancesParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "findSLOInstancesParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; query: ",
+          "UnionC",
+          "<[",
+          "UndefinedC",
+          ", ",
+          "PartialC",
+          "<{ search: ",
+          "StringC",
+          "; size: ",
+          "StringC",
+          "; searchAfter: ",
+          "StringC",
+          "; }>]>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_instances.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16506,6 +16658,24 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.serverlessSloSettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "serverlessSloSettingsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ staleThresholdInHours: ",
+          "NumberC",
+          "; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.settingsSchema",
         "type": "Object",
         "tags": [],
@@ -19932,24 +20102,6 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.sloServerlessSettingsSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "sloServerlessSettingsSchema",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ staleThresholdInHours: ",
-          "NumberC",
-          "; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.sloSettingsSchema",
         "type": "Object",
         "tags": [],
@@ -23282,6 +23434,34 @@
           "; }>>; }>; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.storedSloSettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "storedSloSettingsSchema",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ useAllRemoteClusters: ",
+          "BooleanC",
+          "; selectedRemoteClusters: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>, ",
+          "PartialC",
+          "<{ staleThresholdInHours: ",
+          "NumberC",
+          "; }>]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

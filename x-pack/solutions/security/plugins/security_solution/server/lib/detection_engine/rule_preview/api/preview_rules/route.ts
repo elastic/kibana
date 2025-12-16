@@ -285,6 +285,7 @@ export const previewRulesRoute = (
                       searchSourceClient,
                     }),
                   getMaintenanceWindowIds: async () => [],
+                  getMaintenanceWindowNames: async () => [],
                   uiSettingsClient: coreContext.uiSettings.client,
                   getDataViews: async () => dataViewsService,
                   share,
