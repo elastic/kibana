@@ -18,7 +18,7 @@ export const streamsPromptsSOAttributesV2 = streamsPromptsSOAttributesV1.extends
   descriptionPromptOverride: schema.maybe(schema.string()),
 });
 
-export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV1>;
+export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV2>;
 
 export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
   return {
