@@ -31,7 +31,7 @@ import type {
   TrialCompanionMilestoneServiceStart,
 } from './trial_companion_milestone_service.types';
 import { newTelemetryLogger } from '../../telemetry/helpers';
-import type { Milestone } from '../../../../common/trial_companion/types';
+import { Milestone } from '../../../../common/trial_companion/types';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
 import type { NBAMilestone, DetectorF } from '../types';
 
@@ -73,6 +73,11 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
       casesM6(usageCollectorDeps)
     );
   }
+
+  detectors.push(async () => {
+    return Milestone._FINAL;
+  });
+
   const repo: TrialCompanionMilestoneRepository = new TrialCompanionMilestoneRepositoryImpl(
     logger,
     soClient

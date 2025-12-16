@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
-import type { Milestone } from '../../../../common/trial_companion/types';
+import { Milestone } from '../../../../common/trial_companion/types';
 import type { TrialCompanionUserNBAService } from './trial_companion_user_nba_service.types';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
 import type { NBAUserSeenSavedObjectAttributes } from '../saved_objects';
@@ -59,7 +59,8 @@ export class TrialCompanionUserNBAServiceImpl implements TrialCompanionUserNBASe
 
     if (
       !milestone ||
-      (userStatus && userStatus.attributes.milestoneIds.includes(milestone.milestoneId))
+      (userStatus && userStatus.attributes.milestoneIds.includes(milestone.milestoneId)) ||
+      milestone.milestoneId === Milestone._FINAL // we don't show the final milestone yet, might be changed in the future
     ) {
       return undefined;
     }
