@@ -301,12 +301,43 @@
               "\nStop execution of expression."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -1030,12 +1061,43 @@
               "\nCancel the execution of the expression. This will set abort signal\n(available in execution context) to aborted state, letting expression\nfunctions to stop their execution."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExecutionContract.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -3267,12 +3329,43 @@
             "label": "cancel",
             "description": [],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/public/loader.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionLoader.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/public/loader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -14008,12 +14101,43 @@
               "\nStop execution of expression."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -23302,12 +23426,43 @@
               "\nStop execution of expression."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -24031,12 +24186,43 @@
               "\nCancel the execution of the expression. This will set abort signal\n(available in execution context) to aborted state, letting expression\nfunctions to stop their execution."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExecutionContract.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {

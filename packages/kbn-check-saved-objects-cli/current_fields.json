@@ -98,6 +98,10 @@
     "apiKeyId",
     "createdAt"
   ],
+  "api_key_to_invalidate": [
+    "apiKeyId",
+    "createdAt"
+  ],
   "apm-custom-dashboards": [
     "dashboardSavedObjectId",
     "kuery",

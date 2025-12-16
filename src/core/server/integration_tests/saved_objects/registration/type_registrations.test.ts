@@ -18,6 +18,7 @@ const previouslyRegisteredTypes = [
   'alert',
   'alerting_rule_template',
   'api_key_pending_invalidation',
+  'api_key_to_invalidate',
   'apm-custom-dashboards',
   'apm-indices',
   'apm-server-schema',
