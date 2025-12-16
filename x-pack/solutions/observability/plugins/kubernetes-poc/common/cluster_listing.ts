@@ -14,7 +14,6 @@ export interface ClusterData {
   totalNodes: number;
   totalNamespaces: number;
   failedPods: number;
-  pendingPods: number;
   runningPods: number;
   cpuUtilization: number | null;
   memoryUtilization: number | null;

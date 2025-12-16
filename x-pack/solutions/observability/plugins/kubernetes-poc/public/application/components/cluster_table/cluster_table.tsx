@@ -24,6 +24,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiButtonIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ClusterData, HealthStatus } from '../../../../common/cluster_listing';
@@ -176,11 +177,10 @@ const CloudProviderCell: React.FC<{ provider: string | null }> = ({ provider }) 
 
 interface PodStatusCellProps {
   running: number;
-  pending: number;
   failed: number;
 }
 
-const PodStatusCell: React.FC<PodStatusCellProps> = ({ running, pending, failed }) => {
+const PodStatusCell: React.FC<PodStatusCellProps> = ({ running, failed }) => {
   return (
     <EuiFlexGroup
       gutterSize="xs"
@@ -197,17 +197,6 @@ const PodStatusCell: React.FC<PodStatusCellProps> = ({ running, pending, failed 
         >
           <EuiBadge tabIndex={0} color="success">
             {running}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-        <EuiToolTip
-          content={i18n.translate('xpack.kubernetesPoc.clusterTable.pendingPodsTooltip', {
-            defaultMessage: 'Pending pods',
-          })}
-        >
-          <EuiBadge tabIndex={0} color="warning">
-            {pending}
           </EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
@@ -316,7 +305,14 @@ export const ClusterTable: React.FC<ClusterTableProps> = ({ clusters, onExpandCl
           );
 
         case 'clusterName':
-          return <EuiText size="s">{cluster.clusterName}</EuiText>;
+          return (
+            <EuiLink
+              data-test-subj="kubernetesPocClusterNameLink"
+              onClick={() => onExpandCluster?.(cluster)}
+            >
+              {cluster.clusterName}
+            </EuiLink>
+          );
 
         case 'cloudProvider':
           return <CloudProviderCell provider={cluster.cloudProvider} />;
@@ -328,13 +324,7 @@ export const ClusterTable: React.FC<ClusterTableProps> = ({ clusters, onExpandCl
           return <EuiText size="s">{cluster.totalNamespaces}</EuiText>;
 
         case 'podStatuses':
-          return (
-            <PodStatusCell
-              running={cluster.runningPods}
-              pending={cluster.pendingPods}
-              failed={cluster.failedPods}
-            />
-          );
+          return <PodStatusCell running={cluster.runningPods} failed={cluster.failedPods} />;
 
         case 'cpuUtilization':
           return <UtilizationCell value={cluster.cpuUtilization} />;

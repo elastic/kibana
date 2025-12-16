@@ -40,7 +40,6 @@ FROM remote_cluster:metrics-*
     total_namespaces = COUNT_DISTINCT(k8s.namespace.name),
     total_pods = COUNT_DISTINCT(k8s.pod.uid),
     running_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 1,
-    pending_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 2,
     failed_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 3,
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_memory_usage = SUM(k8s.node.memory.usage),
@@ -54,7 +53,7 @@ FROM remote_cluster:metrics-*
 | EVAL memory_utilization = ROUND(sum_memory_usage / TO_DOUBLE(sum_allocatable_memory) * 100, 2)
 | EVAL volume_utilization = ROUND(sum_filesystem_usage / TO_DOUBLE(sum_filesystem_capacity) * 100, 2)
 | KEEP k8s.cluster.name, health_status, cloud.provider, total_nodes, total_namespaces,
-       failed_pods, pending_pods, running_pods,
+       failed_pods, running_pods,
        cpu_utilization, memory_utilization, volume_utilization
 `;
 
@@ -135,7 +134,6 @@ const getClusterListingRoute = createKubernetesPocServerRoute({
         totalNodes: row[columnIndex.total_nodes] as number,
         totalNamespaces: row[columnIndex.total_namespaces] as number,
         failedPods: row[columnIndex.failed_pods] as number,
-        pendingPods: row[columnIndex.pending_pods] as number,
         runningPods: row[columnIndex.running_pods] as number,
         cpuUtilization: row[columnIndex.cpu_utilization] as number | null,
         memoryUtilization: row[columnIndex.memory_utilization] as number | null,

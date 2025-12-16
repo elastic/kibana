@@ -248,7 +248,6 @@ FROM remote_cluster:metrics-*
         "cloudProvider": "gcp",
         "totalNodes": 12,
         "failedPods": 2,
-        "pendingPods": 5,
         "runningPods": 150,
         "cpuUtilization": 45.23,
         "memoryUtilization": 62.18
@@ -399,7 +398,6 @@ FROM remote_cluster:metrics-*
     ready_nodes = COUNT_DISTINCT(k8s.node.name) WHERE k8s.node.condition_ready > 0,
     total_pods = COUNT_DISTINCT(k8s.pod.uid),
     running_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 1,
-    pending_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 2,
     failed_pods = COUNT_DISTINCT(k8s.pod.uid) WHERE k8s.pod.phase == 3,
     sum_cpu_usage = SUM(k8s.node.cpu.usage),
     sum_memory_usage = SUM(k8s.node.memory.usage),
@@ -410,7 +408,7 @@ FROM remote_cluster:metrics-*
 | EVAL cpu_utilization = ROUND(sum_cpu_usage / sum_allocatable_cpu * 100, 2)
 | EVAL memory_utilization = ROUND(sum_memory_usage / TO_DOUBLE(sum_allocatable_memory) * 100, 2)
 | KEEP k8s.cluster.name, health_status, cloud.provider, total_nodes,
-       failed_pods, pending_pods, running_pods,
+       failed_pods, running_pods,
        cpu_utilization, memory_utilization
 ```
 
@@ -430,7 +428,6 @@ FROM remote_cluster:metrics-*
 | `cloud.provider` | Cloud provider (gcp, aws, azure, etc.) |
 | `total_nodes` | Total node count |
 | `failed_pods` | Count of pods in Failed phase |
-| `pending_pods` | Count of pods in Pending phase |
 | `running_pods` | Count of pods in Running phase |
 | `cpu_utilization` | CPU usage as % of allocatable (e.g., 25.56) |
 | `memory_utilization` | Memory usage as % of allocatable (e.g., 29.08) |
