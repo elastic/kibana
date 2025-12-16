@@ -252,15 +252,9 @@ function validateSorting({
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
 }) {
-  const allColumns = [...metrics, ...(rows ?? []), ...(split_metrics_by ?? [])];
-  let sortedCount = 0;
-  for (const column of allColumns) {
-    if ('sorted' in column) {
-      sortedCount++;
-      if (sortedCount > 1) {
-        return 'Only one column across metrics, rows, and split_metrics_by can be sorted at a time.';
-      }
-    }
+  const allColumns = metrics.concat(rows ?? [], split_metrics_by ?? []);
+  if (allColumns.filter((column) => 'sorted' in column && column.sorted).length > 1) {
+    return 'Only one column across metrics, rows, and split_metrics_by can be sorted at a time.';
   }
 }
 
