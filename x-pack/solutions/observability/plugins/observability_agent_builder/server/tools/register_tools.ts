@@ -82,7 +82,7 @@ export async function registerTools({
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = [
     createGetDataSourcesTool({ core, plugins, logger }),
-    createRunLogRateAnalysisTool({ logger }),
+    createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
