@@ -12,7 +12,7 @@ import type { RefObject } from 'react';
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip, type EuiDataGridRefProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IndexUpdateService } from '../../index_update_service';
+import type { IndexUpdateService } from '../../services/index_update_service';
 
 const addRowText = i18n.translate('indexEditor.dataGrid.addRow', {
   defaultMessage: 'Add Row',
