@@ -65,7 +65,7 @@ function getSortPredicateForColumn(
   direction: 'asc' | 'desc',
   layerId: string | undefined,
   frame: FramePublicAPI
-):  HeatmapGridConfig['xSortPredicate'] {
+): HeatmapGridConfig['xSortPredicate'] {
   if (!accessor || !layerId || !frame.activeData?.[layerId]) {
     // Fallback to alphabetical if we can't determine the type
     return direction === 'asc' ? 'alphaAsc' : 'alphaDesc';
