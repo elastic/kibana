@@ -29,7 +29,7 @@
     "@kbn/ml-is-populated-object",
     "@kbn/i18n",
     "@kbn/licensing-types",
-    "@kbn/fs"
+    "@kbn/fs",
     "@kbn/react-query"
   ]
 }
