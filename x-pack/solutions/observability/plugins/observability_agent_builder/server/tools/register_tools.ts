@@ -13,6 +13,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createGetDataSourcesTool,
@@ -35,9 +36,13 @@ import {
   createGetCorrelatedLogsTool,
 } from './get_correlated_logs/get_correlated_logs';
 import {
+  createGetServicesTool,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
+} from './get_services/get_services';
+import {
+  createDownstreamDependenciesTool,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-} from '../../common/constants';
+} from './get_downstream_dependencies/get_downstream_dependencies';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -54,23 +59,16 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
-];
-
-// registered in the APM plugin
-const APM_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 ];
 
-export const OBSERVABILITY_AGENT_TOOL_IDS = [
-  ...PLATFORM_TOOL_IDS,
-  ...OBSERVABILITY_TOOL_IDS,
-  ...APM_TOOL_IDS,
-];
+export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
 
 export async function registerTools({
   core,
   plugins,
+  dataRegistry,
   logger,
 }: {
   core: CoreSetup<
@@ -78,14 +76,17 @@ export async function registerTools({
     ObservabilityAgentBuilderPluginStart
   >;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = [
     createGetDataSourcesTool({ core, plugins, logger }),
-    createRunLogRateAnalysisTool({ logger }),
+    createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
+    createGetServicesTool({ core, dataRegistry, logger }),
+    createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
   ];
 
