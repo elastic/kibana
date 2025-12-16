@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-// Feature flag for the observability agent
-export const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-export const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
-
-// Tool IDs for tools defined in the APM plugin
-export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
-  'observability.get_downstream_dependencies';
-export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
-
 // Attachment type IDs
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';
