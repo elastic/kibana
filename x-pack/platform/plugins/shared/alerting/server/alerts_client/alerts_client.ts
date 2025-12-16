@@ -520,11 +520,8 @@ export class AlertsClient<
             })
           );
         } else {
-          // skip writing the alert document if the number of consecutive
-          // active alerts is less than the rule alertDelay threshold
-          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
-            continue;
-          }
+          const isDeferred = activeAlerts[id].getActiveCount() < this.options.rule.alertDelay;
+
           activeAlertsToIndex.push(
             buildNewAlert<
               AlertData,
@@ -541,6 +538,7 @@ export class AlertsClient<
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
               dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+              isDeferred,
             })
           );
         }

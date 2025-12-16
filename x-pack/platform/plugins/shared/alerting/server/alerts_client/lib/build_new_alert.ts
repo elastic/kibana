@@ -34,6 +34,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_STATUS_ACTIVE,
   ALERT_STATE_NAMESPACE,
+  ALERT_STATUS_DEFERRED,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Alert as LegacyAlert } from '../../alert/alert';
@@ -59,6 +60,7 @@ interface BuildNewAlertOpts<
   timestamp: string;
   kibanaVersion: string;
   dangerouslyCreateAlertsInAllSpaces?: boolean;
+  isDeferred: boolean;
 }
 
 /**
@@ -81,6 +83,7 @@ export const buildNewAlert = <
   payload,
   kibanaVersion,
   dangerouslyCreateAlertsInAllSpaces,
+  isDeferred,
 }: BuildNewAlertOpts<
   AlertData,
   LegacyState,
@@ -95,6 +98,7 @@ export const buildNewAlert = <
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const alertStatus = isDeferred ? ALERT_STATUS_DEFERRED : ALERT_STATUS_ACTIVE;
 
   return deepmerge.all(
     [
@@ -114,7 +118,7 @@ export const buildNewAlert = <
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
         [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
         [ALERT_MUTED]: isMuted,
-        [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+        [ALERT_STATUS]: alertStatus,
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
