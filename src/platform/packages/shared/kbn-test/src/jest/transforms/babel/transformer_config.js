@@ -20,26 +20,6 @@ module.exports = () => ({
       },
     ],
   ],
-  plugins: [
-    [
-      require.resolve('babel-plugin-transform-barrels'),
-      {
-        executorName: 'jest',
-        moduleIgnorePatterns: [
-          'react',
-          'React',
-          '@jest/globals',
-          '@testing-library/*',
-          '@elastic/eui/lib/test/*',
-          '@elastic/eui/test-env/test/*',
-          '@emotion/*',
-          'styled-components',
-          'enzyme',
-          'chalk',
-        ],
-      },
-    ],
-  ],
   overrides: [
     {
       exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
