@@ -39,7 +39,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/discover-shared-plugin",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }
