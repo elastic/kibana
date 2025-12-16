@@ -29,7 +29,8 @@ export function transformToV1LensItemAttributes(
   attributes: LensAttributesV0 | LensAttributes
 ): LensAttributes {
   return [
-    // splitAccessors migration needs to run before the color mapping one
+    // splitAccessors migration needs to run before the color mapping one due to the
+    // requirements about the splitAccessors required by the color mapping runtime convertion
     convertToSplitAccessors,
     convertToLegendStats,
     convertToRawColorMappingsFn,

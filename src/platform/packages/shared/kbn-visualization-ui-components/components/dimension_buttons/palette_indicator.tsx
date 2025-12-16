@@ -31,6 +31,7 @@ export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorC
           }
         `}
         size="xs"
+        // limiting the visible colors to a max to avoid too many colors
         palette={accessorConfig.palette.slice(0, MAX_PALETTE_INDICATOR_COLORS)}
       />
     </div>
