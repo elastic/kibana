@@ -18,6 +18,7 @@ import {
   EuiCallOut,
   EuiCodeBlock,
   EuiConfirmModal,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
@@ -37,11 +38,7 @@ export interface Layer {
   isConvertibleToEsql: boolean;
 }
 
-export function ConvertToEsqlModal({
-  layers,
-  onCancel,
-  onConfirm,
-}: {
+export const ConvertToEsqlModal: React.FunctionComponent<{
   layers: Layer[];
   onCancel: EuiConfirmModalProps['onCancel'];
   /**
@@ -49,7 +46,7 @@ export function ConvertToEsqlModal({
    * @param params - Object containing array of layer IDs selected for conversion
    */
   onConfirm: (params: { layersToConvert: string[] }) => void;
-}) {
+}> = ({ layers, onCancel, onConfirm }) => {
   const { euiTheme } = useEuiTheme();
 
   const [selectedItems, setSelectedItems] = useState<Layer[]>([]);
@@ -159,6 +156,10 @@ export function ConvertToEsqlModal({
     initialSelected: [],
   };
 
+  const isConfirmButtonEnabled =
+    (layers.length === 1 && layers[0].isConvertibleToEsql) ||
+    (layers.length > 1 && selectedItems.length > 0);
+
   return (
     <EuiConfirmModal
       aria-label={i18n.translate('xpack.lens.config.switchToQueryModeAriaLabel', {
@@ -172,12 +173,18 @@ export function ConvertToEsqlModal({
         defaultMessage: 'Cancel',
       })}
       onConfirm={() => {
-        onConfirm({ layersToConvert: selectedItems.map((layer) => layer.id) });
+        let layersToConvert: string[] = [];
+        if (layers.length === 1 && layers[0].isConvertibleToEsql) {
+          layersToConvert = [layers[0].id];
+        } else if (layers.length > 1 && selectedItems.length > 0) {
+          layersToConvert = selectedItems.map((layer) => layer.id);
+        }
+        onConfirm({ layersToConvert });
       }}
       confirmButtonText={i18n.translate('xpack.lens.config.switchToQueryModeButtonLabel', {
         defaultMessage: 'Switch to query mode',
       })}
-      confirmButtonDisabled={selectedItems.length === 0}
+      confirmButtonDisabled={!isConfirmButtonEnabled}
     >
       <p>
         {i18n.translate('xpack.lens.config.queryModeDescription', {
@@ -202,23 +209,7 @@ export function ConvertToEsqlModal({
 
       <EuiSpacer size="l" />
 
-      {layers.length === 1 ? (
-        <>
-          <EuiText size="xs" component="div">
-            <p>
-              <strong>
-                {i18n.translate('xpack.lens.config.queryPreviewDescription', {
-                  defaultMessage: 'Query preview',
-                })}
-              </strong>
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-            {layers[0].query}
-          </EuiCodeBlock>
-        </>
-      ) : (
+      {layers.length > 1 ? (
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.lens.config.layersTableCaption', {
             defaultMessage: 'Layers available for conversion to query mode',
@@ -230,7 +221,26 @@ export function ConvertToEsqlModal({
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           selection={selection}
         />
-      )}
+      ) : layers.length === 1 && layers[0].isConvertibleToEsql ? (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" component="div">
+              <p>
+                <strong>
+                  {i18n.translate('xpack.lens.config.queryPreviewDescription', {
+                    defaultMessage: 'Query preview',
+                  })}
+                </strong>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCodeBlock isCopyable language="esql" paddingSize="s">
+              {layers[0].query}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
     </EuiConfirmModal>
   );
-}
+};
