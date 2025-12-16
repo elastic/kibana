@@ -343,7 +343,7 @@ export function initializeUnifiedSearchManager(
           timeRestore$,
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           map(([filters, query, refresh_interval, time_range]) => ({
             filters,
             query,
