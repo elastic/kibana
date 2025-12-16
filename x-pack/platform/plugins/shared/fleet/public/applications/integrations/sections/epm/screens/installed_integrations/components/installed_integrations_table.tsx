@@ -28,6 +28,12 @@ import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrat
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
+import {
+  hasPreviousVersion,
+  isRollbackTTLExpired,
+  useRollbackAvailablePackages,
+} from '../hooks/use_rollback_available';
+
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 import { DashboardsCell } from './dashboards_cell';
@@ -83,12 +89,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     const count = item.packagePoliciesInfo.count;
     return count > 0;
   };
-  const hasPreviousVersion = (item: InstalledPackageUIPackageListItem) => {
-    return !!item.installationInfo?.previous_version;
-  };
-  const isRollbackTTLExpired = (item: InstalledPackageUIPackageListItem) => {
-    return !!item.installationInfo?.is_rollback_ttl_expired;
-  };
+
+  const isRollbackAvailablePackages: Record<string, boolean> =
+    useRollbackAvailablePackages(installedPackages);
 
   return (
     <>
@@ -334,10 +337,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                         type: 'icon',
 
                         onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
-                        enabled: (item) =>
-                          hasPreviousVersion(item) &&
-                          !!licenseService.isEnterprise() &&
-                          !isRollbackTTLExpired(item),
+                        enabled: (item) => isRollbackAvailablePackages[item.name] ?? false,
                         description: (item) =>
                           !hasPreviousVersion(item)
                             ? i18n.translate(
