@@ -7,50 +7,63 @@
 
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
+import type {
+  PatchUpdateRequestBody,
+  PatchUpdateRequestParams,
+} from '../../../../common/api/endpoint';
 import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';
-import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
+import { registerPatchUpdateScriptRoute } from './update_script';
+import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { registerCreateScriptRoute } from './create_script';
 import { EndpointAuthorizationError } from '../../errors';
 
-describe('POST: create script API route', () => {
+describe('PATCH: update script API route', () => {
   let apiTestSetup: HttpApiTestSetupMock;
   let httpRequestMock: ReturnType<
-    HttpApiTestSetupMock<undefined, undefined, CreateScriptRequestBody>['createRequestMock']
+    HttpApiTestSetupMock<
+      PatchUpdateRequestParams,
+      undefined,
+      PatchUpdateRequestBody
+    >['createRequestMock']
   >;
   let httpHandlerContextMock: HttpApiTestSetupMock<
+    PatchUpdateRequestParams,
     undefined,
-    undefined,
-    CreateScriptRequestBody
+    PatchUpdateRequestBody
   >['httpHandlerContextMock'];
   let httpResponseMock: HttpApiTestSetupMock<
+    PatchUpdateRequestParams,
     undefined,
-    undefined,
-    CreateScriptRequestBody
+    PatchUpdateRequestBody
   >['httpResponseMock'];
 
   beforeEach(async () => {
-    apiTestSetup = createHttpApiTestSetupMock<undefined, undefined, CreateScriptRequestBody>();
+    apiTestSetup = createHttpApiTestSetupMock<
+      PatchUpdateRequestParams,
+      undefined,
+      PatchUpdateRequestBody
+    >();
 
     ({ httpHandlerContextMock, httpResponseMock } = apiTestSetup);
 
     httpRequestMock = apiTestSetup.createRequestMock({
-      body: ScriptsLibraryMock.generateCreateScriptBody(),
+      body: ScriptsLibraryMock.generateUpdateScriptBody(),
     });
+
+    httpRequestMock.params = { script_id: '123' };
 
     ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
       'space_a'
     );
 
-    registerCreateScriptRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
+    registerPatchUpdateScriptRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
 
-  describe('registerCreateScriptRoute()', () => {
+  describe('registerPatchUpdateScriptRoute()', () => {
     it('should register the route', () => {
       const registeredRoute = apiTestSetup.getRegisteredVersionedRoute(
-        'post',
-        SCRIPTS_LIBRARY_ROUTE,
+        'patch',
+        SCRIPTS_LIBRARY_ROUTE_ITEM,
         '2023-10-31'
       );
 
@@ -70,7 +83,7 @@ describe('POST: create script API route', () => {
       );
 
       await apiTestSetup
-        .getRegisteredVersionedRoute('post', SCRIPTS_LIBRARY_ROUTE, '2023-10-31')
+        .getRegisteredVersionedRoute('patch', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
@@ -79,10 +92,10 @@ describe('POST: create script API route', () => {
     });
   });
 
-  describe('route handler', () => {
-    it('should get scripts client with correct space ID and call create() method', async () => {
+  describe('Patch update route handler', () => {
+    it('should get scripts client with correct space ID and call update() method', async () => {
       await apiTestSetup
-        .getRegisteredVersionedRoute('post', SCRIPTS_LIBRARY_ROUTE, '2023-10-31')
+        .getRegisteredVersionedRoute('patch', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(
@@ -90,13 +103,13 @@ describe('POST: create script API route', () => {
       ).toHaveBeenCalledWith('space_a', 'unknown');
 
       expect(
-        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient('', '').create
-      ).toHaveBeenCalledWith(httpRequestMock.body);
+        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient('', '').update
+      ).toHaveBeenCalledWith({ ...httpRequestMock.body, id: httpRequestMock.params.script_id });
     });
 
     it('should respond with the correct body payload', async () => {
       await apiTestSetup
-        .getRegisteredVersionedRoute('post', SCRIPTS_LIBRARY_ROUTE, '2023-10-31')
+        .getRegisteredVersionedRoute('patch', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.ok).toHaveBeenCalledWith({
