@@ -302,5 +302,5 @@ xpack.genAiSettings:
 cps.enabled: true
 cps.cpsEnabled: false
 
-# Disable saved objects access control featrures (write-restricted dashboards)
+# Disable saved objects access control features (write-restricted dashboards)
 savedObjects.enableAccessControl: false
