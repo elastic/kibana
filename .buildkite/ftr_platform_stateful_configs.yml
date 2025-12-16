@@ -400,7 +400,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/stats/config.ts
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
-  - x-pack/platform/test/api_integration/apis/transform/config.ts
   - x-pack/platform/test/api_integration/apis/upgrade_assistant/config.ts
   - x-pack/platform/test/api_integration/apis/watcher/config.ts
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
