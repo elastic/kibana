@@ -58,8 +58,8 @@ import { buildIgnoreMissingFilter, castFieldsToString, buildWhereCondition } fro
 export function convertDissectProcessorToESQL(processor: DissectProcessor): ESQLAstCommand[] {
   const {
     from,
-    pattern, // eslint-disable-next-line @typescript-eslint/naming-convention
-    append_separator, // eslint-disable-next-line @typescript-eslint/naming-convention
+    pattern,
+    append_separator,
     ignore_missing = false, // default same as ES Dissect Enrich Processor
     where,
   } = processor;
