@@ -23,7 +23,7 @@ import type {
 } from '../../../../types';
 import * as generic from '../../generic';
 import { isColumn, isFunctionExpression, isParamLiteral } from '../../../is';
-import type { EsqlQuery } from '../../../../query';
+import type { EsqlQuery } from '../../../../composer/query';
 
 /**
  * Lists all "LIMIT" commands in the query AST.
