@@ -14,13 +14,12 @@
       "dataViews",
       "embeddable",
       "uiActions",
-      "dashboard",
       "data",
       "charts",
       "fieldFormats",
       "developerExamples",
       "dataViewFieldEditor",
     ],
-    "requiredBundles": ["dashboard", "presentationUtil", "kibanaUtils", "kibanaReact"]
+    "requiredBundles": ["presentationUtil", "kibanaUtils", "kibanaReact"]
   }
 }

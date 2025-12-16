@@ -19,7 +19,7 @@ export const registerPanelPlacementSettings = <SerializedState extends object = 
 ) => {
   if (registry.has(embeddableType)) {
     throw new Error(
-      i18n.translate('dashboard.panelPlacement.panelPlacementSettingsExistsError', {
+      i18n.translate('presentationUtil.panelPlacement.panelPlacementSettingsExistsError', {
         defaultMessage: 'Panel placement settings for embeddable type {panelType} already exists',
         values: { panelType: embeddableType },
       })
