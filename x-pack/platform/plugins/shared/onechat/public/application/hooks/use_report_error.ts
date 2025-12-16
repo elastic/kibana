@@ -45,7 +45,7 @@ export const useReportConverseError = () => {
       reportEvent({
         eventType: AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR,
         eventData: {
-          error_type: error?.constructor?.name || 'unknown',
+          error_type: error instanceof Error ? error?.constructor?.name : 'unknown',
           error_message: error instanceof Error ? error.message : String(error),
           error_stack: error instanceof Error ? error.stack : undefined,
           conversation_id: conversationId,

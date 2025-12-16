@@ -110,7 +110,6 @@ export const ChatExperience: React.FC = () => {
       source: TELEMETRY_SOURCE,
     });
     setConfirmModalOpen(false);
-    // The actual setting change is handled by FieldRow when user saves
   }, [analytics]);
 
   const handleCancelAgent = useCallback(() => {

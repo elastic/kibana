@@ -286,11 +286,12 @@ const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
       items: {
         type: 'keyword',
         _meta: {
-          description: 'Name of tool used',
+          description:
+            'Tool ID used (normalized: built-in tools keep ID, custom tools become "custom")',
         },
       },
       _meta: {
-        description: 'Names of tools used in the response',
+        description: 'Tool IDs used in the response (normalized)',
         optional: true,
       },
     },
