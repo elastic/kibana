@@ -7,6 +7,9 @@ source .buildkite/scripts/steps/functional/common.sh
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 
+echo '--- Update Scout Test Config Manifests'
+node scripts/scout.js update-test-config-manifests
+
 echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
 node scripts/scout discover-playwright-configs --save
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json

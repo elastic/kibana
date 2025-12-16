@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -262,7 +263,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             pagination={pagination}
             sorting={sorting}
             data-test-subj="inferenceEndpointTable"
-            tableCaption={i18n.INFERENCE_ENDPOINTS_TABLE_CAPTION}
+            tableCaption={kbnI18n.translate(
+              'xpack.searchInferenceEndpoints.tabularPage.tableCaption',
+              {
+                defaultMessage: 'Inference endpoints list',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

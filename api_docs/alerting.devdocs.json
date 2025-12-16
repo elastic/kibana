@@ -9106,6 +9106,20 @@
         "children": [
           {
             "parentPluginId": "alerting",
+            "id": "def-common.RuleSpecificFlappingProperties.enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.RuleSpecificFlappingProperties.lookBackWindow",
             "type": "number",
             "tags": [],
@@ -10053,6 +10067,21 @@
           "5000"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/max_alert_limit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BackfillInitiator",
+        "type": "Type",
+        "tags": [],
+        "label": "BackfillInitiator",
+        "description": [],
+        "signature": [
+          "\"user\" | \"system\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/backfill.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12026,6 +12055,33 @@
                             "trackAdoption": false
                           }
                         ]
+                      },
+                      {
+                        "parentPluginId": "alerting",
+                        "id": "def-common.alertMappings.properties.actions.properties.params",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "params",
+                        "description": [],
+                        "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "alerting",
+                            "id": "def-common.alertMappings.properties.actions.properties.params.type",
+                            "type": "string",
+                            "tags": [],
+                            "label": "type",
+                            "description": [],
+                            "signature": [
+                              "\"flattened\""
+                            ],
+                            "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
                       }
                     ]
                   }
@@ -13608,6 +13664,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.backfillInitiator",
+        "type": "Object",
+        "tags": [],
+        "label": "backfillInitiator",
+        "description": [],
+        "signature": [
+          "{ readonly USER: \"user\"; readonly SYSTEM: \"system\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/backfill.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

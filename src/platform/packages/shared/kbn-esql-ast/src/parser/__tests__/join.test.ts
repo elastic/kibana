@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
-import { Walker } from '../../walker';
+import { EsqlQuery } from '../../composer/query';
+import { Walker } from '../../ast/walker';
 
 describe('<TYPE> JOIN command', () => {
   describe('correctly formatted', () => {

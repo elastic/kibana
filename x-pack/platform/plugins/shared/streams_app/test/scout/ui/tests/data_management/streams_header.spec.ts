@@ -65,7 +65,7 @@ test.describe('Stream detail header', { tag: ['@ess', '@svlOblt'] }, () => {
     // Initial data quality should be good
     await pageObjects.streams.verifyDataQuality(TEST_STREAM_NAME, 'Good');
 
-    const currentTime = Date.now();
+    let currentTime = Date.now();
     // Ingest 1 doc with a malformed messaege to have 1 degraded document
     await generateLogsData(logsSynthtraceEsClient)({
       index: TEST_STREAM_NAME,
@@ -75,12 +75,16 @@ test.describe('Stream detail header', { tag: ['@ess', '@svlOblt'] }, () => {
       isMalformed: true,
     });
 
+    // Wait to ensure the doc is indexed
+    await page.waitForTimeout(20000);
+
     // Refresh the page to reflect the processor changes
     await page.reload();
 
     // We should have 51 documents in total now, 1 degraded -> ~1.96% degraded docs -> < 3% so Degraded quality
     await pageObjects.streams.verifyDataQuality(TEST_STREAM_NAME, 'Degraded');
 
+    currentTime = Date.now();
     // Ingest 4 more malformed docs to have 5 degraded documents
     await generateLogsData(logsSynthtraceEsClient)({
       index: TEST_STREAM_NAME,
@@ -89,6 +93,9 @@ test.describe('Stream detail header', { tag: ['@ess', '@svlOblt'] }, () => {
       docsPerMinute: 4,
       isMalformed: true,
     });
+
+    // Wait to ensure the docs are indexed
+    await page.waitForTimeout(20000);
 
     // Refresh the page to reflect the processor changes
     await page.reload();

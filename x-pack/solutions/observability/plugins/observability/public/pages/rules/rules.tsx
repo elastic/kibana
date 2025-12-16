@@ -181,6 +181,12 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
               http.basePath.prepend(paths.observability.createRule(ruleTypeId))
             );
           }}
+          onSelectTemplate={(templateId) => {
+            setRuleTypeModalVisibility(false);
+            return application.navigateToUrl(
+              http.basePath.prepend(paths.observability.createRuleFromTemplate(templateId))
+            );
+          }}
           http={http}
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}

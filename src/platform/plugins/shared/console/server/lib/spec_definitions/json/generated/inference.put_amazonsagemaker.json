@@ -1,15 +1,35 @@
 {
   "inference.put_amazonsagemaker": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "url_components": {
+      "task_type": [
+        "text_embedding",
+        "completion",
+        "chat_completion",
+        "sparse_embedding",
+        "rerank"
+      ]
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_inference/{task_type}/{amazonsagemaker_inference_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/infer-service-amazon-sagemaker.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-amazonsagemaker",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

@@ -9,23 +9,18 @@
 
 import type { Subscription } from 'rxjs';
 import { timer } from 'rxjs';
-
-export enum AbortReason {
-  Timeout = 'timeout',
-}
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 export class SearchAbortController {
   private inputAbortSignals: AbortSignal[] = new Array();
   private abortController: AbortController = new AbortController();
   private timeoutSub?: Subscription;
   private destroyed = false;
-  private reason?: AbortReason;
 
   constructor(timeout?: number) {
     if (timeout) {
       this.timeoutSub = timer(timeout).subscribe(() => {
-        this.reason = AbortReason.Timeout;
-        this.abortController.abort();
+        this.abortController.abort(AbortReason.TIMEOUT);
         this.timeoutSub!.unsubscribe();
       });
     }
@@ -34,7 +29,7 @@ export class SearchAbortController {
   private abortHandler = () => {
     const allAborted = this.inputAbortSignals.every((signal) => signal.aborted);
     if (allAborted) {
-      this.abortController.abort();
+      this.abortController.abort(this.inputAbortSignals[0].reason);
       this.cleanup();
     }
   };
@@ -67,12 +62,16 @@ export class SearchAbortController {
     return this.abortController.signal;
   }
 
-  public abort() {
+  public abort(reason?: AbortReason) {
     this.cleanup();
-    this.abortController.abort();
+    this.abortController.abort(reason);
   }
 
   public isTimeout() {
-    return this.reason === AbortReason.Timeout;
+    return this.abortController.signal.reason === AbortReason.TIMEOUT;
+  }
+
+  public isCanceled() {
+    return this.abortController.signal.reason === AbortReason.CANCELED;
   }
 }

@@ -476,6 +476,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomGetFileFailureCode(): string {
     return this.randomChoice([
+      'ra_get-file_error_canceled',
       'ra_get-file_error_not-found',
       'ra_get-file_error_is-directory',
       'ra_get-file_error_invalid-input',
@@ -492,6 +493,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomScanFailureCode(): string {
     return this.randomChoice([
+      'ra_scan_error_canceled',
       'ra_scan_error_invalid-input',
       'ra_scan_error_not-found',
       'ra_scan_error_queue-quota',

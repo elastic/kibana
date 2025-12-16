@@ -36,16 +36,18 @@ describe('bulkMarkApiKeysForInvalidation', () => {
   });
 
   test('should log the proper error when savedObjectsClient create failed', async () => {
+    const e = new Error('Fail');
     const logger = loggingSystemMock.create().get();
     const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-    unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Fail'));
+    unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(e);
     await bulkMarkApiKeysForInvalidation(
       { apiKeys: [Buffer.from('123').toString('base64'), Buffer.from('456').toString('base64')] },
       logger,
       unsecuredSavedObjectsClient
     );
     expect(logger.error).toHaveBeenCalledWith(
-      'Failed to bulk mark list of API keys ["MTIz", "NDU2"] for invalidation: Fail'
+      'Failed to bulk mark list of API keys ["MTIz", "NDU2"] for invalidation: Fail',
+      { error: { stack_trace: e.stack } }
     );
   });
 

@@ -33,7 +33,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/rule-registry-plugin'
-  - '@kbn/observability-plugin'
+  - '@kbn/observability-shared-plugin'
   - '@kbn/core-http-server'
   - '@kbn/data-views-plugin'
   - '@kbn/metrics-data-access-plugin'
@@ -43,18 +43,33 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
+  - '@kbn/spaces-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/logging'
   - '@kbn/inference-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/ai-assistant-common'
 tags:
   - plugin
   - prod
   - group-observability
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - server/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

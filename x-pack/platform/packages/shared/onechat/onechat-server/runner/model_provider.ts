@@ -56,6 +56,7 @@ export interface ModelProvider {
 export interface ModelCallInfo {
   connectorId: string;
   tokens?: ChatCompletionTokenCount;
+  model?: string;
 }
 
 export interface ModelProviderStats {

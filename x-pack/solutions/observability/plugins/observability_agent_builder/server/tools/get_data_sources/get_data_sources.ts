@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -40,6 +41,12 @@ export function createGetDataSourcesTool({
       'Lists the Elasticsearch indices and index patterns where observability data (logs, metrics, traces, alerts) is stored. Essential for determining the correct indices to target in subsequent queries.',
     schema: getDataSourcesSchema,
     tags: ['observability'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async () => {
       try {
         const {

@@ -264,7 +264,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
-              { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
               {
                 link: 'management:observabilityAiAssistantManagement',
                 breadcrumbStatus: 'hidden',

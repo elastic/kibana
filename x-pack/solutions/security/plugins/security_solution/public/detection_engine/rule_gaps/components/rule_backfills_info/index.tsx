@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import { backfillInitiator, type BackfillInitiator } from '@kbn/alerting-plugin/common';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
 import { BackfillStatusInfo } from './backfill_status';
@@ -40,6 +41,15 @@ const getBackfillsTableColumns = (canEditRules: boolean) => {
       ),
       render: (value: BackfillStatus) => <BackfillStatusInfo status={value} />,
       width: '10%',
+    },
+    {
+      field: 'initiator',
+      name: i18n.BACKFILLS_TABLE_COLUMN_INITIATOR,
+      render: (value: BackfillInitiator) =>
+        value === backfillInitiator.SYSTEM
+          ? i18n.BACKFILLS_TABLE_INITIATOR_AUTO_GAP_FILL
+          : i18n.BACKFILLS_TABLE_INITIATOR_MANUAL,
+      width: '15%',
     },
     {
       field: 'created_at',

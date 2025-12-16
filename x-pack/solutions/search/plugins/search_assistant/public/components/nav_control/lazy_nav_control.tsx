@@ -28,7 +28,7 @@ export const NavControlInitiator = ({ coreStart, pluginsStart }: NavControlIniti
 
   useEffect(() => {
     const sub = coreStart.settings.client
-      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
+      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE)
       .subscribe((chatExperience) => {
         setIsClassicExperience(chatExperience === AIChatExperience.Classic);
       });

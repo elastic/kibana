@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
 
 import type { RouteDefinitionParams } from '..';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -107,6 +108,17 @@ export function defineUpdateUserProfileDataRoute({
           return response.customError({
             body: 'Unsupported media type',
             statusCode: 415,
+          });
+        }
+      }
+
+      const avatarColor = userProfileData.avatar?.color;
+      if (avatarColor) {
+        const isValidColor = isValidUserProfileAvatarColor(avatarColor);
+        if (!isValidColor) {
+          return response.customError({
+            body: 'Invalid hex color',
+            statusCode: 400,
           });
         }
       }

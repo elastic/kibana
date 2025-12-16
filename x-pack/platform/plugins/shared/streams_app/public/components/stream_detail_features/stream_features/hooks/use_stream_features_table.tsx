@@ -6,16 +6,33 @@
  */
 
 import React from 'react';
-import { type Feature } from '@kbn/streams-schema';
+import { isFeatureWithFilter, type Feature, type Streams } from '@kbn/streams-schema';
 import { EuiMarkdownFormat, type EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ConditionPanel } from '../../../data_management/shared';
+import { FeatureEventsSparklineLast24hrs } from '../feature_events_sparkline';
 
-// TODO: check if all columns from the stream_existing_features_table and stream_features_table can be moved to this hook to be shared between them
-export const useStreamFeaturesTable = () => {
+export const useStreamFeaturesTable = ({ definition }: { definition: Streams.all.Definition }) => {
+  const nameColumn: EuiBasicTableColumn<Feature> = {
+    field: 'name',
+    name: TITLE_LABEL,
+    sortable: true,
+    truncateText: true,
+  };
+
+  const filterColumn: EuiBasicTableColumn<Feature> = {
+    name: FILTER_LABEL,
+    width: '30%',
+    render: (feature: Feature) => {
+      if (isFeatureWithFilter(feature)) {
+        return <ConditionPanel condition={feature.filter} />;
+      }
+    },
+  };
+
   const descriptionColumn: EuiBasicTableColumn<Feature> = {
     field: 'description',
     name: DESCRIPTION_LABEL,
-    width: '30%',
     truncateText: {
       lines: 4,
     },
@@ -23,11 +40,40 @@ export const useStreamFeaturesTable = () => {
       <EuiMarkdownFormat textSize="xs">{description}</EuiMarkdownFormat>
     ),
   };
+
+  const eventsLast24HoursColumn: EuiBasicTableColumn<Feature> = {
+    name: EVENTS_LAST_24_HOURS_LABEL,
+    width: '15%',
+    render: (feature: Feature) => {
+      if (isFeatureWithFilter(feature)) {
+        return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
+      }
+    },
+  };
+
   return {
+    nameColumn,
     descriptionColumn,
+    filterColumn,
+    eventsLast24HoursColumn,
   };
 };
 
 const DESCRIPTION_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.description', {
   defaultMessage: 'Description',
 });
+
+const TITLE_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.title', {
+  defaultMessage: 'Title',
+});
+
+const FILTER_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.filter', {
+  defaultMessage: 'Filter',
+});
+
+const EVENTS_LAST_24_HOURS_LABEL = i18n.translate(
+  'xpack.streams.streamFeaturesTable.columns.eventsLast24Hours',
+  {
+    defaultMessage: 'Events (last 24 hours)',
+  }
+);

@@ -1,4 +1,5 @@
 **Third-party search**
+* [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 
 **Threat intelligence**

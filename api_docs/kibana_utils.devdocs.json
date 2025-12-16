@@ -10646,7 +10646,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.AbortReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "AbortReason",
+        "description": [],
+        "path": "src/platform/plugins/shared/kibana_utils/common/abort_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "kibanaUtils",

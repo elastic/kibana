@@ -43,7 +43,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
   const [currentText, setCurrentText] = useState('');
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !hasActiveConversation) return;
 
     const fullText = title || labels.newConversation;
 
@@ -65,7 +65,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
 
     // Always track the previous title
     setPreviousTitle(fullText);
-  }, [title, currentText, isLoading, previousTitle]);
+  }, [title, currentText, isLoading, previousTitle, hasActiveConversation]);
 
   const displayedTitle = currentText || previousTitle;
 
@@ -78,7 +78,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
     setIsEditing(false);
   };
 
-  const shouldShowTitle = !isLoading;
+  const shouldShowTitle = hasActiveConversation;
   if (!shouldShowTitle) {
     return null;
   }

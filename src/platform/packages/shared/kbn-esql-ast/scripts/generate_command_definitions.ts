@@ -14,7 +14,7 @@ import { join } from 'path';
 import type { ElasticsearchCommandDefinition } from '../src/commands/definitions/types';
 import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
 
-const GENERATED_COMMANDS_BASE_PATH = '../src/definitions/generated/commands';
+const GENERATED_COMMANDS_BASE_PATH = '../src/commands/definitions/generated/commands';
 const ELASTICSEARCH_COMMANDS_PATH =
   '/docs/reference/query-languages/esql/kibana/definition/commands';
 

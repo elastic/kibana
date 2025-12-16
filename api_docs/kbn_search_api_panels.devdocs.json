@@ -179,6 +179,53 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisUpdateCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisUpdateCallout",
+        "description": [],
+        "signature": [
+          "({ ctaLink, promoId, isCloudEnabled, handleOnClick, direction, hasUpdatePrivileges, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisUpdateCalloutProps",
+            "text": "EisUpdateCalloutProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  handleOnClick,\n  direction,\n  hasUpdatePrivileges,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisUpdateCalloutProps",
+                "text": "EisUpdateCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-public.getConsoleRequest",
         "type": "Function",
         "tags": [],
@@ -632,6 +679,97 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisUpdateCalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EisUpdateCalloutProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.handleOnClick",
+            "type": "Function",
+            "tags": [],
+            "label": "handleOnClick",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"row\" | \"column\""
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.hasUpdatePrivileges",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasUpdatePrivileges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

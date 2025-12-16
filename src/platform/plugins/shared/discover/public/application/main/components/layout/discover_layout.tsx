@@ -56,7 +56,6 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
-import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -394,8 +393,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
-    sendErrorMsg(stateContainer.dataState.data$.documents$);
-    sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);

@@ -3314,6 +3314,14 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesProjectRoutingOverrides",
+            "text": "PublishesProjectRoutingOverrides"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasLibraryTransforms",
             "text": "HasLibraryTransforms"
           },

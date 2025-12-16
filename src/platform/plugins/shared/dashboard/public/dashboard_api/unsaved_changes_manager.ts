@@ -125,7 +125,6 @@ export function initializeUnsavedChangesManager({
         }
 
         if (storeUnsavedChanges) {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
           const dashboardBackupState: DashboardBackupState = {
             // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.

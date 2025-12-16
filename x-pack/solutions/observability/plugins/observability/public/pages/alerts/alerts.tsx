@@ -14,6 +14,7 @@ import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_window_callout';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
@@ -40,11 +41,7 @@ import {
 } from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import {
-  ALERTS_URL_STORAGE_KEY,
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../common/constants';
+import { ALERTS_URL_STORAGE_KEY, observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';

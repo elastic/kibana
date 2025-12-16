@@ -11,7 +11,7 @@ import { CharStreams, type Token } from 'antlr4';
 import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
 import { attachDecorations, collectDecorations } from './decorations';
-import { Builder } from '../../builder';
+import { Builder } from '../../ast/builder';
 import { CstToAstConverter } from './cst_to_ast_converter';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
@@ -26,7 +26,7 @@ import type {
   EditorError,
 } from '../../types';
 import { isFunctionExpression, isProperNode, isQuery, isMap, isCommand } from '../../ast/is';
-import { singleItems } from '../../visitor/utils';
+import { singleItems } from '../../ast/visitor/utils';
 import { DEFAULT_CHANNEL, SOURCE_COMMANDS } from './constants';
 import type { EsqlParsingTarget } from './types';
 

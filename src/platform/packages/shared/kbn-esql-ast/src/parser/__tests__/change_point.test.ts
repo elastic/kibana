@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 import type { ESQLCommandOption } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('CHANGE_POINT command', () => {
   describe('correctly formatted', () => {

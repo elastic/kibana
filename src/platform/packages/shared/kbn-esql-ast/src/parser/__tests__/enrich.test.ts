@@ -9,7 +9,7 @@
 
 import { parse } from '..';
 import type { ESQLCommand, ESQLSource } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('ENRICH', () => {
   describe('correctly formatted', () => {

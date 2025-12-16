@@ -1,0 +1,15 @@
+{
+  "indices.put_sample_configuration": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "{index}/_sample/config"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-sample-configuration",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

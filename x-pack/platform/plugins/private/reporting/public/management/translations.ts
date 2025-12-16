@@ -366,18 +366,6 @@ export const CANNOT_LOAD_REPORTING_HEALTH_MESSAGE = i18n.translate(
   }
 );
 
-export const TECH_PREVIEW_LABEL = i18n.translate('xpack.reporting.technicalPreviewBadgeLabel', {
-  defaultMessage: 'Technical preview',
-});
-
-export const TECH_PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.reporting.technicalPreviewBadgeDescription',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-  }
-);
-
 export function getInvalidEmailAddress(email: string) {
   return i18n.translate('xpack.reporting.components.email.error.invalidEmail', {
     defaultMessage: 'Email address {email} is not valid',

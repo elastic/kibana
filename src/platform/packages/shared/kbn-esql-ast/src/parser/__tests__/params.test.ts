@@ -8,7 +8,7 @@
  */
 
 import { parse } from '..';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('single ? param', () => {
   /**

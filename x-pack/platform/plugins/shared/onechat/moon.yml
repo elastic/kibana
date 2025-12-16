@@ -66,18 +66,13 @@ dependsOn:
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-saved-objects-server'
   - '@kbn/management-settings-ids'
-  - '@kbn/management-settings-components-field-row'
   - '@kbn/visualization-utils'
   - '@kbn/data-views-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/lens-plugin'
   - '@kbn/license-management-plugin'
   - '@kbn/scout'
-  - '@kbn/management-settings-field-definition'
-  - '@kbn/management-settings-types'
-  - '@kbn/management-settings-utilities'
   - '@kbn/management-plugin'
-  - '@kbn/react-kibana-context-theme'
   - '@kbn/share-plugin'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/workflows-management-plugin'
@@ -100,6 +95,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/ui-theme'
   - '@kbn/ai-assistant-management-plugin'
+  - '@kbn/react-kibana-context-theme'
 tags:
   - plugin
   - prod

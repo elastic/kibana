@@ -27,6 +27,10 @@ export interface NewAgentBuilderAttachmentProps {
    * Size of the button
    */
   size?: EuiButtonEmptySizes;
+  /**
+   * Whether the button is disabled
+   */
+  disabled?: boolean;
 }
 
 /**
@@ -37,6 +41,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   color = 'primary',
   onClick,
   size = 'm',
+  disabled = false,
 }: NewAgentBuilderAttachmentProps) {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   if (!isAgentBuilderEnabled) {
@@ -49,6 +54,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       data-test-subj={'newAgentBuilderAttachment'}
       onClick={onClick}
       size={size}
+      disabled={disabled}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>

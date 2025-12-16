@@ -146,6 +146,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await onechat.isConversationInHistory(conversationIds[2])).to.be(true);
     });
 
+    it('can rename a conversation and the title updates correctly', async () => {
+      const conversationIdToRename = conversationIds[1];
+      const newTitle = 'Renamed Conversation Title';
+
+      // Navigate to the conversation
+      await onechat.navigateToConversationViaHistory(conversationIdToRename);
+
+      // Wait for conversation content to load
+      await retry.try(async () => {
+        await testSubjects.find('agentBuilderRoundResponse');
+      });
+
+      // Rename the conversation
+      const updatedTitle = await onechat.renameConversation(newTitle);
+
+      // Assert the title was updated correctly
+      expect(updatedTitle).to.be(newTitle);
+    });
+
     it.skip('does not allow continuing to chat if the agent cannot be found', async () => {
       // 1. Add new agent
       // 2. Create new conversation with that agent

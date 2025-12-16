@@ -8,14 +8,14 @@
 import { renderHook, act } from '@testing-library/react';
 import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
 import { useFetchEntityDetailsHighlights } from './use_fetch_entity_details_highlights';
-import { useChatComplete } from '@kbn/elastic-assistant';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { EntityHighlightsResponse } from '../types';
 
 const mockFetchEntityDetailsHighlights = jest.fn();
 const mockAddError = jest.fn();
-const mockSendMessage = jest.fn();
-const mockAbortStream = jest.fn();
+const mockInferenceOutput = jest.fn();
 
-const mockUseChatComplete = useChatComplete as jest.MockedFunction<typeof useChatComplete>;
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 jest.mock('../../../api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
@@ -36,8 +36,8 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
   }),
 }));
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useChatComplete: jest.fn(),
+jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
+  useKibana: jest.fn(),
 }));
 
 const mockProps = {
@@ -60,25 +60,29 @@ const mockEntityDetailsResponse = {
   prompt: 'Test prompt for AI',
 };
 
-const mockSuccessfulSendMessageResponse = {
-  isError: false,
-  response: 'AI generated analysis of the entity',
-};
-
-const mockErrorSendMessageResponse = {
-  isError: true,
-  response: 'Error processing request',
+const mockSuccessfulInferenceOutput: {
+  output: EntityHighlightsResponse;
+  content: string;
+} = {
+  output: {
+    highlights: [{ title: 'Test Highlight', text: 'Test highlight text' }],
+    recommendedActions: ['Action 1', 'Action 2'],
+  },
+  content: 'AI generated analysis of the entity',
 };
 
 describe('useFetchEntityDetailsHighlights', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseChatComplete.mockReturnValue({
-      sendMessage: mockSendMessage,
-      abortStream: mockAbortStream,
-      isLoading: false,
-    });
+    mockUseKibana.mockReturnValue({
+      services: {
+        inference: {
+          output: mockInferenceOutput,
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
   });
 
   it('returns the expected initial state and functions', () => {
@@ -87,14 +91,14 @@ describe('useFetchEntityDetailsHighlights', () => {
     expect(result.current).toEqual({
       fetchEntityHighlights: expect.any(Function),
       isChatLoading: false,
-      abortStream: mockAbortStream,
+      abortStream: expect.any(Function),
       result: null,
     });
   });
 
   it('successfully fetches entity highlights and sends message to AI', async () => {
     mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
-    mockSendMessage.mockResolvedValueOnce(mockSuccessfulSendMessageResponse);
+    mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
 
     const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps));
 
@@ -111,19 +115,21 @@ describe('useFetchEntityDetailsHighlights', () => {
       connectorId: 'test-connector-id',
     });
 
-    expect(mockSendMessage).toHaveBeenCalledWith({
-      message: expect.stringContaining('Test prompt for AI'),
-      replacements: mockEntityDetailsResponse.replacements,
-      query: {
-        content_references_disabled: true,
-      },
+    expect(mockInferenceOutput).toHaveBeenCalledWith({
+      id: 'entity-highlights',
+      connectorId: 'test-connector-id',
+      schema: expect.any(Object),
+      system: 'Test prompt for AI',
+      input: expect.stringContaining('Context:'),
+      abortSignal: expect.any(AbortSignal),
     });
 
     // Verify the result state is updated
     expect(result.current.result).toEqual({
-      formattedEntitySummary: JSON.stringify(mockEntityDetailsResponse.summary),
-      aiResponse: 'AI generated analysis of the entity',
+      summaryAsText: JSON.stringify(mockEntityDetailsResponse.summary),
+      response: mockSuccessfulInferenceOutput.output,
       replacements: mockEntityDetailsResponse.replacements,
+      generatedAt: expect.any(Number),
     });
 
     // Verify no errors were added
@@ -144,15 +150,16 @@ describe('useFetchEntityDetailsHighlights', () => {
       title: 'Failed to run LLM',
     });
 
-    // Verify sendMessage was not called due to early return
-    expect(mockSendMessage).not.toHaveBeenCalled();
+    // Verify inference.output was not called due to early return
+    expect(mockInferenceOutput).not.toHaveBeenCalled();
 
     expect(result.current.result).toBeNull();
   });
 
-  it('handles error from sendMessage', async () => {
+  it('handles error from inference.output', async () => {
+    const inferenceError = new Error('Error processing request');
     mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
-    mockSendMessage.mockResolvedValueOnce(mockErrorSendMessageResponse);
+    mockInferenceOutput.mockRejectedValueOnce(inferenceError);
 
     const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps));
 
@@ -162,9 +169,9 @@ describe('useFetchEntityDetailsHighlights', () => {
 
     expect(mockFetchEntityDetailsHighlights).toHaveBeenCalled();
 
-    expect(mockSendMessage).toHaveBeenCalled();
+    expect(mockInferenceOutput).toHaveBeenCalled();
 
-    expect(mockAddError).toHaveBeenCalledWith(new Error('Error processing request'), {
+    expect(mockAddError).toHaveBeenCalledWith(inferenceError, {
       title: 'Failed to run LLM',
     });
 
@@ -184,7 +191,7 @@ describe('useFetchEntityDetailsHighlights', () => {
       await result.current.fetchEntityHighlights();
     });
 
-    expect(mockSendMessage).not.toHaveBeenCalled();
+    expect(mockInferenceOutput).not.toHaveBeenCalled();
     expect(result.current.result).toBeNull();
   });
 
@@ -201,7 +208,7 @@ describe('useFetchEntityDetailsHighlights', () => {
       await result.current.fetchEntityHighlights();
     });
 
-    expect(mockSendMessage).not.toHaveBeenCalled();
+    expect(mockInferenceOutput).not.toHaveBeenCalled();
     expect(result.current.result).toBeNull();
   });
 
@@ -218,13 +225,13 @@ describe('useFetchEntityDetailsHighlights', () => {
       await result.current.fetchEntityHighlights();
     });
 
-    expect(mockSendMessage).not.toHaveBeenCalled();
+    expect(mockInferenceOutput).not.toHaveBeenCalled();
     expect(result.current.result).toBeNull();
   });
 
-  it('formats the message correctly with entity context', async () => {
+  it('formats the input correctly with entity context', async () => {
     mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
-    mockSendMessage.mockResolvedValueOnce(mockSuccessfulSendMessageResponse);
+    mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
 
     const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps));
 
@@ -232,19 +239,18 @@ describe('useFetchEntityDetailsHighlights', () => {
       await result.current.fetchEntityHighlights();
     });
 
-    const expectedMessage = `Test prompt for AI.      
-        Context:
+    const expectedInput = `Context:
             EntityType: user,
             EntityIdentifier: anonymized-user,
-          ${JSON.stringify(mockEntityDetailsResponse.summary)}
-        `;
+          ${JSON.stringify(mockEntityDetailsResponse.summary)}`;
 
-    expect(mockSendMessage).toHaveBeenCalledWith({
-      message: expectedMessage,
-      replacements: mockEntityDetailsResponse.replacements,
-      query: {
-        content_references_disabled: true,
-      },
+    expect(mockInferenceOutput).toHaveBeenCalledWith({
+      id: 'entity-highlights',
+      connectorId: 'test-connector-id',
+      schema: expect.any(Object),
+      system: 'Test prompt for AI',
+      input: expectedInput,
+      abortSignal: expect.any(AbortSignal),
     });
   });
 });

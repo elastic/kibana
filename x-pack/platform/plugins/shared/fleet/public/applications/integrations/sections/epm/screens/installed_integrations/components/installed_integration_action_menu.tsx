@@ -20,6 +20,8 @@ import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrat
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { useLicense, useStartServices } from '../../../../../hooks';
 
+import { useRollbackAvailablePackages } from '../hooks/use_rollback_available';
+
 import { IntegrationKnowledgeFlyout } from './integration_knowledge_flyout';
 import { EisCostTour } from './eis_cost_tour';
 
@@ -72,6 +74,8 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     setIsPopoverOpen(false);
     setShowIntegrationKnowledgeFlyout(true);
   }, []);
+  const isRollbackAvailablePackages: Record<string, boolean> =
+    useRollbackAvailablePackages(selectedItems);
 
   const items = useMemo(() => {
     const hasUpgreadableIntegrations = selectedItems.some(
@@ -86,8 +90,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     );
 
     const hasRollbackableIntegrations = selectedItems.some(
-      (item) =>
-        !!item.installationInfo?.previous_version && !item.installationInfo?.is_rollback_ttl_expired
+      (item) => isRollbackAvailablePackages[item.name]
     );
 
     const menuItems = [
@@ -164,7 +167,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
                 <EuiContextMenuItem
                   key="rollback"
                   icon="returnKey"
-                  disabled={!hasRollbackableIntegrations || !licenseService.isEnterprise()}
+                  disabled={!hasRollbackableIntegrations}
                   onClick={openRollbackModal}
                 >
                   <FormattedMessage
@@ -192,6 +195,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     enablePackageRollback,
     licenseService,
     openManageIntegrationKnowledgeFlyout,
+    isRollbackAvailablePackages,
   ]);
 
   return (

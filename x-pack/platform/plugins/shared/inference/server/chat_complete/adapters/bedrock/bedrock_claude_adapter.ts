@@ -92,7 +92,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
         }
       }),
       filter((value): value is ConverseCompletionChunk => !!value),
-      processConverseCompletionChunks()
+      processConverseCompletionChunks(modelName)
     );
   },
 };

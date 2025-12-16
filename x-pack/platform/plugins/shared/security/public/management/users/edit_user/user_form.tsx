@@ -91,7 +91,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   const [form, eventHandlers] = useForm({
     onSubmit: async (values) => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { password, confirm_password, ...rest } = values;
       const user = isNewUser ? { password, ...rest } : rest;
       try {

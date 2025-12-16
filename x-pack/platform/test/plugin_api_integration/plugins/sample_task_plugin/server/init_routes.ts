@@ -727,4 +727,30 @@ export function initRoutes(
       });
     }
   );
+
+  router.post(
+    {
+      path: `/api/invalidate_api_key_task/run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization because it is used only for testing',
+        },
+      },
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      __: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskId = 'invalidate_api_keys';
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
 }

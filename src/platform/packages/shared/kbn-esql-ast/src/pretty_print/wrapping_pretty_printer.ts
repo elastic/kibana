@@ -17,9 +17,9 @@ import type {
   FunctionCallExpressionVisitorContext,
   ListLiteralExpressionVisitorContext,
   MapExpressionVisitorContext,
-} from '../visitor';
-import { CommandVisitorContext, Visitor } from '../visitor';
-import { children, singleItems } from '../visitor/utils';
+} from '../ast/visitor';
+import { CommandVisitorContext, Visitor } from '../ast/visitor';
+import { children, singleItems } from '../ast/visitor/utils';
 import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
 import { BasicPrettyPrinter } from './basic_pretty_printer';
 import {

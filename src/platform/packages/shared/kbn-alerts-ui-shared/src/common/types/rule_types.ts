@@ -128,3 +128,8 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
 }
 
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
+
+export type RuleTemplate = Pick<
+  Rule,
+  'id' | 'name' | 'params' | 'tags' | 'alertDelay' | 'schedule' | 'flapping' | 'ruleTypeId'
+>;

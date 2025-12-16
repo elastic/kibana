@@ -61,6 +61,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   const currentChatExperience =
     unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??
+    chatExperienceField?.defaultValue ??
     AIChatExperience.Classic;
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
 
@@ -366,7 +367,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 
-          {isAgentExperience && (
+          {isAgentExperience && showChatExperienceSetting && (
             <>
               <EuiSpacer size="l" />
 

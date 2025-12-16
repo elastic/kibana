@@ -4315,6 +4315,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               }
             ]
           },
@@ -4431,6 +4435,10 @@
               {
                 "plugin": "reindexService",
                 "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/credential_store.ts"
+              },
+              {
+                "plugin": "taskManagerDependencies",
+                "path": "x-pack/platform/plugins/private/task_manager_dependencies/server/plugin.ts"
               },
               {
                 "plugin": "transform",

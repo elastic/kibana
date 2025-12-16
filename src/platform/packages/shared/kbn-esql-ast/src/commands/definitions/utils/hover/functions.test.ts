@@ -10,7 +10,7 @@ import { type FunctionDefinition, FunctionDefinitionTypes } from '../../types';
 import { getFormattedFunctionSignature } from './functions';
 import type { ESQLFunction } from '../../../../types';
 import type { ESQLColumnData } from '../../../registry/types';
-import { exp } from '../../../../synth';
+import { exp } from '../../../../composer/synth';
 
 describe('getFormattedFunctionSignature', () => {
   describe('basic function formatting', () => {

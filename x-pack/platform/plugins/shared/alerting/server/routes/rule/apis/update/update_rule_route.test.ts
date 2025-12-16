@@ -218,7 +218,6 @@ describe('updateRuleRoute', () => {
             "throttle": "10m",
           },
           "id": "1",
-          "isFlappingEnabled": true,
         },
       ]
     `);

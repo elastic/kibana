@@ -64,7 +64,6 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
     <>
       {pagination.totalItemCount > 0 && (
         <>
-          <EuiSpacer size="xl" />
           <EuiText size="xs" color="subdued" data-test-subj="cases-files-table-results-count">
             {i18n.SHOWING_FILES(items.length)}
           </EuiText>

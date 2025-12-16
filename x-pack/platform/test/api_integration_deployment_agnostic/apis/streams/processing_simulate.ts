@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from '@kbn/expect';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
@@ -417,7 +415,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processor_id: 'draft',
             type: 'generic_simulation_failure',
             message:
-              "[patterns] Invalid regex pattern found in: [%{INVALID_PATTERN:field}]. Unable to find pattern [INVALID_PATTERN] in Grok's pattern dictionary",
+              "parse_exception\n\tRoot causes:\n\t\tparse_exception: [patterns] Invalid regex pattern found in: [%{INVALID_PATTERN:field}]. Unable to find pattern [INVALID_PATTERN] in Grok's pattern dictionary",
           },
         ]);
       });

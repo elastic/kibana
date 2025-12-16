@@ -59,7 +59,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
 
-  const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.show === true;
+  const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.manageAgents === true;
   const isAiAgentsEnabled = getIsAiAgentsEnabled(coreStart.featureFlags);
 
   const [selectedType, setSelectedType] = useState<AIExperienceSelection>(AIAssistantType.Default);

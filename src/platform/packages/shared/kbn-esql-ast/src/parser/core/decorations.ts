@@ -15,8 +15,8 @@
 
 import type { Token } from 'antlr4';
 import { type CommonTokenStream } from 'antlr4';
-import { Builder } from '../../builder';
-import { Visitor } from '../../visitor';
+import { Builder } from '../../ast/builder';
+import { Visitor } from '../../ast/visitor';
 import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,

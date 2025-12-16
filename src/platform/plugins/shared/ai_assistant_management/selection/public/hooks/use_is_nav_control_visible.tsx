@@ -62,8 +62,7 @@ export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPlug
   );
 
   const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
-    PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-    AIChatExperience.Classic
+    PREFERRED_CHAT_EXPERIENCE_SETTING_KEY
   );
 
   const activeSpace$ = useMemo(

@@ -121,6 +121,17 @@ const absentOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description: '',
@@ -288,6 +299,23 @@ const avgOverTimeDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'double',
+          optional: false,
+          description: 'Expression that outputs values to average.',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the average',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
           optional: false,
           description: 'Expression that outputs values to average.',
         },
@@ -1418,6 +1446,23 @@ const firstOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description: '',
@@ -1690,6 +1735,23 @@ const lastOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'the field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description: 'the field to calculate the latest value for',
@@ -1810,6 +1872,23 @@ const maxOverTimeDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the maximum',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
           optional: false,
           description: '',
         },
@@ -2047,6 +2126,23 @@ const minOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the minimum',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description: '',
@@ -2218,6 +2314,57 @@ const percentileOverTimeDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'double',
+          optional: false,
+          description: 'Expression that outputs values to calculate the percentile of.',
+        },
+        {
+          name: 'percentile',
+          type: 'long',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Expression that outputs values to calculate the percentile of.',
+        },
+        {
+          name: 'percentile',
+          type: 'double',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Expression that outputs values to calculate the percentile of.',
+        },
+        {
+          name: 'percentile',
+          type: 'integer',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
           optional: false,
           description: 'Expression that outputs values to calculate the percentile of.',
         },
@@ -2420,6 +2567,17 @@ const presentOverTimeDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
           optional: false,
           description: '',
         },
@@ -2706,7 +2864,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'window',
           type: 'time_duration',
           optional: true,
-          description: 'the time window over which to compute the standard deviation',
+          description: 'the time window over which to compute the sum over time',
         },
       ],
       returnType: 'double',
@@ -2723,7 +2881,24 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'window',
           type: 'time_duration',
           optional: true,
-          description: 'the time window over which to compute the standard deviation',
+          description: 'the time window over which to compute the sum over time',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the sum over time',
         },
       ],
       returnType: 'double',
@@ -2740,7 +2915,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'window',
           type: 'time_duration',
           optional: true,
-          description: 'the time window over which to compute the standard deviation',
+          description: 'the time window over which to compute the sum over time',
         },
       ],
       returnType: 'long',
@@ -2757,7 +2932,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'window',
           type: 'time_duration',
           optional: true,
-          description: 'the time window over which to compute the standard deviation',
+          description: 'the time window over which to compute the sum over time',
         },
       ],
       returnType: 'long',

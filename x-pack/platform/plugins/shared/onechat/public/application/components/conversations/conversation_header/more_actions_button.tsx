@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiButtonIcon,
@@ -14,10 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiTitle,
   EuiSpacer,
-  EuiIcon,
   useEuiTheme,
-  EuiFlexItem,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -103,60 +99,6 @@ const MenuSectionTitle = ({ title }: { title: string }) => {
       </EuiTitle>
       <EuiSpacer size="s" />
     </>
-  );
-};
-
-interface ExternalLinkProps {
-  href: string;
-  icon: IconType;
-  children: React.ReactNode;
-  dataTestSubj: string;
-  onClick: () => void;
-}
-const ExternalLink = ({ href, icon, children, dataTestSubj, onClick }: ExternalLinkProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const containerStyles = css`
-    justify-content: space-between;
-    padding-left: ${euiTheme.size.s};
-
-    .externalLinkIcon {
-      opacity: 0;
-      transition: opacity ${euiTheme.animation.normal};
-    }
-
-    &:hover .externalLinkIcon {
-      opacity: 1;
-    }
-  `;
-
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      direction="row"
-      responsive={false}
-      css={containerStyles}
-      data-test-subj={dataTestSubj}
-    >
-      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-        <EuiIcon type={icon} color="text" size="m" />
-        {children}
-      </EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          className="externalLinkIcon"
-          target="_blank"
-          rel="noopener noreferrer"
-          iconType="popout"
-          color="text"
-          size="m"
-          href={href}
-          aria-label={fullscreenLabels.externalLinkAriaLabel}
-          onClick={onClick}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };
 
@@ -252,35 +194,35 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="management-title"
       title={fullscreenLabels.conversationManagementLabel}
     />,
-    <ExternalLink
+    <EuiContextMenuItem
       key="agents"
-      icon={() => <RobotIcon />}
+      icon={<RobotIcon />}
       onClick={closePopover}
       href={createOnechatUrl(appPaths.agents.list)}
-      dataTestSubj="onechatActionsAgents"
+      data-test-subj="onechatActionsAgents"
     >
       {fullscreenLabels.agents}
-    </ExternalLink>,
-    <ExternalLink
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
       key="tools"
       icon="wrench"
       onClick={closePopover}
       href={createOnechatUrl(appPaths.tools.list)}
-      dataTestSubj="onechatActionsTools"
+      data-test-subj="onechatActionsTools"
     >
       {fullscreenLabels.tools}
-    </ExternalLink>,
+    </EuiContextMenuItem>,
     ...(hasAccessToGenAiSettings
       ? [
-          <ExternalLink
+          <EuiContextMenuItem
             key="agentBuilderSettings"
             icon="gear"
             onClick={closePopover}
             href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
-            dataTestSubj="agentBuilderGenAiSettingsButton"
+            data-test-subj="agentBuilderGenAiSettingsButton"
           >
             {fullscreenLabels.genAiSettings}
-          </ExternalLink>,
+          </EuiContextMenuItem>,
         ]
       : []),
   ];

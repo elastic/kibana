@@ -22,6 +22,69 @@ import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout
 import { Groups } from '../alert_sources/groups';
 import type { Group } from '../../../common/typings';
 
+/**
+ * Formats a comparator string for display.
+ * Converts NOT_BETWEEN and OUTSIDE_RANGE to 'NOT BETWEEN', otherwise returns uppercase.
+ */
+const formatComparator = (comparator: string): string => {
+  if (comparator === COMPARATORS.NOT_BETWEEN || comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE) {
+    // No need for i18n as we are using the enum value, we only need a space.
+    return 'NOT BETWEEN';
+  }
+  return comparator.toUpperCase();
+};
+
+/**
+ * Renders threshold rows for a list of criteria.
+ * Combines alert threshold and warning threshold into one line when warning threshold exists.
+ */
+const renderThresholdRows = (ruleCriteria: FlyoutThresholdData[]): React.ReactElement => {
+  return (
+    <div>
+      {ruleCriteria.map((criteria, index) => {
+        const { threshold, comparator, warningThreshold, warningComparator } = criteria;
+        const formattedComparator = formatComparator(comparator);
+        // threshold is typed as string[] but is actually a string at runtime
+        const thresholdStr = Array.isArray(threshold) ? threshold.join(' AND ') : threshold;
+
+        let thresholdText = i18n.translate(
+          'xpack.observability.alertFlyout.overviewTab.thresholdAlert',
+          {
+            defaultMessage: '{comparator} {threshold}',
+            values: {
+              comparator: formattedComparator,
+              threshold: thresholdStr,
+            },
+          }
+        );
+
+        if (warningThreshold && warningComparator) {
+          const formattedWarningComparator = formatComparator(warningComparator);
+          thresholdText = i18n.translate(
+            'xpack.observability.alertFlyout.overviewTab.thresholdWithWarning',
+            {
+              defaultMessage:
+                'Alert when {comparator} {threshold}, Warning when {warningComparator} {warningThreshold}',
+              values: {
+                comparator: formattedComparator,
+                threshold: thresholdStr,
+                warningComparator: formattedWarningComparator,
+                warningThreshold,
+              },
+            }
+          );
+        }
+
+        return (
+          <EuiText size="s" key={`${thresholdStr}-${index}`}>
+            <h4>{thresholdText}</h4>
+          </EuiText>
+        );
+      })}
+    </div>
+  );
+};
+
 interface AlertOverviewField {
   id: string;
   key: string;
@@ -125,26 +188,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
 
         case ColumnIDs.THRESHOLD:
           if (!ruleCriteria) return <>{'-'}</>;
-          return (
-            <div>
-              {ruleCriteria.map((criteria, criticalIndex) => {
-                const { threshold, comparator } = criteria;
-                let formattedComparator = comparator.toUpperCase();
-                if (
-                  comparator === COMPARATORS.NOT_BETWEEN ||
-                  comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE
-                ) {
-                  // No need for i18n as we are using the enum value, we only need a space.
-                  formattedComparator = 'NOT BETWEEN';
-                }
-                return (
-                  <EuiText size="s" key={`${threshold}-${criticalIndex}`}>
-                    <h4>{`${formattedComparator} ${threshold}`}</h4>
-                  </EuiText>
-                );
-              })}
-            </div>
-          );
+          return renderThresholdRows(ruleCriteria);
 
         case ColumnIDs.RULE_TYPE:
           const ruleType = value as string;

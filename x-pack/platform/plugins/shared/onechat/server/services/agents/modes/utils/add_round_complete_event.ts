@@ -174,6 +174,7 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     inputTokens += call.tokens?.prompt ?? 0;
     outputTokens += call.tokens?.completion ?? 0;
   }
+  const modelFromResponse = stats.calls.find((call) => call.model)?.model;
 
   return {
     // we don't support multi-models yet, so we can just pick from the first call
@@ -181,5 +182,6 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    ...(modelFromResponse ? { model: modelFromResponse } : {}),
   };
 };

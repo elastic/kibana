@@ -16,13 +16,36 @@ import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DEFAULT_DETECTION_PAGE_FILTERS,
-} from '../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
+
+export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    hideActionBar: true,
+    persist: true,
+    hideExists: true,
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+    hideActionBar: true,
+    hideExists: true,
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
 
 export type PageFiltersProps = Pick<
   AlertFilterControlsProps,

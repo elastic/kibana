@@ -314,7 +314,7 @@ const prepareIngestSimulationBody = (
  * If the simulation fails, we won't be able to extract the documents reports and the processor metrics.
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
-const executePipelineSimulation = async (
+export const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
@@ -329,12 +329,12 @@ const executePipelineSimulation = async (
     };
   } catch (error) {
     if (error instanceof esErrors.ResponseError) {
-      const { processor_tag, reason } = error.body?.error;
+      const { processor_tag } = error.body?.error;
 
       return {
         status: 'failure',
         error: {
-          message: reason,
+          message: error.message,
           processor_id: processor_tag,
           type: 'generic_simulation_failure',
         },
