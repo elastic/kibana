@@ -31,7 +31,9 @@ function parseDeleteSpaceAfterTests(): boolean {
   return envValue.toLowerCase().trim() !== 'false';
 }
 
-export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
+export function createPlaywrightConfig(
+  options: ScoutPlaywrightOptions
+): PlaywrightTestConfig<ScoutTestOptions> {
   /**
    * Playwright loads the config file multiple times, so we need to generate a unique run id
    * and store it in the environment to be used across all config function calls.
