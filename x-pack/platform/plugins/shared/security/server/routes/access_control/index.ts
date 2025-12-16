@@ -11,7 +11,7 @@ import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { RouteDefinitionParams } from '..';
 import { MANAGE_ACCESS_CONTROL_ACTION } from '../../saved_objects/access_control_service';
 
-export const defineAccessControlRoutes = async ({
+export const defineAccessControlRoutes = ({
   router,
   authz,
   isAccessControlEnabled,
