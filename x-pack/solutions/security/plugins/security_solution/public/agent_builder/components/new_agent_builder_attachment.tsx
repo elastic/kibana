@@ -24,12 +24,12 @@ export interface NewAgentBuilderAttachmentTelemetry {
     | 'entity_flyout'
     | 'rules_table'
     | 'rule_creation'
-    | 'attack_discovery'
-    | 'other';
+    | 'rule_failure'
+    | 'attack_discovery';
   /**
    * Attachment type
    */
-  attachmentType?: 'alert' | 'entity' | 'rule' | 'attack_discovery' | 'other';
+  attachmentType?: 'alert' | 'entity' | 'rule';
   /**
    * Attachment count
    */
