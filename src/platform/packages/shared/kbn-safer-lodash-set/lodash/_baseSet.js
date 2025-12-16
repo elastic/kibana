@@ -44,6 +44,7 @@ function baseSet(object, path, value, customizer) {
     }
 
     if (key == 'prototype' && index > 0 && path[index - 1] == 'constructor') {
+      console.log('Illegal access of constructor.prototype', key, index, path[index - 1]);
       throw new Error('Illegal access of constructor.prototype')
     }
 

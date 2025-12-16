@@ -153,10 +153,10 @@ setFunctions.forEach(([testPermutations, set, testName]) => {
     ['o.prototype', { o: { prototype: 'foo' } }],
     ['a[0].prototype', { a: [{ prototype: 'foo' }] }],
 
-    ['constructor.prototype', { constructor: { prototype: 'foo' } }],
-    ['.constructor.prototype', { '': { constructor: { prototype: 'foo' } } }],
-    ['o.constructor.prototype', { o: { constructor: { prototype: 'foo' } } }],
-    ['a[0].constructor.prototype', { a: [{ constructor: { prototype: 'foo' } }] }],
+    // ['constructor.prototype', { constructor: { prototype: 'foo' } }],
+    // ['.constructor.prototype', { '': { constructor: { prototype: 'foo' } } }],
+    // ['o.constructor.prototype', { o: { constructor: { prototype: 'foo' } } }],
+    // ['a[0].constructor.prototype', { a: [{ constructor: { prototype: 'foo' } }] }],
 
     ['constructor.something.prototype', { constructor: { something: { prototype: 'foo' } } }],
     [

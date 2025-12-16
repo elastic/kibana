@@ -83,11 +83,6 @@ setAndSetWithFunctions.forEach(([set, testName]) => {
     ['o.prototype', { o: { prototype: 'foo' } }],
     ['a[0].prototype', { a: [{ prototype: 'foo' }] }],
 
-    ['constructor.prototype', { constructor: { prototype: 'foo' } }],
-    ['.constructor.prototype', { '': { constructor: { prototype: 'foo' } } }],
-    ['o.constructor.prototype', { o: { constructor: { prototype: 'foo' } } }],
-    ['a[0].constructor.prototype', { a: [{ constructor: { prototype: 'foo' } }] }],
-
     ['constructor.something.prototype', { constructor: { something: { prototype: 'foo' } } }],
     [
       '.constructor.something.prototype',
@@ -140,6 +135,10 @@ setAndSetWithFunctions.forEach(([set, testName]) => {
       [['constructor', 'prototype'], 'foo'],
       [['a', 'constructor', 'prototype'], 'foo'],
       [['a', 'b', 'constructor', 'prototype'], 'polluted'],
+      ['constructor.prototype', { constructor: { prototype: 'foo' } }],
+      ['.constructor.prototype', { '': { constructor: { prototype: 'foo' } } }],
+      ['o.constructor.prototype', { o: { constructor: { prototype: 'foo' } } }],
+      ['a[0].constructor.prototype', { a: [{ constructor: { prototype: 'foo' } }] }],
     ];
     constructorPrototypeTestCases.forEach(([path, value]) => {
       t.throws(() => set({}, path, value), /Illegal access of constructor\.prototype/);
