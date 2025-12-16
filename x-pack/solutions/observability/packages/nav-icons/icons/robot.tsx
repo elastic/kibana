@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { type SVGProps } from 'react';
-import { EuiIcon, type EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import type { SVGProps } from 'react';
+import React from 'react';
 
 export const robotIconType: React.FC<SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" {...props}>
@@ -21,6 +23,6 @@ export const robotIconType: React.FC<SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-export const RobotIcon = ({ size = 'm', ...rest }: Omit<EuiIconProps, 'type'>) => {
+export const iconRobot = ({ size = 'm', ...rest }: Omit<EuiIconProps, 'type'>) => {
   return <EuiIcon type={robotIconType} size={size} {...rest} />;
 };
