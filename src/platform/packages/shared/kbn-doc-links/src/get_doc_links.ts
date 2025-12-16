@@ -1059,6 +1059,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mcpServer: `${ELASTIC_DOCS}solutions/search/agent-builder/mcp-server`,
       a2aServer: `${ELASTIC_DOCS}solutions/search/agent-builder/a2a-server`,
       limitationsKnownIssues: `${ELASTIC_DOCS}solutions/search/agent-builder/limitations-known-issues`,
+      learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-agent-or-ai-assistant`,
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless
