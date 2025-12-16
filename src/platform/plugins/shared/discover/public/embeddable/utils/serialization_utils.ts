@@ -13,7 +13,6 @@ import {
   type SerializedTimeRange,
   type SerializedTitles,
   type SerializedPanelState,
-  findSavedObjectRef,
 } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
@@ -24,7 +23,7 @@ import type {
   SearchEmbeddableState,
 } from '../../../common/embeddable/types';
 import type { DiscoverServices } from '../../build_services';
-import { EDITABLE_PANEL_KEYS, SEARCH_EMBEDDABLE_TYPE } from '../constants';
+import { EDITABLE_PANEL_KEYS } from '../constants';
 import type { SearchEmbeddableRuntimeState } from '../types';
 
 export const deserializeState = async ({
@@ -35,10 +34,8 @@ export const deserializeState = async ({
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
-  const savedObjectRef = findSavedObjectRef(SEARCH_EMBEDDABLE_TYPE, serializedState.references);
-  const savedObjectId = savedObjectRef
-    ? savedObjectRef.id
-    : (serializedState.rawState as SearchEmbeddableByReferenceState).savedObjectId;
+  const savedObjectId = (serializedState.rawState as SearchEmbeddableByReferenceState)
+    .savedObjectId;
   if (savedObjectId) {
     // by reference
     const { get } = discoverServices.savedSearch;

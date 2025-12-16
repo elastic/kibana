@@ -21,7 +21,13 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
+import {
+  isFeature,
+  type StreamQueryKql,
+  type Streams,
+  type Feature,
+  type FeatureType,
+} from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -35,33 +41,40 @@ import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
-import { defaultQuery, NO_FEATURE } from './utils/default_query';
+import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { FeaturesSelector } from '../feature_selector';
+import { ALL_DATA_OPTION } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 import { getFormattedError } from '../../../util/errors';
+import { SignificantEventsGenerationPanel } from '../generation_panel';
+import { useStreamDescriptionApi } from '../../stream_detail_features/stream_description/use_stream_description_api';
 
 interface Props {
+  refreshDefinition: () => void;
   onClose: () => void;
-  definition: Streams.all.Definition;
+  definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
   features: Feature[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedFeatures?: Feature[];
+  initialSelectedFeatures: Feature[];
+  generateAutomatically: boolean;
+  onFeatureIdentificationClick: () => void;
 }
 
 export function AddSignificantEventFlyout({
+  refreshDefinition,
   query,
   onClose,
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedFeatures = [],
+  initialSelectedFeatures,
   features,
+  generateAutomatically,
+  onFeatureIdentificationClick,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -77,12 +90,15 @@ export function AddSignificantEventFlyout({
   const aiFeatures = useAIFeatures();
 
   const dataViewsFetch = useStreamsAppFetch(() => {
-    return data.dataViews.create({ title: definition.name }).then((value) => {
+    return data.dataViews.create({ title: definition.stream.name }).then((value) => {
       return [value];
     });
-  }, [data.dataViews, definition.name]);
+  }, [data.dataViews, definition.stream.name]);
 
-  const { generate, abort } = useSignificantEventsApi({ name: definition.name, start, end });
+  const { onGenerateDescription: generateDescription, onSaveDescription: saveDescription } =
+    useStreamDescriptionApi({ definition, refreshDefinition });
+
+  const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name, start, end });
 
   const isEditMode = !!query?.id;
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
@@ -124,87 +140,97 @@ export function AddSignificantEventFlyout({
     let inputTokensUsed = 0;
     let outputTokensUsed = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
-    if (!connector || selectedFeatures.length === 0) {
+    if (!connector) {
       return;
     }
 
-    const startTime = Date.now();
     setIsGenerating(true);
     setGeneratedQueries([]);
 
-    from(selectedFeatures)
-      .pipe(
-        concatMap((feature) =>
-          generate(connector, feature).pipe(
-            concatMap(({ queries: nextQueries, tokensUsed }) => {
-              numberOfGeneratedQueries += nextQueries.length;
-              numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
-              inputTokensUsed += tokensUsed.prompt;
-              outputTokensUsed += tokensUsed.completion;
+    const maybeGenerateDescription =
+      !definition.stream.description && selectedFeatures.length === 0
+        ? generateDescription().then((description) => saveDescription(description))
+        : Promise.resolve();
 
-              setGeneratedQueries((prev) => [
-                ...prev,
-                ...nextQueries
-                  .filter((nextQuery) => {
-                    const validation = validateQuery({
-                      title: nextQuery.title,
+    maybeGenerateDescription.then(() => {
+      const startTime = Date.now();
+
+      from(selectedFeatures.length === 0 ? [ALL_DATA_OPTION.value] : selectedFeatures)
+        .pipe(
+          concatMap((feature) =>
+            generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
+              concatMap(({ queries: nextQueries, tokensUsed }) => {
+                numberOfGeneratedQueries += nextQueries.length;
+                if (isFeature(feature)) {
+                  numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
+                }
+                inputTokensUsed += tokensUsed.prompt;
+                outputTokensUsed += tokensUsed.completion;
+
+                setGeneratedQueries((prev) => [
+                  ...prev,
+                  ...nextQueries
+                    .filter((nextQuery) => {
+                      const validation = validateQuery({
+                        title: nextQuery.title,
+                        kql: { query: nextQuery.kql },
+                      });
+
+                      return validation.kql.isInvalid === false;
+                    })
+                    .map((nextQuery) => ({
+                      id: v4(),
                       kql: { query: nextQuery.kql },
-                    });
+                      title: nextQuery.title,
+                      feature: nextQuery.feature,
+                      severity_score: nextQuery.severity_score,
+                      evidence: nextQuery.evidence,
+                    })),
+                ]);
 
-                    return validation.kql.isInvalid === false;
-                  })
-                  .map((nextQuery) => ({
-                    id: v4(),
-                    kql: { query: nextQuery.kql },
-                    title: nextQuery.title,
-                    feature: nextQuery.feature,
-                    severity_score: nextQuery.severity_score,
-                    evidence: nextQuery.evidence,
-                  })),
-              ]);
-
-              return [];
-            })
+                return [];
+              })
+            )
           )
         )
-      )
-      .subscribe({
-        error: (error) => {
-          setIsGenerating(false);
-          if (error.name === 'AbortError') {
-            return;
-          }
-          notifications.toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
-              {
-                defaultMessage: `Could not generate significant events queries`,
-              }
-            ),
-            toastMessage: getFormattedError(error).message,
-          });
-        },
-        complete: () => {
-          notifications.toasts.addSuccess({
-            title: i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
-              { defaultMessage: `Generated significant events queries successfully` }
-            ),
-          });
-          telemetryClient.trackSignificantEventsSuggestionsGenerate({
-            duration_ms: Date.now() - startTime,
-            input_tokens_used: inputTokensUsed,
-            output_tokens_used: outputTokensUsed,
-            count: numberOfGeneratedQueries,
-            count_by_feature_type: numberOfGeneratedQueriesByFeature,
-            features_selected: selectedFeatures.length,
-            features_total: features.length,
-            stream_name: definition.name,
-            stream_type: getStreamTypeFromDefinition(definition),
-          });
-          setIsGenerating(false);
-        },
-      });
+        .subscribe({
+          error: (error) => {
+            setIsGenerating(false);
+            if (error.name === 'AbortError') {
+              return;
+            }
+            notifications.toasts.addError(error, {
+              title: i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
+                {
+                  defaultMessage: `Could not generate significant events queries`,
+                }
+              ),
+              toastMessage: getFormattedError(error).message,
+            });
+          },
+          complete: () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
+                { defaultMessage: `Generated significant events queries successfully` }
+              ),
+            });
+            telemetryClient.trackSignificantEventsSuggestionsGenerate({
+              duration_ms: Date.now() - startTime,
+              input_tokens_used: inputTokensUsed,
+              output_tokens_used: outputTokensUsed,
+              count: numberOfGeneratedQueries,
+              count_by_feature_type: numberOfGeneratedQueriesByFeature,
+              features_selected: selectedFeatures?.length ?? 0,
+              features_total: features.length,
+              stream_name: definition.stream.name,
+              stream_type: getStreamTypeFromDefinition(definition.stream),
+            });
+            setIsGenerating(false);
+          },
+        });
+    });
   }, [
     aiFeatures?.genAiConnectors.selectedConnector,
     selectedFeatures,
@@ -213,10 +239,12 @@ export function AddSignificantEventFlyout({
     telemetryClient,
     features.length,
     definition,
+    generateDescription,
+    saveDescription,
   ]);
 
   useEffect(() => {
-    if (initialFlow === 'ai' && initialSelectedFeatures.length > 0) {
+    if (initialFlow === 'ai' && generateAutomatically) {
       generateQueries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -285,29 +313,14 @@ export function AddSignificantEventFlyout({
                 />
                 <EuiSpacer size="m" />
                 {selectedFlow === 'ai' && (
-                  <>
-                    <FeaturesSelector
-                      features={features}
-                      selectedFeatures={selectedFeatures}
-                      onFeaturesChange={setSelectedFeatures}
-                    />
-                    <EuiSpacer size="m" />
-                    <ConnectorListButton
-                      buttonProps={{
-                        iconType: 'sparkles',
-                        isLoading: isGenerating,
-                        isDisabled: isSubmitting || selectedFeatures.length === 0,
-                        onClick: generateQueries,
-                        'data-test-subj': 'significant_events_flyout_generate_suggestions_button',
-                        children: i18n.translate(
-                          'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
-                          {
-                            defaultMessage: 'Generate suggestions',
-                          }
-                        ),
-                      }}
-                    />
-                  </>
+                  <SignificantEventsGenerationPanel
+                    features={features}
+                    selectedFeatures={selectedFeatures}
+                    onFeaturesChange={setSelectedFeatures}
+                    onGenerateSuggestionsClick={generateQueries}
+                    onFeatureIdentificationClick={onFeatureIdentificationClick}
+                    isLoadingGeneration={isGenerating}
+                  />
                 )}
               </EuiPanel>
             </EuiFlexItem>
@@ -346,7 +359,7 @@ export function AddSignificantEventFlyout({
                         setCanSave={(next: boolean) => {
                           setCanSave(next);
                         }}
-                        definition={definition}
+                        definition={definition.stream}
                         dataViews={dataViewsFetch.value ?? []}
                         features={features}
                       />
@@ -364,7 +377,7 @@ export function AddSignificantEventFlyout({
                       }}
                       stopGeneration={stopGeneration}
                       isSubmitting={isSubmitting}
-                      definition={definition}
+                      definition={definition.stream}
                       setQueries={(next: StreamQueryKql[]) => {
                         setQueries(next);
                       }}
@@ -416,9 +429,7 @@ export function AddSignificantEventFlyout({
                             query: {
                               ...queries[0],
                               feature: queries[0].feature
-                                ? queries[0].feature.name === NO_FEATURE.name
-                                  ? undefined
-                                  : omit(queries[0].feature, 'description')
+                                ? omit(queries[0].feature, 'description')
                                 : undefined,
                             },
                             isUpdating: isEditMode,
@@ -430,9 +441,7 @@ export function AddSignificantEventFlyout({
                             queries: queries.map((nextQuery) => ({
                               ...nextQuery,
                               feature: nextQuery.feature
-                                ? nextQuery.feature.name === NO_FEATURE.name
-                                  ? undefined
-                                  : omit(nextQuery.feature, 'description')
+                                ? omit(nextQuery.feature, 'description')
                                 : undefined,
                             })),
                           }).finally(() => setIsSubmitting(false));
