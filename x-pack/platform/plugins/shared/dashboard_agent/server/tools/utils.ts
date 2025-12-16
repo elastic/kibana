@@ -7,7 +7,7 @@
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/onechat-server';
-import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import {
   LensConfigBuilder,
   type LensApiSchemaType,
@@ -15,13 +15,17 @@ import {
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/common/page_bundle_constants';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 
-// Default panel sizes based on visualization type
-const DEFAULT_PANEL_HEIGHT = 9;
-const SMALL_PANEL_WIDTH = 12; // Metrics & small charts (4 per row)
-const LARGE_PANEL_WIDTH = 24; // XY & other charts (2 per row)
-
-const SMALL_CHART_TYPES = new Set(['metric', 'legacy_metric', 'gauge']);
+import {
+  DEFAULT_PANEL_HEIGHT,
+  SMALL_PANEL_WIDTH,
+  LARGE_PANEL_WIDTH,
+  MARKDOWN_PANEL_WIDTH,
+  MARKDOWN_MIN_HEIGHT,
+  MARKDOWN_MAX_HEIGHT,
+  SMALL_CHART_TYPES,
+} from './constants';
 
 const getPanelWidth = (chartType: string): number => {
   return SMALL_CHART_TYPES.has(chartType) ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH;
@@ -39,14 +43,53 @@ export const checkDashboardToolsAvailability = async ({
 };
 
 /**
+ * Calculates the height of a markdown panel based on content length.
+ */
+const calculateMarkdownPanelHeight = (content: string): number => {
+  const lineCount = content.split('\n').length;
+  const estimatedHeight = lineCount + 2;
+  return Math.max(MARKDOWN_MIN_HEIGHT, Math.min(MARKDOWN_MAX_HEIGHT, estimatedHeight));
+};
+
+/**
+ * Builds a markdown panel for dashboard summaries with dynamic height based on content.
+ */
+export const buildMarkdownPanel = (content: string): DashboardPanel => ({
+  type: MARKDOWN_EMBEDDABLE_TYPE,
+  config: { content },
+  grid: { x: 0, y: 0, w: MARKDOWN_PANEL_WIDTH, h: calculateMarkdownPanelHeight(content) },
+});
+
+/**
+ * Returns the height of a markdown panel for use in offset calculations.
+ */
+export const getMarkdownPanelHeight = (content: string): number =>
+  calculateMarkdownPanelHeight(content);
+
+/**
+ * Filters out markdown panels from an array of dashboard panels.
+ * Used when replacing the markdown summary during dashboard updates.
+ * Note: Dashboard panels array can contain both panels and sections.
+ */
+export const filterOutMarkdownPanels = (
+  panels: (DashboardPanel | DashboardSection)[] | undefined
+): (DashboardPanel | DashboardSection)[] =>
+  panels?.filter((item) => !('type' in item) || item.type !== MARKDOWN_EMBEDDABLE_TYPE) ?? [];
+
+/**
  * Normalizes panel configurations to the correct DashboardPanel format.
  * This is a temporary function to handle lens API schema conversion.
+ * @param panels - Array of panel configurations
+ * @param yOffset - Optional Y offset for positioning (e.g., when a markdown panel is prepended)
  */
-export const normalizePanels = (panels: unknown[] | undefined): DashboardPanel[] => {
+export const normalizePanels = (
+  panels: unknown[] | undefined,
+  yOffset: number = 0
+): DashboardPanel[] => {
   const panelConfigs = panels ?? [];
   const dashboardPanels: DashboardPanel[] = [];
   let currentX = 0;
-  let currentY = 0;
+  let currentY = yOffset;
 
   for (const panel of panelConfigs) {
     const config = panel as LensApiSchemaType;
