@@ -562,7 +562,7 @@ export const Default: Story = {
   render: (args) => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
-      onCreate={action('onCreate')}
+      onCreate={async (name) => action('onCreate')(name)}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
@@ -586,7 +586,7 @@ export const WithValidation: Story = {
     return (
       <CreateClassicStreamFlyout
         onClose={action('onClose')}
-        onCreate={action('onCreate')}
+        onCreate={async (name) => action('onCreate')(name)}
         onCreateTemplate={action('onCreateTemplate')}
         onRetryLoadTemplates={action('onRetryLoadTemplates')}
         templates={MOCK_TEMPLATES}
@@ -615,7 +615,7 @@ export const WithSlowValidation: Story = {
     return (
       <CreateClassicStreamFlyout
         onClose={action('onClose')}
-        onCreate={action('onCreate')}
+        onCreate={async (name) => action('onCreate')(name)}
         onCreateTemplate={action('onCreateTemplate')}
         onRetryLoadTemplates={action('onRetryLoadTemplates')}
         templates={MOCK_TEMPLATES}
@@ -630,7 +630,7 @@ export const EmptyState: Story = {
   render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
-      onCreate={action('onCreate')}
+      onCreate={async (name) => action('onCreate')(name)}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={[]}
@@ -642,7 +642,7 @@ export const ErrorState: Story = {
   render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
-      onCreate={action('onCreate')}
+      onCreate={async (name) => action('onCreate')(name)}
       onCreateTemplate={action('onCreateTemplate')}
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={[]}
