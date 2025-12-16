@@ -10,7 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 import type { SupertestWithRoleScopeType } from '../../../services';
 import { esqlRuleCreatorRole } from './roles';
 
-export default function createEsqlRuleTests({ getService }: DeploymentAgnosticFtrProviderContext) {
+export default function updateEsqlRuleTests({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const supertest = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
@@ -18,7 +18,7 @@ export default function createEsqlRuleTests({ getService }: DeploymentAgnosticFt
   let supertestWithAdminScope: SupertestWithRoleScopeType;
   let limitedStackRulesRole: RoleCredentials;
 
-  describe('create_esql_rule', function () {
+  describe('update_esql_rule', function () {
     this.tags('skipCloud');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -40,8 +40,8 @@ export default function createEsqlRuleTests({ getService }: DeploymentAgnosticFt
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('should handle create esql rule request appropriately', async () => {
-      const { body: response } = await supertest
+    it('should handle update esql rule request appropriately', async () => {
+      const { body: createResponse } = await supertest
         .post(`/internal/rule/esql`)
         .set(limitedStackRulesRole.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -57,26 +57,42 @@ export default function createEsqlRuleTests({ getService }: DeploymentAgnosticFt
           group_key: ['host.name'],
         });
 
-      expect(response).toEqual(
+      const { body: updateResponse } = await supertest
+        .put(`/internal/rule/esql/${createResponse.id}`)
+        .set(limitedStackRulesRole.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .set('kbn-internal-origin', 'esqlRuleCreatorRole')
+        .send({
+          name: 'def',
+          tags: ['bar'],
+          schedule: '10m',
+          enabled: true,
+          esql: 'FROM another_index | STATS count = COUNT(*) BY host.name',
+          timeField: '@timespan',
+          lookbackWindow: '20m',
+          group_key: ['service.name'],
+        });
+
+      expect(updateResponse).toEqual(
         expect.objectContaining({
-          id: expect.any(String),
-          name: 'abc',
-          tags: ['foo'],
+          id: createResponse.id,
+          name: 'def',
+          tags: ['bar'],
           actions: [],
-          enabled: false,
+          enabled: true,
           rule_type_id: '.esql',
           running: false,
           consumer: 'alerts',
           params: {
             esqlQuery: {
-              esql: 'FROM an_index | STATS count = COUNT(*) BY host.name',
+              esql: 'FROM another_index | STATS count = COUNT(*) BY host.name',
             },
-            timeWindowSize: 15,
+            timeWindowSize: 20,
             timeWindowUnit: 'm',
-            timeField: '@timestamp',
-            group_key: ['host.name'],
+            timeField: '@timespan',
+            group_key: ['service.name'],
           },
-          schedule: { interval: '5m' },
+          schedule: { interval: '10m' },
         })
       );
     });

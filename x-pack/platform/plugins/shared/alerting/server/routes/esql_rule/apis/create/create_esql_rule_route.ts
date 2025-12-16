@@ -15,7 +15,6 @@ import {
 import { esqlRuleResponseSchemaV1 } from '../../../../../common/routes/esql_rule/response';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
-import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 import { transformESQLRuleToResponseV1 } from '../../transforms';
 
 export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
@@ -55,14 +54,7 @@ export const createEsqlRuleRoute = (routeOptions: RouteOptions) => {
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
-          const ruleTypes = alertingContext.listTypes();
           const ruleData: CreateESQLRuleRequestBodyV1 = req.body;
-
-          validateInternalRuleType({
-            ruleTypeId: '.esql',
-            ruleTypes,
-            operationText: 'create',
-          });
 
           const createdRule = await rulesClient.createESQLRule(ruleData);
 

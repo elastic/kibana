@@ -8,7 +8,8 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('rules', () => {
+  describe('rules_and_alerts', () => {
     loadTestFile(require.resolve('./create_esql_rule'));
+    loadTestFile(require.resolve('./update_esql_rule'));
   });
 }

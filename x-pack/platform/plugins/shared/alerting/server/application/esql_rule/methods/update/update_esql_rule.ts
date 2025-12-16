@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type ESQLParams } from '@kbn/response-ops-rule-params';
-import { v4 as uuidv4 } from 'uuid';
+
+import type { ESQLParamsV1 } from '@kbn/response-ops-rule-params';
 import type { SanitizedRule } from '../../../../types';
 import type { RulesClientContext } from '../../../../rules_client';
-import type { CreateRuleData } from '../../../rule/methods/create';
-import { createRule } from '../../../rule/methods/create';
-import type { CreateESQLRuleData } from './types';
+import type { UpdateRuleData } from '../../../rule/methods/update';
+import { updateRule } from '../../../rule/methods/update';
+import type { UpdateESQLRuleData } from './types/update_esql_rule_data';
 
-export async function createESQLRule(
+export async function updateESQLRule(
   context: RulesClientContext,
-  ruleData: CreateESQLRuleData
-): Promise<SanitizedRule<ESQLParams>> {
-  const ruleId = uuidv4();
-  context.logger.debug(`Creating ESQL rule with ruleId: ${ruleId}.`);
+  ruleId: string,
+  ruleData: UpdateESQLRuleData
+): Promise<SanitizedRule<ESQLParamsV1>> {
+  const { logger } = context;
+  logger.debug(`Updating ESQL rule with ruleId: ${ruleId}.`);
 
   const {
     esql,
@@ -33,7 +34,7 @@ export async function createESQLRule(
   const timeWindowSize = durationMatch ? parseInt(durationMatch[1], 10) : 0;
   const timeWindowUnit = durationMatch ? durationMatch[2] : 'm';
 
-  const params: ESQLParams = {
+  const params: ESQLParamsV1 = {
     esqlQuery: {
       esql,
     },
@@ -44,19 +45,17 @@ export async function createESQLRule(
     ...(parentId && { parentId }),
   };
 
-  const ruleDataForCreate: CreateRuleData<ESQLParams> = {
+  const ruleDataForUpdate: UpdateRuleData<ESQLParamsV1> = {
     ...restOfRuleData,
-    alertTypeId: '.esql',
-    consumer: 'alerts',
     schedule: { interval: schedule },
     params,
     actions: [],
   };
 
-  const createdRule = await createRule(context, {
-    data: ruleDataForCreate,
-    options: { id: ruleId },
+  const updatedRule = await updateRule(context, {
+    id: ruleId,
+    data: ruleDataForUpdate,
   });
-  context.logger.debug(`Successfully created ESQL rule with ruleId: ${ruleId}.`);
-  return createdRule;
+  logger.debug(`Successfully updated ESQL rule with ruleId: ${ruleId}.`);
+  return updatedRule;
 }
