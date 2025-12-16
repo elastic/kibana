@@ -336,6 +336,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  uppercase: {
+    type: 'uppercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseInputDisplay',
+      {
+        defaultMessage: 'Uppercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseHelpText"
+          defaultMessage="{uppercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            uppercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsUppercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.uppercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.uppercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its uppercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -376,6 +407,7 @@ const PROCESSOR_GROUP_MAP: Record<
   rename: 'set',
   math: 'set',
   manual_ingest_pipeline: 'other',
+  uppercase: 'set',
 };
 
 const getProcessorDescription =

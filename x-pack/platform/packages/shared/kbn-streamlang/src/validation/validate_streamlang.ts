@@ -202,6 +202,15 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'uppercase':
+      // Uppercase processor can have optional 'to' field, defaults to modifying 'from' in place
+      if (processor.to) {
+        fields.push(processor.to);
+      } else if (processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+
     case 'date':
       // Date processor can have optional 'to' field, defaults to @timestamp
       if (processor.to) {
@@ -326,7 +335,8 @@ function getProcessorOutputType(
 
     case 'dissect':
     case 'replace':
-      // Dissect and replace always produce string output
+    case 'uppercase':
+      // Dissect, replace, and uppercase always produce string output
       return 'string';
 
     case 'date':
@@ -424,6 +434,13 @@ function getExpectedInputType(
       }
       return null;
 
+    case 'uppercase':
+      // Uppercase requires string input
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'rename':
     case 'set':
     case 'append':
@@ -484,6 +501,7 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'remove':
       case 'grok':
       case 'dissect':
+      case 'uppercase':
         if (step.from) fieldsUsed.push(step.from);
         break;
       case 'rename':
@@ -716,6 +734,7 @@ function validateProcessorValues(
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
+    case 'uppercase':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

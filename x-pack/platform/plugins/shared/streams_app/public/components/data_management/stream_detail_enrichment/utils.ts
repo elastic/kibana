@@ -13,11 +13,11 @@ import type {
   MathProcessor,
   ProcessorType,
   ReplaceProcessor,
+  StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
-  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -29,8 +29,8 @@ import {
 import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -40,6 +40,7 @@ import type {
   ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
 import type {
+  ConditionBlockFormState,
   ConvertFormState,
   DateFormState,
   DissectFormState,
@@ -51,7 +52,7 @@ import type {
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
-  ConditionBlockFormState,
+  UppercaseFormState,
 } from './types';
 
 /**
@@ -66,6 +67,7 @@ export const SPECIALISED_TYPES = [
   'set',
   'replace',
   'drop_document',
+  'uppercase',
 ];
 
 interface FormStateDependencies {
@@ -215,6 +217,14 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
+  action: 'uppercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -243,6 +253,7 @@ const defaultProcessorFormStateByType: Record<
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
+  uppercase: defaultUppercaseProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -283,7 +294,8 @@ export const getFormStateFromActionStep = (
     step.action === 'set' ||
     step.action === 'convert' ||
     step.action === 'replace' ||
-    step.action === 'math'
+    step.action === 'math' ||
+    step.action === 'uppercase'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -487,6 +499,22 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as MathProcessor,
+      };
+    }
+
+    if (formState.action === 'uppercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'uppercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        },
       };
     }
 
