@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { concat, EMPTY, mergeMap, of } from 'rxjs';
+import { map } from 'rxjs';
 import { v4 } from 'uuid';
 import type { ToolDefinition } from '@kbn/inference-common';
 import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
@@ -154,75 +154,48 @@ export function registerQueryFunction(params: FunctionRegistrationParameters) {
 
       const chatMessageId = v4();
 
-      // The server-side framework does NOT automatically create a tool response
-      // for functions that return Observables - the Observable must emit the
-      // tool response itself. We need to emit exactly ONE FunctionResponseMessage
-      // to maintain the 1:1 tool call/response pairing that the LLM expects.
-      //
-      // naturalLanguageToEsql emits events in this order:
-      // 1. OutputEvents (documentation lookups) - can be multiple
-      // 2. ChatCompletionChunks (streaming content)
-      // 3. ChatCompletionMessageEvent (final assistant message)
-      //
-      // We accumulate all OutputEvents and emit ONE FunctionResponseMessage
-      // as soon as we see the first non-OutputEvent. This ensures the tool
-      // response appears BEFORE the assistant's final message in the conversation.
-      let accumulatedOutput: Record<string, unknown> = {};
-      let toolResponseEmitted = false;
-
+      // TODO: remove - Test in deployment
       return events$.pipe(
-        mergeMap((event) => {
+        map((event) => {
           if (isOutputEvent(event)) {
-            // Accumulate output data from documentation lookups, don't emit yet
-            accumulatedOutput = { ...accumulatedOutput, ...event.output };
-            return EMPTY;
+            return createFunctionResponseMessage({
+              content: {},
+              name: QUERY_FUNCTION_NAME,
+              data: event.output,
+            });
           }
-
-          // Convert the current event to the appropriate format
-          let currentEvent;
           if (isChatCompletionChunkEvent(event)) {
-            currentEvent = {
+            return {
               id: chatMessageId,
               type: StreamingChatResponseEventType.ChatCompletionChunk,
               message: {
                 content: event.content,
               },
             };
-          } else {
-            const fnCall = event.toolCalls[0]
-              ? {
-                  name: event.toolCalls[0].function.name,
-                  arguments: JSON.stringify(event.toolCalls[0].function.arguments),
-                  trigger: MessageRole.Assistant as const,
-                }
-              : undefined;
+          }
 
-            currentEvent = {
-              type: StreamingChatResponseEventType.MessageAdd,
-              id: chatMessageId,
+          const fnCall = event.toolCalls[0]
+            ? {
+                name: event.toolCalls[0].function.name,
+                arguments: JSON.stringify(event.toolCalls[0].function.arguments),
+                trigger: MessageRole.Assistant as const,
+              }
+            : undefined;
+
+          const messageAddEvent: MessageAddEvent = {
+            type: StreamingChatResponseEventType.MessageAdd,
+            id: chatMessageId,
+            message: {
+              '@timestamp': new Date().toISOString(),
               message: {
-                '@timestamp': new Date().toISOString(),
-                message: {
-                  content: event.content,
-                  role: MessageRole.Assistant,
-                  function_call: fnCall,
-                },
+                content: event.content,
+                role: MessageRole.Assistant,
+                function_call: fnCall,
               },
-            } as MessageAddEvent;
-          }
+            },
+          };
 
-          // Emit tool response BEFORE the first non-OutputEvent
-          if (!toolResponseEmitted) {
-            toolResponseEmitted = true;
-            const toolResponse = createFunctionResponseMessage({
-              content: {},
-              name: QUERY_FUNCTION_NAME,
-              data: accumulatedOutput,
-            });
-            return concat(of(toolResponse), of(currentEvent));
-          }
-
-          return of(currentEvent);
+          return messageAddEvent;
         })
       );
     }
