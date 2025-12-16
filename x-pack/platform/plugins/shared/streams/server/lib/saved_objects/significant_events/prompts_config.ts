@@ -12,6 +12,7 @@ export const streamsPromptsSOType = 'stream-prompts';
 export const streamsPromptsSOAttributesV1 = schema.object({
   featurePromptOverride: schema.maybe(schema.string()),
   significantEventsPromptOverride: schema.maybe(schema.string()),
+  descriptionPromptOverride: schema.maybe(schema.string()),
 });
 
 export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV1>;
