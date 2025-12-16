@@ -56,8 +56,7 @@ export async function prepareSamplesForPatternExtraction(
     samples = selectPreviewRecords.resultFunc(
       originalSamples,
       previewDocsFilter,
-      simulation.documents,
-      undefined
+      simulation.documents
     );
   }
 
