@@ -9,7 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-app-menu'],
-  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/kbn-app-menu/setup_tests.ts'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/app-menu/core-chrome-app-menu-components'],
 };

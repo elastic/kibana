@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/storybook'
   - '@kbn/unified-tabs'
-  - '@kbn/app-menu'
 tags:
   - shared-common
   - package

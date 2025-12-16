@@ -17,7 +17,7 @@ import type {
   ApplicationSetup,
   ApplicationStart,
 } from '@kbn/core-application-browser';
-import type { AppMenuConfig } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 /** @internal */
 export interface Mounter {

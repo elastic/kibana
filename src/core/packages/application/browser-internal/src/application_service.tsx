@@ -32,7 +32,7 @@ import type {
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { AppMenuConfig } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 

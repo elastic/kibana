@@ -11,8 +11,8 @@ import type { FC } from 'react';
 import React, { useRef, useLayoutEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
-import type { AppMenuConfig } from '@kbn/app-menu';
-import { AppMenu } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { AppMenu } from '@kbn/core-chrome-app-menu-components';
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };

@@ -12,7 +12,7 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo, useLayoutEffect, useState } from 'react';
-import type { AppMenuConfig } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
 interface AppMenuBarProps {

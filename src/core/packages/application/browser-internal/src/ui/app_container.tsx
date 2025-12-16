@@ -24,7 +24,7 @@ import {
   type ScopedHistory,
 } from '@kbn/core-application-browser';
 import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
-import type { AppMenuConfig } from '@kbn/app-menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 

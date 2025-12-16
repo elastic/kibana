@@ -5,18 +5,15 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/split-button",
-    "@kbn/i18n",
-  ]
+  "kbn_references": []
 }

@@ -1,9 +1,7 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/app-menu",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
+  "id": "@kbn/core-chrome-app-menu",
+  "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "shared"
 }
