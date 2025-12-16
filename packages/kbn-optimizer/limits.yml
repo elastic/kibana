@@ -25,7 +25,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 565105
+  core: 559233
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 41839
-  esql: 20000
+  esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9000
+  presentationUtil: 9948
   productDocBase: 5025
   productIntercept: 9860
   profiling: 20716
