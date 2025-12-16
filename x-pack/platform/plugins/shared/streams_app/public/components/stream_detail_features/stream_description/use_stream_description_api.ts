@@ -150,6 +150,9 @@ export const useStreamDescriptionApi = ({
       return generatedDescription;
     } catch (error) {
       setIsGenerating(false);
+      if (error.name === 'AbortError') {
+        return;
+      }
       notifications.toasts.addError(error, {
         title: i18n.translate(
           'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',

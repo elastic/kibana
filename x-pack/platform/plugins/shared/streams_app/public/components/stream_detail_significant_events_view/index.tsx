@@ -38,7 +38,12 @@ interface Props {
 
 export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
-  const { unifiedSearch } = useKibana().dependencies.start;
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { unifiedSearch },
+    },
+  } = useKibana();
   const { euiTheme } = useEuiTheme();
 
   const aiFeatures = useAIFeatures();
@@ -81,6 +86,16 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       .then((data) => {
         setDetectedFeatures(data.features);
       })
+      .catch((error) => {
+        if (error.name === 'AbortError') {
+          return;
+        }
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.streamDetailView.featureIdentification.errorTitle', {
+            defaultMessage: 'Failed to identify features',
+          }),
+        });
+      })
       .finally(() => {
         setIsFeatureDetectionLoading(false);
       });
@@ -90,6 +105,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     setIsFeatureDetectionLoading,
     setIsFeatureDetectionFlyoutOpen,
     setDetectedFeatures,
+    notifications.toasts,
   ]);
 
   useEffect(() => {
