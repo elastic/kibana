@@ -8,7 +8,7 @@
 import type { OnechatEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
-import type { AgentPrompt } from '../agents/prompts';
+import type { PromptRequest } from '../agents/prompts';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -94,7 +94,7 @@ export const isToolResultEvent = (event: OnechatEvent<string, any>): event is To
 // Prompt request
 
 export interface PromptRequestEventData {
-  prompt: AgentPrompt;
+  prompt: PromptRequest;
 }
 
 export type PromptRequestEvent = ChatEventBase<ChatEventType.promptRequest, PromptRequestEventData>;

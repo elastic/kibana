@@ -21,3 +21,11 @@ export {
   getKibanaDefaultAgentCapabilities,
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
+export {
+  type ConfirmPromptDefinition,
+  type ConfirmationPrompt,
+  type ConfirmationPromptResponse,
+  type PromptRequest,
+  AgentPromptType,
+  isConfirmationPrompt,
+} from './prompts';

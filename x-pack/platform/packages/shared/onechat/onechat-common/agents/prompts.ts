@@ -9,14 +9,31 @@ export enum AgentPromptType {
   confirmation = 'confirmation',
 }
 
-export enum AgentPromptSource {
-  tool = 'tool',
+export enum ConfirmationStatus {
+  /**
+   * the confirmation for the given ID wasn't prompted to the user yet
+   */
+  unprompted = 'unprompted',
+  /**
+   * The user confirmed the prompt
+   */
+  accepted = 'accepted',
+  /**
+   * The user declined the prompt
+   */
+  rejected = 'rejected',
 }
 
 export interface ConfirmPromptDefinition {
+  /** id of the permission to ask confirmation for */
+  id: string;
+  /** optional title to display for the confirmation prompt */
   title?: string;
-  message: string;
+  /** optional message to display for the confirmation prompt */
+  message?: string;
+  /** optional text to display for the confirmation prompt's confirm button */
   confirm_text?: string;
+  /** optional text to display for the confirmation prompt's cancel button */
   cancel_text?: string;
 }
 
@@ -24,33 +41,13 @@ export interface ConfirmationPromptResponse {
   confirmed: boolean;
 }
 
-export interface Prompt {
-  type: AgentPromptType;
-  source: AgentPromptSource;
-  data: object;
-  state: object;
-}
-
-export interface ConfirmationPrompt extends Prompt {
+export interface ConfirmationPrompt extends ConfirmPromptDefinition {
   type: AgentPromptType.confirmation;
-  confirm: ConfirmPromptDefinition;
 }
 
-export interface ToolConfirmationPrompt extends ConfirmationPrompt {
-  source: AgentPromptSource.tool;
-  data: {
-    toolId: string;
-    toolCallId: string;
-    toolParams: Record<string, unknown>;
-  };
-}
+// all types of prompt
+export type PromptRequest = ConfirmationPrompt;
 
-// all types of prompts which can be emitted by an tool
-export type ToolPrompt = ToolConfirmationPrompt;
-
-// all types of prompts which can be surfaced to the user
-export type AgentPrompt = ToolConfirmationPrompt;
-
-export const isToolConfirmationPrompt = (prompt: AgentPrompt): prompt is ToolConfirmationPrompt => {
-  return prompt.source === AgentPromptSource.tool && prompt.type === AgentPromptType.confirmation;
+export const isConfirmationPrompt = (prompt: PromptRequest): prompt is ConfirmationPrompt => {
+  return prompt.type === AgentPromptType.confirmation;
 };

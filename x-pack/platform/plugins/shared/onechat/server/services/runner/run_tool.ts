@@ -147,7 +147,11 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       request,
     }),
     stateManager: stateManager.getToolStateManager({ toolId, toolCallId }),
-    prompts: promptManager.forTool({ toolId, toolCallId, toolParams }),
+    prompts: promptManager.forTool({
+      toolId,
+      toolCallId,
+      toolParams: toolParams as Record<string, unknown>,
+    }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };

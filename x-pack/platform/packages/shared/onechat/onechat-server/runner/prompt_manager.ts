@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { ConfirmPromptDefinition } from '@kbn/onechat-common/agents/prompts';
-import type { ToolConfirmationPromptWithResponse } from '../agents/prompts';
+import type {
+  ConfirmPromptDefinition,
+  ConfirmationStatus,
+} from '@kbn/onechat-common/agents/prompts';
+import type { ConfirmationPromptWithResponse } from '../agents/prompts';
 import type { ToolHandlerPromptReturn } from '../tools/handler';
 
 export interface PromptManager {
-  set(toolCallId: string, prompt: ToolConfirmationPromptWithResponse): void;
+  set(promptId: string, prompt: ConfirmationPromptWithResponse): void;
   clear(): void;
   forTool(opts: {
     toolId: string;
@@ -19,14 +22,17 @@ export interface PromptManager {
   }): ToolPromptManager;
 }
 
+interface ConfirmationInfo {
+  status: ConfirmationStatus;
+}
+
 export interface ToolPromptManager {
-  // TODO: probably expose a lighter version with only the state and result
   /**
-   * Returns the currently pending prompt, if any.
+   * Get the status for the given confirmation prompt
    */
-  getPendingPrompt(): ToolConfirmationPromptWithResponse | undefined;
+  checkConfirmationStatus(promptId: string): ConfirmationInfo;
   /**
    * Creates a confirmation prompt which can be returned by the tool handler
    */
-  confirm(opts: ConfirmPromptDefinition & { state?: object }): ToolHandlerPromptReturn;
+  askForConfirmation(opts: ConfirmPromptDefinition): ToolHandlerPromptReturn;
 }

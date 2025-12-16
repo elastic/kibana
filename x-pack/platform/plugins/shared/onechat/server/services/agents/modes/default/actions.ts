@@ -6,7 +6,7 @@
  */
 
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
-import type { ToolPrompt } from '@kbn/onechat-common/agents/prompts';
+import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
 import type { ToolCall } from '@kbn/onechat-genai-utils/langchain';
 
 export enum AgentActionType {
@@ -45,8 +45,10 @@ export interface ExecuteToolAction {
 
 export interface ToolPromptAction {
   type: AgentActionType.ToolPrompt;
+  tool_id: string;
   tool_call_id: string;
-  prompt: ToolPrompt;
+  tool_params: Record<string, unknown>;
+  prompt: PromptRequest;
 }
 
 export interface HandoverAction {

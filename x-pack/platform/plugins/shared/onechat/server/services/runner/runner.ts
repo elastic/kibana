@@ -35,7 +35,7 @@ import type { TrackingService } from '../../telemetry';
 import {
   createEmptyRunContext,
   createConversationStateManager,
-  createInterruptManager,
+  createPromptManager,
   initPromptManager,
 } from './utils';
 import { createResultStore } from './tool_result_store';
@@ -144,7 +144,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
       const resultStore = createResultStore();
-      const promptManager = createInterruptManager();
+      const promptManager = createPromptManager();
       const stateManager = createConversationStateManager();
       const modelProvider = modelProviderFactory({ request, defaultConnectorId });
       const allDeps = {
@@ -162,7 +162,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runInternalTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
       const resultStore = createResultStore();
-      const promptManager = createInterruptManager();
+      const promptManager = createPromptManager();
       const stateManager = createConversationStateManager();
       const modelProvider = modelProviderFactory({ request, defaultConnectorId });
       const allDeps = {
@@ -182,7 +182,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const resultStore = createResultStore(params.agentParams.conversation?.rounds);
 
       const stateManager = createConversationStateManager();
-      const promptManager = createInterruptManager();
+      const promptManager = createPromptManager();
       initPromptManager({
         promptManager,
         conversation: params.agentParams.conversation,

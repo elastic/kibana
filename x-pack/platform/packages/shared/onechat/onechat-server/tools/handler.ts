@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { ToolPrompt } from '@kbn/onechat-common/agents/prompts';
+import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -27,7 +27,7 @@ import type {
 export type ToolHandlerResult = Omit<ToolResult, 'tool_result_id'> & { tool_result_id?: string };
 
 export interface ToolHandlerPromptReturn {
-  prompt: ToolPrompt;
+  prompt: PromptRequest;
 }
 
 /**

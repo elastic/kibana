@@ -8,7 +8,8 @@
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
 import type { Attachment, AttachmentInput } from '../attachments';
-import type { AgentPrompt } from '../agents/prompts';
+import type { PromptRequest } from '../agents/prompts';
+import type { RoundState } from './round_state';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -166,8 +167,10 @@ export interface ConversationRound {
   id: string;
   /** current status of the round */
   status: ConversationRoundStatus;
+  /** persisted state to resume interrupted states */
+  state?: RoundState;
   /** if status is awaiting_prompt, contains the current prompt request*/
-  pending_prompt?: AgentPrompt;
+  pending_prompt?: PromptRequest;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */

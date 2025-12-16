@@ -6,10 +6,10 @@
  */
 
 import type {
-  ToolConfirmationPrompt,
+  ConfirmationPrompt,
   ConfirmationPromptResponse,
 } from '@kbn/onechat-common/agents/prompts';
 
-export type ToolConfirmationPromptWithResponse = ToolConfirmationPrompt & {
+export type ConfirmationPromptWithResponse = ConfirmationPrompt & {
   response: ConfirmationPromptResponse;
 };

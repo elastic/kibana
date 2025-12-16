@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ConfirmationStatus } from '@kbn/onechat-common/agents/prompts';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -35,18 +36,17 @@ This parameter should only be used when you already know of a specific pattern t
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
     handler: async ({ pattern }, { esClient, logger, prompts }) => {
-      const pendingPrompt = prompts.getPendingPrompt();
-      console.log('***** IN LIST INDICES TOOL *****', pendingPrompt);
+      const { status: confirmStatus } = prompts.checkConfirmationStatus('list_indices');
 
-      if (!pendingPrompt) {
-        // no pending prompt, it's a normal call to the tool, so we ask for confirmation
-        return prompts.confirm({
+      console.log('***** IN LIST INDICES TOOL *****', confirmStatus);
+
+      if (confirmStatus === ConfirmationStatus.unprompted) {
+        return prompts.askForConfirmation({
+          id: 'list_indices',
           message: 'Are you sure you want to list all indices?',
-          state: {},
         });
       }
-
-      if (!pendingPrompt.response.confirmed) {
+      if (confirmStatus === ConfirmationStatus.rejected) {
         return {
           results: [createErrorResult(`User denied usage of the tool`)],
         };
