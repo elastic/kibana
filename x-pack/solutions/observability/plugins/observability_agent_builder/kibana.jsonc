@@ -19,7 +19,7 @@
       "metricsDataAccess",
       "inference"
     ],
-    "optionalPlugins": ["ml"],
+    "optionalPlugins": ["ml", "spaces"],
     "requiredBundles": [],
     "extraPublicDirs": []
   }

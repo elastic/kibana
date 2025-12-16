@@ -19,6 +19,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PanelText } from '../../../../common/components/panel_text';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
@@ -37,6 +38,7 @@ import type {
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
 import { QradarDataInputStep } from './types';
+import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -47,14 +49,26 @@ export interface MigrationDataInputFlyoutProps {
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
 
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({
-    onClose,
-    migrationStats: initialMigrationSats,
-    migrationSource: initialMigrationSource = MigrationSource.SPLUNK,
-  }) => {
+  ({ onClose, migrationStats: initialMigrationStats }) => {
     const modalTitleId = useGeneratedHtmlId({
       prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
+
+    const {
+      migrationSource,
+      setMigrationSource,
+      migrationSourceDisabled,
+      setMigrationSourceDisabled,
+      migrationSourceOptions,
+    } = useMigrationSourceStep(initialMigrationStats?.vendor ?? MigrationSource.SPLUNK);
+
+    const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
+      initialMigrationStats
+    );
+
+    const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
+
+    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
 
     const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
       ({ migrationSource: vendor, newMissingResourcesIndexed }) => {
@@ -64,7 +78,9 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
             return;
           }
 
-          setDataInputStep(QradarDataInputStep.End);
+          if (migrationStats?.id) {
+            setDataInputStep(QradarDataInputStep.End);
+          }
           return;
         }
 
@@ -78,26 +94,12 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
           return;
         }
 
-        setDataInputStep(SplunkDataInputStep.End);
+        if (migrationStats?.id) {
+          setDataInputStep(SplunkDataInputStep.End);
+        }
       },
-      []
+      [migrationStats?.id]
     );
-
-    const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
-      initialMigrationSats
-    );
-
-    const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
-
-    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
-
-    const {
-      migrationSource,
-      setMigrationSource,
-      migrationSourceDisabled,
-      setMigrationSourceDisabled,
-      migrationSourceOptions,
-    } = useMigrationSourceStep(initialMigrationSource);
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
       handleMissingResourcesIndexed: setMissingResourcesStep,
@@ -166,7 +168,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 <MigrationSourceDropdown
                   migrationSource={migrationSource}
                   setMigrationSource={setMigrationSource}
-                  disabled={migrationSourceDisabled}
+                  disabled={!!migrationStats?.id || migrationSourceDisabled}
                   migrationSourceOptions={migrationSourceOptions}
                   missingResourcesIndexed={missingResourcesIndexed}
                   handleMissingResourcesIndexed={setMissingResourcesStep}
@@ -187,6 +189,11 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                   </EuiFlexItem>
                 ))}
               </>
+              <EuiFlexItem>
+                <PanelText size="xs" subdued cursive>
+                  <p>{getCopyrightNoticeByVendor(migrationSource)}</p>
+                </PanelText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
