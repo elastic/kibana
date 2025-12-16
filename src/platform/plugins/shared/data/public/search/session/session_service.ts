@@ -10,20 +10,20 @@
 import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
   EMPTY,
+  BehaviorSubject,
   distinctUntilChanged,
   filter,
   from,
   map,
   mergeMap,
+  type Observable,
   repeat,
   startWith,
+  Subscription,
   switchMap,
   take,
   takeUntil,
-  BehaviorSubject,
-  Subscription,
   timer,
-  type Observable,
 } from 'rxjs';
 import type {
   PluginInitializerContext,
@@ -34,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { ConfigSchema } from '../../../server/config';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
 import {
@@ -69,7 +70,7 @@ interface TrackSearchDescriptor {
   /**
    * Cancel the search
    */
-  abort: () => void;
+  abort: (reason: AbortReason) => void;
 
   /**
    * Used for polling after running in background (to ensure the search makes it into the background search saved
@@ -551,7 +552,7 @@ export class SessionService {
     state.trackedSearches
       .filter((s) => s.state === TrackedSearchState.InProgress)
       .forEach((s) => {
-        s.searchDescriptor.abort();
+        s.searchDescriptor.abort(AbortReason.CANCELED);
       });
     this.state.transitions.cancel();
     if (isStoredSession) {
