@@ -40,7 +40,7 @@ apiTest.describe(
   { tag: tags.ESS_ONLY },
   () => {
     let transformPowerUserApiCredentials: RoleApiCredentials;
-    let dataViewToBeDeletedTitle: string;
+    let dataViewToBeDeletedTitle: string | undefined;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
@@ -51,7 +51,7 @@ apiTest.describe(
 
       if (dataViewToBeDeletedTitle) {
         await deleteDataViewByTitle(dataViewToBeDeletedTitle, kbnClient);
-        dataViewToBeDeletedTitle = ''; // reset after deletion
+        dataViewToBeDeletedTitle = undefined; // reset after deletion
       }
     });
 
