@@ -466,7 +466,20 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }
 
   public async delete(scriptId: string): Promise<void> {
-    throw new ScriptLibraryError('Not implemented', 501);
+    const scriptSo = await this.getScriptSavedObject(scriptId);
+
+    await this.soClient
+      .delete(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, scriptId)
+      .catch(catchAndWrapError.withMessage(`Failed to delete script with id: ${scriptId}`));
+
+    try {
+      await this.filesClient.delete({ id: scriptSo.attributes.file_id }).catch(catchAndWrapError);
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete file [${scriptSo.attributes.file_id}] for script [${scriptId}].File is now orphaned. ${error.message}`,
+        { error }
+      );
+    }
   }
 
   public async download(scriptId: string): Promise<ScriptDownloadResponse> {
