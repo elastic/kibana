@@ -128,9 +128,7 @@ function getEsqlControls(embeddable: LensApi) {
       [control.id]: {
         ...control.controlConfig,
         type: control.type,
-        grow: control.grow,
         order: control.order,
-        width: control.width,
       },
     };
   }, {});
