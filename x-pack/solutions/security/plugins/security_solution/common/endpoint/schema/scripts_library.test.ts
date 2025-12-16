@@ -9,6 +9,8 @@
 import { Readable } from 'stream';
 import type { CreateScriptRequestBody } from '../../api/endpoint/scripts_library';
 import {
+  GetOneScriptRequestSchema,
+  DownloadScriptRequestSchema,
   PatchUpdateScriptRequestSchema,
   CreateScriptRequestSchema,
 } from '../../api/endpoint/scripts_library';
@@ -299,6 +301,18 @@ describe('Scripts library schemas', () => {
       expect(() => PatchUpdateScriptRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
         'At least one field must be defined for update'
       );
+    });
+  });
+
+  describe('Download API', () => {
+    it('should accept a script_id URL param', () => {
+      expect(DownloadScriptRequestSchema.params.validate({ script_id: 'foo' })).toBeTruthy();
+    });
+  });
+
+  describe('Get one API', () => {
+    it('should accept a script_id URL param', () => {
+      expect(GetOneScriptRequestSchema.params.validate({ script_id: 'foo' })).toBeTruthy();
     });
   });
 });

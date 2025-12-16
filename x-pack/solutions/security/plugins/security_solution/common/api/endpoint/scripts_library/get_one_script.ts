@@ -14,4 +14,4 @@ export const GetOneScriptRequestSchema = {
   }),
 };
 
-export type GetONeScriptRequestParams = TypeOf<typeof GetOneScriptRequestSchema.params>;
+export type GetOneScriptRequestParams = TypeOf<typeof GetOneScriptRequestSchema.params>;

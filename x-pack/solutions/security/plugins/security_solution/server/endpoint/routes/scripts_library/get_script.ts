@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
-import type { GetONeScriptRequestParams } from '../../../../common/api/endpoint/scripts_library';
+import type { GetOneScriptRequestParams } from '../../../../common/api/endpoint/scripts_library';
 import { GetOneScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
 import { errorHandler } from '../error_handler';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -22,7 +22,7 @@ import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constant
 export const getOneScriptRequestHandler = (
   endpointAppServices: EndpointAppContextService
 ): RequestHandler<
-  GetONeScriptRequestParams,
+  GetOneScriptRequestParams,
   undefined,
   undefined,
   SecuritySolutionRequestHandlerContext
