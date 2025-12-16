@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiMarkdownEditor, EuiTitle, EuiSpacer, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import type { Condition } from '@kbn/streamlang';
 import { isFeatureWithFilter, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
@@ -34,8 +40,8 @@ export const FeatureDetailExpanded = ({
   };
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiTitle size="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" css={{ padding: '24px 24px 0 0' }}>
+      <EuiTitle size="xxs">
         <h3>
           {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
             defaultMessage: 'Description',
@@ -51,17 +57,16 @@ export const FeatureDetailExpanded = ({
         )}
         value={feature.description}
         onChange={handleDescriptionChange}
-        height={400}
         readOnly={false}
         initialViewMode="viewing"
+        height={320}
+        autoExpandPreview={false}
       />
-
-      <EuiSpacer size="m" />
-
+      <EuiHorizontalRule />
       {isFeatureWithFilter(feature) && (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-            <EuiTitle size="xs">
+            <EuiTitle size="xxs">
               <h3>
                 {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
                   defaultMessage: 'Filter',
@@ -89,6 +94,7 @@ export const FeatureDetailExpanded = ({
             isEditingCondition={isEditingCondition}
             setCondition={handleConditionChange}
           />
+          <EuiHorizontalRule />
         </EuiFlexGroup>
       )}
     </EuiFlexGroup>
