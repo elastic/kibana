@@ -7,4 +7,9 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-node scripts/type_check
+
+if is_pr; then
+  node scripts/type_check --with-archive
+else
+  node scripts/type_check
+fi
