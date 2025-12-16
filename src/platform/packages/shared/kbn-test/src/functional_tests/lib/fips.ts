@@ -20,7 +20,7 @@ export function applyFipsOverrides(vars: any) {
     exclude: skipTags,
   };
 
-  if (vars.esTestCluster.serverArgs.includes("'xpack.security.enabled=false'")) {
+  if (!vars.esTestCluster.serverArgs.includes("'xpack.security.enabled=true'")) {
     /*
      * When running in FIPS mode, security must be enabled. Many suites expect that there will be no authc/authz.
      * Test user's roles are set to `defaultRoles`, the most privileged roles are added here
