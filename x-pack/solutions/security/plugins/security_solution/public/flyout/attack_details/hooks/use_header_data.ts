@@ -39,6 +39,10 @@ export const useHeaderData = () => {
     () => normalizeToStringArray(getFieldsData(FIELD_ALERT_IDS)),
     [getFieldsData]
   );
+
+  // Remove duplicated alert IDs for the update status action
+  const nonDuplicatedAlertIds = useMemo(() => [...new Set(alertIds)], [alertIds]);
+
   const replacements = useMemo(() => {
     const value = getFieldsData(FIELD_REPLACEMENTS);
 
@@ -53,10 +57,10 @@ export const useHeaderData = () => {
     () => ({
       title,
       timestamp,
-      alertIds,
+      alertIds: nonDuplicatedAlertIds,
       alertsCount: alertIds.length,
       replacements,
     }),
-    [title, timestamp, alertIds, replacements]
+    [title, timestamp, nonDuplicatedAlertIds, alertIds.length, replacements]
   );
 };
