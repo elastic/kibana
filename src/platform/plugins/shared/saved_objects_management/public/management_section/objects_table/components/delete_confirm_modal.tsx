@@ -192,7 +192,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
           pagination={true}
           sorting={false}
           tableCaption={i18n.translate(
-            'savedObjectsManagement.deleteSavedObjectsConfirmModal.tableCaption',
+            'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.tableCaption',
             { defaultMessage: 'Saved objects to delete' }
           )}
         />
