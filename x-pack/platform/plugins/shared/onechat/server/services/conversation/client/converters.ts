@@ -142,7 +142,6 @@ export const updateConversation = ({
     ...update,
     space,
     updated_at: updateDate.toISOString(),
-    attachments: update.attachments ?? conversation.attachments,
   };
 
   return updated;

@@ -52,7 +52,6 @@ export interface ResolvedAttachmentRef {
  * Provides CRUD operations with version tracking.
  */
 export interface AttachmentStateManager {
-  // Read operations
   /** Get an attachment by ID */
   get(id: string): VersionedAttachment | undefined;
   /** Get the latest version of an attachment */
@@ -66,7 +65,6 @@ export interface AttachmentStateManager {
   /** Get diff between two versions of an attachment */
   getDiff(id: string, fromVersion: number, toVersion: number): AttachmentDiff | undefined;
 
-  // Write operations
   /** Add a new attachment */
   add(input: VersionedAttachmentInput): VersionedAttachment;
   /** Update an existing attachment (creates new version if content changed) */
@@ -80,13 +78,10 @@ export interface AttachmentStateManager {
   /** Update description without creating new version */
   rename(id: string, description: string): boolean;
 
-  // Utility methods
   /** Resolve attachment references to their actual data */
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[];
   /** Get total estimated tokens for all active attachments */
   getTotalTokenEstimate(): number;
-  /** Convert internal state to array */
-  toArray(): VersionedAttachment[];
   /** Check if any changes have been made */
   hasChanges(): boolean;
   /** Reset the dirty flag (call after saving) */
@@ -342,10 +337,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       }
     }
     return total;
-  }
-
-  toArray(): VersionedAttachment[] {
-    return Array.from(this.attachments.values());
   }
 
   hasChanges(): boolean {
