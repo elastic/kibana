@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 import type {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -118,7 +119,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     return this.repo;
   }
 
-  async refreshMilestones() {
+  async refreshMilestones(abortSignal: AbortSignal) {
     this.logger.debug('about to refresh milestones in the saved objects store');
     try {
       const saved = await this.getMilestoneRepository().getCurrent();
@@ -128,6 +129,11 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
       // potential optimization: stop checking once we reach the final milestone, we could check SO in start function
       // potential optimization: run only detectors for milestones higher than the current one
       for (const d of this.detectors) {
+        if (abortSignal.aborted) {
+          this.logger.info('Abort signal received, stopping milestone detection');
+          return;
+        }
+
         const milestoneId = await d();
         if (milestoneId) {
           currentMilestoneId = milestoneId;
@@ -162,10 +168,10 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
         title: TASK_TITLE,
         timeout: TIMEOUT,
         maxAttempts: 1,
-        createTaskRunner: () => {
+        createTaskRunner: ({ abortController }: RunContext) => {
           return {
             run: async () => {
-              await this.refreshMilestones();
+              await this.refreshMilestones(abortController.signal);
             },
 
             cancel: async () => {
