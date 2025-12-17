@@ -1,43 +1,53 @@
-# ES|QL AST library
+# ES|QL Language library
 
-The general idea of this package is to provide low-level ES|QL parsing,
-building, traversal, pretty-printing, and manipulation features on top of a
-custom compact AST representation, which is designed to be resilient to many
-grammar changes.
+The general idea of this package is to provide comprehensive ES|QL functionality including low-level parsing,
+building, traversal, pretty-printing, manipulation features on top of a custom compact AST representation, 
+and advanced language features such as validation, autocomplete, hover, and signature help.
+
+This package is the result of merging `kbn-esql-ast` and `kbn-esql-validation-autocomplete` to provide
+a unified ES|QL library with all language features in one place.
 
 ### Contents of the package
+
+#### Core AST Functionality
 
 At the lowest level, the package provides a parser that converts ES|QL text into
 an AST representation. Or, you can use the `Builder` class to construct the AST
 manually:
 
-- [`parser` &mdash; Contains text to ES|QL AST parsing code](./src/parser/README.md).
-- [`builder` &mdash; Contains the `Builder` class for AST node construction](./src/builder/README.md).
+- [`parser` — Contains text to ES|QL AST parsing code](./src/parser/README.md)
+- [`ast/builder` — Contains the `Builder` class for AST node construction](./src/ast/builder/README.md)
 
-The _Traversal API_ lets you walk the AST. The `Walker` class is a simple
-to use, but the `Visitor` class is more powerful and flexible:
+The _Traversal API_ lets you walk the AST. The `Walker` class is simple
+to use, while the mutate utilities provide more powerful manipulation capabilities:
 
-- [`walker` &mdash; Contains the ES|QL AST `Walker` utility](./src/walker/README.md).
-- [`visitor` &mdash; Contains the ES|QL AST `Visitor` utility](./src/visitor/README.md).
+- [`ast/walker` — Contains the ES|QL AST `Walker` utility](./src/ast/walker/README.md)
+- [`ast/mutate` — Contains code for traversing and mutating the AST](./src/ast/mutate/README.md)
 
-Higher-level functionality is provided by the `mutate` and `synth` modules. They
-allow you to traverse and modify the AST, or to easily construct AST nodes:
+The _Pretty-printing API_ lets you format the AST to text:
 
-- [`mutate` &mdash; Contains code for traversing and mutating the AST](./src/mutate/README.md).
-- [`synth` &mdash; Ability to construct AST nodes from template strings](./src/synth/README.md).
+- [`pretty_print` — Contains code for formatting AST to text](./src/pretty_print/README.md)
 
-The _Pretty-printing API_ lets you format the AST to text. There are two
-implementations &mdash; a basic pretty-printer and a wrapping pretty-printer:
+#### Language Features
 
-- [`pretty_print` &mdash; Contains code for formatting AST to text](./src/pretty_print/README.md).
+Advanced ES|QL language features including editor support:
 
-The _Commands registry_ allows you to register a new command:
+- [`language` — Validation, autocomplete, hover, and signature help](./src/language/README.md)
+  - `language/validation` — ES|QL query validation logic
+  - `language/autocomplete` — Autocomplete and suggestion services
+  - `language/hover` — Hover information providers
+  - `language/signature_help` — Function signature assistance
+  - `language/inline_suggestions` — Inline suggestion features
 
-- [`commands_registry` &mdash; Provides a centralized system for managing and interacting with ES|QL commands](./src/commands_registry/README.md).
+#### Commands and Query Building
+
+The _Commands registry_ allows you to register and manage ES|QL commands:
+
+- [`commands/registry` — Provides a centralized system for managing and interacting with ES|QL commands](./src/commands/registry/README.md)
 
 The _Composer API_ provides a high-level, secure, and developer-friendly way to build ES|QL queries:
 
-- [`composer` &mdash; ES|QL query composer with secure parameter handling and fluent API](./src/composer/README.md).
+- [`composer` — ES|QL query composer with secure parameter handling and fluent API](./src/composer/README.md)
 
 ## Demo
 

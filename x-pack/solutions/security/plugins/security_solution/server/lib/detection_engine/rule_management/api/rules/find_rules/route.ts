@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { gapStatus } from '@kbn/alerting-plugin/common';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -27,7 +27,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
       path: DETECTION_ENGINE_RULES_URL_FIND,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })
@@ -54,12 +54,12 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const rulesClient = await ctx.alerting.getRulesClient();
 
           let ruleIds: string[] | undefined;
-          if (query.gaps_range_start && query.gaps_range_end) {
+          const gapFillStatuses = query.gap_fill_statuses;
+          if (Boolean(gapFillStatuses?.length) && query.gaps_range_start && query.gaps_range_end) {
             const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
+              highestPriorityGapFillStatuses: gapFillStatuses,
               start: query.gaps_range_start,
               end: query.gaps_range_end,
-              statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-              hasUnfilledIntervals: true,
             });
             ruleIds = ruleIdsWithGaps.ruleIds;
             if (ruleIds.length === 0) {

@@ -147,7 +147,7 @@ export function SignificantEventsGeneratedTable({
         defaultMessage: 'Feature',
       }),
       render: (_, item: StreamQueryKql) => {
-        return <EuiBadge color="hollow">{item.feature?.name}</EuiBadge>;
+        return <EuiBadge color="hollow">{item.feature?.name ?? '--'}</EuiBadge>;
       },
     },
     {

@@ -14,10 +14,11 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type {
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
-  ObservabilityAgentPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 
@@ -65,8 +66,11 @@ export function createGetAnomalyDetectionJobsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getAnomalyDetectionJobsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getAnomalyDetectionJobsSchema> = {
@@ -76,6 +80,12 @@ export function createGetAnomalyDetectionJobsTool({
       'Retrieves Machine Learning anomaly detection jobs and their top anomaly records for a given time range. Use this to identify unusual patterns or outliers in observability data.',
     schema: getAnomalyDetectionJobsSchema,
     tags: ['observability', 'machine_learning', 'anomaly_detection'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       {
         jobIds,
@@ -102,6 +112,7 @@ export function createGetAnomalyDetectionJobsTool({
           rangeStart,
           rangeEnd,
         });
+
         if (!mlJobs.length) {
           return {
             results: [
@@ -160,8 +171,11 @@ async function getMlJobs({
   rangeStart,
   rangeEnd,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   mlClient: Ml;
   request: KibanaRequest;
   logger: Logger;

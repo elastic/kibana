@@ -9,12 +9,12 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { MetricsExperienceClientProvider } from '../context/metrics_experience_client_provider';
 import { withRestorableState } from '../restorable_state';
 import { MetricsExperienceStateProvider } from '../context/metrics_experience_state_provider';
+import type { UnifiedMetricsGridProps } from '../types';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +28,7 @@ const queryClient = new QueryClient({
 });
 
 const InternalUnifiedMetricsExperienceGrid = (
-  props: ChartSectionProps & { client?: MetricsExperienceClient }
+  props: UnifiedMetricsGridProps & { client?: MetricsExperienceClient }
 ) => {
   if (!props.client) {
     return null;
@@ -44,7 +44,7 @@ const InternalUnifiedMetricsExperienceGrid = (
 };
 
 const InternalUnifiedMetricsExperienceGridWithState = (
-  props: ChartSectionProps & { client?: MetricsExperienceClient }
+  props: UnifiedMetricsGridProps & { client?: MetricsExperienceClient }
 ) => {
   return (
     <MetricsExperienceStateProvider>
