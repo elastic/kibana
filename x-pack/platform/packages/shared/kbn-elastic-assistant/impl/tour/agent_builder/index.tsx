@@ -18,6 +18,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import type { AgentBuilderTourState } from './step_config';
 import { agentBuilderTourStep1, tourDefaultConfig } from './step_config';
@@ -25,7 +26,7 @@ import { AGENT_BUILDER_TOUR_CONTINUE, AGENT_BUILDER_TOUR_SKIP } from './translat
 import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
 
 interface Props {
-  analytics;
+  analytics?: AnalyticsServiceStart;
   children?: EuiTourStepProps['children'];
   isDisabled: boolean;
   storageKey: NEW_FEATURES_TOUR_STORAGE_KEYS;

@@ -368,10 +368,6 @@ describe('GenAiSettingsApp', () => {
 
     renderComponent({}, { analytics: { reportEvent } });
 
-    const chatExperienceField = await screen.findByTestId(
-      `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
-    );
-
     // The <select> isn't guaranteed to be nested under the editField container (implementation detail
     // of the management settings FieldRow), so locate it globally by its option values.
     const allSelects = Array.from(document.querySelectorAll('select'));
@@ -400,10 +396,6 @@ describe('GenAiSettingsApp', () => {
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
 
     renderComponent({}, { analytics: { reportEvent } });
-
-    const chatExperienceField = await screen.findByTestId(
-      `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
-    );
 
     // The <select> isn't guaranteed to be nested under the editField container (implementation detail
     // of the management settings FieldRow), so locate it globally by its option values.
