@@ -54,7 +54,7 @@ export const serviceRiskLevelColumn: ColumnHeaderOptions = {
   displayAsText: i18n.ALERTS_HEADERS_SERVICE_RISK_LEVEL,
 };
 
-const getBaseColumns = (
+export const getBaseColumns = (
   license?: LicenseService
 ): Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
