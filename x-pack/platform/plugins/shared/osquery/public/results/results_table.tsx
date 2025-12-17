@@ -32,10 +32,14 @@ import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../common/constants';
 import { useActionResults } from '../action_results/use_action_results';
-import { generateEmptyDataMessage } from './translations';
 import {
-  ViewResultsInDiscoverAction,
+  generateEmptyDataMessage,
+  PAGINATION_LIMIT_TITLE,
+  PAGINATION_LIMIT_DESCRIPTION,
+} from './translations';
+import {
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
 } from '../packs/pack_queries_status_table';
@@ -99,8 +103,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     application: { getUrlForApp },
     appName,
     timelines,
+    notifications: { toasts },
   } = useKibana().services;
-
   const getFleetAppUrl = useCallback(
     (agentId: any) =>
       getUrlForApp('fleet', {
@@ -109,19 +113,36 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [getUrlForApp]
   );
 
+  const showPaginationLimitToast = useCallback(() => {
+    toasts.addWarning({
+      title: PAGINATION_LIMIT_TITLE,
+      text: PAGINATION_LIMIT_DESCRIPTION,
+      toastLifeTimeMs: 10000,
+    });
+  }, [toasts]);
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
-    (pageSize: any) =>
+    (pageSize: any) => {
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
         pageIndex: 0,
-      })),
+      }));
+    },
     [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
-    [setPagination]
+    (pageIndex: any) => {
+      if ((pageIndex + 1) * pagination.pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+        showPaginationLimitToast();
+
+        return;
+      }
+
+      setPagination((currentPagination) => ({ ...currentPagination, pageIndex }));
+    },
+    [pagination.pageSize, setPagination, showPaginationLimitToast]
   );
 
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
