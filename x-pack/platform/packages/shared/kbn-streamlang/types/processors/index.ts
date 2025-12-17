@@ -423,6 +423,20 @@ export const uppercaseProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<UppercaseProcessor>;
 
+export interface LowercaseProcessor extends ProcessorBaseWithWhere {
+  action: 'lowercase';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const lowercaseProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('lowercase'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<LowercaseProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -437,6 +451,7 @@ export type StreamlangProcessorDefinition =
   | RemoveProcessor
   | ReplaceProcessor
   | UppercaseProcessor
+  | LowercaseProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -452,6 +467,7 @@ export const streamlangProcessorSchema = z.union([
   removeProcessorSchema,
   replaceProcessorSchema,
   uppercaseProcessorSchema,
+  lowercaseProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
