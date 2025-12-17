@@ -15,6 +15,7 @@ import type {
 } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiCode,
   EuiDataGrid,
   EuiPanel,
   EuiLink,
@@ -24,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -34,11 +36,7 @@ import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../common/constants';
 import { useActionResults } from '../action_results/use_action_results';
-import {
-  generateEmptyDataMessage,
-  PAGINATION_LIMIT_TITLE,
-  PAGINATION_LIMIT_DESCRIPTION,
-} from './translations';
+import { generateEmptyDataMessage, PAGINATION_LIMIT_TITLE } from './translations';
 import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
@@ -48,6 +46,11 @@ import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
+
+const PAGINATION_LIMIT_MESSAGE_VALUES = {
+  viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong>,
+  indexName: <EuiCode>logs-osquery_manager.results</EuiCode>,
+};
 
 const euiDataGridCss = {
   ':not(.euiDataGrid--fullScreen)': {
@@ -105,6 +108,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     appName,
     timelines,
     notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
   const getFleetAppUrl = useCallback(
     (agentId: any) =>
@@ -117,10 +122,16 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const showPaginationLimitToast = useCallback(() => {
     toasts.addWarning({
       title: PAGINATION_LIMIT_TITLE,
-      text: PAGINATION_LIMIT_DESCRIPTION,
-      toastLifeTimeMs: 10000,
+      text: toMountPoint(
+        <FormattedMessage
+          id="xpack.osquery.results.paginationLimitDescription"
+          defaultMessage="Results limited to first 10,000 documents. To see all results, please use the {viewInDiscoverButton} button. Read access to {indexName} index is required."
+          values={PAGINATION_LIMIT_MESSAGE_VALUES}
+        />,
+        { i18n: i18nStart, theme }
+      ),
     });
-  }, [toasts]);
+  }, [i18nStart, theme, toasts]);
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
