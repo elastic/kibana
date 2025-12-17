@@ -19,7 +19,7 @@ interface StreamFeaturesApi {
   removeFeaturesFromStream: (
     features: Pick<Feature, 'type' | 'name'>[]
   ) => Promise<StorageClientBulkResponse>;
-  abort: () => void;
+  cancelFeatureIdentification: () => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -32,7 +32,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     services: { telemetryClient },
   } = useKibana();
 
-  const { signal, abort, refresh } = useAbortController();
+  const { signal } = useAbortController();
 
   return {
     identifyFeatures: async (connectorId: string) => {
@@ -164,9 +164,19 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         }
       );
     },
-    abort: () => {
-      abort();
-      refresh();
+    cancelFeatureIdentification: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          query: {
+            connectorId: '',
+            to: '',
+            from: '',
+            cancel: true,
+          },
+        },
+      });
     },
   };
 }

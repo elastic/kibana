@@ -11,6 +11,7 @@ import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { compact, isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 import { useKibana } from '../../hooks/use_kibana';
@@ -53,7 +54,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   }, [timeState.start, timeState.end]);
 
   const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
-  const { identifyFeatures, abort } = useStreamFeaturesApi(definition.stream);
+  const { identifyFeatures, cancelFeatureIdentification } = useStreamFeaturesApi(definition.stream);
   const [isFeatureDetectionFlyoutOpen, setIsFeatureDetectionFlyoutOpen] = useState(false);
   const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
   const [detectedFeatures, setDetectedFeatures] = useState<Feature[]>([]);
@@ -90,10 +91,25 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
         if (error.name === 'AbortError') {
           return;
         }
-        notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.streams.streamDetailView.featureIdentification.errorTitle', {
+
+        setIsFeatureDetectionFlyoutOpen(false);
+
+        const title = i18n.translate(
+          'xpack.streams.streamDetailView.featureIdentification.errorTitle',
+          {
             defaultMessage: 'Failed to identify features',
-          }),
+          }
+        );
+
+        if (isHttpFetchError(error) && error.body?.statusCode === 409) {
+          notifications.toasts.addError(new Error(error.body.message), {
+            title,
+          });
+          return;
+        }
+
+        notifications.toasts.addError(error, {
+          title,
         });
       })
       .finally(() => {
@@ -144,7 +160,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       features={detectedFeatures}
       isLoading={isFeatureDetectionLoading}
       closeFlyout={() => {
-        abort();
+        cancelFeatureIdentification();
         refreshFeatures();
         setIsFeatureDetectionFlyoutOpen(false);
       }}

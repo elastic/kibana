@@ -10,6 +10,7 @@ import { TaskPriority, type TaskManagerStartContract } from '@kbn/task-manager-p
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
+import { CancellationInProgressError } from './cancellation_in_progress_error';
 
 interface TaskRequest<TaskType, TParams extends {}> {
   task: Omit<PersistedTask & { type: TaskType }, 'status' | 'created_at' | 'task'>;
@@ -59,12 +60,16 @@ export class TaskClient<TaskType extends string> {
     }
   }
 
-  // What if you want to cancel the current task and then re-schedule it?
   public async schedule<TParams extends {} = {}>({
     task,
     params,
     request,
   }: TaskRequest<TaskType, TParams>) {
+    const storedTask = await this.get(task.id);
+    if (storedTask.status === 'being_canceled') {
+      throw new CancellationInProgressError('Previous task run is still being canceled');
+    }
+
     const taskDoc: PersistedTask<TParams> = {
       ...task,
       task: {
@@ -103,6 +108,20 @@ export class TaskClient<TaskType extends string> {
         throw error;
       }
     }
+  }
+
+  public async cancel(id: string) {
+    this.logger.debug(`Canceling task ${id}`);
+
+    const task = await this.get(id);
+    if (task.status !== 'in_progress') {
+      return;
+    }
+
+    await this.update({
+      ...task,
+      status: 'being_canceled',
+    });
   }
 
   public async update<TParams extends {} = {}, TPayload extends {} = {}>(

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type TaskStatus = 'not_started' | 'in_progress' | 'completed' | 'failed';
+export type TaskStatus =
+  | 'not_started'
+  | 'in_progress'
+  | 'completed'
+  | 'failed'
+  | 'being_canceled'
+  | 'canceled';
 
 interface PersistedTaskBase<TParams extends {} = {}> {
   id: string;
@@ -25,6 +31,12 @@ interface NotStartedTask<TParams extends {} = {}> extends PersistedTaskBase<TPar
 interface InProgressTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
   status: 'in_progress';
 }
+interface BeingCanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
+  status: 'being_canceled';
+}
+interface CanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
+  status: 'canceled';
+}
 interface CompletedTask<TParams extends {} = {}, TPayload extends {} = {}>
   extends PersistedTaskBase<TParams> {
   status: 'completed';
@@ -43,7 +55,9 @@ export type PersistedTask<TParams extends {} = {}, TPayload extends {} = {}> =
   | NotStartedTask<TParams>
   | InProgressTask<TParams>
   | CompletedTask<TParams, TPayload>
-  | FailedTask<TParams>;
+  | FailedTask<TParams>
+  | BeingCanceledTask<TParams>
+  | CanceledTask<TParams>;
 
 export type TaskParams<TParams extends {} = {}> = TParams & {
   _task: PersistedTask;

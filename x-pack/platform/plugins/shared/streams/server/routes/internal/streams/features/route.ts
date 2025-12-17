@@ -21,6 +21,9 @@ import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { catchError, from, map } from 'rxjs';
 import { BooleanFromString } from '@kbn/zod-helpers';
+import { conflict } from '@hapi/boom';
+import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
+import { isStale } from '../../../../lib/tasks/is_stale';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import type { IdentifyFeaturesResult } from '../../../../lib/streams/feature/feature_type_registry';
 import type { FeatureIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/feature_identification';
@@ -287,7 +290,7 @@ export const bulkFeaturesRoute = createServerRoute({
 
 export type FeatureIdentificationTaskResult =
   | {
-      status: 'not_started' | 'in_progress' | 'stale';
+      status: 'not_started' | 'in_progress' | 'stale' | 'being_canceled' | 'canceled';
     }
   | {
       status: 'failed';
@@ -316,6 +319,7 @@ export const identifyFeaturesRoute = createServerRoute({
       from: dateFromString,
       to: dateFromString,
       schedule: BooleanFromString.optional(),
+      cancel: BooleanFromString.optional(),
     }),
   }),
   handler: async ({
@@ -343,40 +347,47 @@ export const identifyFeaturesRoute = createServerRoute({
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
+    if (params.query.schedule) {
+      try {
+        await taskClient.schedule<FeatureIdentificationTaskParams>({
+          task: {
+            type: 'streams_feature_identification',
+            id: `streams_feature_identification_${name}`,
+            space: '*',
+            stream: name,
+          },
+          params: {
+            connectorId,
+            start: start.getTime(),
+            end: end.getTime(),
+          },
+          request,
+        });
+
+        return {
+          status: 'in_progress',
+        };
+      } catch (error) {
+        if (error instanceof CancellationInProgressError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
+    } else if (params.query.cancel) {
+      await taskClient.cancel(`streams_feature_identification_${name}`);
+
+      return {
+        status: 'being_canceled',
+      };
+    }
+
     const task = await taskClient.get<FeatureIdentificationTaskParams, IdentifyFeaturesResult>(
       `streams_feature_identification_${name}`
     );
 
-    if (params.query.schedule) {
-      await taskClient.schedule<FeatureIdentificationTaskParams>({
-        task: {
-          type: 'streams_feature_identification',
-          id: `streams_feature_identification_${name}`,
-          space: '*',
-          stream: name,
-        },
-        params: {
-          connectorId,
-          start: start.getTime(),
-          end: end.getTime(),
-        },
-        request,
-      });
-
-      return {
-        status: 'in_progress',
-      };
-    }
-    if (task.status === 'not_started') {
-      return {
-        status: 'not_started',
-      };
-    } else if (task.status === 'in_progress') {
-      const createdAt = new Date(task.created_at);
-      const now = Date.now();
-      const fiveMinutesInMs = 5 * 60 * 1000;
-      const isStale = now - createdAt.getTime() > fiveMinutesInMs;
-      if (isStale) {
+    if (task.status === 'in_progress') {
+      if (isStale(task.created_at)) {
         return {
           status: 'stale',
         };
@@ -390,11 +401,15 @@ export const identifyFeaturesRoute = createServerRoute({
         status: 'failed',
         error: task.task.error,
       };
+    } else if (task.status === 'completed') {
+      return {
+        status: 'completed',
+        ...task.task.payload,
+      };
     }
 
     return {
-      status: 'completed',
-      ...task.task.payload,
+      status: task.status,
     };
   },
 });

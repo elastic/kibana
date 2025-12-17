@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
 import { useAIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
@@ -26,7 +27,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
     core: { notifications },
   } = useKibana();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { identifyFeatures, abort } = useStreamFeaturesApi(definition);
+  const { identifyFeatures, cancelFeatureIdentification } = useStreamFeaturesApi(definition);
   const aiFeatures = useAIFeatures();
   const [features, setFeatures] = useState<Feature[]>([]);
   const {
@@ -78,11 +79,24 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                             if (error.name === 'AbortError') {
                               return;
                             }
+                            setIsFlyoutVisible(false);
+
+                            const title = i18n.translate(
+                              'xpack.streams.streamDetailView.featureIdentification.errorTitle',
+                              {
+                                defaultMessage: 'Failed to identify features',
+                              }
+                            );
+
+                            if (isHttpFetchError(error) && error.body?.statusCode === 409) {
+                              notifications.toasts.addError(new Error(error.body.message), {
+                                title,
+                              });
+                              return;
+                            }
+
                             notifications.toasts.addError(error, {
-                              title: i18n.translate(
-                                'xpack.streams.streamDetailView.featureIdentification.errorTitle',
-                                { defaultMessage: 'Failed to identify features' }
-                              ),
+                              title,
                             });
                           })
                           .finally(() => {
@@ -119,7 +133,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
               features={features}
               isLoading={isLoading}
               closeFlyout={() => {
-                abort();
+                cancelFeatureIdentification();
                 refreshFeatures();
                 setIsFlyoutVisible(false);
               }}
