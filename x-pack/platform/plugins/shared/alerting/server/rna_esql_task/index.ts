@@ -10,11 +10,25 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
+import { spaceIdToNamespace } from '../lib';
 
 export const ALERTING_ESQL_TASK_TYPE = 'alerting:esql' as const;
 
 export interface EsqlRulesTaskParams {
   ruleId: string;
+}
+
+export function getEsqlRulesAlertsDataStreamName({
+  config,
+  spaceId,
+  spaces,
+}: {
+  config: AlertingConfig;
+  spaceId: string;
+  spaces?: AlertingPluginsStart['spaces'];
+}) {
+  const namespace = spaceIdToNamespace(spaces, spaceId) ?? 'default';
+  return `${config.esqlRules.alertsDataStreamPrefix}-${namespace}`;
 }
 
 /**
@@ -36,7 +50,6 @@ export function initializeEsqlRulesTaskDefinition(
       title: 'Alerting ES|QL rules executor',
       timeout: '5m',
       createTaskRunner: ({ taskInstance }: RunContext) => {
-        const params = taskInstance.params as EsqlRulesTaskParams;
         return {
           async run() {
             return { state: taskInstance.state };
