@@ -2230,7 +2230,9 @@
       "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
       "zod": ["typings/zod/v3"],
-      "zod/v4": ["typings/zod/v4"]
+      "zod/v4": ["typings/zod/v4"],
+      "vega-lite": ["typings/vega/vega_lite"],
+      "vega-tooltip": ["typings/vega/vega_tooltip"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
