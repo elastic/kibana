@@ -146,6 +146,7 @@ dependsOn:
   - '@kbn/unified-tabs'
   - '@kbn/esql-composer'
   - '@kbn/cps'
+  - '@kbn/controls-constants'
 tags:
   - plugin
   - prod
