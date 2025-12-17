@@ -47,27 +47,26 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
-const paginationLimitDescriptionValues = {
-  viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong>,
-};
-const paginationLimitIndexAccessValues = {
-  indexName: <EuiCode>logs-osquery_manager.results</EuiCode>,
-};
-
 const PaginationLimitToastContent = () => (
   <>
     <p>
       <FormattedMessage
         id="xpack.osquery.results.paginationLimitDescription"
         defaultMessage="Results limited to first 10,000 documents. To see all results, please use the {viewInDiscoverButton} button."
-        values={paginationLimitDescriptionValues}
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong>,
+        }}
       />
     </p>
     <p>
       <FormattedMessage
         id="xpack.osquery.results.paginationLimitIndexAccess"
         defaultMessage="Read access to {indexName} index is required."
-        values={paginationLimitIndexAccessValues}
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          indexName: <EuiCode>logs-osquery_manager.results</EuiCode>,
+        }}
       />
     </p>
   </>
