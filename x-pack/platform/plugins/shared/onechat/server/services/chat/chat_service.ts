@@ -161,13 +161,10 @@ class ChatServiceImpl implements ChatService {
               // Track round completion and query-to-result time
               try {
                 if (isRoundCompleteEvent(event)) {
+                  if (requestId) trackingService?.trackQueryEnd(requestId);
                   const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
-
-                  if (trackingService) {
-                    if (requestId) trackingService.trackQueryEnd(requestId);
-                    if (conversationId) {
-                      trackingService.trackConversationRound(conversationId, currentRoundCount);
-                    }
+                  if (conversationId) {
+                    trackingService?.trackConversationRound(conversationId, currentRoundCount);
                   }
 
                   analyticsService?.reportMessageReceived({

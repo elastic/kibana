@@ -295,17 +295,8 @@ describe('GenAiSettingsApp', () => {
       );
       expect(chatExperienceField).toBeInTheDocument();
 
-      const allSelects = document.querySelectorAll('select');
-
-      const chatExperienceSelect = Array.from(allSelects).find((select) => {
-        const options = Array.from(select.querySelectorAll('option'));
-        return options.some((opt) => opt.value === AIChatExperience.Agent);
-      });
-
-      expect(chatExperienceSelect).toBeTruthy();
-
       // Change the select value to Agent
-      fireEvent.change(chatExperienceSelect!, { target: { value: AIChatExperience.Agent } });
+      fireEvent.change(chatExperienceField, { target: { value: AIChatExperience.Agent } });
 
       // After changing to Agent, the AI Assistant Visibility field should be hidden
       await waitFor(() => {
@@ -368,15 +359,9 @@ describe('GenAiSettingsApp', () => {
 
     renderComponent({}, { analytics: { reportEvent } });
 
-    // The <select> isn't guaranteed to be nested under the editField container (implementation detail
-    // of the management settings FieldRow), so locate it globally by its option values.
-    const allSelects = Array.from(document.querySelectorAll('select'));
-    const chatExperienceSelect = allSelects.find((select) => {
-      const options = Array.from(select.querySelectorAll('option'));
-      return options.some((opt) => opt.value === AIChatExperience.Agent);
-    });
-    if (!chatExperienceSelect) throw new Error('Expected chat experience select to exist');
-
+    const chatExperienceSelect = await screen.findByTestId(
+      `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
+    );
     fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Classic } });
 
     const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
@@ -397,15 +382,9 @@ describe('GenAiSettingsApp', () => {
 
     renderComponent({}, { analytics: { reportEvent } });
 
-    // The <select> isn't guaranteed to be nested under the editField container (implementation detail
-    // of the management settings FieldRow), so locate it globally by its option values.
-    const allSelects = Array.from(document.querySelectorAll('select'));
-    const chatExperienceSelect = allSelects.find((select) => {
-      const options = Array.from(select.querySelectorAll('option'));
-      return options.some((opt) => opt.value === AIChatExperience.Agent);
-    });
-    if (!chatExperienceSelect) throw new Error('Expected chat experience select to exist');
-
+    const chatExperienceSelect = await screen.findByTestId(
+      `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
+    );
     fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Agent } });
 
     // Close modal to mirror the real flow before saving
