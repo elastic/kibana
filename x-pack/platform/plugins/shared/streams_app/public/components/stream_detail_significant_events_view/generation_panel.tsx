@@ -36,7 +36,7 @@ export function SignificantEventsGenerationPanel({
 }: FeatureSelectorProps & {
   onFeatureIdentificationClick: () => void;
   onManualEntryClick: () => void;
-  onGenerateSuggestionsClick: () => void;
+  onGenerateSuggestionsClick: (features: Feature[]) => void;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
   selectedFlow?: Flow;
@@ -63,7 +63,7 @@ export function SignificantEventsGenerationPanel({
               isGeneratingQueries={isGeneratingQueries}
               onGenerateSuggestionsClick={() => {
                 setGeneratingFrom('features');
-                onGenerateSuggestionsClick();
+                onGenerateSuggestionsClick(selectedFeatures);
               }}
               generatingFrom={generatingFrom}
               isSavingManualEntry={isSavingManualEntry}
@@ -110,7 +110,7 @@ export function SignificantEventsGenerationPanel({
                 onClick: () => {
                   setGeneratingFrom('all_data');
                   onFeaturesChange([]);
-                  onGenerateSuggestionsClick();
+                  onGenerateSuggestionsClick([]);
                 },
                 isDisabled: isGeneratingQueries || isSavingManualEntry,
                 isLoading: isGeneratingQueries && generatingFrom === 'all_data',

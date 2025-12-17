@@ -130,118 +130,123 @@ export function AddSignificantEventFlyout({
     }
   }, [selectedFlow]);
 
-  const generateQueries = useCallback(() => {
-    setSelectedFlow('ai');
+  const generateQueries = useCallback(
+    (featuresOverride?: Feature[]) => {
+      setSelectedFlow('ai');
 
-    let numberOfGeneratedQueries = 0;
-    const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
-      system: 0,
-    };
-    let inputTokensUsed = 0;
-    let outputTokensUsed = 0;
-    const connector = aiFeatures?.genAiConnectors.selectedConnector;
-    if (!connector) {
-      return;
-    }
+      let numberOfGeneratedQueries = 0;
+      const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
+        system: 0,
+      };
+      let inputTokensUsed = 0;
+      let outputTokensUsed = 0;
+      const connector = aiFeatures?.genAiConnectors.selectedConnector;
+      if (!connector) {
+        return;
+      }
 
-    setIsGenerating(true);
-    setGeneratedQueries([]);
+      setIsGenerating(true);
+      setGeneratedQueries([]);
 
-    const maybeGenerateDescription =
-      !definition.stream.description && selectedFeatures.length === 0
-        ? generateDescription().then((description) => saveDescription(description))
-        : Promise.resolve();
+      const effectiveFeatures = featuresOverride ?? selectedFeatures;
 
-    maybeGenerateDescription.then(() => {
-      const startTime = Date.now();
+      const maybeGenerateDescription =
+        !definition.stream.description && effectiveFeatures.length === 0
+          ? generateDescription().then((description) => saveDescription(description))
+          : Promise.resolve();
 
-      from(selectedFeatures.length === 0 ? [ALL_DATA_OPTION.value] : selectedFeatures)
-        .pipe(
-          concatMap((feature) =>
-            generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
-              concatMap(({ queries: nextQueries, tokensUsed }) => {
-                numberOfGeneratedQueries += nextQueries.length;
-                if (isFeature(feature)) {
-                  numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
-                }
-                inputTokensUsed += tokensUsed.prompt;
-                outputTokensUsed += tokensUsed.completion;
+      maybeGenerateDescription.then(() => {
+        const startTime = Date.now();
 
-                setGeneratedQueries((prev) => [
-                  ...prev,
-                  ...nextQueries
-                    .filter((nextQuery) => {
-                      const validation = validateQuery({
-                        title: nextQuery.title,
+        from(effectiveFeatures.length === 0 ? [ALL_DATA_OPTION.value] : effectiveFeatures)
+          .pipe(
+            concatMap((feature) =>
+              generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
+                concatMap(({ queries: nextQueries, tokensUsed }) => {
+                  numberOfGeneratedQueries += nextQueries.length;
+                  if (isFeature(feature)) {
+                    numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
+                  }
+                  inputTokensUsed += tokensUsed.prompt;
+                  outputTokensUsed += tokensUsed.completion;
+
+                  setGeneratedQueries((prev) => [
+                    ...prev,
+                    ...nextQueries
+                      .filter((nextQuery) => {
+                        const validation = validateQuery({
+                          title: nextQuery.title,
+                          kql: { query: nextQuery.kql },
+                        });
+
+                        return validation.kql.isInvalid === false;
+                      })
+                      .map((nextQuery) => ({
+                        id: v4(),
                         kql: { query: nextQuery.kql },
-                      });
+                        title: nextQuery.title,
+                        feature: nextQuery.feature,
+                        severity_score: nextQuery.severity_score,
+                        evidence: nextQuery.evidence,
+                      })),
+                  ]);
 
-                      return validation.kql.isInvalid === false;
-                    })
-                    .map((nextQuery) => ({
-                      id: v4(),
-                      kql: { query: nextQuery.kql },
-                      title: nextQuery.title,
-                      feature: nextQuery.feature,
-                      severity_score: nextQuery.severity_score,
-                      evidence: nextQuery.evidence,
-                    })),
-                ]);
-
-                return [];
-              })
+                  return [];
+                })
+              )
             )
           )
-        )
-        .subscribe({
-          error: (error) => {
-            setIsGenerating(false);
-            if (error.name === 'AbortError') {
-              return;
-            }
-            notifications.showErrorDialog({
-              title: i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
-                {
-                  defaultMessage: `Could not generate significant events queries`,
-                }
-              ),
-              error,
-            });
-          },
-          complete: () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
-                { defaultMessage: `Generated significant events queries successfully` }
-              ),
-            });
-            telemetryClient.trackSignificantEventsSuggestionsGenerate({
-              duration_ms: Date.now() - startTime,
-              input_tokens_used: inputTokensUsed,
-              output_tokens_used: outputTokensUsed,
-              count: numberOfGeneratedQueries,
-              count_by_feature_type: numberOfGeneratedQueriesByFeature,
-              features_selected: selectedFeatures?.length ?? 0,
-              features_total: features.length,
-              stream_name: definition.stream.name,
-              stream_type: getStreamTypeFromDefinition(definition.stream),
-            });
-            setIsGenerating(false);
-          },
-        });
-    });
-  }, [
-    aiFeatures?.genAiConnectors.selectedConnector,
-    selectedFeatures,
-    generate,
-    notifications,
-    telemetryClient,
-    features.length,
-    definition,
-    generateDescription,
-    saveDescription,
-  ]);
+          .subscribe({
+            error: (error) => {
+              setIsGenerating(false);
+              if (error.name === 'AbortError') {
+                return;
+              }
+              notifications.showErrorDialog({
+                title: i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
+                  {
+                    defaultMessage: `Could not generate significant events queries`,
+                  }
+                ),
+                error,
+              });
+            },
+            complete: () => {
+              notifications.toasts.addSuccess({
+                title: i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
+                  { defaultMessage: `Generated significant events queries successfully` }
+                ),
+              });
+              telemetryClient.trackSignificantEventsSuggestionsGenerate({
+                duration_ms: Date.now() - startTime,
+                input_tokens_used: inputTokensUsed,
+                output_tokens_used: outputTokensUsed,
+                count: numberOfGeneratedQueries,
+                count_by_feature_type: numberOfGeneratedQueriesByFeature,
+                features_selected: selectedFeatures?.length ?? 0,
+                features_total: features.length,
+                stream_name: definition.stream.name,
+                stream_type: getStreamTypeFromDefinition(definition.stream),
+              });
+              setIsGenerating(false);
+            },
+          });
+      });
+    },
+    [
+      aiFeatures?.genAiConnectors.selectedConnector,
+      selectedFeatures,
+      generate,
+      notifications,
+      telemetryClient,
+      features.length,
+      definition,
+      generateDescription,
+      saveDescription,
+    ]
+  );
 
   useEffect(() => {
     if (initialFlow === 'ai' && generateOnMount) {
