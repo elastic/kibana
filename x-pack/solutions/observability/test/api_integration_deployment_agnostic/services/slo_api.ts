@@ -12,6 +12,7 @@ import type {
   CreateSLOInput,
   FindSLODefinitionsResponse,
   FindSLOInstancesResponse,
+  FindSLOTemplatesResponse,
   GetSLOTemplateResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
@@ -251,6 +252,28 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
     ): Promise<GetSLOTemplateResponse> {
       const { body } = await supertestWithoutAuth
         .get(`/api/observability/slo_templates/${templateId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+
+      return body;
+    },
+
+    async findTemplates(
+      params: { search?: string; tags?: string[]; page?: number; perPage?: number },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<FindSLOTemplatesResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params.search) queryParams.search = params.search;
+      if (params.tags && params.tags.length > 0) queryParams.tags = params.tags.join(',');
+      if (params.page !== undefined) queryParams.page = params.page;
+      if (params.perPage !== undefined) queryParams.perPage = params.perPage;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_templates`)
+        .query(queryParams)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send()

@@ -21,5 +21,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./slo_settings'));
     loadTestFile(require.resolve('./find_instances'));
     loadTestFile(require.resolve('./get_slo_template'));
+    loadTestFile(require.resolve('./find_slo_templates'));
   });
 }

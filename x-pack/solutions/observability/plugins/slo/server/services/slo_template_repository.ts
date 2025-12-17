@@ -14,14 +14,22 @@ import {
   optionalSettingsSchema,
   tagsSchema,
   timeWindowSchema,
+  type Paginated,
+  type Pagination,
 } from '@kbn/slo-schema';
 import { isRight } from 'fp-ts/Either';
 import type { SLOTemplate, StoredSLOTemplate } from '../domain/models';
 import { SLOTemplateNotFound } from '../errors';
 import { SO_SLO_TEMPLATE_TYPE } from '../saved_objects';
 
+interface SearchParams {
+  pagination: Pagination;
+  search?: string;
+  tags?: string[];
+}
 export interface SLOTemplateRepository {
   findById(templateId: string): Promise<SLOTemplate>;
+  search(params: SearchParams): Promise<Paginated<SLOTemplate>>;
 }
 
 export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
@@ -31,7 +39,7 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
     try {
       const response = await this.soClient.get<StoredSLOTemplate>(SO_SLO_TEMPLATE_TYPE, templateId);
 
-      return this.toSloTemplate(response.attributes);
+      return this.toSloTemplate(response.attributes) ?? {};
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw new SLOTemplateNotFound(`SLO Template with id [${templateId}] not found`);
@@ -40,9 +48,34 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
     }
   }
 
+  async search({ search, pagination, tags }: SearchParams): Promise<Paginated<SLOTemplate>> {
+    const filters = [];
+    if (tags && tags.length) {
+      filters.push(`slo_template.attributes.tags: (${tags.join(' OR ')})`);
+    }
+
+    const response = await this.soClient.find<StoredSLOTemplate>({
+      type: SO_SLO_TEMPLATE_TYPE,
+      page: pagination.page,
+      perPage: pagination.perPage,
+      search,
+      searchFields: ['name'],
+      ...(filters.length && { filter: filters.join(' AND ') }),
+    });
+
+    return {
+      total: response.total,
+      perPage: response.per_page,
+      page: response.page,
+      results: response.saved_objects
+        .map((so) => this.toSloTemplate(so.attributes))
+        .filter((template) => this.isSLOTemplate(template)),
+    };
+  }
+
   // We use .decode() instead of .is() when objects contains durationType fields
   // stored as "1h", decoded as { unit: "h", value: 1 }
-  private toSloTemplate(stored: StoredSLOTemplate): SLOTemplate {
+  private toSloTemplate(stored: StoredSLOTemplate): SLOTemplate | undefined {
     try {
       const template: SLOTemplate = {};
       if (stored.name && typeof stored.name === 'string') {
@@ -91,7 +124,11 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
 
       return template;
     } catch {
-      return {};
+      return undefined;
     }
+  }
+
+  private isSLOTemplate(template: SLOTemplate | undefined): template is SLOTemplate {
+    return template !== undefined;
   }
 }
