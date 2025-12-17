@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { useObservable } from '@kbn/use-observable';
 import { SidebarPanel } from './sidebar_panel';
 import { useSidebar } from './use_sidebar';
 import { useSidebarService } from './sidebar_provider';
@@ -18,13 +17,8 @@ import { SidebarAppRenderer } from './sidebar_app_renderer';
 export interface SidebarProps {}
 
 export function Sidebar(props: SidebarProps) {
-  const { close, isOpen } = useSidebar();
+  const { close, isOpen, currentAppId } = useSidebar();
   const sidebarService = useSidebarService();
-
-  const currentAppId = useObservable(
-    sidebarService.state.currentAppId$,
-    sidebarService.state.getCurrentAppId()
-  );
 
   if (!isOpen) {
     return null;

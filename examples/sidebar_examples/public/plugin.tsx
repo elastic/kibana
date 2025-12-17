@@ -19,13 +19,35 @@ interface SetupDeps {
 export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
-      appId: 'sidebarExampleBasic',
+      appId: 'sidebarExampleText',
       button: {
-        iconType: 'logoKibana',
+        iconType: 'editorAlignLeft',
       },
       app: {
-        title: 'Basic sidebar example',
-        loadComponent: () => import('./demo_sidebar_app').then((m) => m.DemoSidebarApp),
+        title: 'Text Input Example',
+        loadComponent: () => import('./text_input_app').then((m) => () => <m.TextInputApp />),
+      },
+    });
+
+    core.chrome.sidebar.registerApp({
+      appId: 'sidebarExampleCounter',
+      button: {
+        iconType: 'number',
+      },
+      app: {
+        title: 'Counter Example',
+        loadComponent: () => import('./counter_app').then((m) => () => <m.CounterApp />),
+      },
+    });
+
+    core.chrome.sidebar.registerApp({
+      appId: 'sidebarExampleTabs',
+      button: {
+        iconType: 'documents',
+      },
+      app: {
+        title: 'Tab Selection Example',
+        loadComponent: () => import('./tab_selection_app').then((m) => () => <m.TabSelectionApp />),
       },
     });
 

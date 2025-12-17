@@ -10,13 +10,19 @@
 import React from 'react';
 import { SidebarRegistryService, type SidebarRegistryServiceApi } from './sidebar_registry_service';
 import { SidebarStateService, type SidebarStateServiceApi } from './sidebar_state_service';
+import {
+  SidebarAppStateService,
+  type SidebarAppStateServiceApi,
+} from './sidebar_app_state_service';
 import { SidebarServiceProvider } from '../components';
 
 export interface SidebarServiceSetup {
   registerApp: SidebarRegistryServiceApi['registerApp'];
 }
 
-export type SidebarServiceStart = SidebarStateServiceApi;
+export interface SidebarServiceStart extends SidebarStateServiceApi {
+  appState: SidebarAppStateServiceApi;
+}
 
 /**
  * Composite service for sidebar functionality
@@ -24,15 +30,18 @@ export type SidebarServiceStart = SidebarStateServiceApi;
  * Composes:
  * - SidebarRegistryService: Manages app registration
  * - SidebarStateService: Manages UI state
+ * - SidebarAppStateService: Manages app-specific state
  * - wrapInProvider method to wrap application in Sidebar context
  */
 export class SidebarService {
   readonly registry: SidebarRegistryServiceApi;
   readonly state: SidebarStateServiceApi;
+  readonly appState: SidebarAppStateServiceApi;
 
   constructor() {
     this.registry = new SidebarRegistryService();
     this.state = new SidebarStateService(this.registry);
+    this.appState = new SidebarAppStateService();
   }
 
   setup(): SidebarServiceSetup {
@@ -45,6 +54,7 @@ export class SidebarService {
     return {
       ...this.registry,
       ...this.state,
+      appState: this.appState,
     };
   }
 

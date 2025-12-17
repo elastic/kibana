@@ -22,3 +22,7 @@ export type {
 
 export { SidebarRegistryService, type SidebarRegistryServiceApi } from './sidebar_registry_service';
 export { SidebarStateService, type SidebarStateServiceApi } from './sidebar_state_service';
+export {
+  SidebarAppStateService,
+  type SidebarAppStateServiceApi,
+} from './sidebar_app_state_service';

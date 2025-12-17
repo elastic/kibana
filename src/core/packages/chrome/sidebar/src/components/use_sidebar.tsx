@@ -19,6 +19,8 @@ export interface UseSidebarHook {
   open: (appId: string) => void;
   close: () => void;
 
+  currentAppId: string | null;
+
   width: number;
   setWidth: (width: number) => void;
 }
@@ -31,12 +33,73 @@ export function useSidebar(): UseSidebarHook {
 
   const isOpen = useObservable(sidebar.isOpen$, sidebar.isOpen());
   const width = useObservable(sidebar.width$, sidebar.getWidth());
+  const currentAppId = useObservable(sidebar.currentAppId$, sidebar.getCurrentAppId());
 
   return {
     isOpen,
     width,
+    currentAppId,
     open: useCallback((appId: string) => sidebar.open(appId), [sidebar]),
     close: useCallback(() => sidebar.close(), [sidebar]),
     setWidth: useCallback((_width: number) => sidebar.setWidth(_width), [sidebar]),
   };
+}
+
+/**
+ * Return type for useSidebarAppState hook
+ */
+export interface UseSidebarAppStateReturn<T> {
+  state: T | undefined;
+  setState: (state: T) => void;
+  updateState: (partial: Partial<T>) => void;
+}
+
+/**
+ * Hook to access and update app-specific state for the sidebar
+ *
+ * @param appId The sidebar app ID
+ * @returns Object containing state, setState, and updateState
+ *
+ * @example
+ * ```tsx
+ * interface MyAppState {
+ *   selectedTab: string;
+ *   filters: string[];
+ * }
+ *
+ * function MySidebarApp() {
+ *   const { state, setState, updateState } = useSidebarAppState<MyAppState>('my-app');
+ *
+ *   // Set complete state
+ *   const handleReset = () => {
+ *     setState({ selectedTab: 'overview', filters: [] });
+ *   };
+ *
+ *   // Update partial state
+ *   const handleTabChange = (tab: string) => {
+ *     updateState({ selectedTab: tab });
+ *   };
+ *
+ *   return <div>{state?.selectedTab}</div>;
+ * }
+ * ```
+ */
+export function useSidebarAppState<T>(appId: string): UseSidebarAppStateReturn<T> {
+  const service = useSidebarService();
+  const state = useObservable(
+    service.appState.getAppState$<T>(appId),
+    service.appState.getAppState<T>(appId)
+  );
+
+  const setState = useCallback(
+    (newState: T) => service.appState.setAppState(appId, newState),
+    [appId, service]
+  );
+
+  const updateState = useCallback(
+    (partial: Partial<T>) => service.appState.updateAppState(appId, partial),
+    [appId, service]
+  );
+
+  return { state, setState, updateState };
 }

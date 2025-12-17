@@ -9,7 +9,7 @@
 
 export { SidebarServiceProvider } from './sidebar_provider';
 export type { SidebarProviderProps } from './sidebar_provider';
-export { useSidebar } from './use_sidebar';
+export { useSidebar, useSidebarAppState } from './use_sidebar';
 export type { UseSidebarHook } from './use_sidebar';
 export { Sidebar } from './sidebar';
 export type { SidebarProps } from './sidebar';
