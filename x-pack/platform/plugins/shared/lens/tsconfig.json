@@ -134,6 +134,7 @@
     "@kbn/esql-composer",
     "@kbn/cps",
     "@kbn/controls-constants",
+    "@kbn/controls-renderer",
   ],
   "exclude": ["target/**/*"]
 }
