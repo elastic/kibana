@@ -56,8 +56,10 @@ const setup = ({
     );
   const dataViewCreateSpy = jest.spyOn(services.dataViews, 'create');
   const dataViewsClearCacheSpy = jest.spyOn(services.dataViews, 'clearInstanceCache');
+  const savedSearch = { ...savedSearchMock, timeRestore: false };
+  savedSearch.searchSource.setField('filter', []);
   const state = getDiscoverStateMock({
-    savedSearch: { ...savedSearchMock, timeRestore: false },
+    savedSearch,
     additionalPersistedTabs: additionalPersistedTabs?.(services),
     services,
   });
