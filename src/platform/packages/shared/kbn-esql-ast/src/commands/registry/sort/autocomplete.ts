@@ -13,7 +13,6 @@ import {
   getFragmentData,
 } from '../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../definitions/utils';
-import { getExpressionType, isExpressionComplete } from '../../definitions/utils/expressions';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../types';
@@ -42,13 +41,15 @@ export async function autocomplete(
   });
 
   const commandText = innerText.slice(command.location.min);
-  const { position: pos, context: posContext } = getSortPos(commandText, command, cursorPosition);
+  const { position: pos, expressionRoot } = getSortPos(commandText, command);
 
   switch (pos) {
-    case 'empty_expression': {
-      return await suggestForExpression({
+    case 'expression': {
+      const columnExists = (name: string) => _columnExists(name, context);
+
+      const { suggestions: expressionSuggestions, computed } = await suggestForExpression({
         query,
-        expressionRoot: undefined,
+        expressionRoot,
         command,
         cursorPosition,
         location: Location.SORT,
@@ -60,47 +61,21 @@ export async function autocomplete(
           openSuggestions: true,
         },
       });
-    }
-
-    case 'expression': {
-      const expressionRoot = command.args[command.args.length - 1];
-      if (!expressionRoot || Array.isArray(expressionRoot)) {
-        // guaranteed by the getSortPos function, but we check it here for type safety
-        return [];
-      }
 
       const suggestions: ISuggestionItem[] = [];
 
-      const columnExists = (name: string) => _columnExists(name, context);
-
-      const expressionType = getExpressionType(expressionRoot, context?.columns);
-      const isComplete = isExpressionComplete(expressionType, innerText);
-
-      if (isComplete && !posContext?.insideFunction) {
+      if (computed.isComplete && !computed.insideFunction) {
         suggestions.push(
           ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
         );
       }
 
       if (!rightAfterColumn(innerText, expressionRoot, columnExists)) {
-        const expressionSuggestions = await suggestForExpression({
-          query,
-          expressionRoot,
-          command,
-          cursorPosition,
-          location: Location.SORT,
-          context,
-          callbacks,
-          options: {
-            addSpaceAfterFirstField: false,
-            addSpaceAfterOperator: true,
-            openSuggestions: true,
-          },
-        });
         suggestions.push(...expressionSuggestions);
       }
 
       const nullsPrefixRange = getNullsPrefixRange(innerText);
+
       if (nullsPrefixRange) {
         suggestions.forEach((suggestion) => {
           suggestion.rangeToReplace = nullsPrefixRange;
