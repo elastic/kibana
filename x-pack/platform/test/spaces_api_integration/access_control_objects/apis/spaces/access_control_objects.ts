@@ -224,6 +224,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
+
+        // Verify owner
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
         const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
@@ -839,6 +850,24 @@ export default function ({ getService }: FtrProviderContext) {
 
           // revoke privs
           await createSimpleUser(['viewer']);
+
+          // Verify owner
+          const { cookie: adminCookie } = await loginAsKibanaAdmin();
+          let getResponse = await supertestWithoutAuth
+            .get(`/access_control_objects/${objectId1}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+          expect(getResponse.body).to.have.property('accessControl');
+          expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+          getResponse = await supertestWithoutAuth
+            .get(`/access_control_objects/${objectId2}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+          expect(getResponse.body).to.have.property('accessControl');
+          expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
           const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
             'simple_user',
             'changeme'
@@ -998,6 +1027,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
+
+        // Verify owner
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
         const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
@@ -1463,6 +1503,24 @@ export default function ({ getService }: FtrProviderContext) {
 
           // revoke privs
           await createSimpleUser(['viewer']);
+
+          // Verify owner
+          const { cookie: adminCookie } = await loginAsKibanaAdmin();
+          let getResponse = await supertestWithoutAuth
+            .get(`/access_control_objects/${objectId1}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+          expect(getResponse.body).to.have.property('accessControl');
+          expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+          getResponse = await supertestWithoutAuth
+            .get(`/access_control_objects/${objectId2}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+          expect(getResponse.body).to.have.property('accessControl');
+          expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
           const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
             'simple_user',
             'changeme'
@@ -1600,6 +1658,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
+
+        // Verify owner
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
         const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
@@ -2091,6 +2160,24 @@ export default function ({ getService }: FtrProviderContext) {
 
             // revoke privs
             await createSimpleUser(['viewer']);
+
+            // Verify owner
+            const { cookie: adminCookie } = await loginAsKibanaAdmin();
+            let getResponse = await supertestWithoutAuth
+              .get(`/access_control_objects/${objectId1}`)
+              .set('kbn-xsrf', 'true')
+              .set('cookie', adminCookie.cookieString())
+              .expect(200);
+            expect(getResponse.body).to.have.property('accessControl');
+            expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+            getResponse = await supertestWithoutAuth
+              .get(`/access_control_objects/${objectId2}`)
+              .set('kbn-xsrf', 'true')
+              .set('cookie', adminCookie.cookieString())
+              .expect(200);
+            expect(getResponse.body).to.have.property('accessControl');
+            expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
             const { cookie: revokedCookie, profileUid: revokedProfileUid } =
               await loginAsObjectOwner('simple_user', 'changeme');
 
@@ -2480,6 +2567,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
+
+        // Verify owner
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        let getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
         const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
@@ -2497,7 +2595,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(403);
 
-        const getResponse = await supertestWithoutAuth
+        getResponse = await supertestWithoutAuth
           .get(`/access_control_objects/${objectId}`)
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
@@ -2788,6 +2886,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
+
+        // Verify owner
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        let getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
         const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
@@ -2805,7 +2914,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(403);
 
-        const getResponse = await supertestWithoutAuth
+        getResponse = await supertestWithoutAuth
           .get(`/access_control_objects/${objectId}`)
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
