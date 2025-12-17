@@ -12,7 +12,6 @@ import type {
 import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { getInstallationInfo } from './helper';
 
 const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
   expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
@@ -1285,11 +1284,11 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           await retry.tryForTime(10000, async () => {
-            const installation = await getInstallationInfo(
-              supertest,
-              'integration_to_input',
-              '3.0.0'
-            );
+            const installationSO = await es.get({
+              index: '.kibana_ingest',
+              id: 'epm-packages:integration_to_input',
+            });
+            const installation = (installationSO._source as any)?.['epm-packages'] ?? {};
             expectIdArraysEqual(
               installation.installed_es.filter((asset: any) => asset.type !== 'knowledge_base'),
               expectedAssets
