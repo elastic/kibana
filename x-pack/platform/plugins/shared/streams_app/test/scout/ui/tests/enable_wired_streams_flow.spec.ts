@@ -10,7 +10,6 @@ import { test } from '../fixtures';
 
 // Common test IDs
 const WIRED_SWITCH = 'streamsWiredSwitch';
-const SETTINGS_FLYOUT = 'streamsSettingsFlyout';
 const DISABLE_MODAL = 'streamsWiredDisableModal';
 const DISABLE_CHECKBOX = 'streamsWiredDisableConfirmCheckbox';
 const DISABLE_BUTTON = 'streamsWiredDisableConfirmButton';
@@ -51,12 +50,15 @@ test.describe('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlOblt']
     pageObjects,
     esClient,
   }) => {
+    const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
+
     // Verify logs index doesn't exist
     const logsExists = await esClient.indices.exists({ index: 'logs' });
     expect(logsExists).toBe(false);
 
     // Open settings and enable wired streams
     await page.getByRole('button', { name: 'Settings' }).click();
+    await expect(settingsFlyoutTitle).toBeVisible();
     await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
     await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
 
@@ -65,11 +67,14 @@ test.describe('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlOblt']
 
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
+    await expect(settingsFlyoutTitle).toBeHidden();
 
     // Verify logs index was created
-    const logsExistsAfter = await esClient.indices.exists({ index: 'logs' });
-    expect(logsExistsAfter).toBe(true);
+    await expect
+      .poll(() => esClient.indices.exists({ index: 'logs' }), {
+        message: 'logs index should be created after enabling wired streams',
+      })
+      .toBe(true);
 
     // Verify logs stream appears in the UI
     await pageObjects.streams.goto();
@@ -81,14 +86,17 @@ test.describe('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlOblt']
     page,
     pageObjects,
   }) => {
+    const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
+
     // Enable wired streams
     await page.getByRole('button', { name: 'Settings' }).click();
+    await expect(settingsFlyoutTitle).toBeVisible();
     await page.getByTestId(WIRED_SWITCH).click();
     await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
 
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
+    await expect(settingsFlyoutTitle).toBeHidden();
 
     // Reload page to see updated streams
     await pageObjects.streams.goto();
@@ -99,13 +107,16 @@ test.describe('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlOblt']
   });
 
   test('should disable wired streams and show empty state', async ({ page, pageObjects }) => {
+    const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
+
     // First enable wired streams
     await page.getByRole('button', { name: 'Settings' }).click();
+    await expect(settingsFlyoutTitle).toBeVisible();
     await page.getByTestId(WIRED_SWITCH).click();
     await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
+    await expect(settingsFlyoutTitle).toBeHidden();
 
     // Verify logs stream is visible
     await pageObjects.streams.goto();
@@ -132,7 +143,7 @@ test.describe('Enable Wired Streams - Success flow', { tag: ['@ess', '@svlOblt']
 
     // Close flyout with Escape key
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId(SETTINGS_FLYOUT)).toBeHidden();
+    await expect(settingsFlyoutTitle).toBeHidden();
 
     // Verify UI now shows empty state (no logs stream)
     await pageObjects.streams.goto();
