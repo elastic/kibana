@@ -133,19 +133,15 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
     // Generate CSS rule for this connector
     const iconBase64 = await getStepIconBase64(connector);
 
-    let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label="${connectorType}"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon .codicon:before`;
+    let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
+      .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon:before,
+      .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon:before,
+      .monaco-list .monaco-list-row[aria-label="${connectorType}"] .suggest-icon:before,
+      .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon:before`;
     if (connectorType === 'elasticsearch') {
-      // Target the codicon class for elasticsearch connectors AND any suggestion with "elasticsearch." in aria-label
-      selector = `.codicon-symbol-struct:before,
-        .monaco-list .monaco-list-row[aria-label*="elasticsearch."] .suggest-icon .codicon:before`;
+      selector = '.codicon-symbol-struct:before';
     } else if (connectorType === 'kibana') {
-      // Target the codicon class for kibana connectors AND any suggestion with "kibana." in aria-label
-      selector = `.codicon-symbol-module:before,
-        .monaco-list .monaco-list-row[aria-label*="kibana."] .suggest-icon .codicon:before`;
+      selector = '.codicon-symbol-module:before';
     } else if (connectorType === 'console') {
       selector = '.codicon-symbol-variable:before';
     }
