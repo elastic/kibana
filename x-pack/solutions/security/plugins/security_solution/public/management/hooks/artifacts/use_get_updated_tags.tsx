@@ -20,7 +20,16 @@ interface TagFiltersType {
   [tagCategory: string]: TagFilter;
 }
 
+interface TagUpdateOperation<TagFilters> {
+  tagType: keyof TagFilters;
+  newTags: string[];
+}
+
 type GetTagsUpdatedBy<TagFilters> = (tagType: keyof TagFilters, newTags: string[]) => string[];
+
+type GetMultipleTagsUpdatedBy<TagFilters> = (
+  updates: Array<TagUpdateOperation<TagFilters>>
+) => string[];
 
 const DEFAULT_FILTERS = Object.freeze({
   policySelection: isPolicySelectionTag,
@@ -44,30 +53,40 @@ const DEFAULT_FILTERS = Object.freeze({
  *  second: (tag) => tag.startsWith('2:'),
  * }
  * ...
- * const { getTagsUpdatedBy } = useGetUpdatedTags(exception, FILTERS_IN_ORDER)
+ * const { getTagsUpdatedBy, getMultipleTagsUpdatedBy } = useGetUpdatedTags(exception, FILTERS_IN_ORDER)
  * ```
  *
- * The returned `getTagsUpdatedBy()` function can be used in event handlers of the given tag category
- * without affecting other tags.
+ * The returned `getTagsUpdatedBy()` function can be used in event handlers to update a single
+ * tag category:
  * ```
- * const newTags = getTagsUpdatedBy('second', ['2:new-tag-1', ...])
+ * const newTags = getTagsUpdatedBy('second', ['2:new-tag'])
+ * ```
+ *
+ * The returned `getMultipleTagsUpdatedBy()` function can be used to update multiple tag
+ * categories at once without affecting other tags:
+ * ```
+ * const newTags = getMultipleTagsUpdatedBy([
+ *   { tagType: 'second', newTags: ['2:new-tag-1'] },
+ *   { tagType: 'first', newTags: ['1:new-tag-2'] }
+ * ])
  * ```
  *
  * @param exception
  * @param filters
- * @returns `getTagsUpdatedBy(tagCategory, ['new', 'tags'])`
+ * @returns `getTagsUpdatedBy('category', ['new', 'tags'])` and `getMultipleTagsUpdatedBy([{ tagType: 'category', newTags: ['new', 'tags'] }])`
  */
 export const useGetUpdatedTags = <TagFilters extends TagFiltersType = typeof DEFAULT_FILTERS>(
   exception: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
   filters: TagFilters = DEFAULT_FILTERS as unknown as TagFilters
 ): Readonly<{
   getTagsUpdatedBy: GetTagsUpdatedBy<TagFilters>;
+  getMultipleTagsUpdatedBy: GetMultipleTagsUpdatedBy<TagFilters>;
 }> => {
   const getTagsUpdatedBy: GetTagsUpdatedBy<TagFilters> = useCallback(
     (tagType, newTags) => {
       if (!filters[tagType]) {
         throw new Error(
-          `getTagsUpdateBy() was called with an unknown tag type: ${String(tagType)}`
+          `getTagsUpdatedBy() was called with an unknown tag type: ${String(tagType)}`
         );
       }
 
@@ -76,12 +95,37 @@ export const useGetUpdatedTags = <TagFilters extends TagFiltersType = typeof DEF
     [exception, filters]
   );
 
+  const getMultipleTagsUpdatedBy: GetMultipleTagsUpdatedBy<TagFilters> = useCallback(
+    (updates) => {
+      let currentTags = exception.tags ?? [];
+
+      for (const { tagType, newTags } of updates) {
+        if (!filters[tagType]) {
+          throw new Error(
+            `getMultipleTagsUpdatedBy() was called with an unknown tag type: ${String(tagType)}`
+          );
+        }
+
+        // Filter out old tags of this type and add new tags
+        currentTags = currentTags.filter((tag) => !filters[tagType](tag)).concat(...newTags);
+      }
+
+      return currentTags;
+    },
+    [exception, filters]
+  );
+
   return {
     /**
-     * @param tagsToUpdate The category of the tags to update, keys of the filter object.
-     * @param newTags
-     * @return a new tags array
+     * @param tagType the type of tag to update
+     * @param newTags the new tags to use for this type
+     * @return a new tags array with the updates applied
      */
     getTagsUpdatedBy,
+    /**
+     * @param updates Array of tag update operations containing tagType and newTags
+     * @return a new tags array with all updates applied
+     */
+    getMultipleTagsUpdatedBy,
   };
 };
