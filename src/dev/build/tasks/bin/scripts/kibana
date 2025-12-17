@@ -49,16 +49,13 @@ fi
 NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT="${NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT:---heapsnapshot-signal=SIGUSR2 --diagnostic-dir=$DIR/data}"
 ALL_NODE_OPTIONS="$BASE_NODE_OPTIONS $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS"
 
-if [ "$ELASTIC_CONTAINER" = "true" ] && ! echo "$ALL_NODE_OPTIONS" | grep -q -- '--max-old-space-size'; then
+if [ "$ELASTIC_CONTAINER" = "true" ] && ! printf '%s' "$ALL_NODE_OPTIONS" | grep -q -- '--max-old-space-size'; then
   max_old_space_percentage=75
   heap_mb=
   cgroup_memory_limit_bytes=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null)
-  mem_available_kb=$(grep -E '^MemAvailable:' /proc/meminfo 2>/dev/null | grep -Eo '[0-9]+')
-  if echo "$cgroup_memory_limit_bytes" | grep -qE '^[0-9]+$'; then
-    heap_mb=$(( (cgroup_memory_limit_bytes / 1024 / 1024) * max_old_space_percentage / 100 ))
-  elif echo "$mem_available_kb" | grep -qE '^[0-9]+$'; then
-    heap_mb=$(( (mem_available_kb / 1024) * max_old_space_percentage / 100 ))
-  fi
+  mem_available_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo 2>/dev/null)
+  case "$cgroup_memory_limit_bytes" in ''|*[!0-9]*) ;; *) heap_mb=$(( (cgroup_memory_limit_bytes / 1024 / 1024) * max_old_space_percentage / 100 )) ;; esac
+  [ -n "$heap_mb" ] || case "$mem_available_kb" in ''|*[!0-9]*) ;; *) heap_mb=$(( (mem_available_kb / 1024) * max_old_space_percentage / 100 )) ;; esac
   [ "$heap_mb" -gt 4096 ] 2>/dev/null && heap_mb=4096
   [ "$heap_mb" -gt 0 ] 2>/dev/null && ALL_NODE_OPTIONS="$ALL_NODE_OPTIONS --max-old-space-size=$heap_mb"
 fi
