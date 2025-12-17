@@ -99,6 +99,14 @@ export const configSchema = schema.object({
   enabledRuleTypes: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
   ),
+  /**
+   * RnA ES|QL rules execution path that writes to a dedicated
+   * append-only alerts data stream.
+   */
+  esqlRules: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    alertsDataStream: schema.string({ defaultValue: 'alerts-esql' }),
+  }),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

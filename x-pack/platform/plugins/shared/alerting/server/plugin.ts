@@ -113,6 +113,7 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
+import { initializeEsqlRulesTaskDefinition } from './rna_esql_task';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -412,6 +413,15 @@ export class AlertingPlugin {
     core.status.set(serviceStatus$);
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
+
+    // Dedicated Task Manager task type for ES|QL rules execution.
+    // Registered regardless of enabled flag so that scheduling can be toggled independently.
+    initializeEsqlRulesTaskDefinition(
+      this.logger,
+      plugins.taskManager,
+      core.getStartServices(),
+      this.config
+    );
 
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
       'alerting',
