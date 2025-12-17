@@ -103,7 +103,12 @@ export function StreamDetailRoutingImpl() {
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
-      onPageReady();
+      onPageReady({
+        customMetrics: {
+          key1: 'available_streams_count',
+          value1: streamsListFetch.value?.streams?.length ?? 0,
+        },
+      });
     }
   }, [streamsListFetch, onPageReady]);
 

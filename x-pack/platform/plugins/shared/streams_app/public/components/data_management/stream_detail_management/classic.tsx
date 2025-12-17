@@ -182,10 +182,15 @@ export function ClassicStreamDetailManagement({
               <EuiSpacer />
             </>
           ) : null}
-          <UnmanagedElasticsearchAssets
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-          />
+          <>
+            {i18n.translate('xpack.streams.classicStreamDetailManagement.hiLabel', {
+              defaultMessage: 'HI!',
+            })}
+            <UnmanagedElasticsearchAssets
+              definition={definition}
+              refreshDefinition={refreshDefinition}
+            />
+          </>
         </>
       ),
       label: (

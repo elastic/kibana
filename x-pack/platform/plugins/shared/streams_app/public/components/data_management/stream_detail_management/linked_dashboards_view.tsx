@@ -43,7 +43,12 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (attachmentsFetch.value && !attachmentsFetch.loading) {
-      onPageReady();
+      onPageReady({
+        customMetrics: {
+          key1: 'linked_dashboards_count',
+          value1: attachmentsFetch.value?.attachments.length ?? 0,
+        },
+      });
     }
   }, [attachmentsFetch.value, attachmentsFetch.loading, onPageReady]);
 

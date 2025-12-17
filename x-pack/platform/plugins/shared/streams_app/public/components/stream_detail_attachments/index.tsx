@@ -99,9 +99,16 @@ export function StreamDetailAttachments({
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (definition && !attachmentsFetch.loading) {
-      onPageReady();
+      onPageReady({
+        customMetrics: {
+          key1: 'attachment_count',
+          value1: attachmentsFetch.value?.attachments?.length ?? 0,
+          key2: 'processing_steps_count',
+          value2: definition.stream.ingest.processing.steps.length,
+        },
+      });
     }
-  }, [definition, attachmentsFetch.loading, onPageReady]);
+  }, [definition, attachmentsFetch.loading, attachmentsFetch.value, onPageReady]);
 
   const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {

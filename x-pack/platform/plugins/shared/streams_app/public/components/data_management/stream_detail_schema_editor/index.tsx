@@ -87,9 +87,14 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!isLoadingFields && !loading) {
-      onPageReady();
+      onPageReady({
+        customMetrics: {
+          key1: 'schema_editor_fields_count',
+          value1: fields?.length ?? 0,
+        },
+      });
     }
-  }, [isLoadingFields, loading, onPageReady]);
+  }, [fields.length, isLoadingFields, loading, onPageReady]);
 
   const handleCancelClick = useDiscardConfirm(discardChanges, {
     defaultFocusedButton: 'cancel',
