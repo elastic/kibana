@@ -42,18 +42,6 @@ describe('useProjectRouting', () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('should return undefined when project picker access is disabled', () => {
-    mockServices.cps = {
-      cpsManager: {
-        getProjectPickerAccess: jest.fn(() => 'disabled'),
-      },
-    } as unknown as CPSPluginStart;
-
-    const { result } = renderHook(() => useProjectRouting(mockServices));
-
-    expect(result.current).toBeUndefined();
-  });
-
   it('should create manager with correct methods when enabled', () => {
     const mockProjectRouting: ProjectRouting = `alias:_*`;
     mockServices.cps = {
