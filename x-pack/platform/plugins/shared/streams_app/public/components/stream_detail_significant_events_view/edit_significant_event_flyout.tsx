@@ -28,6 +28,7 @@ export const EditSignificantEventFlyout = ({
   features,
   refresh,
   onFeatureIdentificationClick,
+  generateOnMount,
 }: {
   refreshDefinition: () => void;
   refresh: () => void;
@@ -41,6 +42,7 @@ export const EditSignificantEventFlyout = ({
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onFeatureIdentificationClick: () => void;
+  generateOnMount: boolean;
 }) => {
   const {
     core: { notifications },
@@ -58,6 +60,7 @@ export const EditSignificantEventFlyout = ({
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
+      generateOnMount={generateOnMount}
       refreshDefinition={refreshDefinition}
       onFeatureIdentificationClick={onFeatureIdentificationClick}
       definition={definition}

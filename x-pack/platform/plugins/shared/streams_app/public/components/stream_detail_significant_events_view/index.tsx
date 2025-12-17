@@ -152,7 +152,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     />
   ) : null;
 
-  const editFlyout = (
+  const editFlyout = (generateOnMount: boolean) => (
     <EditSignificantEventFlyout
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
@@ -166,6 +166,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       setSelectedFeatures={setSelectedFeatures}
       features={features}
       onFeatureIdentificationClick={identifyFeaturesCallback}
+      generateOnMount={generateOnMount}
     />
   );
 
@@ -194,7 +195,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
           }}
         />
         {featureDetectionFlyout}
-        {editFlyout}
+        {editFlyout(true)}
       </>
     );
   }
@@ -307,7 +308,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
         </EuiFlexItem>
       </EuiFlexGroup>
       {featureDetectionFlyout}
-      {editFlyout}
+      {editFlyout(false)}
     </>
   );
 }

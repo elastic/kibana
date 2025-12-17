@@ -37,7 +37,6 @@ import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
-import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
@@ -60,9 +59,11 @@ interface Props {
   initialFlow?: Flow;
   initialSelectedFeatures: Feature[];
   onFeatureIdentificationClick: () => void;
+  generateOnMount: boolean;
 }
 
 export function AddSignificantEventFlyout({
+  generateOnMount,
   refreshDefinition,
   query,
   onClose,
@@ -243,7 +244,7 @@ export function AddSignificantEventFlyout({
   ]);
 
   useEffect(() => {
-    if (initialFlow === 'ai') {
+    if (initialFlow === 'ai' && generateOnMount) {
       generateQueries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
