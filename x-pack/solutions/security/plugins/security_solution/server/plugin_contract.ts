@@ -47,7 +47,6 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/serve
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -96,7 +95,7 @@ export interface SecuritySolutionPluginStartDependencies {
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
-  llmTasks: LlmTasksPluginStart;
+  llmTasks?: LlmTasksPluginStart;
 }
 
 export interface SecuritySolutionPluginSetup {

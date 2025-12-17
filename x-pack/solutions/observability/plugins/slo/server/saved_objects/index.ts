@@ -6,3 +6,5 @@
  */
 
 export { slo, SO_SLO_TYPE } from './slo';
+export { sloTemplate, SO_SLO_TEMPLATE_TYPE } from './slo_template';
+export { sloSettings, SO_SLO_SETTINGS_TYPE } from './slo_settings';

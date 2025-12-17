@@ -417,7 +417,7 @@
           },
           " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Promise<{ label: React.FC<{ openFlyout: () => void; }>; toolTipContent?: React.ReactNode; flyoutContent: React.FC<{ closeFlyout: () => void; flyoutRef: React.RefObject<HTMLDivElement>; }>; flyoutSizing?: Pick<",
           "EuiFlyoutProps",
-          "<\"div\">, \"size\" | \"maxWidth\"> | undefined; shouldRender: ({ availableExportItems, }: { availableExportItems: ",
+          "<\"div\" | \"nav\">, \"size\" | \"maxWidth\"> | undefined; shouldRender: ({ availableExportItems, }: { availableExportItems: ",
           {
             "pluginId": "share",
             "scope": "public",
@@ -2270,7 +2270,9 @@
                     "section": "def-common.EncryptedSavedObjectsClient",
                     "text": "EncryptedSavedObjectsClient"
                   },
-                  ") => void; }"
+                  ") => void; registerApiKeyInvalidateFn: (fn?: ",
+                  "ApiKeyInvalidationFn",
+                  " | undefined) => void; }"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
                 "deprecated": false,

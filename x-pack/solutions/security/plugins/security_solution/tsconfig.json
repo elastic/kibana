@@ -271,6 +271,7 @@
     "@kbn/onechat-plugin",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/onechat-browser",
-    "@kbn/ai-assistant-common"
+    "@kbn/ai-assistant-common",
+    "@kbn/product-doc-common"
   ]
 }

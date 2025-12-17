@@ -1273,6 +1273,16 @@
           },
           "<",
           "SecuritySubFeatureId",
+          "> | undefined; rule_gaps_auto_fill?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
           "> | undefined; detections?: ",
           {
             "pluginId": "@kbn/security-solution-features",
