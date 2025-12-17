@@ -13,6 +13,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { getConnectorProvider } from '@kbn/inference-common';
 import {
   type ChatEvent,
   oneChatDefaultAgentId,
@@ -178,22 +179,29 @@ class ChatServiceImpl implements ChatService {
                     }
                   }
 
-                  // Track MessageReceived event for Agent Builder
                   if (analytics) {
                     const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
                     const round = event.data.round;
+                    const connector = context.chatModel.getConnector();
                     const toolsInvoked =
                       round.steps
                         ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
                         .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
 
-                    console.log('MessageReceived ==>', JSON.stringify({ round }, null, 2));
                     analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, {
                       conversation_id: effectiveConversationId,
                       response_length: round.response?.message?.length,
                       round_number: currentRoundCount,
                       agent_id: normalizedAgentId,
                       tools_invoked: toolsInvoked,
+                      trace_id: round.trace_id,
+                      started_at: round.started_at,
+                      time_to_first_token: round.time_to_first_token,
+                      time_to_last_token: round.time_to_last_token,
+                      model_provider: getConnectorProvider(connector),
+                      llm_calls: round.model_usage?.llm_calls,
+                      input_tokens: round.model_usage?.input_tokens,
+                      output_tokens: round.model_usage?.output_tokens,
                     });
                   }
                 }

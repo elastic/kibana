@@ -63,6 +63,14 @@ export interface ReportMessageReceivedParams {
   round_number?: number;
   agent_id?: string;
   tools_invoked: string[];
+  trace_id?: string;
+  started_at?: string;
+  time_to_first_token?: number;
+  time_to_last_token?: number;
+  model_provider?: string;
+  llm_calls?: number;
+  input_tokens?: number;
+  output_tokens?: number;
 }
 
 export interface ReportConverseErrorParams {
@@ -282,6 +290,62 @@ const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom")',
         optional: false,
+      },
+    },
+    trace_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Trace ID associated with this round (when tracing is enabled)',
+        optional: true,
+      },
+    },
+    started_at: {
+      type: 'date',
+      _meta: {
+        description: 'When the round started',
+        optional: true,
+      },
+    },
+    time_to_first_token: {
+      type: 'integer',
+      _meta: {
+        description: 'Time from round start to first token arrival, in ms',
+        optional: true,
+      },
+    },
+    time_to_last_token: {
+      type: 'integer',
+      _meta: {
+        description: 'Time from round start to last token arrival, in ms',
+        optional: true,
+      },
+    },
+    model_provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'Connector provider (OpenAI|Google|Anthropic|Elastic)',
+        optional: true,
+      },
+    },
+    llm_calls: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of LLM calls performed during this round',
+        optional: true,
+      },
+    },
+    input_tokens: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of input tokens sent during this round',
+        optional: true,
+      },
+    },
+    output_tokens: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of output tokens received during this round',
+        optional: true,
       },
     },
   },
