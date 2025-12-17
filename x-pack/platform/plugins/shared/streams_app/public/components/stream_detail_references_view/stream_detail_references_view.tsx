@@ -49,10 +49,32 @@ export function StreamDetailReferencesView({
 
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
-    if (definition && !streamsListFetch.loading) {
-      onPageReady();
+    if (definition && !streamsListFetch.loading && streamsListFetch.value) {
+      const streams = streamsListFetch.value;
+      const referencingGroupsCount = streams
+        .filter((stream) => Streams.GroupStream.Definition.is(stream.stream))
+        .filter((stream) =>
+          (stream.stream as Streams.GroupStream.Definition).group.members.includes(
+            definition.stream.name
+          )
+        ).length;
+
+      const isGroupStream = Streams.GroupStream.Definition.is(definition.stream);
+
+      onPageReady({
+        customMetrics: {
+          key1: 'total_streams_count',
+          value1: streams.length,
+          key2: 'referencing_groups_count',
+          value2: referencingGroupsCount,
+          ...(isGroupStream && {
+            key3: 'member_count',
+            value3: (definition.stream as Streams.GroupStream.Definition).group.members.length,
+          }),
+        },
+      });
     }
-  }, [definition, streamsListFetch.loading, onPageReady]);
+  }, [definition, streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
   if (streamsListFetch.loading) {
     return <EuiLoadingSpinner />;
