@@ -32,7 +32,7 @@ describe('saved_searches_utils', () => {
             rowsPerPage: 250,
             sampleSize: 1000,
             breakdownField: 'extension.keyword',
-            interval: 'm',
+            chartInterval: 'm',
           },
         },
       ];
@@ -49,7 +49,7 @@ describe('saved_searches_utils', () => {
         rowsPerPage: 250,
         sampleSize: 1000,
         breakdownField: 'extension.keyword',
-        interval: 'm',
+        chartInterval: 'm',
         controlGroupJson: undefined,
         tabs,
       };
@@ -67,6 +67,7 @@ describe('saved_searches_utils', () => {
       ).toMatchInlineSnapshot(`
         Object {
           "breakdownField": "extension.keyword",
+          "chartInterval": "m",
           "columns": Array [
             "a",
             "b",
@@ -79,7 +80,6 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
-          "interval": "m",
           "isTextBasedQuery": false,
           "managed": false,
           "references": Array [],
@@ -117,13 +117,13 @@ describe('saved_searches_utils', () => {
             Object {
               "attributes": Object {
                 "breakdownField": "extension.keyword",
+                "chartInterval": "m",
                 "columns": Array [
                   "a",
                   "b",
                 ],
                 "grid": Object {},
                 "hideChart": true,
-                "interval": "m",
                 "isTextBasedQuery": false,
                 "kibanaSavedObjectMeta": Object {
                   "searchSourceJSON": "{}",

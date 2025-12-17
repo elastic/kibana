@@ -183,7 +183,6 @@ describe('Test discover app state', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
-        interval: false,
       });
       state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -191,7 +190,6 @@ describe('Test discover app state', () => {
         hideChart: true,
         rowHeight: true,
         breakdownField: true,
-        interval: true,
       });
     });
 
@@ -204,7 +202,6 @@ describe('Test discover app state', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
-        interval: false,
       });
       state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -212,7 +209,6 @@ describe('Test discover app state', () => {
         hideChart: true,
         rowHeight: true,
         breakdownField: true,
-        interval: true,
       });
     });
 
@@ -225,7 +221,6 @@ describe('Test discover app state', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
-        interval: false,
       });
       state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -233,7 +228,6 @@ describe('Test discover app state', () => {
         hideChart: true,
         rowHeight: false,
         breakdownField: true,
-        interval: true,
       });
     });
 
@@ -246,7 +240,6 @@ describe('Test discover app state', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
-        interval: false,
       });
       state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -254,28 +247,6 @@ describe('Test discover app state', () => {
         hideChart: false,
         rowHeight: true,
         breakdownField: true,
-        interval: true,
-      });
-    });
-
-    it('should call setResetDefaultProfileState correctly with initial interval', () => {
-      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
-      stateStorageGetSpy.mockReturnValue({ interval: 'm' });
-      const state = getStateContainer();
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: false,
-        rowHeight: false,
-        breakdownField: false,
-        interval: false,
-      });
-      state.actions.initializeAndSync();
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        hideChart: true,
-        rowHeight: true,
-        breakdownField: true,
-        interval: false,
       });
     });
 
@@ -294,7 +265,6 @@ describe('Test discover app state', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
-        interval: false,
       });
       state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
@@ -302,7 +272,6 @@ describe('Test discover app state', () => {
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
-        interval: false,
       });
     });
   });

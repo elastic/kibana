@@ -406,7 +406,6 @@ export function getDataStateContainer({
                     rowHeight: false,
                     breakdownField: false,
                     hideChart: false,
-                    interval: false,
                   },
                 })
               );

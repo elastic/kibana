@@ -113,8 +113,8 @@ export function getStateDefaults({
   if (savedSearch?.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
   }
-  if (savedSearch?.interval) {
-    defaultState.interval = savedSearch.interval;
+  if (savedSearch?.chartInterval) {
+    defaultState.interval = savedSearch.chartInterval;
   }
   if (savedSearch?.density) {
     defaultState.density = savedSearch.density;

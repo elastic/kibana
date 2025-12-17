@@ -56,6 +56,6 @@ export const toSavedSearchAttributes = (
     sampleSize: savedSearch.sampleSize,
     density: savedSearch.density,
     breakdownField: savedSearch.breakdownField,
-    interval: savedSearch.interval,
+    chartInterval: savedSearch.chartInterval,
     visContext: savedSearch.visContext,
   });

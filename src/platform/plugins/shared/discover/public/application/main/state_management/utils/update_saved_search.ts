@@ -95,9 +95,9 @@ export function updateSavedSearch({
     }
 
     if (typeof appState.interval !== 'undefined') {
-      savedSearch.interval = appState.interval;
-    } else if (savedSearch.interval) {
-      savedSearch.interval = 'auto';
+      savedSearch.chartInterval = appState.interval;
+    } else if (savedSearch.chartInterval) {
+      savedSearch.chartInterval = 'auto';
     }
 
     savedSearch.hideAggregatedPreview = appState.hideAggregatedPreview;

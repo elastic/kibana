@@ -60,6 +60,7 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "message",
           "extension",
@@ -72,7 +73,6 @@ describe('toSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": undefined,
-        "interval": undefined,
         "isTextBasedQuery": false,
         "managed": false,
         "references": Array [
@@ -193,6 +193,7 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "my",
           "tab",
@@ -206,7 +207,6 @@ describe('toSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": undefined,
-        "interval": undefined,
         "isTextBasedQuery": false,
         "managed": false,
         "references": Array [

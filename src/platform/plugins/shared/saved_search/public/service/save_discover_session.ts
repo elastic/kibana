@@ -118,7 +118,7 @@ export const saveDiscoverSession = async (
         rowsPerPage: tab.rowsPerPage,
         sampleSize: tab.sampleSize,
         breakdownField: tab.breakdownField,
-        interval: tab.interval,
+        chartInterval: tab.chartInterval,
         density: tab.density,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
@@ -126,7 +126,7 @@ export const saveDiscoverSession = async (
     };
   });
 
-  const { interval, ...firstTabAttributes } = tabs[0].attributes;
+  const { chartInterval, ...firstTabAttributes } = tabs[0].attributes;
 
   const attributes: SavedSearchAttributes = {
     title: discoverSession.title,
@@ -137,6 +137,7 @@ export const saveDiscoverSession = async (
     sort: firstTabAttributes.sort as SortOrder[],
     density: firstTabAttributes.density as DataGridDensity,
   };
+
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(tabReferences, discoverSession.tags ?? [])
     : tabReferences;

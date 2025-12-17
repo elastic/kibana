@@ -204,7 +204,7 @@ export const SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND = schema.object({
 
 const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10 =
   DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8.extends({
-    interval: schema.maybe(schema.string()),
+    chartInterval: schema.maybe(schema.string()),
   });
 
 const SCHEMA_DISCOVER_SESSION_TAB_VERSION_10 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_8.extends({

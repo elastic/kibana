@@ -502,7 +502,7 @@ export function getDiscoverStateContainer({
     // Set the default profile state only if not loading a saved search,
     // to avoid overwriting saved search state
     if (!currentSavedSearch.id) {
-      const { breakdownField, columns, rowHeight, hideChart, interval } = getCurrentUrlState(
+      const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
         stateStorage,
         services
       );
@@ -515,7 +515,6 @@ export function getDiscoverStateContainer({
             rowHeight: rowHeight === undefined,
             breakdownField: breakdownField === undefined,
             hideChart: hideChart === undefined,
-            interval: interval === undefined,
           },
         })
       );

@@ -188,12 +188,12 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.breakdownField).toEqual('');
   });
 
-  it('should pass interval if state has interval', async () => {
+  it('should pass chartInterval if state has interval', async () => {
     const savedSearch = {
       ...savedSearchMock,
       searchSource: savedSearchMock.searchSource.createCopy(),
     };
-    expect(savedSearch.interval).toBeUndefined();
+    expect(savedSearch.chartInterval).toBeUndefined();
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
@@ -204,14 +204,14 @@ describe('updateSavedSearch', () => {
         interval: 'm',
       },
     });
-    expect(savedSearch.interval).toEqual('m');
+    expect(savedSearch.chartInterval).toEqual('m');
   });
 
   it('should pass "auto" if state already has interval', async () => {
     const savedSearch = {
       ...savedSearchMock,
       searchSource: savedSearchMock.searchSource.createCopy(),
-      interval: 'm',
+      chartInterval: 'm',
     };
     updateSavedSearch({
       savedSearch,
@@ -223,7 +223,7 @@ describe('updateSavedSearch', () => {
         interval: undefined,
       },
     });
-    expect(savedSearch.interval).toEqual('auto');
+    expect(savedSearch.chartInterval).toEqual('auto');
   });
 
   it('should set query and filters from services', async () => {

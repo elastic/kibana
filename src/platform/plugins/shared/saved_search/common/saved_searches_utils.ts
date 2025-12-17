@@ -47,7 +47,7 @@ export const fromSavedSearchAttributes = <
     rowsPerPage: attributes.rowsPerPage,
     sampleSize: attributes.sampleSize,
     breakdownField: attributes.breakdownField,
-    interval: attributes.interval,
+    chartInterval: attributes.chartInterval,
     visContext: attributes.visContext,
     controlGroupJson: attributes.controlGroupJson,
     density: attributes.density,

@@ -79,7 +79,6 @@ export async function changeDataView({
           rowHeight: true,
           breakdownField: true,
           hideChart: true,
-          interval: true,
         },
       })
     );

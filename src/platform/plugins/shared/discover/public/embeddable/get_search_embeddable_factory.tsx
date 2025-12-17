@@ -138,7 +138,6 @@ export const getSearchEmbeddableFactory = ({
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
             hideChart: 'skip',
-            interval: 'skip',
             isTextBasedQuery: 'skip',
             kibanaSavedObjectMeta: 'skip',
             nonPersistedDisplayOptions: 'skip',
