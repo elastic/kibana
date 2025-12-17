@@ -124,6 +124,8 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       emit: jest.fn(),
     },
     logger: loggerMock.create(),
+    promptManager: createPromptManagerMock(),
+    stateManager: createStateManagerMock(),
   };
 };
 
