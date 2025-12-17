@@ -15,6 +15,7 @@ import type {
 import { schema } from '@kbn/config-schema';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { ToolType } from '@kbn/onechat-common';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
@@ -177,7 +178,7 @@ export function registerRoutes(
 
       try {
         const { name, type, token } = request.body;
-        const [, { actions, dataSourcesRegistry }] = await getStartServices();
+        const [, { actions, dataSourcesRegistry, onechat }] = await getStartServices();
 
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
@@ -193,6 +194,7 @@ export function registerRoutes(
         const connectorType = dataConnectorTypeDef.stackConnector.type;
         const secrets = buildSecretsFromConnectorSpec(connectorType, token);
 
+        logger.info(`Creating Kibana stack connector for data connector '${name}'`);
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const stackConnector = await actionsClient.create({
           action: {
@@ -206,28 +208,41 @@ export function registerRoutes(
         const savedObjectsClient = coreContext.savedObjects.client;
         const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
 
+        logger.info(`Creating workflows for data connector '${name}'`);
         const workflowIds: string[] = [];
+        const toolIds: string[] = [];
         for (const workflowInfo of dataConnectorTypeDef.generateWorkflows(stackConnector.id)) {
+          const workflow = await workflowManagement.management.createWorkflow(
+            { yaml: workflowInfo.content },
+            spaceId,
+            request
+          );
+          workflowIds.push(workflow.id);
           if (workflowInfo.shouldGenerateABTool) {
-            const workflow = await workflowManagement.management.createWorkflow(
-              { yaml: workflowInfo.content },
-              spaceId,
-              request
-            );
-            workflowIds.push(workflow.id);
+            const toolRegistry = await onechat.tools.getRegistry({ request });
+            const tool = await toolRegistry.create({
+              id: `${type}-${workflow.id}`,
+              type: ToolType.workflow,
+              description: `Workflow tool for ${type} data connector`,
+              tags: ['data-connector', type],
+              configuration: {
+                workflow_id: workflow.id,
+              },
+            });
+            toolIds.push(tool.id);
+            logger.info(`Created tool for workflow '${workflow.name}'`);
           }
         }
 
         const now = new Date().toISOString();
+        logger.info(`Creating ${DATA_CONNECTOR_SAVED_OBJECT_TYPE} SO created at ${now}`);
         const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
           name,
           type,
-          config: {},
-          features: [],
           createdAt: now,
           updatedAt: now,
           workflowIds,
-          toolIds: [],
+          toolIds,
           kscIds: [stackConnector.id],
         });
 
