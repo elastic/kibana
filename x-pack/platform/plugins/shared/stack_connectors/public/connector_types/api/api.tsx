@@ -32,8 +32,7 @@ export function getConnectorType(): ConnectorTypeModel<
       defaultMessage: 'API',
     }),
     actionConnectorFields: lazy(() => import('./api_connectors')),
-    // No params form needed - params are filled programmatically in workflows
-    actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
+    actionParamsFields: lazy(() => import('./api_params')),
     validateParams: async (actionParams: ActionParamsType) => {
       return { errors: {} };
     },

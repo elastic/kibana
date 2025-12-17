@@ -27,3 +27,45 @@ export const BASE_PATH_REQUIRED = i18n.translate(
     defaultMessage: 'Base API URL is required.',
   }
 );
+
+export const PATH_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.api.pathFieldLabel',
+  {
+    defaultMessage: 'Path',
+  }
+);
+
+export const METHOD_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.api.methodFieldLabel',
+  {
+    defaultMessage: 'Method',
+  }
+);
+
+export const BODY_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.api.bodyFieldLabel',
+  {
+    defaultMessage: 'Body',
+  }
+);
+
+export const QUERY_PARAMS_TITLE = i18n.translate(
+  'xpack.stackConnectors.components.api.queryParamsTitle',
+  {
+    defaultMessage: 'Query Parameters',
+  }
+);
+
+export const HEADERS_TITLE = i18n.translate(
+  'xpack.stackConnectors.components.api.headersTitle',
+  {
+    defaultMessage: 'Headers',
+  }
+);
+
+export const TIMEOUT_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.api.timeoutFieldLabel',
+  {
+    defaultMessage: 'Timeout (seconds)',
+  }
+);
