@@ -28,12 +28,15 @@ export const deletePreviousPipelines = async (
     ({ type, id }) =>
       type === ElasticsearchAssetType.ingestPipeline && id.includes(previousPkgVersion)
   );
+  logger.debug(
+    `Deleting ${installedPipelines.length} ingest pipelines for package ${pkgName} version ${previousPkgVersion}`
+  );
   try {
     await pMap(
       installedPipelines,
-      ({ type, id }) => {
+      async ({ type, id }) => {
         logger.debug(`Deleting pipeline with id: ${id}`);
-        return deletePipeline(esClient, id);
+        return await deletePipeline(esClient, id);
       },
       {
         concurrency: MAX_CONCURRENT_PIPELINES_DELETIONS,
