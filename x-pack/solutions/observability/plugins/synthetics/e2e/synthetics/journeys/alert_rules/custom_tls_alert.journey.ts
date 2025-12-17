@@ -116,7 +116,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
     await retry.tryForTime(5 * 1000, async () => {
       await page.getByTestId('querySubmitButton').click();
-      if (!(await page.getByText(tlsRuleName).isVisible())) {
+      if (!((await page.getByText(tlsRuleName).count()) > 0)) {
         throw new Error('Alert not found');
       }
     });
