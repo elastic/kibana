@@ -46,14 +46,14 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.error.label', {
       defaultMessage: 'APM Error',
     }),
-    icon: 'bug',
+    icon: 'error',
   },
   {
     type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.log.label', {
       defaultMessage: 'Log Entry',
     }),
-    icon: 'logstashQueue',
+    icon: 'logPatternAnalysis',
   },
 ];
 
