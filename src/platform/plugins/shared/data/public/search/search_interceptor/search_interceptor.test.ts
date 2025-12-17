@@ -17,16 +17,15 @@ import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
 import type { ISessionService } from '..';
 import { SearchSessionState } from '..';
-
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
 import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { ESQL_ASYNC_SEARCH_STRATEGY, UI_SETTINGS } from '../../../common';
 import type { SearchServiceStartDependencies } from '../search_service';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
-
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
 
@@ -145,9 +144,9 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    next.mockClear();
-    error.mockClear();
-    complete.mockClear();
+    next.mockReset();
+    error.mockReset();
+    complete.mockReset();
     jest.clearAllTimers();
     jest.clearAllMocks();
 
@@ -1050,7 +1049,6 @@ describe('SearchInterceptor', () => {
       afterEach(() => {
         const sessionServiceMock = sessionService as jest.Mocked<ISessionService>;
         sessionServiceMock.getSearchOptions.mockReset();
-        mockCoreSetup.http.post.mockReset();
       });
 
       test('gets session search options from session service', async () => {
@@ -1359,7 +1357,7 @@ describe('SearchInterceptor', () => {
         const abort = sessionService.trackSearch.mock.calls[0][0].abort;
         expect(abort).toBeInstanceOf(Function);
 
-        abort();
+        abort(AbortReason.REPLACED);
 
         await timeTravel(10);
 
@@ -2127,6 +2125,112 @@ describe('SearchInterceptor', () => {
         });
 
         response.subscribe({ error });
+      });
+    });
+
+    describe('partial results', () => {
+      beforeEach(() => {
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            id: '1',
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+          })
+        );
+      });
+
+      test('should request partial results and throw error if timed out', async () => {
+        const abortController = new AbortController();
+        setTimeout(() => {
+          abortController.abort(AbortReason.TIMEOUT);
+        }, 50);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 100 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(); // Run first request/response
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+
+        await timeTravel(50); // Run until abort
+
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(mockCoreSetup.http.post.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            "/internal/search/ese/1",
+            Object {
+              "asResponse": true,
+              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"retrieveResults\\":true,\\"stream\\":true}",
+              "context": undefined,
+              "signal": AbortSignal {},
+              "version": "1",
+            },
+          ]
+        `);
+        expect(error).toHaveBeenCalled();
+      });
+
+      test('should request partial results and not throw error if canceled', async () => {
+        const abortController = new AbortController();
+        setTimeout(() => {
+          abortController.abort(AbortReason.CANCELED);
+        }, 50);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 100 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(); // Run first request/response
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+
+        await timeTravel(50); // Run until abort
+
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(mockCoreSetup.http.post.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            "/internal/search/ese/1",
+            Object {
+              "asResponse": true,
+              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"retrieveResults\\":true,\\"stream\\":true}",
+              "context": undefined,
+              "signal": AbortSignal {},
+              "version": "1",
+            },
+          ]
+        `);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('should not request partial results and throw error if canceled for a reason other than CANCELED/TIMEOUT', async () => {
+        const abortController = new AbortController();
+        setTimeout(() => {
+          abortController.abort(AbortReason.CLEANUP);
+        }, 50);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 100 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(); // Run first request/response
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+
+        await timeTravel(50); // Run until abort
+
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        expect(error).toHaveBeenCalled();
       });
     });
   });
