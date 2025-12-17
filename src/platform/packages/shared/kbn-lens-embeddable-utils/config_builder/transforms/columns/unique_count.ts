@@ -15,7 +15,6 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 export const fromUniqueCountAPItoLensState = (
   options: LensApiUniqueCountMetricOperation
 ): CardinalityIndexPatternColumn => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { field, format, empty_as_null } = options;
   return {
     operationType: 'unique_count',

@@ -41,7 +41,10 @@ const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.
   defaultMessage: 'AI',
 });
 
-export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
+export function createNavigationTree({
+  isAppRegistered,
+  showAiAssistant = true,
+}: ApplicationStart & { showAiAssistant?: boolean }): NavigationTreeDefinition {
   return {
     body: [
       {
@@ -250,10 +253,14 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
-              {
-                link: 'management:observabilityAiAssistantManagement',
-                breadcrumbStatus: 'hidden',
-              },
+              ...(showAiAssistant
+                ? [
+                    {
+                      link: 'management:observabilityAiAssistantManagement' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ]
+                : []),
             ],
           },
           {
@@ -286,4 +293,8 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
       },
     ],
   };
+}
+
+export const navigationTree = (application: ApplicationStart): NavigationTreeDefinition => {
+  return createNavigationTree(application);
 };
