@@ -70,6 +70,9 @@ export class AnalyticsService {
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
+      // NOTE: `tools_invoked` is intentionally an array that can include duplicates (one per tool
+      // call). This allows downstream telemetry analysis to compute per-tool invocation counts by
+      // aggregating over the array values.
       const toolsInvoked =
         round.steps
           ?.filter((step) => step.type === ConversationRoundStepType.toolCall)

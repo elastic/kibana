@@ -288,7 +288,7 @@ const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
       },
       _meta: {
         description:
-          'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom")',
+          'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom"). Intentionally includes duplicates (one entry per tool call) so counts per tool can be computed downstream by aggregating over this array.',
         optional: false,
       },
     },
