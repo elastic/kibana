@@ -114,9 +114,8 @@ export interface ControlPanelsState<
   [panelId: string]: ControlPanelState<State>;
 }
 
-export type ControlPanelState<
-  ControlState extends FlattenedStickyControlState = FlattenedStickyControlState
-> = ControlState & {
-  type: string; // prevents having to cast to the literal type
-  order: number;
-};
+export type ControlPanelState<ControlState extends object = object> = ControlState &
+  FlattenedStickyControlState & {
+    type: string; // prevents having to cast to the literal type
+    order: number;
+  };
