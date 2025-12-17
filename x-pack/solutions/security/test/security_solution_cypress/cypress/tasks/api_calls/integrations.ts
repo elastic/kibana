@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type { CreateAgentPolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   EPM_API_ROUTES,
@@ -83,7 +83,7 @@ export function installIntegrations({
  * @returns Cypress chainable that resolves to true if installed, false otherwise
  */
 export const checkPackageInstalled = (packageName: string): Cypress.Chainable<boolean> => {
-  return rootRequest({
+  return rootRequest<GetInfoResponse>({
     method: 'GET',
     url: `/api/fleet/epm/packages/${packageName}`,
     failOnStatusCode: false,
@@ -112,13 +112,13 @@ export const waitForPackageInstalled = (
     return checkPackageInstalled(packageName).then((isInstalled) => {
       if (isInstalled) {
         cy.log(`Package ${packageName} is now installed`);
-        return;
+        return cy.wrap(undefined);
       }
 
       const elapsed = Date.now() - startTime;
       if (elapsed > timeout) {
         // Get current status for better error message
-        return rootRequest({
+        return rootRequest<GetInfoResponse>({
           method: 'GET',
           url: `/api/fleet/epm/packages/${packageName}`,
           failOnStatusCode: false,
