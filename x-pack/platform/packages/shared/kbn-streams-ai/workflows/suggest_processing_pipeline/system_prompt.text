@@ -76,7 +76,6 @@ If a pre-generated parsing processor is provided, you must include it as the fir
   "tool": "simulate_pipeline",
   "arguments": {
     "pipeline": {
-      "description": "Pipeline with pre-generated parsing and additional processors for normalization.",
       "steps": [
         {
           "action": "grok",
@@ -128,7 +127,6 @@ You now submit a corrected pipeline that keeps the pre-generated parsing process
   "tool": "simulate_pipeline",
   "arguments": {
     "pipeline": {
-      "description": "Pipeline with pre-generated parsing and proper timestamp normalization.",
       "steps": [
         {
           "action": "grok",

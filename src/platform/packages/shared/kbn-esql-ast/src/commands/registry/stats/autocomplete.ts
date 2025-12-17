@@ -8,7 +8,7 @@
  */
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
-import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
+import { isAssignment, isColumn } from '../../../ast/is';
 import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
 import type {
@@ -38,9 +38,9 @@ import {
 } from '../../definitions/utils/autocomplete/functions';
 import { getAllFunctions } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
-import { isExpressionComplete, getExpressionType } from '../../definitions/utils/expressions';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode, findAstPosition } from '../../definitions/utils/ast';
+import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 import { within } from '../../../ast/location';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
 import { buildExpressionFunctionParameterContext } from '../../definitions/utils';
@@ -88,7 +88,7 @@ export async function autocomplete(
       location = Location.STATS;
     }
 
-    const functionsSpecificSuggestions = await suggestForExpression({
+    const { suggestions: functionsSpecificSuggestions } = await suggestForExpression({
       query,
       expressionRoot: foundFunction,
       command,
@@ -124,7 +124,6 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: foundFunction || expressionRoot,
         location: Location.STATS,
         context,
         callbacks,
@@ -154,32 +153,16 @@ export async function autocomplete(
     }
 
     case 'expression_after_assignment': {
-      // Find expression root
       const assignment = command.args[command.args.length - 1];
-      const rightHandAssignment = isAssignment(assignment)
-        ? assignment.args[assignment.args.length - 1]
+      const expressionRoot = isAssignment(assignment)
+        ? getAssignmentExpressionRoot(assignment)
         : undefined;
-      let expressionRoot = Array.isArray(rightHandAssignment) ? rightHandAssignment[0] : undefined;
-
-      // @TODO the marker shouldn't be leaking through here
-      if (isMarkerNode(expressionRoot)) {
-        expressionRoot = undefined;
-      }
-
-      if (Array.isArray(expressionRoot)) {
-        return [];
-      }
-
-      const lastArgRhs = Array.isArray(rightHandAssignment)
-        ? rightHandAssignment[0]
-        : rightHandAssignment;
 
       const expressionSuggestions = await getExpressionSuggestions({
         query,
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: foundFunction || lastArgRhs,
         location: Location.STATS,
         context,
         callbacks,
@@ -207,7 +190,7 @@ export async function autocomplete(
         return [];
       }
 
-      const suggestions = await suggestForExpression({
+      const { suggestions, computed } = await suggestForExpression({
         query,
         expressionRoot,
         command,
@@ -220,10 +203,9 @@ export async function autocomplete(
         },
       });
 
-      // Is this a complete boolean expression?
-      // If so, we can call it done and suggest a pipe
-      const expressionType = getExpressionType(expressionRoot, context?.columns);
-      if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+      const { expressionType, isComplete } = computed;
+
+      if (expressionType === 'boolean' && isComplete) {
         suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
       }
 
@@ -231,35 +213,19 @@ export async function autocomplete(
     }
 
     case 'grouping_expression_after_assignment': {
-      // Find expression root
       const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
       const assignment = byNode.args[byNode.args.length - 1];
-      const rightHandAssignment = isAssignment(assignment)
-        ? assignment.args[assignment.args.length - 1]
+      const expressionRoot = isAssignment(assignment)
+        ? getAssignmentExpressionRoot(assignment)
         : undefined;
-      let expressionRoot = Array.isArray(rightHandAssignment) ? rightHandAssignment[0] : undefined;
-
-      // @TODO the marker shouldn't be leaking through here
-      if (isMarkerNode(expressionRoot)) {
-        expressionRoot = undefined;
-      }
-
-      // guaranteed by the getPosition function, but we check it here for type safety
-      if (Array.isArray(expressionRoot)) {
-        return [];
-      }
 
       const ignoredColumns = alreadyUsedColumns(command);
-      const lastArgRhs = Array.isArray(rightHandAssignment)
-        ? rightHandAssignment[0]
-        : rightHandAssignment;
 
       return getExpressionSuggestions({
         query,
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: foundFunction || lastArgRhs,
         location: Location.STATS_BY,
         context,
         callbacks,
@@ -291,7 +257,6 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: foundFunction || expressionRoot,
         location: Location.STATS_BY,
         context,
         callbacks,
@@ -320,7 +285,6 @@ async function getExpressionSuggestions({
   cursorPosition,
   expressionRoot,
   location,
-  lastArg,
   context,
   callbacks,
   emptySuggestions = [],
@@ -337,7 +301,6 @@ async function getExpressionSuggestions({
   command: ESQLAstAllCommands;
   cursorPosition: number;
   expressionRoot: ESQLSingleAstItem | undefined;
-  lastArg?: ESQLAstItem;
   location: Location;
   context?: ICommandContext;
   callbacks?: ICommandCallbacks;
@@ -352,49 +315,46 @@ async function getExpressionSuggestions({
   functionParameterContext?: FunctionParameterContext;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
-  const innerText = query.substring(0, cursorPosition);
 
-  const insideFunction =
-    lastArg && isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
+  const modifiedCallbacks = suggestColumns ? callbacks : { ...callbacks, getByType: undefined };
 
-  if (!rightAfterColumn(innerText, expressionRoot, (name) => _columnExists(name, context))) {
-    const modifiedCallbacks = suggestColumns ? callbacks : { ...callbacks, getByType: undefined };
+  const { suggestions: expressionSuggestions, computed } = await suggestForExpression({
+    query,
+    expressionRoot,
+    command,
+    cursorPosition,
+    location,
+    context,
+    callbacks: modifiedCallbacks,
+    options: {
+      addSpaceAfterFirstField,
+      ignoredColumnsForEmptyExpression: ignoredColumns,
+      suggestFields: suggestColumns,
+      suggestFunctions,
+      controlType,
+      openSuggestions,
+      functionParameterContext,
+    },
+  });
 
-    suggestions.push(
-      ...(await suggestForExpression({
-        query,
-        expressionRoot,
-        command,
-        cursorPosition,
-        location,
-        context,
-        callbacks: modifiedCallbacks,
-        options: {
-          addSpaceAfterFirstField,
-          ignoredColumnsForEmptyExpression: ignoredColumns,
-          suggestFields: suggestColumns,
-          suggestFunctions,
-          controlType,
-          openSuggestions,
-          functionParameterContext,
-        },
-      }))
-    );
+  const { insideFunction } = computed;
+
+  if (
+    !rightAfterColumn(computed.innerText, expressionRoot, (name) => _columnExists(name, context))
+  ) {
+    suggestions.push(...expressionSuggestions);
   }
 
   if (
     (!expressionRoot ||
       (isColumn(expressionRoot) && !_columnExists(expressionRoot.parts.join('.'), context))) &&
-    !/not\s+$/i.test(innerText) &&
+    computed.position !== 'after_not' &&
     !insideFunction
   ) {
     suggestions.push(...emptySuggestions);
   }
 
-  if (
-    isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
-    !insideFunction
-  ) {
+  if (computed.isComplete && !insideFunction) {
     suggestions.push(...afterCompleteSuggestions);
   }
 
