@@ -151,6 +151,7 @@ export const AIAgentTourCallout = ({
             await confirmAgentBuilderOptIn();
           }}
           onCancel={handleCancelInConfirmationModal}
+          docLinks={docLinks.links}
         />
       )}
     </>
