@@ -117,7 +117,7 @@ export function executeFunctionAndCatchError({
     }),
     catchError((error) => {
       logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
-      
+
       if (isToolValidationError(error)) {
         return of(
           createFunctionResponseMessage({
