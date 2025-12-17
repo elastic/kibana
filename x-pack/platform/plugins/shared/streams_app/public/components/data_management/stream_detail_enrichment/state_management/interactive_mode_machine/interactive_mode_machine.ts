@@ -236,6 +236,7 @@ export const interactiveModeMachine = setup({
       const steps = getStepsForSimulation({
         stepRefs: context.stepRefs,
         simulationMode,
+        selectedConditionId,
       });
 
       // Check for incomplete conditions (e.g., range with empty values) - don't simulate if conditions are invalid
@@ -247,11 +248,7 @@ export const interactiveModeMachine = setup({
       // Send steps update to simulator via parent
       context.parentRef.send({
         type: 'simulation.updateSteps',
-        steps: getStepsForSimulation({
-          stepRefs: context.stepRefs,
-          simulationMode,
-          selectedConditionId,
-        }),
+        steps,
       });
     }),
     storeConditionFilter: assign((_, params: { conditionId: string | undefined }) => {
