@@ -7,13 +7,13 @@
 
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
-import type { NormalizedValue } from '../../indicators/utils/field_value';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import type { FilterIn, FilterOut } from '../utils/filter';
 import { updateFiltersArray } from '../utils/filter';
 import { useTIDataView } from '../../indicators/hooks/use_ti_data_view';
+import { unwrapValue } from '../../indicators/utils/unwrap_value';
 
 export interface UseFilterInParam {
   /**
@@ -49,10 +49,9 @@ export const useFilterInOut = ({
   const { filterManager } = useIndicatorsFiltersContext();
   const { sourcererDataView } = useTIDataView();
 
-  const { key, value } =
-    typeof indicator === 'string'
-      ? { key: field, value: indicator as NormalizedValue }
-      : getIndicatorFieldAndValue(indicator, field);
+  const { key } =
+    typeof indicator === 'string' ? { key: field } : getIndicatorFieldAndValue(indicator, field);
+  const value = typeof indicator === 'string' ? indicator : unwrapValue(indicator, field);
 
   const filterFn = useCallback((): void => {
     const existingFilters = filterManager.getFilters();

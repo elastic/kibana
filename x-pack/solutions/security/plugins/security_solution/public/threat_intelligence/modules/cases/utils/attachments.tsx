@@ -16,7 +16,7 @@ import { CASE_ATTACHMENT_TYPE_ID } from '../../../../../common/threat_intelligen
 import { EMPTY_VALUE } from '../../../constants/common';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
-import { getIndicatorFieldAndValue, toSingleValue } from '../../indicators/utils/field_value';
+import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**
  * Indicator name, type, feed name and first seen values,
@@ -93,15 +93,20 @@ export const generateAttachmentsWithoutOwner = (
  * @param indicator the indicator we're attaching to a case
  */
 export const generateAttachmentsMetadata = (indicator: Indicator): AttachmentMetadata => {
-  const indicatorName: string | null = toSingleValue(
-    getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value
-  );
-  const indicatorType: string | null = toSingleValue(
-    getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Type).value
-  );
-  const indicatorFeedName: string | null = toSingleValue(
-    getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Feed).value
-  );
+  const indicatorName: string | null = getIndicatorFieldAndValue(
+    indicator,
+    RawIndicatorFieldId.Name
+  ).value;
+
+  const indicatorType: string | null = getIndicatorFieldAndValue(
+    indicator,
+    RawIndicatorFieldId.Type
+  ).value;
+
+  const indicatorFeedName: string | null = getIndicatorFieldAndValue(
+    indicator,
+    RawIndicatorFieldId.Feed
+  ).value;
 
   return {
     indicatorName: indicatorName || EMPTY_VALUE,

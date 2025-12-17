@@ -7,7 +7,7 @@
 
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
-import { getIndicatorFieldAndValue, toSingleValue } from '../../indicators/utils/field_value';
+import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**
  * Checks if an indicator has sha256, sha1 or md5 (in that order) and returns an empty string if it does not.
@@ -16,24 +16,29 @@ import { getIndicatorFieldAndValue, toSingleValue } from '../../indicators/utils
  * @param indicator the indicator we want to
  */
 export const canAddToBlockList = (indicator: Indicator): string | null => {
-  const sha256: string | null = toSingleValue(
-    getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.FileSha256).value
-  );
+  const sha256: string | null = getIndicatorFieldAndValue(
+    indicator,
+    RawIndicatorFieldId.FileSha256
+  ).value;
 
   if (sha256 != null) {
     return sha256;
   }
 
-  const sha1: string | null = toSingleValue(
-    getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.FileSha1).value
-  );
+  const sha1: string | null = getIndicatorFieldAndValue(
+    indicator,
+    RawIndicatorFieldId.FileSha1
+  ).value;
+
   if (sha1 != null) {
     return sha1;
   }
 
-  const md5: string | null = toSingleValue(
-    getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.FileMd5).value
-  );
+  const md5: string | null = getIndicatorFieldAndValue(
+    indicator,
+    RawIndicatorFieldId.FileMd5
+  ).value;
+
   if (md5 != null) {
     return md5;
   }
