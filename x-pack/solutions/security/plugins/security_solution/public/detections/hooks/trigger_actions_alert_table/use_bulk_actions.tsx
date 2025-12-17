@@ -15,6 +15,7 @@ import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
@@ -110,16 +111,24 @@ export const getBulkActionHook =
       };
     }, [refresh]);
 
-    const timelineAction = useAddBulkToTimelineAction(timelineActionParams);
+    const {
+      timelinePrivileges: { read: hasTimelineReadPrivilege },
+    } = useUserPrivileges();
+    const addBulkToTimelineAction = useAddBulkToTimelineAction(timelineActionParams);
+
+    const timelineActions = useMemo(
+      () => (hasTimelineReadPrivilege ? [addBulkToTimelineAction] : []),
+      [hasTimelineReadPrivilege, addBulkToTimelineAction]
+    );
 
     const alertActions = useBulkAlertActionItems(alertActionParams);
 
     const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
     const items = useMemo(() => {
-      return [...alertActions, timelineAction, ...alertTagsItems, ...alertAssigneesItems];
-    }, [alertActions, alertTagsItems, timelineAction, alertAssigneesItems]);
+      return [...alertActions, ...timelineActions, ...alertTagsItems, ...alertAssigneesItems];
+    }, [alertActions, alertTagsItems, timelineActions, alertAssigneesItems]);
     return useMemo(() => {
-      return [{ id: 0, items }, ...alertTagsPanels, ...alertAssigneesPanels];
-    }, [alertTagsPanels, items, alertAssigneesPanels]);
+      return [{ id: 0, items }, ...alertActionsPanels, ...alertTagsPanels, ...alertAssigneesPanels];
+    }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels]);
   };
