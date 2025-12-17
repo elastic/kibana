@@ -33,9 +33,3 @@ export const selectIsTabsBarHidden = createSelector(
   (state: DiscoverInternalState) => state.tabsBarVisibility,
   (tabsBarVisibility) => tabsBarVisibility === TabsBarVisibility.hidden
 );
-
-export const selectExpandedDoc = (state: DiscoverInternalState, tabId: string) =>
-  state.tabs.byId[tabId]?.expandedDoc;
-
-export const selectInitialDocViewerTabId = (state: DiscoverInternalState, tabId: string) =>
-  state.tabs.byId[tabId]?.initialDocViewerTabId;
