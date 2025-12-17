@@ -11,6 +11,7 @@ plugins:
     - observability_onboarding
     - painless_lab
     - profiling
+    - search_homepage
     - security_solution
     - slo
     - spaces

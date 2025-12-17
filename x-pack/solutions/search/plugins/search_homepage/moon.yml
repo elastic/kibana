@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/cloud'
   - '@kbn/onechat-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
