@@ -332,7 +332,17 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; projectRoutingOverrides$: ",
+          "<string | undefined>; hasUnsavedChanges$: ",
+          "Observable",
+          "<boolean>; resetUnsavedChanges: () => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -8443,7 +8453,7 @@
             "label": "orientation",
             "description": [],
             "signature": [
-              "\"single\" | \"right angled\" | \"multiple\""
+              "\"multiple\" | \"single\" | \"right angled\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/tagcloud/types.ts",
             "deprecated": false,
@@ -16853,7 +16863,17 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; projectRoutingOverrides$: ",
+          "<string | undefined>; hasUnsavedChanges$: ",
+          "Observable",
+          "<boolean>; resetUnsavedChanges: () => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18717,7 +18737,17 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; projectRoutingOverrides$: ",
+          "<string | undefined>; hasUnsavedChanges$: ",
+          "Observable",
+          "<boolean>; resetUnsavedChanges: () => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
