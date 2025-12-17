@@ -256,6 +256,7 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/react-query",
-    "@kbn/tour-queue"
+    "@kbn/tour-queue",
+    "@kbn/onechat-genai-utils"
   ]
 }
