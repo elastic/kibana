@@ -19,7 +19,8 @@ const ESQLParamsSchemaProperties = {
   timeWindowUnit: schema.string({
     validate: validateTimeWindowUnits,
   }),
-  group_key: schema.arrayOf(schema.string()),
+  groupKey: schema.arrayOf(schema.string()),
+  role: schema.maybe(schema.oneOf([schema.literal('parent'), schema.literal('recovery')])),
   timeField: schema.string({
     minLength: 1,
   }),
