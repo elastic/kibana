@@ -49,7 +49,6 @@ export class AnalyticsService {
     conversationId?: string;
   }): void {
     try {
-      console.log('round ==>', JSON.stringify(round, null, 2));
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
       // NOTE: `tools_invoked` is intentionally an array that can include duplicates (one per tool
       // call). This allows downstream telemetry analysis to compute per-tool invocation counts by
