@@ -400,14 +400,8 @@ export function getDataStateContainer({
             abortController,
             onFetchRecordsComplete: async () => {
               if (isEsqlQueryWithTransformationalCommand && !abortController.signal.aborted) {
-                // defer triggering chart fetching until after main request completes for ES|QL mode
+                // defer triggering chart fetching until after main request completes for ES|QL transformational searches
                 fetchChart$.next(latestFetchDetails);
-              }
-
-              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
-
-              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
-                return;
               }
 
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
@@ -423,6 +417,11 @@ export function getDataStateContainer({
                     appState: postFetchStateUpdate,
                   })
                 );
+              }
+
+              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
+              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
+                return;
               }
 
               // Clear the default profile state flags after the data fetching
