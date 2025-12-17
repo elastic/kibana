@@ -26,7 +26,7 @@ export interface ChatRequestBodyPayload {
 
 export type ChatResponse = Omit<
   ConversationRound,
-  'id' | 'input' | 'pending_prompt' | 'response'
+  'id' | 'input' | 'pending_prompt' | 'response' | 'state'
 > & {
   conversation_id: string;
   round_id: string;
