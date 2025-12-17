@@ -19,7 +19,7 @@ import {
   ScoutReportEventAction,
   type ScoutTestRunInfo,
   generateTestRunId,
-  getTestIDForTitle,
+  computeTestID,
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
@@ -73,15 +73,12 @@ export class ScoutCypressReporter {
         type: SCOUT_TARGET_TYPE,
         mode: SCOUT_TARGET_MODE,
       },
-      config: configPath
-        ? {
-            file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, configPath)),
-            category,
-          }
-        : {
-            file: this.getScoutFileInfoForPath(''),
-            category,
-          },
+      config: {
+        file: configPath
+          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, configPath))
+          : undefined,
+        category,
+      },
     };
 
     // Register event listeners
@@ -182,6 +179,7 @@ export class ScoutCypressReporter {
      * Test execution started
      */
     const testFile = this.getTestFile(test);
+    const relativeTestFile = testFile ? path.relative(REPO_ROOT, testFile) : 'unknown';
 
     this.report.logEvent({
       ...datasources.environmentMetadata,
@@ -193,14 +191,12 @@ export class ScoutCypressReporter {
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
-        file: testFile
-          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, testFile))
-          : undefined,
       },
       test: {
-        id: getTestIDForTitle(test.fullTitle()),
+        id: computeTestID(relativeTestFile, test.fullTitle()),
         title: test.title,
         tags: [],
+        file: testFile ? this.getScoutFileInfoForPath(relativeTestFile) : undefined,
       },
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
@@ -213,6 +209,7 @@ export class ScoutCypressReporter {
      * Test execution ended
      */
     const testFile = this.getTestFile(test);
+    const relativeTestFile = testFile ? path.relative(REPO_ROOT, testFile) : 'unknown';
 
     this.report.logEvent({
       ...datasources.environmentMetadata,
@@ -224,16 +221,14 @@ export class ScoutCypressReporter {
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
-        file: testFile
-          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, testFile))
-          : undefined,
       },
       test: {
-        id: getTestIDForTitle(test.fullTitle()),
+        id: computeTestID(relativeTestFile, test.fullTitle()),
         title: test.title,
         tags: [],
         status: test.isPending() ? 'skipped' : test.isPassed() ? 'passed' : 'failed',
         duration: test.duration,
+        file: testFile ? this.getScoutFileInfoForPath(relativeTestFile) : undefined,
       },
       event: {
         action: ScoutReportEventAction.TEST_END,
