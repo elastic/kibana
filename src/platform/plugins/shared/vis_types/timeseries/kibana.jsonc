@@ -21,7 +21,10 @@
       "dataViews",
       "fieldFormats",
       "usageCollection",
-      "unifiedSearch"
+      "unifiedSearch",
+      "expressionXY",
+      "uiActions",
+      "embeddable"
     ],
     "optionalPlugins": [
       "home"

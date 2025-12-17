@@ -25,7 +25,7 @@ const storageSettings = {
       labels: types.keyword({}),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
-      configuration: types.object({ dynamic: true }),
+      config: types.object({ properties: {}, dynamic: false }),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
@@ -41,17 +41,20 @@ export interface AgentProperties {
   labels?: string[];
   avatar_color?: string;
   avatar_symbol?: string;
-  configuration: {
-    instructions?: string;
-    tools: ToolSelection[];
-  };
+  config: AgentConfigurationProperties;
   created_at: string;
   updated_at: string;
+  // deprecated fields
+  configuration?: AgentConfigurationProperties;
+}
+
+export interface AgentConfigurationProperties {
+  instructions?: string;
+  tools: ToolSelection[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;
 
-// @ts-expect-error type mismatch for labels type
 export type AgentProfileStorage = StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>;
 
 export const createStorage = ({
@@ -61,7 +64,6 @@ export const createStorage = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): AgentProfileStorage => {
-  // @ts-expect-error type mismatch for labels type
   return new StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>(
     esClient,
     logger,

@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
@@ -18,7 +18,7 @@ import {
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
-  dimensions?: string[];
+  dimensions?: Dimension[];
   metric: MetricField;
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
@@ -67,10 +67,10 @@ export const useChartLayers = ({
         ],
         breakdown: hasDimensions
           ? dimensions.length === 1
-            ? dimensions[0]
+            ? dimensions[0].name
             : DIMENSIONS_COLUMN
           : undefined,
       },
     ];
-  }, [dimensions, metric, color, seriesType, customFunction]);
+  }, [color, customFunction, dimensions, metric.instrument, metric.name, metric.unit, seriesType]);
 };

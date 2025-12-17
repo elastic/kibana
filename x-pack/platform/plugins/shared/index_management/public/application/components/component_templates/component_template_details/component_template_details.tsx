@@ -102,6 +102,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
     ) {
       content = (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.calloutTitle"
@@ -134,6 +135,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
     } else {
       content = (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.loadingErrorMessage"

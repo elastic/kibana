@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { InstallMigrationDashboardsResponse } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_INSTALL_PATH } from '../../../../common/siem_migrations/dashboards/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

@@ -17,6 +17,7 @@ import {
 import rison from '@kbn/rison';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
+import type { RawNotification } from '@kbn/reporting-plugin/server/saved_objects/scheduled_report/schemas/latest';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -217,6 +218,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       password: REPORTING_USER_PASSWORD,
       roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
+      email: 'reportinguser@example.com',
     });
   };
 
@@ -243,7 +245,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     password: string,
     job: JobParamsPDFV2,
     schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
-    startedAt?: string
+    startedAt?: string,
+    notification?: RawNotification
   ) => {
     const jobParams = rison.encode(job);
     const scheduleToUse = startedAt
@@ -253,7 +256,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule: scheduleToUse });
+      .send({ jobParams, schedule: scheduleToUse, notification });
   };
   const generatePng = async (
     username: string,
@@ -343,12 +346,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const listScheduledReports = async (
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS || 'changeme'
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    search?: string
   ) => {
     const res = await supertestWithoutAuth
       .get(INTERNAL_ROUTES.SCHEDULED.LIST)
       .auth(username, password)
-      .set('kbn-xsrf', 'xxx');
+      .set('kbn-xsrf', 'xxx')
+      .query({ ...(search ? { search } : {}) });
 
     return res.body;
   };
@@ -367,6 +372,20 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return body;
   };
 
+  const enableReportSchedules = async (
+    ids: string[],
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .patch(INTERNAL_ROUTES.SCHEDULED.BULK_ENABLE)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ids })
+      .expect(200);
+    return body;
+  };
+
   const deleteReportSchedules = async (
     ids: string[],
     username = 'elastic',
@@ -378,6 +397,23 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ ids })
       .expect(200);
+    return body;
+  };
+
+  const updateScheduledReport = async (
+    id: string,
+    title?: string,
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    status: number = 200
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .put(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/${id}`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ title, schedule })
+      .expect(status);
     return body;
   };
 
@@ -561,7 +597,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     deleteTasks,
     listScheduledReports,
     disableReportSchedules,
+    enableReportSchedules,
     deleteReportSchedules,
     runTelemetryTask,
+    updateScheduledReport,
   };
 }

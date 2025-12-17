@@ -29,6 +29,8 @@ import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_
 import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
 import type { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
+import { getDescriptionFields } from './custom_threshold_description_fields';
+
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',
   {
@@ -120,5 +122,6 @@ export const registerObservabilityRuleTypes = (
         )
     ),
     priority: 110,
+    getDescriptionFields,
   });
 };

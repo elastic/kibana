@@ -269,6 +269,11 @@ describe('Options List Control Api', () => {
       await waitFor(async () => {
         expect(option).toBeChecked();
       });
+
+      await userEvent.click(option);
+      await waitFor(async () => {
+        expect(option).not.toBeChecked();
+      });
     });
 
     test('clicking another option unselects "Exists"', async () => {

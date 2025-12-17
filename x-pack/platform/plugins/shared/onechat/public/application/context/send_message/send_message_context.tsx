@@ -6,47 +6,64 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
+import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
   sendMessage: ({ message }: { message: string }) => void;
   isResponseLoading: boolean;
-  error: unknown;
   pendingMessage: string | undefined;
+  error: unknown;
+  errorSteps: ConversationRoundStep[];
   agentReasoning: string | null;
   retry: () => void;
   canCancel: boolean;
   cancel: () => void;
   cleanConversation: () => void;
+  connectorSelection: {
+    selectedConnector: string | undefined;
+    selectConnector: (connectorId: string) => void;
+    defaultConnectorId?: string;
+  };
 }
 
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+  const connectorSelection = useConnectorSelection();
+
   const {
     sendMessage,
     isResponseLoading,
-    error,
     pendingMessage,
+    error,
+    errorSteps,
     agentReasoning,
     retry,
     canCancel,
     cancel,
     cleanConversation,
-  } = useSendMessageMutation();
+  } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
 
   return (
     <SendMessageContext.Provider
       value={{
         sendMessage,
         isResponseLoading,
-        error,
         pendingMessage,
+        error,
+        errorSteps,
         agentReasoning,
         retry,
         canCancel,
         cancel,
         cleanConversation,
+        connectorSelection: {
+          selectedConnector: connectorSelection.selectedConnector,
+          selectConnector: connectorSelection.selectConnector,
+          defaultConnectorId: connectorSelection.defaultConnectorId,
+        },
       }}
     >
       {children}

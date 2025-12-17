@@ -7,11 +7,11 @@
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateConfig } from './validate_configuration';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-ast';
 import type { EsqlToolFieldTypes } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 
-jest.mock('@kbn/esql-validation-autocomplete', () => ({
+jest.mock('@kbn/esql-ast', () => ({
   validateQuery: jest.fn(),
 }));
 
@@ -52,9 +52,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue(['case_id']);
       await expect(validateConfig(config)).resolves.toBeUndefined();
 
-      expect(mockValidateQuery).toHaveBeenCalledWith(config.query, {
-        ignoreOnMissingCallbacks: true,
-      });
+      expect(mockValidateQuery).toHaveBeenCalledWith(config.query);
       expect(mockGetESQLQueryVariables).toHaveBeenCalledWith(config.query);
     });
 

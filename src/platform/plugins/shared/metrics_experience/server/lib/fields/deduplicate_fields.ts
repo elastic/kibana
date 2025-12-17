@@ -8,6 +8,7 @@
  */
 
 import type { MetricField } from '../../../common/types';
+import { generateMapKey } from './enrich_metric_fields';
 
 const BASE_FIELD_NAME = 'metrics.';
 export function deduplicateFields(fields: MetricField[]): MetricField[] {
@@ -18,7 +19,7 @@ export function deduplicateFields(fields: MetricField[]): MetricField[] {
     const base = isMetricsPrefixed ? field.name.slice(BASE_FIELD_NAME.length) : field.name;
 
     if (!map.has(base) || !isMetricsPrefixed) {
-      map.set(base, { ...field, name: base });
+      map.set(generateMapKey(field.index, base), { ...field, name: base });
     }
   }
 

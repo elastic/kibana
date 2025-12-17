@@ -13,4 +13,5 @@ export default createTestConfig({
     reportName:
       'Detection Engine - Exception Workflows Integration Tests - Serverless Env - Essentials Tier',
   },
+  indexRefreshInterval: '1s',
 });

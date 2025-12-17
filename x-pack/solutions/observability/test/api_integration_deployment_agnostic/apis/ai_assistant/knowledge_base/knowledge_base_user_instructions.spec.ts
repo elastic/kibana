@@ -11,6 +11,7 @@ import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import type { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import pRetry from 'p-retry';
+import type { Readable } from 'node:stream';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { clearKnowledgeBase } from '../utils/knowledge_base';
 import type { LlmProxy } from '../utils/create_llm_proxy';
@@ -301,7 +302,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
+        const conversationCreatedEvent = getConversationCreatedEvent(
+          createResponse.body as Readable
+        );
         const conversationId = conversationCreatedEvent.conversation.id;
 
         const res = await observabilityAIAssistantAPIClient[username]({

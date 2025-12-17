@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { StreamDetailFailureStore } from './failure_store';
 import { StreamDetailGeneralData } from './general_data';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
@@ -23,6 +24,15 @@ export function StreamDetailLifecycle({
   const { timeState } = useTimefilter();
   const data = useDataStreamStats({ definition, timeState });
 
+  const { onPageReady } = usePerformanceContext();
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !data.isLoading) {
+      onPageReady();
+    }
+  }, [definition, data.isLoading, onPageReady]);
+
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <StreamDetailGeneralData
@@ -31,7 +41,11 @@ export function StreamDetailLifecycle({
         data={data}
       />
       <EuiSpacer size="m" />
-      <StreamDetailFailureStore definition={definition} data={data} />
+      <StreamDetailFailureStore
+        definition={definition}
+        data={data}
+        refreshDefinition={refreshDefinition}
+      />
     </EuiFlexGroup>
   );
 }

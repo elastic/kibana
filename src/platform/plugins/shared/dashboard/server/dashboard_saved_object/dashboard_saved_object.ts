@@ -16,8 +16,7 @@ import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './sche
 
 import type { DashboardSavedObjectTypeMigrationsDeps } from './migrations/dashboard_saved_object_migrations';
 import { createDashboardSavedObjectTypeMigrations } from './migrations/dashboard_saved_object_migrations';
-
-export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export const createDashboardSavedObjectType = ({
   migrationDeps,
@@ -27,6 +26,7 @@ export const createDashboardSavedObjectType = ({
   name: DASHBOARD_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
+  supportsAccessControl: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {

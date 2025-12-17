@@ -6,21 +6,23 @@
  */
 
 import React from 'react';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicy, CloudProvider } from '@kbn/fleet-plugin/public';
 import { AWSReusableConnectorForm } from '../aws_cloud_connector/aws_reusable_connector_form';
-import type { CloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
+import { AzureReusableConnectorForm } from '../azure_cloud_connector/azure_reusable_connector_form';
+import type { CloudConnectorCredentials } from '../types';
+import { AWS_PROVIDER, AZURE_PROVIDER } from '../constants';
 
 export const ReusableCloudConnectorForm: React.FC<{
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   newPolicy: NewPackagePolicy;
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
   isEditPage: boolean;
 }> = ({ credentials, setCredentials, cloudProvider, newPolicy, isEditPage }) => {
-  const provider = cloudProvider || 'aws';
+  const provider = cloudProvider || AWS_PROVIDER;
 
   switch (provider) {
-    case 'aws':
+    case AWS_PROVIDER:
       return (
         <AWSReusableConnectorForm
           isEditPage={isEditPage}
@@ -29,9 +31,17 @@ export const ReusableCloudConnectorForm: React.FC<{
           setCredentials={setCredentials}
         />
       );
+    case AZURE_PROVIDER:
+      return (
+        <AzureReusableConnectorForm
+          isEditPage={isEditPage}
+          credentials={credentials}
+          cloudConnectorId={newPolicy.cloud_connector_id || undefined}
+          setCredentials={setCredentials}
+        />
+      );
     case 'gcp':
-    case 'azure':
-      // TODO: Implement GCP and Azure cloud connector forms
+      // TODO: Implement GCP cloud connector forms
       return null;
     default:
       return null;

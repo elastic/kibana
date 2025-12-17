@@ -14,7 +14,11 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   return {
+    agents: {} as any,
+    attachments: {} as any,
     tools: {} as any,
+    setConversationFlyoutActiveConfig: jest.fn(),
+    clearConversationFlyoutActiveConfig: jest.fn(),
     openConversationFlyout: jest
       .fn()
       .mockImplementation((options: OpenConversationFlyoutOptions) => {

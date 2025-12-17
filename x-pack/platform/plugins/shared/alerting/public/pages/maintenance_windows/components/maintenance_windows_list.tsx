@@ -19,12 +19,13 @@ import {
 } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
+import type { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import type { MaintenanceWindowStatus, MaintenanceWindow } from '../../../../common';
-import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { StatusFilter } from './status_filter';
 import type { TableActionsPopoverProps } from './table_actions_popover';
 import { TableActionsPopover } from './table_actions_popover';
@@ -173,12 +174,12 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       () => [
         {
           name: '',
-          render: ({ status, id }: { status: MaintenanceWindowStatus; id: string }) => {
+          render: (item: MaintenanceWindow) => {
             return (
               <TableActionsPopover
-                id={id}
+                id={item.id}
                 isLoading={isMutatingOrLoading}
-                status={status}
+                status={item.status as MaintenanceWindowStatus}
                 onEdit={onEdit}
                 onCancel={onCancel}
                 onArchive={onArchive}

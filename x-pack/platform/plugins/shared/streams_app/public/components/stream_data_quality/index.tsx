@@ -5,20 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDatasetQualityController } from '../../hooks/use_dataset_quality_controller';
 
 export function StreamDetailDataQuality({
   definition,
+  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  refreshDefinition?: () => void;
 }) {
   const { datasetQuality } = useKibana().dependencies.start;
 
-  const controller = useDatasetQualityController(definition);
+  const controller = useDatasetQualityController(definition, true, refreshDefinition);
+
+  const { onPageReady } = usePerformanceContext();
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && controller) {
+      onPageReady();
+    }
+  }, [definition, controller, onPageReady]);
 
   return controller ? (
     <datasetQuality.DatasetQualityDetails controller={controller} />

@@ -11,7 +11,7 @@ import {
   fromPercentileRanksAPItoLensState,
   fromPercentileRankLensStateToAPI,
 } from './percentile_ranks';
-import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiPercentileRanksOperation } from '../../schema/metric_ops';
 import { LENS_PERCENTILE_RANK_DEFAULT_VALUE } from '../../schema/constants';
 

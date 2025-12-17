@@ -107,7 +107,7 @@ class SavedObjectFinderUiClass extends React.Component<
   SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>,
   SavedObjectFinderState
 > {
-  public static propTypes = {
+  public static propTypes: Record<string, PropTypes.Validator<unknown>> = {
     onChoose: PropTypes.func,
     noItemsMessage: PropTypes.node,
     savedObjectMetaData: PropTypes.array.isRequired,
@@ -406,7 +406,7 @@ class SavedObjectFinderUiClass extends React.Component<
             items={this.state.items}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
-            message={this.props.noItemsMessage}
+            noItemsMessage={this.props.noItemsMessage}
             search={search}
             pagination={pagination}
             sorting={!!this.state.query?.text ? undefined : sorting}

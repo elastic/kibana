@@ -15,6 +15,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -41,6 +42,8 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_STATE_NAMESPACE,
+  ALERT_MUTED,
 } from '@kbn/rule-data-utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from './object_remover';
@@ -120,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(OPEN_OR_ACTIVE.has(hits1[EVENT_ACTION])).to.be(true);
       expect(hits1[ALERT_FLAPPING_HISTORY]).to.be.an(Array);
       expect(hits1[ALERT_MAINTENANCE_WINDOW_IDS]).to.be.an(Array);
+      expect(hits1[ALERT_MAINTENANCE_WINDOW_NAMES]).to.be.an(Array);
       expect(typeof hits1[ALERT_REASON]).to.be('string');
       expect(typeof hits1[ALERT_RULE_EXECUTION_UUID]).to.be('string');
       expect(typeof hits1[ALERT_RULE_EXECUTION_TIMESTAMP]).to.be('string');
@@ -131,6 +135,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof hits1[VERSION]).to.be('string');
       expect(typeof hits1[ALERT_CONSECUTIVE_MATCHES]).to.be('number');
       expect(hits1[ALERT_RULE_EXECUTION_TIMESTAMP]).to.eql(hits1['@timestamp']);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateEnd)).to.be.a(Date);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateStart)).to.be.a(Date);
 
       // remove fields we aren't going to compare directly
       const fields = [
@@ -139,6 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.duration.us',
         'kibana.alert.flapping_history',
         'kibana.alert.maintenance_window_ids',
+        'kibana.alert.maintenance_window_names',
         'kibana.alert.reason',
         'kibana.alert.rule.execution.uuid',
         'kibana.alert.rule.execution.timestamp',
@@ -151,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.consecutive_matches',
         'kibana.alert.severity_improving',
         'kibana.alert.previous_action_group',
+        'kibana.alert.state',
       ];
 
       for (const field of fields) {
@@ -167,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
+        [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -267,6 +276,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
       expect(hits2[ALERT_PREVIOUS_ACTION_GROUP]).to.be('query matched');
       expect(hits2[ALERT_SEVERITY_IMPROVING]).to.be(undefined);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateEnd)).to.be.a(Date);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateStart)).to.be.a(Date);
 
       // remove fields we know will be different
       const fields = [
@@ -281,6 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.severity_improving',
         'kibana.alert.previous_action_group',
         'kibana.alert.url',
+        'kibana.alert.state',
       ];
 
       for (const field of fields) {

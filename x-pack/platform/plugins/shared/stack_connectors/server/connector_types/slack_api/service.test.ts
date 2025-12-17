@@ -12,8 +12,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { createExternalService } from './service';
 import type { SlackApiService } from '../../../common/slack_api/types';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { SlackApiConfig } from '@kbn/connector-schemas/slack_api';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -115,6 +116,17 @@ const postBlockkitResponse = createAxiosResponse({
   },
 });
 
+const createExternalServiceMock = ({ config }: { config?: SlackApiConfig } = {}) =>
+  createExternalService(
+    {
+      secrets: { token: 'token' },
+      config,
+    },
+    logger,
+    configurationUtilities,
+    connectorUsageCollector
+  );
+
 describe('Slack API service', () => {
   let service: SlackApiService;
 
@@ -123,14 +135,8 @@ describe('Slack API service', () => {
       logger,
       connectorId: 'test-connector-id',
     });
-    service = createExternalService(
-      {
-        secrets: { token: 'token' },
-      },
-      logger,
-      configurationUtilities,
-      connectorUsageCollector
-    );
+
+    service = createExternalServiceMock();
   });
 
   beforeEach(() => {
@@ -157,7 +163,7 @@ describe('Slack API service', () => {
       requestMock.mockImplementation(() => getValidChannelIdResponse);
       const res = await service.validChannelId('channel_id_1');
       expect(res).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         data: {
           ok: true,
           channel,
@@ -190,7 +196,7 @@ describe('Slack API service', () => {
       });
 
       expect(await service.validChannelId('channel_id_1')).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',
@@ -274,7 +280,7 @@ describe('Slack API service', () => {
       expect(
         await service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
       ).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',
@@ -363,7 +369,7 @@ describe('Slack API service', () => {
           text: 'abc',
         })
       ).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'Unexpected token \'a\', "abc" is not valid JSON',
         status: 'error',
@@ -381,10 +387,329 @@ describe('Slack API service', () => {
           text: JSON.stringify(testBlock),
         })
       ).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',
+      });
+    });
+  });
+
+  describe('Channel names', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const methods = [
+      ['postMessage', 'hello'],
+      ['postBlockkit', JSON.stringify(testBlock)],
+    ] as const;
+
+    const errorNoAllowedChannelsRes = {
+      actionId: CONNECTOR_ID,
+      message: 'error posting slack message',
+      serviceMessage:
+        'One or more provided channel names are not included in the allowed channels list',
+      status: 'error',
+    };
+
+    const errorNoChannelsRes = {
+      actionId: CONNECTOR_ID,
+      message: 'error posting slack message',
+      serviceMessage:
+        'One of channels, channelIds, or channelNames is required and cannot be empty',
+      status: 'error',
+    };
+
+    describe.each(methods)('%s', (method, text) => {
+      it.each([
+        ['channelNames', '#channel-1'],
+        ['channelIds', 'channel-id-1'],
+        ['channels', 'my-channel'],
+      ])('should post a message if allowedChannels is undefined and use %s', async (key, value) => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ [key]: [value], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: value }),
+          })
+        );
+      });
+
+      it.each([
+        ['channelNames', '#channel-1'],
+        ['channelIds', 'channel-id-1'],
+        ['channels', 'my-channel'],
+      ])(
+        'should post a message if allowedChannels is an empty array and use channelsIds',
+        async (key, value) => {
+          service = createExternalServiceMock({ config: { allowedChannels: [] } });
+
+          await service[method]({ [key]: [value], text });
+
+          expect(requestMock).toHaveBeenCalledTimes(1);
+
+          expect(requestMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              data: expect.objectContaining({ channel: value }),
+            })
+          );
+        }
+      );
+
+      it('should post a message if allowedChannels is an empty array and use channels', async () => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ channels: ['my-channel'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'my-channel' }),
+          })
+        );
+      });
+
+      it('should throw an error if channelNames is not in allowedChannels', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'channel-name' }] },
+        });
+
+        expect(await service[method]({ channelNames: ['not-in-list'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should throw an error if channelIds is not in allowedChannels', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'channel-name' }] },
+        });
+
+        expect(await service[method]({ channelIds: ['not-in-list'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should validate against allowedChannels.name for channelNames', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ channelNames: ['channel-1-id'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should validate against allowedChannels.id for channelIds', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ channelIds: ['my-channel-name'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should not throw if allowedChannels.name is set and channelIds is used', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'my-channel-name' }] },
+        });
+
+        await service[method]({ channelIds: ['channel-id-1'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-id-1' }),
+          })
+        );
+      });
+
+      it('should not validate again allowChannels properties for channels', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'my-channel', name: 'my-channel' }] },
+        });
+
+        await service[method]({ channels: ['my-channel'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'my-channel' }),
+          })
+        );
+      });
+
+      it('should throw an error if allowedChannels, channelNames, channelIds, and channels are not provided', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'my-channel-id', name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ text })).toEqual(errorNoChannelsRes);
+      });
+
+      it('should throw an error if channelNames, channelIds, and channels are not provided but allowedChannels is', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
+
+        expect(await service[method]({ text })).toEqual(errorNoChannelsRes);
+      });
+
+      it('channelNames should take priority over channelIds and channels', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
+
+        await service[method]({
+          channelNames: ['channel-name'],
+          channelIds: ['channel-id'],
+          channels: ['channel'],
+          text,
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name' }),
+          })
+        );
+      });
+
+      it('channelIds should take priority over channels', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
+
+        await service[method]({
+          channelIds: ['channel-id'],
+          channels: ['channel'],
+          text,
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-id' }),
+          })
+        );
+      });
+
+      it('channelNames should take priority over channelIds', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
+
+        await service[method]({
+          channelNames: ['channel-name'],
+          channelIds: ['channel-id'],
+          text,
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name' }),
+          })
+        );
+      });
+
+      it('channelNames should take priority over channels', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
+
+        await service[method]({
+          channelNames: ['channel-name'],
+          channels: ['channel'],
+          text,
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name' }),
+          })
+        );
+      });
+
+      it('should take the first provided channel for channelNames', async () => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ channelNames: ['channel-name-1', 'channel-name-2'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name-1' }),
+          })
+        );
+      });
+
+      it('should take the first provided channel for channelIds', async () => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ channelIds: ['channel-id-1', 'channel-id-2'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-id-1' }),
+          })
+        );
+      });
+
+      it('should take the first provided channel for channels', async () => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ channels: ['channel-1', 'channel-2'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-1' }),
+          })
+        );
+      });
+
+      it('should validate correctly if the allowedChannels does not start with # but the channelNames does', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'channel-1' }] },
+        });
+
+        await service[method]({ channelNames: ['#channel-1'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: '#channel-1' }),
+          })
+        );
+      });
+
+      it('should validate correctly if the allowedChannels does not start with # but contains it', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'channel-#-1' }] },
+        });
+
+        expect(await service[method]({ channelNames: ['#channel-1'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
       });
     });
   });

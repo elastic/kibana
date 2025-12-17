@@ -358,7 +358,14 @@ class AnnotationsTableUI extends Component {
       }
 
       if (this.state.errorMessage !== undefined) {
-        return <EuiCallOut title={this.state.errorMessage} color="danger" iconType="cross" />;
+        return (
+          <EuiCallOut
+            announceOnMount
+            title={this.state.errorMessage}
+            color="danger"
+            iconType="cross"
+          />
+        );
       }
     }
 
@@ -367,6 +374,7 @@ class AnnotationsTableUI extends Component {
     if (annotations.length === 0) {
       return (
         <EuiCallOut
+          announceOnMount={false}
           title={
             <FormattedMessage
               id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"

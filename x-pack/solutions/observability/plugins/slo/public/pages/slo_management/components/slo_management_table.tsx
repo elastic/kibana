@@ -17,22 +17,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse } from '@kbn/slo-schema';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, type SLODefinitionResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { sloPaths } from '../../../../common';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
+import { useActionModal } from '../../../context/action_modal';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { useActionModal } from '../../../context/action_modal';
 import { useBulkOperation } from '../context/bulk_operation';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloManagementBulkActions } from './slo_management_bulk_actions';
@@ -56,6 +56,7 @@ export function SloManagementTable() {
     name: search,
     tags,
     includeOutdatedOnly,
+    includeHealth: true,
   });
   const { tasks } = useBulkOperation();
 
@@ -147,14 +148,14 @@ export function SloManagementTable() {
       type: 'icon',
       icon: 'logstashOutput',
       name: i18n.translate('xpack.slo.item.actions.purge', {
-        defaultMessage: 'Purge',
+        defaultMessage: 'Purge rollup data',
       }),
       description: i18n.translate('xpack.slo.item.actions.purge', {
-        defaultMessage: 'Purge',
+        defaultMessage: 'Purge rollup data',
       }),
       'data-test-subj': 'sloActionsPurge',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge' }),
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge_rollup' }),
     },
     {
       type: 'icon',
@@ -229,15 +230,74 @@ export function SloManagementTable() {
       },
     },
     {
-      field: 'State',
-      width: '20%',
+      field: 'state',
+      width: '15%',
       name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
         defaultMessage: 'State',
       }),
-      render: (_: SLODefinitionResponse['enabled'], item: SLODefinitionResponse) => {
-        const color = item.enabled ? 'success' : 'danger';
-        const label = item.enabled ? 'Running' : 'Paused';
+      render: (_, item: SLODefinitionResponse) => {
+        const color = item.enabled ? 'success' : 'subdued';
+        const label = item.enabled ? 'Enabled' : 'Disabled';
+
         return <EuiHealth color={color}>{label}</EuiHealth>;
+      },
+    },
+    {
+      field: 'health',
+      width: '15%',
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.slo.sloManagementTable.columns.health', {
+              defaultMessage: 'Health',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiIconTip
+              position="top"
+              content={
+                <>
+                  {i18n.translate('xpack.slo.sloManagementTable.columns.stateTooltipEnabled', {
+                    defaultMessage:
+                      'An SLO needs attention when its transforms are not operating as expected.',
+                  })}
+                </>
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      render: (_, item: SLODefinitionResponse) => {
+        if (item.health === undefined) {
+          return (
+            <EuiHealth color="subdued">
+              {i18n.translate('xpack.slo.sloManagementTable.columns.health.noInformation', {
+                defaultMessage: 'N/A',
+              })}
+            </EuiHealth>
+          );
+        }
+
+        return !item.health.isProblematic ? (
+          <EuiHealth color="success">
+            {i18n.translate('xpack.slo.sloManagementTable.columns.health.healthy', {
+              defaultMessage: 'Healthy',
+            })}
+          </EuiHealth>
+        ) : (
+          <EuiHealth color="danger">
+            <EuiLink
+              data-test-subj="sloDetailsLink"
+              href={http.basePath.prepend(sloPaths.sloDetails(item.id, ALL_VALUE))}
+              target="_blank"
+              color="danger"
+            >
+              {i18n.translate('xpack.slo.sloManagementTable.columns.health.needsAttention', {
+                defaultMessage: 'Needs attention',
+              })}
+            </EuiLink>
+          </EuiHealth>
+        );
       },
     },
     {

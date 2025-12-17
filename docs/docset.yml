@@ -63,3 +63,4 @@ subs:
   observability:   "Observability"
   kib-repo:   "https://github.com/elastic/kibana/"
   kib-pull: "https://github.com/elastic/kibana/pull/"
+  jsm:   "Jira Service Management"

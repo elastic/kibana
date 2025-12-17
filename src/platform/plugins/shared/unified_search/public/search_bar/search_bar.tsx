@@ -80,7 +80,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showDatePicker?: boolean;
-  showProjectPicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
@@ -161,6 +160,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * typically bound to UI controls like dropdowns or input fields (Dashboard controls here).
    */
   esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
+
+  /** Optional configurations for the lookup join index editor */
+  onOpenQueryInNewTab?: QueryBarTopRowProps['onOpenQueryInNewTab'];
 
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
@@ -556,6 +558,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                   this.services.notifications.toasts.remove(toast);
                   this.services.data.search.showSearchSessionsFlyout({
                     appId: this.services.appName,
+                    trackingProps: { openedFrom: 'toast' },
                   });
                 }}
               >
@@ -573,24 +576,36 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     dateRange: TimeRange;
     query?: QT | Query | undefined;
   }) => {
-    if (!this.isDirty()) {
-      const searchSession = await this.services.data.search.session.save();
-      this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      return;
-    }
-
-    const currentSessionId = this.services.data.search.session.getSessionId();
-
-    const subscription = this.services.data.search.session
-      .getSession$()
-      .subscribe(async (newSessionId) => {
-        if (currentSessionId === newSessionId) return;
-        subscription.unsubscribe();
-        const searchSession = await this.services.data.search.session.save();
+    try {
+      if (!this.isDirty()) {
+        const searchSession = await this.services.data.search.session.save({
+          entryPoint: 'main button',
+        });
         this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      });
+        return;
+      }
 
-    this.onQueryBarSubmit(payload);
+      const currentSessionId = this.services.data.search.session.getSessionId();
+
+      const subscription = this.services.data.search.session
+        .getSession$()
+        .subscribe(async (newSessionId) => {
+          if (currentSessionId === newSessionId) return;
+          subscription.unsubscribe();
+          const searchSession = await this.services.data.search.session.save({
+            entryPoint: 'main button',
+          });
+          this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
+        });
+
+      this.onQueryBarSubmit(payload);
+    } catch (e) {
+      this.services.notifications.toasts.addError(e as Error, {
+        title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.errorToast.title', {
+          defaultMessage: 'There was a problem sending your search to background',
+        }),
+      });
+    }
   };
 
   private shouldShowDatePickerAsBadge() {
@@ -782,8 +797,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
+          onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
-          showProjectPicker={this.props.showProjectPicker}
         />
       </div>
     );

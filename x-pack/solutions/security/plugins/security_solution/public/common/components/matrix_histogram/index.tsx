@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { isString } from 'lodash/fp';
+import type { PageScope } from '../../../data_view_manager/constants';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
 
 import type {
+  MatrixHistogramConfigs,
   MatrixHistogramOption,
   MatrixHistogramQueryProps,
-  MatrixHistogramConfigs,
 } from './types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { NO_BREAKDOWN_STACK_BY_VALUE } from '../events_tab/histogram_configurations';
 
 export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
@@ -33,7 +33,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
     hideHistogramIfEmpty?: boolean;
     id: string;
     showSpacer?: boolean;
-    sourcererScopeId?: SourcererScopeName;
+    sourcererScopeId?: PageScope;
     hideQueryToggle?: boolean;
     applyGlobalQueriesAndFilters?: boolean;
   };

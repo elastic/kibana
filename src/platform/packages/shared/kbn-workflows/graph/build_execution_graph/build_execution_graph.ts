@@ -378,8 +378,13 @@ function visitOnFailure(
     graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
-  if (onFailureConfiguration.continue) {
-    graph = createContinue(stepId, graph);
+  // Here we can statically determine that 'continue' is needed if "continue" is boolean.
+  // If condition is a string (expression), we need to evaluate it at runtime, so we always create the continue node.
+  if (
+    typeof onFailureConfiguration.continue === 'string' ||
+    onFailureConfiguration.continue === true
+  ) {
+    graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
   context.stack.pop();
@@ -470,7 +475,11 @@ function handleWorkflowLevelOnFailure(
   return result;
 }
 
-function createContinue(stepId: string, innerGraph: WorkflowGraphType): WorkflowGraphType {
+function createContinue(
+  stepId: string,
+  condition: string | boolean,
+  innerGraph: WorkflowGraphType
+): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
   const enterContinueNodeId = `enterContinue_${stepId}`;
   const exitNodeId = `exitContinue_${stepId}`;
@@ -480,6 +489,9 @@ function createContinue(stepId: string, innerGraph: WorkflowGraphType): Workflow
     stepId,
     stepType: 'continue',
     exitNodeId,
+    configuration: {
+      condition,
+    },
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',
@@ -753,27 +765,49 @@ function createForeachGraphForStepWithForeach(
 }
 
 export function convertToWorkflowGraph(
-  workflowSchema: WorkflowYaml
+  workflowSchema: WorkflowYaml,
+  defaultSettings?: WorkflowSettings
 ): graphlib.Graph<GraphNodeUnion> {
+  const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
-    settings: workflowSchema.settings,
+    settings: resolvedSettings,
     stack: [],
     parentKey: '',
   };
 
   let finalGraph = createStepsSequence(workflowSchema.steps, context);
 
-  if (workflowSchema.settings?.timeout) {
+  if (resolvedSettings?.timeout) {
     finalGraph = handleTimeout(
       'workflow_level_timeout',
       'workflow_level_timeout',
-      workflowSchema.settings.timeout,
+      resolvedSettings.timeout,
       finalGraph,
       context
     );
   }
 
   return finalGraph;
+}
+
+function resolveWorklfowSettings(
+  workflowSettings?: WorkflowSettings,
+  defaultSettings?: WorkflowSettings
+): WorkflowSettings | undefined {
+  if (!defaultSettings) {
+    return workflowSettings;
+  }
+
+  if (!workflowSettings) {
+    return defaultSettings;
+  }
+
+  return {
+    ...workflowSettings,
+    timeout: workflowSettings.timeout ?? defaultSettings.timeout,
+    'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
+    timezone: workflowSettings.timeout ?? defaultSettings.timezone,
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

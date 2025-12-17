@@ -339,11 +339,14 @@ export const ActionTypeForm = ({
       }
       const res: { errors: IErrorObject } = await actionTypeRegistry
         .get(actionItem.actionTypeId)
-        ?.validateParams(actionItem.params);
+        ?.validateParams(
+          actionItem.params,
+          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+        );
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem, disableErrorMessages]);
+  }, [actionItem, disableErrorMessages, actionConnector]);
 
   const [queryError, setQueryError] = useState<string | null>(null);
   useEffect(() => {
@@ -585,7 +588,7 @@ export const ActionTypeForm = ({
                   {warning ? (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiCallOut size="s" color="warning" title={warning} />
+                      <EuiCallOut announceOnMount size="s" color="warning" title={warning} />
                     </>
                   ) : null}
                 </Suspense>

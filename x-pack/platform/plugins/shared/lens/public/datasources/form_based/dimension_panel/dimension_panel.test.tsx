@@ -24,17 +24,17 @@ import type { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
-import type { FormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
+  FormBasedPrivateState,
   FiltersIndexPatternColumn,
   GenericIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '../operations';
+  OperationMetadata,
+  DateHistogramIndexPatternColumn,
+} from '@kbn/lens-common';
 import { replaceColumn } from '../operations';
 import { documentField } from '../document_field';
-import type { OperationMetadata } from '../../../types';
-import type { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';

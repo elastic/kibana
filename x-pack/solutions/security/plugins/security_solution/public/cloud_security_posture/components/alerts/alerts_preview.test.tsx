@@ -54,7 +54,7 @@ describe('AlertsPreview', () => {
       <TestProviders>
         <AlertsPreview
           alertsData={mockAlertsData}
-          isLinkEnabled={true}
+          isPreviewMode={false}
           openDetailsPanel={mockOpenLeftPanel}
         />
       </TestProviders>
@@ -68,7 +68,7 @@ describe('AlertsPreview', () => {
       <TestProviders>
         <AlertsPreview
           alertsData={mockAlertsData}
-          isLinkEnabled={true}
+          isPreviewMode={false}
           openDetailsPanel={mockOpenLeftPanel}
         />
       </TestProviders>
@@ -82,7 +82,7 @@ describe('AlertsPreview', () => {
       <TestProviders>
         <AlertsPreview
           alertsData={mockAlertsData}
-          isLinkEnabled={true}
+          isPreviewMode={false}
           openDetailsPanel={mockOpenLeftPanel}
         />
       </TestProviders>

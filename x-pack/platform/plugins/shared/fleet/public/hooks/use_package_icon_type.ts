@@ -14,7 +14,7 @@ import type { PackageInfo, PackageListItem } from '../types';
 // Import the specific hook to avoid a circular dependency in Babel
 import { useLinks as useEPMLinks } from '../applications/integrations/hooks/use_links';
 
-import { sendGetPackageInfoByKey } from '.';
+import { sendGetPackageInfoByKeyForRq } from '.';
 
 type Package = PackageInfo | PackageListItem;
 
@@ -66,16 +66,19 @@ export const usePackageIconType = ({
     }
 
     if (tryApi && !paramIcons && !iconList) {
-      sendGetPackageInfoByKey(packageName, version)
+      sendGetPackageInfoByKeyForRq(packageName, version)
         .catch((error) => undefined) // Ignore API errors
         .then((res) => {
           CACHED_ICONS.delete(cacheKey);
-          setIconList(res?.data?.item?.icons);
+          setIconList(res?.item?.icons);
+
+          // fallback to default package icon if no icons found from API
+          if (!res?.item?.icons) {
+            CACHED_ICONS.set(cacheKey, 'package');
+            setIconType('package');
+          }
         });
     }
-
-    CACHED_ICONS.set(cacheKey, 'package');
-    setIconType('package');
   }, [paramIcons, cacheKey, toPackageImage, iconList, packageName, iconType, tryApi, version]);
 
   if (iconType !== '') {

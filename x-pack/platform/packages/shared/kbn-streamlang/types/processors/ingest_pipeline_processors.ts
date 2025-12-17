@@ -13,8 +13,15 @@ import type {
   RenameProcessor,
   SetProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   AppendProcessor,
+  ConvertProcessor,
+  RemoveByPrefixProcessor,
+  RemoveProcessor,
+  DropDocumentProcessor,
+  ReplaceProcessor,
 } from '.';
+import type { Condition } from '../conditions';
 
 /** Ingest Pipeline processor configurations very closely resemble Streamlang DSL action blocks */
 
@@ -54,6 +61,44 @@ export type IngestPipelineAppendProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// Convert
+export type IngestPipelineConvertProcessor = RenameFieldsAndRemoveAction<
+  ConvertProcessor,
+  ConvertProcessor extends { where: Condition }
+    ? { from: 'field'; to: 'target_field'; where: 'if' }
+    : { from: 'field'; to: 'target_field' }
+>;
+
+// RemoveByPrefix
+export type IngestPipelineRemoveByPrefixProcessor = RenameFieldsAndRemoveAction<
+  RemoveByPrefixProcessor,
+  { from: 'fields' }
+>;
+
+// Remove
+export type IngestPipelineRemoveProcessor = RenameFieldsAndRemoveAction<
+  RemoveProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
+// Drop
+export type IngestPipelineDropProcessor = RenameFieldsAndRemoveAction<
+  DropDocumentProcessor,
+  { where: 'if' }
+>;
+
+// Replace
+export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
+  ReplaceProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Math (uses script processor internally)
+export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
+  MathProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -64,7 +109,13 @@ export type IngestPipelineProcessor =
   | IngestPipelineGrokProcessor
   | IngestPipelineDissectProcessor
   | IngestPipelineDateProcessor
+  | IngestPipelineDropProcessor
+  | IngestPipelineMathProcessor
   | IngestPipelineRenameProcessor
   | IngestPipelineSetProcessor
   | IngestPipelineAppendProcessor
+  | IngestPipelineConvertProcessor
+  | IngestPipelineRemoveByPrefixProcessor
+  | IngestPipelineRemoveProcessor
+  | IngestPipelineReplaceProcessor
   | IngestPipelineManualIngestPipelineProcessor;

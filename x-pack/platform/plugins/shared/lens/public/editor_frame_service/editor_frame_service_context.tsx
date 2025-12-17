@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, type ReactNode } from 'react';
-import type { DatasourceMap, VisualizationMap } from '../types';
+import type { VisualizationMap, DatasourceMap } from '@kbn/lens-common';
 
 export interface EditorFrameServiceValue {
   visualizationMap: VisualizationMap;

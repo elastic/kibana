@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -10,7 +10,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
-    "@kbn/expression-partition-vis-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/inspector-plugin",
@@ -80,7 +79,8 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
     "@kbn/css-utils",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/lens-common",
   ],
   "exclude": ["target/**/*"]
 }

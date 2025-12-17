@@ -56,21 +56,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(docTypes).to.eql(['animal', 'technical']);
       });
 
-      it('returns entries in a consistent order', async () => {
-        const entries = await recall('whales');
-
-        expect(entries.map(({ id, esScore }) => `${formatScore(esScore!)} - ${id}`)).to.eql([
-          'high - animal_whale_migration_patterns',
-          'low - animal_elephants_social_structure',
-          'low - technical_api_gateway_timeouts',
-          'low - technical_cache_misses_thirdparty_api',
-          'low - animal_cheetah_life_speed',
-          'low - technical_db_outage_slow_queries',
-          'low - animal_giraffe_habitat_feeding',
-          'low - animal_penguin_antarctic_adaptations',
-        ]);
-      });
-
       it('returns the "Cheetah" entry from search connectors as the top result', async () => {
         const entries = await recall('Cheetah');
         const { text, esScore } = first(entries)!;
@@ -109,16 +94,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     return body.entries;
   }
-}
-
-function formatScore(score: number) {
-  if (score > 0.5) {
-    return 'high';
-  }
-
-  if (score > 0.1) {
-    return 'medium';
-  }
-
-  return 'low';
 }

@@ -12,29 +12,37 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { docLinks } from '../common/doc_links';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import { registerAnalytics, registerApp } from './register';
+import { OnechatNavControlInitiator } from './components/nav_control/lazy_onechat_nav_control';
 import {
   AgentBuilderAccessChecker,
   AgentService,
+  AttachmentsService,
   ChatService,
   ConversationsService,
   NavigationService,
   ToolsService,
   type OnechatInternalService,
 } from './services';
+import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
+import { registerStepDefinitions } from './step_types';
+import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
+  ConversationFlyoutRef,
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
+import type { EmbeddableConversationProps } from './embeddable/types';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 export class OnechatPlugin
   implements
@@ -46,10 +54,13 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
+  private conversationFlyoutActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: OnechatInternalService;
   private setupServices?: {
     navigationService: NavigationService;
   };
+  private activeFlyoutRef: ConversationFlyoutRef | null = null;
+  private updateFlyoutPropsCallback: ((props: EmbeddableConversationProps) => void) | null = null;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -58,11 +69,6 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isOnechatUiEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_ENABLED_SETTING_ID,
-      true
-    );
-
     const navigationService = new NavigationService({
       management: deps.management.locator,
       licenseManagement: deps.licenseManagement?.locator,
@@ -70,30 +76,21 @@ export class OnechatPlugin
 
     this.setupServices = { navigationService };
 
-    if (isOnechatUiEnabled) {
-      registerApp({
-        core,
-        getServices: () => {
-          if (!this.internalServices) {
-            throw new Error('getServices called before plugin start');
-          }
-          return this.internalServices;
-        },
-      });
-
-      registerAnalytics({ analytics: core.analytics });
-      registerLocators(deps.share);
-    }
-
-    try {
-      core.getStartServices().then(([coreStart]) => {
-        const { capabilities } = coreStart.application;
-        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
-          registerManagementSection({ core, management: deps.management });
+    registerApp({
+      core,
+      getServices: () => {
+        if (!this.internalServices) {
+          throw new Error('getServices called before plugin start');
         }
-      });
-    } catch (error) {
-      this.logger.error('Error registering Agent Builder management section', error);
+        return this.internalServices;
+      },
+    });
+
+    registerAnalytics({ analytics: core.analytics });
+    registerLocators(deps.share);
+
+    if (deps.workflowsExtensions) {
+      registerStepDefinitions(deps.workflowsExtensions);
     }
 
     return {};
@@ -105,6 +102,7 @@ export class OnechatPlugin
     docLinks.setDocLinks(core.docLinks.links);
 
     const agentService = new AgentService({ http });
+    const attachmentsService = new AttachmentsService();
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
@@ -118,6 +116,7 @@ export class OnechatPlugin
 
     const internalServices: OnechatInternalService = {
       agentService,
+      attachmentsService,
       chatService,
       conversationsService,
       navigationService,
@@ -128,14 +127,74 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
-    return {
+    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+
+    const onechatService: OnechatPluginStart = {
+      agents: createPublicAgentsContract({ agentService }),
+      attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
-      openConversationFlyout: (options) =>
-        openConversationFlyout(options, {
+      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+        // set config until flyout is next opened
+        this.conversationFlyoutActiveConfig = config;
+        // if there is already an active flyout, update its props
+        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+          this.updateFlyoutPropsCallback(config);
+          return { flyoutRef: this.activeFlyoutRef };
+        }
+      },
+      clearConversationFlyoutActiveConfig: () => {
+        this.conversationFlyoutActiveConfig = {};
+      },
+      openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
+        const config = options ?? this.conversationFlyoutActiveConfig;
+
+        // If a flyout is already open, update its props instead of creating a new one
+        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+          this.updateFlyoutPropsCallback(config);
+          return { flyoutRef: this.activeFlyoutRef };
+        }
+
+        // Create new flyout and set up prop updates
+        const { flyoutRef } = openConversationFlyout(config, {
           coreStart: core,
           services: internalServices,
-          startDependencies,
-        }),
+          onPropsUpdate: (callback) => {
+            this.updateFlyoutPropsCallback = callback;
+          },
+          onClose: () => {
+            this.activeFlyoutRef = null;
+            this.updateFlyoutPropsCallback = null;
+          },
+        });
+
+        this.activeFlyoutRef = flyoutRef;
+
+        return { flyoutRef };
+      },
     };
+
+    if (hasAgentBuilder) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <OnechatNavControlInitiator
+              coreStart={core}
+              pluginsStart={startDependencies}
+              onechatService={onechatService}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        // right before the user profile
+        order: 1001,
+      });
+    }
+
+    return onechatService;
   }
 }
