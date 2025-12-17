@@ -40,10 +40,10 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams",
-      "observabilityAgentBuilder"
+      "streams"
     ],
     "optionalPlugins": [
+      "observabilityAgentBuilder",
       "onechat",
       "aiops",
       "cases",
