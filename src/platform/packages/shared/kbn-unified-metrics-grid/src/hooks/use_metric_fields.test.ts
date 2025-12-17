@@ -44,7 +44,7 @@ describe('useMetricFields', () => {
   const defaultFieldsContext = {
     metricFields: [] as MetricField[],
     dimensions: [] as Dimension[],
-    sampleRowByMetric: new Map(),
+    getSampleRow: jest.fn(() => undefined),
   };
 
   beforeEach(() => {
@@ -83,7 +83,7 @@ describe('useMetricFields', () => {
     ];
 
     it('adds dimensions from sample rows', () => {
-      const sampleRowByMetric = new Map([
+      const sampleRows = new Map([
         ['cpu.usage', { 'host.name': 'host-1', 'service.name': 'api', 'cpu.usage': 0.75 }],
         ['memory.used', { 'host.name': 'host-1', 'memory.used': 1024 }],
       ]);
@@ -95,7 +95,7 @@ describe('useMetricFields', () => {
           { name: 'memory.used', index: 'metrics-*', type: 'long', dimensions: [] },
         ],
         dimensions: baseDimensions,
-        sampleRowByMetric,
+        getSampleRow: (name: string) => sampleRows.get(name),
       });
 
       const { result } = renderHook(() => useMetricFields());
@@ -115,7 +115,7 @@ describe('useMetricFields', () => {
     });
 
     it('adds normalized units from sample rows', () => {
-      const sampleRowByMetric = new Map([
+      const sampleRows = new Map([
         ['cpu.usage', { 'cpu.usage': 0.75, unit: '%' }],
         ['latency', { latency: 1500, unit: 'ms' }],
       ]);
@@ -127,7 +127,7 @@ describe('useMetricFields', () => {
           { name: 'latency', index: 'metrics-*', type: 'long', dimensions: [] },
         ],
         dimensions: [],
-        sampleRowByMetric,
+        getSampleRow: (name: string) => sampleRows.get(name),
       });
 
       const { result } = renderHook(() => useMetricFields());
@@ -142,7 +142,7 @@ describe('useMetricFields', () => {
     });
 
     it('excludes dimensions without values', () => {
-      const sampleRowByMetric = new Map([
+      const sampleRows = new Map([
         ['cpu.usage', { 'host.name': 'host-1', 'service.name': null, 'cpu.usage': 0.75 }],
       ]);
 
@@ -150,7 +150,7 @@ describe('useMetricFields', () => {
         ...defaultFieldsContext,
         metricFields: [{ name: 'cpu.usage', index: 'metrics-*', type: 'double', dimensions: [] }],
         dimensions: baseDimensions,
-        sampleRowByMetric,
+        getSampleRow: (name: string) => sampleRows.get(name),
       });
 
       const { result } = renderHook(() => useMetricFields());
@@ -160,7 +160,7 @@ describe('useMetricFields', () => {
     });
 
     it('sorts fields alphabetically by name', () => {
-      const sampleRowByMetric = new Map([
+      const sampleRows = new Map([
         ['zebra.metric', { 'zebra.metric': 1 }],
         ['alpha.metric', { 'alpha.metric': 2 }],
         ['middle.metric', { 'middle.metric': 3 }],
@@ -173,7 +173,7 @@ describe('useMetricFields', () => {
           { name: 'alpha.metric', index: 'metrics-*', type: 'long', dimensions: [] },
           { name: 'middle.metric', index: 'metrics-*', type: 'long', dimensions: [] },
         ],
-        sampleRowByMetric,
+        getSampleRow: (name: string) => sampleRows.get(name),
       });
 
       const { result } = renderHook(() => useMetricFields());
@@ -187,14 +187,14 @@ describe('useMetricFields', () => {
   });
 
   describe('dimensions', () => {
-    it('extracts unique dimensions from sampled metric fields', () => {
+    it('returns dimensions from context', () => {
       const dimensions: Dimension[] = [
         { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
         { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
         { name: 'region', type: ES_FIELD_TYPES.KEYWORD },
       ];
 
-      const sampleRowByMetric = new Map([
+      const sampleRows = new Map([
         [
           'system.cpu.utilization',
           { 'host.name': 'host-1', 'service.name': 'api', 'cpu.usage': 0.75 },
@@ -212,18 +212,14 @@ describe('useMetricFields', () => {
           { name: 'system.memory.utilization', index: 'metrics-*', type: 'long', dimensions: [] },
         ],
         dimensions,
-        sampleRowByMetric,
+        getSampleRow: (name: string) => sampleRows.get(name),
       });
 
       const { result } = renderHook(() => useMetricFields());
 
-      // host.name appears in both fields but should only be included once
+      // dimensions come directly from context
       expect(result.current.dimensions).toHaveLength(3);
-      expect(result.current.dimensions.map((d) => d.name)).toEqual([
-        'host.name',
-        'region',
-        'service.name',
-      ]);
+      expect(result.current.dimensions).toEqual(dimensions);
     });
 
     it('sorts dimensions alphabetically', () => {
@@ -233,7 +229,7 @@ describe('useMetricFields', () => {
         { name: 'Middle', type: ES_FIELD_TYPES.KEYWORD },
       ];
 
-      const sampleRowByMetric = new Map([
+      const sampleRows = new Map([
         ['metric1', { Zebra: 'z', alpha: 'a', Middle: 'm', metric1: 1 }],
       ]);
 
@@ -241,7 +237,7 @@ describe('useMetricFields', () => {
         ...defaultFieldsContext,
         metricFields: [{ name: 'metric1', index: 'metrics-*', type: 'long', dimensions: [] }],
         dimensions,
-        sampleRowByMetric,
+        getSampleRow: (name: string) => sampleRows.get(name),
       });
 
       const { result } = renderHook(() => useMetricFields());
@@ -252,7 +248,7 @@ describe('useMetricFields', () => {
     it('removes invalid dimensions from selection when context data changes', async () => {
       const dimensions: Dimension[] = [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }];
 
-      const sampleRowByMetric = new Map([
+      const sampleRows = new Map([
         ['system.cpu.utilization', { 'host.name': 'host-1', 'system.cpu.utilization': 0.75 }],
       ]);
 
@@ -262,10 +258,10 @@ describe('useMetricFields', () => {
           { name: 'system.cpu.utilization', index: 'metrics-*', type: 'double', dimensions: [] },
         ],
         dimensions,
-        sampleRowByMetric,
+        getSampleRow: (name: string) => sampleRows.get(name),
       });
 
-      // User has selected a dimension that no longer exists in sampledDimensions
+      // User has selected a dimension that no longer exists in context dimensions
       useMetricsExperienceStateMock.mockReturnValue({
         ...defaultStateContext,
         selectedDimensions: [

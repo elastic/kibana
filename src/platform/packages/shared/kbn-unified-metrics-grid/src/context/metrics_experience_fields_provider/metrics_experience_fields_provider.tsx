@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useMemo, type PropsWithChildren } from 'react';
+import React, { createContext, useCallback, useMemo, type PropsWithChildren } from 'react';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, MetricField } from '../../types';
-import { extractFields, createSampleRowByMetric } from './helpers/fields_parser';
+import { categorizeFields, createSampleRowByField } from './helpers/fields_parser';
 
 export type FieldCapsResponseMap = Record<
   string,
@@ -22,13 +22,13 @@ export type FieldCapsResponseMap = Record<
 export interface MetricsExperienceFieldsContextValue {
   metricFields: MetricField[];
   dimensions: Dimension[];
-  sampleRowByMetric: Map<string, DatatableRow>;
+  getSampleRow: (metricName: string) => DatatableRow | undefined;
 }
 
 const EMPTY_CONTEXT: MetricsExperienceFieldsContextValue = {
   metricFields: [],
   dimensions: [],
-  sampleRowByMetric: new Map(),
+  getSampleRow: () => undefined,
 };
 
 export const MetricsExperienceFieldsContext =
@@ -44,34 +44,53 @@ export const MetricsExperienceFieldsProvider = ({
 }: PropsWithChildren<MetricsExperienceFieldsProviderProps>) => {
   const { table, dataView } = fetchParams;
 
-  const { metricFields, dimensions } = useMemo(
+  const { metricFields, dimensions } = useMemo(() => {
+    if (!dataView) {
+      return { metricFields: [], dimensions: [] };
+    }
+
+    const result = categorizeFields({
+      index: dataView.getIndexPattern(),
+      dataViewFieldMap: dataView.fields.toSpec(),
+      columns: table?.columns,
+    });
+
+    return {
+      metricFields: result.metricFields.sort((a, b) =>
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      ),
+      dimensions: result.dimensions.sort((a, b) =>
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      ),
+    };
+  }, [dataView, table?.columns]);
+
+  const rows = useMemo(() => table?.rows ?? [], [table?.rows]);
+  const metricFieldNames = useMemo(() => metricFields.map((f) => f.name), [metricFields]);
+  const sampleRowIndex = useMemo(
     () =>
-      dataView != null
-        ? extractFields({
-            index: dataView.getIndexPattern(),
-            dataViewFieldMap: dataView.fields.toSpec(),
-            columns: table?.columns,
-          })
-        : { metricFields: [], dimensions: [] },
-    [dataView, table?.columns]
+      createSampleRowByField({
+        rows,
+        fieldNames: metricFieldNames,
+      }),
+    [rows, metricFieldNames]
   );
 
-  const { sampleRowByMetric } = useMemo(
-    () =>
-      createSampleRowByMetric({
-        rows: table?.rows ?? [],
-        fieldSpecs: metricFields,
-      }),
-    [table?.rows, metricFields]
+  const getSampleRow = useCallback(
+    (metricName: string): DatatableRow | undefined => {
+      const index = sampleRowIndex.get(metricName);
+      return index !== undefined ? rows[index] : undefined;
+    },
+    [sampleRowIndex, rows]
   );
 
   const value = useMemo<MetricsExperienceFieldsContextValue>(
     () => ({
       metricFields,
       dimensions,
-      sampleRowByMetric,
+      getSampleRow,
     }),
-    [metricFields, dimensions, sampleRowByMetric]
+    [metricFields, dimensions, getSampleRow]
   );
 
   return (

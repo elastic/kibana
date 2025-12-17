@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const isNaNValue = (value: unknown): boolean => {
-  return typeof value === 'number' && Number.isNaN(value);
-};
-
 export const hasValue = (value: unknown): boolean => {
-  if (value == null || value === '' || isNaNValue(value)) {
+  if (value == null || value === '' || Number.isNaN(value)) {
     return false;
   }
   if (Array.isArray(value)) {
-    return value.some((v) => v != null && v !== '' && !isNaNValue(v));
+    return value.some((v) => v != null && v !== '' && !Number.isNaN(v));
   }
   return true;
 };

@@ -10,11 +10,10 @@
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { MetricField } from '../../../types';
-import { extractFields, createSampleRowByMetric } from './fields_parser';
+import { categorizeFields, createSampleRowByField } from './fields_parser';
 
 describe('fields_parser', () => {
-  describe('extractFields', () => {
+  describe('categorizeFields', () => {
     const baseParams = {
       index: 'metrics-*',
       dataViewFieldMap: {} as DataViewFieldMap,
@@ -22,7 +21,7 @@ describe('fields_parser', () => {
     };
 
     it('returns empty arrays when dataViewFieldMap is empty', () => {
-      const result = extractFields(baseParams);
+      const result = categorizeFields(baseParams);
 
       expect(result.metricFields).toEqual([]);
       expect(result.dimensions).toEqual([]);
@@ -48,7 +47,7 @@ describe('fields_parser', () => {
         },
       ];
 
-      const result = extractFields({ ...baseParams, dataViewFieldMap, columns });
+      const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
 
       expect(result.metricFields).toHaveLength(1);
       expect(result.metricFields[0]).toEqual({
@@ -80,7 +79,7 @@ describe('fields_parser', () => {
         },
       ];
 
-      const result = extractFields({ ...baseParams, dataViewFieldMap, columns });
+      const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
 
       expect(result.dimensions).toHaveLength(1);
       expect(result.dimensions[0]).toEqual({
@@ -108,7 +107,7 @@ describe('fields_parser', () => {
         },
       ];
 
-      const result = extractFields({ ...baseParams, dataViewFieldMap, columns });
+      const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
 
       expect(result.dimensions).toHaveLength(1);
       expect(result.dimensions[0].name).toBe('service.name');
@@ -144,7 +143,7 @@ describe('fields_parser', () => {
         { id: 'valid.field', name: 'valid.field', meta: { type: 'number', esType: 'double' } },
       ];
 
-      const result = extractFields({ ...baseParams, dataViewFieldMap, columns });
+      const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
 
       expect(result.metricFields).toHaveLength(1);
       expect(result.metricFields[0].name).toBe('valid.field');
@@ -152,59 +151,56 @@ describe('fields_parser', () => {
     });
   });
 
-  describe('createSampleRowByMetric', () => {
-    const baseFieldSpecs: MetricField[] = [
-      { name: 'system.cpu.utilization', index: 'metrics-*', type: 'double', dimensions: [] },
-      { name: 'system.memory.utilization', index: 'metrics-*', type: 'double', dimensions: [] },
-    ];
+  describe('createSampleRowByField', () => {
+    const fieldNames = ['system.cpu.utilization', 'system.memory.utilization'];
 
-    it('returns empty maps when rows is empty', () => {
-      const result = createSampleRowByMetric({ rows: [], fieldSpecs: baseFieldSpecs });
+    it('returns empty map when rows is empty', () => {
+      const result = createSampleRowByField({ rows: [], fieldNames });
 
-      expect(result.sampleRowByMetric.size).toBe(0);
+      expect(result.size).toBe(0);
     });
 
-    it('returns empty maps when fieldSpecs is empty', () => {
+    it('returns empty map when fieldNames is empty', () => {
       const rows: DatatableRow[] = [{ 'system.cpu.utilization': 0.5 }];
-      const result = createSampleRowByMetric({ rows, fieldSpecs: [] });
+      const result = createSampleRowByField({ rows, fieldNames: [] });
 
-      expect(result.sampleRowByMetric.size).toBe(0);
+      expect(result.size).toBe(0);
     });
 
-    it('creates sample row mapping for each metric field', () => {
+    it('creates sample row index mapping for each field', () => {
       const rows: DatatableRow[] = [
         { 'system.cpu.utilization': 0.5, 'host.name': 'host-1' },
         { 'system.memory.utilization': 0.7, 'host.name': 'host-1' },
       ];
 
-      const result = createSampleRowByMetric({ rows, fieldSpecs: baseFieldSpecs });
+      const result = createSampleRowByField({ rows, fieldNames });
 
-      expect(result.sampleRowByMetric.size).toBe(2);
-      expect(result.sampleRowByMetric.get('system.cpu.utilization')).toEqual(rows[0]);
-      expect(result.sampleRowByMetric.get('system.memory.utilization')).toEqual(rows[1]);
+      expect(result.size).toBe(2);
+      expect(result.get('system.cpu.utilization')).toBe(0); // index 0
+      expect(result.get('system.memory.utilization')).toBe(1); // index 1
     });
 
-    it('uses first row with value for each metric (does not overwrite)', () => {
+    it('uses first row with value for each field (does not overwrite)', () => {
       const rows: DatatableRow[] = [
         { 'system.cpu.utilization': 0.5, 'host.name': 'host-1' },
         { 'system.cpu.utilization': 0.8, 'host.name': 'host-2' },
       ];
 
-      const result = createSampleRowByMetric({ rows, fieldSpecs: baseFieldSpecs });
+      const result = createSampleRowByField({ rows, fieldNames });
 
-      // Should use first row, not second
-      expect(result.sampleRowByMetric.get('system.cpu.utilization')).toEqual(rows[0]);
+      // Should use first row index, not second
+      expect(result.get('system.cpu.utilization')).toBe(0);
     });
 
-    it('skips rows without values for metric fields', () => {
+    it('skips rows without values for fields', () => {
       const rows: DatatableRow[] = [
         { 'host.name': 'host-1' }, // No metric value
         { 'system.cpu.utilization': 0.5, 'host.name': 'host-2' },
       ];
 
-      const result = createSampleRowByMetric({ rows, fieldSpecs: baseFieldSpecs });
+      const result = createSampleRowByField({ rows, fieldNames });
 
-      expect(result.sampleRowByMetric.get('system.cpu.utilization')).toEqual(rows[1]);
+      expect(result.get('system.cpu.utilization')).toBe(1); // index 1
     });
 
     it('handles null and undefined values correctly', () => {
@@ -214,9 +210,24 @@ describe('fields_parser', () => {
         { 'system.cpu.utilization': 0.5, 'host.name': 'host-3' },
       ];
 
-      const result = createSampleRowByMetric({ rows, fieldSpecs: baseFieldSpecs });
+      const result = createSampleRowByField({ rows, fieldNames });
 
-      expect(result.sampleRowByMetric.get('system.cpu.utilization')).toEqual(rows[2]);
+      expect(result.get('system.cpu.utilization')).toBe(2); // index 2
+    });
+
+    it('stops early when all fields are found', () => {
+      const rows: DatatableRow[] = [
+        { 'system.cpu.utilization': 0.5, 'system.memory.utilization': 0.7 },
+        { 'system.cpu.utilization': 0.8, 'system.memory.utilization': 0.9 },
+        { 'system.cpu.utilization': 0.3, 'system.memory.utilization': 0.4 },
+      ];
+
+      const result = createSampleRowByField({ rows, fieldNames });
+
+      // Both found in first row
+      expect(result.size).toBe(2);
+      expect(result.get('system.cpu.utilization')).toBe(0);
+      expect(result.get('system.memory.utilization')).toBe(0);
     });
   });
 });

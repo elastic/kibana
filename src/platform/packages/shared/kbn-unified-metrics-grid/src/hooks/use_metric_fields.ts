@@ -31,7 +31,7 @@ interface UseMetricFieldsReturn {
  */
 export const useMetricFields = (): UseMetricFieldsReturn => {
   const { searchTerm, selectedDimensions, onDimensionsChange } = useMetricsExperienceState();
-  const { metricFields, dimensions, sampleRowByMetric } = useMetricsExperienceFieldsContext();
+  const { metricFields, dimensions, getSampleRow } = useMetricsExperienceFieldsContext();
 
   // Ref to access current values in effects without adding them to dependencies
   const stateRef = useRef({
@@ -41,54 +41,51 @@ export const useMetricFields = (): UseMetricFieldsReturn => {
 
   stateRef.current.selectedDimensions = selectedDimensions;
 
-  // Computed values
-  const sampledMetricFields = useMemo(() => {
-    if (metricFields.length === 0 || sampleRowByMetric.size === 0) {
+  const enrichedMetricFields = useMemo(() => {
+    if (metricFields.length === 0) {
       return [];
     }
 
-    const result: MetricField[] = [];
+    const fields: MetricField[] = [];
+
     for (const metricField of metricFields) {
-      const row = sampleRowByMetric.get(metricField.name);
+      const row = getSampleRow(metricField.name);
       if (row) {
-        result.push(enrichMetricField(metricField, dimensions, row));
+        const enriched = enrichMetricField(metricField, dimensions, row);
+        fields.push(enriched);
       }
     }
-    return result.sort((a, b) => a.name.localeCompare(b.name));
-  }, [metricFields, dimensions, sampleRowByMetric]);
 
-  const sampledDimensions = useMemo(
-    () => getUniqueDimensions(sampledMetricFields),
-    [sampledMetricFields]
-  );
+    return fields;
+  }, [metricFields, dimensions, getSampleRow]);
 
   const { filteredFields: visibleMetricFields } = useMetricFieldsFilter({
-    fields: sampledMetricFields,
+    fields: enrichedMetricFields,
     searchTerm,
     dimensions: selectedDimensions,
   });
 
   // Update return value
   stateRef.current.returnValue = {
-    allMetricFields: sampledMetricFields,
+    allMetricFields: enrichedMetricFields,
     visibleMetricFields,
-    dimensions: sampledDimensions,
+    dimensions,
   };
 
   // Sync selected dimensions when context data changes - removes invalid selections
   useEffect(() => {
     const currentSelection = stateRef.current.selectedDimensions;
-    if (sampledDimensions.length === 0 || currentSelection.length === 0) {
+    if (dimensions.length === 0 || currentSelection.length === 0) {
       return;
     }
 
-    const availableDimNames = new Set(sampledDimensions.map((d) => d.name));
+    const availableDimNames = new Set(dimensions.map((d) => d.name));
     const validSelection = currentSelection.filter((d) => availableDimNames.has(d.name));
 
     if (validSelection.length !== currentSelection.length) {
       onDimensionsChange(validSelection);
     }
-  }, [onDimensionsChange, sampledDimensions]);
+  }, [onDimensionsChange, dimensions]);
 
   return stateRef.current.returnValue;
 };
@@ -126,20 +123,4 @@ const enrichMetricField = (
     dimensions: getDimensionsFromRow(row, dimensions),
     unit: getUnit(row, metricField.name),
   };
-};
-
-const getUniqueDimensions = (fields: Array<{ dimensions: Dimension[] }>): Dimension[] => {
-  const dimensionMap = new Map<string, Dimension>();
-
-  for (const field of fields) {
-    for (const dimension of field.dimensions) {
-      if (!dimensionMap.has(dimension.name)) {
-        dimensionMap.set(dimension.name, dimension);
-      }
-    }
-  }
-
-  return [...dimensionMap.values()].sort((a, b) =>
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-  );
 };

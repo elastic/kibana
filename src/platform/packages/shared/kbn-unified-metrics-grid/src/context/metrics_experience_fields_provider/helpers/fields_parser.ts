@@ -31,13 +31,14 @@ const FILTER_OUT_FIELDS = new Set([
 const shouldSkipField = (fieldName: string) => FILTER_OUT_FIELDS.has(fieldName);
 
 /**
- * Extracts metric fields and dimensions from a data view and esql result columns.
+ * Categorizes fields from ES|QL result columns into metric fields and dimensions
+ * based on data view metadata. Only considers fields that are not null in the ES|QL result.
  * @param index - The index pattern to use for the metric fields.
  * @param dataViewFieldMap - The data view field map to use for the metric fields.
  * @param columns - The columns to use for the metric fields.
  * @returns The metric fields and dimensions.
  */
-export const extractFields = ({
+export const categorizeFields = ({
   index,
   dataViewFieldMap,
   columns = [],
@@ -62,13 +63,13 @@ export const extractFields = ({
     }
 
     const dataViewField = dataViewFieldMap[columnName];
-    const fieldType = (column?.meta?.esType || dataViewField.esTypes?.[0]) as ES_FIELD_TYPES;
+    const fieldType = (column.meta?.esType || dataViewField.esTypes?.[0]) as ES_FIELD_TYPES;
 
-    if (fieldType === undefined) {
+    if (fieldType === undefined || column.isNull) {
       continue;
     }
 
-    if (Boolean(dataViewField.timeSeriesMetric)) {
+    if (dataViewField.timeSeriesMetric) {
       metricFields.push({
         index: column.meta?.index ?? index,
         name: columnName,
@@ -76,7 +77,7 @@ export const extractFields = ({
         instrument: dataViewField.timeSeriesMetric,
         dimensions: [],
       });
-    } else if (Boolean(dataViewField.timeSeriesDimension) || DIMENSION_TYPES.includes(fieldType)) {
+    } else if (dataViewField.timeSeriesDimension || DIMENSION_TYPES.includes(fieldType)) {
       dimensions.push({
         name: columnName,
         type: fieldType,
@@ -90,49 +91,33 @@ export const extractFields = ({
   };
 };
 
-export interface RowMappings {
-  sampleRowByMetric: Map<string, DatatableRow>;
-}
-
-/**
- * Creates a map of metric field name → sample rows.
- * @param rows - The rows to use for the sample rows.
- * @param fieldSpecs - The field specs to use for the sample rows.
- * @returns The sample rows by metric field name.
- */
-export const createSampleRowByMetric = ({
-  rows = [],
-  fieldSpecs,
+export const createSampleRowByField = ({
+  rows,
+  fieldNames,
 }: {
   rows: DatatableRow[];
-  fieldSpecs: MetricField[];
-}): RowMappings => {
-  const sampleRowByMetric = new Map<string, DatatableRow>();
+  fieldNames: string[];
+}): Map<string, number> => {
+  const sampleRowIndex = new Map<string, number>();
 
-  if (!rows?.length || fieldSpecs.length === 0) {
-    return { sampleRowByMetric };
+  if (!rows.length || !fieldNames.length) {
+    return sampleRowIndex;
   }
 
-  const specByFieldName = new Map<string, MetricField>();
-  const pendingSamples = new Set<string>();
+  const fieldNamesSet = new Set(fieldNames);
 
-  for (const spec of fieldSpecs) {
-    specByFieldName.set(spec.name, spec);
-    pendingSamples.add(spec.name);
-  }
+  for (let i = 0; i < rows.length; i++) {
+    if (sampleRowIndex.size === fieldNamesSet.size) {
+      break;
+    }
 
-  for (const row of rows) {
-    for (const fieldName in row) {
-      if (specByFieldName.has(fieldName) && hasValue(row[fieldName])) {
-        const spec = specByFieldName.get(fieldName)!;
-
-        if (pendingSamples.has(spec.name)) {
-          sampleRowByMetric.set(spec.name, row);
-          pendingSamples.delete(spec.name);
-        }
+    const row = rows[i];
+    for (const fieldName of fieldNamesSet) {
+      if (!sampleRowIndex.has(fieldName) && hasValue(row[fieldName])) {
+        sampleRowIndex.set(fieldName, i);
       }
     }
   }
 
-  return { sampleRowByMetric };
+  return sampleRowIndex;
 };
