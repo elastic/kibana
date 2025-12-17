@@ -70,11 +70,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                       onClick: () => {
                         setIsLoading(true);
                         setIsFlyoutVisible(!isFlyoutVisible);
-                        identifyFeatures(
-                          aiFeatures?.genAiConnectors.selectedConnector!,
-                          'now',
-                          'now-24h'
-                        )
+                        identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!)
                           .then((data) => {
                             setFeatures(data.features);
                           })
