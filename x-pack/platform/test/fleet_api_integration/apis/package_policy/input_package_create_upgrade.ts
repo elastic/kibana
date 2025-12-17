@@ -170,7 +170,9 @@ export default function (providerContext: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
-  describe('Package Policy - input package behavior', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246383
+  // Failing: See https://github.com/elastic/kibana/issues/246383
+  describe.skip('Package Policy - input package behavior', function () {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
