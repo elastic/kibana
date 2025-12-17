@@ -675,7 +675,7 @@ Object {
         "host": Object {
           "anyOf": Array [
             Object {
-              "maxLength": 512,
+              "maxLength": 2048,
               "type": "string",
             },
             Object {
@@ -805,7 +805,7 @@ Object {
         "bcc": Object {
           "default": Array [],
           "items": Object {
-            "maxLength": 512,
+            "maxLength": 256,
             "type": "string",
           },
           "maxItems": 100,
@@ -814,7 +814,7 @@ Object {
         "cc": Object {
           "default": Array [],
           "items": Object {
-            "maxLength": 512,
+            "maxLength": 256,
             "type": "string",
           },
           "maxItems": 100,
@@ -855,7 +855,7 @@ Object {
         "to": Object {
           "default": Array [],
           "items": Object {
-            "maxLength": 512,
+            "maxLength": 256,
             "type": "string",
           },
           "maxItems": 100,
