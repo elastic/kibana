@@ -71,7 +71,7 @@ export interface MigrationStepProps {
   migrationStats?: MigrationStats;
   onMigrationCreated: (createdMigrationStats: MigrationStats) => void;
   onMissingResourcesFetched: OnMissingResourcesFetched;
-  setDataInputStep: (step: number) => void;
+  setDataInputStep: React.Dispatch<React.SetStateAction<number>>;
   missingResourcesIndexed?: MissingResourcesIndexed;
 }
 

@@ -78,10 +78,17 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
             return;
           }
 
-          if (migrationStats?.id) {
-            setDataInputStep(QradarDataInputStep.End);
-          }
-          return;
+          // when all reference sets are created, move to the next step
+          setDataInputStep((currentStep) => {
+            if (!migrationStats?.id) {
+              return QradarDataInputStep.Rules;
+            }
+            // If we are not on the Reference Set step, move to the End step
+            if (currentStep !== QradarDataInputStep.ReferenceSet) {
+              return QradarDataInputStep.End;
+            }
+            return QradarDataInputStep.Enhancements;
+          });
         }
 
         if (newMissingResourcesIndexed?.macros.length) {

@@ -162,6 +162,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiText size="s">{i18n.ENHANCEMENTS_INSTRUCTIONS}</EuiText>
+          <EuiText size="s">{i18n.ENHANCEMENTS_HELPER_TEXT}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
