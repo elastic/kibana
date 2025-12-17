@@ -76,3 +76,68 @@ export function installIntegrations({
     });
   });
 }
+
+/**
+ * Checks if a Fleet package is installed by querying the Fleet EPM API
+ * @param packageName - The name of the package to check (e.g., 'entityanalytics_okta')
+ * @returns Cypress chainable that resolves to true if installed, false otherwise
+ */
+export const checkPackageInstalled = (packageName: string): Cypress.Chainable<boolean> => {
+  return rootRequest({
+    method: 'GET',
+    url: `/api/fleet/epm/packages/${packageName}`,
+    failOnStatusCode: false,
+  }).then((response) => {
+    const status = response.body?.item?.status;
+    return status === 'installed';
+  });
+};
+
+/**
+ * Polls the Fleet EPM API until a package installation status is 'installed'
+ * @param packageName - The name of the package to wait for (e.g., 'entityanalytics_okta')
+ * @param options - Configuration options
+ * @param options.timeout - Maximum time to wait in milliseconds (default: 60000)
+ * @param options.interval - Polling interval in milliseconds (default: 2000)
+ * @returns Cypress chainable that resolves when package is installed or times out
+ */
+export const waitForPackageInstalled = (
+  packageName: string,
+  options: { timeout?: number; interval?: number } = {}
+): Cypress.Chainable<void> => {
+  const { timeout = 60000, interval = 2000 } = options;
+  const startTime = Date.now();
+
+  const checkStatus = (): Cypress.Chainable<void> => {
+    return checkPackageInstalled(packageName).then((isInstalled) => {
+      if (isInstalled) {
+        cy.log(`Package ${packageName} is now installed`);
+        return;
+      }
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed > timeout) {
+        // Get current status for better error message
+        return rootRequest({
+          method: 'GET',
+          url: `/api/fleet/epm/packages/${packageName}`,
+          failOnStatusCode: false,
+        }).then((response) => {
+          const currentStatus = response.body?.item?.status || 'unknown';
+          throw new Error(
+            `Package ${packageName} installation timeout after ${timeout}ms. Current status: ${currentStatus}`
+          );
+        });
+      }
+
+      cy.log(
+        `Waiting for package ${packageName} to be installed... (${Math.round(
+          elapsed / 1000
+        )}s elapsed)`
+      );
+      return cy.wait(interval).then(() => checkStatus());
+    });
+  };
+
+  return checkStatus();
+};
