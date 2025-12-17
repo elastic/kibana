@@ -77,10 +77,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     );
   });
 
-  test('should switch between editing different rules', async ({
-    apiServices,
-    pageObjects,
-  }, testInfo) => {
+  test('should switch between editing different rules', async ({ pageObjects }, testInfo) => {
     // Create another test rule
     const secondStreamSuffix = `edit-test-2-w${testInfo.workerIndex}`;
     const secondStreamName = `logs.${secondStreamSuffix}`;

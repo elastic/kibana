@@ -14,7 +14,7 @@ test.describe(
   () => {
     let createdStreams: string[] = [];
 
-    test.beforeEach(async ({ browserAuth, pageObjects }, testInfo) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       createdStreams = [];
       await pageObjects.streams.gotoPartitioningTab('logs');

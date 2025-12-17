@@ -23,7 +23,7 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
   // Track all streams created during tests for cleanup
   let createdStreams: string[] = [];
 
-  test.beforeEach(async ({ apiServices, browserAuth }, testInfo) => {
+  test.beforeEach(async ({ apiServices, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     createdStreams = [];
 

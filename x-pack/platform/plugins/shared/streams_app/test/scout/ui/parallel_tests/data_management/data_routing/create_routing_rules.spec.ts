@@ -14,7 +14,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   // Track streams created during tests for cleanup
   let createdStreams: string[] = [];
 
-  test.beforeEach(async ({ browserAuth, pageObjects }, testInfo) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     createdStreams = [];
     await pageObjects.streams.gotoPartitioningTab('logs');
