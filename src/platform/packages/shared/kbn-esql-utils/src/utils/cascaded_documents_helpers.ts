@@ -13,7 +13,6 @@ import {
   Builder,
   EsqlQuery,
   isColumn,
-  isOptionNode,
   isFunctionExpression,
   isSubQuery,
   mutate,
@@ -21,7 +20,6 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLAstItem,
-  type ESQLCommandOption,
   type ESQLColumn,
   isBinaryExpression,
   Walker,
@@ -625,96 +623,6 @@ function handleStatsByCategorizeLeafOperation(
 
   return {
     esql: BasicPrettyPrinter.print(cascadeOperationQuery.ast),
-  };
-}
-
-/**
- * Modifies the provided ESQL query to only include the specified columns in the stats by option.
- */
-export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]): AggregateQuery {
-  const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
-
-  const dataSourceCommand = getESQLQueryDataSourceCommand(EditorESQLQuery);
-
-  if (!dataSourceCommand) {
-    throw new Error('Query does not have a data source');
-  }
-
-  const statsCommands = Array.from(mutate.commands.stats.list(EditorESQLQuery.ast));
-
-  if (statsCommands.length === 0) {
-    throw new Error(`Query does not include a "stats" command`);
-  }
-
-  const { grouping: statsCommandToOperateOnGrouping, command: statsCommandToOperateOn } =
-    getStatsCommandToOperateOn(EditorESQLQuery) ?? {};
-
-  if (!statsCommandToOperateOn) {
-    throw new Error(`No valid "stats" command was found in the query`);
-  }
-
-  const isValidPick = pick.every(
-    (col) =>
-      Object.keys(statsCommandToOperateOnGrouping!).includes(col) ||
-      Object.keys(statsCommandToOperateOnGrouping!).includes(`\`${col}\``)
-  );
-
-  if (!isValidPick) {
-    // nothing to do, return query as is
-    return {
-      esql: BasicPrettyPrinter.print(EditorESQLQuery.ast),
-    };
-  }
-
-  // Create a modified stats command with only the specified column as args for the "by" option
-  const modifiedStatsCommand = Builder.command({
-    name: 'stats',
-    args: statsCommandToOperateOn.args.map((statsCommandArg) => {
-      if (isOptionNode(statsCommandArg) && statsCommandArg.name === 'by') {
-        return Builder.option({
-          name: statsCommandArg.name,
-          args: statsCommandArg.args.reduce<Array<ESQLAstItem>>((acc, cur) => {
-            if (isColumn(cur) && pick.includes(removeBackticks(cur.name))) {
-              acc.push(synth.exp(cur.text, { withFormatting: false }));
-            } else if (
-              isFunctionExpression(cur) &&
-              isSupportedStatsFunction(
-                cur.subtype === 'variadic-call'
-                  ? cur.name
-                  : (cur.args[1] as ESQLAstItem[]).find(isFunctionExpression)?.name ?? ''
-              ) &&
-              pick.includes(
-                cur.subtype === 'variadic-call'
-                  ? cur.text
-                  : removeBackticks(cur.args.find(isColumn)?.name ?? '')
-              )
-            ) {
-              acc.push(synth.exp(cur.text, { withFormatting: false }));
-            }
-
-            return acc;
-          }, []),
-        });
-      }
-
-      // leverage synth to clone the rest of the args since we'd want to use those parts as is
-      return synth.exp((statsCommandArg as ESQLCommandOption).text, { withFormatting: false });
-    }),
-  });
-
-  // Get the position of the original stats command
-  const statsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
-    (cmd) => cmd.text === statsCommandToOperateOn.text
-  );
-
-  // remove stats command
-  mutate.generic.commands.remove(EditorESQLQuery.ast, statsCommandToOperateOn);
-
-  // insert modified stats command at same position previous one was at
-  mutate.generic.commands.insert(EditorESQLQuery.ast, modifiedStatsCommand, statsCommandIndex);
-
-  return {
-    esql: BasicPrettyPrinter.print(EditorESQLQuery.ast),
   };
 }
 

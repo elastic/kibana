@@ -13,7 +13,6 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { AggregateQuery } from '@kbn/es-query';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
@@ -39,15 +38,6 @@ jest.mock('./fetch_documents', () => ({
 jest.mock('./fetch_esql', () => ({
   fetchEsql: jest.fn().mockResolvedValue([]),
 }));
-
-jest.mock('@kbn/esql-utils', () => {
-  const original = jest.requireActual('@kbn/esql-utils');
-  return {
-    ...original,
-    // mock mutateQueryStatsGrouping to return the query as is
-    mutateQueryStatsGrouping: jest.fn((query: AggregateQuery) => query),
-  };
-});
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 const mockfetchEsql = fetchEsql as unknown as jest.MockedFunction<typeof fetchEsql>;
