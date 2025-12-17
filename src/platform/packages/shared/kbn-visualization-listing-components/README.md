@@ -4,7 +4,7 @@ Shared components and utilities for visualization listing pages.
 
 ## Purpose
 
-This package provides reusable UI components and utilities for displaying visualizations in listing/table views. It's used by:
+This package provides utilities for displaying visualizations in listing/table views. It's used by:
 
 - Visualizations plugin (for the Visualize Library listing)
 - Visualization Listing plugin (for visualization tab in Dashboards)

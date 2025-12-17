@@ -66,6 +66,28 @@ describe('useDashboardListingTable', () => {
     coreServices.notifications.toasts.addError = jest.fn();
   });
 
+  test('should return the correct initial hasInitialFetchReturned state', () => {
+    const { result } = renderHook(() =>
+      useDashboardListingTable({
+        getDashboardUrl,
+        goToDashboard,
+      })
+    );
+
+    expect(result.current.hasInitialFetchReturned).toBe(false);
+  });
+
+  test('should return the correct initial pageDataTestSubject state', () => {
+    const { result } = renderHook(() =>
+      useDashboardListingTable({
+        getDashboardUrl,
+        goToDashboard,
+      })
+    );
+
+    expect(result.current.pageDataTestSubject).toBeUndefined();
+  });
+
   test('should return the correct refreshUnsavedDashboards function', () => {
     const { result } = renderHook(() =>
       useDashboardListingTable({
@@ -121,7 +143,7 @@ describe('useDashboardListingTable', () => {
       createItem: expect.any(Function),
       deleteItems: expect.any(Function),
       editItem: expect.any(Function),
-      noItemsMessage: expect.any(Object),
+      emptyPrompt: expect.anything(),
       entityName: 'Dashboard',
       entityNamePlural: 'Dashboards',
       findItems: expect.any(Function),
@@ -131,9 +153,12 @@ describe('useDashboardListingTable', () => {
       initialFilter: 'myFilter',
       initialPageSize: 5,
       listingLimit: 20,
+      onFetchSuccess: expect.any(Function),
+      setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,
       contentEditor: {
+        isReadonly: false,
         onSave: expect.any(Function),
         customValidators: expect.any(Object),
       },
@@ -145,7 +170,7 @@ describe('useDashboardListingTable', () => {
     expect(tableListViewTableProps).toEqual(expectedProps);
   });
 
-  test('should call deleteDashboards when deleteItems is called', () => {
+  test('should call deleteDashboards when deleteItems is called', async () => {
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -153,9 +178,9 @@ describe('useDashboardListingTable', () => {
       })
     );
 
-    act(() => {
-      result.current.tableListViewTableProps.deleteItems?.([
-        { id: 'test-id' } as DashboardSavedObjectUserContent,
+    await act(async () => {
+      await result.current.tableListViewTableProps.deleteItems?.([
+        { id: 'test-id', type: 'dashboard' } as DashboardSavedObjectUserContent,
       ]);
     });
 

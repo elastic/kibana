@@ -165,10 +165,12 @@ async function deleteDashboardListingItems(
 
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardSavedObjectUserContent>,
-  'tableCaption' | 'onFetchSuccess' | 'setPageDataTestSubject'
+  'tableCaption'
 > & { title: string };
 
 interface UseDashboardListingTableReturnType {
+  hasInitialFetchReturned: boolean;
+  pageDataTestSubject: string | undefined;
   refreshUnsavedDashboards: () => void;
   tableListViewTableProps: DashboardListingViewTableProps;
   unsavedDashboardIds: string[];
@@ -196,7 +198,7 @@ export const useDashboardListingTable = ({
   useSessionStorageIntegration?: boolean;
   showCreateDashboardButton?: boolean;
 }): UseDashboardListingTableReturnType => {
-  const { getTableListTitle, getEntityName, getEntityNamePlural } = dashboardListingTableStrings;
+  const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
 
   const entityName = getEntityName();
   const entityNamePlural = getEntityNamePlural();
@@ -208,6 +210,9 @@ export const useDashboardListingTable = ({
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
   );
+
+  const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
+  const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
 
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -291,6 +296,12 @@ export const useDashboardListingTable = ({
     [goToDashboard]
   );
 
+  const onFetchSuccess = useCallback(() => {
+    if (!hasInitialFetchReturned) {
+      setHasInitialFetchReturned(true);
+    }
+  }, [hasInitialFetchReturned]);
+
   const getDetailViewLink = useCallback<NonNullable<GetDetailViewLink>>(
     (entity: DashboardSavedObjectUserContent) => {
       const dashboard = entity as DashboardSavedObjectUserContent;
@@ -330,6 +341,8 @@ export const useDashboardListingTable = ({
       initialFilter,
       initialPageSize,
       listingLimit,
+      onFetchSuccess,
+      setPageDataTestSubject,
       title,
       urlStateEnabled,
       createdByEnabled: true,
@@ -388,6 +401,8 @@ export const useDashboardListingTable = ({
     initialFilter,
     initialPageSize,
     listingLimit,
+    onFetchSuccess,
+    setPageDataTestSubject,
     showCreateDashboardButton,
     title,
     unsavedDashboardIds,
@@ -407,6 +422,8 @@ export const useDashboardListingTable = ({
   );
 
   return {
+    hasInitialFetchReturned,
+    pageDataTestSubject,
     refreshUnsavedDashboards,
     tableListViewTableProps,
     unsavedDashboardIds,

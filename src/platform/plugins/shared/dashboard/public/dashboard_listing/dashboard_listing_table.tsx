@@ -72,8 +72,6 @@ export const DashboardListingTable = ({
           <TableListViewTable<DashboardSavedObjectUserContent>
             tableCaption={tableCaption}
             {...tableListViewTable}
-            onFetchSuccess={() => {}}
-            setPageDataTestSubject={() => {}}
           />
         </>
       </TableListViewKibanaProvider>

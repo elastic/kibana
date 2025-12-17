@@ -17,7 +17,7 @@ import type {
   EuiTableActionsColumnType,
   CriteriaWithPagination,
 } from '@elastic/eui';
-import { EuiButton, EuiCallOut, EuiSpacer, Query, Ast } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -970,7 +970,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     if (createItem) {
       return (
         <EuiButton
-          onClick={() => createItem()}
+          onClick={createItem}
           data-test-subj="newItemButton"
           iconType="plusInCircleFilled"
           fill
@@ -990,14 +990,23 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       return emptyPrompt;
     } else {
       return (
-        <FormattedMessage
-          id="contentManagement.tableList.listing.noAvailableItemsMessage"
-          defaultMessage="No {entityNamePlural} available."
-          values={{ entityNamePlural }}
+        <EuiEmptyPrompt
+          title={
+            <h1>
+              {
+                <FormattedMessage
+                  id="contentManagement.tableList.listing.noAvailableItemsMessage"
+                  defaultMessage="No {entityNamePlural} available."
+                  values={{ entityNamePlural }}
+                />
+              }
+            </h1>
+          }
+          actions={renderCreateButton()}
         />
       );
     }
-  }, [emptyPrompt, entityNamePlural]);
+  }, [emptyPrompt, entityNamePlural, renderCreateButton]);
 
   const renderFetchError = useCallback(() => {
     return (
