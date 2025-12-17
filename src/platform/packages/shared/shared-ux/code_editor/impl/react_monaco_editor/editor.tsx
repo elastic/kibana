@@ -127,6 +127,8 @@ export interface MonacoEditorProps {
 // initialize supported languages
 initializeSupportedLanguages();
 
+export const OVERFLOW_WIDGETS_TEST_ID = 'kbnCodeEditorEditorOverflowWidgetsContainer';
+
 export function MonacoEditor({
   width = '100%',
   height = '100%',
@@ -208,6 +210,7 @@ export function MonacoEditor({
       // add the monaco class name to the overflow widgets dom node so that styles,
       // for it's widgets still apply
       overflowWidgetsDomNode.current?.classList.add('monaco-editor');
+      overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
 
       // Before initializing monaco editor
       const finalOptions = { ...options, ...handleEditorWillMount() };
