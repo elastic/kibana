@@ -112,8 +112,10 @@ describe('InferenceConnector', () => {
     it('marks 429 errors as user errors', async () => {
       // @ts-ignore
       mockEsClient.transport.request.mockResolvedValue({
-        body: Readable.from([`data: [insufficient_quota]\n\n`]),
-        statusCode: 429,
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
       });
 
       try {
@@ -362,8 +364,10 @@ describe('InferenceConnector', () => {
     it('marks 429 errors as user errors', async () => {
       // @ts-ignore
       mockEsClient.transport.request.mockResolvedValue({
-        body: Readable.from([`data: [insufficient_quota]\n\n`]),
-        statusCode: 429,
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
       });
 
       try {

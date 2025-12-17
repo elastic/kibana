@@ -17,7 +17,6 @@ import type {
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import { trace } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
@@ -49,7 +48,11 @@ import type {
   ChatCompleteResponse,
 } from '@kbn/connector-schemas/inference';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
+import {
+  chunksIntoMessage,
+  eventSourceStreamIntoObservable,
+  detectandThrowUserError,
+} from './helpers';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
@@ -216,10 +219,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);
-      if (response.statusCode === 429) {
-        throw createTaskRunError(new Error(error), TaskErrorSource.USER);
-      }
-
+      detectandThrowUserError(error);
       throw new Error(error);
     }
 
