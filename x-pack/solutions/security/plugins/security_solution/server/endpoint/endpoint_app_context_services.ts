@@ -28,6 +28,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { EndpointError } from '../../common/endpoint/errors';
 import type { ReferenceDataClientInterface } from './lib/reference_data';
 import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
