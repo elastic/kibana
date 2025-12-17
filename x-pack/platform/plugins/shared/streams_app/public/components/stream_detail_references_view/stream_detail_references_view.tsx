@@ -6,7 +6,7 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -34,6 +35,7 @@ export function StreamDetailReferencesView({
       },
     },
   } = useKibana();
+  const { onPageReady } = usePerformanceContext();
 
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -44,6 +46,13 @@ export function StreamDetailReferencesView({
     },
     [streamsRepositoryClient]
   );
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !streamsListFetch.loading) {
+      onPageReady();
+    }
+  }, [definition, streamsListFetch.loading, onPageReady]);
 
   if (streamsListFetch.loading) {
     return <EuiLoadingSpinner />;

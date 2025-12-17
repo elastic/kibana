@@ -78,6 +78,7 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -181,6 +182,7 @@ export interface ObservabilityPublicPluginsStart {
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   onechat?: OnechatPluginStart;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
