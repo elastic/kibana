@@ -97,12 +97,10 @@ export const generateAttachmentsMetadata = (indicator: Indicator): AttachmentMet
     indicator,
     RawIndicatorFieldId.Name
   ).value;
-
   const indicatorType: string | null = getIndicatorFieldAndValue(
     indicator,
     RawIndicatorFieldId.Type
   ).value;
-
   const indicatorFeedName: string | null = getIndicatorFieldAndValue(
     indicator,
     RawIndicatorFieldId.Feed

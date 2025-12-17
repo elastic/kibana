@@ -20,7 +20,6 @@ export const canAddToBlockList = (indicator: Indicator): string | null => {
     indicator,
     RawIndicatorFieldId.FileSha256
   ).value;
-
   if (sha256 != null) {
     return sha256;
   }
@@ -29,7 +28,6 @@ export const canAddToBlockList = (indicator: Indicator): string | null => {
     indicator,
     RawIndicatorFieldId.FileSha1
   ).value;
-
   if (sha1 != null) {
     return sha1;
   }
@@ -38,7 +36,6 @@ export const canAddToBlockList = (indicator: Indicator): string | null => {
     indicator,
     RawIndicatorFieldId.FileMd5
   ).value;
-
   if (md5 != null) {
     return md5;
   }
