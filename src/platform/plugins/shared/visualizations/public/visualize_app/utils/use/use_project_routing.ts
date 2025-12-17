@@ -24,7 +24,7 @@ export function useProjectRouting(services: VisualizeServices) {
 
   useEffect(() => {
     const cpsManager = services.cps?.cpsManager;
-    if (!cpsManager || cpsManager?.getProjectPickerAccess() === 'disabled') {
+    if (!cpsManager) {
       return;
     }
 
