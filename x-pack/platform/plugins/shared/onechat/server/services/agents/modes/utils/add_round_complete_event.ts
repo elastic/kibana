@@ -364,5 +364,6 @@ const mergeModelUsage = (
     llm_calls: a.llm_calls + b.llm_calls,
     input_tokens: a.input_tokens + b.input_tokens,
     output_tokens: a.output_tokens + b.output_tokens,
+    model: a.model ?? b.model,
   };
 };
