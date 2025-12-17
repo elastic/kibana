@@ -201,6 +201,13 @@ export function getMatchingSignatures(
       return false;
     }
 
+    // Reject signature if there are required params after the last provided arg.
+    // E.g. DATE_FORMAT(format?, date) with 1 arg fails because 'date' (required) is at index 1.
+    const lastRequiredIndex = sig.params.findLastIndex((p) => !p.optional);
+    if (!sig.minParams && lastRequiredIndex >= givenTypes.length) {
+      return false;
+    }
+
     return givenTypes.every((givenType, index) => {
       let param;
       const totalArgs = givenTypes.length;
