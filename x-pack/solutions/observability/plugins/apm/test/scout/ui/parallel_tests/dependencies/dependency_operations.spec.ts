@@ -18,7 +18,7 @@ const gotoParams = {
   end: testData.OPBEANS_END_DATE,
 };
 
-test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
   });
@@ -55,7 +55,7 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Links to dependency operation when clicking on an operation in operations table', async ({
+  test('Links to dependency operation detail when clicking on an operation in operations table', async ({
     page,
     pageObjects: { dependencyDetailsPage },
   }) => {

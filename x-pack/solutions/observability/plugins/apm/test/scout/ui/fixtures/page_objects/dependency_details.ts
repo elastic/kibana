@@ -144,4 +144,51 @@ export class DependencyDetailsPage {
       .click();
   }
   // #endregion
+
+  // #region Operation Detail
+  private async waitForWaterfallToLoad() {
+    this.page
+      .getByTestId('apmActionMenuButtonInvestigateButton')
+      .getByRole('progressbar')
+      .waitFor({ state: 'hidden' });
+  }
+
+  private async waitForOperationDetailToLoad() {
+    await Promise.all([
+      waitForChartToLoad(this.page, 'latencyChart'),
+      waitForChartToLoad(this.page, 'throughputChart'),
+      waitForChartToLoad(this.page, 'errorRateChart'),
+      waitForChartToLoad(this.page, 'apmCorrelationsChart'),
+      this.waitForWaterfallToLoad(),
+    ]);
+  }
+
+  async gotoOperationDetail(params: {
+    dependencyName: string;
+    spanName: string;
+    start: string;
+    end: string;
+  }) {
+    const { dependencyName, spanName, start, end } = params;
+
+    await this.page.goto(
+      `${this.kbnUrl.app('apm')}/dependencies/operation?${new URLSearchParams({
+        dependencyName,
+        spanName,
+        rangeFrom: start,
+        rangeTo: end,
+      })}`
+    );
+    await this.waitForOperationDetailToLoad();
+  }
+
+  async expectCorrelationsChartVisible() {
+    await expect(this.page.getByTestId('apmCorrelationsChart')).toBeVisible();
+  }
+
+  async expectWaterfallVisible() {
+    await expect(this.page.getByTestId('apmActionMenuButtonInvestigateButton')).toBeVisible();
+    await expect(this.page.getByTestId('apmFullTraceButtonViewFullTraceButton')).toBeVisible();
+  }
+  // #endregion
 }
