@@ -25,6 +25,7 @@ export interface DocLinksMeta {
  */
 export interface DocLinks {
   readonly settings: string;
+  readonly aiAssistantSettings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
   readonly serverlessReleaseNotes: string;
