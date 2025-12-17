@@ -139,23 +139,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when a high volume of data is loaded', () => {
-      let body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
-      let statusCode: number;
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateManyDependencies({ apmSynthtraceEsClient, from: start, to: end });
-        const response = await callApi('synth-java-0');
-        body = response.body;
-        statusCode = response.status;
       });
 
       after(() => apmSynthtraceEsClient.clean());
 
-      it('returns dependency data without error', () => {
-        expect(statusCode).to.be(200);
-        expect(body.serviceDependencies.length).to.be.greaterThan(0);
+      it('returns dependency data without error', async () => {
+        const response = await callApi('synth-java-0');
+        expect(response.status).to.be(200);
+        expect(response.body.serviceDependencies.length).to.be.greaterThan(0);
       });
     });
   });

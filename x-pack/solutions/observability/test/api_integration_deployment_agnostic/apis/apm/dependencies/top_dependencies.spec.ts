@@ -191,29 +191,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when a high volume of data is loaded', () => {
-      let body: TopDependencies;
-      let statusCode: number;
-      let statisticsBody: TopDependenciesStatistics;
-      let statisticsStatusCode: number;
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateManyDependencies({ apmSynthtraceEsClient, from: start, to: end });
-        const [response, statisticsResponse] = await Promise.all([callApi(), callStatisticsApi()]);
-        body = response.body;
-        statusCode = response.status;
-        statisticsBody = statisticsResponse.body;
-        statisticsStatusCode = statisticsResponse.status;
       });
 
       after(() => apmSynthtraceEsClient.clean());
 
-      it('returns an array of dependencies without error', () => {
-        expect(statusCode).to.be(200);
-        expect(body.dependencies.length).to.be.greaterThan(0);
-        expect(statisticsStatusCode).to.be(200);
-        expect(Object.keys(statisticsBody.currentTimeseries).length).to.be.greaterThan(0);
+      it('returns an array of top dependencies without error', async () => {
+        const response = await callApi();
+        expect(response.status).to.be(200);
+        expect(response.body.dependencies.length).to.be.greaterThan(0);
+      });
+
+      it('returns dependencies statistics without error', async () => {
+        const response = await callStatisticsApi();
+        expect(response.status).to.be(200);
+        expect(Object.keys(response.body.currentTimeseries).length).to.be.greaterThan(0);
       });
     });
   });

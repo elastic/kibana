@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateManyDependencies } from '../../dependencies/generate_many_dependencies';
@@ -44,23 +43,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when a high volume of data is loaded', () => {
-      let body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies/breakdown'>;
-      let statusCode: number;
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateManyDependencies({ apmSynthtraceEsClient, from: start, to: end });
-        const response = await callApi();
-        body = response.body;
-        statusCode = response.status;
       });
 
       after(() => apmSynthtraceEsClient.clean());
 
-      it('returns a breakdown of dependencies without error', () => {
-        expect(statusCode).to.be(200);
-        expect(body.breakdown.length).to.be.greaterThan(0);
+      it('returns a breakdown of dependencies without error', async () => {
+        const response = await callApi();
+        expect(response.status).to.be(200);
+        expect(response.body.breakdown.length).to.be.greaterThan(0);
       });
     });
   });
