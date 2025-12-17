@@ -28,7 +28,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  // Testing via flaky test runner
   describe('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
