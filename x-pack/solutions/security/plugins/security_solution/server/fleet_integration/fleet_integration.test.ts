@@ -1207,7 +1207,9 @@ describe('Fleet integrations', () => {
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
       delete policyConfig.inputs[0]!.config!.policy;
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
       delete policyConfig.inputs[0]!.config!.artifact_manifest;
 
       await expect(() =>

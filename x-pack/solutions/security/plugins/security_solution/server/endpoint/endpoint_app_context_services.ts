@@ -59,6 +59,7 @@ import type {
 } from './services/fleet/endpoint_fleet_services_factory';
 import { EndpointFleetServicesFactory } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
+import { EndpointError } from '../../common/endpoint/errors';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
