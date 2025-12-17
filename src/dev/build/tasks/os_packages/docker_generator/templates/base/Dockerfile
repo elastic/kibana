@@ -143,12 +143,9 @@ RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
 # Provide a non-root user to run the process.
 RUN groupadd --gid 1000 kibana && \
-    useradd --uid 1000 --gid 1000 \
+    useradd --uid 1000 --gid 1000{{^cloud}} -G 0{{/cloud}} \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
-{{^cloud}}
-RUN usermod -a -G 0 kibana
-{{/cloud}}
 
 LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.label-schema.license="{{license}}" \
