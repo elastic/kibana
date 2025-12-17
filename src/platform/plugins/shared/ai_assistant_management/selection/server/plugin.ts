@@ -89,10 +89,9 @@ export class AIAssistantManagementSelectionPlugin
           getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
             if (request) {
               try {
-                const [coreStart, startServices] = await core.getStartServices();
-                // Avoid security exceptions before login
-                const user = coreStart.security.authc.getCurrentUser(request);
-                if (startServices.spaces && user) {
+                const [, startServices] = await core.getStartServices();
+                // Avoid security exceptions before login - only check space when authenticated
+                if (startServices.spaces && request.auth.isAuthenticated) {
                   const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
                     request
                   );

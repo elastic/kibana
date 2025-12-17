@@ -1075,7 +1075,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"data-test-subj\" | \"errorMessage\" | \"height\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,

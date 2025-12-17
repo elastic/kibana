@@ -13,11 +13,8 @@ import type { ESQLAstItem, ESQLFunction } from '../../../../../../types';
 import type { FunctionDefinition, SupportedDataType } from '../../../../types';
 import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
 import { SignatureAnalyzer } from '../signature_analyzer';
-import {
-  getExpressionType,
-  getRightmostNonVariadicOperator,
-  getMatchingSignatures,
-} from '../../../expressions';
+import { getExpressionType, getMatchingSignatures } from '../../../expressions';
+import { getRightmostNonVariadicOperator } from '../utils';
 import { getFunctionDefinition } from '../../../functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
