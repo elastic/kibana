@@ -189,11 +189,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const round = await extractRound(events$);
 
-  /////
-  // throw new Error('dev mode')
-  // throw new Error('dev mode\n' + JSON.stringify(round, undefined, 2));
-  /////
-
   return {
     round,
   };

@@ -34,7 +34,6 @@ export const ensureValidInput = ({
         `Conversation is awaiting a prompt response, but none was provided.`
       );
     }
-    // todo: validate the prompt shape
   }
 };
 

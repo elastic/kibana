@@ -16,6 +16,7 @@ import type {
 } from '@kbn/onechat-server/runner';
 import { createErrorResult } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
+import { isToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { ToolCallSource } from '../../telemetry';
@@ -91,7 +92,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   );
 
-  if ('results' in toolReturn) {
+  if (isToolHandlerStandardReturn(toolReturn)) {
     const resultsWithIds = toolReturn.results.map<ToolResult>(
       (result) =>
         ({

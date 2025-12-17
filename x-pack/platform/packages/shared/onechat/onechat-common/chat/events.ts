@@ -183,7 +183,7 @@ export const isThinkingCompleteEvent = (
 export interface RoundCompleteEventData {
   /** round that was completed */
   round: ConversationRound;
-  /** if true, it means the round was resumed, so we need to replace the last one instead of happening a new round */
+  /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
 }
 

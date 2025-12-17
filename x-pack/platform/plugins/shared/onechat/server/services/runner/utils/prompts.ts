@@ -58,7 +58,6 @@ export const initPromptManager = ({
   input: ConverseInput;
   conversation?: Conversation;
 }) => {
-  // TODO: fix that logic
   if (conversation?.rounds.length) {
     const lastRound = conversation.rounds[conversation.rounds.length - 1];
     const interrupt = lastRound.pending_prompt;

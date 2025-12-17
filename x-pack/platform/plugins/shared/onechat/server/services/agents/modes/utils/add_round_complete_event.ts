@@ -125,10 +125,8 @@ const resumeRound = ({
 }): ConversationRound => {
   // resuming / replaying tool events for the pending step
   const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
-  // TODO: another way to detect interrupted step?
   if (isToolCallStep(lastStep) && lastStep.results.length === 0) {
     const toolCallId = lastStep.tool_call_id;
-
     const toolResults = events
       .filter(isToolResultEvent)
       .filter(({ data }) => data.tool_call_id === toolCallId);
@@ -214,8 +212,6 @@ const createRound = ({
       const toolProgress = toolProgressions.filter(
         (progressEvent) => progressEvent.data.tool_call_id === toolCall.tool_call_id
       );
-
-      // TODO: add interrupt event
 
       return [createToolCallStep({ toolCall: event, toolResult, toolProgress })];
     }

@@ -38,7 +38,7 @@ export const conversationToLangchainMessages = ({
   let input = conversation.nextInput;
 
   // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
-  // we also uses the last message's input as the next input for the next round
+  // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
   const lastRound = conversation.previousRounds[conversation.previousRounds.length - 1];
   if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
     rounds = rounds.slice(0, rounds.length - 1);
