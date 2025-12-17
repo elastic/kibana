@@ -76,15 +76,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         badgeType: 'techPreview' as const,
       },
       {
-        id: 'searchPlayground',
-        title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
-          defaultMessage: 'Playground',
-        }),
-        link: 'searchPlayground' as AppDeepLinkId,
-        breadcrumbStatus: 'hidden' as 'hidden',
-        icon: LazyIconPlayground, // Temp svg until we have icon in EUI
-      },
-      {
         children: [
           {
             id: 'ml_overview',
@@ -124,24 +115,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         id: 'machine_learning',
         renderAs: 'panelOpener',
         title: MACHINE_LEARNING_TITLE,
-      },
-    ],
-    footer: [
-      {
-        id: 'search_getting_started',
-        icon: 'launch',
-        link: 'searchGettingStarted',
-      },
-      {
-        id: 'dev_tools',
-        title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
-          defaultMessage: 'Developer Tools',
-        }),
-        icon: 'code',
-        link: 'dev_tools:console',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-        },
       },
       {
         children: [
@@ -183,6 +156,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             children: [
               { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
               { link: 'searchQueryRules' },
+              { link: 'searchPlayground' },
             ],
             id: 'search_relevance',
             breadcrumbStatus: 'hidden',
@@ -197,6 +171,24 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
           defaultMessage: 'Data management',
         }),
+      },
+    ],
+    footer: [
+      {
+        id: 'search_getting_started',
+        icon: 'launch',
+        link: 'searchGettingStarted',
+      },
+      {
+        id: 'dev_tools',
+        title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
+          defaultMessage: 'Developer Tools',
+        }),
+        icon: 'code',
+        link: 'dev_tools:console',
+        getIsActive: ({ pathNameSerialized, prepend }) => {
+          return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+        },
       },
       {
         id: 'admin_and_settings',
