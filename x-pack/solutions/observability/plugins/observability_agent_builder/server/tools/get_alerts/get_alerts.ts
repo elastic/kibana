@@ -16,7 +16,7 @@ import {
   ALERT_STATUS_ACTIVE,
   AlertConsumers,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
@@ -24,6 +24,7 @@ import type {
 import { getRelevantAlertFields } from './get_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
@@ -102,6 +103,12 @@ export function createGetAlertsTool({
     description: `Retrieves Observability alerts within a specified time range. Supports filtering by status (active/recovered) and KQL queries to find specific alert instances.`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       {
         start = DEFAULT_TIME_RANGE.start,

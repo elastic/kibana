@@ -115,7 +115,8 @@ describe('utils', () => {
       expect(update.exceptions_list).toEqual(installedRule1.exceptions_list);
     });
   });
-  describe('validReadAuthzFields', () => {
+
+  describe('isKeyUpdateableWithReadPermission', () => {
     it('should accept valid fields', () => {
       expect(
         Object.keys({ exceptions_list: 'test value' }).every((key) =>

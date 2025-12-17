@@ -359,7 +359,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { item_id, ...itemNoId } = getCreateExceptionListItemMinimalSchemaMock();
 
         // create a simple exception list item
@@ -430,7 +429,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give a 404 if both id and list_id is null', async () => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { item_id, ...listNoId } = getUpdateMinimalExceptionListItemSchemaMock();
 
         const { body } = await supertest
