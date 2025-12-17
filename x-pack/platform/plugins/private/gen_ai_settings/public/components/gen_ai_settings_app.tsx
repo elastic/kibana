@@ -121,8 +121,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector. 
-              When you set a default AI connector, it is pre-selected for all of these features in this space. 
+            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector.
+              When you set a default AI connector, it is pre-selected for all of these features in this space.
               If you haven't set a default, the most recently used connector is selected automatically. {manageConnectors}`}
             values={{
               manageConnectors: (
@@ -244,12 +244,33 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
     const needsReload = await saveAll();
     if (shouldTrackOptInConfirmed) {
+      console.log(
+        `${AGENT_BUILDER_EVENT_TYPES.OptInAction} ==>`,
+        JSON.stringify(
+          {
+            action: 'confirmed',
+            source: TELEMETRY_SOURCE,
+          },
+          null,
+          2
+        )
+      );
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'confirmed',
         source: TELEMETRY_SOURCE,
       });
     }
     if (shouldTrackOptOut) {
+      console.log(
+        `${AGENT_BUILDER_EVENT_TYPES.OptOut} ==>`,
+        JSON.stringify(
+          {
+            source: TELEMETRY_SOURCE,
+          },
+          null,
+          2
+        )
+      );
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptOut, {
         source: TELEMETRY_SOURCE,
       });
