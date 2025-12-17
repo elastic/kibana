@@ -15,6 +15,7 @@ import {
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getLatestApmPackage } from './get_latest_apm_package';
 import { translateLegacySchemaPaths } from './translate_legacy_schema_paths';
+import { getNormalizedCloudApmUrl } from './normalize_cloud_apm_url';
 
 export async function getApmPackagePolicyDefinition({
   apmServerSchema,
@@ -67,7 +68,7 @@ function getApmPackageInputVars({
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
 }): Record<string, { type: string; value: any }> {
   const overrideValues: Record<string, any> = {
-    url: cloudPluginSetup?.apm?.url, // overrides 'apm-server.url' to be the cloud APM host
+    url: getNormalizedCloudApmUrl(cloudPluginSetup), // overrides 'apm-server.url' to be the cloud APM host
     rum_allow_origins: ensureValidMultiText(
       apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH.rum_allow_origins]
     ), // fixes issue where "*" needs to be wrapped in quotes to be parsed as a YAML string

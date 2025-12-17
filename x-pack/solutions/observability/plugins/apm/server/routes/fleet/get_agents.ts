@@ -12,6 +12,7 @@ import { keyBy } from 'lodash';
 import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { getApmPackagePolicies } from './get_apm_package_policies';
+import { getNormalizedCloudApmUrl } from './normalize_cloud_apm_url';
 
 async function getFleetAgentByIds({
   policyIds,
@@ -54,7 +55,7 @@ export async function getFleetAgents({
 }): Promise<FleetAgentResponse> {
   const cloudStandaloneSetup = cloudPluginSetup
     ? {
-        apmServerUrl: cloudPluginSetup?.apm.url,
+        apmServerUrl: getNormalizedCloudApmUrl(cloudPluginSetup),
         secretToken: cloudPluginSetup?.apm.secretToken,
       }
     : undefined;
