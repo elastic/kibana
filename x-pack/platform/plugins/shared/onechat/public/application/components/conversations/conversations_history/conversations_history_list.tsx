@@ -6,7 +6,13 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexItem, EuiLoadingSpinner, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopoverTitle,
+  EuiSelectable,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
@@ -40,6 +46,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
   const currentConversationId = useConversationId();
   const { navigateToOnechatUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const { euiTheme } = useEuiTheme();
 
   const timeSections = useMemo(() => {
     if (!conversations || conversations.length === 0) {
@@ -114,6 +121,9 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     }
     .euiSelectableList__groupLabel {
       border-block-end: 0;
+      :not(:first-of-type) {
+        padding-block-start: ${euiTheme.size.m};
+      }
     }
   `;
 
