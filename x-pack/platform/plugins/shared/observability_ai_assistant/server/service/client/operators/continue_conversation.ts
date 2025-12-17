@@ -29,6 +29,7 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isToolValidationError } from '@kbn/inference-common';
+import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
@@ -334,10 +335,7 @@ export function continueConversation({
       return of(
         createServerSideFunctionResponseError({
           name: functionCallName,
-          error: createToolNotFoundError({
-            name: functionCallName,
-            args: lastMessage.function_call!.arguments ?? '',
-          }),
+          error: createToolNotFoundError(functionCallName),
         })
       );
     }
