@@ -128,6 +128,51 @@ describe('getUnifiedTraceItems', () => {
   });
 
   describe('basic functionality', () => {
+    it('should return trace items and unified trace without agent marks', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {},
+              fields: {
+                ...defaultSearchFields,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).toEqual({
+        traceItems: [
+          {
+            id: 'span-1',
+            name: 'Test Span',
+            timestampUs: 1672531200000000,
+            traceId: 'test-trace-id',
+            duration: 1000,
+            status: undefined,
+            errors: [{ errorDocId: 'error-1' }],
+            parentId: undefined,
+            serviceName: 'test-service',
+            type: undefined,
+            spanLinksCount: {
+              incoming: 0,
+              outgoing: 0,
+            },
+          },
+        ],
+        agentMarks: {},
+        unifiedTraceErrors: mockUnifiedTraceErrors,
+      });
+    });
     it('should return trace items and unified trace with agent marks', async () => {
       const mockSearchResponse = {
         hits: {

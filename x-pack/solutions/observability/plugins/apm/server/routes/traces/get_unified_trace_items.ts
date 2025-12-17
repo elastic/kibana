@@ -188,9 +188,10 @@ export async function getUnifiedTraceItems({
     const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
     if (event[PROCESSOR_EVENT] === ProcessorEvent.transaction) {
       const source = hit._source as {
-        transaction: Pick<Required<Transaction>['transaction'], 'marks'>;
+        transaction?: Pick<Required<Transaction>['transaction'], 'marks'>;
       };
-      if (source.transaction.marks?.agent) {
+
+      if (source.transaction?.marks?.agent) {
         agentMarks = { ...agentMarks, ...source.transaction.marks.agent };
       }
     }
