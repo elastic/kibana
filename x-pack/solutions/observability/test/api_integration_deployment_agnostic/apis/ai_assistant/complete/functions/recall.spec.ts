@@ -31,6 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
+      await clearKnowledgeBase(es);
       await addSampleDocsToInternalKb(getService, technicalSampleDocs);
       await addSampleDocsToCustomIndex(getService, animalSampleDocs, customSearchConnectorIndex);
     });
