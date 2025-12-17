@@ -20,6 +20,8 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
+import type { PipelineHelper } from './helpers/pipeline';
+import { createPipelineHelper } from './helpers/pipeline';
 import type { TransformHelper } from './helpers/transform';
 import { createTransformHelper } from './helpers/transform';
 
@@ -36,11 +38,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let adminRoleAuthc: RoleCredentials;
   let transformHelper: TransformHelper;
+  let pipelineHelper: PipelineHelper;
 
   describe('Delete SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       transformHelper = createTransformHelper(getService);
+      pipelineHelper = createPipelineHelper(getService);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -75,14 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await transformHelper.assertNotFound(getSLOTransformId(id, 1));
       await transformHelper.assertNotFound(getSLOSummaryTransformId(id, 1));
 
-      // Expect standard pipeline to be deleted
-      const wildcardPipelineId = getWildcardPipelineId(id, 1);
-      try {
-        await esClient.ingest.getPipeline({ id: wildcardPipelineId });
-        throw new Error('Standard wildcard pipeline should have been deleted');
-      } catch (err: any) {
-        expect(err.meta?.statusCode).eql(404);
-      }
+      await pipelineHelper.assertNotFound(getWildcardPipelineId(id, 1));
 
       // expect summary and rollup documents to be deleted
       await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
@@ -147,33 +144,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // Verify pipelines exist
-      const rollupPipelineBefore = await esClient.ingest.getPipeline({
-        id: customSLOPipelineId,
-      });
-      expect(rollupPipelineBefore).property(customSLOPipelineId);
-
-      const summaryPipelineBefore = await esClient.ingest.getPipeline({
-        id: customSLOSummaryPipelineId,
-      });
-      expect(summaryPipelineBefore).property(customSLOSummaryPipelineId);
+      await pipelineHelper.assertExists(customSLOPipelineId);
+      await pipelineHelper.assertExists(customSLOSummaryPipelineId);
 
       // Delete the SLO
       await sloApi.delete(id, adminRoleAuthc);
 
-      // Verify custom pipelines are deleted
-      try {
-        await esClient.ingest.getPipeline({ id: customSLOPipelineId });
-        throw new Error('Custom SLO pipeline should have been deleted');
-      } catch (err: any) {
-        expect(err.meta?.statusCode).eql(404);
-      }
-
-      try {
-        await esClient.ingest.getPipeline({ id: customSLOSummaryPipelineId });
-        throw new Error('Custom SLO summary pipeline should have been deleted');
-      } catch (err: any) {
-        expect(err.meta?.statusCode).eql(404);
-      }
+      await pipelineHelper.assertNotFound(customSLOPipelineId);
+      await pipelineHelper.assertNotFound(customSLOSummaryPipelineId);
     });
   });
 }
