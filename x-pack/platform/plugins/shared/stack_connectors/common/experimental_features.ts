@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeConnectorRTROn: true,
   microsoftDefenderEndpointOn: true,
   connectorsFromSpecs: true,
-  agentBuilderExternalMcpOn: false,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
