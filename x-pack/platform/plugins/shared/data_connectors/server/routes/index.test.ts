@@ -8,8 +8,9 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { buildSecretsFromConnectorSpec, registerRoutes, type RouteDependencies } from '.';
+import { registerRoutes, type RouteDependencies } from '.';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { buildSecretsFromConnectorSpec } from './connectors_helpers';
 
 jest.mock('@kbn/connector-specs', () => ({
   connectorsSpecs: {
@@ -331,7 +332,7 @@ describe('registerRoutes', () => {
   });
 
   describe('POST /api/data_connectors', () => {
-    it('should create a new data connector with workflows and tools', async () => {
+    it('should create a new data connector related resources', async () => {
       const mockStackConnector = {
         id: 'ksc-1',
         actionTypeId: '.notion',
