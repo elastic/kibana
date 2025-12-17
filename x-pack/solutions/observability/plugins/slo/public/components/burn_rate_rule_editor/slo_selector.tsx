@@ -28,6 +28,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
     name: searchValue,
   });
   const hasError = errors !== undefined && errors.length > 0;
+  const hasNoSlos = data?.results.length === 0;
 
   useEffect(() => {
     setSelectedOptions(initialSlo ? [{ value: initialSlo.id, label: initialSlo.name }] : []);
@@ -54,7 +55,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
     return <EuiLoadingSpinner size="m" data-test-subj="sloSelectorLoadingSpinner" />;
   }
 
-  if (hasLoadedOnlyOnce && data?.results.length === 0) {
+  if (hasLoadedOnlyOnce && hasNoSlos) {
     return <SloSelectorEmptyState />;
   }
 

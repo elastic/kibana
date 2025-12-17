@@ -39,8 +39,12 @@ describe('SLO Selector', () => {
     expect(screen.getByTestId('sloSelectorLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders an empty state when there are no SLOs', async () => {
-    useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: emptySloList });
+  it('renders an empty state when it has loaded only once and there are no SLOs', async () => {
+    useFetchSloDefinitionsMock.mockReturnValue({
+      isLoading: false,
+      hasLoadedOnlyOnce: true,
+      data: emptySloList,
+    });
 
     render(<SloSelector onSelected={onSelectedSpy} />);
 
@@ -48,6 +52,8 @@ describe('SLO Selector', () => {
   });
 
   it('fetches SLOs asynchronously', async () => {
+    useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloList });
+
     render(<SloSelector onSelected={onSelectedSpy} />);
 
     expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: '' });
@@ -68,10 +74,11 @@ describe('SLO Selector', () => {
     expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: 'latency' });
   });
 
-  it('does not render empty state when there is a search term', async () => {
+  it('does not render empty state when there are no results for the search term', async () => {
     useFetchSloDefinitionsMock
-      .mockReturnValueOnce({ isLoading: false, data: sloList })
-      .mockReturnValueOnce({ isLoading: false, data: emptySloList });
+      .mockReturnValueOnce({ isLoading: false, data: sloList, hasLoadedOnlyOnce: true })
+      .mockReturnValueOnce({ isLoading: false, data: sloList, hasLoadedOnlyOnce: false })
+      .mockReturnValue({ isLoading: false, data: emptySloList, hasLoadedOnlyOnce: false });
 
     render(<SloSelector onSelected={onSelectedSpy} />);
 
@@ -82,7 +89,7 @@ describe('SLO Selector', () => {
       expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: 'latency' })
     );
 
-    expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: 'latency' });
+    expect(screen.queryByTestId('sloSelectorEmptyState')).not.toBeInTheDocument();
   });
 
   it('renders options when there are SLOs', async () => {
