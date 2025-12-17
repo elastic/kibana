@@ -448,7 +448,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Side effetcts', () => {
+    describe('Side effects', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
 
