@@ -339,4 +339,62 @@ describe('getInitialAppState', () => {
       }
     `);
   });
+
+  describe('default sort array', () => {
+    test('should use persistedTab sort array if valid and data view is provided', () => {
+      const services = createDiscoverServicesMock();
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: {
+          ...getPersistedTab({ services }),
+          sort: [['timestamp', 'asc']],
+        },
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      expect(appState.sort).toEqual([['timestamp', 'asc']]);
+    });
+
+    test('should not use persistedTab sort array if invalid and data view is provided', () => {
+      const services = createDiscoverServicesMock();
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: {
+          ...getPersistedTab({ services }),
+          sort: [['test', 'desc']],
+        },
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      expect(appState.sort).toEqual([['timestamp', 'desc']]);
+    });
+
+    test('should use persistedTab sort array when data view is not provided', () => {
+      const services = createDiscoverServicesMock();
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: {
+          ...getPersistedTab({ services }),
+          sort: [['test', 'desc']],
+        },
+        dataView: undefined,
+        services,
+      });
+      expect(appState.sort).toEqual([['test', 'desc']]);
+    });
+
+    test('should use persistedTab sort array when partial data view is provided', () => {
+      const services = createDiscoverServicesMock();
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: {
+          ...getPersistedTab({ services }),
+          sort: [['test', 'desc']],
+        },
+        dataView: { id: 'partial-data-view-id', timeFieldName: 'timestamp' },
+        services,
+      });
+      expect(appState.sort).toEqual([['test', 'desc']]);
+    });
+  });
 });
