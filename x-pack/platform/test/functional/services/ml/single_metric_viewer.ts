@@ -11,12 +11,14 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningSingleMetricViewerProvider(
-  { getService }: FtrProviderContext,
+  { getService, getPageObjects }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async assertSingleMetricViewerEmptyListMessageExsist() {
@@ -122,8 +124,21 @@ export function MachineLearningSingleMetricViewerProvider(
     },
 
     async openAnomalyExplorer() {
-      await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
-      await testSubjects.existOrFail('mlPageAnomalyExplorer');
+      // Since the button group is removed, preserve the current URL query params and change path
+      const currentUrl = await browser.getCurrentUrl();
+      const urlObj = new URL(currentUrl);
+      const queryString = urlObj.search;
+      
+      // Navigate to Anomaly Explorer, preserving the query string (which includes job selection)
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/explorer`,
+        queryString
+      );
+      
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('mlPageAnomalyExplorer');
+      });
     },
 
     async openConfigForControl(entityFieldName: string) {

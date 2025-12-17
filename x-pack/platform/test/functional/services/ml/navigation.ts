@@ -323,8 +323,18 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToAnomalyExplorerViaSingleMetricViewer() {
-      // clicks the `Anomaly Explorer` icon on the button group to switch result views
-      await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
+      // Since the button group is removed, preserve the current URL query params and change path
+      const currentUrl = await browser.getCurrentUrl();
+      const urlObj = new URL(currentUrl);
+      const queryString = urlObj.search;
+      
+      // Navigate to Anomaly Explorer, preserving the query string (which includes job selection)
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/explorer`,
+        queryString
+      );
+      
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the anomaly explorer page is visible
         await testSubjects.existOrFail('mlPageAnomalyExplorer');
@@ -332,8 +342,18 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToSingleMetricViewerViaAnomalyExplorer() {
-      // clicks the `Single Metric Viewer` icon on the button group to switch result views
-      await testSubjects.click('mlAnomalyResultsViewSelectorSingleMetricViewer');
+      // Since the button group is removed, preserve the current URL query params and change path
+      const currentUrl = await browser.getCurrentUrl();
+      const urlObj = new URL(currentUrl);
+      const queryString = urlObj.search;
+      
+      // Navigate to Single Metric Viewer, preserving the query string (which includes job selection)
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/timeseriesexplorer`,
+        queryString
+      );
+      
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the single metric viewer page is visible
         await testSubjects.existOrFail('mlPageSingleMetricViewer');
