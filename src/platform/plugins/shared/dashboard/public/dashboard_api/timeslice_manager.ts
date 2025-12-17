@@ -82,7 +82,7 @@ export const initializeTimesliceManager = (
     .pipe(
       switchMap(async () => {
         await new Promise((resolve) => {
-          unpublishedTimeslice$.pipe(skip(1), first()).subscribe(resolve);
+          unpublishedTimeslice$.pipe(first()).subscribe(resolve);
         });
       })
     )
