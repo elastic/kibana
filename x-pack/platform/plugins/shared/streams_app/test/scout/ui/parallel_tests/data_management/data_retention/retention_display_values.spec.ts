@@ -44,7 +44,7 @@ test.describe('Stream data retention - display values', { tag: ['@ess', '@svlObl
 
     await apiServices.streams.forkStream('logs', testStreamName, {
       field: 'service.name',
-      eq: `display-values-w${testInfo.workerIndex}`,
+      eq: `display-values-w${testInfo.parallelIndex}`,
     });
     await pageObjects.streams.gotoDataRetentionTab(testStreamName);
   });

@@ -21,7 +21,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
 
       // Create unique stream names for this worker
-      const workerSuffix = `w${testInfo.workerIndex}`;
+      const workerSuffix = `w${testInfo.parallelIndex}`;
       streamNames = [
         `logs.first-${workerSuffix}`,
         `logs.second-${workerSuffix}`,
@@ -129,7 +129,7 @@ test.describe(
       apiServices,
       pageObjects,
     }, testInfo) => {
-      const workerSuffix = `w${testInfo.workerIndex}`;
+      const workerSuffix = `w${testInfo.parallelIndex}`;
       const singleStreamName = `logs.single-${workerSuffix}`;
       const secondStreamSuffix = `second-single-${workerSuffix}`;
       const secondStreamName = `logs.${secondStreamSuffix}`;

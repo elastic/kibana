@@ -40,7 +40,7 @@ test.describe('Stream data retention - mode switching', { tag: ['@ess', '@svlObl
 
     await apiServices.streams.forkStream('logs', testStreamName, {
       field: 'service.name',
-      eq: `mode-switch-w${testInfo.workerIndex}`,
+      eq: `mode-switch-w${testInfo.parallelIndex}`,
     });
     await pageObjects.streams.gotoDataRetentionTab(testStreamName);
   });

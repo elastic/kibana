@@ -16,54 +16,58 @@ import type { ApiServicesFixture } from '@kbn/scout';
  * When running tests with multiple workers, each worker needs unique resource names
  * to avoid conflicts. These utilities help generate unique stream names and manage
  * cleanup without affecting other workers.
+ *
+ * IMPORTANT: We use `parallelIndex` instead of `workerIndex` because:
+ * - `workerIndex` can exceed the configured worker count (due to retries, restarts)
+ * - `parallelIndex` is always between 0 and (workers - 1), guaranteed
  */
 
 /**
  * Generates a unique stream name for parallel test execution.
- * Uses workerIndex to ensure streams don't conflict across workers.
+ * Uses parallelIndex to ensure streams don't conflict across workers.
  *
- * @param testInfo - Playwright TestInfo object containing workerIndex
+ * @param testInfo - Playwright TestInfo object containing parallelIndex
  * @param baseName - Base name for the stream (e.g., 'retention', 'routing')
- * @returns A unique stream name like 'logs.retention-w0'
+ * @returns A unique stream name like 'logs.retention-p0'
  *
  * @example
  * ```ts
  * test.beforeEach(async ({ apiServices }, testInfo) => {
  *   const streamName = getUniqueStreamName(testInfo, 'my-test');
- *   // Creates: logs.my-test-w0, logs.my-test-w1, etc.
+ *   // Creates: logs.my-test-p0, logs.my-test-p1, etc.
  * });
  * ```
  */
 export function getUniqueStreamName(testInfo: TestInfo, baseName: string): string {
-  return `logs.${baseName}-w${testInfo.workerIndex}`;
+  return `logs.${baseName}-p${testInfo.parallelIndex}`;
 }
 
 /**
  * Generates a unique classic stream name for parallel test execution.
  * Classic streams have a different naming pattern (no 'logs.' prefix in the parent).
  *
- * @param testInfo - Playwright TestInfo object containing workerIndex
+ * @param testInfo - Playwright TestInfo object containing parallelIndex
  * @param baseName - Base name for the stream
- * @returns A unique classic stream name like 'logs-my-test-w0'
+ * @returns A unique classic stream name like 'logs-my-test-p0'
  */
 export function getUniqueClassicStreamName(testInfo: TestInfo, baseName: string): string {
-  return `logs-${baseName}-w${testInfo.workerIndex}`;
+  return `logs-${baseName}-p${testInfo.parallelIndex}`;
 }
 
 /**
  * Generates a unique nested stream name for parallel test execution.
  *
- * @param testInfo - Playwright TestInfo object containing workerIndex
+ * @param testInfo - Playwright TestInfo object containing parallelIndex
  * @param baseName - Base name for the parent stream
  * @param childName - Name for the child stream
- * @returns A unique nested stream name like 'logs.parent-w0.child'
+ * @returns A unique nested stream name like 'logs.parent-p0.child'
  */
 export function getUniqueNestedStreamName(
   testInfo: TestInfo,
   baseName: string,
   childName: string
 ): string {
-  return `logs.${baseName}-w${testInfo.workerIndex}.${childName}`;
+  return `logs.${baseName}-p${testInfo.parallelIndex}.${childName}`;
 }
 
 /**

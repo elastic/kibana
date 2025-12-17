@@ -26,7 +26,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   });
 
   test('should create a new routing rule successfully', async ({ page, pageObjects }, testInfo) => {
-    const streamSuffix = `nginx-create-w${testInfo.workerIndex}`;
+    const streamSuffix = `nginx-create-w${testInfo.parallelIndex}`;
     const fullStreamName = `logs.${streamSuffix}`;
 
     // Clean up if stream exists from previous run
@@ -45,7 +45,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     // Set up routing condition
     await pageObjects.streams.fillConditionEditor({
       field: 'service.name',
-      value: `nginx-w${testInfo.workerIndex}`,
+      value: `nginx-w${testInfo.parallelIndex}`,
       operator: 'equals',
     });
 
@@ -65,7 +65,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
       'equals'
     );
     await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
-      `nginx-w${testInfo.workerIndex}`
+      `nginx-w${testInfo.parallelIndex}`
     );
   });
 
@@ -181,7 +181,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     page,
     pageObjects,
   }, testInfo) => {
-    const streamSuffix = `nav-test-w${testInfo.workerIndex}`;
+    const streamSuffix = `nav-test-w${testInfo.parallelIndex}`;
     const fullStreamName = `logs.${streamSuffix}`;
 
     // Create a child stream first
@@ -212,7 +212,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     page,
     pageObjects,
   }, testInfo) => {
-    const streamSuffix = `toast-test-w${testInfo.workerIndex}`;
+    const streamSuffix = `toast-test-w${testInfo.parallelIndex}`;
     const fullStreamName = `logs.${streamSuffix}`;
 
     await pageObjects.streams.clickCreateRoutingRule();
@@ -241,7 +241,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     page,
     pageObjects,
   }, testInfo) => {
-    const streamSuffix = `dup-test-w${testInfo.workerIndex}`;
+    const streamSuffix = `dup-test-w${testInfo.parallelIndex}`;
     const fullStreamName = `logs.${streamSuffix}`;
 
     // Create first rule

@@ -41,7 +41,7 @@ test.describe(
       // Create a test stream with routing rules
       await apiServices.streams.forkStream('logs', testStreamName, {
         field: 'service.name',
-        eq: `retention-test-w${testInfo.workerIndex}`,
+        eq: `retention-test-w${testInfo.parallelIndex}`,
       });
 
       await pageObjects.streams.gotoDataRetentionTab(testStreamName);

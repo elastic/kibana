@@ -16,7 +16,7 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }, testInfo) => {
       await browserAuth.loginAsAdmin();
 
-      const workerSuffix = `w${testInfo.workerIndex}`;
+      const workerSuffix = `w${testInfo.parallelIndex}`;
 
       // Create unique stream names for this worker
       const child1 = `logs.child1-${workerSuffix}`;
@@ -64,7 +64,7 @@ test.describe(
     });
 
     test('should expand and collapse', async ({ pageObjects }, testInfo) => {
-      const workerSuffix = `w${testInfo.workerIndex}`;
+      const workerSuffix = `w${testInfo.parallelIndex}`;
       const child1 = `logs.child1-${workerSuffix}`;
       const child2 = `logs.child2-${workerSuffix}`;
       const child3 = `logs.child3-${workerSuffix}`;

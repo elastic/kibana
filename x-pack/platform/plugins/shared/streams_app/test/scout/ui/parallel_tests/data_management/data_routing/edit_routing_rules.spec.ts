@@ -26,7 +26,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     // Create a test stream with routing rules first
     await apiServices.streams.forkStream('logs', testStreamName, {
       field: 'service.name',
-      eq: `test-service-w${testInfo.workerIndex}`,
+      eq: `test-service-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(testStreamName);
 
@@ -73,13 +73,13 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
       'equals'
     );
     await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
-      `test-service-w${testInfo.workerIndex}`
+      `test-service-w${testInfo.parallelIndex}`
     );
   });
 
   test('should switch between editing different rules', async ({ pageObjects }, testInfo) => {
     // Create another test rule
-    const secondStreamSuffix = `edit-test-2-w${testInfo.workerIndex}`;
+    const secondStreamSuffix = `edit-test-2-w${testInfo.parallelIndex}`;
     const secondStreamName = `logs.${secondStreamSuffix}`;
 
     await pageObjects.streams.clickCreateRoutingRule();

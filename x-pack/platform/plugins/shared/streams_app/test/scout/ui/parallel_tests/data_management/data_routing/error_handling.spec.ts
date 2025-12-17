@@ -29,7 +29,7 @@ test.describe(
       context,
       pageObjects,
     }, testInfo) => {
-      const streamSuffix = `network-test-w${testInfo.workerIndex}`;
+      const streamSuffix = `network-test-w${testInfo.parallelIndex}`;
       const fullStreamName = `logs.${streamSuffix}`;
 
       await pageObjects.streams.clickCreateRoutingRule();
@@ -59,7 +59,7 @@ test.describe(
       context,
       pageObjects,
     }, testInfo) => {
-      const streamSuffix = `error-test-w${testInfo.workerIndex}`;
+      const streamSuffix = `error-test-w${testInfo.parallelIndex}`;
       const fullStreamName = `logs.${streamSuffix}`;
 
       // Create a rule first

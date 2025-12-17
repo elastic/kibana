@@ -243,7 +243,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     // Create a parent stream with a child
     await apiServices.streams.forkStream('logs', parentStream, {
       field: 'service.name',
-      eq: `parent-w${testInfo.workerIndex}`,
+      eq: `parent-w${testInfo.parallelIndex}`,
     });
 
     // Create a child under the parent

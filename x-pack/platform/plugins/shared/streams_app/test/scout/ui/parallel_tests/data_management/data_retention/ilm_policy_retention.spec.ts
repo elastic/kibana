@@ -37,7 +37,7 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
 
     await apiServices.streams.forkStream('logs', testStreamName, {
       field: 'service.name',
-      eq: `ilm-policy-w${testInfo.workerIndex}`,
+      eq: `ilm-policy-w${testInfo.parallelIndex}`,
     });
     await pageObjects.streams.gotoDataRetentionTab(testStreamName);
   });

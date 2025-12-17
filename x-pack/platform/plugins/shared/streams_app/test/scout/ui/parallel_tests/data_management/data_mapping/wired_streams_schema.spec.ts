@@ -35,12 +35,12 @@ test.describe(
       // Create a parent wired stream
       await apiServices.streams.forkStream('logs', parentStreamName, {
         field: 'severity_text',
-        eq: `info-w${testInfo.workerIndex}`,
+        eq: `info-w${testInfo.parallelIndex}`,
       });
       // Create a child wired stream
       await apiServices.streams.forkStream(parentStreamName, childStreamName, {
         field: 'service.name',
-        eq: `test-service-w${testInfo.workerIndex}`,
+        eq: `test-service-w${testInfo.parallelIndex}`,
       });
 
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });

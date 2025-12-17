@@ -53,7 +53,7 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
     await safeDeleteStream(apiServices, streamName);
     await apiServices.streams.forkStream('logs', streamName, {
       field: 'service.name',
-      eq: `inherit-default-w${testInfo.workerIndex}`,
+      eq: `inherit-default-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(streamName);
 
@@ -78,7 +78,7 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
     await safeDeleteStream(apiServices, streamName);
     await apiServices.streams.forkStream('logs', streamName, {
       field: 'service.name',
-      eq: `inherit-toggle-w${testInfo.workerIndex}`,
+      eq: `inherit-toggle-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(streamName);
 
@@ -108,7 +108,7 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
     await safeDeleteStream(apiServices, parentName);
     await apiServices.streams.forkStream('logs', parentName, {
       field: 'service.name',
-      eq: `inherit-nested-w${testInfo.workerIndex}`,
+      eq: `inherit-nested-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(parentName);
 
@@ -138,7 +138,7 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
     await safeDeleteStream(apiServices, parentName);
     await apiServices.streams.forkStream('logs', parentName, {
       field: 'service.name',
-      eq: `inherit-override-w${testInfo.workerIndex}`,
+      eq: `inherit-override-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(parentName);
 
@@ -173,13 +173,13 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
 
     await apiServices.streams.forkStream('logs', stream1, {
       field: 'service.name',
-      eq: `inherit-multi-1-w${testInfo.workerIndex}`,
+      eq: `inherit-multi-1-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(stream1);
 
     await apiServices.streams.forkStream('logs', stream2, {
       field: 'service.name',
-      eq: `inherit-multi-2-w${testInfo.workerIndex}`,
+      eq: `inherit-multi-2-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(stream2);
 
@@ -200,7 +200,7 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
     await safeDeleteStream(apiServices, streamName);
     await apiServices.streams.forkStream('logs', streamName, {
       field: 'service.name',
-      eq: `inherit-parent-change-w${testInfo.workerIndex}`,
+      eq: `inherit-parent-change-w${testInfo.parallelIndex}`,
     });
     createdStreams.push(streamName);
 

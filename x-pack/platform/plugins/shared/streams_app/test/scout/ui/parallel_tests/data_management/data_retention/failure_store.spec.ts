@@ -60,7 +60,7 @@ test.describe('Stream data retention - updating failure store', () => {
       // Create wired stream with failure store enabled
       await apiServices.streams.forkStream('logs', wiredStreamName, {
         field: 'service.name',
-        eq: `failure-store-w${testInfo.workerIndex}`,
+        eq: `failure-store-w${testInfo.parallelIndex}`,
       });
       try {
         await esClient.indices.putDataStreamOptions(

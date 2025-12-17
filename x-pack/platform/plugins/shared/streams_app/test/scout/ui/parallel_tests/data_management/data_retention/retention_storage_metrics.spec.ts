@@ -42,7 +42,7 @@ test.describe(
 
       await apiServices.streams.forkStream('logs', testStreamName, {
         field: 'service.name',
-        eq: `storage-metrics-w${testInfo.workerIndex}`,
+        eq: `storage-metrics-w${testInfo.parallelIndex}`,
       });
       await pageObjects.streams.gotoDataRetentionTab(testStreamName);
     });

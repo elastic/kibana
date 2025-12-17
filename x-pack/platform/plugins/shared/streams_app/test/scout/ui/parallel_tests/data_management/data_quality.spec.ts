@@ -33,7 +33,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     // Create a test stream with routing rules first
     await apiServices.streams.forkStream('logs', wiredStream, {
       field: 'service.name',
-      eq: `nginx-w${testInfo.workerIndex}`,
+      eq: `nginx-w${testInfo.parallelIndex}`,
     });
 
     // Generate some normal logs

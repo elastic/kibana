@@ -27,7 +27,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Create a test stream with routing rules
     await apiServices.streams.forkStream('logs', testStreamName, {
       field: 'severity_text',
-      eq: `info-w${testInfo.workerIndex}`,
+      eq: `info-w${testInfo.parallelIndex}`,
     });
 
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });

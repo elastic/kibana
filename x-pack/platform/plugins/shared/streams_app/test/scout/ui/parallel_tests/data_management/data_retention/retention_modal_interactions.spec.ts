@@ -41,7 +41,7 @@ test.describe('Stream data retention - modal interactions', { tag: ['@ess', '@sv
 
     await apiServices.streams.forkStream('logs', testStreamName, {
       field: 'service.name',
-      eq: `modal-interactions-w${testInfo.workerIndex}`,
+      eq: `modal-interactions-w${testInfo.parallelIndex}`,
     });
     await pageObjects.streams.gotoDataRetentionTab(testStreamName);
   });

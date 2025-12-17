@@ -114,7 +114,7 @@ test.describe('Stream data routing - AI suggestions editing validation', { tag: 
     await safeDeleteStream(apiServices, existingStream);
     await apiServices.streams.forkStream('logs', existingStream, {
       field: 'service.name',
-      eq: `existing-service-w${testInfo.workerIndex}`,
+      eq: `existing-service-w${testInfo.parallelIndex}`,
     });
 
     await page.reload();
@@ -133,7 +133,7 @@ test.describe('Stream data routing - AI suggestions editing validation', { tag: 
     await expect(nameInput).toBeVisible();
 
     // Use the unique suffix to trigger duplicate name error
-    const existingBaseName = `existing-w${testInfo.workerIndex}`;
+    const existingBaseName = `existing-w${testInfo.parallelIndex}`;
     await nameInput.fill(existingBaseName);
 
     await expect(

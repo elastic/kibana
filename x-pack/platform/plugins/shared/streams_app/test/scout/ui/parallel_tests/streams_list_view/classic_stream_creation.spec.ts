@@ -17,8 +17,8 @@ function getCreatedStreamNameFromUrl(urlString: string): string {
   return decodeURIComponent(match?.[1] ?? '');
 }
 
-function buildUniqueTemplateConfig(testInfo: { workerIndex: number; testId: string }) {
-  const uniqueId = `${testInfo.workerIndex}-${testInfo.testId}`;
+function buildUniqueTemplateConfig(testInfo: { parallelIndex: number; testId: string }) {
+  const uniqueId = `${testInfo.parallelIndex}-${testInfo.testId}`;
 
   return {
     templateName: `${CLASSIC_STREAM_TEMPLATE_NAME}-${uniqueId}`,
