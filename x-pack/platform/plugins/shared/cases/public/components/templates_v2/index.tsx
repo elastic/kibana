@@ -48,6 +48,7 @@ const fetchTemplate = async (templateId: string) => {
 };
 
 const createTemplate = async (templateInput: CreateTemplateInput) => {
+  console.log('createTemplate', templateInput);
   return KibanaServices.get().http.post<Template>(`${CASES_INTERNAL_URL}/templates`, {
     body: JSON.stringify(templateInput),
   });
@@ -257,6 +258,8 @@ export const TemplateFormFields = () => {
 TemplateFormFields.displayName = 'TemplateFormFields';
 
 export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
+  const createTemplateMutation = useCreateTemplate();
+
   const form = useForm<{ name: string; definition: string }>({
     defaultValues: {
       definition: sample,
@@ -274,16 +277,16 @@ export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
         renderHeader={() => <span>{'Create template'}</span>}
         footer={
           <CommonFlyoutFooter
-            isLoading={false}
-            disabled={false}
+            isLoading={form.formState.isSubmitting}
+            disabled={!form.formState.isValid}
             onCancel={onClose}
-            onSave={form.handleSubmit((payload) => {
-              console.log('payload', payload);
+            onSave={form.handleSubmit(async (payload) => {
+              await createTemplateMutation.mutateAsync(payload);
             })}
           />
         }
       >
-        {TemplateFormFields}
+        {() => <TemplateFormFields />}
       </CommonFlyout>
     </FormProvider>
   );
