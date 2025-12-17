@@ -127,7 +127,7 @@ export function loadEmbeddableData(
     const isThereAnotherRequestOnFlight = loadingReasons.length > 1;
     // filter out blocking errors if marked as skippable, but only if there are other requests on flight
     const filteredBlockingErrors = blockingErrors.filter(
-      (msg) => isThereAnotherRequestOnFlight && !msg.canBeSkipped
+      (msg) => !msg.canBeSkipped || isThereAnotherRequestOnFlight
     );
     updateValidationErrors(filteredBlockingErrors);
     updateBlockingErrors(filteredBlockingErrors);
