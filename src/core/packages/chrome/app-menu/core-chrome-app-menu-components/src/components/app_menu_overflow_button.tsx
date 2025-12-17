@@ -60,7 +60,7 @@ export const AppMenuOverflowButton = ({
     <EuiButtonIcon
       iconType="boxesHorizontal" // TODO: Change to "ellipsis" when it's available in EUI.
       size="xs"
-      aria-label={i18n.translate('appMenu.showMoreButtonLabel', {
+      aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
       color="text"
@@ -76,7 +76,7 @@ export const AppMenuOverflowButton = ({
     <AppMenuPopover
       items={items}
       anchorElement={button}
-      tooltipContent={i18n.translate('appMenu.showMoreButtonTooltip', {
+      tooltipContent={i18n.translate('core.chrome.appMenu.showMoreButtonTooltip', {
         defaultMessage: 'More',
       })}
       isOpen={isPopoverOpen}
