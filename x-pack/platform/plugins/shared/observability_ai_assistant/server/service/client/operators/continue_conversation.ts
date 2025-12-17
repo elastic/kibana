@@ -28,8 +28,8 @@ import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_compl
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
 import { isToolValidationError } from '@kbn/inference-common';
+import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
 import {
   CompatibleJSONSchema,
   Message,
@@ -118,15 +118,15 @@ export function executeFunctionAndCatchError({
     }),
     catchError((error) => {
       logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
-      
+
       if (isToolValidationError(error)) {
-          return of(
-            createFunctionResponseMessage({
-              name,
-              content: { message: error.message, errors: error.meta },
-            })
-          );
-        }
+        return of(
+          createFunctionResponseMessage({
+            name,
+            content: { message: error.message, errors: error.meta },
+          })
+        );
+      }
       // We want to catch the error only when a promise occurs
       // if it occurs in the Observable, we cannot easily recover
       // from it because the function may have already emitted
