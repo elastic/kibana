@@ -32,6 +32,17 @@ export interface ControlsLayout {
   };
 }
 
+export interface PublishesControlsLayout {
+  layout$: BehaviorSubject<ControlsLayout>;
+}
+
+export const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout => {
+  return Boolean(
+    (api as PublishesControlsLayout).layout$ &&
+      Object.keys((api as PublishesControlsLayout).layout$.getValue()).includes('controls')
+  );
+};
+
 export type ControlsRendererParentApi = Pick<
   PresentationContainer,
   'children$' | 'addNewPanel' | 'replacePanel'

@@ -8,5 +8,9 @@
  */
 
 export { ControlsRenderer } from './src/controls_renderer';
-export type { ControlsRendererParentApi, HasPrependWrapperRef } from './src/types';
-export { apiHasPrependWrapperRef } from './src/types';
+export type {
+  ControlsRendererParentApi,
+  HasPrependWrapperRef,
+  PublishesControlsLayout,
+} from './src/types';
+export { apiHasPrependWrapperRef, apiPublishesControlsLayout } from './src/types';
