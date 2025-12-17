@@ -634,12 +634,6 @@ export class PromQLCstToAstConverter {
             return '\t';
           case 'v':
             return '\v';
-          case '\\':
-            return '\\';
-          case "'":
-            return "'";
-          case '"':
-            return '"';
           default:
             return char;
         }
