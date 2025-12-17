@@ -43,7 +43,6 @@ describe('useMetricFieldsFilter', () => {
     fields: baseFields,
     searchTerm: '',
     dimensions: [] as Dimension[],
-    dimensionValuesMetricFields: [] as string[],
   };
 
   describe('when no filters are applied', () => {

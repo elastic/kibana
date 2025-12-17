@@ -92,11 +92,10 @@ export const extractFields = ({
 
 export interface RowMappings {
   sampleRowByMetric: Map<string, DatatableRow>;
-  fieldSpecsByRow: WeakMap<DatatableRow, MetricField>;
 }
 
 /**
- * Creates a map of metric field name → (value → row).
+ * Creates a map of metric field name → sample rows.
  * @param rows - The rows to use for the sample rows.
  * @param fieldSpecs - The field specs to use for the sample rows.
  * @returns The sample rows by metric field name.
@@ -109,10 +108,9 @@ export const createSampleRowByMetric = ({
   fieldSpecs: MetricField[];
 }): RowMappings => {
   const sampleRowByMetric = new Map<string, DatatableRow>();
-  const specByRow = new WeakMap<DatatableRow, MetricField>();
 
   if (!rows?.length || fieldSpecs.length === 0) {
-    return { sampleRowByMetric, fieldSpecsByRow: specByRow };
+    return { sampleRowByMetric };
   }
 
   const specByFieldName = new Map<string, MetricField>();
@@ -127,7 +125,6 @@ export const createSampleRowByMetric = ({
     for (const fieldName in row) {
       if (specByFieldName.has(fieldName) && hasValue(row[fieldName])) {
         const spec = specByFieldName.get(fieldName)!;
-        specByRow.set(row, spec);
 
         if (pendingSamples.has(spec.name)) {
           sampleRowByMetric.set(spec.name, row);
@@ -137,64 +134,5 @@ export const createSampleRowByMetric = ({
     }
   }
 
-  return { sampleRowByMetric, fieldSpecsByRow: specByRow };
-};
-
-/**
- * Creates a map of dimension name → (value → Set<metricFieldKey>).
- * @param rows - The rows to use for the values.
- * @param specByRow - The spec by row to use for the values.
- * @param requiredFields - The required fields to use for the values.
- * @param dimensions - The dimensions to use for the values.
- * @returns The values by dimension name.
- */
-export const createValuesByDimensions = ({
-  rows,
-  specByRow,
-  requiredFields,
-  dimensions,
-}: {
-  rows: DatatableRow[];
-  specByRow: WeakMap<DatatableRow, MetricField>;
-  requiredFields: string[];
-  dimensions: Dimension[];
-}): Map<string, Map<string, Set<string>>> => {
-  const result = new Map<string, Map<string, Set<string>>>();
-
-  if (!rows?.length || requiredFields.length === 0) {
-    return result;
-  }
-
-  const requiredFieldsSet = new Set(requiredFields);
-
-  for (const row of rows) {
-    const spec = specByRow.get(row);
-    if (!spec) {
-      continue;
-    }
-
-    for (const dim of dimensions) {
-      const dimensionValue = row[dim.name];
-      if (!requiredFieldsSet.has(dim.name) || !hasValue(dimensionValue)) {
-        continue;
-      }
-
-      const value = String(dimensionValue);
-      let dimensionMap = result.get(dim.name);
-
-      if (!dimensionMap) {
-        dimensionMap = new Map();
-        result.set(dim.name, dimensionMap);
-      }
-
-      const existingSet = dimensionMap.get(value);
-      if (existingSet) {
-        existingSet.add(spec.name);
-      } else {
-        dimensionMap.set(value, new Set([spec.name]));
-      }
-    }
-  }
-
-  return result;
+  return { sampleRowByMetric };
 };

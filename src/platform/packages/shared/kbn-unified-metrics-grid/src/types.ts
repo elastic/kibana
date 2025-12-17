@@ -30,8 +30,6 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
 }
 
-export type DimensionValueFilters = Record<string, string[]>;
-
 export interface Dimension {
   name: string;
   type: ES_FIELD_TYPES;

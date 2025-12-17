@@ -22,12 +22,6 @@ export interface MetricsExperienceRestorableState {
 
   // Selected dimensions
   selectedDimensions: Dimension[];
-
-  // Selected dimension values
-  selectedDimensionValues: string[];
-
-  // selected metric field keys matching the selected dimension values
-  selectedValuesMetricFields: string[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

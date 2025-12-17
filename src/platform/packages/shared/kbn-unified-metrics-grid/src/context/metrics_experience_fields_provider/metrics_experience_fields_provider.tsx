@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useCallback, useMemo, type PropsWithChildren } from 'react';
+import React, { createContext, useMemo, type PropsWithChildren } from 'react';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, MetricField } from '../../types';
-import {
-  extractFields,
-  createSampleRowByMetric,
-  createValuesByDimensions,
-} from './helpers/fields_parser';
+import { extractFields, createSampleRowByMetric } from './helpers/fields_parser';
 
 export type FieldCapsResponseMap = Record<
   string,
@@ -27,14 +23,12 @@ export interface MetricsExperienceFieldsContextValue {
   metricFields: MetricField[];
   dimensions: Dimension[];
   sampleRowByMetric: Map<string, DatatableRow>;
-  getValuesByDimension: (requiredFields: string[]) => Map<string, Map<string, Set<string>>>;
 }
 
 const EMPTY_CONTEXT: MetricsExperienceFieldsContextValue = {
   metricFields: [],
   dimensions: [],
   sampleRowByMetric: new Map(),
-  getValuesByDimension: (_: string[]) => new Map(),
 };
 
 export const MetricsExperienceFieldsContext =
@@ -62,7 +56,7 @@ export const MetricsExperienceFieldsProvider = ({
     [dataView, table?.columns]
   );
 
-  const { sampleRowByMetric, fieldSpecsByRow } = useMemo(
+  const { sampleRowByMetric } = useMemo(
     () =>
       createSampleRowByMetric({
         rows: table?.rows ?? [],
@@ -71,25 +65,13 @@ export const MetricsExperienceFieldsProvider = ({
     [table?.rows, metricFields]
   );
 
-  const getValuesByDimension = useCallback(
-    (fieldNames: string[]) =>
-      createValuesByDimensions({
-        rows: table?.rows ?? [],
-        specByRow: fieldSpecsByRow,
-        requiredFields: fieldNames,
-        dimensions,
-      }),
-    [table?.rows, fieldSpecsByRow, dimensions]
-  );
-
   const value = useMemo<MetricsExperienceFieldsContextValue>(
     () => ({
       metricFields,
       dimensions,
       sampleRowByMetric,
-      getValuesByDimension,
     }),
-    [metricFields, dimensions, sampleRowByMetric, getValuesByDimension]
+    [metricFields, dimensions, sampleRowByMetric]
   );
 
   return (

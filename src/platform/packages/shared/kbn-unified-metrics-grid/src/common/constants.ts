@@ -9,8 +9,6 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-export const FIELD_VALUE_SEPARATOR = String.fromCharCode(0x1d);
-
 // Full screen classes
 export const METRICS_GRID_CLASS = 'metricsGrid';
 export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsGridWrapper--fullScreen';
@@ -19,10 +17,8 @@ export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrict
 
 // data-test-subj
 export const METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceBreakdownSelector';
-export const METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceValuesSelector';
 
 // Selection limits
-export const MAX_VALUES_SELECTIONS = 10;
 export const MAX_DIMENSIONS_SELECTIONS = 1;
 export const PAGE_SIZE = 20;
 
