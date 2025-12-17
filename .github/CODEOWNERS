@@ -508,7 +508,6 @@ src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-presentation-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
-src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appex-qa
@@ -871,6 +870,7 @@ x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
+x-pack/packages/ai-infra/security-labs-artifact-builder @elastic/security-generative-ai
 x-pack/packages/kbn-synthetics-private-location @elastic/actionable-obs-team
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
@@ -923,7 +923,6 @@ x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
-x-pack/platform/packages/shared/ai-insights @elastic/obs-ai-team
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
@@ -2312,6 +2311,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
+src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
