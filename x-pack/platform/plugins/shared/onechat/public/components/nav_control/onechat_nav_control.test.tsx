@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -34,7 +34,7 @@ describe('OnechatNavControl', () => {
 
   it('toggles the flyout when the nav button is clicked', () => {
     const toggleConversationFlyout = jest.fn();
-    const openChat$ = new BehaviorSubject(AIChatExperience.Assistant);
+    const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
@@ -62,7 +62,7 @@ describe('OnechatNavControl', () => {
 
   it('toggles the flyout on Cmd/Ctrl+; keyboard shortcut', () => {
     const toggleConversationFlyout = jest.fn();
-    const openChat$ = new BehaviorSubject(AIChatExperience.Assistant);
+    const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
@@ -87,5 +87,39 @@ describe('OnechatNavControl', () => {
     // Provide both ctrlKey and metaKey so the assertion is platform-independent
     fireEvent.keyDown(window, { key: ';', code: 'Semicolon', ctrlKey: true, metaKey: true });
     expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the flyout when openChat$ emits Agent', () => {
+    const toggleConversationFlyout = jest.fn();
+    const openConversationFlyout = jest.fn();
+    const completeOpenChat = jest.fn();
+    const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
+
+    mockUseUiPrivileges.mockReturnValue({ show: true } as any);
+    mockUseKibana.mockReturnValue({
+      services: {
+        onechat: {
+          toggleConversationFlyout,
+          openConversationFlyout,
+        },
+        aiAssistantManagementSelection: {
+          openChat$,
+          completeOpenChat,
+        },
+      },
+    } as any);
+
+    render(
+      <IntlProvider locale="en">
+        <OnechatNavControl />
+      </IntlProvider>
+    );
+
+    act(() => {
+      openChat$.next(AIChatExperience.Agent);
+    });
+
+    expect(openConversationFlyout).toHaveBeenCalledTimes(1);
+    expect(completeOpenChat).toHaveBeenCalledTimes(1);
   });
 });
