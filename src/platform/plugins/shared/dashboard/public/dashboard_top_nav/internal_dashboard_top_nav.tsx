@@ -30,6 +30,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
+import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -73,7 +74,6 @@ export function InternalDashboardTopNav({
   embedSettings,
   forceHideUnifiedSearch,
   redirectTo,
-  setCustomHeaderActionMenu,
   showBorderBottom = true,
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
@@ -82,7 +82,7 @@ export function InternalDashboardTopNav({
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
-  const { setAppMenu, onAppLeave } = useDashboardMountContext();
+  const { onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
 
@@ -263,20 +263,6 @@ export function InternalDashboardTopNav({
   void viewModeTopNavConfig; // TODO
   void editModeTopNavConfig; // TODO
 
-  useEffect(() => {
-    setAppMenu?.({
-      items: [
-        {
-          label: 'Test',
-          run: () => {},
-          order: 1,
-          id: 'placeholder',
-          iconType: 'gear',
-        },
-      ],
-    });
-  }, [setAppMenu]);
-
   UseUnmount(() => {
     dashboardApi.clearOverlays();
   });
@@ -295,8 +281,6 @@ export function InternalDashboardTopNav({
         } as EuiToolTipProps,
       });
     }
-
-    console.log(badges);
 
     const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
@@ -367,6 +351,20 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
+      <AppMenu
+        setAppMenu={coreServices.chrome.setAppMenu}
+        config={{
+          items: [
+            {
+              label: 'Test',
+              run: () => {},
+              order: 1,
+              id: 'placeholder',
+              iconType: 'gear',
+            },
+          ],
+        }}
+      />
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
