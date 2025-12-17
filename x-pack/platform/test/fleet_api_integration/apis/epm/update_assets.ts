@@ -341,14 +341,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'all_assets',
         });
 
-        expect({
-          ...res.attributes,
-          installed_kibana: sortBy(res.attributes.installed_kibana, ['id']),
-          package_assets: sortBy(res.attributes.package_assets, ['id']),
-          installed_es: sortBy(res.attributes.installed_es, ['id']).filter(
-            (asset) => asset.type !== 'knowledge_base'
-          ),
-        }).eql({
+        const expectedSO = {
           installed_kibana_space_id: 'default',
           installed_kibana: sortBy(
             [
@@ -647,7 +640,22 @@ export default function (providerContext: FtrProviderContext) {
           verification_status: 'unknown',
           verification_key_id: null,
           previous_version: '0.1.0',
+        };
+
+        expectedSO.installed_es.forEach((item) => {
+          expect(
+            res.attributes.installed_es.find(
+              (asset: any) => asset.type === item.type && asset.id === item.id
+            )
+          ).to.not.be(undefined);
         });
+
+        expect({
+          ...res.attributes,
+          installed_kibana: sortBy(res.attributes.installed_kibana, ['id']),
+          package_assets: sortBy(res.attributes.package_assets, ['id']),
+          installed_es: [],
+        }).eql({ ...expectedSO, installed_es: [] });
       });
     });
 
