@@ -14,7 +14,6 @@ import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { UppercaseTargetField } from './uppercase_optional_fields';
 
-// todo - add field selector for from and to, and where advanced editor
 export const UppercaseProcessorForm = () => {
   return (
     <>
