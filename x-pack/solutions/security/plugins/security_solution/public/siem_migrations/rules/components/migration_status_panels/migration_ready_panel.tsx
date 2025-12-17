@@ -23,10 +23,16 @@ import { useGetMissingResources } from '../../../common/hooks/use_get_missing_re
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { MigrationSource } from '../../../common/types';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
 }
+
+const RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION: Record<MigrationSource, string> = {
+  [MigrationSource.SPLUNK]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_SPLUNK,
+  [MigrationSource.QRADAR]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR,
+};
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
   const { openFlyout } = useMigrationDataInputContext();
@@ -86,7 +92,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
                 <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                   <span>{migrationPanelDescription}</span>
                   {!isLoading && missingResources.length > 0 && (
-                    <span> {i18n.RULE_MIGRATION_READY_MISSING_RESOURCES}</span>
+                    <span>
+                      {RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION[migrationStats.vendor]}
+                    </span>
                   )}
                 </PanelText>
               </EuiFlexItem>
