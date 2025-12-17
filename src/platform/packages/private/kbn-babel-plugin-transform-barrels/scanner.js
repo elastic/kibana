@@ -94,7 +94,8 @@ function parseBarrelExports(content, filePath) {
 
       for (const specifier of node.specifiers) {
         if (specifier.type === 'ExportSpecifier') {
-          const exportedName = specifier.exported.name || specifier.exported.value;
+          const exported = specifier.exported;
+          const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
           const localName = specifier.local.name;
 
           exports[exportedName] = {
@@ -208,7 +209,8 @@ function extractDirectExports(content, filePath) {
       if (node.specifiers && !node.source) {
         for (const spec of node.specifiers) {
           if (spec.type === 'ExportSpecifier') {
-            const exportedName = spec.exported.name || spec.exported.value;
+            const exported = spec.exported;
+            const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
             const localName = spec.local.name;
             exports[exportedName] = {
               path: filePath,
@@ -227,16 +229,20 @@ function extractDirectExports(content, filePath) {
       let localName = 'default';
 
       if (node.declaration) {
-        if (node.declaration.type === 'Identifier') {
-          localName = node.declaration.name;
-        } else if (node.declaration.id && node.declaration.id.name) {
-          localName = node.declaration.id.name;
+        const decl = node.declaration;
+        if (decl.type === 'Identifier') {
+          localName = decl.name;
+        } else if (
+          (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration') &&
+          decl.id
+        ) {
+          localName = decl.id.name;
         }
       }
 
       exports.default = {
         path: filePath,
-        type: 'default',
+        type: /** @type {const} */ ('default'),
         localName: localName,
         importedName: 'default',
       };
