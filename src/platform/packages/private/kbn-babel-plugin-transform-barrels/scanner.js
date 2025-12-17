@@ -12,7 +12,7 @@ const path = require('path');
 const { readFile } = require('fs/promises');
 const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
-
+const fs = require('fs');
 /**
  * Build the barrel index by scanning all index files in the repository.
  * This runs ONCE before the Piscina worker pool is created.
@@ -53,7 +53,7 @@ async function buildBarrelIndex(repoRoot) {
           index[barrelPath] = { exports };
         }
       } catch (err) {
-        // Skip files that can't be parsed (e.g., syntax errors)
+        // Skip files that can't be parsed
         console.warn(`[barrel-transform] Skipping ${barrelPath}: ${err.message}`);
       }
     })
@@ -119,7 +119,7 @@ function parseBarrelExports(content, filePath) {
       // For `export *`, we need to parse the source file to get all exports
       // This is done synchronously within the async context (acceptable here)
       try {
-        const sourceContent = require('fs').readFileSync(resolvedPath, 'utf-8');
+        const sourceContent = fs.readFileSync(resolvedPath, 'utf-8');
         const sourceExports = extractDirectExports(sourceContent, resolvedPath);
 
         for (const [name, info] of Object.entries(sourceExports)) {
@@ -132,9 +132,6 @@ function parseBarrelExports(content, filePath) {
         // Skip if source can't be read
       }
     },
-
-    // Handle: export { default } from './source' or export { default as Foo } from './source'
-    // Already covered by ExportNamedDeclaration above
   });
 
   return exports;
@@ -265,7 +262,6 @@ function resolveModulePath(modulePath, fromDir) {
     return null;
   }
 
-  const fs = require('fs');
   const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
 
   const basePath = path.resolve(fromDir, modulePath);

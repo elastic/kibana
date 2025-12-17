@@ -122,9 +122,6 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   const newNodes = [];
 
   for (const [targetPath, specifiers] of newImports) {
-    // Convert absolute path to relative from current file
-    // The barrel index stores absolute paths for reliable lookups,
-    // but import statements need relative paths from the current file
     const relativePath = absoluteToRelative(targetPath, currentFileDir);
 
     const importNode = createImportDeclaration(t, specifiers, relativePath);
@@ -133,10 +130,7 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
 
   // If there are unchanged specifiers, keep a modified original import
   if (unchangedSpecifiers.length > 0) {
-    const remainingImport = t.importDeclaration(
-      unchangedSpecifiers,
-      t.stringLiteral(importSource)
-    );
+    const remainingImport = t.importDeclaration(unchangedSpecifiers, t.stringLiteral(importSource));
     newNodes.push(remainingImport);
   }
 
@@ -161,16 +155,12 @@ function resolveToBarrelPath(importSource, fromDir, barrelIndex) {
 
   const basePath = path.resolve(fromDir, importSource);
 
-  // Try as-is with extensions
   for (const ext of extensions) {
     const fullPath = basePath + ext;
     if (barrelIndex[fullPath]) {
       return fullPath;
     }
-  }
 
-  // Try as directory with index file
-  for (const ext of ['.ts', '.tsx', '.js', '.jsx']) {
     const indexPath = path.join(basePath, 'index' + ext);
     if (barrelIndex[indexPath]) {
       return indexPath;
