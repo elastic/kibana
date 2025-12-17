@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
       });
 
-      it('Warns when case is different', async function () {
+      it('Does not warn about the duplicated titile when the casing is different', async function () {
         await dashboard.switchToEditMode();
         await dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(
           dashboardName.toUpperCase(),
@@ -146,9 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         );
 
-        await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
-
-        await dashboard.cancelSave();
+        await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
       });
     });
 
