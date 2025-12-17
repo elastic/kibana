@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/lazy-object'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
+  - '@kbn/expect'
 tags:
   - plugin
   - prod

@@ -20,35 +20,20 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
+import { formatDataRetention } from '../../../../utils';
 import { ErrorState } from './error_state';
 import { EmptyState } from './empty_state';
 
-const formatDataRetention = (template: TemplateDeserialized): string | undefined => {
-  const { lifecycle } = template;
-
-  if (!lifecycle?.enabled) {
-    return undefined;
-  }
-
-  if (lifecycle.infiniteDataRetention) {
-    return '∞';
-  }
-
-  if (lifecycle.value && lifecycle.unit) {
-    return `${lifecycle.value}${lifecycle.unit}`;
-  }
-
-  return undefined;
-};
-
 interface SelectTemplateStepProps {
-  templates: TemplateDeserialized[];
+  templates: IndexTemplate[];
   selectedTemplate: string | null;
   onTemplateSelect: (templateName: string | null) => void;
   onCreateTemplate: () => void;
   hasErrorLoadingTemplates?: boolean;
   onRetryLoadTemplates: () => void;
+  showDataRetention?: boolean;
 }
 
 export const SelectTemplateStep = ({
@@ -58,6 +43,7 @@ export const SelectTemplateStep = ({
   onCreateTemplate,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
+  showDataRetention = true,
 }: SelectTemplateStepProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -67,47 +53,63 @@ export const SelectTemplateStep = ({
         const hasIlmPolicy = Boolean(template.ilmPolicy?.name);
         const dataRetention = !hasIlmPolicy ? formatDataRetention(template) : undefined;
 
+        const getAppendContent = () => {
+          if (!showDataRetention) {
+            return undefined;
+          }
+
+          if (hasIlmPolicy) {
+            return (
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    <EuiTextTruncate text={template.ilmPolicy?.name ?? ''} width={250} />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">
+                    {i18n.translate(
+                      'xpack.createClassicStreamFlyout.selectTemplateStep.ilmBadgeLabel',
+                      {
+                        defaultMessage: 'ILM',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
+
+          if (dataRetention) {
+            return (
+              <EuiText size="s" color="subdued">
+                {dataRetention}
+              </EuiText>
+            );
+          }
+
+          return undefined;
+        };
+
         return {
           label: template.name,
           checked: template.name === selectedTemplate ? 'on' : undefined,
           'data-test-subj': `template-option-${template.name}`,
           template,
-          append: hasIlmPolicy ? (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <EuiTextTruncate text={template.ilmPolicy?.name ?? ''} width={250} />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate(
-                    'xpack.createClassicStreamFlyout.selectTemplateStep.ilmBadgeLabel',
-                    {
-                      defaultMessage: 'ILM',
-                    }
-                  )}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : dataRetention ? (
-            <EuiText size="s" color="subdued">
-              {dataRetention}
-            </EuiText>
-          ) : undefined,
-        } as EuiSelectableOption<{ template: TemplateDeserialized }>;
+          append: getAppendContent(),
+        } as EuiSelectableOption<{ template: IndexTemplate }>;
       }),
-    [templates, selectedTemplate]
+    [templates, selectedTemplate, showDataRetention]
   );
 
-  const renderOption = (option: EuiSelectableOption<{ template: TemplateDeserialized }>) => {
+  const renderOption = (option: EuiSelectableOption<{ template: IndexTemplate }>) => {
     const templateData = option?.template;
     const isManaged = templateData?._kbnMeta?.type === 'managed';
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTextTruncate text={option.label} width={250} />
+          {showDataRetention ? <EuiTextTruncate text={option.label} width={250} /> : option.label}
         </EuiFlexItem>
         {isManaged && (
           <EuiFlexItem grow={false}>

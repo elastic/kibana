@@ -5,40 +5,58 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { roundedBorderRadiusStyles } from '../../conversation.styles';
+import { css } from '@emotion/react';
 
-export const usePopoverButtonStyles = ({
-  open,
-  disabled = false,
+export const SELECTOR_LIST_HEADER_HEIGHT = 57;
+export const SELECTOR_LIST_FOOTER_HEIGHT = 57;
+const SELECTOR_POPOVER_MAX_HEIGHT = 300;
+export const getMaxListHeight = ({
+  withHeader,
+  withFooter,
 }: {
-  open: boolean;
-  disabled?: boolean;
+  withHeader?: boolean;
+  withFooter?: boolean;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const popoverButtonStyles = css`
-    transition-property: none;
-    min-inline-size: 0;
-    ${roundedBorderRadiusStyles}
-  `;
-  const closedPopoverStyles = css`
-    &:not(:hover) {
-      border-color: transparent;
-    }
-  `;
-  const disabledStyles = css`
-    cursor: default;
-    background-color: transparent;
-    color: ${euiTheme.colors.textParagraph};
-  `;
-  return [popoverButtonStyles, !open && closedPopoverStyles, disabled && disabledStyles];
+  let height = SELECTOR_POPOVER_MAX_HEIGHT;
+  if (withHeader) {
+    height -= SELECTOR_LIST_HEADER_HEIGHT;
+  }
+  if (withFooter) {
+    height -= SELECTOR_LIST_FOOTER_HEIGHT;
+  }
+  return height;
 };
 
-export const selectorListStyles = ({ listId }: { listId: string }) => css`
-  /* Override list item styles */
-  &#${listId} .euiSelectableListItem {
-    border-style: none;
-    background-color: transparent;
-  }
-`;
+export const useSelectorListStyles = ({ listId }: { listId: string }) => {
+  const { euiTheme } = useEuiTheme();
+  const listItemStyles = css`
+    &#${listId} .euiSelectableListItem {
+      border-style: none;
+      color: unset;
+      :hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
+      }
+      & .euiSelectableListItem__content {
+        block-size: 100%;
+        gap: ${euiTheme.size.s};
+        .euiSelectableListItem__icon,
+        .euiSelectableListItem__prepend,
+        .euiSelectableListItem__append {
+          margin: 0;
+        }
+      }
+      & .euiSelectableListItem__text {
+        text-decoration: none;
+      }
+    }
+  `;
+  const selectedItemStyles = css`
+    &#${listId} .euiSelectableListItem-isFocused {
+      :not(:hover) {
+        background-color: unset;
+      }
+    }
+  `;
+  return [listItemStyles, selectedItemStyles];
+};

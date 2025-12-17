@@ -8,6 +8,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 
+type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
+
 interface TimeseriesChangePoint {
   change_point?: number | undefined;
   r_value?: number | undefined;
@@ -55,7 +57,54 @@ interface APMError {
   traceId: string | undefined;
 }
 
-export interface ObservabilityAgentDataRegistryTypes {
+interface APMErrorSample {
+  processor?: {
+    event?: string;
+  };
+  error?: {
+    id?: string;
+    culprit?: string;
+    grouping_key?: string;
+    exception?: Array<{ type?: string }>;
+  };
+  trace?: {
+    id?: string;
+  };
+}
+
+interface APMTransaction {
+  transaction?: {
+    id?: string;
+    name?: string;
+    type?: string;
+  };
+  trace?: {
+    id?: string;
+  };
+  service?: {
+    name?: string;
+  };
+}
+
+interface ServicesItemsItem {
+  serviceName: string;
+  transactionType?: string;
+  environments?: string[];
+  agentName?: string;
+  latency?: number | null;
+  transactionErrorRate?: number;
+  throughput?: number;
+  healthStatus?: ServiceHealthStatus;
+  alertsCount?: number;
+}
+
+interface ServicesItemsResponse {
+  items: ServicesItemsItem[];
+  maxCountExceeded: boolean;
+  serviceOverflowCount: number;
+}
+
+export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
     serviceName: string;
@@ -63,6 +112,16 @@ export interface ObservabilityAgentDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<APMError[]>;
+
+  apmErrorDetails: (params: {
+    request: KibanaRequest;
+    errorId: string;
+    serviceName: string;
+    serviceEnvironment: string;
+    start: string;
+    end: string;
+    kuery?: string;
+  }) => Promise<{ error?: APMErrorSample; transaction?: APMTransaction } | undefined>;
 
   apmServiceSummary: (params: {
     request: KibanaRequest;
@@ -98,4 +157,13 @@ export interface ObservabilityAgentDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<ChangePointGrouping[]>;
+
+  servicesItems: (params: {
+    request: KibanaRequest;
+    environment?: string;
+    kuery?: string;
+    start: string;
+    end: string;
+    searchQuery?: string;
+  }) => Promise<ServicesItemsResponse>;
 }

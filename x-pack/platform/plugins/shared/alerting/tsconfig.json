@@ -72,7 +72,8 @@
     "@kbn/es-types",
     "@kbn/lazy-object",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/config"
+    "@kbn/config",
+    "@kbn/expect"
   ],
   "exclude": ["target/**/*"]
 }

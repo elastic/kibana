@@ -108,9 +108,10 @@ export class MaintenanceWindowsPlugin
     };
 
     const getMaintenanceWindowClientInternal = (
-      request: KibanaRequest
+      request: KibanaRequest,
+      excludedExtension?: ['spaces']
     ): MaintenanceWindowClientApi => {
-      return maintenanceWindowClientFactory.create(request);
+      return maintenanceWindowClientFactory.create(request, excludedExtension);
     };
 
     scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
