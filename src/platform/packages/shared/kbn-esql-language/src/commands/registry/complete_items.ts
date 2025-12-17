@@ -67,6 +67,7 @@ export const allStarConstant: ISuggestionItem = {
     defaultMessage: 'All (*)',
   }),
   sortText: '1',
+  category: SuggestionCategory.CONSTANT_VALUE,
 };
 
 function buildValuePlaceholder(placeholderType: 'value' | 'default' = 'value'): ISuggestionItem {

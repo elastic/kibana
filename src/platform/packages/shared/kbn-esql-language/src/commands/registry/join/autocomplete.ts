@@ -27,9 +27,6 @@ import {
 import { specialIndicesToSuggestions } from '../../definitions/utils/sources';
 import { esqlCommandRegistry } from '..';
 import { suggestForExpression } from '../../definitions/utils';
-import { isFunctionExpression } from '../../../ast/is';
-import { within } from '../../../ast/location';
-import { getExpressionType, isExpressionComplete } from '../../definitions/utils/expressions';
 
 export async function autocomplete(
   query: string,
@@ -151,7 +148,7 @@ export async function autocomplete(
         ) => Promise<ESQLFieldWithMetadata[]>
       );
 
-      const suggestions = await suggestForExpression({
+      const { suggestions, computed } = await suggestForExpression({
         query,
         expressionRoot,
         command,
@@ -170,15 +167,10 @@ export async function autocomplete(
       // Filter out AS operator - it's not valid in boolean expressions
       const filteredSuggestions = suggestions.filter(({ label }) => label !== 'AS');
 
-      const insideFunction =
-        expressionRoot &&
-        isFunctionExpression(expressionRoot) &&
-        within(cursorPosition, expressionRoot);
+      const { expressionType, isComplete, insideFunction } = computed;
 
       if (expressionRoot && !insideFunction) {
-        const expressionType = getExpressionType(expressionRoot, enrichedContext?.columns);
-        const isBooleanComplete =
-          expressionType === 'boolean' && isExpressionComplete(expressionType, innerText);
+        const isBooleanComplete = expressionType === 'boolean' && isComplete;
 
         // Special case: single common field (exists in both source and lookup) is valid as shorthand for field = field
         const fieldIsCommon =

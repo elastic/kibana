@@ -105,7 +105,7 @@ describe('COMPLETION Autocomplete', () => {
   });
 
   it('suggests WITH after the user writes a param as prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH { $0 }']);
+    await completionExpectSuggestions(`FROM a | COMPLETION ? `, ['WITH { $0 }']);
   });
 
   it('suggests WITH after the prompt', async () => {
