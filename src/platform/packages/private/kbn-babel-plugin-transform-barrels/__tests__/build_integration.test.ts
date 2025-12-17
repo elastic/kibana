@@ -21,7 +21,8 @@ import { Build } from '../../../../../dev/build/lib/build';
 const TEST_PACKAGE_PATH = 'src/core/packages/http/server-internal';
 const TEST_PACKAGE_MANIFEST = Path.join(REPO_ROOT, TEST_PACKAGE_PATH, 'kibana.jsonc');
 
-jest.setTimeout(600 * 1000);
+// We allow extra time due to building shared packages.
+jest.setTimeout(300 * 1000);
 
 describe('barrel transform build integration', () => {
   let outputDir: string;
