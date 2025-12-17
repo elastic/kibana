@@ -47,6 +47,7 @@ export const ChatExperience: React.FC = () => {
     handleFieldChange(AI_CHAT_EXPERIENCE_TYPE, undefined);
   }, [handleFieldChange]);
 
+  // testing stuff
   const description = useMemo(
     () => (
       <FormattedMessage
