@@ -129,7 +129,7 @@ describe('test_utils', () => {
       // Mock JSON.parse to throw a non-Error object
       const originalParse = JSON.parse;
       JSON.parse = jest.fn(() => {
-        throw 'string error';
+        throw new Error('string error');
       });
 
       try {
