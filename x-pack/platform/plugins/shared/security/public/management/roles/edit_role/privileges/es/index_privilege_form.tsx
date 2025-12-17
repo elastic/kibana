@@ -340,6 +340,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         { defaultMessage: 'Add a field pattern…' }
                       )}
                       fullWidth
+                      isCaseSensitive
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -368,6 +369,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         { defaultMessage: 'Add a field pattern…' }
                       )}
                       fullWidth
+                      isCaseSensitive
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
