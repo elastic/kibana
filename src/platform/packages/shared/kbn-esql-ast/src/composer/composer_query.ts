@@ -722,12 +722,17 @@ export class ComposerQuery {
    * query.lookup_join('other_index', ['user', 'id']);
    * // Result: ... | LOOKUP JOIN other_index ON user.id | ...
    *
+   * // Join with an alias
+   * query.lookup_join({ index: 'other_index', alias: 'o' }, 'user_id');
+   * // Result: ... | LOOKUP JOIN other_index AS o ON user_id | ...
+   *
    * // Join using a qualified column
    * query.lookup_join('other_index', ['usersIndex', ['id']]);
    * // Result: ... | LOOKUP JOIN other_index ON [usersIndex].[id] | ...
    * ```
    *
-   * @param lookupIndex The name of the index to join with.
+   * @param lookupIndex The name of the index to join with, or an object with
+   *     index and alias properties.
    * @param onFieldName The first field to join on. Can be a string column name
    *     or an array of column parts for nested columns (e.g., ['user', 'id']
    *     for 'user.id').
@@ -739,7 +744,16 @@ export class ComposerQuery {
     onFieldName: ComposerColumnShorthand,
     ...onFieldNames: Array<ComposerColumnShorthand>
   ): ComposerQuery => {
-    const lookupIndexNode = typeof lookupIndex === 'string' ? synth.src(lookupIndex) : lookupIndex;
+    let lookupIndexNode;
+
+    if (typeof lookupIndex === 'string') {
+      lookupIndexNode = synth.src(lookupIndex);
+    } else if ('index' in lookupIndex && 'alias' in lookupIndex) {
+      lookupIndexNode = synth.srcAs(lookupIndex.index, lookupIndex.alias);
+    } else {
+      lookupIndexNode = lookupIndex;
+    }
+
     const onFieldNameNodes = ([onFieldName, ...onFieldNames] as ComposerColumnShorthand[]).map(
       (shorthand) => {
         return synth.col(shorthand);
