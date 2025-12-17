@@ -45,23 +45,21 @@ ${examples.join('\n')}
 }`;
 
 /** @internal **/
-export const buildDocumentation = (declaration: string, examples?: string[]) => `
----
-\
-***${declarationLabel}***
-\
-  - \`\`${declaration}\`\`
-\
----
+export const buildDocumentation = (detail: string, declaration: string, examples?: string[]) => `
+${detail}
+
+# ${declarationLabel}
+\`\`\`esql
+${declaration}
+\`\`\`
+
 ${
-  examples
+  examples?.length
     ? `\
-***${examplesLabel}***
-\
-${examples.map(
-  (i) => `
-  - \`\`${i}\`\`
+# ${examplesLabel}
+\`\`\`esql
+${examples.map((ex) => ex.replace(/^…/gm, '...')).join('\n')}
+\`\`\`
 `
-)}`
     : ''
 }`;
