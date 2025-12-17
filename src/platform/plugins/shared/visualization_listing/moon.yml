@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/saved-objects-tagging-oss-plugin'
   - '@kbn/dashboard-plugin'
+  - '@kbn/visualization-listing-components'
 tags:
   - plugin
   - prod
