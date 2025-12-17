@@ -108,10 +108,11 @@ export class DiscoverApp {
     });
   }
 
-  async waitForDocTableLoadingComplete() {
-    await this.page.testSubj.waitForSelector('discoverDocTable', {
-      state: 'visible',
-      timeout: 30000,
+  async waitForDocTableRendered() {
+    const table = this.page.testSubj.locator('discoverDocTable');
+    await expect(table).toBeVisible();
+    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+      timeout: 30_000,
     });
   }
 
@@ -247,7 +248,7 @@ export class DiscoverApp {
   async selectTextBaseLang() {
     if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
       await this.page.testSubj.click('select-text-based-language-btn');
-      await this.waitForDocTableLoadingComplete();
+      await this.waitForDocTableRendered();
     }
   }
 }
