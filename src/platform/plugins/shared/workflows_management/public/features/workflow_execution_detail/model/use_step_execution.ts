@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQuery } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 
 export function useStepExecution(workflowExecutionId: string, stepExecutionId: string) {

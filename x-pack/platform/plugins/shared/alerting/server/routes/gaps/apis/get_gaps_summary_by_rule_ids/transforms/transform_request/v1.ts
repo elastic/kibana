@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import type { GetGapsSummaryByRuleIdsParams } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
+import type { GetGapsSummaryByRuleIdsParams } from '../../../../../../application/gaps/methods/get_gaps_summary_by_rule_ids/types';
 import type { GetGapsSummaryByRuleIdsBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 
 export const transformRequest = ({

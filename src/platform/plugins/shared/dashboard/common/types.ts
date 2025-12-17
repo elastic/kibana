@@ -7,49 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { DashboardState } from '../server';
 
-import type { DashboardAttributes } from '../server/content_management';
+export type { DashboardState };
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
   createNew: boolean;
   show: boolean;
   [key: string]: boolean;
-}
-
-export interface DashboardAttributesAndReferences {
-  attributes: DashboardAttributes;
-  references: Reference[];
-}
-
-export interface DashboardState {
-  options?: DashboardAttributes['options'];
-  description?: DashboardAttributes['description'];
-  tags?: DashboardAttributes['tags'];
-  timeRestore: DashboardAttributes['timeRestore'];
-  title: DashboardAttributes['description'];
-  query?: DashboardAttributes['query'];
-  filters?: DashboardAttributes['filters'];
-  timeRange?: DashboardAttributes['timeRange'];
-  refreshInterval?: RefreshInterval;
-  panels: DashboardAttributes['panels'];
-
-  /**
-   * Temporary. Currently Dashboards are in charge of providing references to all of their children.
-   * Eventually this will be removed in favour of the Dashboard injecting references serverside.
-   */
-  references?: Reference[];
-
-  /**
-   * Serialized control group state.
-   * Contains state loaded from dashboard saved object
-   */
-  controlGroupInput?: ControlsGroupState;
 }
 
 export type DashboardLocatorParams = Partial<

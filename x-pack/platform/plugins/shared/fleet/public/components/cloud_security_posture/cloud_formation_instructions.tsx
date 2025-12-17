@@ -36,7 +36,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
     return (
       <>
         <EuiSpacer size="m" />
-        <EuiCallOut title={error} color="danger" iconType="error" />
+        <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
       </>
     );
   }

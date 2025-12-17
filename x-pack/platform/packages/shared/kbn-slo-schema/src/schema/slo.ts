@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import type { Either } from 'fp-ts/Either';
+import * as t from 'io-ts';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
@@ -109,19 +109,31 @@ const artifactsWithIdSchema = t.partial({ artifacts: dashboardsWithIdSchema });
 const artifactsWithRefIdSchema = t.partial({ artifacts: dashboardsWithRefIdSchema });
 
 const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
-
 const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
+
+const storedSloDefinitionTemplateSchema = t.partial({
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  timeWindow: timeWindowSchema,
+  budgetingMethod: budgetingMethodSchema,
+  objective: objectiveSchema,
+  settings: settingsSchema,
+  tags: tagsSchema,
+  groupBy: groupBySchema,
+});
 
 export {
   budgetingMethodSchema,
-  objectiveSchema,
   groupBySchema,
+  objectiveSchema,
   occurrencesBudgetingMethodSchema,
   optionalSettingsSchema,
   settingsSchema,
   sloDefinitionSchema,
-  storedSloDefinitionSchema,
   sloIdSchema,
+  storedSloDefinitionSchema,
+  storedSloDefinitionTemplateSchema,
   tagsSchema,
   targetSchema,
   timeslicesBudgetingMethodSchema,

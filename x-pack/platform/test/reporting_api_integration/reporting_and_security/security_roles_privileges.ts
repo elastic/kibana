@@ -308,6 +308,44 @@ export default function ({ getService }: FtrProviderContext) {
         testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
         scheduledReportTaskIds.push(res.body.job.id);
       });
+
+      it('applies the correct email notification settings to the scheduled report', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF with email',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'visualization',
+            version: '7.14.0',
+          },
+          { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+          undefined,
+          {
+            email: {
+              to: ['user@example.com'],
+              subject: 'Report: {{title}} - {{date}}',
+              message: 'Your scheduled report {{title}} is ready. Generated at {{date}}.',
+            },
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF with email');
+        expect(soResult.body._source.scheduled_report.notification).to.eql({
+          email: {
+            to: ['user@example.com'],
+            subject: 'Report: {{title}} - {{date}}',
+            message: 'Your scheduled report {{title}} is ready. Generated at {{date}}.',
+          },
+        });
+        scheduledReportIds.push(res.body.job.id);
+        scheduledReportTaskIds.push(res.body.job.id);
+      });
     });
 
     describe('Canvas: Schedule PDF report', () => {

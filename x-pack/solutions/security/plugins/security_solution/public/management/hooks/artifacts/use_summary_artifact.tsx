@@ -6,8 +6,8 @@
  */
 import type { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { QueryObserverResult, UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';

@@ -18,6 +18,7 @@ import {
 import type { ReportingPluginRouter } from '../../../../types';
 import { authorizedUserPreRouting, getCounters } from '../../../common';
 import { handleUnavailable } from '../../../common/request_handler';
+import { validateReportingLicense } from '../utils';
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 
@@ -44,6 +45,7 @@ export const registerInternalListRoute = ({
       },
       validate: {
         query: schema.object({
+          search: schema.maybe(schema.string({ maxLength: 1000 })),
           page: schema.string({ defaultValue: '1' }),
           size: schema.string({
             defaultValue: `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}`,
@@ -71,16 +73,13 @@ export const registerInternalListRoute = ({
           return handleUnavailable(res);
         }
 
-        // check license
-        const licenseInfo = await reporting.getLicenseInfo();
-        const licenseResults = licenseInfo.scheduledReports;
+        await validateReportingLicense({ reporting, responseFactory: res });
 
-        if (!licenseResults.enableLinks) {
-          return res.forbidden({ body: licenseResults.message });
-        }
-
-        const { page: queryPage = '1', size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}` } =
-          req.query;
+        const {
+          page: queryPage = '1',
+          size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}`,
+          search,
+        } = req.query;
         const page = parseInt(queryPage, 10) || 1;
         const size = Math.min(
           MAX_SCHEDULED_REPORT_LIST_SIZE,
@@ -94,7 +93,7 @@ export const registerInternalListRoute = ({
           responseFactory: res,
         });
 
-        const results = await scheduledReportsService.list({ user, page, size });
+        const results = await scheduledReportsService.list({ user, page, size, search });
 
         counters.usageCounter();
 

@@ -9,9 +9,10 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
-import { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 import { createExploreDataView } from '../../utils/create_explore_data_view';
@@ -31,15 +32,20 @@ import { createExploreDataView } from '../../utils/create_explore_data_view';
  * and that state is not reset for slices that already have selections.
  *
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
+ * @param attacksAlertsAlignmentEnabled - Prevent attacks dataview creation if feature flag is not enabled.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
-export const createInitListener = (dependencies: {
-  http: CoreStart['http'];
-  application: CoreStart['application'];
-  uiSettings: CoreStart['uiSettings'];
-  dataViews: DataViewsServicePublic;
-  spaces: SpacesPluginStart;
-}) => {
+export const createInitListener = (
+  dependencies: {
+    http: CoreStart['http'];
+    application: CoreStart['application'];
+    uiSettings: CoreStart['uiSettings'];
+    dataViews: DataViewsServicePublic;
+    spaces: SpacesPluginStart;
+    storage: Storage;
+  },
+  attacksAlertsAlignmentEnabled: boolean
+) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (
@@ -48,12 +54,13 @@ export const createInitListener = (dependencies: {
     ) => {
       try {
         // Initialize default data views first
-        const { defaultDataView, alertDataView } = await createDefaultDataView({
+        const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
           spaces: dependencies.spaces,
           application: dependencies.application,
           http: dependencies.http,
+          attacksAlertsAlignmentEnabled,
         });
 
         const exploreDataView = await createExploreDataView(
@@ -87,16 +94,17 @@ export const createInitListener = (dependencies: {
         // preventing race conditions
         // Whats more, portions of the state that already have selections applied to them will not be reset in the init listener.
         [
-          DataViewManagerScopeName.detections,
-          DataViewManagerScopeName.analyzer,
-          DataViewManagerScopeName.timeline,
-          DataViewManagerScopeName.default,
-          DataViewManagerScopeName.explore,
+          PageScope.alerts,
+          PageScope.attacks,
+          PageScope.analyzer,
+          PageScope.timeline,
+          PageScope.default,
+          PageScope.explore,
         ]
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
-            if (scope === DataViewManagerScopeName.explore) {
+            if (scope === PageScope.explore) {
               return listenerApi.dispatch(
                 selectDataViewAsync({
                   id: exploreDataView.id,
@@ -105,12 +113,37 @@ export const createInitListener = (dependencies: {
               );
             }
 
-            listenerApi.dispatch(
-              selectDataViewAsync({
-                id: defaultDataView.id,
-                scope,
-              })
-            );
+            if (scope === PageScope.attacks) {
+              return listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: attackDataView.id,
+                  scope,
+                })
+              );
+            }
+            const storedDataViewId = dependencies.storage.get(
+              `securitySolution.dataViewManager.selectedDataView.${scope}`
+            ) as string | null | undefined;
+            const state = listenerApi.getState();
+            if (
+              storedDataViewId &&
+              !state.dataViewManager[scope].dataViewId &&
+              typeof storedDataViewId === 'string'
+            ) {
+              return listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: storedDataViewId,
+                  scope,
+                })
+              );
+            } else {
+              return listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: defaultDataView.id,
+                  scope,
+                })
+              );
+            }
           });
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)

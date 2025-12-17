@@ -199,6 +199,7 @@ export function ChangeKbModel({
     if (error) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.observabilityAiAssistantManagement.knowledgeBase.errorLoadingModelsTitle',
             {
@@ -225,6 +226,12 @@ export function ChangeKbModel({
             onChange={(value) => setSelectedInferenceId(value)}
             disabled={isKnowledgeBaseInLoadingState}
             data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBase.modelSelectAriaLabel',
+              {
+                defaultMessage: 'Semantic search model',
+              }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

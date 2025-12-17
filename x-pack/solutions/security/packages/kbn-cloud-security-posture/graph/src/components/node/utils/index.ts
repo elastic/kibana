@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createPreviewItems } from './preview-link';
+export { createPreviewItems } from './preview_link';

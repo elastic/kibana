@@ -110,7 +110,6 @@ export class PerAlertActionScheduler<
 
     for (const { action, alert } of executables) {
       const { actionTypeId } = action;
-
       if (
         !shouldScheduleAction({
           action,
@@ -123,7 +122,6 @@ export class PerAlertActionScheduler<
       ) {
         continue;
       }
-
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
         actionTypeId

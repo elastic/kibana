@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -16,9 +17,10 @@ import { createStreamsRepositoryAdminClient } from './helpers/repository_client'
 const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { dsl: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
     wired: {
       routing: [],
@@ -57,6 +59,9 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
           type: 'system',
         },
       },
+    },
+    failure_store: {
+      lifecycle: { enabled: { data_retention: '30d' } },
     },
   },
 };
@@ -112,6 +117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
+            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
             wired: {
               ...rootStreamDefinition.ingest.wired,
               fields: {
@@ -139,6 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
+            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
             wired: {
               ...rootStreamDefinition.ingest.wired,
               routing: [

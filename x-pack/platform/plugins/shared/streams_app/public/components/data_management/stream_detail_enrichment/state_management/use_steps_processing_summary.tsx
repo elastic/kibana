@@ -8,10 +8,12 @@
 import { useMemo } from 'react';
 import { isActionBlock } from '@kbn/streamlang';
 import {
+  useInteractiveModeSelector,
   useSimulatorSelector,
   useStreamEnrichmentSelector,
 } from './stream_enrichment_state_machine';
-import { selectWhetherAnyProcessorBeforePersisted } from './stream_enrichment_state_machine/selectors';
+import { getActiveSimulationMode } from './stream_enrichment_state_machine/utils';
+import { selectWhetherAnyProcessorBeforePersisted } from './interactive_mode_machine/selectors';
 
 export type StepsProcessingSummaryMap = Map<string, StepProcessingStatus>;
 type StepProcessingStatus =
@@ -21,10 +23,11 @@ type StepProcessingStatus =
   | 'successful'
   | 'disabled.processorBeforePersisted'
   | 'skipped.followsProcessorBeingEdited'
-  | 'skipped.createdInPreviousSimulation';
+  | 'skipped.createdInPreviousSimulation'
+  | 'condition';
 
 export const useStepsProcessingSummary = () => {
-  const stepsContext = useStreamEnrichmentSelector((state) => {
+  const stepsContext = useInteractiveModeSelector((state) => {
     return new Map(
       state.context.stepRefs.map((stepRef) => [stepRef.id, stepRef.getSnapshot().context])
     );
@@ -44,7 +47,12 @@ export const useStepsProcessingSummary = () => {
     return snapshot.context.steps;
   });
 
-  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector((snapshot) =>
+  const simulationMode = useStreamEnrichmentSelector((snapshot) =>
+    getActiveSimulationMode(snapshot.context)
+  );
+  const isPartialSimulation = simulationMode === 'partial';
+
+  const isAnyProcessorBeforePersisted = useInteractiveModeSelector((snapshot) =>
     selectWhetherAnyProcessorBeforePersisted(snapshot.context)
   );
 
@@ -60,7 +68,7 @@ export const useStepsProcessingSummary = () => {
           processorMetrics?.[stepId]?.errors.some((e) => e.type === 'generic_simulation_failure')
         );
         const isPending = hasSimulation && !processorMetrics?.[stepId];
-        if (isAnyProcessorBeforePersisted) {
+        if (isPartialSimulation && isAnyProcessorBeforePersisted) {
           summaryMap.set(stepId, 'disabled.processorBeforePersisted');
         } else if (!isParticipatingInSimulation) {
           if (stepContext.isNew) {
@@ -77,12 +85,15 @@ export const useStepsProcessingSummary = () => {
         } else {
           summaryMap.set(stepId, 'successful');
         }
+      } else {
+        summaryMap.set(stepId, 'condition');
       }
     });
     return summaryMap;
   }, [
     hasSimulation,
     isAnyProcessorBeforePersisted,
+    isPartialSimulation,
     isSimulationRunning,
     processorMetrics,
     simulatorSteps,

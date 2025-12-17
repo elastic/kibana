@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';

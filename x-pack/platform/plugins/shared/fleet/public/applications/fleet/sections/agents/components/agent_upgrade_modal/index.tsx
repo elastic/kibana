@@ -564,6 +564,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       {isSelectedVersionIAR ? (
         <>
           <EuiCallOut
+            announceOnMount
             iconType="info"
             title={
               <FormattedMessage
@@ -578,7 +579,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               defaultMessage="For more information, refer to {documentationLink}."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.agentReleaseProcess}>
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                    href={docLinks.links.fleet.agentReleaseProcess}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.settings.iarVersionSelected.documentationLink"
                       defaultMessage="Elastic Agent release process"
@@ -654,6 +659,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={
               <FormattedMessage
@@ -733,6 +739,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.fleet.upgradeAgents.warningCalloutErrors', {
               defaultMessage:

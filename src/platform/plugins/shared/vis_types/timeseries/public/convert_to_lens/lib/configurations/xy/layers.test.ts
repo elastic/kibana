@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYLayerConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Panel, Metric } from '../../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
@@ -20,6 +19,7 @@ import { getLayers } from './layers';
 import { createPanel, createSeries } from '../../__mocks__';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { XYLayerConfig } from '@kbn/lens-common';
 
 const mockExtractOrGenerateDatasourceInfo = jest.fn();
 

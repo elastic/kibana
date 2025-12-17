@@ -250,7 +250,7 @@ describe('EndpointActionFailureMessage', () => {
       const errorMessages = getByTestId(testId);
       expect(errorMessages).not.toBeNull();
       expect(errorMessages.textContent).toContain(
-        'The following errors were encountered:Host: Fails-a-lotErrors: Too many scans are queued | Error info A | Error info B | Error info CHost: Errs-a-lotErrors: File path or folder was not found (404) | Error info P | Error info Q | Error info R'
+        'The following errors were encountered:Host: Fails-a-lotErrors: Too many scans are queued | Error info A | Error info B | Error info CHost: Errs-a-lotErrors: File path or folder was not found | Error info P | Error info Q | Error info R'
       );
     });
 
@@ -367,7 +367,7 @@ describe('EndpointActionFailureMessage', () => {
       const errorMessages = getByTestId(testId);
       expect(errorMessages).not.toBeNull();
       expect(errorMessages.textContent).toContain(
-        'The following errors were encountered:Host: Errs-a-lotErrors: File path or folder was not found (404) | Error info P | Error info Q | Error info R'
+        'The following errors were encountered:Host: Errs-a-lotErrors: File path or folder was not found | Error info P | Error info Q | Error info R'
       );
     });
 
@@ -422,7 +422,7 @@ describe('EndpointActionFailureMessage', () => {
       const errorMessages = getByTestId(testId);
       expect(errorMessages).not.toBeNull();
       expect(errorMessages.textContent).toContain(
-        'The following error was encountered:Host: Errs-a-lotErrors: File path or folder was not found (404)'
+        'The following error was encountered:Host: Errs-a-lotErrors: File path or folder was not found'
       );
     });
   });

@@ -38,6 +38,7 @@ import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
+import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
 
 import type { SelectionMode } from './components/types';
 
@@ -92,6 +93,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToChangePrivilege, setAgentToChangePrivilege] = useState<Agent | undefined>(
     undefined
   );
+  const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
@@ -106,14 +108,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
-    search,
     setSearch,
     selectedAgentPolicies,
     setSelectedAgentPolicies,
-    sortField,
-    setSortField,
-    sortOrder,
-    setSortOrder,
+    sort,
     selectedStatus,
     setSelectedStatus,
     selectedTags,
@@ -121,9 +119,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
-    pagination,
+    page,
     pageSizeOptions,
-    setPagination,
     kuery,
     draftKuery,
     setDraftKuery,
@@ -131,59 +128,25 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    isUsingFilter,
+    onTableChange,
+    clearFilters: clearFiltersFromSession,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
     (newKuery: string) => {
       setSearch(newKuery);
-      setPagination({
-        ...pagination,
-        currentPage: 1,
+      onTableChange({
+        page: { index: 0, size: page.size },
       });
     },
-    [setSearch, pagination, setPagination]
-  );
-
-  const isUsingFilter = !!(
-    search.trim() ||
-    selectedAgentPolicies.length ||
-    selectedStatus.length ||
-    selectedTags.length ||
-    showUpgradeable
+    [setSearch, onTableChange, page.size]
   );
 
   const clearFilters = useCallback(() => {
     setDraftKuery('');
-    setSearch('');
-    setSelectedAgentPolicies([]);
-    setSelectedStatus([]);
-    setSelectedTags([]);
-    setShowUpgradeable(false);
-  }, [
-    setDraftKuery,
-    setSearch,
-    setSelectedAgentPolicies,
-    setSelectedStatus,
-    setSelectedTags,
-    setShowUpgradeable,
-  ]);
-
-  const onTableChange = ({
-    page,
-    sort,
-  }: {
-    page?: { index: number; size: number };
-    sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
-  }) => {
-    const newPagination = {
-      ...pagination,
-      currentPage: page!.index + 1,
-      pageSize: page!.size,
-    };
-    setPagination(newPagination);
-    setSortField(sort!.field);
-    setSortOrder(sort!.direction);
-  };
+    clearFiltersFromSession();
+  }, [setDraftKuery, clearFiltersFromSession]);
 
   const unsupportedMigrateAgents = useMemo(() => {
     const protectedAgents = Array.isArray(selectedAgents)
@@ -259,6 +222,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
         onMigrateAgentClick={() => setAgentToMigrate(agent)}
         onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
+        onViewAgentJsonClick={() => setAgentToViewJson(agent)}
       />
     );
   };
@@ -496,6 +460,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {agentToViewJson && (
+        <EuiPortal>
+          <AgentDetailsJsonFlyout
+            agent={agentToViewJson}
+            onClose={() => setAgentToViewJson(undefined)}
+          />
+        </EuiPortal>
+      )}
       {showUnhealthyCallout && (
         <>
           {cloud?.deploymentUrl ? (
@@ -546,8 +518,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
-        sortField={sortField}
-        sortOrder={sortOrder}
+        sortField={sort.field}
+        sortOrder={sort.direction}
         unsupportedMigrateAgents={unsupportedMigrateAgents}
         unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
       />
@@ -573,9 +545,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent list table */}
       <AgentListTable
         agents={agentsOnCurrentPage}
-        sortField={sortField}
-        pageSizeOptions={pageSizeOptions}
-        sortOrder={sortOrder}
+        sortField={sort.field}
+        sortOrder={sort.direction}
         isLoading={isLoading}
         agentPoliciesIndexedById={agentPoliciesIndexedById}
         renderActions={renderActions}
@@ -583,7 +554,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selected={selectedAgents}
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
-        pagination={pagination}
+        pagination={{
+          currentPage: page.index + 1, // Convert from 0-based to 1-based
+          pageSize: page.size,
+        }}
+        pageSizeOptions={pageSizeOptions}
         totalAgents={Math.min(nAgentsInTable, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}

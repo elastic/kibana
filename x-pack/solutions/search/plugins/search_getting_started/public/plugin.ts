@@ -7,7 +7,7 @@
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
@@ -16,6 +16,7 @@ import type {
   SearchGettingStartedAppPluginStartDependencies,
   SearchGettingStartedServicesContextDeps,
 } from './types';
+import { docLinks } from './common/doc_links';
 
 export class SearchGettingStartedPlugin
   implements
@@ -43,6 +44,7 @@ export class SearchGettingStartedPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
         const services: SearchGettingStartedServicesContextDeps = {
           ...depsStart,
           history,
@@ -61,4 +63,6 @@ export class SearchGettingStartedPlugin
   public start(core: CoreStart) {
     return {};
   }
+
+  public stop() {}
 }

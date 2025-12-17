@@ -6,7 +6,7 @@
  */
 
 import type { IToasts } from '@kbn/core/public';
-import { QueryClient, QueryCache } from '@tanstack/react-query';
+import { QueryClient, QueryCache } from '@kbn/react-query';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from '../utils/get_error_message';
 
 export function initQueryClient(toasts: IToasts): QueryClient {

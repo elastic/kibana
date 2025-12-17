@@ -274,12 +274,15 @@ export const ReactControlExample = ({
   return (
     <>
       {dataViewNotFound && (
-        <EuiCallOut color="warning" iconType="warning">
+        <EuiCallOut announceOnMount color="warning" iconType="warning">
           <p>{`Install "Sample web logs" to run example`}</p>
         </EuiCallOut>
       )}
       {!dataViewNotFound && (
-        <EuiCallOut title="This example uses session storage to persist saved state and unsaved changes">
+        <EuiCallOut
+          announceOnMount
+          title="This example uses session storage to persist saved state and unsaved changes"
+        >
           <EuiButton
             color="accent"
             size="s"

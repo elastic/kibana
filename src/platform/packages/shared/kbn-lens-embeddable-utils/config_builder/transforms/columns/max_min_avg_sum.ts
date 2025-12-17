@@ -14,7 +14,7 @@ import type {
   MinIndexPatternColumn,
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
+} from '@kbn/lens-common';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensStateMetricSharedProps, getLensAPIMetricSharedProps } from './utils';
 import type { LensApiMetricOperation, LensApiSumMetricOperation } from '../../schema/metric_ops';
@@ -33,16 +33,13 @@ export function fromBasicMetricAPItoLensState(
     operationType: options.operation,
     sourceField: field,
     ...getLensStateMetricSharedProps(options),
-    params: {
-      ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
-    },
+    ...(format ? { params: { format: fromFormatAPIToLensState(format) } } : {}),
   };
 }
 
 export function fromSumMetricAPIToLensState(
   options: LensApiSumMetricOperation
 ): SumIndexPatternColumn {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { field, format, empty_as_null } = options;
 
   return {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormBasedPersistedState, PieVisualizationState } from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, LensPartitionVisualizationState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   BuildDependencies,
@@ -25,7 +25,7 @@ const ACCESSOR = 'metric_formula_accessor';
 
 function buildVisualizationState(
   config: LensTreeMapConfig | LensPieConfig | LensMosaicConfig
-): PieVisualizationState {
+): LensPartitionVisualizationState {
   const layer = config;
 
   const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];

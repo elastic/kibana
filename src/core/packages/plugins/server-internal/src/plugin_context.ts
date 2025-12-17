@@ -214,6 +214,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       legacy: deps.elasticsearch.legacy,
       publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
+      setCpsFeatureFlag: deps.elasticsearch.setCpsFeatureFlag,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
@@ -265,8 +266,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
       setSecurityExtension: deps.savedObjects.setSecurityExtension,
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
+      setAccessControlTransforms: deps.savedObjects.setAccessControlTransforms,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      isAccessControlEnabled: deps.savedObjects.isAccessControlEnabled,
     },
     status: {
       core$: deps.status.core$,
@@ -408,7 +411,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
     dataStreams: {
-      getClient: (dataStream) => deps.dataStreams.getClient(dataStream),
+      initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
     },
   };
 }

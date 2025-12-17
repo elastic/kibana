@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
 import { FAILURE_STORE_SELECTOR } from '../../../../util/constants';
 
-export const getFailureStoreIndexName = (definition: Streams.ingest.all.GetResponse) => {
-  return definition.stream.name + FAILURE_STORE_SELECTOR;
+export const getFailureStoreIndexName = (streamName: string) => {
+  return streamName + FAILURE_STORE_SELECTOR;
 };

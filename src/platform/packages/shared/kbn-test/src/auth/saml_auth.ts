@@ -362,13 +362,14 @@ export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => 
 };
 
 export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => {
-  const { username, email, fullname, role, kbnHost, log } = params;
+  const { username, email, fullname, role, kbnHost, serverless, log } = params;
   const samlResponse = await createMockedSAMLResponse({
     kibanaUrl: kbnHost + '/api/security/saml/callback',
     username,
     full_name: fullname,
     email,
     roles: [role],
+    serverless,
   });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
   return new Session(cookie, email);

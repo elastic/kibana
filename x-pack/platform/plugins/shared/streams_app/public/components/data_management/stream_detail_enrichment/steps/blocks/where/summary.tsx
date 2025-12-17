@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isWhereBlock } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 import React from 'react';
 import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
@@ -24,6 +24,7 @@ export const WhereBlockSummary = ({
   level,
   isFirstStepInLevel,
   isLastStepInLevel,
+  readOnly = false,
 }: StepConfigurationProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
@@ -31,7 +32,7 @@ export const WhereBlockSummary = ({
     stepRef.send({ type: 'step.edit' });
   };
 
-  if (!isWhereBlock(step)) return null;
+  if (!isConditionBlock(step)) return null;
 
   return (
     <EuiFlexGroup
@@ -53,7 +54,7 @@ export const WhereBlockSummary = ({
         `}
       >
         <ConditionDisplay
-          condition={step.where}
+          condition={step.condition}
           showKeyword={true}
           keyword="WHERE"
           keywordWrapper={(children) => (
@@ -85,23 +86,25 @@ export const WhereBlockSummary = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          // Facilitates text truncation for the condition summary
-          flex-shrink: 0;
-        `}
-      >
-        <EuiFlexGroup gutterSize="none">
-          <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
-          <StepContextMenu
-            stepRef={stepRef}
-            stepUnderEdit={stepUnderEdit}
-            isFirstStepInLevel={isFirstStepInLevel}
-            isLastStepInLevel={isLastStepInLevel}
-          />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {!readOnly && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            // Facilitates text truncation for the condition summary
+            flex-shrink: 0;
+          `}
+        >
+          <EuiFlexGroup gutterSize="none">
+            <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
+            <StepContextMenu
+              stepRef={stepRef}
+              stepUnderEdit={stepUnderEdit}
+              isFirstStepInLevel={isFirstStepInLevel}
+              isLastStepInLevel={isLastStepInLevel}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

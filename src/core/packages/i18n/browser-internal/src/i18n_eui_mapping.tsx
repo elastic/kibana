@@ -799,6 +799,15 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You can still continue tabbing through other global page landmarks.',
       }
     ),
+    'euiFlyoutMenu.back': i18n.translate('core.euiFlyoutMenu.back', {
+      defaultMessage: 'Back',
+    }),
+    'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
+      defaultMessage: 'History',
+    }),
+    'euiFlyoutManaged.defaultTitle': i18n.translate('core.euiFlyoutManaged.defaultTitle', {
+      defaultMessage: 'Unknown Flyout',
+    }),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
@@ -1341,6 +1350,34 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
     }),
+    'euiTimeWindowButtons.invalidShiftLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidShiftLabel',
+      { defaultMessage: 'Cannot shift invalid time window' }
+    ),
+    'euiTimeWindowButtons.invalidZoomOutLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidZoomOutLabel',
+      { defaultMessage: 'Cannot zoom out invalid time window' }
+    ),
+    'euiTimeWindowButtons.previousLabel': i18n.translate(
+      'core.euiTimeWindowButtons.previousLabel',
+      { defaultMessage: 'Previous' }
+    ),
+    'euiTimeWindowButtons.previousDescription': ({ displayInterval }: EuiValues) =>
+      i18n.translate('core.euiTimeWindowButtons.previousDescription', {
+        defaultMessage: 'Previous {displayInterval}',
+        values: { displayInterval },
+      }),
+    'euiTimeWindowButtons.zoomOutLabel': i18n.translate('core.euiTimeWindowButtons.zoomOutLabel', {
+      defaultMessage: 'Zoom out',
+    }),
+    'euiTimeWindowButtons.nextLabel': i18n.translate('core.euiTimeWindowButtons.nextLabel', {
+      defaultMessage: 'Next',
+    }),
+    'euiTimeWindowButtons.nextDescription': ({ displayInterval }: EuiValues) =>
+      i18n.translate('core.euiTimeWindowButtons.nextDescription', {
+        defaultMessage: 'Next {displayInterval}',
+        values: { displayInterval },
+      }),
     'euiQuickSelect.fullDescription': ({ timeTense, timeValue, timeUnit }: EuiValues) =>
       i18n.translate('core.euiQuickSelect.fullDescription', {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',
