@@ -20,8 +20,7 @@ export async function updateESQLRule(
   const { logger } = context;
   logger.debug(`Updating ESQL rule with ruleId: ${ruleId}.`);
 
-  const { esql, lookbackWindow, timeField, groupKey, parentId, schedule, ...restOfRuleData } =
-    ruleData;
+  const { esql, lookbackWindow, timeField, groupKey, schedule, ...restOfRuleData } = ruleData;
 
   const durationMatch = lookbackWindow.match(/^(\d+)([smhd])$/);
   const timeWindowSize = durationMatch ? parseInt(durationMatch[1], 10) : 0;
@@ -35,7 +34,6 @@ export async function updateESQLRule(
     timeWindowUnit,
     timeField,
     groupKey,
-    ...(parentId && { parentId }),
   };
 
   const ruleDataForUpdate: UpdateRuleData<ESQLParamsV1> = {

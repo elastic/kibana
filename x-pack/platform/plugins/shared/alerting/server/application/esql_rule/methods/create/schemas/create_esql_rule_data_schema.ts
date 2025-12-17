@@ -17,5 +17,4 @@ export const createESQLRuleDataSchema = schema.object({
   lookbackWindow: schema.string({ validate: validateDurationV1 }),
   timeField: schema.string(),
   groupKey: schema.arrayOf(schema.string()),
-  parentId: schema.maybe(schema.string()),
 });

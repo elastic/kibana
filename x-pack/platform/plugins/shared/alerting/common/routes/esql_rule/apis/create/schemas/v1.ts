@@ -53,13 +53,6 @@ export const createESQLBodySchema = schema.object({
       description: 'The primary timestamp field for the query.',
     },
   }),
-  parentId: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'The parent ID for the rule, used for tracking recovery rules.',
-      },
-    })
-  ),
   schedule: schema.string({
     validate: validateDurationV1,
     meta: {
