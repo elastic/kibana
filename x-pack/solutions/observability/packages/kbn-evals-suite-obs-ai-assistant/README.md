@@ -216,3 +216,16 @@ FROM .kibana-evaluations
     """
 }
 ```
+
+## Snapshot Replay
+
+For loading historical observability data (logs, metrics, traces) into Elasticsearch with timestamp transformation, use the [`@kbn/es-snapshot-loader`](../../../../platform/packages/shared/kbn-es-snapshot-loader/README.md) package:
+
+```bash
+node scripts/es_snapshot_loader replay \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --patterns "logs-*,metrics-*,traces-*"
+```
+
+See the [@kbn/es-snapshot-loader documentation](../../../../platform/packages/shared/kbn-es-snapshot-loader/README.md) for full usage details.

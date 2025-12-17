@@ -16,7 +16,7 @@ jest.mock('@kbn/onechat-genai-utils', () => ({
 
 describe('attackDiscoverySearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = attackDiscoverySearchTool(mockCore);
+  const tool = attackDiscoverySearchTool(mockCore, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();

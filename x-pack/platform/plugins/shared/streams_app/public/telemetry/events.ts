@@ -12,6 +12,10 @@ import {
   STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
+  STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -24,6 +28,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 import {
@@ -33,6 +38,9 @@ import {
   streamsAIDissectSuggestionLatencySchema,
   streamsAttachmentClickEventSchema,
   streamsAttachmentCountSchema,
+  streamsAttachmentLinkChangedSchema,
+  streamsAttachmentFlyoutOpenedSchema,
+  streamsAttachmentFlyoutActionSchema,
   streamsChildStreamCreatedSchema,
   streamsProcessingSavedSchema,
   streamsRetentionChangedSchema,
@@ -45,6 +53,7 @@ import {
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
   streamsProcessingSimulationSamplesFetchLatencySchema,
+  streamsPartitioningSamplesFetchLatencySchema,
   streamsTabVisitedSchema,
 } from './schemas';
 
@@ -56,6 +65,26 @@ const streamsAttachmentCountEventType = {
 const streamsAttachmentClickEventType = {
   eventType: STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   schema: streamsAttachmentClickEventSchema,
+};
+
+const streamsAttachmentLinkedEventType = {
+  eventType: STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  schema: streamsAttachmentLinkChangedSchema,
+};
+
+const streamsAttachmentUnlinkedEventType = {
+  eventType: STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  schema: streamsAttachmentLinkChangedSchema,
+};
+
+const streamsAttachmentFlyoutOpenedEventType = {
+  eventType: STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  schema: streamsAttachmentFlyoutOpenedSchema,
+};
+
+const streamsAttachmentFlyoutActionEventType = {
+  eventType: STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
+  schema: streamsAttachmentFlyoutActionSchema,
 };
 
 const streamsAIGrokSuggestionLatencyEventType = {
@@ -138,6 +167,11 @@ const streamsProcessingSimulationSamplesFetchLatencyEventType = {
   schema: streamsProcessingSimulationSamplesFetchLatencySchema,
 };
 
+const streamsPartitioningSamplesFetchLatencyEventType = {
+  eventType: STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
+  schema: streamsPartitioningSamplesFetchLatencySchema,
+};
+
 const streamsTabVisitedEventType = {
   eventType: STREAMS_TAB_VISITED_EVENT_TYPE,
   schema: streamsTabVisitedSchema,
@@ -146,6 +180,10 @@ const streamsTabVisitedEventType = {
 export {
   streamsAttachmentCountEventType,
   streamsAttachmentClickEventType,
+  streamsAttachmentLinkedEventType,
+  streamsAttachmentUnlinkedEventType,
+  streamsAttachmentFlyoutOpenedEventType,
+  streamsAttachmentFlyoutActionEventType,
   streamsAIGrokSuggestionLatencyEventType,
   streamsAIGrokSuggestionAcceptedEventType,
   streamsAIDissectSuggestionLatencyEventType,
@@ -162,5 +200,6 @@ export {
   streamsFeatureIdentificationDeletedEventType,
   streamsDescriptionGeneratedEventType,
   streamsProcessingSimulationSamplesFetchLatencyEventType,
+  streamsPartitioningSamplesFetchLatencyEventType,
   streamsTabVisitedEventType,
 };
