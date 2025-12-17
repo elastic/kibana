@@ -237,42 +237,28 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       : undefined;
     const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Classic;
     const normalizedUnsavedChatExperience = unsavedChatExperience ?? AIChatExperience.Classic;
+
+    // Telemetry should compare the effective "before" and "after" values.
+    // - "before" should include the default if there is no saved value.
+    // - "after" should reflect the unsaved change, or fall back to "before" if unchanged.
+    const telemetryBeforeChatExperience =
+      savedChatExperience ?? defaultChatExperience ?? AIChatExperience.Classic;
+    const telemetryAfterChatExperience = unsavedChatExperience ?? telemetryBeforeChatExperience;
     const shouldTrackOptInConfirmed =
-      normalizedSavedChatExperience !== AIChatExperience.Agent &&
-      normalizedUnsavedChatExperience === AIChatExperience.Agent;
+      telemetryBeforeChatExperience !== AIChatExperience.Agent &&
+      telemetryAfterChatExperience === AIChatExperience.Agent;
     const shouldTrackOptOut =
-      normalizedSavedChatExperience === AIChatExperience.Agent &&
-      normalizedUnsavedChatExperience === AIChatExperience.Classic;
+      telemetryBeforeChatExperience === AIChatExperience.Agent &&
+      telemetryAfterChatExperience !== AIChatExperience.Agent;
 
     const needsReload = await saveAll();
     if (shouldTrackOptInConfirmed) {
-      console.log(
-        `${AGENT_BUILDER_EVENT_TYPES.OptInAction} ==>`,
-        JSON.stringify(
-          {
-            action: 'confirmed',
-            source: TELEMETRY_SOURCE,
-          },
-          null,
-          2
-        )
-      );
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'confirmed',
         source: TELEMETRY_SOURCE,
       });
     }
     if (shouldTrackOptOut) {
-      console.log(
-        `${AGENT_BUILDER_EVENT_TYPES.OptOut} ==>`,
-        JSON.stringify(
-          {
-            source: TELEMETRY_SOURCE,
-          },
-          null,
-          2
-        )
-      );
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptOut, {
         source: TELEMETRY_SOURCE,
       });

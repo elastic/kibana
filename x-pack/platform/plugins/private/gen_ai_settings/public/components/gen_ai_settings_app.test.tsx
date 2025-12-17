@@ -374,6 +374,37 @@ describe('GenAiSettingsApp', () => {
     });
   });
 
+  it('returns opt out telemetry when saving a switch from default Agent to Classic (no userValue)', async () => {
+    const reportEvent = jest.fn();
+    mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+    coreStart.settings.client.getAll.mockReturnValue(
+      createSettingsMock({
+        [AI_CHAT_EXPERIENCE_TYPE]: {
+          value: AIChatExperience.Agent,
+          type: 'select',
+          options: [AIChatExperience.Classic, AIChatExperience.Agent],
+        },
+      }) as any
+    );
+
+    renderComponent({}, { analytics: { reportEvent } });
+
+    const chatExperienceSelect = await screen.findByTestId(
+      `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
+    );
+    fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Classic } });
+
+    const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
+        source: 'stack_management',
+      });
+    });
+  });
+
   it('returns confirmed opt in telemetry when saving a switch to Agent', async () => {
     const reportEvent = jest.fn();
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
