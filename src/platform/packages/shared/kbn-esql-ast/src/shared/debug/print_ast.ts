@@ -8,7 +8,7 @@
  */
 
 import { printTree } from 'tree-dump';
-import { childrenFoAnyNode } from '../../visitor/utils';
+import { childrenFoAnyNode } from '../../ast/visitor/utils';
 import type { ESQLProperNode } from '../../types';
 
 /**

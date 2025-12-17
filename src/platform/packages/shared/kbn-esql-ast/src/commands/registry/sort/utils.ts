@@ -9,60 +9,50 @@
 
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
-import { type ESQLSingleAstItem, isColumn, isFunctionExpression } from '../../../..';
+import { type ESQLSingleAstItem, isColumn } from '../../../..';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import type { ESQLAstAllCommands } from '../../../types';
-import { within } from '../../../ast/location';
 import type { ISuggestionItem } from '../types';
 
 export type SortPosition =
-  | 'empty_expression'
   | 'expression'
   | 'order_complete'
   | 'after_order'
   | 'nulls_complete'
   | 'after_nulls';
 
-export interface SortPositionContext {
-  insideFunction?: boolean;
-}
-
 export const getSortPos = (
   query: string,
-  command: ESQLAstAllCommands,
-  cursorPosition: number
-): { position: SortPosition | undefined; context?: SortPositionContext } => {
+  command: ESQLAstAllCommands
+): { position: SortPosition | undefined; expressionRoot: ESQLSingleAstItem | undefined } => {
   const lastArg = command.args[command.args.length - 1];
-  if (!lastArg || /,\s+$/.test(query)) {
-    return { position: 'empty_expression' };
-  }
+  const afterComma = /,\s+$/.test(query);
+  const hasExpressionArg = lastArg && !Array.isArray(lastArg) && lastArg.type !== 'order';
 
-  if (!Array.isArray(lastArg) && lastArg.type !== 'order') {
-    const insideFunction = isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
+  // Expression context: no arg, after comma, or within an expression (not order node)
+  if (!lastArg || afterComma || hasExpressionArg) {
+    const expressionRoot = hasExpressionArg && !afterComma ? lastArg : undefined;
 
-    return {
-      position: 'expression',
-      context: { insideFunction },
-    };
+    return { position: 'expression', expressionRoot };
   }
 
   if (/(?:asc|desc)$/i.test(query)) {
-    return { position: 'order_complete' };
+    return { position: 'order_complete', expressionRoot: undefined };
   }
 
   if (/(?:asc|desc)\s+(?:N?U?L?L?S? ?(F?I?R?S?|LA?S?)?)$/i.test(query)) {
-    return { position: 'after_order' };
+    return { position: 'after_order', expressionRoot: undefined };
   }
 
   if (/(?:nulls\s+first|nulls\s+last)$/i.test(query)) {
-    return { position: 'nulls_complete' };
+    return { position: 'nulls_complete', expressionRoot: undefined };
   }
 
   if (/(?:nulls\s+first|nulls\s+last)\s+$/i.test(query)) {
-    return { position: 'after_nulls' };
+    return { position: 'after_nulls', expressionRoot: undefined };
   }
 
-  return { position: undefined };
+  return { position: undefined, expressionRoot: undefined };
 };
 
 export const sortModifierSuggestions = {
