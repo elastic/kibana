@@ -156,7 +156,7 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_analytics/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
-import { entityAnalyticsToolInternal } from './assistant/tools/entity_analytics/entity_analytics';
+import { entityAnalyticsToolInternal } from './agent_builder/tools/entity_analytics/entity_analytics';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
