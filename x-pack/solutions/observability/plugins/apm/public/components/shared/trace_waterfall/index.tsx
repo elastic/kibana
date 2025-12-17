@@ -14,7 +14,7 @@ import { VariableSizeList as List, areEqual } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
-import type { TraceAgentMark, TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
@@ -37,7 +37,7 @@ export interface Props {
   showLegend?: boolean;
   serviceName?: string;
   isFiltered?: boolean;
-  agentMarks?: TraceAgentMark[];
+  agentMarks?: Record<string, number>;
 }
 
 export function TraceWaterfall({
@@ -126,7 +126,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
-              marks={[...errorMarks, ...agentMarks]}
+              marks={[...agentMarks, ...errorMarks]}
             />
           </div>
           <VerticalLinesContainer
@@ -137,7 +137,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
-            marks={[...errorMarks, ...agentMarks]}
+            marks={[...agentMarks, ...errorMarks]}
           />
           <div
             css={css`

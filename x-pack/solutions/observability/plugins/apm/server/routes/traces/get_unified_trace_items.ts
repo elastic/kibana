@@ -37,7 +37,7 @@ import {
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type { TraceAgentMark, TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
@@ -109,7 +109,7 @@ export async function getUnifiedTraceItems({
 }): Promise<{
   traceItems: TraceItem[];
   unifiedTraceErrors: UnifiedTraceErrors;
-  agentMarks: TraceAgentMark[];
+  agentMarks: Record<string, number>;
 }> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
@@ -183,7 +183,7 @@ export async function getUnifiedTraceItems({
   ]);
 
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
-  const agentMarks: TraceAgentMark[] = [];
+  let agentMarks: Record<string, number> = {};
   const traceItems = compactMap(unifiedTraceItems.hits.hits, (hit) => {
     const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
     if (event[PROCESSOR_EVENT] === ProcessorEvent.transaction) {
@@ -191,12 +191,7 @@ export async function getUnifiedTraceItems({
         transaction: Pick<Required<Transaction>['transaction'], 'marks'>;
       };
       if (source.transaction.marks?.agent) {
-        agentMarks.push(
-          ...Object.entries(source.transaction.marks.agent).map(([name, milliseconds]) => ({
-            name,
-            position: milliseconds * 1000,
-          }))
-        );
+        agentMarks = { ...agentMarks, ...source.transaction.marks.agent };
       }
     }
 

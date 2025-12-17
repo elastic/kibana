@@ -9,7 +9,7 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
-import type { TraceAgentMark, TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -149,7 +149,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
   ): Promise<{
     traceItems: TraceItem[];
     errors: Error[];
-    agentMarks: TraceAgentMark[];
+    agentMarks: Record<string, number>;
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),

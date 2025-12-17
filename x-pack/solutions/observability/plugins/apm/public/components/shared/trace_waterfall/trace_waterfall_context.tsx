@@ -11,13 +11,16 @@ import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
-import type { TraceAgentMark, TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
 import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
-import type { AgentMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
+import {
+  getAgentMarks,
+  type AgentMark,
+} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
 export interface TraceWaterfallContextProps {
   duration: number;
@@ -89,7 +92,7 @@ interface Props {
   serviceName?: string;
   isFiltered?: boolean;
   errors?: Error[];
-  agentMarks?: TraceAgentMark[];
+  agentMarks?: Record<string, number>;
 }
 
 export function TraceWaterfallContextProvider({
@@ -187,22 +190,11 @@ export function TraceWaterfallContextProvider({
         serviceName,
         message,
         errorMarks,
-        agentMarks: getWaterfallAgentMarks(agentMarks),
+        agentMarks: getAgentMarks(agentMarks),
       }}
     >
       {children}
     </TraceWaterfallContext.Provider>
-  );
-}
-
-function getWaterfallAgentMarks(agentMarks?: TraceAgentMark[]): AgentMark[] {
-  return (
-    agentMarks?.map((agentMark) => ({
-      type: 'agentMark',
-      id: agentMark.name,
-      offset: agentMark.position,
-      verticalLine: true,
-    })) ?? []
   );
 }
 
