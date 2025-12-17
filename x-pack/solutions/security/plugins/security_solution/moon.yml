@@ -256,6 +256,7 @@ dependsOn:
   - '@kbn/object-utils'
   - '@kbn/react-query'
   - '@kbn/tour-queue'
+  - '@kbn/onechat-genai-utils'
 tags:
   - plugin
   - prod
