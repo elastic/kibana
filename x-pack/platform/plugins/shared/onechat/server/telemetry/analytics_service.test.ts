@@ -20,7 +20,6 @@ import {
   ModelProvider,
   type InferenceConnector,
 } from '@kbn/inference-common';
-import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
@@ -50,44 +49,6 @@ describe('AnalyticsService', () => {
       it('registers the event type', () => {
         expect(analytics.registerEventType).toHaveBeenCalledWith(eventConfig);
       });
-    });
-  });
-
-  describe('reportMessageSent', () => {
-    const payload: ChatRequestBodyPayload = {
-      input: 'hello',
-      agent_id: oneChatDefaultAgentId,
-    };
-
-    it('reports the MessageSent event', () => {
-      service.reportMessageSent(payload);
-
-      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.MessageSent, {
-        conversation_id: 'new',
-        message_length: payload.input.length,
-        has_attachments: false,
-        attachment_count: undefined,
-        attachment_types: undefined,
-        agent_id: oneChatDefaultAgentId,
-      });
-    });
-
-    it('does not throw when reporting throws', () => {
-      analytics.reportEvent.mockImplementation(() => {
-        throw new Error('boom');
-      });
-
-      expect(() => service.reportMessageSent(payload)).not.toThrow();
-    });
-
-    it('logs debug when reporting throws', () => {
-      analytics.reportEvent.mockImplementation(() => {
-        throw new Error('boom');
-      });
-
-      service.reportMessageSent(payload);
-
-      expect(logger.debug).toHaveBeenCalled();
     });
   });
 
@@ -125,7 +86,7 @@ describe('AnalyticsService', () => {
       trace_id: 'trace-1',
     };
 
-    it('reports the MessageReceived event', () => {
+    it('reports the RoundComplete event', () => {
       service.reportMessageReceived({
         agentId: oneChatDefaultAgentId,
         conversationId: 'conversation-1',
@@ -134,24 +95,20 @@ describe('AnalyticsService', () => {
         connector,
       });
 
-      expect(analytics.reportEvent).toHaveBeenCalledWith(
-        AGENT_BUILDER_EVENT_TYPES.MessageReceived,
-        {
-          conversation_id: 'conversation-1',
-          response_length: round.response.message.length,
-          round_number: 2,
-          agent_id: oneChatDefaultAgentId,
-          tools_invoked: ['custom'],
-          trace_id: 'trace-1',
-          started_at: '2025-01-01T00:00:00.000Z',
-          time_to_first_token: 1,
-          time_to_last_token: 2,
-          model_provider: ModelProvider.OpenAI,
-          llm_calls: 3,
-          input_tokens: 4,
-          output_tokens: 5,
-        }
-      );
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
+        conversation_id: 'conversation-1',
+        response_length: round.response.message.length,
+        round_number: 2,
+        agent_id: oneChatDefaultAgentId,
+        tools_invoked: ['custom'],
+        started_at: '2025-01-01T00:00:00.000Z',
+        time_to_first_token: 1,
+        time_to_last_token: 2,
+        model_provider: ModelProvider.OpenAI,
+        llm_calls: 3,
+        input_tokens: 4,
+        output_tokens: 5,
+      });
     });
 
     it('does not throw when reporting throws', () => {
