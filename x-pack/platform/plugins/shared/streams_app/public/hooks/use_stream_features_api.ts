@@ -58,7 +58,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
                 connectorId,
                 to: new Date(now).toISOString(),
                 from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-                force: attempts === 0 ? true : false,
+                schedule: attempts === 0 ? true : false,
               },
             },
           }

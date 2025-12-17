@@ -315,7 +315,7 @@ export const identifyFeaturesRoute = createServerRoute({
       connectorId: z.string(),
       from: dateFromString,
       to: dateFromString,
-      force: BooleanFromString.optional(),
+      schedule: BooleanFromString.optional(),
     }),
   }),
   handler: async ({
@@ -347,7 +347,7 @@ export const identifyFeaturesRoute = createServerRoute({
       `streams_feature_identification_${name}`
     );
 
-    if (params.query.force) {
+    if (params.query.schedule) {
       await taskClient.schedule<FeatureIdentificationTaskParams>({
         task: {
           type: 'streams_feature_identification',
@@ -367,7 +367,7 @@ export const identifyFeaturesRoute = createServerRoute({
         status: 'in_progress',
       };
     }
-    if (task.status === 'not_started' || params.query.force) {
+    if (task.status === 'not_started') {
       return {
         status: 'not_started',
       };

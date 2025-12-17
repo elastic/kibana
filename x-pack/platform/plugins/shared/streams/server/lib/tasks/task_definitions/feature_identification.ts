@@ -6,6 +6,8 @@
  */
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
+import { isInferenceProviderError } from '@kbn/inference-common';
+import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../../routes/utils/get_request_abort_signal';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -43,6 +45,9 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
               request: runContext.fakeRequest,
             });
 
+            // Get connector info for error enrichment
+            const connector = await inferenceClient.getConnectorById(connectorId);
+
             try {
               const [{ hits }, stream] = await Promise.all([
                 featureClient.getFeatures(name),
@@ -71,7 +76,7 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                 stream,
                 features: hits,
                 signal,
-                systemPromptOverride: featurePromptOverride,
+                featurePromptOverride,
               });
 
               // I think I have to send the telemetry here
@@ -89,6 +94,10 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                 },
               });
             } catch (error) {
+              const errorMessage = isInferenceProviderError(error)
+                ? formatInferenceProviderError(error, connector)
+                : error.message;
+
               await taskClient.update<FeatureIdentificationTaskParams>({
                 ..._task,
                 status: 'failed',
@@ -98,7 +107,7 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                     start,
                     end,
                   },
-                  error: error.message,
+                  error: errorMessage,
                 },
               });
             }
