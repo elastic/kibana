@@ -201,6 +201,48 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
       });
 
+      it('should throw when overwriting an object owned by current user if RBAC privileges are revoked', async () => {
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+          'simple_user',
+          'changeme'
+        );
+        const createResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+          .expect(200);
+
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
+        expect(createResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+
+        // revoke privs
+        await createSimpleUser(['viewer']);
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+          await loginAsNotObjectOwner('simple_user', 'changeme');
+
+        expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+        const overwriteResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create?overwrite=true')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', revokedCookie.cookieString())
+          .send({ id: objectId, type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+          .expect(403);
+
+        expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
+        expect(overwriteResponse.body).to.have.property(
+          'message',
+          `Unable to create ${ACCESS_CONTROL_TYPE}`
+        );
+      });
+
       it('should allow overwriting an object owned by another user if admin', async () => {
         const { cookie: objectOwnerCookie, profileUid: objectOnwerProfileUid } =
           await loginAsObjectOwner('test_user', 'changeme');
@@ -755,6 +797,63 @@ export default function ({ getService }: FtrProviderContext) {
           expect(res.body.saved_objects[1]).to.have.property('type', NON_ACCESS_CONTROL_TYPE);
           expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
           expect(res.body.saved_objects[1]).not.to.have.property('error');
+        });
+
+        it('rejects when overwriting by owner if RBAC privileges are revoked', async () => {
+          await createSimpleUser(['kibana_savedobjects_editor']);
+          const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+            'simple_user',
+            'changeme'
+          );
+
+          const firstObject = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', ownerCookie.cookieString())
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body.accessControl).to.have.property('owner', ownerProfileUid);
+
+          const secondObject = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', ownerCookie.cookieString())
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body.accessControl).to.have.property('owner', ownerProfileUid);
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          // revoke privs
+          await createSimpleUser(['viewer']);
+          const { cookie: revokedCookie, profileUid: revokedProfileUid } =
+            await loginAsNotObjectOwner('simple_user', 'changeme');
+
+          expect(ownerProfileUid).to.eql(revokedProfileUid);
+
+          const res = await supertestWithoutAuth
+            .post('/access_control_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', revokedCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(403);
+
+          expect(res.body).to.have.property('error', 'Forbidden');
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.be(`Unable to bulk_create ${ACCESS_CONTROL_TYPE}`);
         });
       });
     });
@@ -2346,7 +2445,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
       });
 
-      it('should allow transfer ownership of write-restricted objects by owner even if other RBAC privileges are revoked', async () => {
+      it('should allow transfer ownership of write-restricted objects by owner even if RBAC privileges are revoked', async () => {
         const { cookie: testUserCookie, profileUid: testUserProfileUid } =
           await loginAsNotObjectOwner('test_user', 'changeme');
 
@@ -2649,7 +2748,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
       });
 
-      it('should allow owner to change access mode even if other RBAC privileges are revoked', async () => {
+      it('should allow owner to change access mode even if RBAC privileges are revoked', async () => {
         const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
 
         await createSimpleUser(['kibana_savedobjects_editor']);
