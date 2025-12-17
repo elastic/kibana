@@ -6,30 +6,14 @@
  */
 
 import type { CoreStart, Logger } from '@kbn/core/server';
-import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { schema } from '@kbn/config-schema';
 
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
-import { spaceIdToNamespace } from '../lib';
+import { createEsqlRulesTaskRunner } from './task_runner';
 
 export const ALERTING_ESQL_TASK_TYPE = 'alerting:esql' as const;
-
-export interface EsqlRulesTaskParams {
-  ruleId: string;
-}
-
-export function getEsqlRulesAlertsDataStreamName({
-  config,
-  spaceId,
-  spaces,
-}: {
-  config: AlertingConfig;
-  spaceId: string;
-  spaces?: AlertingPluginsStart['spaces'];
-}) {
-  const namespace = spaceIdToNamespace(spaces, spaceId) ?? 'default';
-  return `${config.esqlRules.alertsDataStreamPrefix}-${namespace}`;
-}
 
 /**
  * Registers a dedicated Task Manager task type for future ES|QL rules execution.
@@ -40,7 +24,7 @@ export function getEsqlRulesAlertsDataStreamName({
 export function initializeEsqlRulesTaskDefinition(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  _coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   config: AlertingConfig
 ) {
   const taskType = ALERTING_ESQL_TASK_TYPE;
@@ -49,13 +33,12 @@ export function initializeEsqlRulesTaskDefinition(
     [taskType]: {
       title: 'Alerting ES|QL rules executor',
       timeout: '5m',
-      createTaskRunner: ({ taskInstance }: RunContext) => {
-        return {
-          async run() {
-            return { state: taskInstance.state };
-          },
-        };
-      },
+      paramsSchema: schema.object({
+        ruleId: schema.string(),
+        spaceId: schema.string(),
+        consumer: schema.maybe(schema.string()),
+      }),
+      createTaskRunner: createEsqlRulesTaskRunner({ logger, coreStartServices, config }),
       // what should we do about cost? since it depends on the ES|QL query
     },
   });
