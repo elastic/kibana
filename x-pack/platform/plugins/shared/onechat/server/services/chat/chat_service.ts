@@ -13,15 +13,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { getConnectorProvider } from '@kbn/inference-common';
-import {
-  type ChatEvent,
-  oneChatDefaultAgentId,
-  isRoundCompleteEvent,
-  ConversationRoundStepType,
-  AGENT_BUILDER_EVENT_TYPES,
-} from '@kbn/onechat-common';
-import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { type ChatEvent, oneChatDefaultAgentId, isRoundCompleteEvent } from '@kbn/onechat-common';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -39,8 +31,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
-import type { TrackingService } from '../../telemetry';
-import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from '../../telemetry/utils';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -50,7 +41,7 @@ interface ChatServiceDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   trackingService?: TrackingService;
-  analytics?: AnalyticsServiceSetup;
+  analyticsService?: AnalyticsService;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
@@ -82,7 +73,7 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
     browserApiTools,
   }: ChatConverseParams): Observable<ChatEvent> {
-    const { trackingService, analytics } = this.dependencies;
+    const { trackingService, analyticsService } = this.dependencies;
     const requestId = trackingService?.trackQueryStart();
 
     return withConverseSpan({ agentId, conversationId }, (span) => {
@@ -179,31 +170,13 @@ class ChatServiceImpl implements ChatService {
                     }
                   }
 
-                  if (analytics) {
-                    const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
-                    const round = event.data.round;
-                    const connector = context.chatModel.getConnector();
-                    const toolsInvoked =
-                      round.steps
-                        ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
-                        .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
-
-                    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, {
-                      conversation_id: effectiveConversationId,
-                      response_length: round.response?.message?.length,
-                      round_number: currentRoundCount,
-                      agent_id: normalizedAgentId,
-                      tools_invoked: toolsInvoked,
-                      trace_id: round.trace_id,
-                      started_at: round.started_at,
-                      time_to_first_token: round.time_to_first_token,
-                      time_to_last_token: round.time_to_last_token,
-                      model_provider: getConnectorProvider(connector),
-                      llm_calls: round.model_usage?.llm_calls,
-                      input_tokens: round.model_usage?.input_tokens,
-                      output_tokens: round.model_usage?.output_tokens,
-                    });
-                  }
+                  analyticsService?.reportMessageReceived({
+                    conversationId: effectiveConversationId,
+                    roundCount: currentRoundCount,
+                    agentId,
+                    round: event.data.round,
+                    connector: context.chatModel.getConnector(),
+                  });
                 }
               } catch (error) {
                 this.dependencies.logger.error(error);

@@ -10,11 +10,9 @@ import type {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { agentBuilderServerEbtEvents } from '@kbn/onechat-common';
 import type { OnechatConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -32,6 +30,7 @@ import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
+import { AnalyticsService } from './telemetry';
 
 export class OnechatPlugin
   implements
@@ -48,7 +47,7 @@ export class OnechatPlugin
   private serviceManager = new ServiceManager();
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
-  private analytics?: AnalyticsServiceSetup;
+  private analyticsService?: AnalyticsService;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -73,10 +72,11 @@ export class OnechatPlugin
     }
 
     // Register server-side EBT events for Agent Builder
-    this.analytics = coreSetup.analytics;
-    agentBuilderServerEbtEvents.forEach((eventConfig) => {
-      coreSetup.analytics.registerEventType(eventConfig);
-    });
+    this.analyticsService = new AnalyticsService(
+      coreSetup.analytics,
+      this.logger.get('telemetry').get('analytics')
+    );
+    this.analyticsService.registerAgentBuilderEventTypes();
 
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
@@ -110,6 +110,7 @@ export class OnechatPlugin
         return services;
       },
       trackingService: this.trackingService,
+      analyticsService: this.analyticsService,
     });
 
     return {
@@ -138,7 +139,7 @@ export class OnechatPlugin
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
-      analytics: this.analytics,
+      analyticsService: this.analyticsService,
     });
 
     const { tools, agents, runnerFactory } = startServices;

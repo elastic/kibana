@@ -14,7 +14,6 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common';
 import {
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
@@ -31,13 +30,13 @@ import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
-import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 export function registerChatRoutes({
   router,
   getInternalServices,
   coreSetup,
   logger,
+  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -433,23 +432,7 @@ export function registerChatRoutes({
             })
           : [];
 
-        // Track MessageSent event for Agent Builder
-        try {
-          const normalizedAgentId = normalizeAgentIdForTelemetry(payload.agent_id);
-
-          coreSetup.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageSent, {
-            conversation_id: payload.conversation_id || 'new',
-            message_length: payload.input?.length,
-            has_attachments: attachments.length > 0,
-            attachment_count: attachments.length > 0 ? attachments.length : undefined,
-            attachment_types:
-              attachments.length > 0 ? attachments.map((a) => a.type || 'unknown') : undefined,
-            agent_id: normalizedAgentId,
-          });
-        } catch (error) {
-          // Don't fail the request if telemetry fails
-          logger.debug('Failed to report MessageSent telemetry event', { error });
-        }
+        analyticsService?.reportMessageSent(payload);
 
         const chatEvents$ = callConverse({
           payload,

@@ -11,4 +11,6 @@ export {
   agentBuilderServerEbtEvents,
   type AgentBuilderTelemetryEventsMap,
   type AgentBuilderEventTypes,
+  type ReportMessageReceivedParams,
+  type ReportMessageSentParams,
 } from './agent_builder_events';

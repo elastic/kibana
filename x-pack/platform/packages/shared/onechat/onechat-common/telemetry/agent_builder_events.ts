@@ -49,7 +49,7 @@ export interface ReportAddToChatClickedParams {
 }
 
 export interface ReportMessageSentParams {
-  conversation_id: string;
+  conversation_id?: string;
   message_length?: number;
   has_attachments: boolean;
   attachment_count?: number;
@@ -58,7 +58,7 @@ export interface ReportMessageSentParams {
 }
 
 export interface ReportMessageReceivedParams {
-  conversation_id: string;
+  conversation_id?: string;
   response_length?: number;
   round_number?: number;
   agent_id?: string;
@@ -199,7 +199,7 @@ const MESSAGE_SENT_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Conversation ID',
-        optional: false,
+        optional: true,
       },
     },
     message_length: {
@@ -253,7 +253,7 @@ const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Conversation ID',
-        optional: false,
+        optional: true,
       },
     },
     response_length: {
