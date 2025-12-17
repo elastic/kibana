@@ -60,4 +60,3 @@ test.describe('Advanced tab permissions - Classic streams', { tag: ['@ess', '@sv
     await pageObjects.streams.verifyClassicBadge();
   });
 });
-

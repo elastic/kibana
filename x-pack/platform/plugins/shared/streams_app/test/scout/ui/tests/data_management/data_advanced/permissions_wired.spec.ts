@@ -40,4 +40,3 @@ test.describe('Advanced tab permissions - Wired streams', { tag: ['@ess', '@svlO
     await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
   });
 });
-
