@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { RootSchema, SchemaArray, SchemaObject } from '@elastic/ebt';
+import type { RootSchema, SchemaObject } from '@elastic/ebt';
 import type { FeatureType } from '@kbn/streams-schema';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
-  StreamsAIGrokSuggestionLatencyProps,
   StreamsAIDissectSuggestionAcceptedProps,
-  StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsAttachmentLinkChangedProps,
@@ -28,8 +26,6 @@ import type {
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
-  StreamsProcessingSimulationSamplesFetchLatencyProps,
-  StreamsPartitioningSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
 } from './types';
 
@@ -160,53 +156,6 @@ const streamsAttachmentFlyoutActionSchema: RootSchema<StreamsAttachmentFlyoutAct
   },
 };
 
-const matchRate: SchemaArray<number, number> = {
-  type: 'array',
-  items: {
-    type: 'float',
-    _meta: {
-      description: 'The rate',
-    },
-  },
-  _meta: {
-    description: 'The success rate of each match',
-  },
-};
-
-const streamsAIGrokSuggestionLatencySchema: RootSchema<StreamsAIGrokSuggestionLatencyProps> = {
-  name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  field: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the field used.',
-    },
-  },
-  connector_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The ID of the LLM connector',
-    },
-  },
-  suggestion_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of suggestions in the response',
-    },
-  },
-  match_rate: matchRate,
-  duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the request',
-    },
-  },
-};
-
 const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionAcceptedProps> = {
   name: {
     type: 'keyword',
@@ -239,41 +188,6 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
     },
   },
 };
-
-const streamsAIDissectSuggestionLatencySchema: RootSchema<StreamsAIDissectSuggestionLatencyProps> =
-  {
-    name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    field: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the field used.',
-      },
-    },
-    connector_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'The ID of the LLM connector',
-      },
-    },
-    suggestion_count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of suggestions in the response',
-      },
-    },
-    match_rate: matchRate,
-    duration_ms: {
-      type: 'long',
-      _meta: {
-        description: 'The duration of the request',
-      },
-    },
-  };
 
 const streamsAIDissectSuggestionAcceptedSchema: RootSchema<StreamsAIDissectSuggestionAcceptedProps> =
   {
@@ -537,57 +451,6 @@ const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedP
   },
 };
 
-const streamsProcessingSimulationSamplesFetchLatencySchema: RootSchema<StreamsProcessingSimulationSamplesFetchLatencyProps> =
-  {
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    data_source_type: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The type of data source used for fetching simulation samples: latest-samples or kql-samples',
-      },
-    },
-    duration_ms: {
-      type: 'long',
-      _meta: {
-        description: 'The time (in milliseconds) it took to fetch simulation samples',
-      },
-    },
-  };
-
-const streamsPartitioningSamplesFetchLatencySchema: RootSchema<StreamsPartitioningSamplesFetchLatencyProps> =
-  {
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    duration_ms: {
-      type: 'long',
-      _meta: {
-        description: 'The time (in milliseconds) it took to fetch partitioning preview samples',
-      },
-    },
-  };
-
 const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
   stream_name: {
     type: 'keyword',
@@ -667,9 +530,7 @@ export {
   streamsAttachmentLinkChangedSchema,
   streamsAttachmentFlyoutOpenedSchema,
   streamsAttachmentFlyoutActionSchema,
-  streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
-  streamsAIDissectSuggestionLatencySchema,
   streamsAIDissectSuggestionAcceptedSchema,
   streamsRetentionChangedSchema,
   streamsProcessingSavedSchema,
@@ -681,7 +542,5 @@ export {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
-  streamsProcessingSimulationSamplesFetchLatencySchema,
-  streamsPartitioningSamplesFetchLatencySchema,
   streamsTabVisitedSchema,
 };
