@@ -8,7 +8,8 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { MapsListView } from './maps_list_view';
 import { APP_ID } from '../../../common/constants';
 import { getMapClient } from '../../content_management';
@@ -16,14 +17,21 @@ import { getMapClient } from '../../content_management';
 interface Props {
   history: ScopedHistory;
   stateTransfer: EmbeddableStateTransfer;
+  coreStart: CoreStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
 
-export function LoadListAndRender(props: Props) {
+export const LoadListAndRender = ({
+  history,
+  stateTransfer,
+  coreStart,
+  savedObjectsTagging,
+}: Props) => {
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [hasSavedMaps, setHasSavedMaps] = useState(true);
 
   useEffect(() => {
-    props.stateTransfer.clearEditorState(APP_ID);
+    stateTransfer.clearEditorState(APP_ID);
 
     let ignore = false;
     getMapClient()
@@ -48,9 +56,17 @@ export function LoadListAndRender(props: Props) {
   }, []);
 
   if (!mapsLoaded) {
-    // do not render loading state to avoid UI flash when listing page is displayed
+    // do not render loading state to avoid UI flash when listing page is displayed.
     return null;
   }
 
-  return hasSavedMaps ? <MapsListView history={props.history} /> : <Redirect to="/map" />;
-}
+  return hasSavedMaps ? (
+    <MapsListView
+      history={history}
+      coreStart={coreStart}
+      savedObjectsTagging={savedObjectsTagging}
+    />
+  ) : (
+    <Redirect to="/map" />
+  );
+};

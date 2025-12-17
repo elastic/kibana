@@ -34,9 +34,23 @@ export function savedObjectToItem(
   savedObject: SavedObject<StoredMapAttributes> | PartialSavedObject<StoredMapAttributes>,
   partial: boolean
 ): MapItem | PartialMapsItem {
-  const { references, attributes, ...rest } = savedObject;
+  const {
+    references,
+    attributes,
+    // Extract snake_case fields from core saved objects API.
+    updated_at: updatedAt,
+    created_at: createdAt,
+    updated_by: updatedBy,
+    created_by: createdBy,
+    ...rest
+  } = savedObject;
   return {
     ...rest,
+    // Map snake_case to camelCase for content management types.
+    updatedAt,
+    createdAt,
+    updatedBy,
+    createdBy,
     attributes: transformMapAttributesOut(attributes as MapAttributes, (targetName) => {
       return references ? references.find(({ name }) => name === targetName) : undefined;
     }),
