@@ -17,7 +17,6 @@ export function MachineLearningSingleMetricViewerProvider(
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const browser = getService('browser');
   const PageObjects = getPageObjects(['common']);
 
   return {
@@ -124,18 +123,7 @@ export function MachineLearningSingleMetricViewerProvider(
     },
 
     async openAnomalyExplorer() {
-      // Since the button group is removed, preserve the current URL query params and change path
-      const currentUrl = await browser.getCurrentUrl();
-      const urlObj = new URL(currentUrl);
-      const queryString = urlObj.search;
-      
-      // Navigate to Anomaly Explorer, preserving the query string (which includes job selection)
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'ml',
-        `/explorer`,
-        queryString
-      );
-      
+      await testSubjects.click('~mlMainTab & ~anomalyExplorer');
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('mlPageAnomalyExplorer');
       });

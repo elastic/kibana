@@ -323,39 +323,15 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToAnomalyExplorerViaSingleMetricViewer() {
-      // Since the button group is removed, preserve the current URL query params and change path
-      const currentUrl = await browser.getCurrentUrl();
-      const urlObj = new URL(currentUrl);
-      const queryString = urlObj.search;
-      
-      // Navigate to Anomaly Explorer, preserving the query string (which includes job selection)
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'ml',
-        `/explorer`,
-        queryString
-      );
-      
+      await this.navigateToAnomalyExplorerWithSideNav();
       await retry.tryForTime(60 * 1000, async () => {
-        // verify that the anomaly explorer page is visible
         await testSubjects.existOrFail('mlPageAnomalyExplorer');
       });
     },
 
     async navigateToSingleMetricViewerViaAnomalyExplorer() {
-      // Since the button group is removed, preserve the current URL query params and change path
-      const currentUrl = await browser.getCurrentUrl();
-      const urlObj = new URL(currentUrl);
-      const queryString = urlObj.search;
-      
-      // Navigate to Single Metric Viewer, preserving the query string (which includes job selection)
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'ml',
-        `/timeseriesexplorer`,
-        queryString
-      );
-      
+      await this.navigateToSingleMetricViewerWithSideNav();
       await retry.tryForTime(60 * 1000, async () => {
-        // verify that the single metric viewer page is visible
         await testSubjects.existOrFail('mlPageSingleMetricViewer');
       });
     },

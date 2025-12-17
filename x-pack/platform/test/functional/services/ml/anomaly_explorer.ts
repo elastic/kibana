@@ -224,7 +224,6 @@ export function MachineLearningAnomalyExplorerProvider(
     },
 
     async assertSingleMetricViewerButtonEnabled(expectedEnabled = true) {
-      // Since the button group is removed, check the side nav item instead
       const isEnabled = await testSubjects.isEnabled('~mlMainTab & ~singleMetricViewer');
       expect(isEnabled).to.eql(
         expectedEnabled,
