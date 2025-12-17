@@ -298,6 +298,26 @@ spaceTest.describe(
         const integrationName = `azure-cspm-agent-${Date.now()}`;
         let agentlessPolicyRequestCaptured = false;
         let packagePolicyRequestBody: Record<string, unknown> | null = null;
+        // #region agent log
+        const allInterceptedRequests: string[] = [];
+        // Register generic route FIRST so specific routes (registered later) match first (LIFO order)
+        await page.route(/\/api\/fleet\//, async (route, request) => {
+          allInterceptedRequests.push(`fleet: ${request.method()} ${request.url()}`);
+          fetch('http://127.0.0.1:7242/ingest/44c107b4-f724-40b7-9dd7-a04c905d37b5', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'switch_setup_technology.spec.ts:route:all_fleet',
+              message: 'Fleet API call intercepted',
+              data: { method: request.method(), url: request.url() },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              hypothesisId: 'C',
+            }),
+          }).catch(() => {});
+          await route.continue();
+        });
+        // #endregion
 
         // Intercept agentless policy API - should NOT be called
         await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
@@ -309,6 +329,21 @@ spaceTest.describe(
 
         // Intercept package policy API - this IS the agent-based endpoint
         await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+          // #region agent log
+          allInterceptedRequests.push(`package_policies: ${request.method()} ${request.url()}`);
+          fetch('http://127.0.0.1:7242/ingest/44c107b4-f724-40b7-9dd7-a04c905d37b5', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'switch_setup_technology.spec.ts:route:package_policies',
+              message: 'Package policy route intercepted',
+              data: { method: request.method(), url: request.url() },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              hypothesisId: 'B',
+            }),
+          }).catch(() => {});
+          // #endregion
           if (request.method() === 'POST') {
             packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
           }
@@ -323,7 +358,55 @@ spaceTest.describe(
         await pageObjects.cspmIntegrationPage.selectSetupTechnology('agent-based');
 
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+
+        // #region agent log
+        const saveButtonEnabled = await page
+          .getByTestId('createPackagePolicySaveButton')
+          .isEnabled();
+        const pageUrlBeforeSave = page.url();
+        fetch('http://127.0.0.1:7242/ingest/44c107b4-f724-40b7-9dd7-a04c905d37b5', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'switch_setup_technology.spec.ts:beforeSave',
+            message: 'About to click save',
+            data: { saveButtonEnabled, pageUrlBeforeSave },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            hypothesisId: 'A',
+          }),
+        }).catch(() => {});
+        // #endregion
+
         await pageObjects.cspmIntegrationPage.saveIntegration();
+
+        // #region agent log
+        // Wait a moment then log what we've seen
+        // eslint-disable-next-line playwright/no-wait-for-timeout
+        await page.waitForTimeout(2000);
+        const pageUrlAfterSave = page.url();
+        const toastText = await page
+          .locator('[data-test-subj="euiToastHeader"]')
+          .textContent()
+          .catch(() => 'no toast');
+        fetch('http://127.0.0.1:7242/ingest/44c107b4-f724-40b7-9dd7-a04c905d37b5', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'switch_setup_technology.spec.ts:afterSave',
+            message: 'After save click',
+            data: {
+              pageUrlAfterSave,
+              toastText,
+              allInterceptedRequests,
+              packagePolicyRequestBodyIsNull: packagePolicyRequestBody === null,
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            hypothesisId: 'A',
+          }),
+        }).catch(() => {});
+        // #endregion
 
         // Wait for the package policy request to be captured
         await expect

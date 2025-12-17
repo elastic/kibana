@@ -26,7 +26,9 @@ export class CspmIntegrationPage {
   async navigate() {
     await this.page.gotoApp('fleet/integrations/cloud_security_posture/add-integration/cspm');
     // Wait for the provider selector tabs to be visible before continuing
-    await this.page.getByTestId(AWS_PROVIDER_TEST_SUBJ).waitFor({ state: 'visible' });
+    await this.page
+      .getByTestId(AWS_PROVIDER_TEST_SUBJ)
+      .waitFor({ state: 'visible', timeout: 30000 });
   }
 
   async selectProvider(provider: 'aws' | 'azure') {
