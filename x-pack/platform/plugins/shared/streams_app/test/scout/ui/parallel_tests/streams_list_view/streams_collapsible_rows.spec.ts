@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  test,
-  safeDeleteStream,
-  cleanupTestStreams,
-} from '../../fixtures';
+import { test, safeDeleteStream, cleanupTestStreams } from '../../fixtures';
 
 test.describe(
   'Stream list view - expand and collapse streams in the table',
@@ -92,20 +88,13 @@ test.describe(
         await pageObjects.streams.collapseExpandStream(child1, true);
 
         // Verify that the child streams are no longer visible
-        await pageObjects.streams.verifyStreamsAreNotInTable([
-          child1Child1,
-          child1Child2,
-        ]);
+        await pageObjects.streams.verifyStreamsAreNotInTable([child1Child1, child1Child2]);
 
         // Expand the 'child1' stream node
         await pageObjects.streams.collapseExpandStream(child1, false);
 
         // Verify that the child streams are visible again
-        await pageObjects.streams.verifyStreamsAreInTable([
-          child1,
-          child1Child1,
-          child1Child2,
-        ]);
+        await pageObjects.streams.verifyStreamsAreInTable([child1, child1Child1, child1Child2]);
       });
 
       await test.step('all stream nodes in the table', async () => {
@@ -116,11 +105,7 @@ test.describe(
         await pageObjects.streams.collapseAllStreams();
 
         // Verify that all child streams are no longer visible
-        await pageObjects.streams.verifyStreamsAreNotInTable([
-          child1,
-          child2,
-          child3,
-        ]);
+        await pageObjects.streams.verifyStreamsAreNotInTable([child1, child2, child3]);
 
         // Expand all stream nodes
         await pageObjects.streams.expandAllStreams();
@@ -135,10 +120,7 @@ test.describe(
 
         // Collapse a single stream node to verify individual expand/collapse still works
         await pageObjects.streams.collapseExpandStream(child1, true);
-        await pageObjects.streams.verifyStreamsAreNotInTable([
-          child1Child1,
-          child1Child2,
-        ]);
+        await pageObjects.streams.verifyStreamsAreNotInTable([child1Child1, child1Child2]);
 
         // Expand all again to verify all nodes expand
         await pageObjects.streams.expandAllStreams();

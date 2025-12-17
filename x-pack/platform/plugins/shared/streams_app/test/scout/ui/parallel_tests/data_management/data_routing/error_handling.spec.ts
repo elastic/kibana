@@ -6,10 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
-import {
-  test,
-  cleanupTestStreams,
-} from '../../../fixtures';
+import { test, cleanupTestStreams } from '../../../fixtures';
 
 test.describe(
   'Stream data routing - error handling and recovery',
@@ -58,7 +55,10 @@ test.describe(
       createdStreams.push(fullStreamName);
     });
 
-    test('should recover from API errors during rule updates', async ({ context, pageObjects }, testInfo) => {
+    test('should recover from API errors during rule updates', async ({
+      context,
+      pageObjects,
+    }, testInfo) => {
       const streamSuffix = `error-test-w${testInfo.workerIndex}`;
       const fullStreamName = `logs.${streamSuffix}`;
 

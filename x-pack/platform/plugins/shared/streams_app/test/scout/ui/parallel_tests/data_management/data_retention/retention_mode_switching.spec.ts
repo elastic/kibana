@@ -6,11 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import {
-  test,
-  getUniqueStreamName,
-  safeDeleteStream,
-} from '../../../fixtures';
+import { test, getUniqueStreamName, safeDeleteStream } from '../../../fixtures';
 import {
   closeToastsIfPresent,
   openRetentionModal,

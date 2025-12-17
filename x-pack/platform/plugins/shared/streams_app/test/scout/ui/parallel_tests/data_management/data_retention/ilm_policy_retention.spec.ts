@@ -7,11 +7,7 @@
 
 import { expect } from '@kbn/scout';
 import { omit } from 'lodash';
-import {
-  test,
-  getUniqueStreamName,
-  safeDeleteStream,
-} from '../../../fixtures';
+import { test, getUniqueStreamName, safeDeleteStream } from '../../../fixtures';
 import {
   closeToastsIfPresent,
   openRetentionModal,
@@ -88,7 +84,9 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
     await saveRetentionChanges(page);
 
     // Verify the policy name is displayed using the badge test ID
-    await expect(page.getByTestId(`lifecycleBadge-${testStreamName}`)).toContainText('.alerts-ilm-policy');
+    await expect(page.getByTestId(`lifecycleBadge-${testStreamName}`)).toContainText(
+      '.alerts-ilm-policy'
+    );
   });
 
   test('should persist ILM policy selection across page reload', async ({ page, pageObjects }) => {
@@ -106,6 +104,8 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
 
     // Verify ILM policy persists
     await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
-    await expect(page.getByTestId(`lifecycleBadge-${testStreamName}`)).toContainText('.alerts-ilm-policy');
+    await expect(page.getByTestId(`lifecycleBadge-${testStreamName}`)).toContainText(
+      '.alerts-ilm-policy'
+    );
   });
 });

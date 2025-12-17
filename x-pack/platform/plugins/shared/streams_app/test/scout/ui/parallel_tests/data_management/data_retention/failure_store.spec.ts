@@ -29,55 +29,57 @@ test.describe('Stream data retention - updating failure store', () => {
   let classicStreamName: string;
   let wiredStreamName: string;
 
-  test.beforeEach(async ({ apiServices, browserAuth, logsSynthtraceEsClient, esClient }, testInfo) => {
-    await browserAuth.loginAsAdmin();
+  test.beforeEach(
+    async ({ apiServices, browserAuth, logsSynthtraceEsClient, esClient }, testInfo) => {
+      await browserAuth.loginAsAdmin();
 
-    // Generate unique stream names for this worker
-    classicStreamName = getUniqueClassicStreamName(testInfo, 'failure-store');
-    wiredStreamName = getUniqueStreamName(testInfo, 'failure-store');
+      // Generate unique stream names for this worker
+      classicStreamName = getUniqueClassicStreamName(testInfo, 'failure-store');
+      wiredStreamName = getUniqueStreamName(testInfo, 'failure-store');
 
-    // Clean up any existing streams from previous runs
-    await safeDeleteStream(apiServices, classicStreamName);
-    await safeDeleteStream(apiServices, wiredStreamName);
+      // Clean up any existing streams from previous runs
+      await safeDeleteStream(apiServices, classicStreamName);
+      await safeDeleteStream(apiServices, wiredStreamName);
 
-    // Create classic stream with failure store enabled
-    await generateLogsData(logsSynthtraceEsClient)({ index: classicStreamName });
-    try {
-      await esClient.indices.putDataStreamOptions(
-        {
-          name: classicStreamName,
-          failure_store: {
-            enabled: true,
+      // Create classic stream with failure store enabled
+      await generateLogsData(logsSynthtraceEsClient)({ index: classicStreamName });
+      try {
+        await esClient.indices.putDataStreamOptions(
+          {
+            name: classicStreamName,
+            failure_store: {
+              enabled: true,
+            },
           },
-        },
-        { meta: true }
-      );
-    } catch {
-      // Stream might not support this operation yet
-    }
+          { meta: true }
+        );
+      } catch {
+        // Stream might not support this operation yet
+      }
 
-    // Create wired stream with failure store enabled
-    await apiServices.streams.forkStream('logs', wiredStreamName, {
-      field: 'service.name',
-      eq: `failure-store-w${testInfo.workerIndex}`,
-    });
-    try {
-      await esClient.indices.putDataStreamOptions(
-        {
-          name: wiredStreamName,
-          failure_store: {
-            enabled: true,
+      // Create wired stream with failure store enabled
+      await apiServices.streams.forkStream('logs', wiredStreamName, {
+        field: 'service.name',
+        eq: `failure-store-w${testInfo.workerIndex}`,
+      });
+      try {
+        await esClient.indices.putDataStreamOptions(
+          {
+            name: wiredStreamName,
+            failure_store: {
+              enabled: true,
+            },
           },
-        },
-        { meta: true }
-      );
-    } catch {
-      // Stream might not support this operation yet
-    }
+          { meta: true }
+        );
+      } catch {
+        // Stream might not support this operation yet
+      }
 
-    // Clear processors for classic stream
-    await safeClearStreamProcessors(apiServices, classicStreamName);
-  });
+      // Clear processors for classic stream
+      await safeClearStreamProcessors(apiServices, classicStreamName);
+    }
+  );
 
   test.afterEach(async ({ apiServices, logsSynthtraceEsClient }) => {
     // Clean up streams created during this test

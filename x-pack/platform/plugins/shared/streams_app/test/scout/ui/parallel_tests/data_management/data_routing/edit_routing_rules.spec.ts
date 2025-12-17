@@ -9,12 +9,7 @@
 /* eslint-disable playwright/expect-expect */
 
 import { expect } from '@kbn/scout';
-import {
-  test,
-  getUniqueStreamName,
-  safeDeleteStream,
-  cleanupTestStreams,
-} from '../../../fixtures';
+import { test, getUniqueStreamName, safeDeleteStream, cleanupTestStreams } from '../../../fixtures';
 
 test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
   let testStreamName: string;
@@ -82,7 +77,10 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     );
   });
 
-  test('should switch between editing different rules', async ({ apiServices, pageObjects }, testInfo) => {
+  test('should switch between editing different rules', async ({
+    apiServices,
+    pageObjects,
+  }, testInfo) => {
     // Create another test rule
     const secondStreamSuffix = `edit-test-2-w${testInfo.workerIndex}`;
     const secondStreamName = `logs.${secondStreamSuffix}`;
@@ -119,7 +117,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.toasts.waitFor();
 
     // Stream is deleted, remove from cleanup list
-    createdStreams = createdStreams.filter(s => s !== testStreamName);
+    createdStreams = createdStreams.filter((s) => s !== testStreamName);
   });
 
   test('should cancel rule removal', async ({ pageObjects }) => {

@@ -7,13 +7,7 @@
 
 import { expect } from '@kbn/scout';
 import { omit } from 'lodash';
-import {
-  test,
-  getUniqueStreamName,
-  getUniqueNestedStreamName,
-  safeDeleteStream,
-  cleanupTestStreams,
-} from '../../../fixtures';
+import { test, getUniqueStreamName, safeDeleteStream, cleanupTestStreams } from '../../../fixtures';
 import {
   closeToastsIfPresent,
   openRetentionModal,
@@ -75,7 +69,11 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
     await expect(inheritSwitch).toBeChecked();
   });
 
-  test('should toggle inherit mode on and off', async ({ apiServices, pageObjects, page }, testInfo) => {
+  test('should toggle inherit mode on and off', async ({
+    apiServices,
+    pageObjects,
+    page,
+  }, testInfo) => {
     const streamName = getUniqueStreamName(testInfo, 'inherit-toggle');
     await safeDeleteStream(apiServices, streamName);
     await apiServices.streams.forkStream('logs', streamName, {

@@ -7,11 +7,7 @@
 
 import { expect } from '@kbn/scout';
 import { omit } from 'lodash';
-import {
-  test,
-  getUniqueStreamName,
-  safeDeleteStream,
-} from '../../../fixtures';
+import { test, getUniqueStreamName, safeDeleteStream } from '../../../fixtures';
 import {
   closeRetentionModal,
   closeToastsIfPresent,

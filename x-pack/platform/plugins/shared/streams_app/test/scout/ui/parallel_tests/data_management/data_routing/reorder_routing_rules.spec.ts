@@ -9,11 +9,7 @@
 /* eslint-disable playwright/expect-expect */
 
 import { expect } from '@kbn/scout';
-import {
-  test,
-  safeDeleteStream,
-  cleanupTestStreams,
-} from '../../../fixtures';
+import { test, safeDeleteStream, cleanupTestStreams } from '../../../fixtures';
 
 test.describe(
   'Stream data routing - reordering routing rules',
@@ -56,7 +52,11 @@ test.describe(
       await pageObjects.streams.saveRuleOrder();
       await pageObjects.toasts.waitFor();
 
-      await pageObjects.streams.expectRoutingOrder([streamNames[1], streamNames[2], streamNames[0]]);
+      await pageObjects.streams.expectRoutingOrder([
+        streamNames[1],
+        streamNames[2],
+        streamNames[0],
+      ]);
     });
 
     test('should cancel reordering', async ({ pageObjects }) => {
@@ -82,7 +82,11 @@ test.describe(
       await pageObjects.streams.saveRuleOrder();
       await pageObjects.toasts.waitFor();
 
-      await pageObjects.streams.expectRoutingOrder([streamNames[2], streamNames[1], streamNames[0]]);
+      await pageObjects.streams.expectRoutingOrder([
+        streamNames[2],
+        streamNames[1],
+        streamNames[0],
+      ]);
     });
 
     test('should not allow editing while reordering is in progress', async ({
@@ -113,7 +117,11 @@ test.describe(
       await page.reload();
 
       // Verify order persisted
-      await pageObjects.streams.expectRoutingOrder([streamNames[1], streamNames[2], streamNames[0]]);
+      await pageObjects.streams.expectRoutingOrder([
+        streamNames[1],
+        streamNames[2],
+        streamNames[0],
+      ]);
     });
 
     test('should allow reordering only when multiple rules exist', async ({

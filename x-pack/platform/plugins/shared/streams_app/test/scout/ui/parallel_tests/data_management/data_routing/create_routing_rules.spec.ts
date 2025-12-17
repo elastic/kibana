@@ -6,11 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
-import {
-  test,
-  safeDeleteStream,
-  cleanupTestStreams,
-} from '../../../fixtures';
+import { test, safeDeleteStream, cleanupTestStreams } from '../../../fixtures';
 
 const MAX_STREAM_NAME_LENGTH = 200;
 
@@ -207,7 +203,9 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await streamLink.click();
 
     // Verify we navigated to the child stream's partitioning tab
-    await expect(page).toHaveURL(new RegExp(`${streamSuffix.replace('.', '\\.')}\\/management\\/partitioning`));
+    await expect(page).toHaveURL(
+      new RegExp(`${streamSuffix.replace('.', '\\.')}\\/management\\/partitioning`)
+    );
   });
 
   test('should show "Open stream in new tab" button in success toast', async ({
