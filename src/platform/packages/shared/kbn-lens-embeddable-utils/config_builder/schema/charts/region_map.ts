@@ -43,7 +43,7 @@ export const regionMapStateSchemaNoESQL = schema.object({
   region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
 });
 
-const regionMapStateSchemaESQL = schema.object({
+export const regionMapStateSchemaESQL = schema.object({
   type: schema.literal('region_map'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
