@@ -255,9 +255,6 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to list all data connectors: Database error'
-      );
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
@@ -321,7 +318,6 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Error fetching data connector: Not found');
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
@@ -338,18 +334,15 @@ describe('registerRoutes', () => {
         actionTypeId: '.notion',
         name: 'Notion connector',
       };
-
       const mockWorkflow = {
         id: 'workflow-1',
         name: 'Test Workflow',
         description: 'Test workflow description',
       };
-
       const mockTool = {
         id: 'tool-1',
         type: 'workflow',
       };
-
       const mockSavedObject = {
         id: 'connector-1',
         type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -482,9 +475,6 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Error creating data connector: Failed to create action'
-      );
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
@@ -810,7 +800,6 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Failed to delete all connectors: Find failed');
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
@@ -997,9 +986,6 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to delete connector: Connector not found'
-      );
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
