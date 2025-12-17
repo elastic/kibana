@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { isActionBlock } from '@kbn/streamlang';
+import { useMemo } from 'react';
+import { selectWhetherAnyProcessorBeforePersisted } from '../state_management/interactive_mode_machine/selectors';
 import {
   useInteractiveModeSelector,
   useSimulatorSelector,
   useStreamEnrichmentSelector,
-} from './stream_enrichment_state_machine';
-import { getActiveSimulationMode } from './stream_enrichment_state_machine/utils';
-import { selectWhetherAnyProcessorBeforePersisted } from './interactive_mode_machine/selectors';
+} from '../state_management/stream_enrichment_state_machine';
+import { getActiveSimulationMode } from '../state_management/stream_enrichment_state_machine/utils';
 
 export type StepsProcessingSummaryMap = Map<string, StepProcessingStatus>;
 type StepProcessingStatus =
@@ -23,6 +23,7 @@ type StepProcessingStatus =
   | 'successful'
   | 'disabled.processorBeforePersisted'
   | 'skipped.followsProcessorBeingEdited'
+  | 'skipped.excludedByFilteringCondition'
   | 'skipped.createdInPreviousSimulation'
   | 'condition';
 
@@ -56,6 +57,10 @@ export const useStepsProcessingSummary = () => {
     selectWhetherAnyProcessorBeforePersisted(snapshot.context)
   );
 
+  const isFilteringByCondition = useSimulatorSelector(
+    (snapshot) => snapshot.context.selectedConditionId !== undefined
+  );
+
   const stepsProcessingSummary = useMemo(() => {
     const summaryMap: StepsProcessingSummaryMap = new Map();
 
@@ -72,7 +77,11 @@ export const useStepsProcessingSummary = () => {
           summaryMap.set(stepId, 'disabled.processorBeforePersisted');
         } else if (!isParticipatingInSimulation) {
           if (stepContext.isNew) {
-            summaryMap.set(stepId, 'skipped.followsProcessorBeingEdited');
+            if (isFilteringByCondition) {
+              summaryMap.set(stepId, 'skipped.excludedByFilteringCondition');
+            } else {
+              summaryMap.set(stepId, 'skipped.followsProcessorBeingEdited');
+            }
           } else {
             summaryMap.set(stepId, 'skipped.createdInPreviousSimulation');
           }
@@ -93,6 +102,7 @@ export const useStepsProcessingSummary = () => {
   }, [
     hasSimulation,
     isAnyProcessorBeforePersisted,
+    isFilteringByCondition,
     isPartialSimulation,
     isSimulationRunning,
     processorMetrics,
