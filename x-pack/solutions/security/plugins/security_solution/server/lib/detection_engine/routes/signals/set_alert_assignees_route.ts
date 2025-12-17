@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import {
-  ALERTS_API_ALL,
-  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
-} from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ALERTS_API_ALL } from '@kbn/security-solution-features/constants';
 import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -25,9 +22,8 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [
-            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
-          ],
+          // a t1_analyst, who has read only access, should be able to assign alerts
+          requiredPrivileges: [ALERTS_API_ALL],
         },
       },
     })
