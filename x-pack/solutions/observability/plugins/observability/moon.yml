@@ -149,7 +149,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/onechat-plugin'
   - '@kbn/synthtrace'
-  - '@kbn/ai-insights'
   - '@kbn/observability-agent-builder-plugin'
 tags:
   - plugin
