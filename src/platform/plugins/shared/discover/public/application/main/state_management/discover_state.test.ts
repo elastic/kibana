@@ -271,6 +271,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -443,6 +444,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -471,6 +473,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -517,6 +520,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -545,6 +549,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -573,6 +578,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -614,6 +620,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -643,6 +650,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -676,6 +684,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -710,6 +719,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -744,6 +754,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -766,6 +777,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -783,6 +795,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -812,6 +825,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -831,6 +845,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -868,6 +883,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -921,6 +937,7 @@ describe('Discover state', () => {
             stateContainer: state,
             customizationService,
             dataViewSpec: undefined,
+            esqlControls: undefined,
             defaultUrlState: {},
           },
         })
@@ -974,6 +991,7 @@ describe('Discover state', () => {
             stateContainer: state,
             customizationService,
             dataViewSpec: undefined,
+            esqlControls: undefined,
             defaultUrlState: {
               dataSource: createDataViewDataSource({
                 dataViewId: 'index-pattern-with-timefield-id',
@@ -1012,6 +1030,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: dataViewSpecMock,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1040,6 +1059,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1063,6 +1083,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1083,6 +1104,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1106,6 +1128,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1169,6 +1192,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1206,6 +1230,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1238,6 +1263,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1275,6 +1301,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1318,6 +1345,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1344,6 +1372,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1361,6 +1390,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1387,6 +1417,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );
@@ -1455,6 +1486,7 @@ describe('Discover state', () => {
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            esqlControls: undefined,
           },
         })
       );

@@ -84,4 +84,20 @@ describe('SuggestionOrderingEngine', () => {
     expect(statsResult[1].label).toBe('count');
     expect(statsResult[2].label).toBe('abs');
   });
+
+  it('should sort LOOKUP_COMMON_FIELD first, then FIELD alphabetically', () => {
+    const suggestions = [
+      createSuggestion('sourceField', SuggestionCategory.FIELD),
+      createSuggestion('lookupOnlyField', SuggestionCategory.FIELD),
+      createSuggestion('commonField', SuggestionCategory.LOOKUP_COMMON_FIELD),
+      createSuggestion('anotherSourceField', SuggestionCategory.FIELD),
+    ];
+
+    const result = engine.sort(suggestions, { command: 'JOIN' });
+
+    expect(result[0].label).toBe('commonField');
+    expect(result[1].label).toBe('anotherSourceField');
+    expect(result[2].label).toBe('lookupOnlyField');
+    expect(result[3].label).toBe('sourceField');
+  });
 });
