@@ -18,6 +18,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { SLORepository, TransformManager } from '../services';
 import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 import type { SLOSettingsRepository } from '../services/slo_settings_repository';
+import type { SLOTemplateRepository } from '../services/slo_template_repository';
 
 export type GetScopedClients = ({
   request,
@@ -37,6 +38,7 @@ export interface RouteHandlerScopedClients {
   racClient: AlertsClient;
   repository: SLORepository;
   settingsRepository: SLOSettingsRepository;
+  templateRepository: SLOTemplateRepository;
   transformManager: TransformManager;
   summaryTransformManager: TransformManager;
 }

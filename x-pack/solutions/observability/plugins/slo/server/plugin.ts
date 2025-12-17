@@ -54,6 +54,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -193,6 +194,7 @@ export class SLOPlugin
 
           const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
+          const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless),
@@ -214,6 +216,7 @@ export class SLOPlugin
             spaceId,
             repository,
             settingsRepository,
+            templateRepository,
             transformManager,
             summaryTransformManager,
             racClient,
