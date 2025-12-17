@@ -15,6 +15,7 @@ import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine
 import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_machine';
 import { isStepUnderEdit } from '../steps_state_machine';
 import type { InteractiveModeContext } from './types';
+import { collectDescendantStepIds } from '../utils';
 
 export type StepSpawner = (
   src: 'stepMachine',
@@ -64,7 +65,8 @@ export function getStepsForSimulation({
 
   // Truncate to the selected condition subtree (and everything before it)
   if (selectedConditionId) {
-    const conditionAndDescendants = collectDescendantIds(selectedConditionId, stepRefs);
+    const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+    const conditionAndDescendants = collectDescendantStepIds(steps, selectedConditionId);
 
     conditionAndDescendants.add(selectedConditionId);
 
@@ -117,18 +119,4 @@ export function getActiveDataSourceSamplesFromParent(
     dataSourceId: activeDataSourceSnapshot.context.dataSource.id,
     document: doc,
   }));
-}
-
-function collectDescendantIds(id: string, stepRefs: StepActorRef[]): Set<string> {
-  const ids = new Set<string>();
-  function collect(currentId: string) {
-    stepRefs
-      .filter((step) => step.getSnapshot().context.step.parentId === currentId)
-      .forEach((child) => {
-        ids.add(child.id);
-        collect(child.id);
-      });
-  }
-  collect(id);
-  return ids;
 }

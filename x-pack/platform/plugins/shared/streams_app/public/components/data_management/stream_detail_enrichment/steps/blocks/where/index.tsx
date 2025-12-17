@@ -26,7 +26,7 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
 } from '../../../state_management/stream_enrichment_state_machine';
-import { collectDescendantIds } from '../../../state_management/stream_enrichment_state_machine/utils';
+import { collectDescendantStepIds } from '../../../state_management/utils';
 import { getStepPanelColour } from '../../../utils';
 import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
@@ -78,7 +78,10 @@ export const WhereBlock = (props: StepConfigurationProps) => {
 
   // Only gather these for the summary if the block is collapsed
   const descendantIds = !isExpanded
-    ? collectDescendantIds(step.customIdentifier, stepRefs)
+    ? collectDescendantStepIds(
+        stepRefs.map((ref) => ref.getSnapshot().context.step),
+        step.customIdentifier
+      )
     : undefined;
 
   useEffect(() => {

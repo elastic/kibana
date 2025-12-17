@@ -28,6 +28,7 @@ import {
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
 import type { StepActorRef } from '../steps_state_machine';
+import { collectDescendantStepIds } from '../utils';
 import type { StreamEnrichmentContextType } from './types';
 
 export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
@@ -145,7 +146,8 @@ export const spawnDataSource = <
  * Takes into account nested conditions and their descendants.
  */
 function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): number {
-  const descendantStepIds = collectDescendantIds(parentId, stepRefs);
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+  const descendantStepIds = collectDescendantStepIds(steps, parentId);
   const lastDescendantId = Array.from(descendantStepIds).at(-1);
 
   const lastDescendantIndex = stepRefs.findIndex((stepRef) => {
@@ -162,7 +164,6 @@ function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): nu
 /* Find insert index based on step hierarchy */
 export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | null): number {
   // Find the index of the parent step
-  // debugger;
   const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;
 
   // Find the last index of any step with the same parentId
@@ -203,7 +204,8 @@ export function reorderSteps(
   direction: 'up' | 'down'
 ): StepActorRef[] {
   // 1. Collect all descendant ids for the block to move
-  const children = collectDescendantIds(stepId, stepRefs);
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+  const children = collectDescendantStepIds(steps, stepId);
   const allBlockIds = new Set([stepId, ...children]);
 
   // 2. Find the start and end index of the block in the original array
@@ -246,7 +248,7 @@ export function reorderSteps(
         // Find the end of this next block in withoutBlock
         let candidateBlockEnd = withoutBlock.findIndex((step) => step.id === candidate.id);
         // Find the last descendant of this block
-        const candidateDescendants = collectDescendantIds(candidate.id, stepRefs);
+        const candidateDescendants = collectDescendantStepIds(steps, candidate.id);
         if (candidateDescendants.size > 0) {
           const lastDescendantId = Array.from(candidateDescendants).pop();
           const lastDescendantIdx = withoutBlock.findIndex((step) => step.id === lastDescendantId);
@@ -261,20 +263,6 @@ export function reorderSteps(
     // If not found, insert at the end among siblings
     return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
   }
-}
-
-export function collectDescendantIds(id: string, stepRefs: StepActorRef[]): Set<string> {
-  const ids = new Set<string>();
-  function collect(currentId: string) {
-    stepRefs
-      .filter((step) => step.getSnapshot().context.step.parentId === currentId)
-      .forEach((child) => {
-        ids.add(child.id);
-        collect(child.id);
-      });
-  }
-  collect(id);
-  return ids;
 }
 
 export type RootLevelMap = Map<string, string>;

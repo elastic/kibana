@@ -31,11 +31,11 @@ import { stepMachine } from '../steps_state_machine';
 import type { StepParentActor } from '../steps_state_machine/types';
 import { hasErrorsInParentSnapshot } from '../stream_enrichment_state_machine/selectors';
 import {
-  collectDescendantIds,
   findInsertIndex,
   insertAtIndex,
   reorderSteps,
 } from '../stream_enrichment_state_machine/utils';
+import { collectDescendantStepIds } from '../utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 import {
   createNotifySuggestionFailureNotifier,
@@ -178,7 +178,8 @@ export const interactiveModeMachine = setup({
       }
     ),
     deleteStep: assign(({ context }, params: { id: string }) => {
-      const idsToDelete = collectDescendantIds(params.id, context.stepRefs);
+      const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
+      const idsToDelete = collectDescendantStepIds(steps, params.id);
       idsToDelete.add(params.id);
       return {
         stepRefs: context.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),

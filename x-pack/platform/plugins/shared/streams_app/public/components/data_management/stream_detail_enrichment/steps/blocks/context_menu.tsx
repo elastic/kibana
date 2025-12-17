@@ -25,7 +25,7 @@ import {
   useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
 import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
-import { collectDescendantIds } from '../../state_management/stream_enrichment_state_machine/utils';
+import { collectDescendantStepIds } from '../../state_management/utils';
 import type { StepConfigurationProps } from '../steps_list';
 import { EditStepDescriptionModal } from './action/edit_step_description_modal';
 import { deleteProcessorPromptOptions } from './action/prompt_options';
@@ -112,7 +112,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     (snapshot) => snapshot.context.selectedConditionId
   );
   const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
-
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
@@ -139,7 +139,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   };
 
   const getChildStepsLength = () => {
-    return !isWhere ? 0 : collectDescendantIds(step.customIdentifier, stepRefs).size;
+    return !isWhere ? 0 : collectDescendantStepIds(steps, step.customIdentifier).size;
   };
 
   const deletePromptOptions = !isWhere

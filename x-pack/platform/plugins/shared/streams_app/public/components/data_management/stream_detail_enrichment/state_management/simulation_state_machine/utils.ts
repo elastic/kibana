@@ -21,6 +21,7 @@ import type {
 } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
+import { collectDescendantStepIds } from '../utils';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { DetectedField, Simulation, SimulationContext } from './types';
 
@@ -51,23 +52,6 @@ export function getSourceField(
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
-}
-
-/**
- * Recursively collects all descendant step IDs
- * for a given parent step ID.
- */
-function collectDescendantStepIds(steps: StreamlangStepWithUIAttributes[], parentId: string) {
-  const ids = new Set<string>();
-
-  steps.forEach((step) => {
-    if (step.parentId === parentId) {
-      ids.add(step.customIdentifier);
-      collectDescendantStepIds(steps, step.customIdentifier).forEach((childId) => ids.add(childId));
-    }
-  });
-
-  return ids;
 }
 
 /**
