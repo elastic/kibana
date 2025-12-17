@@ -41,16 +41,30 @@ jest.mock('@kbn/repo-packages', () => ({
   }),
 }));
 
+import { getPkgsById } from '@kbn/repo-packages';
 import { runUnitTestsTool } from './run_unit_tests';
 import { parseToolResultJsonContent } from './test_utils';
 
 const mockedFs = fs as jest.Mocked<typeof fs>;
 const mockedExeca = execa as jest.Mocked<typeof execa>;
-const mockedGetPkgsById = require('@kbn/repo-packages').getPkgsById as jest.Mock;
+const mockedGetPkgsById = getPkgsById as jest.Mock;
+
+const createDefaultPkgsMap = () => {
+  const map = new Map();
+  map.set('@kbn/mcp-dev-server', {
+    normalizedRepoRelativeDir: 'src/platform/packages/shared/kbn-mcp-dev-server',
+  });
+  map.set('@kbn/test-package', {
+    normalizedRepoRelativeDir: 'src/test/package',
+  });
+  return map;
+};
 
 describe('runUnitTestsTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore default mock implementation for getPkgsById.
+    mockedGetPkgsById.mockImplementation(createDefaultPkgsMap);
   });
 
   describe('tool definition', () => {
@@ -430,9 +444,8 @@ describe('runUnitTestsTool', () => {
           return false;
         });
 
-        const result = await runUnitTestsTool.handler({});
+        await runUnitTestsTool.handler({});
 
-        const parsedResult = parseToolResultJsonContent(result);
         // Should only process .ts file, not .json, .md, .png
         expect(mockExecAsync).toHaveBeenCalled();
       });
@@ -563,6 +576,42 @@ describe('runUnitTestsTool', () => {
 
         const parsedResult = parseToolResultJsonContent(result);
         expect(parsedResult.results[0].coverage?.files[0].lines.total).toBe(0);
+      });
+    });
+
+    describe('message truncation', () => {
+      it('does not truncate short failure messages', async () => {
+        const shortMessage = 'Short error';
+        const jestOutputWithShortFailure = {
+          testResults: [
+            {
+              name: '/repo/root/src/test/file.test.ts',
+              status: 'failed',
+              assertionResults: [
+                {
+                  title: 'failing test',
+                  ancestorTitles: [],
+                  status: 'failed',
+                  failureMessages: [shortMessage],
+                },
+              ],
+            },
+          ],
+        };
+
+        setupMocks({ jestOutput: jestOutputWithShortFailure });
+
+        const result = await runUnitTestsTool.handler({
+          package: '@kbn/mcp-dev-server',
+          verbose: false,
+        });
+
+        const parsedResult = parseToolResultJsonContent(result);
+        const failureMessage =
+          parsedResult.results[0].testSuites[0].assertions[0].failureMessages[0];
+        // Short messages should not be truncated.
+        expect(failureMessage).toBe(shortMessage);
+        expect(failureMessage).not.toContain('truncated');
       });
     });
 

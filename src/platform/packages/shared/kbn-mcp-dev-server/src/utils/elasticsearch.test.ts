@@ -33,13 +33,13 @@ describe('elasticsearch client', () => {
     process.env.ELASTICSEARCH_CLOUD_ID = 'cloud-id:base64encoded';
     delete process.env.ELASTICSEARCH_ENDPOINT;
     delete process.env.ELASTICSEARCH_API_KEY;
-    delete process.env.ELASTICSEARCH_PASSWORD;
 
     // Re-import to get fresh module with new env vars
     await import('./elasticsearch');
 
     expect(mockClient).toHaveBeenCalledWith({
       cloud: { id: 'cloud-id:base64encoded' },
+      auth: { username: 'elastic', password: 'changeme' },
     });
   });
 
@@ -47,12 +47,12 @@ describe('elasticsearch client', () => {
     process.env.ELASTICSEARCH_ENDPOINT = 'http://localhost:9200';
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_API_KEY;
-    delete process.env.ELASTICSEARCH_PASSWORD;
 
     await import('./elasticsearch');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
+      auth: { username: 'elastic', password: 'changeme' },
     });
   });
 
@@ -64,6 +64,7 @@ describe('elasticsearch client', () => {
 
     expect(mockClient).toHaveBeenCalledWith({
       cloud: { id: 'cloud-id:base64encoded' },
+      auth: { username: 'elastic', password: 'changeme' },
     });
     expect(mockClient).not.toHaveBeenCalledWith(
       expect.objectContaining({ node: expect.anything() })
@@ -161,12 +162,12 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_ENDPOINT;
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_API_KEY;
-    delete process.env.ELASTICSEARCH_PASSWORD;
 
     await import('./elasticsearch');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
+      auth: { username: 'elastic', password: 'changeme' },
     });
   });
 

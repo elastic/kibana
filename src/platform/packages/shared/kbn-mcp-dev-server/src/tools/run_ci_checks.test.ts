@@ -159,12 +159,12 @@ describe('runCiChecksTool', () => {
 
       const parsedResult = parseToolResultJsonContent(result);
       expect(parsedResult.success).toBe(false);
-      expect(parsedResult.results.every((r) => r.status === 'failed')).toBe(true);
+      expect(parsedResult.results.every((r: any) => r.status === 'failed')).toBe(true);
     });
 
     it('returns failure when some checks fail', async () => {
       let callCount = 0;
-      mockedExeca.command.mockImplementation(() => {
+      (mockedExeca.command as jest.Mock).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return Promise.resolve({} as any);
