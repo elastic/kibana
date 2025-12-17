@@ -392,7 +392,9 @@ async function buildSuggestionsFromHints(
   );
 
   const results = await Promise.all(
-    hints.map((hint) => parametersFromHintsMap[hint.entityType]?.(hint, ctx) ?? [])
+    hints.map(
+      (hint) => parametersFromHintsMap[hint.entityType].suggestionResolver?.(hint, ctx) ?? []
+    )
   );
 
   return results.flat();

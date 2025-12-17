@@ -33,7 +33,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getCursorContext } from '../shared/get_cursor_context';
 import { getFromCommandHelper } from '../shared/resources_helpers';
-import { getCommandContext } from './get_command_context';
+import { getCommandContext, getCommandFunctionsContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
@@ -246,14 +246,23 @@ async function getSuggestionsWithinCommandExpression(
     return findNewUserDefinedColumn(allUserDefinedColumns);
   };
 
+  // Get the context that might be needed by the command itself
   const additionalCommandContext = await getCommandContext(
     astContext.command.name,
     innerText,
     callbacks
   );
+
+  // Get the context that might be needed by functions used within this command
+  const additionalFunctionsContext = await getCommandFunctionsContext(
+    astContext.command,
+    callbacks
+  );
+
   const context = {
     ...references,
     ...additionalCommandContext,
+    ...additionalFunctionsContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
   };

@@ -9,6 +9,7 @@
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ParameterHint, ParameterHintEntityType } from '../../..';
 import type { ISuggestionItem } from '../../../registry/types';
 import type { ExpressionContext } from './expressions/types';
@@ -17,25 +18,52 @@ import { createInferenceEndpointToCompletionItem } from './helpers';
 /**
  * For some parameters, ES gives as hints about the nature of it, that we use to provide
  * custom autocompletion handlers.
+ *
+ * For each hint we need to provide:
+ * - a suggestionResolver to generate the autocomplettion items to shown for that param.
+ * - optionally, a contextResolver that populates the context with the data needed by the suggestionResolver.
  */
 export const parametersFromHintsMap: Record<
   ParameterHintEntityType,
-  (hint: ParameterHint, ctx: ExpressionContext) => Promise<ISuggestionItem[]>
+  {
+    suggestionResolver: (hint: ParameterHint, ctx: ExpressionContext) => Promise<ISuggestionItem[]>;
+    contextResolver?: (
+      hint: ParameterHint,
+      callbacks: ESQLCallbacks
+    ) => Promise<Record<string, unknown>>;
+  }
 > = {
-  ['inference_endpoint']: inferenceEndpointHandler,
+  ['inference_endpoint']: {
+    suggestionResolver: inferenceEndpointSuggestionResolver,
+    contextResolver: inferenceEndpointContextResolver,
+  },
 };
 
-async function inferenceEndpointHandler(
+// -------- INFERENCE ENDPOINT -------- //
+async function inferenceEndpointContextResolver(
+  hint: ParameterHint,
+  callbacks: ESQLCallbacks
+): Promise<Record<string, unknown>> {
+  if (hint.constraints?.task_type) {
+    const inferenceEnpoints =
+      (await callbacks?.getInferenceEndpoints?.(hint.constraints?.task_type as InferenceTaskType))
+        ?.inferenceEndpoints || [];
+
+    return {
+      inferenceEndpoints: inferenceEnpoints,
+    };
+  }
+  return {};
+}
+async function inferenceEndpointSuggestionResolver(
   hint: ParameterHint,
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   if (hint.constraints?.task_type) {
     const inferenceEnpoints =
-      (
-        await ctx.callbacks?.getInferenceEndpoints?.(
-          hint.constraints?.task_type as InferenceTaskType
-        )
-      )?.inferenceEndpoints || [];
+      ctx.context?.inferenceEndpoints?.filter((endpoint) => {
+        return endpoint.task_type === hint.constraints?.task_type;
+      }) ?? [];
 
     return inferenceEnpoints.map(createInferenceEndpointToCompletionItem).map((item) => {
       return {

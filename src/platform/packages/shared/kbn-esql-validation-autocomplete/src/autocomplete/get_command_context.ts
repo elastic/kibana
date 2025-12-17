@@ -8,6 +8,12 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import type { ParameterHint } from '@kbn/esql-ast';
+import { walk } from '@kbn/esql-ast';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
+import { getFunctionDefinition } from '@kbn/esql-ast/src/commands/definitions/utils';
+import { isEqual, uniqWith } from 'lodash';
+import { parametersFromHintsMap } from '@kbn/esql-ast/src/commands/definitions/utils/autocomplete/parameters_from_hints';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
 export const getCommandContext = async (
@@ -79,4 +85,48 @@ export const getCommandContext = async (
     default:
       return {};
   }
+};
+
+/**
+ *  Returns the context needed by the functions used within a command.
+ */
+export const getCommandFunctionsContext = async (
+  command: ESQLAstAllCommands,
+  callbacks?: ESQLCallbacks
+) => {
+  const hints: ParameterHint[] = [];
+
+  // Gathers all hints from all functions used within the command
+  walk(command, {
+    visitFunction: (funcNode) => {
+      const functionDefinition = getFunctionDefinition(funcNode.name);
+
+      if (functionDefinition) {
+        hints.push(
+          ...functionDefinition.signatures
+            .flatMap((sig) => sig.params)
+            .filter((param) => param.hint)
+            .map((param) => param.hint!)
+        );
+      }
+    },
+  });
+
+  // Remove duplicate hints
+  const uniqueHints = uniqWith(
+    hints,
+    (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
+  );
+
+  // If the hint needs ne data to build the suggestions, we add that dat to the context
+  const context = {};
+  for (const hint of uniqueHints) {
+    const parameterHandler = parametersFromHintsMap[hint.entityType];
+    if (parameterHandler?.contextResolver) {
+      const resolvedContext = await parameterHandler.contextResolver(hint, callbacks ?? {});
+      Object.assign(context, resolvedContext);
+    }
+  }
+
+  return context;
 };
