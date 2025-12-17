@@ -13,10 +13,6 @@ import {
   type ConversationRound,
   ConversationRoundStepType,
 } from '@kbn/onechat-common';
-import type {
-  ReportMessageReceivedParams,
-  ReportMessageSentParams,
-} from '@kbn/onechat-common/telemetry';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
@@ -59,15 +55,6 @@ export class AnalyticsService {
     }
   }
 
-  reportMessageSentt(params: ReportMessageSentParams): void {
-    try {
-      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageSent, params);
-    } catch (error) {
-      // Do not fail the request if telemetry fails
-      this.logger.debug('Failed to report MessageSent telemetry event', { error });
-    }
-  }
-
   reportMessageReceived({
     round,
     connector,
@@ -103,15 +90,6 @@ export class AnalyticsService {
         input_tokens: round.model_usage?.input_tokens,
         output_tokens: round.model_usage?.output_tokens,
       });
-    } catch (error) {
-      // Do not fail the request if telemetry fails
-      this.logger.debug('Failed to report MessageReceived telemetry event', { error });
-    }
-  }
-
-  reportMessageReceivedd(params: ReportMessageReceivedParams): void {
-    try {
-      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, params);
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report MessageReceived telemetry event', { error });

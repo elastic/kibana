@@ -213,6 +213,7 @@ describe('ChatExperience', () => {
     act(() => {
       fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
         unsavedValue: AIChatExperience.Agent,
+        type: 'string',
       });
     });
 
@@ -225,6 +226,7 @@ describe('ChatExperience', () => {
     act(() => {
       fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
         unsavedValue: AIChatExperience.Agent,
+        type: 'string',
       });
     });
 
@@ -240,6 +242,7 @@ describe('ChatExperience', () => {
     act(() => {
       fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
         unsavedValue: AIChatExperience.Classic,
+        type: 'string',
       });
     });
 
@@ -252,6 +255,7 @@ describe('ChatExperience', () => {
     act(() => {
       fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
         unsavedValue: AIChatExperience.Agent,
+        type: 'string',
       });
     });
 
@@ -268,6 +272,7 @@ describe('ChatExperience', () => {
     act(() => {
       fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
         unsavedValue: AIChatExperience.Agent,
+        type: 'string',
       });
     });
 
