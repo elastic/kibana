@@ -34,7 +34,6 @@ import { GoToSpacesButton } from './go_to_spaces_button';
 import { useGenAiConnectors } from '../hooks/use_genai_connectors';
 import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 import { useSettingsContext } from '../contexts/settings_context';
-import { clearPendingReloadFlag, setPendingReloadFlag } from '../utils/pending_reload';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
@@ -228,6 +227,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
       ? chatExperienceField.savedValue
       : undefined;
+    const defaultChatExperience = isAIChatExperience(chatExperienceField?.defaultValue)
+      ? (chatExperienceField.defaultValue as AIChatExperience)
+      : undefined;
     const unsavedChatExperience = isAIChatExperience(
       unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue
     )
@@ -242,22 +244,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       normalizedSavedChatExperience === AIChatExperience.Agent &&
       normalizedUnsavedChatExperience === AIChatExperience.Classic;
 
-    /**
-     * `ChatExperience`'s `step_reached` effect can re-run during the save flow (e.g. as
-     * `unsavedChanges`/`fields` update). We set the pending reload flag before awaiting the save so
-     * those intermediate renders reliably see it, then clear it when no reload is needed.
-     */
-    setPendingReloadFlag();
-    let needsReload: boolean;
-    try {
-      needsReload = await saveAll();
-    } catch (e) {
-      clearPendingReloadFlag();
-      throw e;
-    }
-    if (!needsReload) {
-      clearPendingReloadFlag();
-    }
+    const needsReload = await saveAll();
     if (shouldTrackOptInConfirmed) {
       console.log(
         `${AGENT_BUILDER_EVENT_TYPES.OptInAction} ==>`,
@@ -291,7 +278,22 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       });
     }
     if (needsReload) {
-      // Used by `ChatExperience` to avoid firing `step_reached` both before and after reload.
+      // Only skip `step_reached` after reload if it could have been reported on this page load.
+      // This prevents suppressing the Agent -> Classic transition, where `step_reached` should be
+      // emitted after reload.
+      const shouldSkipStepReachedOnReload =
+        normalizedSavedChatExperience === AIChatExperience.Classic &&
+        !(savedChatExperience === undefined && defaultChatExperience === AIChatExperience.Agent);
+
+      if (shouldSkipStepReachedOnReload) {
+        try {
+          // We reload the page after saving; without this one-shot flag, `ChatExperience` would emit
+          // `step_reached` both before and after the reload.
+          window.sessionStorage.setItem('gen_ai_settings:skip_step_reached_once', `${Date.now()}`);
+        } catch {
+          // ignore
+        }
+      }
       window.location.reload();
     }
   }

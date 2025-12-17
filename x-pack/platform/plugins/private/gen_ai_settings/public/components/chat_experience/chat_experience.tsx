@@ -16,13 +16,11 @@ import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_ag
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
-import {
-  clearPendingReloadFlag,
-  getIsReloadNavigation,
-  getPendingReloadFlag,
-} from '../../utils/pending_reload';
 
 const TELEMETRY_SOURCE = 'stack_management' as const;
+const SKIP_STEP_REACHED_ONCE_SESSION_STORAGE_KEY =
+  'gen_ai_settings:skip_step_reached_once' as const;
+const SKIP_STEP_REACHED_ONCE_TTL_MS = 30_000;
 
 type AnalyticsService =
   | { reportEvent: (eventType: string, payload: Record<string, unknown>) => void }
@@ -49,6 +47,24 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience => {
   );
 };
 
+const consumeSkipStepReachedOnce = (
+  storage: Storage = window.sessionStorage,
+  key: string = SKIP_STEP_REACHED_ONCE_SESSION_STORAGE_KEY,
+  now: number = Date.now()
+): boolean => {
+  try {
+    const raw = storage.getItem(key);
+    if (!raw) return false;
+    // Always consume the flag if present to avoid it getting "stuck" and suppressing future visits.
+    storage.removeItem(key);
+    const ts = Number.parseInt(raw, 10);
+    if (!Number.isFinite(ts)) return true;
+    return now - ts < SKIP_STEP_REACHED_ONCE_TTL_MS;
+  } catch {
+    return false;
+  }
+};
+
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
@@ -65,20 +81,12 @@ export const ChatExperience: React.FC = () => {
   useEffect(() => {
     if (hasTrackedInitialStep.current) return;
     if (!field) return;
-    // No saved value indicates Classic (or unknown, which we treat as Classic).
-    if (savedValue) return;
+    // don’t track the opt-in step if the default experience is already Agent
+    if (!savedValue && field?.defaultValue === 'agent') return;
+    if (savedValue && savedValue !== 'classic') return;
 
-    /**
-     * Saving can trigger a full page reload (`gen_ai_settings_app.tsx` sets a sessionStorage flag).
-     * Without this guard, `step_reached` could be reported twice: once before the reload and again
-     * after remount. We skip reporting while the flag is present, and only clear it on a reload
-     * navigation to avoid a race where the post-reload page misses the flag.
-     */
-    const pendingReload = getPendingReloadFlag();
-    if (pendingReload) {
-      if (getIsReloadNavigation()) {
-        clearPendingReloadFlag();
-      }
+    if (consumeSkipStepReachedOnce()) {
+      hasTrackedInitialStep.current = true;
       return;
     }
     reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
@@ -86,7 +94,7 @@ export const ChatExperience: React.FC = () => {
       source: TELEMETRY_SOURCE,
     });
     hasTrackedInitialStep.current = true;
-  }, [analytics, field, savedValue, unsavedChanges]);
+  }, [analytics, field, savedValue]);
 
   // Show confirmation modal for AI Agents selection
   const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(

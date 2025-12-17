@@ -158,7 +158,7 @@ describe('ChatExperience', () => {
   });
 
   it('returns no step_reached telemetry on initial render when a save-triggered reload is pending', async () => {
-    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
+    sessionStorage.setItem('gen_ai_settings:skip_step_reached_once', `${Date.now()}`);
 
     const { reportEvent } = setup({ savedValue: undefined, hasField: true });
 
@@ -169,71 +169,33 @@ describe('ChatExperience', () => {
     expect(reportEvent).not.toHaveBeenCalled();
   });
 
-  it('returns uncleared pending reload flag on initial render when navigation is not a reload', async () => {
-    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
-
-    setup({ savedValue: undefined, hasField: true });
-
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    expect(sessionStorage.getItem('gen_ai_settings:pending_reload')).toBe('1');
+  it('returns no step_reached telemetry on initial render when current value is Agent', () => {
+    const { reportEvent } = setup({ savedValue: AIChatExperience.Agent });
+    expect(reportEvent).not.toHaveBeenCalled();
   });
 
-  it('returns cleared pending reload flag on initial render when navigation is a reload', async () => {
-    const originalGetEntriesByType = performance.getEntriesByType;
-    // @ts-expect-error JSDOM typing differs from real browser PerformanceEntry types.
-    performance.getEntriesByType = jest.fn(() => [{ type: 'reload' }]);
-
-    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
-
-    setup({ savedValue: undefined, hasField: true });
-
-    await act(async () => {
-      await Promise.resolve();
+  it('returns step_reached telemetry when saved value changes from Agent to Classic', async () => {
+    const { reportEvent, renderResult, handleFieldChange } = setup({
+      savedValue: AIChatExperience.Agent,
+      hasField: true,
     });
 
-    performance.getEntriesByType = originalGetEntriesByType;
-
-    expect(sessionStorage.getItem('gen_ai_settings:pending_reload')).toBeNull();
-  });
-
-  it('returns a persisted pending reload flag value when it is set after mount on a reload navigation', async () => {
-    const originalGetEntriesByType = performance.getEntriesByType;
-    // @ts-expect-error JSDOM typing differs from real browser PerformanceEntry types.
-    performance.getEntriesByType = jest.fn(() => [{ type: 'reload' }]);
-
-    // Simulate the initial load after a reload: the component should *consume* this flag and clear it.
-    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
-    const { renderResult, handleFieldChange } = setup({ savedValue: undefined, hasField: true });
-
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    // Simulate the save flow setting the flag later in the same page load.
-    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
     mockUseSettingsContext.mockReturnValue({
-      fields: { [AI_CHAT_EXPERIENCE_TYPE]: { savedValue: undefined } as unknown as FieldDefinition },
+      fields: {
+        [AI_CHAT_EXPERIENCE_TYPE]: { savedValue: AIChatExperience.Classic } as unknown as FieldDefinition,
+      },
       handleFieldChange,
       unsavedChanges: {},
     } as unknown as ReturnType<typeof useSettingsContext>);
 
     renderResult.rerender(<ChatExperience />);
 
-    await act(async () => {
-      await Promise.resolve();
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'step_reached',
+        source: 'stack_management',
+      });
     });
-
-    performance.getEntriesByType = originalGetEntriesByType;
-
-    expect(sessionStorage.getItem('gen_ai_settings:pending_reload')).toBe('1');
-  });
-
-  it('returns no step_reached telemetry on initial render when current value is Agent', () => {
-    const { reportEvent } = setup({ savedValue: AIChatExperience.Agent });
-    expect(reportEvent).not.toHaveBeenCalled();
   });
 
   it('returns step_reached telemetry on initial render when current value is unknown (defaults to Classic)', async () => {
