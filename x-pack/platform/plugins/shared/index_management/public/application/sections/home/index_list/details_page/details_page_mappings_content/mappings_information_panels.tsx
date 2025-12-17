@@ -19,7 +19,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EisPromotionalCallout, EisUpdateCallout } from '@kbn/search-api-panels';
+import {
+  EisCloudConnectPromoCallout,
+  EisPromotionalCallout,
+  EisUpdateCallout,
+} from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import { documentationService } from '../../../../../services';
 import { useAppContext } from '../../../../../app_context';
@@ -43,6 +48,7 @@ export const MappingsInformationPanels = ({
 }: MappingsInformationPanelsProps) => {
   const {
     plugins: { cloud },
+    core: { application },
   } = useAppContext();
   const state = useMappingsState();
 
@@ -87,6 +93,12 @@ export const MappingsInformationPanels = ({
             )}
           </>
         )}
+        <EisCloudConnectPromoCallout
+          promoId="indexDetailsMappings"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="column"
+          navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+        />
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
