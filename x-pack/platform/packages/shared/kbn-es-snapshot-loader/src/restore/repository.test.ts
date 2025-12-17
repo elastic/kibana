@@ -7,14 +7,14 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { getSnapshotMetadata } from './repository';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 
-const log = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-} as unknown as ToolingLog;
+const log = new ToolingLog({
+  level: 'silent',
+  writeTo: {
+    write: () => {},
+  },
+});
 
 describe('getSnapshotMetadata', () => {
   it('defaults to the latest SUCCESS snapshot (skips FAILED and in-progress snapshots)', async () => {

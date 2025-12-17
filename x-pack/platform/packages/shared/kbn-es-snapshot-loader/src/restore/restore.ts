@@ -33,7 +33,7 @@ export function filterIndicesToRestore(snapshotIndices: string[], patterns: stri
 
 export async function restoreIndices({
   esClient,
-  log: logger,
+  log,
   repoName,
   snapshotName,
   indices,
@@ -53,7 +53,7 @@ export async function restoreIndices({
   }
 
   const hasRename = renamePattern && renameReplacement;
-  logger.debug(`Restoring ${indices.length} indices${hasRename ? ' to temp location' : ''}`);
+  log.debug(`Restoring ${indices.length} indices${hasRename ? ' to temp location' : ''}`);
 
   await esClient.snapshot.restore({
     repository: repoName,
@@ -68,6 +68,6 @@ export async function restoreIndices({
     ? indices.map((idx) => idx.replace(new RegExp(renamePattern), renameReplacement))
     : indices;
 
-  logger.info(`Restore initiated for ${restoredNames.length} indices`);
+  log.info(`Restore initiated for ${restoredNames.length} indices`);
   return restoredNames;
 }

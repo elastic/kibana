@@ -19,6 +19,8 @@ import { AiInsightClient } from '../src/clients/ai_insight_client';
 import { apmErrorCountAIInsight } from '../src/alert_templates/alerts';
 
 const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
+const ALERT_CREATION_WAIT_MS = 3000;
+const INDEX_REFRESH_WAIT_MS = 2500;
 
 interface AlertAiInsightExample extends Example {
   input: {
@@ -129,12 +131,12 @@ evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
     });
 
     log.info('Waiting for alert to be created');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, ALERT_CREATION_WAIT_MS));
 
     await esClient.indices.refresh({ index: APM_ALERTS_INDEX });
 
     log.debug('Waiting 2.5s to make sure all indices are refreshed');
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
     const alertsResponse = await esClient.search({
       index: APM_ALERTS_INDEX,
       query: {

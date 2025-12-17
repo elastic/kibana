@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import {
   DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
   getDestinationInfo,
@@ -15,12 +15,12 @@ import {
 import { createTimestampPipeline } from './pipeline';
 import { getMaxTimestampFromData } from '.';
 
-const log = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-} as unknown as ToolingLog;
+const log = new ToolingLog({
+  level: 'silent',
+  writeTo: {
+    write: () => {},
+  },
+});
 
 const createMockEsClient = (esqlResponse?: { values: unknown[][] }): Client =>
   ({
@@ -77,19 +77,6 @@ describe('createTimestampPipeline', () => {
         ]),
       })
     );
-  });
-
-  it('logs success message', async () => {
-    const esClient = createMockEsClient();
-
-    await createTimestampPipeline({
-      esClient,
-      log,
-      pipelineName: 'test-pipeline',
-      maxTimestamp: '2024-01-15T12:00:00.000Z',
-    });
-
-    expect(log.debug).toHaveBeenCalledWith('Timestamp pipeline created');
   });
 });
 

@@ -17,6 +17,8 @@ import {
 import { replaySnapshot } from '@kbn/es-snapshot-loader';
 import { AiInsightClient, type ErrorInsightParams } from '../src/clients/ai_insight_client';
 
+const INDEX_REFRESH_WAIT_MS = 2500;
+
 interface ErrorAiInsightExample extends Example {
   input: ErrorInsightParams;
   output: {
@@ -114,7 +116,7 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
     });
 
     log.debug('Waiting 2.5s to make sure all indices are refreshed');
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
 
     log.info('Querying for APM error ID');
     const errorsResponse = await esClient.search({
