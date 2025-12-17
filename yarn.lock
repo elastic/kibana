@@ -5026,6 +5026,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-grid@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-grid":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-list-mock-data@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data":
   version "0.0.0"
   uid ""

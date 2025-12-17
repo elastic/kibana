@@ -266,6 +266,7 @@
     "@kbn/connector-specs": "link:src/platform/packages/shared/kbn-connector-specs",
     "@kbn/console-plugin": "link:src/platform/plugins/shared/console",
     "@kbn/content-connectors-plugin": "link:x-pack/platform/plugins/shared/content_connectors",
+    "@kbn/content-list-grid": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-grid",
     "@kbn/content-list-provider": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider",
     "@kbn/content-list-provider-client": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client",
     "@kbn/content-list-provider-server": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-server",

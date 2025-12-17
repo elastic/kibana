@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/content-list-grid",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}
+
