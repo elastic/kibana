@@ -55,7 +55,12 @@ export class DataConnectorsServerPlugin
 
     // Register HTTP routes
     const router = core.http.createRouter();
-    registerRoutes(router, this.logger, core.getStartServices, workflowsManagement);
+    registerRoutes({
+      router,
+      logger: this.logger,
+      getStartServices: core.getStartServices,
+      workflowManagement: workflowsManagement,
+    });
 
     return {};
   }

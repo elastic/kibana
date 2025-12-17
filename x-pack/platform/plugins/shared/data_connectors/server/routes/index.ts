@@ -7,8 +7,11 @@
 
 import type {
   IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
   Logger,
   SavedObject,
+  SavedObjectsClientContract,
   SavedObjectsFindResponse,
   StartServicesAccessor,
 } from '@kbn/core/server';
@@ -23,6 +26,10 @@ import type {
   DataConnectorsServerStartDependencies,
 } from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
+
+// Constants
+const DEFAULT_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 1000;
 
 /**
  * Builds the secrets object for a connector based on its spec
@@ -71,12 +78,153 @@ export function buildSecretsFromConnectorSpec(
   return secrets;
 }
 
-export function registerRoutes(
-  router: IRouter,
-  logger: Logger,
-  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>,
-  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement']
+interface CreateWorkflowsAndToolsParams {
+  workflowInfos: Array<{ content: string; shouldGenerateABTool: boolean }>;
+  stackConnectorId: string;
+  type: string;
+  spaceId: string;
+  request: KibanaRequest;
+  logger: Logger;
+  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+  onechatTools: DataConnectorsServerStartDependencies['onechat']['tools'];
+}
+
+interface CreateWorkflowsAndToolsResult {
+  workflowIds: string[];
+  toolIds: string[];
+}
+
+/**
+ * Creates workflows and associated tools for a data connector
+ */
+async function createWorkflowsAndTools(
+  params: CreateWorkflowsAndToolsParams
+): Promise<CreateWorkflowsAndToolsResult> {
+  const { workflowInfos, type, spaceId, request, logger, workflowManagement, onechatTools } =
+    params;
+
+  const workflowIds: string[] = [];
+  const toolIds: string[] = [];
+
+  for (const workflowInfo of workflowInfos) {
+    const workflow = await workflowManagement.management.createWorkflow(
+      { yaml: workflowInfo.content },
+      spaceId,
+      request
+    );
+    workflowIds.push(workflow.id);
+
+    if (workflowInfo.shouldGenerateABTool) {
+      const toolRegistry = await onechatTools.getRegistry({ request });
+      const tool = await toolRegistry.create({
+        id: `${type}-${workflow.id}`,
+        type: ToolType.workflow,
+        description: `Workflow tool for ${type} data connector`,
+        tags: ['data-connector', type],
+        configuration: {
+          workflow_id: workflow.id,
+        },
+      });
+      toolIds.push(tool.id);
+      logger.info(`Created tool for workflow '${workflow.name}'`);
+    }
+  }
+
+  return { workflowIds, toolIds };
+}
+
+interface DeleteRelatedResourcesParams {
+  kscIds: string[];
+  toolIds: string[];
+  workflowIds: string[];
+  spaceId: string;
+  request: KibanaRequest;
+  logger: Logger;
+  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+  actionsClient: Awaited<
+    ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
+  >;
+  toolRegistry: Awaited<
+    ReturnType<DataConnectorsServerStartDependencies['onechat']['tools']['getRegistry']>
+  >;
+}
+
+/**
+ * Deletes all related resources for a data connector (stack connectors, tools, workflows)
+ */
+async function deleteRelatedResources(params: DeleteRelatedResourcesParams): Promise<void> {
+  const {
+    kscIds,
+    toolIds,
+    workflowIds,
+    spaceId,
+    request,
+    logger,
+    workflowManagement,
+    actionsClient,
+    toolRegistry,
+  } = params;
+
+  // Delete stack connectors
+  if (kscIds.length > 0) {
+    const deleteKscPromises = kscIds.map((kscId) => actionsClient.delete({ id: kscId }));
+    await Promise.all(deleteKscPromises);
+    logger.info(`Deleted ${kscIds.length} stack connector(s): ${kscIds.join(', ')}`);
+  }
+
+  // Delete tools
+  if (toolIds.length > 0) {
+    const deleteToolPromises = toolIds.map((toolId) => toolRegistry.delete(toolId));
+    await Promise.all(deleteToolPromises);
+    logger.info(`Deleted ${toolIds.length} tool(s): ${toolIds.join(', ')}`);
+  }
+
+  // Delete workflows
+  if (workflowIds.length > 0) {
+    await workflowManagement.management.deleteWorkflows(workflowIds, spaceId, request);
+    logger.info(`Deleted ${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`);
+  }
+}
+
+/**
+ * Gets the current space ID from the saved objects client
+ */
+function getSpaceId(savedObjectsClient: SavedObjectsClientContract): string {
+  return savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+}
+
+/**
+ * Creates a standardized error response
+ */
+function createErrorResponse(
+  response: KibanaResponseFactory,
+  message: string,
+  error: Error,
+  statusCode: number = 500
 ) {
+  return response.customError({
+    statusCode,
+    body: {
+      message: `${message}: ${error.message}`,
+    },
+  });
+}
+
+/**
+ * Dependencies required for registering data connector routes
+ */
+export interface RouteDependencies {
+  router: IRouter;
+  logger: Logger;
+  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>;
+  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+}
+
+/**
+ * Registers all data connector routes
+ */
+export function registerRoutes(dependencies: RouteDependencies) {
+  const { router, logger, getStartServices, workflowManagement } = dependencies;
   // List all data connectors
   router.get(
     {
@@ -89,7 +237,7 @@ export function registerRoutes(
         },
       },
     },
-    async (context, request, response) => {
+    async (context, _request, response) => {
       const coreContext = await context.core;
 
       try {
@@ -97,7 +245,7 @@ export function registerRoutes(
         const findResult: SavedObjectsFindResponse<DataConnectorAttributes> =
           await savedObjectsClient.find({
             type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-            perPage: 100,
+            perPage: DEFAULT_PAGE_SIZE,
           });
 
         const connectors = findResult.saved_objects.map((savedObject) => {
@@ -112,12 +260,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Failed to list all data connectors: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to list connectors: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to list connectors', error as Error);
       }
     }
   );
@@ -149,12 +292,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Error fetching data connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to fetch data connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to fetch data connector', error as Error);
       }
     }
   );
@@ -180,6 +318,7 @@ export function registerRoutes(
         const { name, type, token } = request.body;
         const [, { actions, dataSourcesRegistry, onechat }] = await getStartServices();
 
+        // Validate data connector type exists
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
         if (!dataConnectorTypeDef) {
@@ -191,6 +330,7 @@ export function registerRoutes(
           });
         }
 
+        // Create stack connector
         const connectorType = dataConnectorTypeDef.stackConnector.type;
         const secrets = buildSecretsFromConnectorSpec(connectorType, token);
 
@@ -205,37 +345,25 @@ export function registerRoutes(
           },
         });
 
+        // Create workflows and tools
         const savedObjectsClient = coreContext.savedObjects.client;
-        const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+        const spaceId = getSpaceId(savedObjectsClient);
 
         logger.info(`Creating workflows for data connector '${name}'`);
-        const workflowIds: string[] = [];
-        const toolIds: string[] = [];
-        for (const workflowInfo of dataConnectorTypeDef.generateWorkflows(stackConnector.id)) {
-          const workflow = await workflowManagement.management.createWorkflow(
-            { yaml: workflowInfo.content },
-            spaceId,
-            request
-          );
-          workflowIds.push(workflow.id);
-          if (workflowInfo.shouldGenerateABTool) {
-            const toolRegistry = await onechat.tools.getRegistry({ request });
-            const tool = await toolRegistry.create({
-              id: `${type}-${workflow.id}`,
-              type: ToolType.workflow,
-              description: `Workflow tool for ${type} data connector`,
-              tags: ['data-connector', type],
-              configuration: {
-                workflow_id: workflow.id,
-              },
-            });
-            toolIds.push(tool.id);
-            logger.info(`Created tool for workflow '${workflow.name}'`);
-          }
-        }
+        const { workflowIds, toolIds } = await createWorkflowsAndTools({
+          workflowInfos: dataConnectorTypeDef.generateWorkflows(stackConnector.id),
+          stackConnectorId: stackConnector.id,
+          type,
+          spaceId,
+          request,
+          logger,
+          workflowManagement,
+          onechatTools: onechat.tools,
+        });
 
+        // Create the data connector saved object
         const now = new Date().toISOString();
-        logger.info(`Creating ${DATA_CONNECTOR_SAVED_OBJECT_TYPE} SO created at ${now}`);
+        logger.info(`Creating ${DATA_CONNECTOR_SAVED_OBJECT_TYPE} SO at ${now}`);
         const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
           name,
           type,
@@ -255,12 +383,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Error creating data connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to create data connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to create data connector', error as Error);
       }
     }
   );
@@ -285,35 +408,41 @@ export function registerRoutes(
         const findResponse: SavedObjectsFindResponse<DataConnectorAttributes> =
           await savedObjectsClient.find({
             type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-            perPage: 1000,
+            perPage: MAX_PAGE_SIZE,
           });
         const connectors = findResponse.saved_objects;
 
-        const kscIds: string[] = connectors.flatMap((connector) => connector.attributes.kscIds);
-        logger.info(
-          `Found ${connectors.length} data connectors and ${kscIds.length} stack connectors to delete.`
-        );
+        logger.info(`Found ${connectors.length} data connector(s) to delete`);
 
+        // Get all resource IDs to delete
+        const kscIds = connectors.flatMap((connector) => connector.attributes.kscIds);
+        const toolIds = connectors.flatMap((connector) => connector.attributes.toolIds);
+        const workflowIds = connectors.flatMap((connector) => connector.attributes.workflowIds);
+
+        // Delete all related resources
         const [, { actions, onechat }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const deleteKscPromises = kscIds.map((kscId) => actionsClient.delete({ id: kscId }));
-        await Promise.all(deleteKscPromises);
-
-        const toolIds: string[] = connectors.flatMap((connector) => connector.attributes.toolIds);
         const toolRegistry = await onechat.tools.getRegistry({ request });
-        const deleteToolPromises = toolIds.map((toolId) => toolRegistry.delete(toolId));
-        await Promise.all(deleteToolPromises);
+        const spaceId = getSpaceId(savedObjectsClient);
 
-        const workflowIds: string[] = connectors.flatMap(
-          (connector) => connector.attributes.workflowIds
-        );
-        const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
-        await workflowManagement.management.deleteWorkflows(workflowIds, spaceId, request);
+        await deleteRelatedResources({
+          kscIds,
+          toolIds,
+          workflowIds,
+          spaceId,
+          request,
+          logger,
+          workflowManagement,
+          actionsClient,
+          toolRegistry,
+        });
 
+        // Delete the saved objects
         const deletePromises = connectors.map((connector) =>
           savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
         );
         await Promise.all(deletePromises);
+        logger.info(`Deleted ${connectors.length} data connector(s)`);
 
         return response.ok({
           body: {
@@ -323,12 +452,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Failed to delete all connectors: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to delete all connectors: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to delete all connectors', error as Error);
       }
     }
   );
@@ -347,7 +471,6 @@ export function registerRoutes(
     },
     async (context, request, response) => {
       const coreContext = await context.core;
-      const [, { onechat }] = await getStartServices();
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
@@ -355,25 +478,32 @@ export function registerRoutes(
           DATA_CONNECTOR_SAVED_OBJECT_TYPE,
           request.params.id
         );
-        const kscIds: string[] = savedObject.attributes.kscIds;
 
-        const [, { actions }] = await getStartServices();
+        // Get resource IDs from the saved object
+        const { kscIds, toolIds, workflowIds } = savedObject.attributes;
+
+        // Delete all related resources
+        const [, { actions, onechat }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        kscIds.forEach((kscId) => actionsClient.delete({ id: kscId }));
-        logger.info(`Successfully deleted Kibana stack connectors: ${kscIds.join(', ')}`);
-
-        const toolIds: string[] = savedObject.attributes.toolIds;
         const toolRegistry = await onechat.tools.getRegistry({ request });
-        toolIds.forEach((toolId) => toolRegistry.delete(toolId));
-        logger.info(`Successfully deleted tools: ${toolIds.join(', ')}`);
+        const spaceId = getSpaceId(savedObjectsClient);
 
-        const workflowIds: string[] = savedObject.attributes.workflowIds;
-        const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
-        await workflowManagement.management.deleteWorkflows(workflowIds, spaceId, request);
-        logger.info(`Successfully deleted workflows: ${workflowIds.join(', ')}`);
+        await deleteRelatedResources({
+          kscIds,
+          toolIds,
+          workflowIds,
+          spaceId,
+          request,
+          logger,
+          workflowManagement,
+          actionsClient,
+          toolRegistry,
+        });
 
+        // Delete the saved object
         await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
-        logger.info(`Successfully deleted data connector ${savedObject.id}`);
+        logger.info(`Deleted data connector ${savedObject.id}`);
+
         return response.ok({
           body: {
             success: true,
@@ -381,12 +511,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Failed to delete connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to delete connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to delete connector', error as Error);
       }
     }
   );
