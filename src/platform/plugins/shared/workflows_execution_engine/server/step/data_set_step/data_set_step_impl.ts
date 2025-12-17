@@ -26,12 +26,6 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
-    // eslint-disable-next-line no-console
-    console.log('[DataSetStepImpl] Constructor called with:', {
-      stepId: node.stepId,
-      stepType: node.stepType,
-      configuration: node.configuration,
-    });
     const dataSetStep: DataSetStep = {
       name: node.stepId,
       type: node.stepType,
@@ -47,8 +41,6 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
   }
 
   protected override async _run(input: unknown): Promise<RunStepResult> {
-    // eslint-disable-next-line no-console
-    console.log('[DataSetStepImpl] _run called with input:', input);
     try {
       if (typeof input !== 'object' || input === null || Array.isArray(input)) {
         const error = new Error('Input must be an object with key-value pairs');

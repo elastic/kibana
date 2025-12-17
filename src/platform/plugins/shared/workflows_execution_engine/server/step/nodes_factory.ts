@@ -83,13 +83,6 @@ export class NodesFactory {
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const { node } = stepExecutionRuntime;
 
-    // eslint-disable-next-line no-console
-    console.log('[NodesFactory] Creating step:', {
-      stepType: node.stepType,
-      nodeType: node.type,
-      nodeId: node.id,
-    });
-
     // Built-in steps - checked first before workflows_extensions
     // Note: Some built-in steps (like data.set) are also registered in workflows_extensions
     // for YAML schema validation, but execution always uses the built-in implementation.
@@ -127,8 +120,6 @@ export class NodesFactory {
 
     // Handle data.set internal step
     if (isDataSet(node)) {
-      // eslint-disable-next-line no-console
-      console.log('[NodesFactory] Matched data.set step!');
       this.workflowLogger.logDebug('Creating data.set step', {
         event: { action: 'internal-step-creation', outcome: 'success' },
         tags: ['step-factory', 'data-set', 'internal-step'],
@@ -161,16 +152,12 @@ export class NodesFactory {
       }
     }
 
-    // eslint-disable-next-line no-console
-    console.log('[NodesFactory] Falling through to createGenericStepNode for:', node.stepType);
     return this.createGenericStepNode(stepExecutionRuntime);
   }
 
   private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
-    // eslint-disable-next-line no-console
-    console.log('[NodesFactory] createGenericStepNode - node.type:', node.type);
     switch (node.type) {
       case 'enter-foreach':
         return new EnterForeachNodeImpl(
