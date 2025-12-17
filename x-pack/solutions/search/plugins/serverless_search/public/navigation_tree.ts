@@ -7,18 +7,12 @@
 
 import { lazy } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
 
 const LazyIconAgents = lazy(() =>
   import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
-
-const LazyIconPlayground = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
-    default: m.iconPlayground,
-  }))
 );
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
