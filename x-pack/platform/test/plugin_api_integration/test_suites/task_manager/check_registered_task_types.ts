@@ -231,6 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
         'workflow:resume',
         'workflow:run',
         'workflow:scheduled',
+        'streams_feature_identification',
       ]);
     });
   });
