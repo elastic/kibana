@@ -175,7 +175,7 @@ function GenerationContext({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <AssetImage type="checklist" size={100} />
+          <AssetImage type="checklist" size={80} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -249,7 +249,7 @@ function IdentifyFeatures({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <AssetImage type="checklist" size={100} />
+          <AssetImage type="checklist" size={80} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
