@@ -35,6 +35,7 @@ import type {
   UserMessage,
   Visualization,
 } from '@kbn/lens-common';
+import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from './palette_config';
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
@@ -149,11 +150,13 @@ const toExpression = (
     goal: state.goalAccessor,
     shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
     colorMode: state?.colorMode ?? 'none',
+    // colorMode: state?.colorMode ?? 'palette',
     palette: state.palette?.params
       ? paletteService
           .get(CUSTOM_PALETTE)
           .toExpression(computePaletteParams(paletteService, state.palette))
       : undefined,
+    // : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,
     labelMajor: state.labelMajor,
@@ -224,12 +227,39 @@ export const getGaugeVisualization = ({
   },
 
   initialize(addNewLayer, state, mainPalette) {
+    const defaultPalette: PaletteOutput<CustomPaletteParams> = {
+      name: DEFAULT_PALETTE_NAME,
+      type: 'palette',
+      params: {
+        ...defaultPaletteParams,
+        stops: [
+          {
+            color: '#24c292',
+            stop: 0,
+          },
+          {
+            color: '#aee8d2',
+            stop: 25,
+          },
+          {
+            color: '#ffc9c2',
+            stop: 50,
+          },
+          {
+            color: '#f6726a',
+            stop: 75,
+          },
+        ],
+      },
+    };
+
     return (
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+        colorMode: 'palette',
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : defaultPalette,
         ticksPosition: 'auto',
         labelMajorMode: 'auto',
       }

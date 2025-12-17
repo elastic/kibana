@@ -9,7 +9,7 @@ import type { RequiredPaletteParamTypes } from '@kbn/coloring';
 
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
-export const DEFAULT_PALETTE_NAME = 'temperature';
+export const DEFAULT_PALETTE_NAME = 'status';
 export const DEFAULT_COLOR_STEPS = 4;
 export const DEFAULT_MIN_STOP = 0;
 export const DEFAULT_MAX_STOP = 100;
