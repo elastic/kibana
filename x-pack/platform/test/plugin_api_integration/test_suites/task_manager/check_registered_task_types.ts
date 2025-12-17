@@ -60,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Sender',
         'IndicesMetadata:IndicesMetadataTask',
         'ML:saved-objects-sync',
+        'ProductDocBase:EnsureSecurityLabsUpToDate',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
         'ProductDocBase:UninstallAll',
