@@ -6,26 +6,18 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useCallback, useMemo } from 'react';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useConversationList } from '../../../hooks/use_conversation_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { groupConversationsByTime } from '../../../utils/group_conversations';
 import { NoConversationsPrompt } from './no_conversations_prompt';
-import { useConversationList } from '../../../hooks/use_conversation_list';
 
 const EMPTY_CONTAINER_HEIGHT = 300;
 
@@ -157,39 +149,10 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     >
       {(list, search) => (
         <>
-          <PopoverHeader />
           <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
           {list}
         </>
       )}
     </EuiSelectable>
-  );
-};
-
-const PopoverHeader = () => {
-  const { euiTheme } = useEuiTheme();
-
-  const headerStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    border-bottom: 1px solid ${euiTheme.border.color};
-  `;
-
-  return (
-    <EuiFlexGroup
-      css={headerStyles}
-      justifyContent="spaceBetween"
-      alignItems="center"
-      gutterSize="none"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
-          <h5>
-            {i18n.translate('xpack.onechat.conversationsHistory.title', {
-              defaultMessage: 'Conversations',
-            })}
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };
