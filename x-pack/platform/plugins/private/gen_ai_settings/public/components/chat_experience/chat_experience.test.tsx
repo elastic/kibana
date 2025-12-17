@@ -99,7 +99,14 @@ const setup = ({
     services: {
       settings: { client: { validateValue: jest.fn() } },
       notifications: { toasts: { addDanger: jest.fn() } },
-      docLinks: { links: { management: {} as unknown } },
+      docLinks: {
+        links: {
+          management: {} as unknown,
+          agentBuilder: {
+            learnMore: 'https://example.com',
+          } as unknown,
+        } as unknown,
+      },
       application: { capabilities: { advancedSettings: { save: true } } },
       featureFlags: {} as unknown,
       analytics: { reportEvent },
@@ -190,6 +197,38 @@ describe('ChatExperience', () => {
     performance.getEntriesByType = originalGetEntriesByType;
 
     expect(sessionStorage.getItem('gen_ai_settings:pending_reload')).toBeNull();
+  });
+
+  it('returns a persisted pending reload flag value when it is set after mount on a reload navigation', async () => {
+    const originalGetEntriesByType = performance.getEntriesByType;
+    // @ts-expect-error JSDOM typing differs from real browser PerformanceEntry types.
+    performance.getEntriesByType = jest.fn(() => [{ type: 'reload' }]);
+
+    // Simulate the initial load after a reload: the component should *consume* this flag and clear it.
+    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
+    const { renderResult, handleFieldChange } = setup({ savedValue: undefined, hasField: true });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // Simulate the save flow setting the flag later in the same page load.
+    sessionStorage.setItem('gen_ai_settings:pending_reload', '1');
+    mockUseSettingsContext.mockReturnValue({
+      fields: { [AI_CHAT_EXPERIENCE_TYPE]: { savedValue: undefined } as unknown as FieldDefinition },
+      handleFieldChange,
+      unsavedChanges: {},
+    } as unknown as ReturnType<typeof useSettingsContext>);
+
+    renderResult.rerender(<ChatExperience />);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    performance.getEntriesByType = originalGetEntriesByType;
+
+    expect(sessionStorage.getItem('gen_ai_settings:pending_reload')).toBe('1');
   });
 
   it('returns no step_reached telemetry on initial render when current value is Agent', () => {

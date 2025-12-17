@@ -34,7 +34,7 @@ import { GoToSpacesButton } from './go_to_spaces_button';
 import { useGenAiConnectors } from '../hooks/use_genai_connectors';
 import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 import { useSettingsContext } from '../contexts/settings_context';
-import { setPendingReloadFlag } from '../utils/pending_reload';
+import { clearPendingReloadFlag, setPendingReloadFlag } from '../utils/pending_reload';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
@@ -242,7 +242,22 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       normalizedSavedChatExperience === AIChatExperience.Agent &&
       normalizedUnsavedChatExperience === AIChatExperience.Classic;
 
-    const needsReload = await saveAll();
+    /**
+     * `ChatExperience`'s `step_reached` effect can re-run during the save flow (e.g. as
+     * `unsavedChanges`/`fields` update). We set the pending reload flag before awaiting the save so
+     * those intermediate renders reliably see it, then clear it when no reload is needed.
+     */
+    setPendingReloadFlag();
+    let needsReload: boolean;
+    try {
+      needsReload = await saveAll();
+    } catch (e) {
+      clearPendingReloadFlag();
+      throw e;
+    }
+    if (!needsReload) {
+      clearPendingReloadFlag();
+    }
     if (shouldTrackOptInConfirmed) {
       console.log(
         `${AGENT_BUILDER_EVENT_TYPES.OptInAction} ==>`,
@@ -277,7 +292,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     }
     if (needsReload) {
       // Used by `ChatExperience` to avoid firing `step_reached` both before and after reload.
-      setPendingReloadFlag();
       window.location.reload();
     }
   }
