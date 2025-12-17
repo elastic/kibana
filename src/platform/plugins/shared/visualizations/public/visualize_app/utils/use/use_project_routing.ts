@@ -23,14 +23,11 @@ export function useProjectRouting(services: VisualizeServices) {
   >();
 
   useEffect(() => {
-    if (
-      !services.cps?.cpsManager ||
-      services.cps?.cpsManager?.getProjectPickerAccess() === 'disabled'
-    ) {
+    const cpsManager = services.cps?.cpsManager;
+    if (!cpsManager || cpsManager?.getProjectPickerAccess() === 'disabled') {
       return;
     }
 
-    const cpsManager = services.cps.cpsManager;
     const initialProjectRouting = cpsManager.getProjectRouting();
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(initialProjectRouting);
 
