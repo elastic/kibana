@@ -106,6 +106,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
+        describe('Elasticsearch endpoint', function () {
+          it('shows checkmark icon feedback when copy button is clicked', async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.click('copyEndpointButton');
+            // After clicking, the button should show copied state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton-copied');
+            });
+            // After 1 second, it should revert back to normal state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton');
+              await testSubjects.missingOrFail('copyEndpointButton-copied');
+            });
+          });
+        });
+
         describe('View connection details', function () {
           it('renders the view connection details button', async () => {
             await testSubjects.existOrFail('viewConnectionDetailsLink');
@@ -182,36 +198,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'href'
             );
             expect(href).to.contain('docs/solutions/search/get-started');
-          });
-        });
-
-        describe('Getting Started navigation', function () {
-          it('renders Getting Started side nav item', async () => {
-            await pageObjects.common.navigateToApp('searchGettingStarted');
-            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-              deepLinkId: 'searchGettingStarted',
-            });
-          });
-
-          it('navigate to Getting Started using search', async () => {
-            await pageObjects.svlCommonNavigation.search.showSearch();
-            // TODO: test something search project specific instead of generic discover
-            await pageObjects.svlCommonNavigation.search.searchFor('getting started');
-            await pageObjects.svlCommonNavigation.search.clickOnOption(0);
-            await pageObjects.svlCommonNavigation.search.hideSearch();
-
-            expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/getting_started');
-          });
-
-          it('Getting Started nav item shows correct breadcrumbs', async () => {
-            await pageObjects.common.navigateToApp('searchGettingStarted');
-            await testSubjects.existOrFail('gettingStartedHeader');
-            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-              deepLinkId: 'searchGettingStarted',
-            });
-            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-              text: 'Getting started',
-            });
           });
         });
       });

@@ -9,7 +9,7 @@
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstRerankCommand, ESQLSingleAstItem, ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../shared/sorting/types';
 import { Location } from '../types';
 import { getPosition, CaretPosition } from './utils';
 import {
@@ -29,7 +29,6 @@ import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../complete_items';
-import { getExpressionType, isExpressionComplete } from '../../definitions/utils/expressions';
 
 export const QUERY_TEXT = 'Your search query' as const;
 export const QUERY_TEXT_SNIPPET = `"$\{0:${QUERY_TEXT}}"`;
@@ -46,11 +45,11 @@ export async function autocomplete(
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(0, cursorPosition);
 
-  if (!callbacks?.getByType || withinQuotes(innerText)) {
+  if (!callbacks?.getByType) {
     return [];
   }
 
-  const { position, context: positionContext } = getPosition(innerText, command, cursorPosition);
+  const { position, context: positionContext } = getPosition(innerText, command);
 
   switch (position) {
     case CaretPosition.RERANK_KEYWORD: {
@@ -97,6 +96,10 @@ export async function autocomplete(
     }
 
     case CaretPosition.ON_KEYWORD: {
+      if (withinQuotes(innerText)) {
+        return [];
+      }
+
       return [onCompleteItem];
     }
 
@@ -128,7 +131,6 @@ export async function autocomplete(
         callbacks,
         context,
         expressionRoot: positionContext?.expressionRoot,
-        insideFunction: positionContext?.insideFunction,
       });
     }
 
@@ -212,7 +214,6 @@ async function handleOnExpression({
   callbacks,
   context,
   expressionRoot,
-  insideFunction,
 }: {
   query: string;
   command: ESQLAstAllCommands;
@@ -220,10 +221,8 @@ async function handleOnExpression({
   callbacks: ICommandCallbacks;
   context: ICommandContext | undefined;
   expressionRoot: ESQLSingleAstItem | undefined;
-  insideFunction?: boolean;
 }): Promise<ISuggestionItem[]> {
-  const innerText = query.substring(0, cursorPosition);
-  const suggestions = await suggestForExpression({
+  const { suggestions, computed } = await suggestForExpression({
     query,
     expressionRoot,
     command,
@@ -236,16 +235,10 @@ async function handleOnExpression({
     },
   });
 
-  if (expressionRoot) {
-    const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const { isComplete, insideFunction } = computed;
 
-    if (
-      expressionType === 'boolean' &&
-      isExpressionComplete(expressionType, innerText) &&
-      !insideFunction
-    ) {
-      suggestions.push(...buildNextActions());
-    }
+  if (expressionRoot && isComplete && !insideFunction) {
+    suggestions.push(...buildNextActions());
   }
 
   return suggestions;

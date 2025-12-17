@@ -61,6 +61,18 @@ describe('source column expression', () => {
   });
 });
 
+describe('qualified column names', () => {
+  test('can print simple qualified column names', () => {
+    assertPrint('FROM a | KEEP [a].[b]');
+  });
+
+  test('can print composed qualified column names', () => {
+    assertPrint('FROM a | KEEP [a].[`geoip/city_name`]');
+    assertPrint('FROM a | KEEP [a].[`geoip.city_name`]');
+    assertPrint('FROM a | KEEP [a].[`geoip.city_name.txt`]');
+  });
+});
+
 describe('literal expression', () => {
   test('can print source left comment', () => {
     assertPrint('FROM a | STATS /* cmt */ 1');
@@ -262,6 +274,18 @@ describe('commands', () => {
       assertPrint(
         'FROM employees | LEFT JOIN a ON /*1*/ b /*2*/, /*3*/ c /*4*/ > /*5*/ d /*6*/, /*7*/ d.e.f /*8*/ == /*9*/ 42 /*10*/ AND /*11*/ NOT /*12*/ MATCH(/*13*/ g /*14*/, /*15*/ "hallo" /*16*/) /*17*/'
       );
+    });
+
+    test('with AS alias', () => {
+      assertPrint('FROM a | LOOKUP JOIN b AS bb ON c');
+    });
+
+    test('with AS alias and comments around source', () => {
+      assertPrint('FROM a | LOOKUP JOIN /*1*/ b AS bb /*2*/ ON c');
+    });
+
+    test('with comments before and after AS', () => {
+      assertPrint('FROM a | LOOKUP JOIN b /* before */ AS /* after */ bb ON c');
     });
   });
 

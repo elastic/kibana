@@ -33,9 +33,12 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconAlienvaultOtx" */ './specs/alienvault_otx/icon')
     ),
   ],
+  ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
-    '.github',
-    lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
+    '.brave-search',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
+    ),
   ],
-  ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './icons/notion'))],
+  ['.github', lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon'))],
 ]);

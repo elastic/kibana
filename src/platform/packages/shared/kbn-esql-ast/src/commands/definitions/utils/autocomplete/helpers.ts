@@ -28,7 +28,7 @@ import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
-import { SuggestionCategory } from '../../../../sorting/types';
+import { SuggestionCategory } from '../../../../shared/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -615,7 +615,7 @@ export function getLookupIndexCreateSuggestion(
   return {
     label: indexName
       ? i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexWithName',
+          'kbn-esql-ast.esql.autocomplete.createLookupIndexWithName',
 
           {
             defaultMessage: 'Create lookup index "{indexName}"',
@@ -623,7 +623,7 @@ export function getLookupIndexCreateSuggestion(
             values: { indexName },
           }
         )
-      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
+      : i18n.translate('kbn-esql-ast.esql.autocomplete.createLookupIndex', {
           defaultMessage: 'Create lookup index',
         }),
 
@@ -634,7 +634,7 @@ export function getLookupIndexCreateSuggestion(
     filterText: indexName,
 
     detail: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+      'kbn-esql-ast.esql.autocomplete.createLookupIndexDetailLabel',
 
       {
         defaultMessage: 'Click to create',
@@ -649,7 +649,7 @@ export function getLookupIndexCreateSuggestion(
       id: `esql.lookup_index.create`,
 
       title: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+        'kbn-esql-ast.esql.autocomplete.createLookupIndexDetailLabel',
 
         {
           defaultMessage: 'Click to create',
