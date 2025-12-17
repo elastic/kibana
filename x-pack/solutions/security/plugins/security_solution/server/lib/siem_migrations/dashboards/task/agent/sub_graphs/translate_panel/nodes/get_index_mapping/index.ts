@@ -4,11 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Product Intercept', () => {
-    loadTestFile(require.resolve('./home_page'));
-  });
-}
+export { getIndexMappingNode } from './get_index_mapping';
