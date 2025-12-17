@@ -23,6 +23,7 @@ import {
   createAction,
   isAnyOf,
 } from '@reduxjs/toolkit';
+import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
@@ -391,6 +392,8 @@ export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'
 );
 
+export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
+
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
   TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never
@@ -445,6 +448,13 @@ const createMiddleware = (options: InternalStateDependencies) => {
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
     ),
+  });
+
+  startListening({
+    actionCreator: discardFlyoutsOnTabChange,
+    effect: () => {
+      dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
+    },
   });
 
   startListening({

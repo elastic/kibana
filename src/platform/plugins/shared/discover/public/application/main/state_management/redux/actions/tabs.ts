@@ -22,6 +22,7 @@ import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
+  discardFlyoutsOnTabChange,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
@@ -288,6 +289,8 @@ export const updateTabs: InternalStateThunkActionCreator<
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();
       }
+
+      dispatch(discardFlyoutsOnTabChange());
     }
 
     dispatch(
