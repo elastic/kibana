@@ -30,6 +30,9 @@ export { EmailParamsSchema, EmailResponseSchema } from './email';
 // Webhook connector schemas
 export { WebhookParamsSchema, WebhookResponseSchema } from './webhook';
 
+// API connector schemas
+export { ApiParamsSchema, ApiResponseSchema } from './api';
+
 // Jira connector schemas
 export {
   JiraPushToServiceParamsSchema,

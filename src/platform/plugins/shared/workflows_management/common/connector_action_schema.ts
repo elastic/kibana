@@ -13,6 +13,8 @@ import type { BaseConnectorContract } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
+  ApiParamsSchema,
+  ApiResponseSchema,
   BedrockParamsSchema,
   BedrockResponseSchema,
   CasesWebhookCreateCaseParamsSchema,
@@ -131,6 +133,7 @@ export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackParamsSchema],
   ['.email', EmailParamsSchema],
   ['.webhook', WebhookParamsSchema],
+  ['.api', ApiParamsSchema],
   ['.teams', TeamsParamsSchema],
   ['.bedrock', BedrockParamsSchema],
   ['.openai', OpenAIParamsSchema],
@@ -282,6 +285,7 @@ export const ConnectorOutputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackResponseSchema],
   ['.email', EmailResponseSchema],
   ['.webhook', WebhookResponseSchema],
+  ['.api', ApiResponseSchema],
   ['.teams', TeamsResponseSchema],
   ['.bedrock', BedrockResponseSchema],
   ['.openai', OpenAIResponseSchema],
