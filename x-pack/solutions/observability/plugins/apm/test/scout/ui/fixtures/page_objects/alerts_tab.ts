@@ -20,7 +20,6 @@ export class AlertsTab {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services/${serviceName}/alerts?rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
   }
 
   async getControlFrameTitles() {
