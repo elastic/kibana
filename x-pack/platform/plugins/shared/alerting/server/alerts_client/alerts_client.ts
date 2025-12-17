@@ -520,7 +520,7 @@ export class AlertsClient<
             })
           );
         } else {
-          const isDeferred = activeAlerts[id].getActiveCount() < this.options.rule.alertDelay;
+          const isDelayed = activeAlerts[id].getActiveCount() < this.options.rule.alertDelay;
 
           activeAlertsToIndex.push(
             buildNewAlert<
@@ -538,7 +538,7 @@ export class AlertsClient<
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
               dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
-              isDeferred,
+              isDelayed,
             })
           );
         }
