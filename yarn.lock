@@ -6559,11 +6559,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast-inspector-plugin@link:examples/esql_ast_inspector":
+"@kbn/esql-language-inspector-plugin@link:examples/esql_ast_inspector":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
+"@kbn/esql-language@link:src/platform/packages/shared/kbn-esql-language":
   version "0.0.0"
   uid ""
 
