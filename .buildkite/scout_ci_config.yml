@@ -2,7 +2,6 @@
 plugins:
   enabled:
     - apm
-    - cloud_security_posture
     - console
     - discover_enhanced
     - index_management
