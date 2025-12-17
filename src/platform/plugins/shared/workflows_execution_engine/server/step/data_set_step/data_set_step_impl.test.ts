@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AtomicGraphNode } from '@kbn/workflows/graph';
+import type { DataSetGraphNode } from '@kbn/workflows/graph';
 import { DataSetStepImpl } from './data_set_step_impl';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
@@ -19,7 +19,7 @@ describe('DataSetStepImpl', () => {
   let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let mockWorkflowLogger: jest.Mocked<IWorkflowEventLogger>;
-  let mockNode: AtomicGraphNode;
+  let mockNode: DataSetGraphNode;
 
   let stepContextAbortController: AbortController;
   let mockContextManager: jest.Mocked<
@@ -61,7 +61,7 @@ describe('DataSetStepImpl', () => {
 
     mockNode = {
       id: 'test-data-set-step',
-      type: 'atomic',
+      type: 'data.set',
       stepId: 'test-data-set-step',
       stepType: 'data.set',
       configuration: {

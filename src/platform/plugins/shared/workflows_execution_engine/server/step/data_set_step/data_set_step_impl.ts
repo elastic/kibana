@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AtomicGraphNode } from '@kbn/workflows/graph';
+import type { DataSetGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -21,11 +21,17 @@ export interface DataSetStep extends BaseStep {
 
 export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
   constructor(
-    private node: AtomicGraphNode,
+    private node: DataSetGraphNode,
     stepExecutionRuntime: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
+    // eslint-disable-next-line no-console
+    console.log('[DataSetStepImpl] Constructor called with:', {
+      stepId: node.stepId,
+      stepType: node.stepType,
+      configuration: node.configuration,
+    });
     const dataSetStep: DataSetStep = {
       name: node.stepId,
       type: node.stepType,
@@ -41,6 +47,8 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
   }
 
   protected override async _run(input: unknown): Promise<RunStepResult> {
+    // eslint-disable-next-line no-console
+    console.log('[DataSetStepImpl] _run called with input:', input);
     try {
       if (typeof input !== 'object' || input === null || Array.isArray(input)) {
         const error = new Error('Input must be an object with key-value pairs');

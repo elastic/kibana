@@ -9,7 +9,6 @@
 
 import { getStepId } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { DataSetStepTypeId } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { inferZodType } from '../../../../common/lib/zod';
 
@@ -22,7 +21,7 @@ export function getVariablesSchema(workflowExecutionGraph: WorkflowGraph, stepNa
   }
 
   const predecessors = workflowExecutionGraph.getAllPredecessors(stepNode.id);
-  const dataSetSteps = predecessors.filter((node) => node.stepType === DataSetStepTypeId);
+  const dataSetSteps = predecessors.filter((node) => node.stepType === 'data.set');
 
   if (dataSetSteps.length === 0) {
     return z.object({}).optional();
@@ -31,8 +30,8 @@ export function getVariablesSchema(workflowExecutionGraph: WorkflowGraph, stepNa
   let variablesSchema = z.object({});
 
   for (const node of dataSetSteps) {
-    if (node.type === 'atomic' && node.configuration.with) {
-      const withConfig = node.configuration.with;
+    if (node.type === 'data.set' && node.configuration.with) {
+      const withConfig = node.configuration.with as Record<string, unknown>;
       const stepSchema: Record<string, z.ZodTypeAny> = {};
 
       for (const key of Object.keys(withConfig)) {
