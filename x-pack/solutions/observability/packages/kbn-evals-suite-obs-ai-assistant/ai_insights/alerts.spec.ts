@@ -116,7 +116,7 @@ evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
 
     await replaySnapshot({
       esClient,
-      logger: log,
+      log,
       snapshotUrl: 'file:///tmp/repo',
       snapshotName: 'payment-service-failures',
       patterns: ['logs-*', 'metrics-*', 'traces-*'],

@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName } from '../utils';
 
 function escapeRegExp(value: string): string {
@@ -33,7 +33,7 @@ export function filterIndicesToRestore(snapshotIndices: string[], patterns: stri
 
 export async function restoreIndices({
   esClient,
-  logger,
+  log: logger,
   repoName,
   snapshotName,
   indices,
@@ -41,7 +41,7 @@ export async function restoreIndices({
   renameReplacement,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   repoName: string;
   snapshotName: string;
   indices: string[];

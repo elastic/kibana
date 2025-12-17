@@ -107,7 +107,7 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
     log.info('Replaying OTel Demo snapshot: payment-service-failures');
     await replaySnapshot({
       esClient,
-      logger: log,
+      log,
       snapshotUrl: 'file:///tmp/repo',
       snapshotName: 'payment-service-failures',
       patterns: ['logs-*', 'metrics-*', 'traces-*'],
