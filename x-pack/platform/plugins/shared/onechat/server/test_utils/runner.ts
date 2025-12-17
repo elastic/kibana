@@ -13,6 +13,7 @@ import {
   securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   WritableToolResultStore,
@@ -122,6 +123,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
     spaces: spacesMock.createStart(),
+    actions: actionsMock.createStart(),
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
@@ -137,6 +139,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
     spaces: spacesMock.createStart(),
+    actions: actionsMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
