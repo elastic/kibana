@@ -14,8 +14,6 @@ const getSLOTemplateParamsSchema = t.type({
   }),
 });
 
-type GetSLOTemplateResponse = t.OutputOf<typeof sloTemplateSchema>;
-
 const findSLOTemplatesParamsSchema = t.type({
   query: t.union([
     t.undefined,
@@ -28,12 +26,14 @@ const findSLOTemplatesParamsSchema = t.type({
   ]),
 });
 
+type SLOTemplateResponse = t.OutputOf<typeof sloTemplateSchema>;
+type GetSLOTemplateResponse = SLOTemplateResponse;
 interface FindSLOTemplatesResponse {
   total: number;
   page: number;
   perPage: number;
-  results: GetSLOTemplateResponse[];
+  results: SLOTemplateResponse[];
 }
 
 export { findSLOTemplatesParamsSchema, getSLOTemplateParamsSchema };
-export type { GetSLOTemplateResponse, FindSLOTemplatesResponse };
+export type { SLOTemplateResponse, GetSLOTemplateResponse, FindSLOTemplatesResponse };
