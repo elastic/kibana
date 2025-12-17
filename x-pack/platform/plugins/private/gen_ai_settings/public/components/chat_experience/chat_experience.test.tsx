@@ -182,7 +182,9 @@ describe('ChatExperience', () => {
 
     mockUseSettingsContext.mockReturnValue({
       fields: {
-        [AI_CHAT_EXPERIENCE_TYPE]: { savedValue: AIChatExperience.Classic } as unknown as FieldDefinition,
+        [AI_CHAT_EXPERIENCE_TYPE]: {
+          savedValue: AIChatExperience.Classic,
+        } as unknown as FieldDefinition,
       },
       handleFieldChange,
       unsavedChanges: {},
