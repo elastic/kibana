@@ -155,6 +155,8 @@ export class SearchSource {
   private id: string = uniqueId('data_source');
   private shouldOverwriteDataViewType: boolean = false;
   private overwriteDataViewType?: string;
+  private shouldOverwriteTimezone: boolean = false;
+  private overwriteTimezone?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
     (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
@@ -195,6 +197,17 @@ export class SearchSource {
       this.shouldOverwriteDataViewType = true;
       this.overwriteDataViewType = overwriteType;
     }
+  }
+
+  /**
+   * Used to make the search source overwrite the ES query config timezone.
+   *
+   * @param timezone The passed in value will be used as the timezone when building the ES query for this search source.
+   *
+   */
+  setOverwriteTimezone(timezone: string) {
+    this.shouldOverwriteTimezone = true;
+    this.overwriteTimezone = timezone;
   }
 
   /**
@@ -1014,6 +1027,9 @@ export class SearchSource {
     const esQueryConfigs = {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
+      ...(this.shouldOverwriteTimezone && this.overwriteTimezone
+        ? { dateFormatTZ: this.overwriteTimezone }
+        : {}),
     };
     return buildEsQuery(
       this.getDataView(index),
