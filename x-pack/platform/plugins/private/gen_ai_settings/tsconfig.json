@@ -33,7 +33,8 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/ai-agent-confirmation-modal",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-common",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": ["target/**/*"]
 }
