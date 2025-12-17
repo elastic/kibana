@@ -108,12 +108,14 @@ export const entityDetailsHighlightsServiceFactory = ({
             {
               score: [latestRiskScore.calculated_score_norm],
               id_field: [latestRiskScore.id_field],
-              inputs: latestRiskScore.inputs.map((input) => ({
+              alert_inputs: latestRiskScore.inputs.map((input) => ({
                 risk_score: [input.risk_score?.toString() ?? ''],
                 contribution_score: [input.contribution_score?.toString() ?? ''],
                 description: [input.description ?? ''],
                 timestamp: [input.timestamp ?? ''],
               })),
+              asset_criticality_contribution_score:
+                latestRiskScore.category_2_score?.toString() ?? '0',
             },
           ]
         : [];
@@ -250,7 +252,18 @@ export const entityDetailsHighlightsServiceFactory = ({
       );
       return { vulnerabilitiesAnonymized, vulnerabilitiesTotal };
     },
-    getLocalReplacements() {
+    getLocalReplacements(entityField: EntityIdentifierFields, entityIdentifier: string) {
+      // Ensure the entity identifier is present in the replacements
+      const anonymizedEntityIdentifier = getAnonymizedData({
+        anonymizationFields,
+        currentReplacements: {},
+        rawData: { [entityField]: [entityIdentifier] },
+        getAnonymizedValue,
+        getAnonymizedValues,
+      });
+
+      localOnNewReplacements(anonymizedEntityIdentifier.replacements);
+
       return localReplacements;
     },
   };

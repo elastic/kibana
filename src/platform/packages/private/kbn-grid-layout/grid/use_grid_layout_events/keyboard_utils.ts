@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getScrollTop, scrollToContainer, type ScrollContainer } from '../utils/scroll_container';
+import { getScrollPosition, type ScrollContainer, scrollTo } from '@kbn/core-chrome-layout-utils';
 
 export const updateClientY = (
   currentY: number,
@@ -19,7 +19,10 @@ export const updateClientY = (
   if (isCloseToEdge) {
     switch (type) {
       case 'drag':
-        scrollToContainer(scrollContainer, getScrollTop(scrollContainer) + stepY, 'smooth');
+        scrollTo(
+          { top: getScrollPosition(scrollContainer) + stepY, behavior: 'smooth' },
+          scrollContainer
+        );
         return currentY;
       case 'resize':
         setTimeout(() =>

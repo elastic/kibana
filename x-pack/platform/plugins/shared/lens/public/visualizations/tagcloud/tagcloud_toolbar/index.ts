@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-/**
- * TODO: Remove this file after migration to flyout toolbar
- * See: https://github.com/elastic/kibana/issues/240088
- */
-
-export { TagcloudToolbar } from './tagcloud_toolbar';
+export { TagcloudAppearanceSettings } from './appearance_settings';

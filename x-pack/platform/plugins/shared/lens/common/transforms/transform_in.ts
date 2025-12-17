@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { LensTransformDependencies } from '.';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
@@ -13,21 +14,23 @@ import type {
   LensByValueTransformInResult,
   LensTransformIn,
 } from './types';
-import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensState } from './utils';
+import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensConfig } from './utils';
+import type { LensSerializedState } from '../../public';
 
 /**
  * Transform from Lens API format to Lens Serialized State
  */
 export const getTransformIn = ({
+  builder,
   transformEnhancementsIn,
 }: LensTransformDependencies): LensTransformIn => {
-  return function transformIn(state) {
+  return function transformIn(config) {
     const { enhancementsState: enhancements = null, enhancementsReferences = [] } =
-      state.enhancements ? transformEnhancementsIn?.(state.enhancements) ?? {} : {};
+      config.enhancements ? transformEnhancementsIn?.(config.enhancements) ?? {} : {};
     const enhancementsState = enhancements ? { enhancements } : {};
 
-    if (isByRefLensState(state)) {
-      const { savedObjectId: id, ...rest } = state;
+    if (isByRefLensConfig(config)) {
+      const { savedObjectId: id, ...rest } = config;
       return {
         state: rest,
         ...enhancementsState,
@@ -42,12 +45,36 @@ export const getTransformIn = ({
       } satisfies LensByRefTransformInResult;
     }
 
-    const { state: lensState, references: lensReferences } = extractLensReferences(state);
+    const chartType = builder.getType(config.attributes);
+
+    if (!builder.isSupported(chartType)) {
+      const { state, references } = extractLensReferences(config as LensSerializedState);
+      // TODO: remove this once all formats are supported
+      // when not supported, no transform is needed
+      return {
+        state,
+        ...enhancementsState,
+        references: [...references, ...enhancementsReferences],
+      } satisfies LensByValueTransformInResult;
+    }
+
+    if (!config.attributes) {
+      // Not sure if this is possible
+      throw new Error('attributes are missing');
+    }
+
+    const attributes = isLensAPIFormat(config.attributes)
+      ? builder.fromAPIFormat(config.attributes)
+      : config.attributes;
+    const { state, references } = extractLensReferences({
+      ...config,
+      attributes,
+    });
 
     return {
-      state: lensState,
+      state,
       ...enhancementsState,
-      references: [...lensReferences, ...enhancementsReferences],
+      references: [...references, ...enhancementsReferences],
     } satisfies LensByValueTransformInResult;
   };
 };

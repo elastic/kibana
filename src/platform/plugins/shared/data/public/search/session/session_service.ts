@@ -9,19 +9,26 @@
 
 import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
+  BehaviorSubject,
+  combineLatest,
   distinctUntilChanged,
+  EMPTY,
   filter,
+  from,
   map,
   mapTo,
+  merge,
   mergeMap,
+  type Observable,
+  of,
   repeat,
   startWith,
+  Subscription,
   switchMap,
   takeUntil,
   tap,
+  timer,
 } from 'rxjs';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, EMPTY, from, merge, of, Subscription, timer } from 'rxjs';
 import type {
   PluginInitializerContext,
   StartServicesAccessor,
@@ -29,9 +36,10 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { ISearchOptions } from '@kbn/search-types';
+import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
@@ -44,6 +52,7 @@ import type { ISessionsClient } from './sessions_client';
 import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
+import type { ISearchSessionEBTManager } from './ebt_manager';
 
 /**
  * Polling interval for keeping completed searches alive
@@ -67,7 +76,7 @@ interface TrackSearchDescriptor {
   /**
    * Cancel the search
    */
-  abort: () => void;
+  abort: (reason: AbortReason) => void;
 
   /**
    * Used for polling after running in background (to ensure the search makes it into the background search saved
@@ -104,12 +113,12 @@ interface TrackSearchHandler {
   /**
    * Transition search into "complete" status
    */
-  complete(): void;
+  complete(response?: IKibanaSearchResponse): void;
 
   /**
    * Transition search into "error" status
    */
-  error(): void;
+  error(error?: Error): void;
 
   /**
    * Call to notify when search is about to be polled to get current search state to build `searchOptions` from (mainly isSearchStored),
@@ -195,6 +204,7 @@ export class SessionService {
   private hasAccessToSearchSessions: boolean = false;
 
   private toastService?: ToastService;
+  private searchSessionEBTManager?: ISearchSessionEBTManager;
 
   private sessionSnapshots: LRUCache<string, SessionSnapshot>;
   private logger: Logger;
@@ -202,6 +212,7 @@ export class SessionService {
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
+    searchSessionEBTManager: ISearchSessionEBTManager,
     private readonly sessionsClient: ISessionsClient,
     private readonly nowProvider: NowProviderInternalContract,
     private readonly usageCollector?: SearchUsageCollector,
@@ -216,6 +227,7 @@ export class SessionService {
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
+    this.searchSessionEBTManager = searchSessionEBTManager;
 
     this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
     this.logger = initializerContext.logger.get();
@@ -494,10 +506,10 @@ export class SessionService {
    * Restore previously saved search session
    * @param sessionId
    */
-  public restore(sessionId: string) {
+  public async restore(sessionId: string) {
     this.storeSessionSnapshot();
     this.state.transitions.restore(sessionId);
-    this.refreshSearchSessionSavedObject();
+    await this.refreshSearchSessionSavedObject();
   }
 
   /**
@@ -575,16 +587,23 @@ export class SessionService {
   /**
    * Request a cancellation of on-going search requests within current session
    */
-  public async cancel(): Promise<void> {
+  public async cancel({ source }: { source: string }): Promise<void> {
     const isStoredSession = this.isStored();
-    this.state
-      .get()
-      .trackedSearches.filter((s) => s.state === TrackedSearchState.InProgress)
+    const state = this.state.get();
+    state.trackedSearches
+      .filter((s) => s.state === TrackedSearchState.InProgress)
       .forEach((s) => {
-        s.searchDescriptor.abort();
+        s.searchDescriptor.abort(AbortReason.CANCELED);
       });
     this.state.transitions.cancel();
     if (isStoredSession) {
+      const searchSessionSavedObject = state.searchSessionSavedObject;
+      if (searchSessionSavedObject) {
+        this.searchSessionEBTManager?.trackBgsCancelled({
+          session: searchSessionSavedObject,
+          cancelSource: source,
+        });
+      }
       await this.sessionsClient.delete(this.state.get().sessionId!);
     }
   }
@@ -593,7 +612,7 @@ export class SessionService {
    * Save current session as SO to get back to results later
    * (Send to background)
    */
-  public async save() {
+  public async save(trackingProps: { entryPoint: string }) {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     const currentSessionApp = this.state.get().appName;
@@ -601,6 +620,7 @@ export class SessionService {
     if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
+
     const [name, { initialState, restoreState, id: locatorId }] = await Promise.all([
       currentSessionInfoProvider.getName(),
       currentSessionInfoProvider.getLocatorData(),
@@ -620,6 +640,11 @@ export class SessionService {
       restoreState,
       initialState,
       sessionId,
+    });
+
+    this.searchSessionEBTManager?.trackBgsStarted({
+      session: searchSessionSavedObject,
+      ...trackingProps,
     });
 
     // if we are still interested in this result
@@ -775,6 +800,7 @@ export class SessionService {
           // still interested in this result
           this.state.transitions.setSearchSessionSavedObject(savedObject);
         }
+        return savedObject;
       } catch (e) {
         this.toastService?.addError(e, {
           title: i18n.translate(

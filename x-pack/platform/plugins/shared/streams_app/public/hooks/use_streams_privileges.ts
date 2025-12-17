@@ -9,6 +9,8 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -23,10 +25,17 @@ export interface StreamsFeatures {
     available: boolean;
     enabled: boolean;
   };
+  significantEventsDiscovery?: {
+    available: boolean;
+    enabled: boolean;
+  };
   groupStreams?: {
     enabled: boolean;
   };
   contentPacks?: {
+    enabled: boolean;
+  };
+  attachments?: {
     enabled: boolean;
   };
 }
@@ -62,12 +71,18 @@ export function useStreamsPrivileges(): StreamsPrivileges {
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
     false // Default to false if the setting is not defined or not available
   );
+  const significantEventsDiscoveryEnabled = uiSettings.get<boolean>(
+    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+    false
+  );
 
   const significantEventsAvailableForTier = pricing.isFeatureAvailable(
     STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
   );
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
+
+  const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
 
   return {
     ui: streams as {
@@ -80,16 +95,20 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       },
       significantEvents: license && {
         enabled: significantEventsEnabled,
-        available:
-          significantEventsEnabled &&
-          license.hasAtLeast('enterprise') &&
-          significantEventsAvailableForTier,
+        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
+      },
+      significantEventsDiscovery: license && {
+        enabled: significantEventsDiscoveryEnabled,
+        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
       },
       groupStreams: {
         enabled: groupStreamsEnabled,
       },
       contentPacks: {
         enabled: contentPacksEnabled,
+      },
+      attachments: {
+        enabled: attachmentsEnabled,
       },
     },
     isLoading: !license,

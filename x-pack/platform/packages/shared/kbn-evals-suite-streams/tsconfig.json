@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node"]
@@ -23,5 +23,6 @@
     "@kbn/kibana-api-cli",
     "@kbn/dev-cli-runner",
     "@kbn/core",
+    "@kbn/dissect-heuristics",
   ]
 }

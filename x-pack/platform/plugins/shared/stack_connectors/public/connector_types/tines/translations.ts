@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { API_MAX_RESULTS } from '../../../common/tines/constants';
+import { API_MAX_RESULTS } from '@kbn/connector-schemas/tines/constants';
 
 // config form
 export const URL_LABEL = i18n.translate(

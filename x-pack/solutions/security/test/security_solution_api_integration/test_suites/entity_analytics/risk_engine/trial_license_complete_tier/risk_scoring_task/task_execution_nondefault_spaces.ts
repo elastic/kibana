@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -27,9 +24,8 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
-  const doTests = () => {
+  describe('@ess Risk Scoring Task in non-default space', () => {
     describe('with alerts in a non-default space', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -116,27 +112,6 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
             .sort()
         );
       });
-    });
-  };
-
-  describe('@ess Risk Scoring Task in non-default space', () => {
-    describe('ESQL', () => {
-      doTests();
-    });
-
-    describe('Scripted metric', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
     });
   });
 };

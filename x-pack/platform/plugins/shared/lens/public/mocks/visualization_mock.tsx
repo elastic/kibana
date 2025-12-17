@@ -64,6 +64,7 @@ export function createMockVisualization(
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
     DimensionEditorComponent: jest.fn(() => <div data-test-subj="lnsVisDimensionEditor" />),
+    isSubtypeSupported: jest.fn(() => true),
   };
 }
 

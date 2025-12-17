@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -29,5 +29,9 @@
     "@kbn/datemath",
     "@kbn/es-query",
     "@kbn/monaco",
+    "@kbn/core",
+    "@kbn/projects-solutions-groups",
+    "@kbn/index-management-shared-types",
+    "@kbn/licensing-types",
   ]
 }

@@ -52,6 +52,12 @@ export {
   type BuiltinToolDefinitionWithSchema,
 } from './types/builtin';
 export {
+  isMcpTool,
+  type McpToolConfig,
+  type McpToolDefinition,
+  type McpToolDefinitionWithSchema,
+} from './types/mcp';
+export {
   ToolResultType,
   type ToolResult,
   type ErrorResult,
@@ -66,3 +72,4 @@ export {
   isResourceResult,
   isTabularDataResult,
 } from './tool_result';
+export { type BrowserApiToolMetadata } from './browser_tool_metadata';

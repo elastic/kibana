@@ -58,6 +58,7 @@ jest.mock('../../../kibana_services', () => {
         },
       };
     },
+    getHttp: jest.fn(),
   };
 });
 
@@ -67,7 +68,6 @@ describe('CreateSourceEditor', () => {
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
     await waitFor(() =>
       expect(onSourceConfigChange).toBeCalledWith({
-        dataViewId: '30de729e173668cbf8954aa56c4aca5b82a1005586a608b692dae478219f8c76',
         dateField: '@timestamp',
         esql: 'from logs | keep location | limit 10000',
         geoField: 'location',
@@ -88,7 +88,6 @@ describe('CreateSourceEditor', () => {
     );
     await waitFor(() =>
       expect(onSourceConfigChange).toBeCalledWith({
-        dataViewId: 'c9f096614a62aa31893a2d6e8f43139bda7dcdb262b9373f79d0173cc152b4a4',
         dateField: undefined,
         esql: 'from world_countries | keep geometry | limit 10000',
         geoField: 'geometry',

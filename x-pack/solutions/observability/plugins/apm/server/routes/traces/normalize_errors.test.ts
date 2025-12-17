@@ -14,16 +14,16 @@ describe('normalizeErrors', () => {
       const apmErrors: UnifiedTraceErrors['apmErrors'] = [
         {
           id: 'error-1',
+          spanId: 'a',
+          eventName: undefined,
           error: {
-            grouping_key: 'error-1',
-            exception: [{ type: 'Error', message: 'First error' }],
-            id: 'error-1',
+            grouping_key: 'error-3',
+            id: 'error-3',
+            exception: { type: 'Error', message: 'First error' },
+            log: { message: 'Log message' },
           },
           timestamp: {
             us: 1234567890,
-          },
-          service: {
-            name: 'test-service',
           },
         },
       ];
@@ -33,9 +33,10 @@ describe('normalizeErrors', () => {
       expect(result).toEqual([
         {
           error: {
-            grouping_key: 'error-1',
-            id: 'error-1',
+            grouping_key: 'error-3',
+            id: 'error-3',
             exception: { type: 'Error', message: 'First error' },
+            log: { message: 'Log message' },
           },
           timestamp: { us: 1234567890 },
         },
@@ -46,17 +47,13 @@ describe('normalizeErrors', () => {
       const apmErrors: UnifiedTraceErrors['apmErrors'] = [
         {
           id: 'error-3',
+          spanId: 'a',
+          eventName: undefined,
           error: {
-            grouping_key: 'error-3',
-            exception: undefined,
-            id: 'error-3',
-            log: { message: 'Log message' },
+            exception: { type: undefined, message: undefined },
           },
           timestamp: {
             us: 1111111111,
-          },
-          service: {
-            name: 'test-service',
           },
         },
       ];
@@ -66,10 +63,7 @@ describe('normalizeErrors', () => {
       expect(result).toEqual([
         {
           error: {
-            grouping_key: 'error-3',
-            exception: undefined,
-            id: 'error-3',
-            log: { message: 'Log message' },
+            exception: { type: undefined, message: undefined },
           },
           timestamp: { us: 1111111111 },
         },

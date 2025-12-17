@@ -235,7 +235,7 @@ export function savedObjectsRoutes(
   router.versioned
     .post({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
@@ -243,10 +243,17 @@ export function savedObjectsRoutes(
       },
       summary: 'Update what spaces jobs are assigned to',
       description: 'Update a list of jobs to add and/or remove them from given spaces.',
+      options: {
+        tags: ['oas-tag:machine learning'],
+        availability: {
+          since: '9.3.0',
+          stability: 'beta',
+        },
+      },
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             body: updateJobsSpaces,
@@ -316,7 +323,7 @@ export function savedObjectsRoutes(
   router.versioned
     .post({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: ['ml:canCreateTrainedModels'],
@@ -324,10 +331,17 @@ export function savedObjectsRoutes(
       },
       summary: 'Update what spaces trained models are assigned to',
       description: 'Update a list of trained models to add and/or remove them from given spaces.',
+      options: {
+        tags: ['oas-tag:machine learning'],
+        availability: {
+          since: '9.3.0',
+          stability: 'beta',
+        },
+      },
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             body: updateTrainedModelsSpaces,

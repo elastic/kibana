@@ -63,4 +63,20 @@ describe('HeaderButtons', () => {
     );
     expect(getByTestId('addAnotherMigrationButton')).toBeInTheDocument();
   });
+
+  it('should render the migration vendor badge', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HeaderButtons
+          migrationType="dashboard"
+          migrationsStats={getMigrationsStatsMock()}
+          selectedMigrationId="2"
+          onMigrationIdChange={onMigrationIdChange}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('migrationVendorBadge')).toBeInTheDocument();
+    expect(getByTestId('migrationVendorBadge')).toHaveTextContent('QRadar');
+  });
 });

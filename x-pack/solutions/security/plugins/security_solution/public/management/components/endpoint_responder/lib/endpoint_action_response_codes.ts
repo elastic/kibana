@@ -11,6 +11,11 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // GET-FILE CODES
   // -----------------------------------------------------------------
+  'ra_get-file_error_canceled': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   /** file not found */
   'ra_get-file_error_not-found': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.getFile.notFound',
@@ -134,6 +139,11 @@ const CODES = Object.freeze({
   // EXECUTE CODES
   // -----------------------------------------------------------------
 
+  ra_execute_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   // Dev:
   // Something interrupted preparing the zip: file read error, zip error. I think these should be rare,
   // and should succeed on retry by the user or result in file-not-found. We might implement some retries
@@ -225,6 +235,11 @@ const CODES = Object.freeze({
   // UPLOAD CODES
   // -----------------------------------------------------------------
 
+  ra_upload_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   // Dev:
   // generic failure (rare corner case, software bug, etc)
   ra_upload_error_failure: i18n.translate(
@@ -292,6 +307,11 @@ const CODES = Object.freeze({
   // SCAN CODES
   // -----------------------------------------------------------------
 
+  ra_scan_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   'ra_scan_error_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.invalidInput',
     { defaultMessage: 'Invalid absolute file path provided' }
@@ -331,6 +351,71 @@ const CODES = Object.freeze({
   ra_scan_success_done: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.success',
     { defaultMessage: 'Scan complete' }
+  ),
+
+  // -----------------------------------------------------------------
+  // MEMORY-DUMP CODES
+  // -----------------------------------------------------------------
+  'ra_memory-dump_error_canceled': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+  'ra_memory-dump_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.failure',
+    { defaultMessage: 'Unknown failure while capturing memory dump' }
+  ),
+  'ra_memory-dump_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.done',
+    { defaultMessage: 'Memory dump complete' }
+  ),
+  'ra_memory-dump_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.invalidInput',
+    { defaultMessage: 'The request provided for memory dump is invalid' }
+  ),
+
+  // DEV: process with pid or entity_id not foud
+  'ra_memory-dump_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notFound',
+    { defaultMessage: 'The process for memory dump was not found' }
+  ),
+
+  // DEV: not permitted to dump protected process memory. Endpoint honors the OS system protection model
+  // thus protected processes are not allowed to dump memory.
+  'ra_memory-dump_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notPermitted',
+    { defaultMessage: 'Memory dump not permitted on protected processes' }
+  ),
+
+  // DEV: too many queued memory dump requests
+  'ra_memory-dump_error_queue-full': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.queueFull',
+    { defaultMessage: 'Too many memory-dump requests in queue' }
+  ),
+
+  'ra_memory-dump_error_io': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.ioError',
+    { defaultMessage: 'A disk input/output error has occurred' }
+  ),
+
+  // DEV: A catch-all placeholder to indicate that action failed during processing memory dump with
+  // a rare not generally expected code.
+  'ra_memory-dump_error_processing': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.processingError',
+    { defaultMessage: 'Memory dump failed during processing' }
+  ),
+
+  // DEV: processing interrupted by stop/shutdown/reboot. Action has been interrupted or could have
+  // been just in the queue before shutdown. Nonetheless, since in this case all processes are gone,
+  // action will fail
+  'ra_memory-dump_error_processing-interrupted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.processingInterruptedError',
+    { defaultMessage: 'Memory dump action was interrupted' }
+  ),
+
+  // DEV: Fail early when disk space falls below free space threshold set via advanced Endpoint policy
+  'ra_memory-dump_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.insufficientDiskSpaceError',
+    { defaultMessage: 'Host does not have sufficient disk space to capture a memory dump' }
   ),
 });
 

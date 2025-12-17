@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 
 import { AssistantSettingsModal } from './assistant_settings_modal';
 import { welcomeConvo } from '../../mock/conversation';

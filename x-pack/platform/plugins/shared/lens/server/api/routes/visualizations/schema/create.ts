@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
 
 import {
   lensCMCreateOptionsSchema,
@@ -31,6 +32,7 @@ export const lensCreateRequestQuerySchema = schema.object(
 );
 
 export const lensCreateRequestBodySchema = schema.oneOf([
+  lensApiStateSchema,
   lensItemDataSchema,
   lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
 ]);

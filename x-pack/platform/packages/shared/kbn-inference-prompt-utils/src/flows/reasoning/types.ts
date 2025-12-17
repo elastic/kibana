@@ -16,10 +16,13 @@ import type {
   ToolOptionsOfPrompt,
 } from '@kbn/inference-common';
 
+export type ReasoningPower = 'low' | 'medium' | 'high';
+
 export interface ReasoningPromptOptions {
   inferenceClient: BoundInferenceClient;
   maxSteps?: number;
   prevMessages?: undefined;
+  power?: ReasoningPower;
 }
 
 export type ReasoningPromptResponseOf<

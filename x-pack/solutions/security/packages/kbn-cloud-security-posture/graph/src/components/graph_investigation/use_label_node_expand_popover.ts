@@ -67,7 +67,9 @@ export const useLabelNodeExpandPopover = (
         ? 'hide'
         : 'show';
 
-      const shouldShowEventDetailsListItem = !!onShowEventDetailsClick;
+      const shouldShowEventDetailsListItem =
+        onShowEventDetailsClick &&
+        ['single-alert', 'single-event', 'grouped-events'].includes(getNodeDocumentMode(node.data));
 
       return [
         {

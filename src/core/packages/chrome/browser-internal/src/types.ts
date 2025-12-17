@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type {
   ChromeStart,
   ChromeBreadcrumb,
@@ -19,7 +20,6 @@ import type {
   SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
-import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -107,6 +107,12 @@ export interface InternalChromeStart extends ChromeStart {
   getBodyClasses$(): Observable<string[]>;
 
   /**
+   * Used only by the rendering service to render the global footer UI (devbar)
+   * @internal
+   */
+  getGlobalFooter$(): Observable<ReactNode>;
+
+  /**
    * Used only by the serverless plugin to customize project-style chrome.
    * @internal
    */
@@ -185,10 +191,5 @@ export interface InternalChromeStart extends ChromeStart {
      * will be replaced with the legacy Kibana navigation.
      */
     changeActiveSolutionNavigation(id: SolutionId | null): void;
-
-    /**
-     * Used to manage the navigation tour state and start/stop the tour.
-     */
-    navigationTourManager: NavigationTourManager;
   };
 }
