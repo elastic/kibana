@@ -82,6 +82,7 @@ describe('conversation model converters', () => {
         rounds: [
           {
             id: 'round-1',
+            status: ConversationRoundStatus.completed,
             input: {
               message: 'some message',
             },
@@ -145,6 +146,7 @@ describe('conversation model converters', () => {
         rounds: [
           {
             id: 'round-legacy',
+            status: ConversationRoundStatus.completed,
             input: {
               message: 'legacy message',
             },
@@ -334,6 +336,7 @@ describe('conversation model converters', () => {
         conversation_rounds: [
           {
             id: 'round-1',
+            status: ConversationRoundStatus.completed,
             input: {
               message: 'some message',
             },
