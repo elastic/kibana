@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
-import type { UppercaseProcessor } from '../../../../types/processors';
-import { buildIgnoreMissingFilter } from './common';
+import { Builder } from '@kbn/esql-ast';
+import type { LowercaseProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
+import { buildIgnoreMissingFilter } from './common';
 
-export function convertUppercaseProcessorToESQL(processor: UppercaseProcessor): ESQLAstCommand[] {
+export function convertLowercaseProcessorToESQL(processor: LowercaseProcessor): ESQLAstCommand[] {
   const { from, to, ignore_missing = false } = processor;
 
   const commands: ESQLAstCommand[] = [];
@@ -24,17 +24,17 @@ export function convertUppercaseProcessorToESQL(processor: UppercaseProcessor): 
 
   const fromColumn = Builder.expression.column(from);
   const toColumn = Builder.expression.column(to ?? from); // If no target field is provided, use the source field
-  const uppercaseFunction = Builder.expression.func.call('TO_UPPER', [fromColumn]);
+  const lowercaseFunction = Builder.expression.func.call('TO_LOWER', [fromColumn]);
 
-  // Check if this is conditional or unconditional uppercase
+  // Check if this is conditional or unconditional lowercase
   if ('where' in processor && processor.where && !('always' in processor.where)) {
     // Conditional replacement: use EVAL with CASE
-    // EVAL target_field = CASE(<condition>, TO_UPPER(to), fromColumn ?? nil)
+    // EVAL target_field = CASE(<condition>, TO_LOWER(to), fromColumn ?? nil)
     const conditionExpression = conditionToESQLAst(processor.where);
     const elseValue = to ? Builder.expression.literal.nil() : fromColumn;
     const caseExpression = Builder.expression.func.call('CASE', [
       conditionExpression,
-      uppercaseFunction,
+      lowercaseFunction,
       elseValue,
     ]);
     const evalCommand = Builder.command({
@@ -43,10 +43,10 @@ export function convertUppercaseProcessorToESQL(processor: UppercaseProcessor): 
     });
     commands.push(evalCommand);
   } else {
-    // Unconditional uppercase: use EVAL with TO_UPPER() function
+    // Unconditional lowercase: use EVAL with TO_LOWER() function
     const evalCommand = Builder.command({
       name: 'EVAL',
-      args: [Builder.expression.func.binary('=', [toColumn, uppercaseFunction])],
+      args: [Builder.expression.func.binary('=', [toColumn, lowercaseFunction])],
     });
     commands.push(evalCommand);
   }

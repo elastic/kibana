@@ -24,6 +24,7 @@ import type {
   DropDocumentProcessor,
   ReplaceProcessor,
   UppercaseProcessor,
+  LowercaseProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -39,6 +40,7 @@ import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
 import { convertReplaceProcessorToESQL } from './processors/replace';
 import { convertMathProcessorToESQL } from './processors/math';
 import { convertUppercaseProcessorToESQL } from './processors/uppercase';
+import { convertLowercaseProcessorToESQL } from './processors/lowercase';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -80,6 +82,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'uppercase':
       return convertUppercaseProcessorToESQL(processor as UppercaseProcessor);
+
+    case 'lowercase':
+      return convertLowercaseProcessorToESQL(processor as LowercaseProcessor);
 
     case 'manual_ingest_pipeline':
       return [
