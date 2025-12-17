@@ -73,7 +73,8 @@
     "@kbn/safer-lodash-set",
     "@kbn/connector-specs",
     "@kbn/workflows-extensions",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/ai-assistant-icon"
   ],
   "exclude": ["target/**/*"]
 }
