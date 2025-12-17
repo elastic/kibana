@@ -192,7 +192,11 @@ export type {
   FunctionsRegistry,
   TypesRegistry,
 } from './executor';
-export { createExecutionContainer, executionPureTransitions } from './execution';
+export {
+  createExecutionContainer,
+  executionPureTransitions,
+  EXPRESSION_ABORT_ERROR,
+} from './execution';
 export type {
   Execution,
   ExecutionContract,

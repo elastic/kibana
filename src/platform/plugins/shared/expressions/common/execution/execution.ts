@@ -59,6 +59,11 @@ import { ExecutionContract } from './execution_contract';
 import type { ExpressionExecutionParams } from '../service';
 import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
+export const EXPRESSION_ABORT_ERROR = {
+  message: 'The expression was aborted.',
+  name: 'AbortError',
+};
+
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
   ReturnType<Function> extends ObservableLike<unknown>
     ? UnwrapObservable<ReturnType<Function>>
@@ -86,11 +91,7 @@ export interface ExecutionResult<Output> {
 
 const maxCacheSize = 1000;
 
-const createAbortErrorValue = () =>
-  createError({
-    message: 'The expression was aborted.',
-    name: 'AbortError',
-  });
+const createAbortErrorValue = () => createError(EXPRESSION_ABORT_ERROR);
 
 function markPartial<T>() {
   return (source: Observable<T>) =>
