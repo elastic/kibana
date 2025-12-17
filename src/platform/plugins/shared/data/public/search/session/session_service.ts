@@ -9,24 +9,20 @@
 
 import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
   EMPTY,
+  BehaviorSubject,
+  distinctUntilChanged,
   filter,
   from,
   map,
-  mapTo,
-  merge,
   mergeMap,
   type Observable,
-  of,
   repeat,
   startWith,
   Subscription,
   switchMap,
+  take,
   takeUntil,
-  tap,
   timer,
 } from 'rxjs';
 import type {
@@ -35,12 +31,10 @@ import type {
   ToastsStart as ToastService,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
 import {
@@ -58,7 +52,7 @@ import type { ISearchSessionEBTManager } from './ebt_manager';
  * Polling interval for keeping completed searches alive
  * until the user saves the session
  */
-const KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL = 30000;
+const KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL = 30_000;
 
 /**
  * To prevent the session ids map from growing indefinitely we can use an LRU cache - we will limit it to 30 sessions for
@@ -181,22 +175,6 @@ export class SessionService {
 
   public readonly sessionMeta$: Observable<SessionMeta>;
 
-  /**
-   * Emits `true` when session completes and `config.search.sessions.notTouchedTimeout` duration has passed.
-   * Used to stop keeping searches alive after some times and disabled "save session" button
-   *
-   * or when failed to extend searches after session completes
-   */
-  private readonly _disableSaveAfterSearchesExpire$ = new BehaviorSubject<boolean>(false);
-
-  /**
-   * Emits `true` when it is no longer possible to save a session:
-   *   - Failed to keep searches alive after they completed
-   *   - `config.search.sessions.notTouchedTimeout` after searches completed hit
-   *   - Continued session from a different app and lost information about previous searches (https://github.com/elastic/kibana/issues/121543)
-   */
-  public readonly disableSaveAfterSearchesExpire$: Observable<boolean>;
-
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
@@ -215,7 +193,6 @@ export class SessionService {
     searchSessionEBTManager: ISearchSessionEBTManager,
     private readonly sessionsClient: ISessionsClient,
     private readonly nowProvider: NowProviderInternalContract,
-    private readonly usageCollector?: SearchUsageCollector,
     { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
     const { stateContainer, sessionState$, sessionMeta$ } = createSessionStateContainer<
@@ -231,37 +208,6 @@ export class SessionService {
 
     this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
     this.logger = initializerContext.logger.get();
-
-    this.disableSaveAfterSearchesExpire$ = combineLatest([
-      this._disableSaveAfterSearchesExpire$,
-      this.sessionMeta$.pipe(map((meta) => meta.isContinued)),
-    ]).pipe(
-      map(
-        ([_disableSaveAfterSearchesExpire, isSessionContinued]) =>
-          _disableSaveAfterSearchesExpire || isSessionContinued
-      ),
-      distinctUntilChanged()
-    );
-
-    const notTouchedTimeout = moment
-      .duration(initializerContext.config.get().search.sessions.notTouchedTimeout)
-      .asMilliseconds();
-
-    this.subscription.add(
-      this.state$
-        .pipe(
-          switchMap((_state) =>
-            _state === SearchSessionState.Completed
-              ? merge(of(false), timer(notTouchedTimeout).pipe(mapTo(true)))
-              : of(false)
-          ),
-          distinctUntilChanged(),
-          tap((value) => {
-            if (value) this.usageCollector?.trackSessionIndicatorSaveDisabled();
-          })
-        )
-        .subscribe(this._disableSaveAfterSearchesExpire$)
-    );
 
     this.subscription.add(
       sessionMeta$
@@ -314,6 +260,18 @@ export class SessionService {
             if (!this.hasAccess()) return EMPTY; // don't need to keep searches alive if the user can't save session
             if (!this.isSessionStorageReady()) return EMPTY; // don't need to keep searches alive if app doesn't allow saving session
 
+            const finishedStates = [
+              SearchSessionState.Completed,
+              SearchSessionState.BackgroundCompleted,
+              SearchSessionState.Canceled,
+            ];
+
+            const stopOnFinishedState$ = this.state$.pipe(
+              filter((state) => finishedStates.includes(state)),
+              take(1)
+            );
+            const pollingError$ = new BehaviorSubject<boolean>(false);
+
             const schedulePollSearches = () => {
               return timer(KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL).pipe(
                 mergeMap(() => {
@@ -334,7 +292,7 @@ export class SessionService {
                             e
                           );
                           if (this.isCurrentSession(sessionId)) {
-                            this._disableSaveAfterSearchesExpire$.next(true);
+                            pollingError$.next(true);
                           }
                         })
                       )
@@ -342,7 +300,8 @@ export class SessionService {
                   );
                 }),
                 repeat(),
-                takeUntil(this.disableSaveAfterSearchesExpire$.pipe(filter((disable) => disable)))
+                takeUntil(pollingError$.pipe(filter(Boolean))),
+                takeUntil(stopOnFinishedState$)
               );
             };
 
