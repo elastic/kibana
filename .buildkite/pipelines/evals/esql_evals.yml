@@ -43,11 +43,27 @@ steps:
       EOF
 
       # Start Scout server in background
-      node scripts/scout start-server --stateful &
+      node scripts/scout start-server --stateful --kibana-install-dir "$KIBANA_BUILD_LOCATION" &
       SCOUT_PID=$!
 
-      # Wait for server to be ready
-      sleep 120
+      # Wait for Kibana to be ready (and fail fast if the Scout server process exits)
+      KIBANA_URL="$(jq -r '.hosts.kibana' .scout/servers/local.json)"
+      KIBANA_URL="${KIBANA_URL%/}"
+
+      for i in {1..180}; do
+        if ! kill -0 "$SCOUT_PID" 2>/dev/null; then
+          echo "Scout server exited before Kibana became ready"
+          wait "$SCOUT_PID" || true
+          exit 1
+        fi
+
+        if curl -sSf "$KIBANA_URL/api/status" >/dev/null; then
+          echo "Kibana is ready at $KIBANA_URL"
+          break
+        fi
+
+        sleep 5
+      done
 
       # Run ES|QL evaluations
       EVALUATION_REPETITIONS=1 \
