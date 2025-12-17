@@ -137,8 +137,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
               size="xs"
               telemetry={{
                 pathway: 'rule_creation',
-                attachmentType: 'rule',
-                attachmentCount: 1,
+                attachments: ['rule'],
               }}
             />
           ) : (

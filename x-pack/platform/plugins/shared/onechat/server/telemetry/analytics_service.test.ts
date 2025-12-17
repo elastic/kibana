@@ -82,6 +82,7 @@ describe('AnalyticsService', () => {
         llm_calls: 3,
         input_tokens: 4,
         output_tokens: 5,
+        model: 'gpt-97q',
       },
       trace_id: 'trace-1',
     };
@@ -96,18 +97,20 @@ describe('AnalyticsService', () => {
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
+        agent_id: oneChatDefaultAgentId,
         conversation_id: 'conversation-1',
+        input_tokens: 4,
+        llm_calls: 3,
+        message_length: 2,
+        model: 'gpt-97q',
+        model_provider: ModelProvider.OpenAI,
+        output_tokens: 5,
         response_length: round.response.message.length,
         round_number: 2,
-        agent_id: oneChatDefaultAgentId,
-        tools_invoked: ['custom'],
         started_at: '2025-01-01T00:00:00.000Z',
         time_to_first_token: 1,
         time_to_last_token: 2,
-        model_provider: ModelProvider.OpenAI,
-        llm_calls: 3,
-        input_tokens: 4,
-        output_tokens: 5,
+        tools_invoked: ['custom'],
       });
     });
 

@@ -94,8 +94,7 @@ export const AskAiAssistant = <T extends EntityType>({
               onClick={openAgentBuilderFlyout}
               telemetry={{
                 pathway: 'entity_flyout',
-                attachmentType: 'entity',
-                attachmentCount: 1,
+                attachments: ['entity'],
               }}
             />
           ) : (

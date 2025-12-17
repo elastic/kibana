@@ -29,11 +29,7 @@ export interface NewAgentBuilderAttachmentTelemetry {
   /**
    * Attachment type
    */
-  attachmentType?: 'alert' | 'entity' | 'rule';
-  /**
-   * Attachment count
-   */
-  attachmentCount?: number;
+  attachments?: Array<'alert' | 'entity' | 'rule'>;
 }
 
 export interface NewAgentBuilderAttachmentProps {
@@ -78,8 +74,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     if (telemetryData) {
       telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
         pathway: telemetryData.pathway,
-        attachment_type: telemetryData.attachmentType,
-        attachment_count: telemetryData.attachmentCount,
+        attachments: telemetryData.attachments,
       });
     }
     onClick();

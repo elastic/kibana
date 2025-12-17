@@ -43,32 +43,26 @@ export interface ReportOptOutParams {
 
 export interface ReportAddToChatClickedParams {
   pathway: string;
-  attachment_type?: string;
-  attachment_count?: number;
-}
-
-export interface ReportMessageSentParams {
-  conversation_id?: string;
-  message_length?: number;
-  has_attachments: boolean;
-  attachment_count?: number;
-  attachment_types?: string[];
-  agent_id?: string;
+  attachments?: string[];
 }
 
 export interface ReportRoundCompleteParams {
-  conversation_id?: string;
-  response_length?: number;
-  round_number?: number;
   agent_id?: string;
-  tools_invoked: string[];
-  started_at?: string;
-  time_to_first_token?: number;
-  time_to_last_token?: number;
+  attachments?: string[];
+  conversation_id?: string;
+  has_attachments: boolean;
+  input_tokens: number;
+  llm_calls: number;
+  message_length: number;
+  model?: string;
   model_provider?: string;
-  llm_calls?: number;
-  input_tokens?: number;
-  output_tokens?: number;
+  output_tokens: number;
+  response_length: number;
+  round_number: number;
+  started_at: string;
+  time_to_first_token: number;
+  time_to_last_token: number;
+  tools_invoked: string[];
 }
 
 export interface ReportConverseErrorParams {
@@ -85,7 +79,7 @@ export interface ReportConverseErrorParams {
  *
  * NOTE:
  * This intentionally shares a schema with the legacy onechat `ONECHAT_CONVERSE_ERROR` event so
- * solutions can optionally provide richer context (conversation_id/agent_id/connector_id) when
+ * solutions can optionally provide richer context (conversation_id/agent_id) when
  * available, while keeping the event ID under the agent_builder prefix.
  */
 export type ReportAgentBuilderErrorParams = ReportConverseErrorParams;
@@ -111,7 +105,6 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptInActionParams>
   | EventTypeOpts<ReportOptOutParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
-  | EventTypeOpts<ReportMessageSentParams>
   | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportAgentBuilderErrorParams>
   | EventTypeOpts<ReportOnechatConverseErrorParams>;
@@ -171,17 +164,16 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    attachment_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of attachment (alert|entity|rule|attack_discovery|other)',
-        optional: true,
+    attachments: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Type of attachment',
+        },
       },
-    },
-    attachment_count: {
-      type: 'integer',
       _meta: {
-        description: 'Number of attachments',
+        description: 'Types of attachments',
         optional: true,
       },
     },
@@ -191,6 +183,26 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
 const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.RoundComplete,
   schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent',
+        optional: true,
+      },
+    },
+    attachments: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Type of attachment',
+        },
+      },
+      _meta: {
+        description: 'Types of attachments',
+        optional: true,
+      },
+    },
     conversation_id: {
       type: 'keyword',
       _meta: {
@@ -198,25 +210,88 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    has_attachments: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the message has attachments',
+        optional: false,
+      },
+    },
+    input_tokens: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of input tokens sent during this round',
+        optional: false,
+      },
+    },
+    llm_calls: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of LLM calls performed during this round',
+        optional: false,
+      },
+    },
+    output_tokens: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of output tokens received during this round',
+        optional: false,
+      },
+    },
+    message_length: {
+      type: 'integer',
+      _meta: {
+        description: 'Length of the user message in characters',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The exact model used, if available',
+        optional: true,
+      },
+    },
+    model_provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'Connector provider (OpenAI|Google|Anthropic|Elastic)',
+        optional: true,
+      },
+    },
     response_length: {
       type: 'integer',
       _meta: {
-        description: 'Length of the response in characters',
-        optional: true,
+        description: 'Length of the LLM response in characters',
+        optional: false,
       },
     },
     round_number: {
       type: 'integer',
       _meta: {
         description: 'Round number in the conversation',
-        optional: true,
+        optional: false,
       },
     },
-    agent_id: {
-      type: 'keyword',
+    started_at: {
+      type: 'date',
       _meta: {
-        description: 'ID of the agent',
-        optional: true,
+        description: 'When the round started',
+        optional: false,
+      },
+    },
+    time_to_first_token: {
+      type: 'integer',
+      _meta: {
+        description: 'Time from round start to first token arrival, in ms',
+        optional: false,
+      },
+    },
+    time_to_last_token: {
+      type: 'integer',
+      _meta: {
+        description: 'Time from round start to last token arrival, in ms',
+        optional: false,
       },
     },
     tools_invoked: {
@@ -232,55 +307,6 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom"). Intentionally includes duplicates (one entry per tool call) so counts per tool can be computed downstream by aggregating over this array.',
         optional: false,
-      },
-    },
-    started_at: {
-      type: 'date',
-      _meta: {
-        description: 'When the round started',
-        optional: true,
-      },
-    },
-    time_to_first_token: {
-      type: 'integer',
-      _meta: {
-        description: 'Time from round start to first token arrival, in ms',
-        optional: true,
-      },
-    },
-    time_to_last_token: {
-      type: 'integer',
-      _meta: {
-        description: 'Time from round start to last token arrival, in ms',
-        optional: true,
-      },
-    },
-    model_provider: {
-      type: 'keyword',
-      _meta: {
-        description: 'Connector provider (OpenAI|Google|Anthropic|Elastic)',
-        optional: true,
-      },
-    },
-    llm_calls: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of LLM calls performed during this round',
-        optional: true,
-      },
-    },
-    input_tokens: {
-      type: 'integer',
-      _meta: {
-        description: 'Total number of input tokens sent during this round',
-        optional: true,
-      },
-    },
-    output_tokens: {
-      type: 'integer',
-      _meta: {
-        description: 'Total number of output tokens received during this round',
-        optional: true,
       },
     },
   },

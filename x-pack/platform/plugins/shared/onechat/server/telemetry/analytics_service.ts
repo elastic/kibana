@@ -58,20 +58,25 @@ export class AnalyticsService {
         round.steps
           ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
           .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
-
+      const attachments = round.input.attachments?.length
+        ? round.input.attachments.map((a) => a.type || 'unknown')
+        : undefined;
       this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
-        conversation_id: conversationId,
-        response_length: round.response?.message?.length,
-        round_number: roundCount,
         agent_id: normalizedAgentId,
-        tools_invoked: toolsInvoked,
+        attachments,
+        conversation_id: conversationId,
+        input_tokens: round.model_usage.input_tokens,
+        llm_calls: round.model_usage.llm_calls,
+        message_length: round.input.message.length,
+        model: round.model_usage.model,
+        model_provider: getConnectorProvider(connector),
+        output_tokens: round.model_usage.output_tokens,
+        response_length: round.response.message.length,
+        round_number: roundCount,
         started_at: round.started_at,
         time_to_first_token: round.time_to_first_token,
         time_to_last_token: round.time_to_last_token,
-        model_provider: getConnectorProvider(connector),
-        llm_calls: round.model_usage?.llm_calls,
-        input_tokens: round.model_usage?.input_tokens,
-        output_tokens: round.model_usage?.output_tokens,
+        tools_invoked: toolsInvoked,
       });
     } catch (error) {
       // Do not fail the request if telemetry fails

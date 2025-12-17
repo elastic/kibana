@@ -92,8 +92,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
               size="xs"
               telemetry={{
                 pathway: 'attack_discovery',
-                attachmentType: 'alert',
-                attachmentCount: 1,
+                attachments: ['alert'],
               }}
             />
           ) : (

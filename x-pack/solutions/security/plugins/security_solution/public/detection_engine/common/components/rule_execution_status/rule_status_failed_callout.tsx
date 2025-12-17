@@ -110,8 +110,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
               color={color}
               telemetry={{
                 pathway: 'rule_failure',
-                attachmentType: 'rule',
-                attachmentCount: 1,
+                attachments: ['rule'],
               }}
             />
           ) : (

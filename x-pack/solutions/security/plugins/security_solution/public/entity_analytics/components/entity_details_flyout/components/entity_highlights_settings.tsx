@@ -160,8 +160,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               disabled={isLoading || !assistantResult}
               telemetry={{
                 pathway: 'entity_flyout',
-                attachmentType: 'entity',
-                attachmentCount: 1,
+                attachments: ['entity'],
               }}
             />
           </EuiContextMenuItem>

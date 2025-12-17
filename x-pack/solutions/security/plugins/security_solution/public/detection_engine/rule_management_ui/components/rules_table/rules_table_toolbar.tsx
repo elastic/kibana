@@ -128,8 +128,7 @@ export const RulesTableToolbar = React.memo(() => {
                 onClick={openAgentBuilderFlyout}
                 telemetry={{
                   pathway: 'rules_table',
-                  attachmentType: 'rule',
-                  attachmentCount: selectedRules.length,
+                  attachments: ['rule'],
                 }}
               />
             ) : (

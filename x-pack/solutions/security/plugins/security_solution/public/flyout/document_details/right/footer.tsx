@@ -81,8 +81,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
                 onClick={openAgentBuilderFlyout}
                 telemetry={{
                   pathway: 'alerts_flyout',
-                  attachmentType: 'alert',
-                  attachmentCount: 1,
+                  attachments: ['alert'],
                 }}
               />
             ) : (
