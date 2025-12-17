@@ -54,7 +54,7 @@ export default function updateEsqlRuleTests({ getService }: DeploymentAgnosticFt
           esql: 'FROM an_index | STATS count = COUNT(*) BY host.name',
           timeField: '@timestamp',
           lookbackWindow: '15m',
-          group_key: ['host.name'],
+          groupKey: ['host.name'],
         });
 
       const { body: updateResponse } = await supertest
@@ -70,7 +70,7 @@ export default function updateEsqlRuleTests({ getService }: DeploymentAgnosticFt
           esql: 'FROM another_index | STATS count = COUNT(*) BY host.name',
           timeField: '@timespan',
           lookbackWindow: '20m',
-          group_key: ['service.name'],
+          groupKey: ['service.name'],
         });
 
       expect(updateResponse).toEqual(
@@ -90,7 +90,7 @@ export default function updateEsqlRuleTests({ getService }: DeploymentAgnosticFt
             timeWindowSize: 20,
             timeWindowUnit: 'm',
             timeField: '@timespan',
-            group_key: ['service.name'],
+            groupKey: ['service.name'],
           },
           schedule: { interval: '10m' },
         })

@@ -54,7 +54,7 @@ export default function createEsqlRuleTests({ getService }: DeploymentAgnosticFt
           esql: 'FROM an_index | STATS count = COUNT(*) BY host.name',
           timeField: '@timestamp',
           lookbackWindow: '15m',
-          group_key: ['host.name'],
+          groupKey: ['host.name'],
         });
 
       expect(response).toEqual(
@@ -74,7 +74,7 @@ export default function createEsqlRuleTests({ getService }: DeploymentAgnosticFt
             timeWindowSize: 15,
             timeWindowUnit: 'm',
             timeField: '@timestamp',
-            group_key: ['host.name'],
+            groupKey: ['host.name'],
           },
           schedule: { interval: '5m' },
         })

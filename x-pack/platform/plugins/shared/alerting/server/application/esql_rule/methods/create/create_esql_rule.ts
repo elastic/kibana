@@ -19,15 +19,8 @@ export async function createESQLRule(
   const ruleId = uuidv4();
   context.logger.debug(`Creating ESQL rule with ruleId: ${ruleId}.`);
 
-  const {
-    esql,
-    lookbackWindow,
-    timeField,
-    group_key: groupKey,
-    parentId,
-    schedule,
-    ...restOfRuleData
-  } = ruleData;
+  const { esql, lookbackWindow, timeField, groupKey, parentId, schedule, ...restOfRuleData } =
+    ruleData;
 
   const durationMatch = lookbackWindow.match(/^(\d+)([smhd])$/);
   const timeWindowSize = durationMatch ? parseInt(durationMatch[1], 10) : 0;
@@ -40,7 +33,7 @@ export async function createESQLRule(
     timeWindowSize,
     timeWindowUnit,
     timeField,
-    group_key: groupKey,
+    groupKey,
     ...(parentId && { parentId }),
   };
 

@@ -32,7 +32,7 @@ export const updateESQLBodySchema = schema.object({
     defaultValue: [],
     meta: { description: 'The tags for the rule.' },
   }),
-  group_key: schema.arrayOf(schema.string(), {
+  groupKey: schema.arrayOf(schema.string(), {
     meta: { description: 'Fields to group alerts by.' },
   }),
   esql: schema.string({
