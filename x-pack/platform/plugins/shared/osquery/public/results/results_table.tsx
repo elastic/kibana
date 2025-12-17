@@ -47,10 +47,24 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
-const PAGINATION_LIMIT_MESSAGE_VALUES = {
-  viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong>,
-  indexName: <EuiCode>logs-osquery_manager.results</EuiCode>,
-};
+const PaginationLimitToastContent = () => (
+  <>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitDescription"
+        defaultMessage="Results limited to first 10,000 documents. To see all results, please use the {viewInDiscoverButton} button."
+        values={{ viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong> }}
+      />
+    </p>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitIndexAccess"
+        defaultMessage="Read access to {indexName} index is required."
+        values={{ indexName: <EuiCode>logs-osquery_manager.results</EuiCode> }}
+      />
+    </p>
+  </>
+);
 
 const euiDataGridCss = {
   ':not(.euiDataGrid--fullScreen)': {
@@ -122,14 +136,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const showPaginationLimitToast = useCallback(() => {
     toasts.addWarning({
       title: PAGINATION_LIMIT_TITLE,
-      text: toMountPoint(
-        <FormattedMessage
-          id="xpack.osquery.results.paginationLimitDescription"
-          defaultMessage="Results limited to first 10,000 documents. To see all results, please use the {viewInDiscoverButton} button. Read access to {indexName} index is required."
-          values={PAGINATION_LIMIT_MESSAGE_VALUES}
-        />,
-        { i18n: i18nStart, theme }
-      ),
+      text: toMountPoint(<PaginationLimitToastContent />, { i18n: i18nStart, theme }),
     });
   }, [i18nStart, theme, toasts]);
 
