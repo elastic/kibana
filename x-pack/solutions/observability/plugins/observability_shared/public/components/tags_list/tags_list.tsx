@@ -120,7 +120,10 @@ const TagsList = ({
               aria-label={EXPAND_TAGS_LABEL}
               data-test-subj="expand-tags"
             >
-              +{tags.length - toDisplay}
+              {i18n.translate('xpack.observabilityShared.tagsList.showMore', {
+                defaultMessage: '+ {count} more',
+                values: { count: tags.length - toDisplay },
+              })}
             </EuiButtonEmpty>
           </EuiToolTip>
         </EuiFlexItem>
@@ -139,7 +142,9 @@ const TagsList = ({
               aria-label={COLLAPSE_TAGS_LABEL}
               data-test-subj="collapse-tags"
             >
-              -{tags.length - MININUM_TAGS_TO_DISPLAY}
+              {i18n.translate('xpack.observabilityShared.tagsList.showLess', {
+                defaultMessage: 'Show less',
+              })}
             </EuiButtonEmpty>
           </EuiToolTip>
         </EuiFlexItem>
