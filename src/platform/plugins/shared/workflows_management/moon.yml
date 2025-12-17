@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/workflows-extensions'
   - '@kbn/alerts-ui-shared'
+  - '@kbn/ai-assistant-icon'
 tags:
   - plugin
   - prod
