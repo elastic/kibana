@@ -8,8 +8,9 @@
  */
 
 import { printTree } from 'tree-dump';
-import { childrenFoAnyNode } from '../../visitor/utils';
+import { childrenOfAnyNode } from '../../ast/visitor/utils';
 import type { ESQLProperNode } from '../../types';
+import type { PromQLAstNode } from '../../promql/types';
 
 /**
  * Options for printing an AST.
@@ -49,6 +50,16 @@ export interface PrintAstOptions {
    * @default Infinity
    */
   limit?: number;
+
+  /**
+   * The source text from which the AST was parsed.
+   */
+  src?: string;
+
+  /**
+   * Whether to print the source text of each node.
+   */
+  printSrc?: boolean;
 }
 
 /**
@@ -65,14 +76,20 @@ export interface PrintAstOptions {
  * ```
  */
 export const printAst = (
-  top: ESQLProperNode,
+  top: ESQLProperNode | PromQLAstNode,
   options?: PrintAstOptions,
   tab: string = ''
 ): string => {
   const maxDepth = options?.depth ?? 1e3;
   let nodesLeft = options?.limit ?? 1e5; // Remaining number of nodes to print
+  const printSrc = options?.printSrc ?? false;
+  const src = options?.src ?? '';
 
-  const printNode = (node: ESQLProperNode, currentTab: string, depth: number): string => {
+  const printNode = (
+    node: ESQLProperNode | PromQLAstNode,
+    currentTab: string,
+    depth: number
+  ): string => {
     if (nodesLeft-- <= 0) {
       return '...';
     }
@@ -98,14 +115,24 @@ export const printAst = (
     }
 
     if (maxDepth > depth) {
-      for (const child of childrenFoAnyNode(node)) {
+      for (const child of childrenOfAnyNode(node)) {
         childrenTree.push((tabNested: string) => printNode(child, tabNested, depth + 1));
       }
     } else {
       childrenTree.push(() => '...');
     }
 
-    const header = `${type}${location}${name}${text}${inlineDetails}`;
+    let nodeSrc = '';
+
+    if (printSrc && src && node.location) {
+      const { min, max } = node.location;
+
+      if (min >= 0 && max >= min) {
+        nodeSrc = ` "${src.slice(min, max + 1)}"`.replace(/\n/g, '\\n');
+      }
+    }
+
+    const header = `${type}${location}${name}${text}${inlineDetails}${nodeSrc}`;
 
     return header + printTree(currentTab, childrenTree);
   };
