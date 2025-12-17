@@ -7,13 +7,14 @@
 
 import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
-import { getLensRuntimeStateMock } from '../mocks';
+import { getLensInternalApiMock, getLensRuntimeStateMock } from '../mocks';
 import type { LensRuntimeState } from '@kbn/lens-common';
 import { initializeIntegrations } from './initialize_integrations';
 
 function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
-  const { api } = initializeIntegrations(() => runtimeState);
+  const internalApi = getLensInternalApiMock();
+  const { api } = initializeIntegrations(() => runtimeState, internalApi);
   return api;
 }
 

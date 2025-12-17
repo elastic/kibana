@@ -110,6 +110,7 @@ function getDefaultLensApiMock() {
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
+    updateAbortController: jest.fn(),
   };
   return LensApiMock;
 }
