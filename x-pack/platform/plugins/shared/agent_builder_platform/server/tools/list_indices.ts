@@ -8,10 +8,8 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { ConfirmationStatus } from '@kbn/onechat-common/agents/prompts';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -35,23 +33,7 @@ The 'pattern' optional parameter is an index pattern which can be used to filter
 This parameter should only be used when you already know of a specific pattern to filter on,
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient, logger, prompts, stateManager }) => {
-      const { status: confirmStatus } = prompts.checkConfirmationStatus('list_indices');
-      if (confirmStatus === ConfirmationStatus.unprompted) {
-        stateManager.setState({
-          hello: 'world',
-        });
-        return prompts.askForConfirmation({
-          id: 'list_indices',
-          message: 'Are you sure you want to list all indices?',
-        });
-      }
-      if (confirmStatus === ConfirmationStatus.rejected) {
-        return {
-          results: [createErrorResult(`User denied usage of the tool`)],
-        };
-      }
-
+    handler: async ({ pattern }, { esClient, logger }) => {
       logger.debug(`list indices tool called with pattern: ${pattern}`);
       const {
         indices,
