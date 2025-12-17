@@ -7,12 +7,8 @@
 
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
-import {
-  ConversationRoundStatus,
-  ConversationRoundStepType,
-  ToolCallStep,
-  ToolCallWithResult,
-} from '@kbn/onechat-common';
+import type { ToolCallStep, ToolCallWithResult } from '@kbn/onechat-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConversationRound, AgentCapabilities, AssistantResponse } from '@kbn/onechat-common';
+import type { ConversationRound, AgentCapabilities, AssistantResponse } from '@kbn/onechat-common';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { PromptRequest } from '@kbn/onechat-common/agents';
