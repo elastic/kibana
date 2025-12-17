@@ -18,6 +18,7 @@ import { registerFavorites } from '@kbn/content-management-favorites-server';
 import { Core } from './core';
 import { initRpcRoutes, registerProcedures, RpcService } from './rpc';
 import type { Context as RpcContext } from './rpc';
+import { registerListRoute } from './routes';
 import type {
   ContentManagementServerSetup,
   ContentManagementServerStart,
@@ -60,7 +61,10 @@ export class ContentManagementPlugin
     });
   }
 
-  public setup(core: CoreSetup, plugins: ContentManagementServerSetupDependencies) {
+  public setup(
+    core: CoreSetup<ContentManagementServerStartDependencies, ContentManagementServerStart>,
+    plugins: ContentManagementServerSetupDependencies
+  ) {
     if (this.#eventStream) {
       this.#eventStream.setup({ core });
     }
@@ -76,6 +80,9 @@ export class ContentManagementPlugin
       contentRegistry,
     });
 
+    // Register the list route for advanced saved object searching.
+    registerListRoute({ coreSetup: core, router, logger: this.logger });
+
     const favoritesSetup = registerFavorites({
       core,
       logger: this.logger,
@@ -88,7 +95,7 @@ export class ContentManagementPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     if (this.#eventStream) {
       this.#eventStream.start();
     }
