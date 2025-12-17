@@ -29,3 +29,16 @@ export const test = baseTest.extend<StreamsTestFixtures, ScoutWorkerFixtures>({
     await use(extendedPageObjects);
   },
 });
+
+// Export parallel test utilities
+export {
+  getUniqueStreamName,
+  getUniqueClassicStreamName,
+  getUniqueNestedStreamName,
+  safeDeleteStream,
+  safeClearStreamProcessors,
+  safeClearStreamMappings,
+  createUniqueTestStream,
+  createUniqueChildStreams,
+  cleanupTestStreams,
+} from './parallel_test_utils';
