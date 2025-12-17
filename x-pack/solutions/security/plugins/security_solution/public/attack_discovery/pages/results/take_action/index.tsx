@@ -216,11 +216,10 @@ const TakeActionComponent: React.FC<Props> = ({
     closePopover();
     telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
       pathway: 'attack_discovery',
-      attachment_type: 'alert',
-      attachment_count: attackDiscoveries.length,
+      attachments: ['alert'],
     });
     openAgentBuilderFlyout();
-  }, [closePopover, openAgentBuilderFlyout, telemetry, attackDiscoveries.length]);
+  }, [closePopover, openAgentBuilderFlyout, telemetry]);
 
   // button for the popover:
   const button = useMemo(
