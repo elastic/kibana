@@ -8,7 +8,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { SyncBadge } from './sync_badge';
-import { agentsSyncMap } from './sync_badge.constants';
+import { agentsSyncMap } from './constants';
 
 const columnStyle: React.CSSProperties = {
   display: 'flex',

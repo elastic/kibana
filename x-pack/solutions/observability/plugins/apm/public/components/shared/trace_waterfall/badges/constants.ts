@@ -6,13 +6,25 @@
  */
 
 import type { ElasticAgentName } from '@kbn/elastic-agent-utils/src/agent_names';
+import {
+  OPEN_TELEMETRY_AGENT_NAMES,
+  EDOT_AGENT_NAMES,
+} from '@kbn/elastic-agent-utils/src/agent_names';
 
-export type SyncBadgeAgentName = ElasticAgentName;
+type OtelLanguage = 'webjs' | 'swift' | 'android' | 'cpp' | 'erlang' | 'rust';
+type SyncBadgeAgentName = ElasticAgentName | OtelLanguage;
 
 /**
- * Maps agent names to their expected sync behavior.
- * true: Agent natively operates synchronously (e.g., Node.js, browser JS)
- * false: Agent natively operates asynchronously (e.g., Python, PHP, Go)
+ * Set of known OTEL and EDOT agents for O(1) lookup validation.
+ */
+const knownOtelAgents: Set<string> = new Set([...OPEN_TELEMETRY_AGENT_NAMES, ...EDOT_AGENT_NAMES]);
+
+/**
+ * Maps agent names and language names to their expected sync behavior.
+ * Includes Elastic agent names and OTEL language names.
+ *
+ * true: Language natively operates synchronously (e.g., Node.js, browser JS)
+ * false: Language natively operates asynchronously (e.g., Python, PHP, Go)
  */
 export const agentsSyncMap = {
   nodejs: true,
@@ -26,11 +38,31 @@ export const agentsSyncMap = {
   java: false,
   go: false,
   'android/java': false,
+  // OTEL-specific language names
+  webjs: true,
+  cpp: false,
+  erlang: false,
+  rust: false,
+  swift: false,
+  android: false,
 } as const satisfies Record<SyncBadgeAgentName, boolean>;
 
 /**
- * Type guard to check if an agent name is supported by the SyncBadge component.
+ * Gets the sync behavior value for any agent (Elastic, OTEL, or EDOT).
+ * Returns undefined if the agent is not recognized.
+ *
+ * @param agentName - The agent name (e.g., 'nodejs', 'opentelemetry/java', 'otlp/python/elastic')
+ * @returns true for sync agents, false for async agents, undefined if unknown
  */
-export function isSyncBadgeAgent(name: string): name is keyof typeof agentsSyncMap {
-  return name in agentsSyncMap;
+export function getAgentSyncValue(agentName: string): boolean | undefined {
+  if (agentName in agentsSyncMap) {
+    return agentsSyncMap[agentName as keyof typeof agentsSyncMap];
+  }
+
+  if (knownOtelAgents.has(agentName)) {
+    const lang = agentName.split('/')[1];
+    return agentsSyncMap[lang as keyof typeof agentsSyncMap];
+  }
+
+  return undefined;
 }

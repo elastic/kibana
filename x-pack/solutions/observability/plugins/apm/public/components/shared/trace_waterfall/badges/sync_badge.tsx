@@ -9,7 +9,7 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AgentName } from '@kbn/apm-types/es_schemas_ui';
-import { agentsSyncMap, isSyncBadgeAgent } from './sync_badge.constants';
+import { getAgentSyncValue } from './constants';
 
 export interface SyncBadgeProps {
   /**
@@ -55,11 +55,10 @@ export function getSyncLabel(agentName?: AgentName, sync?: boolean) {
     return;
   }
 
-  if (!isSyncBadgeAgent(agentName)) {
+  const agentSyncValue = getAgentSyncValue(agentName);
+  if (agentSyncValue === undefined) {
     return;
   }
-
-  const agentSyncValue = agentsSyncMap[agentName];
 
   if (sync && agentSyncValue) {
     return BLOCKING_LABEL;
