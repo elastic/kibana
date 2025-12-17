@@ -124,16 +124,19 @@ Expected one of:
       };
     case 'unsupportedColumnTypeForCommand':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unsupportedColumnTypeForCommand', {
-          defaultMessage:
-            '{command} only supports values of type {type}. Found "{column}" of type {givenType}',
-          values: {
-            command: out.command.toUpperCase(),
-            type: out.type,
-            column: out.column,
-            givenType: out.givenType,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.unsupportedColumnTypeForCommand',
+          {
+            defaultMessage:
+              '{command} only supports values of type {type}. Found "{column}" of type {givenType}',
+            values: {
+              command: out.command.toUpperCase(),
+              type: out.type,
+              column: out.column,
+              givenType: out.givenType,
+            },
+          }
+        ),
       };
     case 'unknownDissectKeyword':
       return {
@@ -146,13 +149,16 @@ Expected one of:
       };
     case 'functionNotAllowedHere':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.functionNotAvailableInLocation', {
-          defaultMessage: 'Function {name} not allowed in {locationName}',
-          values: {
-            locationName: out.locationName.toUpperCase(),
-            name: out.name.toUpperCase(),
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.functionNotAvailableInLocation',
+          {
+            defaultMessage: 'Function {name} not allowed in {locationName}',
+            values: {
+              locationName: out.locationName.toUpperCase(),
+              name: out.name.toUpperCase(),
+            },
+          }
+        ),
       };
     case 'unknownInterval':
       return {
@@ -238,13 +244,16 @@ Expected one of:
       };
     case 'wrongDissectOptionArgumentType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.wrongDissectOptionArgumentType', {
-          defaultMessage:
-            'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
-          values: {
-            value: out.value,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.wrongDissectOptionArgumentType',
+          {
+            defaultMessage:
+              'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
+            values: {
+              value: out.value,
+            },
+          }
+        ),
         type: 'error',
       };
     case 'invalidJoinIndex':
@@ -351,10 +360,13 @@ Expected one of:
       };
     case 'inlineStatsNotAllowedAfterLimit':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.inlineStatsNotAllowedAfterLimit', {
-          defaultMessage:
-            '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
-        }),
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.inlineStatsNotAllowedAfterLimit',
+          {
+            defaultMessage:
+              '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
+          }
+        ),
         type: 'error',
       };
   }
@@ -422,9 +434,12 @@ export function tagSemanticError(error: ESQLMessage, requiresCallback: string): 
 export const errors = {
   unexpected: (
     location: ESQLLocation,
-    message: string = i18n.translate('kbn-esql-language.esql.validation.errors.unexpected.message', {
-      defaultMessage: 'Unexpected error, this should never happen.',
-    })
+    message: string = i18n.translate(
+      'kbn-esql-language.esql.validation.errors.unexpected.message',
+      {
+        defaultMessage: 'Unexpected error, this should never happen.',
+      }
+    )
   ): ESQLMessage => {
     return createError('unexpected', location, message);
   },

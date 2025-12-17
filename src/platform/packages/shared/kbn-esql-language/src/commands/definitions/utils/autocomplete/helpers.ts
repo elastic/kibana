@@ -335,9 +335,12 @@ export function getControlSuggestion(
             category: SuggestionCategory.CUSTOM_ACTION,
             command: {
               id: `esql.control.${type}.create`,
-              title: i18n.translate('kbn-esql-language.esql.autocomplete.createControlDetailLabel', {
-                defaultMessage: 'Click to create',
-              }),
+              title: i18n.translate(
+                'kbn-esql-language.esql.autocomplete.createControlDetailLabel',
+                {
+                  defaultMessage: 'Click to create',
+                }
+              ),
               arguments: [{ triggerSource }],
             },
           } as ISuggestionItem,

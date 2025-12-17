@@ -28,15 +28,21 @@ export const timeUnitsToSuggest: Literals[] = [
   },
   {
     name: 'quarter',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.quarter', {
-      defaultMessage: 'Quarter',
-    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.definitions.dateDurationDefinition.quarter',
+      {
+        defaultMessage: 'Quarter',
+      }
+    ),
   },
   {
     name: 'quarters',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.quarters', {
-      defaultMessage: 'Quarters (Plural)',
-    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.definitions.dateDurationDefinition.quarters',
+      {
+        defaultMessage: 'Quarters (Plural)',
+      }
+    ),
   },
   {
     name: 'month',
@@ -46,9 +52,12 @@ export const timeUnitsToSuggest: Literals[] = [
   },
   {
     name: 'months',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.months', {
-      defaultMessage: 'Months (Plural)',
-    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.definitions.dateDurationDefinition.months',
+      {
+        defaultMessage: 'Months (Plural)',
+      }
+    ),
   },
   {
     name: 'week',
@@ -88,27 +97,39 @@ export const timeUnitsToSuggest: Literals[] = [
   },
   {
     name: 'minute',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.minute', {
-      defaultMessage: 'Minute',
-    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.definitions.dateDurationDefinition.minute',
+      {
+        defaultMessage: 'Minute',
+      }
+    ),
   },
   {
     name: 'minutes',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.minutes', {
-      defaultMessage: 'Minutes (Plural)',
-    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.definitions.dateDurationDefinition.minutes',
+      {
+        defaultMessage: 'Minutes (Plural)',
+      }
+    ),
   },
   {
     name: 'second',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.second', {
-      defaultMessage: 'Second',
-    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.definitions.dateDurationDefinition.second',
+      {
+        defaultMessage: 'Second',
+      }
+    ),
   },
   {
     name: 'seconds',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.seconds', {
-      defaultMessage: 'Seconds (Plural)',
-    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.definitions.dateDurationDefinition.seconds',
+      {
+        defaultMessage: 'Seconds (Plural)',
+      }
+    ),
   },
   {
     name: 'millisecond',

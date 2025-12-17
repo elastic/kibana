@@ -58,9 +58,12 @@ export async function autocomplete(
         label: 'INLINE STATS',
         text: 'INLINE STATS ',
         kind: 'Keyword',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineStats.commandSuggestion', {
-          defaultMessage: 'INLINE STATS command',
-        }),
+        detail: i18n.translate(
+          'kbn-esql-language.esql.autocomplete.inlineStats.commandSuggestion',
+          {
+            defaultMessage: 'INLINE STATS command',
+          }
+        ),
         sortText: 'A',
       }),
     ];

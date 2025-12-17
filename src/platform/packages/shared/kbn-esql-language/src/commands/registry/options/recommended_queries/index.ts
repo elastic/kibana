@@ -42,9 +42,12 @@ export const getRecommendedQueriesTemplates = ({
       label: i18n.translate('kbn-esql-language.recommendedQueries.searchExample.label', {
         defaultMessage: 'Search all fields',
       }),
-      description: i18n.translate('kbn-esql-language.recommendedQueries.searchExample.description', {
-        defaultMessage: 'Use WHERE to filter/search data',
-      }),
+      description: i18n.translate(
+        'kbn-esql-language.recommendedQueries.searchExample.description',
+        {
+          defaultMessage: 'Use WHERE to filter/search data',
+        }
+      ),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
       sortText: 'D',
       category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
@@ -53,9 +56,12 @@ export const getRecommendedQueriesTemplates = ({
       label: i18n.translate('kbn-esql-language.recommendedQueries.aggregateExample.label', {
         defaultMessage: 'Aggregate with STATS',
       }),
-      description: i18n.translate('kbn-esql-language.recommendedQueries.aggregateExample.description', {
-        defaultMessage: 'Count aggregation',
-      }),
+      description: i18n.translate(
+        'kbn-esql-language.recommendedQueries.aggregateExample.description',
+        {
+          defaultMessage: 'Count aggregation',
+        }
+      ),
       queryString: `${fromCommand}  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
     },
     ...(timeField
@@ -64,9 +70,12 @@ export const getRecommendedQueriesTemplates = ({
             label: i18n.translate('kbn-esql-language.recommendedQueries.sortByTime.label', {
               defaultMessage: 'Sort by time',
             }),
-            description: i18n.translate('kbn-esql-language.recommendedQueries.sortByTime.description', {
-              defaultMessage: 'Sort by time',
-            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.sortByTime.description',
+              {
+                defaultMessage: 'Sort by time',
+              }
+            ),
             queryString: `${fromCommand}| SORT ${timeField} /* Data is not sorted by default */`,
           },
           {
@@ -110,9 +119,12 @@ export const getRecommendedQueriesTemplates = ({
             label: i18n.translate('kbn-esql-language.recommendedQueries.eventRate.label', {
               defaultMessage: 'Calculate the event rate',
             }),
-            description: i18n.translate('kbn-esql-language.recommendedQueries.eventRate.description', {
-              defaultMessage: 'Event rate over time',
-            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.eventRate.description',
+              {
+                defaultMessage: 'Event rate over time',
+              }
+            ),
             queryString: `${fromCommand}| STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */ | KEEP event_rate`,
           },
           {
@@ -121,18 +133,24 @@ export const getRecommendedQueriesTemplates = ({
               // the capability aiops.enabled can be used to check both of these conditions
               defaultMessage: 'Detect change points',
             }),
-            description: i18n.translate('kbn-esql-language.recommendedQueries.categorize.description', {
-              defaultMessage: 'Change point on count aggregation',
-            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.categorize.description',
+              {
+                defaultMessage: 'Change point on count aggregation',
+              }
+            ),
             queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend)  | CHANGE_POINT count ON buckets `,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
               defaultMessage: 'Total count vs count last hour',
             }),
-            description: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.description', {
-              defaultMessage: 'A more complicated example',
-            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.lastHour.description',
+              {
+                defaultMessage: 'A more complicated example',
+              }
+            ),
             queryString: `${fromCommand} | SORT ${timeField} | EVAL now = NOW() | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other") | STATS count = COUNT(*) BY key | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count) | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG)) | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
           },
         ]

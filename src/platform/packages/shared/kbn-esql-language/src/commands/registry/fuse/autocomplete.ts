@@ -281,9 +281,12 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
             text: '60',
             kind: 'Value',
             sortText: '1',
-            detail: i18n.translate('kbn-esql-language.esql.autocomplete.fuse.rank_constant_default', {
-              defaultMessage: 'Default value',
-            }),
+            detail: i18n.translate(
+              'kbn-esql-language.esql.autocomplete.fuse.rank_constant_default',
+              {
+                defaultMessage: 'Default value',
+              }
+            ),
           },
         ],
       },

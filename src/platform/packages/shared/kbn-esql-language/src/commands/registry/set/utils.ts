@@ -27,9 +27,12 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
       label: '_alias: *',
       text: '_alias: *',
       kind: 'Value',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.projectRouting.allProjectsDoc', {
-        defaultMessage: 'Search all projects',
-      }),
+      detail: i18n.translate(
+        'kbn-esql-language.esql.autocomplete.set.projectRouting.allProjectsDoc',
+        {
+          defaultMessage: 'Search all projects',
+        }
+      ),
       sortText: '1',
     },
   ];
