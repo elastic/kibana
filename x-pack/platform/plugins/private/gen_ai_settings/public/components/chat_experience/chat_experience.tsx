@@ -6,9 +6,11 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal';
 import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
