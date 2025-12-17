@@ -337,6 +337,55 @@ describe('RERANK Autocomplete', () => {
 
       await expectRerankSuggestions(query, [pipeCompleteItem.text]);
     });
+
+    test('suggests inference endpoints as the values for inference_id', async () => {
+      await expectRerankSuggestions(
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'textField',
+          withClause: '{ "inference_id": "',
+        }),
+        ['"inference_1"']
+      );
+      await expectRerankSuggestions(
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'textField',
+          withClause: '{ "inference_id": "i',
+        }),
+        ['"inference_1"']
+      );
+      await expectRerankSuggestions(
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'textField',
+          withClause: '{ "inference_id": "inf',
+        }),
+        ['"inference_1"']
+      );
+    });
+
+    test('does not suggest anything if all the parameters are already provided', async () => {
+      await expectRerankSuggestions(
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'textField',
+          withClause: '{ "inference_id": "inference_1", ',
+        }),
+        []
+      );
+    });
+
+    test('does not suggest anything if the parameter name is unsupported', async () => {
+      await expectRerankSuggestions(
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'textField',
+          withClause: '{ "unsupported_param": "',
+        }),
+        []
+      );
+    });
   });
 
   // ============================================================================
