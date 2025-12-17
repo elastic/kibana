@@ -26,9 +26,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
 
   describe('Find SLOs by outdated status and tags', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/246127
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 

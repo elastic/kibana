@@ -10,6 +10,7 @@ import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/gen
 
 export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
 export const OPBEANS_END_DATE = '2021-10-10T00:15:00.000Z';
+export const BIGGER_TIMEOUT = 45000;
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 // Error constants - based on opbeans synthtrace data
