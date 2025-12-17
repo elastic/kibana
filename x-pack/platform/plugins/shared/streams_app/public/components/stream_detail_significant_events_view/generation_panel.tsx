@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -29,148 +29,248 @@ export function SignificantEventsGenerationPanel({
   onGenerateSuggestionsClick,
   onFeatureIdentificationClick,
   onManualEntryClick,
-  isLoadingGeneration,
+  isGeneratingQueries,
 }: FeatureSelectorProps & {
   onFeatureIdentificationClick: () => void;
-  onManualEntryClick?: () => void;
+  onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
-  isLoadingGeneration: boolean;
+  isGeneratingQueries: boolean;
 }) {
+  const [generatingFrom, setGeneratingFrom] = useState<'all_data' | 'features'>(
+    selectedFeatures.length === 0 ? 'all_data' : 'features'
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
         <EuiPanel hasBorder css={{ 'text-align': 'left' }}>
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <b>
-                  {i18n.translate(
-                    'xpack.streams.significantEvents.significantEventsGenerationPanel.generationContextTitle',
-                    {
-                      defaultMessage: 'Generation context',
-                    }
-                  )}
-                </b>
-              </EuiTitle>
-
-              <EuiSpacer size="s" />
-
-              <EuiText size="s" color="subdued">
-                {i18n.translate(
-                  'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
-                  {
-                    defaultMessage:
-                      'Features are logical subsets of your data and they provide the best context for significant events generation.',
-                  }
-                )}
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <AssetImage type="checklist" size={100} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexItem>
-            <FeaturesSelector
+          {features.length === 0 ? (
+            <IdentifyFeatures
+              identifyFeatures={onFeatureIdentificationClick}
+              isGeneratingQueries={isGeneratingQueries}
+            />
+          ) : (
+            <GenerationContext
               features={features}
               selectedFeatures={selectedFeatures}
               onFeaturesChange={onFeaturesChange}
+              isGeneratingQueries={isGeneratingQueries}
+              onGenerateSuggestionsClick={() => {
+                setGeneratingFrom('features');
+                onGenerateSuggestionsClick();
+              }}
+              generatingFrom={generatingFrom}
             />
+          )}
+        </EuiPanel>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="m" css={{ width: '100%' }}>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="none" />
           </EuiFlexItem>
 
-          <EuiSpacer size="m" />
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {i18n.translate(
+                'xpack.streams.significantEvents.significantEventsGenerationPanel.orStartWithLabel',
+                {
+                  defaultMessage: 'or create significant events with',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
 
           <EuiFlexItem>
+            <EuiHorizontalRule margin="none" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="s">
+          <EuiFlexItem grow={false}>
             <ConnectorListButton
               buttonProps={{
                 iconType: 'sparkles',
-                isLoading: isLoadingGeneration,
-                onClick: () => onGenerateSuggestionsClick(),
-                'data-test-subj': 'significant_events_generate_suggestions_button',
+                onClick: () => {
+                  setGeneratingFrom('all_data');
+                  onGenerateSuggestionsClick();
+                },
+                isDisabled: isGeneratingQueries,
+                isLoading: isGeneratingQueries && generatingFrom === 'all_data',
+                'data-test-subj': 'significant_events_all_data_button',
                 children: i18n.translate(
-                  'xpack.streams.significantEvents.significantEventsGenerationPanel.generateSuggestionsButtonLabel',
+                  'xpack.streams.significantEvents.significantEventsGenerationPanel.allDataButtonLabel',
                   {
-                    defaultMessage: 'Generate suggestions',
+                    defaultMessage: 'All data',
                   }
                 ),
               }}
             />
           </EuiFlexItem>
-        </EuiPanel>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              fill={false}
+              data-test-subj="significant_events_manual_entry_button"
+              onClick={onManualEntryClick}
+              isDisabled={isGeneratingQueries}
+              iconType="plusInCircle"
+            >
+              {i18n.translate(
+                'xpack.streams.significantEvents.significantEventsGenerationPanel.manualEntryButtonLabel',
+                {
+                  defaultMessage: 'Manual entry',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function GenerationContext({
+  features,
+  selectedFeatures,
+  onFeaturesChange,
+  isGeneratingQueries,
+  onGenerateSuggestionsClick,
+  generatingFrom,
+}: FeatureSelectorProps & {
+  isGeneratingQueries: boolean;
+  onGenerateSuggestionsClick: () => void;
+  generatingFrom: 'all_data' | 'features';
+}) {
+  return (
+    <>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <b>
+              {i18n.translate(
+                'xpack.streams.significantEvents.significantEventsGenerationPanel.generationContextTitle',
+                {
+                  defaultMessage: 'Generation context',
+                }
+              )}
+            </b>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
+          <EuiText size="s" color="subdued">
+            {i18n.translate(
+              'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
+              {
+                defaultMessage:
+                  'Select the subset of data you want to generate the significant events for.',
+              }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <AssetImage type="checklist" size={100} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexItem>
+        <FeaturesSelector
+          isDisabled={isGeneratingQueries}
+          features={features}
+          selectedFeatures={selectedFeatures}
+          onFeaturesChange={onFeaturesChange}
+        />
       </EuiFlexItem>
 
-      {!onManualEntryClick && features.length > 0 ? null : (
-        <>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="m" css={{ width: '100%' }}>
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="none" />
-              </EuiFlexItem>
+      <EuiSpacer size="s" />
 
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  {i18n.translate(
-                    'xpack.streams.significantEvents.significantEventsGenerationPanel.orStartWithLabel',
-                    {
-                      defaultMessage: 'or start with',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
+      <EuiFlexItem>
+        <ConnectorListButton
+          buttonProps={{
+            iconType: 'sparkles',
+            isLoading: isGeneratingQueries && generatingFrom === 'features',
+            isDisabled: selectedFeatures.length === 0,
+            onClick: () => onGenerateSuggestionsClick(),
+            'data-test-subj': 'significant_events_generate_suggestions_button',
+            children: i18n.translate(
+              'xpack.streams.significantEvents.significantEventsGenerationPanel.generateSuggestionsButtonLabel',
+              {
+                defaultMessage: 'Generate suggestions',
+              }
+            ),
+          }}
+        />
+      </EuiFlexItem>
+    </>
+  );
+}
 
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="none" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="s">
-              {features.length === 0 && (
-                <EuiFlexItem grow={false}>
-                  <ConnectorListButton
-                    buttonProps={{
-                      iconType: 'sparkles',
-                      onClick: onFeatureIdentificationClick,
-                      isDisabled: isLoadingGeneration,
-                      'data-test-subj': 'significant_events_identify_features_button',
-                      children: i18n.translate(
-                        'xpack.streams.significantEvents.significantEventsGenerationPanel.featureIdentificationButtonLabel',
-                        {
-                          defaultMessage: 'Identify features',
-                        }
-                      ),
-                    }}
-                  />
-                </EuiFlexItem>
+function IdentifyFeatures({
+  identifyFeatures,
+  isGeneratingQueries,
+}: {
+  identifyFeatures: () => void;
+  isGeneratingQueries: boolean;
+}) {
+  return (
+    <>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <b>
+              {i18n.translate(
+                'xpack.streams.significantEvents.significantEventsGenerationPanel.identifyFeaturesTitle',
+                {
+                  defaultMessage: 'Identify features',
+                }
               )}
+            </b>
+          </EuiTitle>
 
-              {onManualEntryClick && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    color="text"
-                    fill={false}
-                    data-test-subj="significant_events_manual_entry_button"
-                    onClick={onManualEntryClick}
-                    iconType="plusInCircle"
-                  >
-                    {i18n.translate(
-                      'xpack.streams.significantEvents.significantEventsGenerationPanel.manualEntryButtonLabel',
-                      {
-                        defaultMessage: 'Manual entry',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </>
-      )}
-    </EuiFlexGroup>
+          <EuiSpacer size="s" />
+
+          <EuiText size="s" color="subdued">
+            {i18n.translate(
+              'xpack.streams.significantEvents.significantEventsGenerationPanel.indentifyFeaturesDescription',
+              {
+                defaultMessage:
+                  'Features are logical subsets of the data and they provide the best context for the generation of significant events. Identify features first.',
+              }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <AssetImage type="checklist" size={100} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexItem>
+        <ConnectorListButton
+          buttonProps={{
+            iconType: 'sparkles',
+            onClick: () => identifyFeatures(),
+            'data-test-subj': 'significant_events_identify_features_button',
+            isDisabled: isGeneratingQueries,
+            children: i18n.translate(
+              'xpack.streams.significantEvents.significantEventsGenerationPanel.identifyFeaturesButtonLabel',
+              {
+                defaultMessage: 'Identify features',
+              }
+            ),
+          }}
+        />
+      </EuiFlexItem>
+    </>
   );
 }

@@ -59,7 +59,6 @@ interface Props {
   query?: StreamQueryKql;
   initialFlow?: Flow;
   initialSelectedFeatures: Feature[];
-  generateAutomatically: boolean;
   onFeatureIdentificationClick: () => void;
 }
 
@@ -72,7 +71,6 @@ export function AddSignificantEventFlyout({
   initialFlow = undefined,
   initialSelectedFeatures,
   features,
-  generateAutomatically,
   onFeatureIdentificationClick,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -132,6 +130,8 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(() => {
+    setSelectedFlow('ai');
+
     let numberOfGeneratedQueries = 0;
     const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
       system: 0,
@@ -243,7 +243,7 @@ export function AddSignificantEventFlyout({
   ]);
 
   useEffect(() => {
-    if (initialFlow === 'ai' && generateAutomatically) {
+    if (initialFlow === 'ai') {
       generateQueries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -292,34 +292,15 @@ export function AddSignificantEventFlyout({
               `}
             >
               <EuiPanel hasShadow={false} paddingSize="l">
-                <EuiText size="xs">
-                  <h4>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.addSignificantEventFlyout.selectOptionLabel',
-                      { defaultMessage: 'Select a method' }
-                    )}
-                  </h4>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <FlowSelector
-                  isSubmitting={isSubmitting}
-                  selected={selectedFlow}
-                  updateSelected={(flow) => {
-                    setSelectedFlow(flow);
-                    setSelectedFeatures([]);
-                  }}
+                <SignificantEventsGenerationPanel
+                  onManualEntryClick={() => setSelectedFlow('manual')}
+                  features={features}
+                  selectedFeatures={selectedFeatures}
+                  onFeaturesChange={setSelectedFeatures}
+                  onGenerateSuggestionsClick={generateQueries}
+                  onFeatureIdentificationClick={onFeatureIdentificationClick}
+                  isGeneratingQueries={isGenerating}
                 />
-                <EuiSpacer size="m" />
-                {selectedFlow === 'ai' && (
-                  <SignificantEventsGenerationPanel
-                    features={features}
-                    selectedFeatures={selectedFeatures}
-                    onFeaturesChange={setSelectedFeatures}
-                    onGenerateSuggestionsClick={generateQueries}
-                    onFeatureIdentificationClick={onFeatureIdentificationClick}
-                    isLoadingGeneration={isGenerating}
-                  />
-                )}
               </EuiPanel>
             </EuiFlexItem>
           )}
