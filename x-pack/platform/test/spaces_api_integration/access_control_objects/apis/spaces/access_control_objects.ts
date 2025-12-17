@@ -203,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should throw when overwriting an object owned by current user if RBAC privileges are revoked', async () => {
         await createSimpleUser(['kibana_savedobjects_editor']);
-        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
         );
@@ -224,8 +224,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
-        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-          await loginAsNotObjectOwner('simple_user', 'changeme');
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
+          'simple_user',
+          'changeme'
+        );
 
         expect(ownerProfileUid).to.eql(revokedProfileUid);
 
@@ -801,7 +803,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('rejects when overwriting by owner if RBAC privileges are revoked', async () => {
           await createSimpleUser(['kibana_savedobjects_editor']);
-          const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+          const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
             'simple_user',
             'changeme'
           );
@@ -837,8 +839,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           // revoke privs
           await createSimpleUser(['viewer']);
-          const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-            await loginAsNotObjectOwner('simple_user', 'changeme');
+          const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
+            'simple_user',
+            'changeme'
+          );
 
           expect(ownerProfileUid).to.eql(revokedProfileUid);
 
@@ -972,7 +976,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should throw when updating write-restricted objects by owner with revoked RBAC privileges', async () => {
         await createSimpleUser(['kibana_savedobjects_editor']);
-        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
         );
@@ -994,8 +998,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
-        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-          await loginAsNotObjectOwner('simple_user', 'changeme');
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
+          'simple_user',
+          'changeme'
+        );
 
         expect(ownerProfileUid).to.eql(revokedProfileUid);
 
@@ -1418,7 +1424,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('rejects if owner no longer has adequate RBAC privileges', async () => {
           await createSimpleUser(['kibana_savedobjects_editor']);
-          const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+          const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
             'simple_user',
             'changeme'
           );
@@ -1457,8 +1463,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           // revoke privs
           await createSimpleUser(['viewer']);
-          const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-            await loginAsNotObjectOwner('simple_user', 'changeme');
+          const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
+            'simple_user',
+            'changeme'
+          );
 
           expect(ownerProfileUid).to.eql(revokedProfileUid);
 
@@ -1576,7 +1584,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('throws when trying to delete write-restricted object by owner with revoked RBAC privileges', async () => {
         await createSimpleUser(['kibana_savedobjects_editor']);
-        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
+        const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
           'simple_user',
           'changeme'
         );
@@ -1592,8 +1600,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
-        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-          await loginAsNotObjectOwner('simple_user', 'changeme');
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
+          'simple_user',
+          'changeme'
+        );
 
         expect(ownerProfileUid).to.eql(revokedProfileUid);
 
@@ -2047,8 +2057,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('rejects if owner no longer has adequate RBAC privileges', async () => {
             await createSimpleUser(['kibana_savedobjects_editor']);
-            const { cookie: ownerCookie, profileUid: ownerProfileUid } =
-              await loginAsNotObjectOwner('simple_user', 'changeme');
+            const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
+              'simple_user',
+              'changeme'
+            );
 
             const firstObject = await supertestWithoutAuth
               .post('/access_control_objects/create')
@@ -2080,7 +2092,7 @@ export default function ({ getService }: FtrProviderContext) {
             // revoke privs
             await createSimpleUser(['viewer']);
             const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-              await loginAsNotObjectOwner('simple_user', 'changeme');
+              await loginAsObjectOwner('simple_user', 'changeme');
 
             expect(ownerProfileUid).to.eql(revokedProfileUid);
 
@@ -2446,8 +2458,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should throw when transferring ownership of write-restricted objects if owner RBAC privileges are revoked', async () => {
-        const { cookie: testUserCookie, profileUid: testUserProfileUid } =
-          await loginAsNotObjectOwner('test_user', 'changeme');
+        const { cookie: testUserCookie, profileUid: testUserProfileUid } = await loginAsObjectOwner(
+          'test_user',
+          'changeme'
+        );
 
         await createSimpleUser(['kibana_savedobjects_editor']);
         const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
@@ -2466,8 +2480,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
-        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-          await loginAsNotObjectOwner('simple_user', 'changeme');
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
+          'simple_user',
+          'changeme'
+        );
 
         expect(ownerProfileUid).to.eql(revokedProfileUid);
 
@@ -2749,7 +2765,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should throw when trying to change access mode if owner RBAC privileges are revoked', async () => {
-        const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+        const { cookie: testUserCookie } = await loginAsObjectOwner('test_user', 'changeme');
 
         await createSimpleUser(['kibana_savedobjects_editor']);
         const { cookie: ownerCookie, profileUid: ownerProfileUid } = await loginAsNotObjectOwner(
@@ -2772,8 +2788,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         // revoke privs
         await createSimpleUser(['viewer']);
-        const { cookie: revokedCookie, profileUid: revokedProfileUid } =
-          await loginAsNotObjectOwner('simple_user', 'changeme');
+        const { cookie: revokedCookie, profileUid: revokedProfileUid } = await loginAsObjectOwner(
+          'simple_user',
+          'changeme'
+        );
 
         expect(ownerProfileUid).to.eql(revokedProfileUid);
 
