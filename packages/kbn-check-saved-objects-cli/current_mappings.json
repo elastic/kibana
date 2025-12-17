@@ -3901,6 +3901,23 @@
     "dynamic": false,
     "properties": {}
   },
+  "slo_template": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
   "space": {
     "dynamic": false,
     "properties": {
