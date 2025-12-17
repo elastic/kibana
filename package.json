@@ -1905,7 +1905,6 @@
     "babel-plugin-istanbul": "^6.1.1",
     "babel-plugin-require-context-hook": "^1.0.0",
     "babel-plugin-styled-components": "^2.1.4",
-    "babel-plugin-transform-barrels": "^1.0.23",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "babel-plugin-transform-require-default": "^0.1.7",
     "babel-plugin-transform-typescript-metadata": "^0.3.2",

@@ -16285,13 +16285,6 @@ babel-plugin-require-context-hook@^1.0.0:
     lodash "^4.17.21"
     picomatch "^2.3.1"
 
-babel-plugin-transform-barrels@^1.0.23:
-  version "1.0.23"
-  resolved "https://registry.yarnpkg.com/babel-plugin-transform-barrels/-/babel-plugin-transform-barrels-1.0.23.tgz#99d1e374c566f85287dc1d871651a977fdb5cbd6"
-  integrity sha512-IpXbRaF9eaZEVdWDjotFJNAu4jFIvbcpa2UY3r9y3QjF0dxmSW8Zxh7EgJ7kKgpjPLXAxDt0pvdJnfCfB6lUlA==
-  dependencies:
-    fast-glob "^3.3.2"
-
 babel-plugin-transform-react-remove-prop-types@^0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-react-remove-prop-types/-/babel-plugin-transform-react-remove-prop-types-0.4.24.tgz#f2edaf9b4c6a5fbe5c1d678bfb531078c1555f3a"
