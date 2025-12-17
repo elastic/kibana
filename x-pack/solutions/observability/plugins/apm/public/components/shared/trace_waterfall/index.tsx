@@ -95,6 +95,10 @@ function TraceWaterfallComponent() {
     agentMarks,
   } = useTraceWaterfallContext();
 
+  const marks = useMemo(() => {
+    return [...agentMarks, ...errorMarks];
+  }, [agentMarks, errorMarks]);
+
   return (
     <EuiFlexGroup direction="column">
       {showLegend && serviceName && (
@@ -126,7 +130,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
-              marks={[...agentMarks, ...errorMarks]}
+              marks={marks}
             />
           </div>
           <VerticalLinesContainer
@@ -137,7 +141,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
-            marks={[...agentMarks, ...errorMarks]}
+            marks={marks}
           />
           <div
             css={css`
