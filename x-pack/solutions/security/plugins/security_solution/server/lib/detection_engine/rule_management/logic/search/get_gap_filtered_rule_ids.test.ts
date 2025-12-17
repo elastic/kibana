@@ -95,6 +95,7 @@ describe('getGapFilteredRuleIds', () => {
         truncated: false,
       });
       expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(1);
+      expect(rulesClient.find).not.toHaveBeenCalled();
     });
   });
 
@@ -122,21 +123,15 @@ describe('getGapFilteredRuleIds', () => {
   });
 
   describe('when filter is provided and many rules have gaps', () => {
-    it('should collect candidate rule IDs and re-query gaps, returning truncated=true when candidate rules exceed maxRuleIds', async () => {
+    it('should filter gap rule IDs using findRules and return truncated=true when filtered results exceed maxRuleIds', async () => {
       // Initial query returns maxRuleIds + 1 (11) rules to indicate truncation
-      rulesClient.getRuleIdsWithGaps
-        .mockResolvedValueOnce({
-          total: 11,
-          ruleIds: Array.from({ length: 11 }, (_, i) => `gap-rule-${i}`),
-          latestGapTimestamp: 1,
-        })
-        .mockResolvedValueOnce({
-          total: 5,
-          ruleIds: ['rule-1', 'rule-3', 'rule-5', 'rule-7', 'rule-9'],
-          latestGapTimestamp: 1,
-        });
+      rulesClient.getRuleIdsWithGaps.mockResolvedValue({
+        total: 11,
+        ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
+        latestGapTimestamp: 1,
+      });
 
-      const mockRules = Array.from({ length: 10 }, (_, i) => {
+      const mockRules = Array.from({ length: 11 }, (_, i) => {
         const rule = getRuleMock(getQueryRuleParams());
         rule.id = `rule-${i}`;
         return rule;
@@ -159,24 +154,18 @@ describe('getGapFilteredRuleIds', () => {
         filter: 'alert.attributes.name: test',
       });
 
-      expect(result.ruleIds).toEqual(['rule-1', 'rule-3', 'rule-5', 'rule-7', 'rule-9']);
+      expect(result.ruleIds).toHaveLength(10);
       expect(result.truncated).toBe(true);
-      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(2);
+      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(1);
       expect(rulesClient.find).toHaveBeenCalled();
     });
 
-    it('should return truncated=false when candidate rules are fewer than maxRuleIds', async () => {
-      rulesClient.getRuleIdsWithGaps
-        .mockResolvedValueOnce({
-          total: 11,
-          ruleIds: Array.from({ length: 11 }, (_, i) => `gap-rule-${i}`),
-          latestGapTimestamp: 1,
-        })
-        .mockResolvedValueOnce({
-          total: 3,
-          ruleIds: ['rule-1', 'rule-2', 'rule-3'],
-          latestGapTimestamp: 1,
-        });
+    it('should return truncated=false when filtered results are fewer than maxRuleIds', async () => {
+      rulesClient.getRuleIdsWithGaps.mockResolvedValue({
+        total: 11,
+        ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
+        latestGapTimestamp: 1,
+      });
 
       const mockRules = Array.from({ length: 5 }, (_, i) => {
         const rule = getRuleMock(getQueryRuleParams());
@@ -184,14 +173,23 @@ describe('getGapFilteredRuleIds', () => {
         return rule;
       });
 
-      rulesClient.find.mockResolvedValue(
-        getFindResultWithMultiHits({
-          data: mockRules,
-          perPage: 250,
-          page: 1,
-          total: 5,
-        })
-      );
+      rulesClient.find
+        .mockResolvedValueOnce(
+          getFindResultWithMultiHits({
+            data: mockRules,
+            perPage: 250,
+            page: 1,
+            total: 5,
+          })
+        )
+        .mockResolvedValueOnce(
+          getFindResultWithMultiHits({
+            data: [],
+            perPage: 250,
+            page: 1,
+            total: 0,
+          })
+        );
 
       const result = await getGapFilteredRuleIds({
         rulesClient,
@@ -201,14 +199,15 @@ describe('getGapFilteredRuleIds', () => {
         filter: 'alert.attributes.name: test',
       });
 
-      expect(result.ruleIds).toEqual(['rule-1', 'rule-2', 'rule-3']);
+      expect(result.ruleIds).toEqual(['rule-0', 'rule-1', 'rule-2', 'rule-3', 'rule-4']);
       expect(result.truncated).toBe(false);
+      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(1);
     });
 
-    it('should return empty array when no candidate rules match the filter', async () => {
+    it('should return empty array when no gap rules match the filter', async () => {
       rulesClient.getRuleIdsWithGaps.mockResolvedValue({
         total: 11,
-        ruleIds: Array.from({ length: 11 }, (_, i) => `gap-rule-${i}`),
+        ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
         latestGapTimestamp: 1,
       });
 
@@ -236,94 +235,100 @@ describe('getGapFilteredRuleIds', () => {
       expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(1);
     });
 
-    it('should paginate through multiple pages when collecting candidate rule IDs', async () => {
-      rulesClient.getRuleIdsWithGaps
-        .mockResolvedValueOnce({
-          total: 301,
-          ruleIds: Array.from({ length: 301 }, (_, i) => `gap-rule-${i}`),
-          latestGapTimestamp: 1,
-        })
-        .mockResolvedValueOnce({
-          total: 280,
-          ruleIds: Array.from({ length: 280 }, (_, i) => `rule-${i}`),
-          latestGapTimestamp: 1,
-        });
+    it('should process batches sequentially when gap rules exceed maxRuleIds', async () => {
+      rulesClient.getRuleIdsWithGaps.mockResolvedValue({
+        total: 25,
+        ruleIds: Array.from({ length: 25 }, (_, i) => `rule-${i}`),
+        latestGapTimestamp: 1,
+      });
 
-      const page1Rules = Array.from({ length: 250 }, (_, i) => {
+      const batch1Rules = Array.from({ length: 3 }, (_, i) => {
         const rule = getRuleMock(getQueryRuleParams());
         rule.id = `rule-${i}`;
         return rule;
       });
-      const page2Rules = Array.from({ length: 50 }, (_, i) => {
+      const batch2Rules = Array.from({ length: 4 }, (_, i) => {
         const rule = getRuleMock(getQueryRuleParams());
-        rule.id = `rule-${250 + i}`;
+        rule.id = `rule-${10 + i}`;
+        return rule;
+      });
+      const batch3Rules = Array.from({ length: 2 }, (_, i) => {
+        const rule = getRuleMock(getQueryRuleParams());
+        rule.id = `rule-${20 + i}`;
         return rule;
       });
 
       rulesClient.find
         .mockResolvedValueOnce(
-          getFindResultWithMultiHits({ data: page1Rules, perPage: 250, page: 1, total: 300 })
+          getFindResultWithMultiHits({ data: batch1Rules, perPage: 250, page: 1, total: 3 })
         )
         .mockResolvedValueOnce(
-          getFindResultWithMultiHits({ data: page2Rules, perPage: 250, page: 2, total: 300 })
+          getFindResultWithMultiHits({ data: batch2Rules, perPage: 250, page: 1, total: 4 })
+        )
+        .mockResolvedValueOnce(
+          getFindResultWithMultiHits({ data: batch3Rules, perPage: 250, page: 1, total: 2 })
         );
 
       const result = await getGapFilteredRuleIds({
         rulesClient,
         gapRange: defaultGapRange,
         gapFillStatuses: defaultGapFillStatuses,
-        maxRuleIds: 300,
+        maxRuleIds: 10,
         filter: 'alert.attributes.name: test',
       });
 
-      // Verify pagination occurred - should have fetched 2 pages
-      expect(rulesClient.find).toHaveBeenCalledTimes(2);
-      expect(rulesClient.find).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({ options: expect.objectContaining({ page: 1, perPage: 250 }) })
-      );
-      expect(rulesClient.find).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ options: expect.objectContaining({ page: 2, perPage: 250 }) })
-      );
-
-      expect(result.ruleIds).toHaveLength(280);
+      expect(result.ruleIds).toHaveLength(9);
       expect(result.truncated).toBe(false);
+      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(1);
+      expect(rulesClient.find).toHaveBeenCalledTimes(3);
     });
 
-    it('should stop pagination early when maxRuleIds is reached', async () => {
-      rulesClient.getRuleIdsWithGaps
-        .mockResolvedValueOnce({
-          total: 501,
-          ruleIds: Array.from({ length: 501 }, (_, i) => `rule-${i}`),
-          latestGapTimestamp: 1,
-        })
-        .mockResolvedValueOnce({
-          total: 100,
-          ruleIds: Array.from({ length: 100 }, (_, i) => `rule-${i}`),
-          latestGapTimestamp: 1,
-        });
+    it('should truncate results when total filtered results exceed maxRuleIds', async () => {
+      rulesClient.getRuleIdsWithGaps.mockResolvedValue({
+        total: 25,
+        ruleIds: Array.from({ length: 25 }, (_, i) => `rule-${i}`),
+        latestGapTimestamp: 1,
+      });
 
-      const page1Rules = Array.from({ length: 250 }, (_, i) => {
+      const batch1Rules = Array.from({ length: 10 }, (_, i) => {
         const rule = getRuleMock(getQueryRuleParams());
         rule.id = `rule-${i}`;
         return rule;
       });
+      const batch2Rules = Array.from({ length: 10 }, (_, i) => {
+        const rule = getRuleMock(getQueryRuleParams());
+        rule.id = `rule-${10 + i}`;
+        return rule;
+      });
+      const batch3Rules = Array.from({ length: 5 }, (_, i) => {
+        const rule = getRuleMock(getQueryRuleParams());
+        rule.id = `rule-${20 + i}`;
+        return rule;
+      });
 
-      rulesClient.find.mockResolvedValue(
-        getFindResultWithMultiHits({ data: page1Rules, perPage: 250, page: 1, total: 500 })
-      );
+      rulesClient.find
+        .mockResolvedValueOnce(
+          getFindResultWithMultiHits({ data: batch1Rules, perPage: 250, page: 1, total: 10 })
+        )
+        .mockResolvedValueOnce(
+          getFindResultWithMultiHits({ data: batch2Rules, perPage: 250, page: 1, total: 10 })
+        )
+        .mockResolvedValueOnce(
+          getFindResultWithMultiHits({ data: batch3Rules, perPage: 250, page: 1, total: 5 })
+        );
 
       const result = await getGapFilteredRuleIds({
         rulesClient,
         gapRange: defaultGapRange,
         gapFillStatuses: defaultGapFillStatuses,
-        maxRuleIds: 200,
+        maxRuleIds: 10,
         filter: 'alert.attributes.name: test',
       });
 
-      expect(rulesClient.find).toHaveBeenCalledTimes(1);
+      expect(result.ruleIds).toHaveLength(10);
       expect(result.truncated).toBe(true);
+      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(1);
+      expect(rulesClient.find).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -350,20 +355,14 @@ describe('getGapFilteredRuleIds', () => {
       );
     });
 
-    it('should pass ruleIds to second getRuleIdsWithGaps call when narrowing', async () => {
-      rulesClient.getRuleIdsWithGaps
-        .mockResolvedValueOnce({
-          total: 11,
-          ruleIds: Array.from({ length: 11 }, (_, i) => `gap-rule-${i}`),
-          latestGapTimestamp: 1,
-        })
-        .mockResolvedValueOnce({
-          total: 2,
-          ruleIds: ['rule-1', 'rule-2'],
-          latestGapTimestamp: 1,
-        });
+    it('should pass filter and ruleIds to findRules when filtering gap rules', async () => {
+      rulesClient.getRuleIdsWithGaps.mockResolvedValue({
+        total: 11,
+        ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
+        latestGapTimestamp: 1,
+      });
 
-      const mockRules = Array.from({ length: 10 }, (_, i) => {
+      const mockRules = Array.from({ length: 5 }, (_, i) => {
         const rule = getRuleMock(getQueryRuleParams());
         rule.id = `rule-${i}`;
         return rule;
@@ -372,9 +371,9 @@ describe('getGapFilteredRuleIds', () => {
       rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
           data: mockRules,
-          perPage: 250,
+          perPage: 10,
           page: 1,
-          total: 10,
+          total: 5,
         })
       );
 
@@ -386,12 +385,8 @@ describe('getGapFilteredRuleIds', () => {
         filter: 'alert.attributes.name: test',
       });
 
-      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenNthCalledWith(2, {
-        highestPriorityGapFillStatuses: defaultGapFillStatuses,
-        start: defaultGapRange.start,
-        end: defaultGapRange.end,
-        ruleIds: expect.arrayContaining(['rule-0', 'rule-1']),
-      });
+      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledTimes(1);
+      expect(rulesClient.find).toHaveBeenCalled();
     });
   });
 });

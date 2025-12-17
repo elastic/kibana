@@ -78,18 +78,6 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
               sortOrder: query.sort_order,
             });
 
-            if (gapRuleIds.length === 0) {
-              const emptyRules = transformFindAlerts({
-                data: [],
-                page: query.page,
-                perPage: query.per_page,
-                total: 0,
-              });
-              return response.ok({ body: emptyRules });
-            }
-
-            ruleIds = gapRuleIds;
-
             if (truncated) {
               warnings = [
                 {
@@ -99,6 +87,21 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
                 },
               ];
             }
+
+            if (gapRuleIds.length === 0) {
+              const emptyRules = transformFindAlerts(
+                {
+                  data: [],
+                  page: query.page,
+                  perPage: query.per_page,
+                  total: 0,
+                },
+                warnings
+              );
+              return response.ok({ body: emptyRules });
+            }
+
+            ruleIds = gapRuleIds;
           }
 
           const rules = await findRules({

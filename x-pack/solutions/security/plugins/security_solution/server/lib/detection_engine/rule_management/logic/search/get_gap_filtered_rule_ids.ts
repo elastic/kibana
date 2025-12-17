@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 
@@ -12,64 +14,62 @@ import type { FindRulesSortField } from '../../../../../../common/api/detection_
 import type { SortOrder } from '../../../../../../common/api/detection_engine';
 import { findRules } from './find_rules';
 
-interface CollectRuleIdsByFilterOptions {
-  rulesClient: RulesClient;
-  maxRuleIdsToCollect: number;
-  filter: string;
-  sortField?: FindRulesSortField;
-  sortOrder?: SortOrder;
-}
-
 /**
- * Collects up to maxRuleIdsToCollect rule IDs that match the provided filter.
+ * Filters rule IDs with gaps by applying the user's filter.
+ * Splits the rule IDs into batches and processes them sequentially so we can
+ * stop early once we've collected enough results to return.
+ * Then return maxRuleIds of them.
  */
-const collectRuleIdsByFilter = async ({
+const filterRuleIdsWithGaps = async ({
   rulesClient,
-  maxRuleIdsToCollect,
+  ruleIdsWithGaps,
   filter,
+  maxRuleIds,
   sortField,
   sortOrder,
-}: CollectRuleIdsByFilterOptions): Promise<{
+}: {
+  rulesClient: RulesClient;
+  ruleIdsWithGaps: string[];
+  filter: string;
+  maxRuleIds: number;
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
+}): Promise<{
   ruleIds: string[];
   truncated: boolean;
 }> => {
-  const ruleIds: string[] = [];
-  const batchSize = 250;
-  let page = 1;
-  let continuePaging = true;
-  let total = 0;
+  // Split rule IDs into batches to avoid exceeding ES max clause limits
+  const batches = chunk(ruleIdsWithGaps, maxRuleIds);
 
-  while (continuePaging) {
-    const pageResult = await findRules({
+  const allMatchingRuleIds: string[] = [];
+
+  // Process batches sequentially so we can stop once we have enough results to know
+  // whether the response should be truncated.
+  for (const batch of batches) {
+    const result = await findRules({
       rulesClient,
-      perPage: batchSize,
-      page,
+      perPage: maxRuleIds,
+      page: 1,
       sortField,
       sortOrder,
       filter,
+      ruleIds: batch,
       fields: ['id'],
     });
 
-    total = pageResult.total;
+    allMatchingRuleIds.push(...result.data.map((rule) => rule.id));
 
-    if (pageResult.data.length === 0) {
+    if (allMatchingRuleIds.length > maxRuleIds) {
       break;
     }
-
-    for (const rule of pageResult.data) {
-      ruleIds.push(rule.id);
-      if (ruleIds.length >= maxRuleIdsToCollect) {
-        continuePaging = false;
-        break;
-      }
-    }
-
-    page += 1;
   }
 
+  const truncated = allMatchingRuleIds.length > maxRuleIds;
+  const finalRuleIds = allMatchingRuleIds.slice(0, maxRuleIds);
+
   return {
-    ruleIds,
-    truncated: total > maxRuleIdsToCollect,
+    ruleIds: finalRuleIds,
+    truncated,
   };
 };
 
@@ -103,17 +103,18 @@ export const getGapFilteredRuleIds = async ({
   sortField,
   sortOrder,
 }: GapFilteredRuleIdsOptions): Promise<GapFilteredRuleIdsResult> => {
-  // Step 1: get rule IDs with gaps for the selected range and gap fill statuses
-  const initialRuleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
+  // Step 1: get ALL rule IDs with gaps for the selected range and gap fill statuses
+  const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
     highestPriorityGapFillStatuses: gapFillStatuses,
     start: gapRange.start,
     end: gapRange.end,
   });
 
-  const initialRuleIds = initialRuleIdsWithGaps.ruleIds.slice(0, maxRuleIds);
-  const gapsTruncated = initialRuleIdsWithGaps.ruleIds.length > maxRuleIds;
+  const initialRuleIds = ruleIdsWithGaps.ruleIds.slice(0, maxRuleIds);
+  const gapsTruncated = ruleIdsWithGaps.ruleIds.length > maxRuleIds;
 
-  // If the number of rules with gaps is already under our cap, we can just return it.
+  // If the number of rules with gaps is under our cap, or no filter is applied,
+  // we can just return them directly.
   if (!gapsTruncated || !filter) {
     return {
       ruleIds: initialRuleIds,
@@ -121,34 +122,15 @@ export const getGapFilteredRuleIds = async ({
     };
   }
 
-  // Otherwise, there are many rules with gaps and a rule-level filter is applied.
-  // We first collect up to maxRuleIds candidate rule IDs that match the user's filters,
-  // then restrict the gaps query to that candidate set.
-  const { ruleIds: candidateRuleIds, truncated: candidatesTruncated } =
-    await collectRuleIdsByFilter({
-      rulesClient,
-      maxRuleIdsToCollect: maxRuleIds,
-      filter,
-      sortField,
-      sortOrder,
-    });
-
-  if (candidateRuleIds.length === 0) {
-    return {
-      ruleIds: [],
-      truncated: false,
-    };
-  }
-
-  const narrowedRuleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
-    highestPriorityGapFillStatuses: gapFillStatuses,
-    start: gapRange.start,
-    end: gapRange.end,
-    ruleIds: candidateRuleIds,
+  // Step 2: There are many rules with gaps AND a filter is applied.
+  // Filter the rule IDs with gaps by the user's filter.
+  // This ensures we return rules that HAVE gaps AND match the filter,
+  return filterRuleIdsWithGaps({
+    rulesClient,
+    ruleIdsWithGaps: ruleIdsWithGaps.ruleIds,
+    filter,
+    maxRuleIds,
+    sortField,
+    sortOrder,
   });
-
-  return {
-    ruleIds: narrowedRuleIdsWithGaps.ruleIds,
-    truncated: candidatesTruncated,
-  };
 };
