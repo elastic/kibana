@@ -17,7 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/chrome/app-menu/core-chrome-app-menu
-dependsOn: []
+dependsOn:
+  - '@kbn/core-chrome-app-menu-components'
 tags:
   - shared-browser
   - package
