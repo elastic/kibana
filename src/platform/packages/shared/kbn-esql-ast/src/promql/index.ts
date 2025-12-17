@@ -8,7 +8,7 @@
  */
 
 // Types
-export * from './types';
+export type * from './types';
 
 // Builder
 export { PromQLBuilder } from './builder';
