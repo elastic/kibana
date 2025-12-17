@@ -40,8 +40,8 @@ Get Page
     - **Page ID** (required): The unique identifier of the page.
 
 Get Data Source
-:   Retrieve a database by its ID. This will return only information about the database properties/columns, _not_ about its rows.
-    - **Data Source ID** (required): The unique identifier of the database. See [Notion docs](https://developers.notion.com/reference/retrieve-a-data-source#finding-a-data-source-id) for how to find this.
+:   Retrieve a database by its ID. Retrieve a database by its ID. This only returns information about the database properties and columns, _not_ about its rows.
+    - **Data Source ID** (required): The unique identifier of the database. Check [Notion's documentation](https://developers.notion.com/reference/retrieve-a-data-source#finding-a-data-source-id) for instructions on how to find this ID.
 
 Query Data Source
 :   Query a database with optional filters.
