@@ -5,8 +5,49 @@
  * 2.0.
  */
 
+import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+
+/**
+ * Hook to build Discover URL with cloud asset inventory data view preselected.
+ *
+ * @param dataViews - DataViews service for looking up data view IDs
+ * @param getUrlForApp - Function to generate app URLs
+ * @returns Discover URL with data view preselected if found, otherwise undefined if getUrlForApp is unavailable
+ */
+const useDiscoverUrl = (
+  dataViews: DataViewsPublicPluginStart | undefined,
+  getUrlForApp: ((appId: string, options?: { path?: string }) => string) | undefined
+): string | undefined => {
+  const [cloudAssetDataViewId, setCloudAssetDataViewId] = useState<string | undefined>();
+
+  // Look up the cloud asset inventory data view ID
+  useEffect(() => {
+    if (!dataViews) return;
+
+    dataViews.find('Cloud Asset Discovery').then(
+      (dataViewList) => {
+        if (dataViewList && dataViewList.length > 0) {
+          setCloudAssetDataViewId(dataViewList[0].id);
+        }
+      },
+      () => {
+        // Silently fail
+      }
+    );
+  }, [dataViews]);
+
+  if (!getUrlForApp) return undefined;
+
+  // Build Discover URL with cloud asset inventory data view if found
+  return cloudAssetDataViewId
+    ? getUrlForApp('discover', {
+        path: `#/?_a=(dataSource:(dataViewId:'${cloudAssetDataViewId}',type:dataView))`,
+      })
+    : getUrlForApp('discover');
+};
 
 /**
  * Hook to generate URLs for callout links using Kibana's routing.
@@ -20,12 +61,14 @@ export const useCalloutLinks = ():
       discoverUrl: string;
     }
   | undefined => {
-  const { services } = useKibana();
-  const { application } = services;
-
+  const { services } = useKibana<{ dataViews?: DataViewsPublicPluginStart }>();
+  const { application, dataViews } = services;
   const getUrlForApp = application?.getUrlForApp;
 
-  if (!getUrlForApp) {
+  // Call hook unconditionally before any early returns
+  const discoverUrl = useDiscoverUrl(dataViews, getUrlForApp);
+
+  if (!getUrlForApp || !discoverUrl) {
     return undefined;
   }
 
@@ -39,8 +82,6 @@ export const useCalloutLinks = ():
   const entityStoreUrl = getUrlForApp('security', {
     path: '/entity_analytics_entity_store',
   });
-
-  const discoverUrl = getUrlForApp('discover');
 
   return {
     integrationUrl,

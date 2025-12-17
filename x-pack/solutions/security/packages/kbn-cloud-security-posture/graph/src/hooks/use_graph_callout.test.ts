@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useGraphCallout } from './use_graph_callout';
 import type { NodeViewModel, EntityNodeViewModel, LabelNodeViewModel } from '../components/types';
 
 // Mock dependencies
 const mockUseQuery = jest.fn();
 const mockGetUrlForApp = jest.fn();
+const mockDataViewsFind = jest.fn();
 const mockKibana = {
   services: {
     http: {
@@ -19,6 +20,9 @@ const mockKibana = {
     },
     application: {
       getUrlForApp: mockGetUrlForApp,
+    },
+    dataViews: {
+      find: mockDataViewsFind,
     },
   },
 };
@@ -34,6 +38,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 describe('useGraphCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Setup default useQuery mock to prevent undefined returns
+    mockUseQuery.mockReturnValue({ data: undefined, error: null });
     // Setup default getUrlForApp mock
     mockGetUrlForApp.mockImplementation((appId: string, options?: { path?: string }) => {
       if (appId === 'integrations') {
@@ -43,10 +49,14 @@ describe('useGraphCallout', () => {
         return `/app/security${options?.path || ''}`;
       }
       if (appId === 'discover') {
-        return '/app/discover';
+        return `/app/discover${options?.path || ''}`;
       }
       return `/app/${appId}`;
     });
+    // Setup default dataViews.find mock to return a resolved Promise
+    mockDataViewsFind.mockReturnValue(
+      Promise.resolve([{ id: 'cloud_asset_inventory-test-id', title: 'Cloud Asset Discovery' }])
+    );
   });
 
   const createMockEntityNode = ({
@@ -89,7 +99,7 @@ describe('useGraphCallout', () => {
   });
 
   describe('Priority 1: missingAllRequirements', () => {
-    it('should show callout with missingAllRequirements config when both integration and Entity Store are not available', () => {
+    it('should show callout with missingAllRequirements config when both integration and Entity Store are not available', async () => {
       mockUseQuery
         // Query 1: Integration not installed
         .mockReturnValueOnce({
@@ -106,7 +116,10 @@ describe('useGraphCallout', () => {
 
       const { result } = renderHook(() => useGraphCallout(nodes));
 
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toBe('Enrich graph experience');
         expect(result.current.config.links).toHaveLength(2);
@@ -121,7 +134,7 @@ describe('useGraphCallout', () => {
   });
 
   describe('Priority 2: uninstalledIntegration', () => {
-    it('should show callout with uninstalledIntegration config when integration is not installed but Entity Store is running', () => {
+    it('should show callout with uninstalledIntegration config when integration is not installed but Entity Store is running', async () => {
       mockUseQuery
         // Query 1: Integration not installed
         .mockReturnValueOnce({
@@ -138,7 +151,10 @@ describe('useGraphCallout', () => {
 
       const { result } = renderHook(() => useGraphCallout(nodes));
 
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toBe('Enrich graph experience');
         expect(result.current.config.links).toHaveLength(1);
@@ -150,7 +166,7 @@ describe('useGraphCallout', () => {
   });
 
   describe('Priority 3: disabledEntityStore', () => {
-    it('should show callout with disabledEntityStore config when integration is installed but Entity Store is not running', () => {
+    it('should show callout with disabledEntityStore config when integration is installed but Entity Store is not running', async () => {
       mockUseQuery
         // Query 1: Integration installed
         .mockReturnValueOnce({
@@ -167,7 +183,10 @@ describe('useGraphCallout', () => {
 
       const { result } = renderHook(() => useGraphCallout(nodes));
 
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toBe('Enrich graph experience');
         expect(result.current.config.links).toHaveLength(1);
@@ -179,7 +198,7 @@ describe('useGraphCallout', () => {
   });
 
   describe('Priority 4: unavailableEntityInfo', () => {
-    it('should show callout with unavailableEntityInfo config when entity is not available in Entity Store', () => {
+    it('should show callout with unavailableEntityInfo config when entity is not available in Entity Store', async () => {
       mockUseQuery
         // Query 1: Integration installed
         .mockReturnValueOnce({
@@ -198,17 +217,22 @@ describe('useGraphCallout', () => {
 
       const { result } = renderHook(() => useGraphCallout(nodes));
 
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toBe('Entity information unavailable');
         expect(result.current.config.links).toHaveLength(1);
-        expect(result.current.config.links[0].href).toBe('/app/discover');
+        expect(result.current.config.links[0].href).toBe(
+          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+        );
       }
     });
   });
 
   describe('Priority 5: unknownEntityType', () => {
-    it('should show callout with unknownEntityType config when entity has no type', () => {
+    it('should show callout with unknownEntityType config when entity has no type', async () => {
       mockUseQuery
         // Query 1: Integration installed
         .mockReturnValueOnce({
@@ -228,15 +252,20 @@ describe('useGraphCallout', () => {
 
       const { result } = renderHook(() => useGraphCallout(nodes));
 
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toContain('Unknown entity type');
         expect(result.current.config.links).toHaveLength(1);
-        expect(result.current.config.links[0].href).toBe('/app/discover');
+        expect(result.current.config.links[0].href).toBe(
+          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+        );
       }
     });
 
-    it('should show callout with unknownEntityType config when entity has no sub_type', () => {
+    it('should show callout with unknownEntityType config when entity has no sub_type', async () => {
       mockUseQuery
         // Query 1: Integration installed
         .mockReturnValueOnce({
@@ -256,15 +285,20 @@ describe('useGraphCallout', () => {
 
       const { result } = renderHook(() => useGraphCallout(nodes));
 
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toContain('Unknown entity type');
         expect(result.current.config.links).toHaveLength(1);
-        expect(result.current.config.links[0].href).toBe('/app/discover');
+        expect(result.current.config.links[0].href).toBe(
+          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+        );
       }
     });
 
-    it('should show callout with unknownEntityType config when entity has no name', () => {
+    it('should show callout with unknownEntityType config when entity has no name', async () => {
       mockUseQuery
         // Query 1: Integration installed
         .mockReturnValueOnce({
@@ -284,11 +318,16 @@ describe('useGraphCallout', () => {
 
       const { result } = renderHook(() => useGraphCallout(nodes));
 
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toContain('Unknown entity type');
         expect(result.current.config.links).toHaveLength(1);
-        expect(result.current.config.links[0].href).toBe('/app/discover');
+        expect(result.current.config.links[0].href).toBe(
+          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+        );
       }
     });
   });
@@ -461,7 +500,7 @@ describe('useGraphCallout', () => {
   });
 
   describe('Dismiss functionality', () => {
-    it('should hide callout after onDismiss is called', () => {
+    it('should hide callout after onDismiss is called', async () => {
       mockUseQuery
         .mockReturnValueOnce({
           data: { item: { status: 'not_installed' } },
@@ -477,7 +516,10 @@ describe('useGraphCallout', () => {
       const { result, rerender } = renderHook(() => useGraphCallout(nodes));
 
       // Initially should show callout
-      expect(result.current.shouldShowCallout).toBe(true);
+      await waitFor(() => {
+        expect(result.current.shouldShowCallout).toBe(true);
+      });
+
       if (result.current.shouldShowCallout) {
         expect(result.current.config.title).toBe('Enrich graph experience');
         expect(result.current.onDismiss).toBeDefined();
