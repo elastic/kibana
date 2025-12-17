@@ -15,7 +15,6 @@
     ],
     "requiredPlugins": [
       "data",
-      "expressions",
       "dataViews",
       "uiActions",
       "contentManagement",
@@ -25,7 +24,8 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "unifiedSearch"
     ]
   }
 }
