@@ -26,6 +26,19 @@ describe('buildKpiRiskScoreQuery search strategy', () => {
     it('should aggregate severity counts from single entity type', async () => {
       const mockResponse: IEsSearchResponse<unknown> = {
         rawResponse: {
+          took: 1,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 0,
+            max_score: 0,
+            hits: [],
+          },
           aggregations: {
             host: {
               buckets: [
@@ -68,6 +81,19 @@ describe('buildKpiRiskScoreQuery search strategy', () => {
     it('should aggregate severity counts from multiple entity types', async () => {
       const mockResponse: IEsSearchResponse<unknown> = {
         rawResponse: {
+          took: 1,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 0,
+            max_score: 0,
+            hits: [],
+          },
           aggregations: {
             host: {
               buckets: [
@@ -124,6 +150,19 @@ describe('buildKpiRiskScoreQuery search strategy', () => {
     it('should calculate total count correctly', async () => {
       const mockResponse: IEsSearchResponse<unknown> = {
         rawResponse: {
+          took: 1,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 0,
+            max_score: 0,
+            hits: [],
+          },
           aggregations: {
             host: {
               buckets: [
@@ -166,6 +205,19 @@ describe('buildKpiRiskScoreQuery search strategy', () => {
     it('should handle empty aggregations', async () => {
       const mockResponse: IEsSearchResponse<unknown> = {
         rawResponse: {
+          took: 1,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 0,
+            max_score: 0,
+            hits: [],
+          },
           aggregations: {
             host: {
               buckets: [],
@@ -191,7 +243,21 @@ describe('buildKpiRiskScoreQuery search strategy', () => {
 
     it('should handle missing aggregations', async () => {
       const mockResponse: IEsSearchResponse<unknown> = {
-        rawResponse: {},
+        rawResponse: {
+          took: 1,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 0,
+            max_score: 0,
+            hits: [],
+          },
+        },
         isPartial: false,
         isRunning: false,
         total: 0,
@@ -212,6 +278,19 @@ describe('buildKpiRiskScoreQuery search strategy', () => {
     it('should include inspect object in response', async () => {
       const mockResponse: IEsSearchResponse<unknown> = {
         rawResponse: {
+          took: 1,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 0,
+            max_score: 0,
+            hits: [],
+          },
           aggregations: {
             host: {
               buckets: [],
