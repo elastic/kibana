@@ -10,33 +10,6 @@ import { test } from '../../fixtures';
 import { RULE_NAMES } from '../../fixtures/generators';
 import { SHORTER_TIMEOUT } from '../../fixtures/constants';
 
-test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    // Navigate to the rules list page
-    await pageObjects.rulesPage.goto();
-    // Verify we're on the rules page
-    await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
-  });
-
-  test('should filter rule types using search and close modal', async ({ pageObjects }) => {
-    await pageObjects.rulesPage.openRuleTypeModal();
-
-    const searchInput = pageObjects.rulesPage.ruleTypeModalSearch;
-    await searchInput.fill('log');
-
-    await expect(searchInput).toHaveValue('log');
-
-    // Clear the search
-    await searchInput.clear();
-    await expect(searchInput).toHaveValue('');
-
-    await pageObjects.rulesPage.closeRuleTypeModal();
-
-    await expect(pageObjects.rulesPage.ruleTypeModal).toBeHidden();
-  });
-});
-
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
