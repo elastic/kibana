@@ -15,8 +15,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   OptInAction: `${TELEMETRY_PREFIX}_opt_in_action`,
   OptOut: `${TELEMETRY_PREFIX}_opt_out`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
-  MessageSent: `${TELEMETRY_PREFIX}_message_sent`,
-  MessageReceived: `${TELEMETRY_PREFIX}_message_received`,
+  RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
   AgentBuilderError: `${TELEMETRY_PREFIX}_error`,
   /**
    * Legacy onechat event name for errors during conversation.
@@ -57,13 +56,12 @@ export interface ReportMessageSentParams {
   agent_id?: string;
 }
 
-export interface ReportMessageReceivedParams {
+export interface ReportRoundCompleteParams {
   conversation_id?: string;
   response_length?: number;
   round_number?: number;
   agent_id?: string;
   tools_invoked: string[];
-  trace_id?: string;
   started_at?: string;
   time_to_first_token?: number;
   time_to_last_token?: number;
@@ -104,8 +102,7 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
-  [AGENT_BUILDER_EVENT_TYPES.MessageSent]: ReportMessageSentParams;
-  [AGENT_BUILDER_EVENT_TYPES.MessageReceived]: ReportMessageReceivedParams;
+  [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentBuilderError]: ReportAgentBuilderErrorParams;
   [AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR]: ReportOnechatConverseErrorParams;
 }
@@ -115,7 +112,7 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptOutParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportMessageSentParams>
-  | EventTypeOpts<ReportMessageReceivedParams>
+  | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportAgentBuilderErrorParams>
   | EventTypeOpts<ReportOnechatConverseErrorParams>;
 
@@ -124,8 +121,7 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
-  | typeof AGENT_BUILDER_EVENT_TYPES.MessageSent
-  | typeof AGENT_BUILDER_EVENT_TYPES.MessageReceived
+  | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentBuilderError
   | typeof AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR;
 
@@ -192,62 +188,8 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
-const MESSAGE_SENT_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.MessageSent,
-  schema: {
-    conversation_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'Conversation ID',
-        optional: true,
-      },
-    },
-    message_length: {
-      type: 'integer',
-      _meta: {
-        description: 'Length of the message in characters',
-        optional: true,
-      },
-    },
-    has_attachments: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the message has attachments',
-        optional: false,
-      },
-    },
-    attachment_count: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of attachments',
-        optional: true,
-      },
-    },
-    attachment_types: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'Type of attachment',
-        },
-      },
-      _meta: {
-        description: 'Types of attachments',
-        optional: true,
-      },
-    },
-    agent_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the agent',
-        optional: true,
-      },
-    },
-  },
-};
-
-const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.MessageReceived,
+const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.RoundComplete,
   schema: {
     conversation_id: {
       type: 'keyword',
@@ -290,13 +232,6 @@ const MESSAGE_RECEIVED_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom"). Intentionally includes duplicates (one entry per tool call) so counts per tool can be computed downstream by aggregating over this array.',
         optional: false,
-      },
-    },
-    trace_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'Trace ID associated with this round (when tracing is enabled)',
-        optional: true,
       },
     },
     started_at: {
@@ -415,6 +350,5 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
-  MESSAGE_SENT_EVENT,
-  MESSAGE_RECEIVED_EVENT,
+  ROUND_COMPLETE_EVENT,
 ];

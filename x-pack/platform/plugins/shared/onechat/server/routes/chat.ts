@@ -432,8 +432,6 @@ export function registerChatRoutes({
             })
           : [];
 
-        analyticsService?.reportMessageSent(payload);
-
         const chatEvents$ = callConverse({
           payload,
           attachments,

@@ -15,7 +15,6 @@ import {
 } from '@kbn/onechat-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getConnectorProvider } from '@kbn/inference-common';
-import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
 import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from './utils';
 
 /**
@@ -36,25 +35,6 @@ export class AnalyticsService {
     });
   }
 
-  reportMessageSent(payload: ChatRequestBodyPayload): void {
-    try {
-      const attachments = payload.attachments ?? [];
-      const normalizedAgentId = normalizeAgentIdForTelemetry(payload.agent_id);
-      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageSent, {
-        conversation_id: payload.conversation_id || 'new',
-        message_length: payload.input?.length,
-        has_attachments: attachments.length > 0,
-        attachment_count: attachments.length > 0 ? attachments.length : undefined,
-        attachment_types:
-          attachments.length > 0 ? attachments.map((a) => a.type || 'unknown') : undefined,
-        agent_id: normalizedAgentId,
-      });
-    } catch (error) {
-      // Do not fail the request if telemetry fails
-      this.logger.debug('Failed to report MessageSent telemetry event', { error });
-    }
-  }
-
   reportMessageReceived({
     round,
     connector,
@@ -69,6 +49,7 @@ export class AnalyticsService {
     conversationId?: string;
   }): void {
     try {
+      console.log('round ==>', JSON.stringify(round, null, 2));
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
       // NOTE: `tools_invoked` is intentionally an array that can include duplicates (one per tool
       // call). This allows downstream telemetry analysis to compute per-tool invocation counts by
@@ -78,13 +59,12 @@ export class AnalyticsService {
           ?.filter((step) => step.type === ConversationRoundStepType.toolCall)
           .map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
 
-      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.MessageReceived, {
+      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
         conversation_id: conversationId,
         response_length: round.response?.message?.length,
         round_number: roundCount,
         agent_id: normalizedAgentId,
         tools_invoked: toolsInvoked,
-        trace_id: round.trace_id,
         started_at: round.started_at,
         time_to_first_token: round.time_to_first_token,
         time_to_last_token: round.time_to_last_token,
