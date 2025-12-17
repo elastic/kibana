@@ -14,14 +14,11 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { UPLOAD_TYPE, useFileUploadContext } from '../../../..';
+import { useFileUploadContext, UPLOAD_TYPE } from '../../../use_file_upload';
 import { IndexInput } from './index_input';
 
 interface Props {
@@ -70,28 +67,6 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.fileUpload.uploadView.indexSelectionTitle"
-            defaultMessage="Index"
-          />
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="xs" />
-
-      <EuiText size="s">
-        <p>
-          <FormattedMessage
-            id="xpack.fileUpload.uploadView.indexChoiceDescription"
-            defaultMessage="An index stores your data and defines the field mappings for searches."
-          />
-        </p>
-      </EuiText>
-
-      <EuiSpacer size="xs" />
-
       {allowExistingIndices === true ? (
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -105,13 +80,13 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
                 {
                   id: UPLOAD_TYPE.NEW,
                   label: i18n.translate('xpack.fileUpload.indexSelection.newLabel', {
-                    defaultMessage: 'Create new index',
+                    defaultMessage: 'New index',
                   }),
                 },
                 {
                   id: UPLOAD_TYPE.EXISTING,
                   label: i18n.translate('xpack.fileUpload.existingIndexSelection.label', {
-                    defaultMessage: 'Upload to existing index',
+                    defaultMessage: 'Existing index',
                   }),
                 },
               ]}

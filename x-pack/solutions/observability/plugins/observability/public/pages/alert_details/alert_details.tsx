@@ -77,6 +77,9 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
   defaultMessage: 'Alert details',
 });
 
+// avoiding circular dependency by having the attachment id here
+const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
+
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
@@ -91,9 +94,13 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
+    onechat,
     uiSettings,
     serverless,
+    observabilityAgentBuilder,
   } = services;
+
+  const AlertAiInsight = observabilityAgentBuilder?.getAlertAIInsight();
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
@@ -166,6 +173,33 @@ export function AlertDetails() {
       setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
   }, [alertDetail, ruleTypeRegistry, urlTabId]);
+
+  // Configure agent builder global flyout with the current alert attachment
+  useEffect(() => {
+    if (!onechat) return;
+    const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
+
+    if (!alertUuid) {
+      return;
+    }
+
+    onechat.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      attachments: [
+        {
+          id: alertUuid,
+          type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+          data: {
+            alertId: alertUuid,
+          },
+        },
+      ],
+    });
+
+    return () => {
+      onechat.clearConversationFlyoutActiveConfig();
+    };
+  }, [onechat, alertDetail]);
 
   useBreadcrumbs(
     [
@@ -268,6 +302,9 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
+          {AlertAiInsight && (
+            <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+          )}
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -293,6 +330,9 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
+        {AlertAiInsight && (
+          <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+        )}
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
@@ -477,8 +517,8 @@ function getRelevantAlertFields(alertDetail: AlertData) {
     'kibana.alert.rule.uuid',
     'event.action',
     'event.kind',
-    'kibana.alert.rule.tags',
     'kibana.alert.maintenance_window_ids',
+    'kibana.alert.maintenance_window_names',
     'kibana.alert.consecutive_matches',
   ]);
 }

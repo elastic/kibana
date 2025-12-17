@@ -30,11 +30,7 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({
-    logger,
-    workflowsManagement,
-    trackingService,
-  }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
@@ -58,6 +54,7 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    actions,
     trackingService,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
@@ -81,12 +78,15 @@ export class ServiceManager {
       elasticsearch,
       uiSettings,
       savedObjects,
+      actions,
     });
 
     const agents = this.services.agents.start({
       spaces,
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       getRunner,
       toolsService: tools,
     });
@@ -96,6 +96,8 @@ export class ServiceManager {
       security,
       elasticsearch,
       inference,
+      spaces,
+      actions,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,

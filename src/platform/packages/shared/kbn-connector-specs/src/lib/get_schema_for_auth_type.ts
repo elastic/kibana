@@ -27,6 +27,7 @@ const getAuthType = (id: string): NormalizedAuthType => {
 export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let authTypeId: string | undefined;
   let defaults: Record<string, unknown> | undefined;
+  let meta: Record<string, Record<string, unknown>> | undefined;
 
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
@@ -34,6 +35,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     const def = authTypeDef as AuthTypeDef;
     authTypeId = def.type;
     defaults = def.defaults;
+    meta = def?.overrides?.meta;
   }
 
   if (!authTypeId) {
@@ -42,6 +44,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
 
   const authType = getAuthType(authTypeId);
 
+  const existingMeta = authType.schema.meta() ?? {};
   let schemaToUse = z.object({
     ...authType.schema.shape,
   });
@@ -59,8 +62,23 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     schemaToUse = authType.normalizeSchema(defaults);
   }
 
+  if (meta) {
+    Object.keys(meta).forEach((key) => {
+      if (schemaToUse.shape[key]) {
+        const metaValue = schemaToUse.shape[key].meta();
+        const metaOverride = meta[key];
+        schemaToUse.shape[key] = schemaToUse.shape[key].meta({ ...metaValue, ...metaOverride });
+      }
+    });
+  }
+
   // add the authType discriminator key
-  return schemaToUse.extend({
-    [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
-  });
+  return {
+    id: authTypeId,
+    schema: schemaToUse
+      .extend({
+        [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
+      })
+      .meta(existingMeta),
+  };
 };

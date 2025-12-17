@@ -15,6 +15,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
 } from '../../../../../common/constants';
 import type { PolicyDetailsSelector, PolicyDetailsState } from '../../../types';
 
@@ -28,7 +29,7 @@ export const getCurrentArtifactsLocation: PolicyDetailsSelector<
 export const getUrlLocationPathname: PolicyDetailsSelector<string | undefined> = (state) =>
   state.location?.pathname;
 
-/** Returns a boolean of whether the user is on the policy form page or not */
+/** Returns a boolean of whether the user is on the policy form tab or not */
 export const isOnPolicyFormView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {
@@ -41,7 +42,7 @@ export const isOnPolicyFormView: PolicyDetailsSelector<boolean> = createSelector
   }
 );
 
-/** Returns a boolean of whether the user is on the policy trusted apps page or not */
+/** Returns a boolean of whether the user is on the policy trusted apps tab or not */
 export const isOnPolicyTrustedAppsView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {
@@ -54,7 +55,7 @@ export const isOnPolicyTrustedAppsView: PolicyDetailsSelector<boolean> = createS
   }
 );
 
-/** Returns a boolean of whether the user is on the policy trusted devices page or not */
+/** Returns a boolean of whether the user is on the policy trusted devices tab or not */
 export const isOnPolicyTrustedDevicesView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {
@@ -67,7 +68,7 @@ export const isOnPolicyTrustedDevicesView: PolicyDetailsSelector<boolean> = crea
   }
 );
 
-/** Returns a boolean of whether the user is on the policy event filters page or not */
+/** Returns a boolean of whether the user is on the policy event filters tab or not */
 export const isOnPolicyEventFiltersView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {
@@ -80,7 +81,7 @@ export const isOnPolicyEventFiltersView: PolicyDetailsSelector<boolean> = create
   }
 );
 
-/** Returns a boolean of whether the user is on the host isolation exceptions page or not */
+/** Returns a boolean of whether the user is on the host isolation exceptions tab or not */
 export const isOnHostIsolationExceptionsView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {
@@ -93,13 +94,26 @@ export const isOnHostIsolationExceptionsView: PolicyDetailsSelector<boolean> = c
   }
 );
 
-/** Returns a boolean of whether the user is on the blocklists page or not */
+/** Returns a boolean of whether the user is on the blocklists tab or not */
 export const isOnBlocklistsView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {
     return (
       matchPath(pathname ?? '', {
         path: MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+        exact: true,
+      }) !== null
+    );
+  }
+);
+
+/** Returns a boolean of whether the user is on the endpoint exceptions tab or not */
+export const isOnEndpointExceptionsView: PolicyDetailsSelector<boolean> = createSelector(
+  getUrlLocationPathname,
+  (pathname) => {
+    return (
+      matchPath(pathname ?? '', {
+        path: MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
         exact: true,
       }) !== null
     );

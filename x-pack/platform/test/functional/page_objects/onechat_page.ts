@@ -187,7 +187,7 @@ export class OneChatPageObject extends FtrService {
   }
 
   /**
-   * Delete a conversation by hovering and clicking the delete button
+   * Delete a conversation by clicking the more actions button and then the delete button
    */
   async deleteConversation(conversationId: string) {
     await this.openConversationsHistory();
@@ -195,10 +195,12 @@ export class OneChatPageObject extends FtrService {
     // Click on conversation to open it
     const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
     await conversationItem.click();
-    // Click on conversation title (it's a button)
-    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
-    await titleElement.click();
 
+    // Click on the more actions button
+    const moreActionsButton = await this.testSubjects.find('agentBuilderMoreActionsButton');
+    await moreActionsButton.click();
+
+    // Click on the delete button from the popover
     const deleteButton = await this.testSubjects.find('agentBuilderConversationDeleteButton');
     await deleteButton.click();
 
@@ -242,10 +244,51 @@ export class OneChatPageObject extends FtrService {
   }
 
   /**
+   * Get the current conversation title text
+   */
+  async getConversationTitle(): Promise<string> {
+    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    return await titleElement.getVisibleText();
+  }
+
+  /**
+   * Rename a conversation by hovering over the title, clicking the pencil icon,
+   * entering the new name, and submitting
+   */
+  async renameConversation(newTitle: string): Promise<string> {
+    // Hover over the conversation title to reveal the pencil icon
+    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    await titleElement.moveMouseTo();
+
+    // Click the pencil icon to enter edit mode
+    const renameButton = await this.testSubjects.find('agentBuilderConversationRenameButton');
+    await renameButton.click();
+
+    // Wait for the inline edit input to appear and clear + type new name
+    const inputElement = await this.testSubjects.find('renameConversationInputField');
+    await inputElement.clearValueWithKeyboard();
+    await inputElement.type(newTitle);
+
+    // Click the save button (checkmark icon)
+    const saveButton = await this.testSubjects.find('renameConversationSaveButton');
+    await saveButton.click();
+
+    // Wait for the title to update
+    await this.retry.try(async () => {
+      const updatedTitle = await this.getConversationTitle();
+      if (updatedTitle !== newTitle) {
+        throw new Error(`Title not yet updated: expected "${newTitle}", got "${updatedTitle}"`);
+      }
+    });
+
+    return newTitle;
+  }
+
+  /**
    * Get the thinking details text
    */
   async getThinkingDetails() {
-    const responseElement = await this.testSubjects.find('agentBuilderRoundResponse');
+    const responseElement = await this.testSubjects.find('agentBuilderThinkingPanel');
     return await responseElement.getVisibleText();
   }
 

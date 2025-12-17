@@ -34,14 +34,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigate search sidenav & breadcrumbs', async () => {
+      // Navigate to the home page to account for the getting started page redirect
+      await svlSearchNavigation.navigateToElasticsearchHome();
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
       // check serverless search side nav exists
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
-
-      // Should default to Homepage
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
@@ -76,8 +76,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Build', 'Playground'],
+          breadcrumbs: ['Playground'],
           pageTestSubject: 'playgroundsListPage',
+        },
+        {
+          link: { deepLinkId: 'searchGettingStarted' },
+          breadcrumbs: ['Getting started'],
+          pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'dev_tools:console' },
@@ -159,12 +164,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'searchPlayground',
           'machine_learning',
           // footer:
+          'search_getting_started',
           'dev_tools',
           'data_management',
           'admin_and_settings',
         ],
         { checkOrder: false }
       );
+    });
+
+    it('does not show cloud connect in sidebar navigation', async () => {
+      // Cloud Connect should NOT appear in serverless deployments
+      expect(await testSubjects.missingOrFail('cloud_connect'));
     });
 
     it('renders a feedback callout', async function () {
@@ -175,17 +186,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
       await browser.refresh();
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-    });
-
-    it('renders tour', async () => {
-      await solutionNavigation.sidenav.tour.reset();
-      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
-      await solutionNavigation.sidenav.tour.nextStep();
-      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
-      await solutionNavigation.sidenav.tour.nextStep();
-      await solutionNavigation.sidenav.tour.expectHidden();
-      await browser.refresh();
-      await solutionNavigation.sidenav.tour.expectHidden();
     });
 
     it('opens panel on legacy management landing page', async () => {

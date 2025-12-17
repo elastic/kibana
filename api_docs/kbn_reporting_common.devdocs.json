@@ -1404,7 +1404,7 @@
         "label": "REPORTING_EXPORT_TYPES",
         "description": [],
         "signature": [
-          "(\"single\" | \"scheduled\")[]"
+          "(\"scheduled\" | \"single\")[]"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
         "deprecated": false,
@@ -1751,6 +1751,17 @@
                 "type": "string",
                 "tags": [],
                 "label": "BULK_DELETE",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.SCHEDULED.BULK_ENABLE",
+                "type": "string",
+                "tags": [],
+                "label": "BULK_ENABLE",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
                 "deprecated": false,

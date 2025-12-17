@@ -8,7 +8,7 @@
  */
 
 import { parseDocument } from 'yaml';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { formatZodError } from './format_zod_error';
 
 describe('formatZodError', () => {

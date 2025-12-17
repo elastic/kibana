@@ -11,6 +11,7 @@ import type {
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
@@ -23,9 +24,10 @@ import {
 } from './builtin';
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
+import { isEnabledDefinition } from './tool_types/definitions';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
-import { getToolTypeInfo } from './utils';
+import { createToolHealthClient } from './health';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
@@ -38,6 +40,7 @@ export interface ToolsServiceStartDeps {
   spaces?: SpacesPluginStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  actions: ActionsPluginStart;
 }
 
 export class ToolsService {
@@ -70,10 +73,19 @@ export class ToolsService {
     spaces,
     uiSettings,
     savedObjects,
+    actions,
   }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
 
-    const toolTypes = getToolTypeDefinitions({ workflowsManagement });
+    const toolTypes = getToolTypeDefinitions({ workflowsManagement, actions });
+
+    // Compute the set of tool types that have health tracking enabled
+    const healthTrackedToolTypes = new Set(
+      toolTypes
+        .filter(isEnabledDefinition)
+        .filter((def) => def.trackHealth === true)
+        .map((def) => def.toolType)
+    );
 
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
@@ -89,6 +101,11 @@ export class ToolsService {
       const space = getCurrentSpaceId({ request, spaces });
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
+      const healthClient = createToolHealthClient({
+        space,
+        logger,
+        esClient: elasticsearch.client.asInternalUser,
+      });
 
       return createToolRegistry({
         getRunner,
@@ -98,12 +115,24 @@ export class ToolsService {
         persistedProvider,
         uiSettings,
         savedObjects,
+        healthClient,
+        healthTrackedToolTypes,
+      });
+    };
+
+    const getHealthClient: ToolsServiceStart['getHealthClient'] = ({ request }) => {
+      const space = getCurrentSpaceId({ request, spaces });
+      return createToolHealthClient({
+        space,
+        logger,
+        esClient: elasticsearch.client.asInternalUser,
       });
     };
 
     return {
       getRegistry,
-      getToolTypeInfo: () => getToolTypeInfo(toolTypes),
+      getToolDefinitions: () => toolTypes,
+      getHealthClient,
     };
   }
 }

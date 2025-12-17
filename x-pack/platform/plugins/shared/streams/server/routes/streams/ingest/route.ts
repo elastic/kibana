@@ -9,9 +9,9 @@ import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { Ingest } from '@kbn/streams-schema/src/models/ingest';
-import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
-import type { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
+import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
+import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
+import { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -64,7 +64,7 @@ async function updateWiredIngest({
   assetClient: AssetClient;
   attachmentClient: AttachmentClient;
   name: string;
-  ingest: WiredIngest;
+  ingest: WiredIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
@@ -78,7 +78,7 @@ async function updateWiredIngest({
     throw badData(`Can't update wired capabilities of a non-wired stream`);
   }
 
-  const { name: _name, ...stream } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.WiredStream.UpsertRequest = {
     dashboards,
@@ -107,7 +107,7 @@ async function updateClassicIngest({
   assetClient: AssetClient;
   attachmentClient: AttachmentClient;
   name: string;
-  ingest: ClassicIngest;
+  ingest: ClassicIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
@@ -121,7 +121,7 @@ async function updateClassicIngest({
     throw badData(`Can't update classic capabilities of a non-classic stream`);
   }
 
-  const { name: _name, ...stream } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.ClassicStream.UpsertRequest = {
     dashboards,
@@ -198,7 +198,7 @@ const upsertIngestRoute = createServerRoute({
       name: z.string(),
     }),
     body: z.object({
-      ingest: Ingest.right,
+      ingest: IngestUpsertRequest.right,
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
@@ -215,7 +215,7 @@ const upsertIngestRoute = createServerRoute({
       throw badData(`_ingest is only supported on Wired and Classic streams`);
     }
 
-    if (WiredIngest.is(ingest)) {
+    if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
         assetClient,

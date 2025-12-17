@@ -353,6 +353,7 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
+    // @ts-expect-error upgrade typescript v5.9.3
     previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
   };
 

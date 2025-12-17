@@ -39,7 +39,8 @@ export const useGetLayerTabsLabel = (layerConfigs: LayerConfig[]) => {
       const layerCountForId = countsByLayerId.get(config.layerId) || 1;
       const displayName = getLensLayerTypeTabDisplayName(
         config.layerType,
-        typeCount > 1 ? layerCountForId : undefined
+        typeCount,
+        layerCountForId
       );
 
       layerTabDisplayNames.set(config.layerId, displayName);

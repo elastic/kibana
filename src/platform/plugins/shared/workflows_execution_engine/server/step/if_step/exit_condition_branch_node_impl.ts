@@ -18,7 +18,7 @@ export class ExitConditionBranchNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     const successors = this.workflowGraph.getDirectSuccessors(this.step.id);
 
     if (successors.length !== 1) {

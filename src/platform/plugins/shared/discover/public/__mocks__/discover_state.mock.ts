@@ -38,10 +38,8 @@ import { DiscoverSearchSessionManager } from '../application/main/state_manageme
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
-import {
-  getCurrentUrlState,
-  getInitialState,
-} from '../application/main/state_management/discover_app_state_container';
+import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
+import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -191,6 +189,7 @@ export function getDiscoverInternalStateMock({
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks: [],
+        services,
       });
 
       await internalState.dispatch(
@@ -200,6 +199,7 @@ export function getDiscoverInternalStateMock({
             stateContainer,
             customizationService,
             dataViewSpec: undefined,
+            esqlControls: undefined,
             defaultUrlState: undefined,
           },
         })
@@ -331,7 +331,7 @@ export function getDiscoverStateMock({
   internalState.dispatch(
     internalStateActions.resetAppState({
       tabId: internalState.getState().tabs.unsafeCurrentId,
-      appState: getInitialState({
+      appState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         savedSearch: finalSavedSearch,
         services,

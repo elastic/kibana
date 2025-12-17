@@ -17,27 +17,51 @@ const stories: Meta<{}> = {
 
 export default stories;
 
-const logsStreamDefinition: Streams.WiredStream.Definition = {
-  name: 'logs',
-  description: '',
-  ingest: {
-    wired: {
-      fields: {},
-      routing: [],
+const logsStreamDefinition: Streams.WiredStream.GetResponse = {
+  stream: {
+    name: 'logs',
+    description: '',
+    updated_at: new Date().toISOString(),
+    ingest: {
+      wired: {
+        fields: {},
+        routing: [],
+      },
+      lifecycle: { inherit: {} },
+      processing: { steps: [], updated_at: new Date().toISOString() },
+      settings: {},
+      failure_store: { inherit: {} },
     },
-    lifecycle: { inherit: {} },
-    processing: { steps: [] },
-    settings: {},
-    failure_store: { inherit: {} },
+  },
+  dashboards: [],
+  rules: [],
+  queries: [],
+  inherited_fields: {},
+  effective_failure_store: { disabled: {}, from: 'logs' },
+  effective_lifecycle: { dsl: {}, from: 'logs' },
+  effective_settings: {},
+  privileges: {
+    manage: true,
+    monitor: true,
+    view_index_metadata: true,
+    lifecycle: true,
+    simulate: true,
+    text_structure: true,
+    read_failure_store: true,
+    manage_failure_store: true,
   },
 };
 
 export const Default: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      generateAutomatically={false}
+      onFeatureIdentificationClick={() => {}}
       definition={logsStreamDefinition}
+      initialSelectedFeatures={[]}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      refreshDefinition={() => {}}
       features={[
         {
           type: 'system',
@@ -56,6 +80,10 @@ export const Default: StoryFn<{}> = () => {
 export const Edit: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      refreshDefinition={() => {}}
+      generateAutomatically={false}
+      onFeatureIdentificationClick={() => {}}
+      initialSelectedFeatures={[]}
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
@@ -78,6 +106,7 @@ export const Edit: StoryFn<{}> = () => {
         },
         feature: {
           name: 'Test feature',
+          type: 'system',
           filter: {
             field: 'host.name',
             eq: 'test.host',

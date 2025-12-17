@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -24,6 +25,7 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
+  SCRIPTS_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
   TRUSTED_APPS_PATH,
@@ -40,6 +42,7 @@ import {
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
+  SCRIPTS_LIBRARY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
 } from '../app/translations';
@@ -47,17 +50,18 @@ import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { links as notesLink } from '../notes/links';
-import { IconConsole } from '../common/icons/console';
-import { IconShield } from '../common/icons/shield';
+import { IconResponseActionHistory } from '../common/icons/response_action_history';
+import { IconBlocklist } from '../common/icons/blocklist';
 import { IconEndpoints } from '../common/icons/endpoints';
-import { IconTool } from '../common/icons/tool';
-import { IconPipeline } from '../common/icons/pipeline';
-import { IconSavedObject } from '../common/icons/saved_object';
-import { IconDashboards } from '../common/icons/dashboards';
+import { IconPolicies } from '../common/icons/policies';
+import { IconEventFilters } from '../common/icons/event_filters';
+import { IconHostIsolationExceptions } from '../common/icons/host_isolation_exceptions';
+import { IconTrustedApplications } from '../common/icons/trusted_applications';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
-import { IconDeviceControl } from '../common/icons/device_control';
+import { IconTrustedDevices } from '../common/icons/trusted_devices';
+import { IconEndpointExceptions } from '../common/icons/endpoint_exceptions';
 
 const categories = [
   {
@@ -76,13 +80,14 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
-      SecurityPageName.endpointExceptions,
       SecurityPageName.trustedApps,
       SecurityPageName.trustedDevices,
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.responseActionsHistory,
+      SecurityPageName.scriptsLibrary,
     ],
   },
   {
@@ -106,7 +111,7 @@ export const links: LinkItem = {
   skipUrlState: true,
   hideTimeline: true,
   globalNavPosition: 12,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',
@@ -132,23 +137,10 @@ export const links: LinkItem = {
         defaultMessage:
           'Use policies to customize endpoint and cloud workload protections and other configurations.',
       }),
-      landingIcon: IconTool,
+      landingIcon: IconPolicies,
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-    },
-    {
-      id: SecurityPageName.endpointExceptions,
-      title: ENDPOINT_EXCEPTIONS,
-      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
-        defaultMessage: 'Add exceptions to your hosts.',
-      }),
-      landingIcon: IconTool,
-      path: ENDPOINT_EXCEPTIONS_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-
-      experimentalKey: 'endpointExceptionsMovedUnderManagement',
     },
     {
       id: SecurityPageName.trustedApps,
@@ -160,7 +152,7 @@ export const links: LinkItem = {
             'Improve performance or alleviate conflicts with other applications running on your hosts.',
         }
       ),
-      landingIcon: IconDashboards,
+      landingIcon: IconTrustedApplications,
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -172,7 +164,7 @@ export const links: LinkItem = {
         defaultMessage:
           'Specify which external devices can connect to your endpoints even when Device Control is enabled.',
       }),
-      landingIcon: IconDeviceControl,
+      landingIcon: IconTrustedDevices,
       path: TRUSTED_DEVICES_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -186,7 +178,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.eventFiltersDescription', {
         defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
       }),
-      landingIcon: IconPipeline,
+      landingIcon: IconEventFilters,
       path: EVENT_FILTERS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -197,7 +189,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.hostIsolationDescription', {
         defaultMessage: 'Allow isolated hosts to communicate with specific IPs.',
       }),
-      landingIcon: IconSavedObject,
+      landingIcon: IconHostIsolationExceptions,
       path: HOST_ISOLATION_EXCEPTIONS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -208,10 +200,23 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.blocklistDescription', {
         defaultMessage: 'Exclude unwanted applications from running on your hosts.',
       }),
-      landingIcon: IconShield,
+      landingIcon: IconBlocklist,
       path: BLOCKLIST_PATH,
       skipUrlState: true,
       hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconEndpointExceptions,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
     },
     {
       id: SecurityPageName.entityAnalyticsManagement,
@@ -244,10 +249,24 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
         defaultMessage: 'View the history of response actions performed on hosts.',
       }),
-      landingIcon: IconConsole,
+      landingIcon: IconResponseActionHistory,
       path: RESPONSE_ACTIONS_HISTORY_PATH,
       skipUrlState: true,
       hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.scriptsLibrary,
+      title: SCRIPTS_LIBRARY,
+      description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
+        defaultMessage: 'View and manage your scripts library.',
+      }),
+      // TODO: Replace with a custom icon same as other links when available
+      landingIcon: 'broom',
+      path: SCRIPTS_LIBRARY_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'responseActionsScriptLibraryManagement',
+      licenseType: 'enterprise',
     },
     notesLink,
   ],
@@ -264,6 +283,7 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
+
   const {
     canReadActionsLogManagement,
     canAccessHostIsolationExceptions,
@@ -275,6 +295,7 @@ export const getManagementFilteredLinks = async (
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
+    canReadScriptsLibrary,
   } =
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
@@ -324,6 +345,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
+  }
+
+  if (!canReadScriptsLibrary) {
+    linksToExclude.push(SecurityPageName.scriptsLibrary);
   }
 
   return excludeLinks(linksToExclude);

@@ -8,20 +8,7 @@
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
 import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
 
-export const workplaceAIDataTypes: DataTypeDefinition[] = [
-  {
-    id: '1',
-    name: 'WebCrawler',
-  },
-  {
-    id: '2',
-    name: 'Content Connector',
-  },
-  {
-    id: '3',
-    name: 'Federated Content Connector',
-  },
-];
+export const workplaceAIDataTypes: DataTypeDefinition[] = [];
 
 export const registerWorkplaceAIDataTypes = ({
   dataSourcesRegistry,

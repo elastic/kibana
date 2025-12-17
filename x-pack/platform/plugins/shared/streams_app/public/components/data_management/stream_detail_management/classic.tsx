@@ -141,7 +141,9 @@ export function ClassicStreamDetailManagement({
   };
 
   tabs.dataQuality = {
-    content: <StreamDetailDataQuality definition={definition} />,
+    content: (
+      <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
+    ),
     label: (
       <EuiToolTip
         content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {

@@ -28,6 +28,7 @@ export const testUpgrade: Task = async (ctx, task) => {
       title: `Ensure migrated objects match latest version fixtures`,
       task: checkDocuments({
         repository: savedObjectsRepository,
+        types: ctx.updatedTypes,
         fixtures: ctx.fixtures.current,
       }),
     },
