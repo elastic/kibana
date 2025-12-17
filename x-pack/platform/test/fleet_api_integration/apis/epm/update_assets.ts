@@ -334,6 +334,8 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should have updated the saved object', async function () {
       await retry.tryForTime(10000, async () => {
+        await installPackage(pkgName, pkgUpdateVersion);
+
         const res = await kibanaServer.savedObjects.get({
           type: 'epm-packages',
           id: 'all_assets',
