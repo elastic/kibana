@@ -12,11 +12,9 @@ import {
   type FindSLOTemplatesResponse,
   type GetSLOTemplateResponse,
 } from '@kbn/slo-schema';
-import type {} from '../../domain/models';
-
+import { IllegalArgumentError } from '../../errors';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { IllegalArgumentError } from '../../errors';
 
 export const getSLOTemplateRoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slo_templates/{templateId}',
@@ -62,7 +60,7 @@ export const findSLOTemplatesRoute = createSloServerRoute({
     const { templateRepository } = await getScopedClients({ request, logger });
     const { page = 1, perPage = 20, search, tags } = params.query ?? {};
     if (page <= 0) {
-      throw new IllegalArgumentError('page must be positive integers');
+      throw new IllegalArgumentError('page must be a positive integer');
     }
     if (perPage < 0) {
       throw new IllegalArgumentError('perPage must be greater than 0');

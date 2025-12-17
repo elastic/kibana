@@ -320,7 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )) as unknown as { statusCode: number; message: string };
 
           expect(response.statusCode).to.eql(400);
-          expect(response.message).to.contain('page must be positive');
+          expect(response.message).to.contain('page must be a positive integer');
         });
 
         it('returns error when page is negative', async () => {
@@ -331,7 +331,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )) as unknown as { statusCode: number; message: string };
 
           expect(response.statusCode).to.eql(400);
-          expect(response.message).to.contain('page must be positive');
+          expect(response.message).to.contain('page must be a positive integer');
         });
 
         it('returns error when perPage exceeds 100', async () => {

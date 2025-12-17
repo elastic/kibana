@@ -67,15 +67,13 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
       total: response.total,
       perPage: response.per_page,
       page: response.page,
-      results: response.saved_objects
-        .map((so) => this.toSloTemplate(so.id, so.attributes))
-        .filter((template) => this.isSLOTemplate(template)),
+      results: response.saved_objects.map((so) => this.toSloTemplate(so.id, so.attributes)),
     };
   }
 
   // We use .decode() instead of .is() when objects contains durationType fields
   // stored as "1h", decoded as { unit: "h", value: 1 }
-  private toSloTemplate(id: string, stored: StoredSLOTemplate): SLOTemplate | undefined {
+  private toSloTemplate(id: string, stored: StoredSLOTemplate): SLOTemplate {
     try {
       const template: SLOTemplate = { templateId: id };
       if (stored.name && typeof stored.name === 'string') {
@@ -124,11 +122,7 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
 
       return template;
     } catch {
-      return undefined;
+      return { templateId: id };
     }
-  }
-
-  private isSLOTemplate(template: SLOTemplate | undefined): template is SLOTemplate {
-    return template !== undefined;
   }
 }
