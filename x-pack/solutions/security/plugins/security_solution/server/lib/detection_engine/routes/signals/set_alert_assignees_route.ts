@@ -6,7 +6,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { ALERTS_API_ALL } from '@kbn/security-solution-features/constants';
 import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -23,7 +23,7 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
       security: {
         authz: {
           // a t1_analyst, who has read only access, should be able to assign alerts
-          requiredPrivileges: [ALERTS_API_READ],
+          requiredPrivileges: [ALERTS_API_ALL],
         },
       },
     })
