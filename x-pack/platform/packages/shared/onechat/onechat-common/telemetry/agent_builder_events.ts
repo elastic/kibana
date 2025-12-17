@@ -158,7 +158,8 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
     agent_id: {
       type: 'keyword',
       _meta: {
-        description: 'ID of the agent',
+        description:
+          'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
         optional: false,
       },
     },
@@ -272,12 +273,12 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         type: 'keyword',
         _meta: {
           description:
-            'Tool ID invoked (normalized: built-in tools keep ID, custom tools become "custom")',
+            'Tool ID invoked (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
         },
       },
       _meta: {
         description:
-          'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom"). Intentionally includes duplicates (one entry per tool call) so counts per tool can be computed downstream by aggregating over this array.',
+          'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). Intentionally includes duplicates (one entry per tool call) so counts per tool can be computed downstream by aggregating over this array.',
         optional: false,
       },
     },

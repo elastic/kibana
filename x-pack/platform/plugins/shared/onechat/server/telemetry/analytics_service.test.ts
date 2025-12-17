@@ -99,7 +99,34 @@ describe('AnalyticsService', () => {
         started_at: '2025-01-01T00:00:00.000Z',
         time_to_first_token: 1,
         time_to_last_token: 2,
-        tools_invoked: ['custom'],
+        tools_invoked: ['custom-3c9388baa67aef90'],
+      });
+    });
+
+    it('reports a hashed agent_id for custom agents', () => {
+      service.reportRoundComplete({
+        agentId: 'my_custom_agent',
+        conversationId: 'conversation-1',
+        round,
+        roundCount: 2,
+        modelProvider,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
+        agent_id: 'custom-da3031a511e7fadf',
+        conversation_id: 'conversation-1',
+        input_tokens: 4,
+        llm_calls: 3,
+        message_length: 2,
+        model: 'gpt-97q',
+        model_provider: ModelProvider.OpenAI,
+        output_tokens: 5,
+        response_length: round.response.message.length,
+        round_number: 2,
+        started_at: '2025-01-01T00:00:00.000Z',
+        time_to_first_token: 1,
+        time_to_last_token: 2,
+        tools_invoked: ['custom-3c9388baa67aef90'],
       });
     });
 
