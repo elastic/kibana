@@ -20,7 +20,6 @@ export const GithubConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
-
   auth: {
     types: ['bearer'],
     headers: {
@@ -107,6 +106,7 @@ export const GithubConnector: ConnectorSpec = {
 
         const ref = typedInput.ref || 'main';
 
+        // Get the commit SHA for the ref
         const commitResponse = await ctx.client.get(
           `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/commits/${ref}`,
           {
@@ -115,71 +115,46 @@ export const GithubConnector: ConnectorSpec = {
             },
           }
         );
-
-        console.log(commitResponse.data);
         const commitSha = commitResponse.data.sha;
 
-        const treeResponseSchema = z.object({
-          sha: z.string(),
-          url: z.string(),
-          tree: z.array(
-            z.object({
-              path: z.string(),
-              mode: z.string(),
-              type: z.string(),
-              sha: z.string(),
-              size: z.number().optional(),
-              url: z.string(),
-            })
-          ),
-          truncated: z.boolean().optional(),
-        });
-
-        const treeResponse = await ctx.client.get<z.infer<typeof treeResponseSchema>>(
+        // Get the tree from the commit
+        const treeResponse = await ctx.client.get(
           `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/git/trees/${commitSha}`,
           {
             params: { recursive: '1' },
             headers: {
-              Authorization: `Bearer ${(ctx.secrets as { token?: string })?.token}`,
               Accept: 'application/vnd.github.v3+json',
             },
           }
         );
 
-        const validatedTree = treeResponseSchema.parse(treeResponse.data);
-        const markdownFiles = validatedTree.tree.filter(
-          (item) => item.type === 'blob' && item.path.toLowerCase().endsWith('.md')
+        // Filter the tree for markdown files
+        const markdownFiles = treeResponse.data.tree.filter(
+          (file: { type: string; path: string }) => file.type === 'blob' && file.path.toLowerCase().endsWith('.md')
         );
 
         if (markdownFiles.length === 0) {
-          throw new Error(`No .md files found in repository ${typedInput.owner}/${typedInput.repo} at ref ${ref}`);
+          throw new Error(`No .md files found in repository ${typedInput.owner}/${typedInput.repo}`);
         }
 
-
-
+        // Get the content of the markdown files
         const markdownFilesWithContent = await Promise.all(
-          markdownFiles.map(async (file) => {
+          markdownFiles.map(async (file: { path: string }) => {
             const response = await ctx.client.get(
               `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${file.path}`,
               {
                 params: { ref },
                 headers: {
-                  Authorization: `Bearer ${(ctx.secrets as { token?: string })?.token}`,
                   Accept: 'application/vnd.github.v3+json',
                 },
               }
             );
 
-            const validatedResponse = response.data;
-
-            // Decode base64 content to UTF-8 string and trim whitespace
-            const decodedContent = Buffer.from(validatedResponse.content, 'base64').toString('utf-8').trim();
-
             return {
-              name: validatedResponse.name,
-              path: validatedResponse.path,
-              content: decodedContent,
-              html_url: validatedResponse.html_url,
+              name: response.data.name,
+              path: response.data.path,
+              content: response.data.content,
+              html_url: response.data.html_url,
             };
           })
         );
@@ -193,6 +168,7 @@ export const GithubConnector: ConnectorSpec = {
           })
         );
 
+        // Only return the name, path, content, and html_url of markdown files
         return getDocsResponseSchema.parse(markdownFilesWithContent);
       },
     },

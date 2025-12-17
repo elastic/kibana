@@ -16,15 +16,9 @@ inputs:
     type: string
   - name: repo
     type: string
-  - name: state
-    type: choice
-    options:
-      - "open"
-      - "closed"
-      - "all"
-    default: "open"
   - name: query
     type: string
+    required: false
 steps:
   - name: search-issues
     type: github.searchIssues
@@ -32,7 +26,6 @@ steps:
     with:
       owner: "\${{inputs.owner}}"
       repo: "\${{inputs.repo}}"
-      state: "\${{inputs.state}}"
       query: "\${{inputs.query}}"
 `;
 }
@@ -65,7 +58,7 @@ steps:
 
 export function generateGithubListRepositoriesWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'github.list_repositories'
+name: 'github.list_repos'
 description: 'List repositories for a specific owner (user or organization)'
 enabled: true
 triggers:
@@ -73,43 +66,11 @@ triggers:
 inputs:
   - name: owner
     type: string
-  - name: type
-    type: choice
-    options:
-      - "all"
-      - "owner"
-      - "member"
-    default: "all"
-  - name: sort
-    type: choice
-    options:
-      - "created"
-      - "updated"
-      - "pushed"
-      - "full_name"
-    default: "full_name"
-  - name: direction
-    type: choice
-    options:
-      - "asc"
-      - "desc"
-    default: "asc"
-  - name: perPage
-    type: number
-    default: 30
-  - name: page
-    type: number
-    default: 1
 steps:
-  - name: list-repositories
-    type: github.listRepositories
+  - name: list-repos
+    type: github.listRepos
     connector-id: ${stackConnectorId}
     with:
       owner: "\${{inputs.owner}}"
-      type: "\${{inputs.type}}"
-      sort: "\${{inputs.sort}}"
-      direction: "\${{inputs.direction}}"
-      perPage: "\${{inputs.perPage}}"
-      page: "\${{inputs.page}}"
 `;
 }
