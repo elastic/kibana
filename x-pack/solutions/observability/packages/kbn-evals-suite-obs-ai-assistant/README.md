@@ -217,6 +217,24 @@ FROM .kibana-evaluations
 }
 ```
 
+## AI Insights Evaluations
+
+The package includes evaluations for AI Insights, which assess the correctness of LLM-generated summaries for alerts.
+
+### Running AI Insights Evaluations
+
+```bash
+EVALUATION_CONNECTOR_ID=your-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-observability/ai_insights/playwright.config.ts \
+    insights/alerts.spec.ts \
+  --project="your-connector"
+```
+
+### Prerequisites
+
+- Setup snapshots.
+
 ## Snapshot Replay
 
 For loading historical observability data (logs, metrics, traces) into Elasticsearch with timestamp transformation, use the [`@kbn/es-snapshot-loader`](../../../../platform/packages/shared/kbn-es-snapshot-loader/README.md) package:
