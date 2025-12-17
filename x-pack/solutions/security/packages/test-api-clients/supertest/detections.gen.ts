@@ -286,7 +286,7 @@ finalize it.
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
 > warn
-> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules and invalidates the old API key. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 > info
@@ -334,7 +334,7 @@ providing you with the most current and effective threat detection capabilities.
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
-> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules and invalidates the old API key. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -350,10 +350,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   /**
       * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
 The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
 > warn
 > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+>Invalidation of the old API key is dependent on the bulk action. Please refer to the [API key behavior](https://www.elastic.co/guide/en/security/current/detections-api-key-behavior.html) for more details.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -530,7 +532,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
-> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules and invalidates the old API key. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
