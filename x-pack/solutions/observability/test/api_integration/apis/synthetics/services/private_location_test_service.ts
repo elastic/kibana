@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
-import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { KibanaSupertestProvider, RetryService } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   legacyPrivateLocationsSavedObjectId,
@@ -21,21 +21,31 @@ export const INSTALLED_VERSION = '1.4.2';
 export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private readonly getService: FtrProviderContext['getService'];
+  private readonly retry: RetryService;
 
   constructor(getService: FtrProviderContext['getService']) {
     this.supertest = getService('supertest');
     this.getService = getService;
+    this.retry = getService('retry');
   }
 
   async installSyntheticsPackage() {
-    await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-    // Attempt to delete any existing package so we can install a specific version
-    await this.supertest.delete(`/api/fleet/epm/packages/synthetics`).set('kbn-xsrf', 'true');
-    await this.supertest
-      .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
-      .set('kbn-xsrf', 'true')
-      .send({ force: true })
-      .expect(200);
+    await this.retry.try(async () => {
+      const setupRes = await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send();
+
+      expect(setupRes.status).to.eql(200, JSON.stringify(setupRes.body));
+      expect(setupRes.body.isInitialized).to.eql(true, JSON.stringify(setupRes.body));
+
+      // Attempt to delete any existing package so we can install a specific version
+      await this.supertest.delete(`/api/fleet/epm/packages/synthetics`).set('kbn-xsrf', 'true');
+
+      const installRes = await this.supertest
+        .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
+        .set('kbn-xsrf', 'true')
+        .send({ force: true });
+
+      expect(installRes.status).to.eql(200, JSON.stringify(installRes.body));
+    });
   }
 
   async addFleetPolicy(name?: string) {
