@@ -51,7 +51,7 @@ import {
   getActiveDataSourceSamplesFromParent,
   getStepsForSimulation,
   spawnStep,
-  hasIncompleteConditions,
+  filterStepsWithIncompleteConditions,
   type StepSpawner,
 } from './utils';
 
@@ -239,16 +239,14 @@ export const interactiveModeMachine = setup({
         selectedConditionId,
       });
 
-      // Check for incomplete conditions (e.g., range with empty values) - don't simulate if conditions are invalid
-      if (hasIncompleteConditions(steps)) {
-        context.parentRef.send({ type: 'simulation.reset' });
-        return;
-      }
+      // Filter out steps with incomplete conditions (e.g., range with empty values)
+      // instead of blocking simulation entirely - this preserves field suggestions from earlier processors
+      const validSteps = filterStepsWithIncompleteConditions(steps);
 
       // Send steps update to simulator via parent
       context.parentRef.send({
         type: 'simulation.updateSteps',
-        steps,
+        steps: validSteps,
       });
     }),
     storeConditionFilter: assign((_, params: { conditionId: string | undefined }) => {

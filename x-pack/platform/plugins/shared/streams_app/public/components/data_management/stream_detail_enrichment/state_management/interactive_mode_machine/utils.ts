@@ -122,11 +122,13 @@ export function getActiveDataSourceSamplesFromParent(
   }));
 }
 
-export function hasIncompleteConditions(steps: StreamlangStepWithUIAttributes[]): boolean {
-  return steps.some((step) => {
+export function filterStepsWithIncompleteConditions(
+  steps: StreamlangStepWithUIAttributes[]
+): StreamlangStepWithUIAttributes[] {
+  return steps.filter((step) => {
     if (isActionBlock(step) && 'where' in step) {
-      return !isFilterConditionComplete(step.where);
+      return isFilterConditionComplete(step.where);
     }
-    return false;
+    return true;
   });
 }
