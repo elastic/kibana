@@ -57,7 +57,6 @@
     "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/rule-registry-plugin",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/esql-ast",
     "@kbn/field-types",
     "@kbn/security-plugin",
