@@ -15,6 +15,7 @@ const SERVERLESS_ONLY = [
   '@svlLogsEssentials',
   '@svlSearch',
   '@svlChat',
+  '@svlWorkplaceAI',
 ];
 const ESS_ONLY = ['@ess'];
 // svlChat is truly serverless only and doesn't have a stateful counterpart
