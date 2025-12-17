@@ -381,4 +381,96 @@ describe('Grouping', () => {
       expect(screen.getByTestId('unit-count')).toBeInTheDocument();
     });
   });
+
+  describe('emptyGroupingComponent', () => {
+    const emptyData = {
+      groupsCount: {
+        value: 0,
+      },
+      groupByFields: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [],
+      },
+      unitsCount: {
+        value: 0,
+      },
+    };
+
+    it('renders default EmptyGroupingComponent when emptyGroupingComponent is not provided', () => {
+      render(
+        <I18nProvider>
+          <Grouping {...testProps} data={emptyData} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('empty-results-panel')).toBeInTheDocument();
+    });
+
+    it('renders custom emptyGroupingComponent when provided', () => {
+      const CustomEmptyComponent = () => (
+        <div data-test-subj="custom-empty-component">Custom Empty State</div>
+      );
+
+      const propsWithCustomEmpty = {
+        ...testProps,
+        data: emptyData,
+        emptyGroupingComponent: <CustomEmptyComponent />,
+      };
+
+      render(
+        <I18nProvider>
+          <Grouping {...propsWithCustomEmpty} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('custom-empty-component')).toBeInTheDocument();
+      expect(screen.getByText('Custom Empty State')).toBeInTheDocument();
+      expect(screen.queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+    });
+
+    it('does not render emptyGroupingComponent when groupsCount > 0', () => {
+      const CustomEmptyComponent = () => (
+        <div data-test-subj="custom-empty-component">Custom Empty State</div>
+      );
+
+      const propsWithCustomEmpty = {
+        ...testProps,
+        emptyGroupingComponent: <CustomEmptyComponent />,
+      };
+
+      render(
+        <I18nProvider>
+          <Grouping {...propsWithCustomEmpty} />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('custom-empty-component')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+      expect(screen.getAllByTestId('grouping-accordion').length).toBe(3);
+    });
+
+    it('does not render emptyGroupingComponent while loading', () => {
+      const CustomEmptyComponent = () => (
+        <div data-test-subj="custom-empty-component">Custom Empty State</div>
+      );
+
+      const propsWithCustomEmpty = {
+        ...testProps,
+        data: emptyData,
+        emptyGroupingComponent: <CustomEmptyComponent />,
+        isLoading: true,
+      };
+
+      render(
+        <I18nProvider>
+          <Grouping {...propsWithCustomEmpty} />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('custom-empty-component')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+      expect(screen.getByTestId('is-loading-grouping-table')).toBeInTheDocument();
+    });
+  });
 });
