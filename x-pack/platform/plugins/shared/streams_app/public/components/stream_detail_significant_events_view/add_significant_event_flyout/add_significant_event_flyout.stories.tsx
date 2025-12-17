@@ -55,6 +55,7 @@ const logsStreamDefinition: Streams.WiredStream.GetResponse = {
 export const Default: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      generateOnMount={false}
       onFeatureIdentificationClick={() => {}}
       definition={logsStreamDefinition}
       initialSelectedFeatures={[]}
@@ -79,6 +80,7 @@ export const Default: StoryFn<{}> = () => {
 export const Edit: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      generateOnMount={false}
       refreshDefinition={() => {}}
       onFeatureIdentificationClick={() => {}}
       initialSelectedFeatures={[]}
