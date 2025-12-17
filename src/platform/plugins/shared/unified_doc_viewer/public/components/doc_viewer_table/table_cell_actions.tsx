@@ -304,7 +304,7 @@ const ToggleColumn: React.FC<
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType={isColumnAdded ? 'minusInCircle' : 'plusInCircle'}
+      iconType={isColumnAdded ? 'cross' : 'plusInCircle'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}

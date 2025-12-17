@@ -104,7 +104,7 @@ export const useUIFieldActions = ({
       },
       {
         id: 'toggleFieldColumnAction',
-        iconType: actions.isColumnAdded({ field }) ? 'minusInCircle' : 'plusInCircle',
+        iconType: actions.isColumnAdded({ field }) ? 'cross' : 'plusInCircle',
         label: toggleColumnLabel,
         onClick: () => actions.toggleFieldColumn({ field }),
       },
