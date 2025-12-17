@@ -20,8 +20,9 @@ import type {
   GetDescriptionFieldsFn,
   RuleType,
 } from '../../../../types';
-import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
@@ -228,7 +229,7 @@ describe('rule_details', () => {
       expect(
         shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find('EuiPageHeader')
+        ).find(KibanaPageTemplate)
       ).toBeTruthy();
     });
 
@@ -534,12 +535,12 @@ describe('rule_details', () => {
 
       it('links to the Edit flyout', () => {
         const rule = mockRule();
-        const pageHeaderProps = shallowWithIntl(
+        const pageTemplateProps = shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         )
-          .find('EuiPageHeader')
-          .props() as EuiPageHeaderProps;
-        const rightSideItems = pageHeaderProps.rightSideItems;
+          .find(KibanaPageTemplate)
+          .props() as KibanaPageTemplateProps;
+        const rightSideItems = pageTemplateProps.pageHeader?.rightSideItems;
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
           <React.Fragment>
             <EuiButtonEmpty
@@ -598,12 +599,12 @@ describe('rule_details', () => {
           },
         ],
       });
-      const pageHeaderProps = shallowWithIntl(
+      const pageTemplateProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
-        .props() as EuiPageHeaderProps;
-      const rightSideItems = pageHeaderProps.rightSideItems;
+        .find(KibanaPageTemplate)
+        .props() as KibanaPageTemplateProps;
+      const rightSideItems = pageTemplateProps.pageHeader?.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
@@ -662,12 +663,12 @@ describe('rule_details', () => {
         muteAll: false,
         actions: [],
       });
-      const pageHeaderProps = shallowWithIntl(
+      const pageTemplateProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
-        .props() as EuiPageHeaderProps;
-      const rightSideItems = pageHeaderProps.rightSideItems;
+        .find(KibanaPageTemplate)
+        .props() as KibanaPageTemplateProps;
+      const rightSideItems = pageTemplateProps.pageHeader?.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
