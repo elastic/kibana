@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './types';
+export * from './tag_utils';
+export * from './transform_utils';
+export * from './file_utils';
 export * from './search_configs';
