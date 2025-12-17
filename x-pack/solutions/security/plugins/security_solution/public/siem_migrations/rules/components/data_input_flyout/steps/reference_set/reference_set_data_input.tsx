@@ -42,7 +42,7 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
       [missingResourcesIndexed]
     );
     const onAllReferenceSetCreated = useCallback(() => {
-      setDataInputStep(QradarDataInputStep.MitreMapping);
+      setDataInputStep(QradarDataInputStep.Enhancements);
     }, [setDataInputStep]);
 
     const dataInputStatus = useMemo(

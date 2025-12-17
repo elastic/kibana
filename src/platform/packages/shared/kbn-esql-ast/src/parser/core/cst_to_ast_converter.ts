@@ -1230,9 +1230,26 @@ export class CstToAstConverter {
     return command;
   }
 
-  private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
+  private fromJoinTarget(
+    ctx: cst.JoinTargetContext
+  ): ast.ESQLSource | ast.ESQLBinaryExpression<'as'> {
     if (ctx._index) {
-      return this.toSource(ctx._index);
+      const source = this.toSource(ctx._index);
+
+      if (ctx._qualifier) {
+        const alias = Builder.identifier(
+          { name: ctx._qualifier.text },
+          this.createParserFieldsFromToken(ctx._qualifier)
+        );
+
+        return Builder.expression.func.binary('as', [source, alias], undefined, {
+          location: getPosition(ctx.start, ctx.stop),
+          text: ctx.getText(),
+          incomplete: Boolean(ctx.exception),
+        });
+      }
+
+      return source;
     } else {
       return Builder.expression.source.node(
         {
@@ -1988,6 +2005,7 @@ export class CstToAstConverter {
       {
         args: [Builder.identifier({ name: text }, this.createParserFieldsFromToken(node.symbol))],
       },
+      undefined,
       {
         text,
         location: getPosition(node.symbol),
@@ -2553,6 +2571,7 @@ export class CstToAstConverter {
     ctx: antlr.ParserRuleContext | cst.QualifiedNamePatternContext | cst.QualifiedNameContext
   ): ast.ESQLColumn {
     const args: ast.ESQLColumn['args'] = [];
+    let qualifier: ast.ESQLIdentifier | undefined;
 
     if (ctx instanceof cst.QualifiedNamePatternContext) {
       const node = this.fromQualifiedNamePattern(ctx);
@@ -2565,8 +2584,12 @@ export class CstToAstConverter {
         throw new Error(`Unexpected node type: ${(node as ast.ESQLProperNode).type} in toColumn`);
       }
     } else if (ctx instanceof cst.QualifiedNameContext) {
-      // TODO: new grammar also introduced here bracketed syntax.
-      // See: https://github.com/elastic/kibana/pull/233585/files#diff-cecb7eac6ebaa167a4c232db56b2912984308749e8b79092c7802230bca7dff5R156-R158
+      const qualifierToken = ctx._qualifier;
+      if (qualifierToken) {
+        const qualifierNode = this.toIdentifierFromToken(qualifierToken);
+        qualifier = qualifierNode;
+      }
+
       const fieldNameCtx = ctx._name ?? ctx.fieldName();
       const list = fieldNameCtx ? fieldNameCtx.identifierOrParameter_list() : [];
 
@@ -2592,14 +2615,11 @@ export class CstToAstConverter {
 
     const text = unescapeColumn(ctx.getText());
     const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
-    const column = Builder.expression.column(
-      { args },
-      {
-        text: ctx.getText(),
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception || text === ''),
-      }
-    );
+    const column = Builder.expression.column({ args }, qualifier, {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+    });
 
     column.name = text;
     column.quoted = hasQuotes;
@@ -2608,17 +2628,7 @@ export class CstToAstConverter {
   }
 
   private fromQualifiedName(ctx: cst.QualifiedNameContext): ast.ESQLColumn {
-    const node = this.toColumn(ctx);
-    const qualifierToken = ctx._qualifier;
-
-    if (qualifierToken) {
-      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
-
-      node.qualifier = qualifierNode;
-      node.args = [qualifierNode, ...node.args];
-    }
-
-    return node;
+    return this.toColumn(ctx);
   }
 
   private fromQualifiedNamePattern(
@@ -2665,23 +2675,14 @@ export class CstToAstConverter {
 
     const text = unescapeColumn(ctx.getText());
     const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
-    const column = Builder.expression.column(
-      { args },
-      {
-        text: ctx.getText(),
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception || text === ''),
-      }
-    );
-
     const qualifierToken = ctx._qualifier;
+    const qualifierNode = qualifierToken ? this.toIdentifierFromToken(qualifierToken) : undefined;
 
-    if (qualifierToken) {
-      const qualifierNode = this.toIdentifierFromToken(qualifierToken);
-
-      column.qualifier = qualifierNode;
-      column.args = [qualifierNode, ...column.args];
-    }
+    const column = Builder.expression.column({ args }, qualifierNode, {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+    });
 
     column.name = text;
     column.quoted = hasQuotes;
@@ -2699,6 +2700,7 @@ export class CstToAstConverter {
     };
     const node = Builder.expression.column(
       { args: [Builder.identifier({ name: '*' }, parserFields)] },
+      undefined,
       parserFields
     );
 

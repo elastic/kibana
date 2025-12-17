@@ -10,7 +10,7 @@ import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
 import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
@@ -51,6 +51,10 @@ export function SignificantEventsTable({
   const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
 
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  const maxYValue = useMemo(
+    () => items.reduce((max, item) => Math.max(max, ...item.occurrences.map(({ y }) => y)), 0),
+    [items]
+  );
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -147,8 +151,9 @@ export function SignificantEventsTable({
           <SignificantEventsHistogramChart
             id={item.query.id}
             occurrences={item.occurrences}
-            change={change}
+            changes={change ? [change] : []}
             xFormatter={xFormatter}
+            maxYValue={maxYValue}
           />
         );
       },
