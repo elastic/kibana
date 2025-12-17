@@ -7,7 +7,12 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
-import type { Attachment, AttachmentInput } from '../attachments';
+import type {
+  Attachment,
+  AttachmentInput,
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '../attachments';
 import type { PromptRequest } from '../agents/prompts';
 import type { RoundState } from './round_state';
 
@@ -21,8 +26,13 @@ export interface RoundInput {
   message: string;
   /**
    * Optional attachments to provide to the agent.
+   * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: Attachment[];
+  /**
+   * References to versioned conversation-level attachments.
+   */
+  attachment_refs?: AttachmentVersionRef[];
 }
 
 /**
@@ -35,8 +45,13 @@ export interface ConverseInput {
   message?: string;
   /**
    * Optional attachments to provide to the agent.
+   * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
+  /**
+   * References to versioned conversation-level attachments.
+   */
+  attachment_refs?: AttachmentVersionRef[];
   /**
    * Response from the user to an prompt request.
    */
@@ -202,6 +217,10 @@ export interface RoundModelUsageStats {
    * Total number of output tokens received this round.
    */
   output_tokens: number;
+  /**
+   * Model identifier from the provider response, if available.
+   */
+  model?: string;
 }
 
 /**
@@ -222,6 +241,11 @@ export interface Conversation {
   updated_at: string;
   /** list of round for this conversation */
   rounds: ConversationRound[];
+  /**
+   * Conversation-level versioned attachments.
+   * These attachments are shared across all rounds and can be referenced via attachment_refs.
+   */
+  attachments?: VersionedAttachment[];
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

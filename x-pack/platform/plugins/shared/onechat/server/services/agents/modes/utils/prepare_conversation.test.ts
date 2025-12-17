@@ -21,6 +21,10 @@ import type {
   AttachmentTypeDefinition,
 } from '@kbn/onechat-server/attachments';
 import { getToolResultId } from '@kbn/onechat-server/tools';
+import {
+  createAgentHandlerContextMock,
+  type AgentHandlerContextMock,
+} from '../../../../test_utils/runner';
 import { prepareConversation } from './prepare_conversation';
 
 jest.mock('@kbn/onechat-server/tools', () => ({
@@ -30,6 +34,7 @@ jest.mock('@kbn/onechat-server/tools', () => ({
 const mockGetToolResultId = getToolResultId as jest.MockedFunction<typeof getToolResultId>;
 
 describe('prepareConversation', () => {
+  let mockContext: AgentHandlerContextMock;
   let mockAttachmentsService: jest.Mocked<AttachmentsService>;
 
   const attachmentDefinition = ({
@@ -69,10 +74,8 @@ describe('prepareConversation', () => {
   };
 
   beforeEach(() => {
-    mockAttachmentsService = {
-      getTypeDefinition: jest.fn(),
-      convertAttachmentTool: jest.fn(),
-    };
+    mockContext = createAgentHandlerContextMock();
+    mockAttachmentsService = mockContext.attachments;
 
     mockGetToolResultId.mockReset();
     let idCounter = 0;
@@ -112,7 +115,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result).toEqual({
@@ -137,7 +140,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toEqual([]);
@@ -189,7 +192,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         nextInput,
         previousRounds: [],
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toHaveLength(2);
@@ -229,7 +232,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         nextInput,
         previousRounds: [],
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toHaveLength(1);
@@ -256,7 +259,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toHaveLength(1);
@@ -287,7 +290,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments[0].attachment.id).toEqual('existing-id');
@@ -344,7 +347,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toHaveLength(3);
@@ -388,7 +391,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments[0].attachment).toEqual({
@@ -417,7 +420,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds).toHaveLength(1);
@@ -460,7 +463,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds[0].input.attachments).toHaveLength(1);
@@ -524,7 +527,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds).toHaveLength(3);
@@ -568,7 +571,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds[0]).toEqual({

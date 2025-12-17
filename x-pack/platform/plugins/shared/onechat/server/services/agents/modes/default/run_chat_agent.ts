@@ -57,8 +57,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, stateManager, attachments, events }
+  context
 ) => {
+  const { logger, modelProvider, toolProvider, attachments, request, stateManager, events } = context;
+
   ensureValidInput({ input: nextInput, conversation });
 
   const pendingRound = getPendingRound(conversation);
@@ -76,7 +78,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
-    attachmentsService: attachments,
+    context,
   });
 
   const selectedTools = await selectTools({

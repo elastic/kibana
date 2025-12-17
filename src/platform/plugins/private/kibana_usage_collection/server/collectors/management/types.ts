@@ -52,6 +52,7 @@ export interface UsageStats {
   'agentBuilder:enabled': boolean;
   'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
+  'agentBuilder:externalMcp': boolean;
   'dataConnectors:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -75,7 +76,6 @@ export interface UsageStats {
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enablePrivilegedUserMonitoring': boolean;
-  'securitySolution:enableEsqlRiskScoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'securitySolution:defaultValueReportMinutes': string;
@@ -176,13 +176,14 @@ export interface UsageStats {
   'observability:apmEnableTransactionProfiling': boolean;
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
+  'aiAssistant:preferredChatExperience': string;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
   'cases:incrementalIdDisplay:enabled': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
-  'observability:streamsEnableSignificantEventsAnalyzer': boolean;
+  'observability:streamsEnableSignificantEventsDiscovery': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableGroupStreams': boolean;

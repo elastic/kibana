@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiSwitch } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { isGroupingBucket } from '@kbn/grouping/src';
+import type { ParsedGroupingAggregation } from '@kbn/grouping/src';
+import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
-  defaultGroupingOptions,
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
-  defaultGroupTitleRenderers,
 } from '../../alerts_table/grouping_settings';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -27,8 +29,13 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { AlertsTable } from '../../alerts_table';
+import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
+import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
+import { groupingOptions, groupingSettings } from './grouping_configs';
+import * as i18n from './translations';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -37,96 +44,151 @@ export interface TableSectionProps {
    * DataView used to fetch the alerts data
    */
   dataView: DataView;
+
+  /**
+   * The status filter retrieved from the FiltersSection component to filter the table
+   * This is an array of Status values, such as ['open', 'acknowledged', 'closed', 'in-progress']
+   */
+  statusFilter: Status[];
+  /**
+   * The page filters retrieved from the FiltersSection component to filter the table
+   */
+  pageFilters: Filter[] | undefined;
 }
 
 /**
  * Renders the alerts table with grouping functionality in the attacks page.
  */
-export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
-  const getGlobalFiltersQuerySelector = useMemo(
-    () => inputsSelectors.globalFiltersQuerySelector(),
-    []
-  );
-  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+export const TableSection = React.memo(
+  ({ dataView, statusFilter, pageFilters }: TableSectionProps) => {
+    const getGlobalFiltersQuerySelector = useMemo(
+      () => inputsSelectors.globalFiltersQuerySelector(),
+      []
+    );
+    const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const query = useDeepEqualSelector(getGlobalQuerySelector);
+    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+    const query = useDeepEqualSelector(getGlobalQuerySelector);
 
-  const { to, from } = useGlobalTime();
+    const { to, from } = useGlobalTime();
 
-  const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
+    const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
 
-  const { loading: listsConfigLoading } = useListsConfig();
+    const { loading: listsConfigLoading } = useListsConfig();
 
-  const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
-    TableId.alertsOnAttacksPage
-  );
+    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+      TableId.alertsOnAttacksPage
+    );
 
-  // AlertsTable manages global filters itself, so not including `filters`
-  const defaultFilters = useMemo(
-    () => [
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-    ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
-  );
-
-  const isLoading = useMemo(
-    () => userInfoLoading || listsConfigLoading,
-    [listsConfigLoading, userInfoLoading]
-  );
-
-  const renderAlertTable = useCallback(
-    (groupingFilters: Filter[]) => {
+    // for showing / hiding anonymized data:
+    const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
+    const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
+    const showAnonymizedSwitch = useMemo(() => {
       return (
-        <AlertsTable
-          tableType={TableId.alertsOnAttacksPage}
-          inputFilters={[...defaultFilters, ...groupingFilters]}
-          isLoading={isLoading}
-          pageScope={PageScope.alerts} // show only detection alerts
-          disableAdditionalToolbarControls={groupingFilters.length > 0}
+        <EuiSwitch
+          checked={showAnonymized}
+          compressed={true}
+          data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
+          label={i18n.SHOW_ANONYMIZED_LABEL}
+          onChange={onToggleShowAnonymized}
         />
       );
-    },
-    [defaultFilters, isLoading]
-  );
+    }, [onToggleShowAnonymized, showAnonymized]);
 
-  const groupTakeActionItems = useGroupTakeActionsItems({
-    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
-  });
+    const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
+    const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
+      attackIds,
+      showAnonymized,
+    });
 
-  const accordionExtraActionGroupStats = useMemo(
-    () => ({
-      aggregations: defaultGroupStatsAggregations,
-      renderer: defaultGroupStatsRenderer,
-    }),
-    []
-  );
+    const onAggregationsChange = useCallback(
+      (aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>, groupingLevel?: number) => {
+        if (groupingLevel != null && groupingLevel !== 0) {
+          return;
+        }
+        const attackIdsGroupBuckets = aggs.groupByFields?.buckets?.filter(
+          (bucket) =>
+            isGroupingBucket(bucket) &&
+            !bucket.isNullGroup &&
+            bucket.selectedGroup === ALERT_ATTACK_IDS
+        );
+        const groupKeys = attackIdsGroupBuckets?.flatMap(({ key }) => key);
+        setAttackIds(groupKeys);
+      },
+      []
+    );
 
-  const dataViewSpec = useMemo(() => {
-    return dataView.toSpec(true);
-  }, [dataView]);
+    // AlertsTable manages global filters itself, so not including `filters`
+    const defaultFilters = useMemo(
+      () => [
+        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+        ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+        ...(pageFilters ?? []),
+      ],
+      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, pageFilters]
+    );
 
-  return (
-    <div data-test-subj={TABLE_SECTION_TEST_ID}>
-      <GroupedAlertsTable
-        accordionButtonContent={defaultGroupTitleRenderers}
-        accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-        dataView={dataView}
-        dataViewSpec={dataViewSpec}
-        defaultFilters={defaultFilters}
-        defaultGroupingOptions={defaultGroupingOptions}
-        from={from}
-        globalFilters={globalFilters}
-        globalQuery={query}
-        groupTakeActionItems={groupTakeActionItems}
-        loading={isLoading}
-        renderChildComponent={renderAlertTable}
-        tableId={TableId.alertsOnAttacksPage}
-        to={to}
-        pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
-      />
-    </div>
-  );
-});
+    const isLoading = useMemo(
+      () => userInfoLoading || listsConfigLoading || !Array.isArray(pageFilters),
+      [listsConfigLoading, userInfoLoading, pageFilters]
+    );
+
+    const renderAlertTable = useCallback(
+      (groupingFilters: Filter[]) => {
+        return (
+          <AlertsTable
+            tableType={TableId.alertsOnAttacksPage}
+            inputFilters={[...defaultFilters, ...groupingFilters]}
+            isLoading={isLoading}
+            pageScope={PageScope.alerts} // show only detection alerts
+            disableAdditionalToolbarControls={groupingFilters.length > 0}
+          />
+        );
+      },
+      [defaultFilters, isLoading]
+    );
+
+    const groupTakeActionItems = useGroupTakeActionsItems({
+      currentStatus: statusFilter,
+      showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
+    });
+
+    const accordionExtraActionGroupStats = useMemo(
+      () => ({
+        aggregations: defaultGroupStatsAggregations,
+        renderer: defaultGroupStatsRenderer,
+      }),
+      []
+    );
+
+    const dataViewSpec = useMemo(() => {
+      return dataView.toSpec(true);
+    }, [dataView]);
+
+    return (
+      <div data-test-subj={TABLE_SECTION_TEST_ID}>
+        <GroupedAlertsTable
+          accordionButtonContent={defaultGroupTitleRenderers}
+          accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+          dataView={dataView}
+          dataViewSpec={dataViewSpec}
+          defaultFilters={defaultFilters}
+          defaultGroupingOptions={groupingOptions}
+          from={from}
+          globalFilters={globalFilters}
+          globalQuery={query}
+          groupTakeActionItems={groupTakeActionItems}
+          loading={isLoading}
+          renderChildComponent={renderAlertTable}
+          tableId={TableId.alertsOnAttacksPage}
+          to={to}
+          onAggregationsChange={onAggregationsChange}
+          additionalToolbarControls={[showAnonymizedSwitch]}
+          pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
+          settings={groupingSettings}
+        />
+      </div>
+    );
+  }
+);
 TableSection.displayName = 'TableSection';

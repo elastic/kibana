@@ -49,7 +49,7 @@ export function useSignificantEventsApi({
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ feature, kql, title, id, severity_score: severityScore }) => {
+    upsertQuery: async ({ id, ...body }) => {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -57,12 +57,7 @@ export function useSignificantEventsApi({
             name,
             queryId: id,
           },
-          body: {
-            kql,
-            title,
-            feature,
-            severity_score: severityScore,
-          },
+          body,
         },
       });
     },

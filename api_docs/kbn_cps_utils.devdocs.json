@@ -11,7 +11,7 @@
         "label": "ProjectPicker",
         "description": [],
         "signature": [
-          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, readonlyCustomTitle, }: ",
+          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, }: ",
           {
             "pluginId": "@kbn/cps-utils",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.ProjectPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n  readonlyCustomTitle,\n}",
+            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n}",
             "description": [],
             "signature": [
               {
@@ -93,7 +93,7 @@
         "label": "ProjectPickerContent",
         "description": [],
         "signature": [
-          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, readonlyCustomTitle, }: ",
+          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, }: ",
           {
             "pluginId": "@kbn/cps-utils",
             "scope": "public",
@@ -112,7 +112,7 @@
             "id": "def-public.ProjectPickerContent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n  readonlyCustomTitle,\n}",
+            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n}",
             "description": [],
             "signature": [
               {
@@ -426,8 +426,8 @@
                 "pluginId": "@kbn/cps-utils",
                 "scope": "public",
                 "docId": "kibKbnCpsUtilsPluginApi",
-                "section": "def-public.ProjectPickerAccessInfo",
-                "text": "ProjectPickerAccessInfo"
+                "section": "def-public.ProjectRoutingAccess",
+                "text": "ProjectRoutingAccess"
               },
               ">"
             ],
@@ -436,29 +436,16 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cps-utils",
-        "id": "def-public.ProjectPickerAccessInfo",
-        "type": "Interface",
-        "tags": [],
-        "label": "ProjectPickerAccessInfo",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
+          },
           {
             "parentPluginId": "@kbn/cps-utils",
-            "id": "def-public.ProjectPickerAccessInfo.access",
-            "type": "Enum",
+            "id": "def-public.ICPSManager.getProjectPickerAccess",
+            "type": "Function",
             "tags": [],
-            "label": "access",
+            "label": "getProjectPickerAccess",
             "description": [],
             "signature": [
+              "() => ",
               {
                 "pluginId": "@kbn/cps-utils",
                 "scope": "public",
@@ -469,21 +456,9 @@
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cps-utils",
-            "id": "def-public.ProjectPickerAccessInfo.readonlyMessage",
-            "type": "string",
-            "tags": [],
-            "label": "readonlyMessage",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -596,20 +571,6 @@
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cps-utils",
-            "id": "def-public.ProjectPickerContentProps.readonlyCustomTitle",
-            "type": "string",
-            "tags": [],
-            "label": "readonlyCustomTitle",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -718,20 +679,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cps-utils",
-            "id": "def-public.ProjectPickerProps.readonlyCustomTitle",
-            "type": "string",
-            "tags": [],
-            "label": "readonlyCustomTitle",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
             "deprecated": false,
@@ -880,7 +827,7 @@
         "label": "ProjectRoutingValue",
         "description": [],
         "signature": [
-          "\"ALL\" | \"_alias:_origin\""
+          "\"_alias:*\" | \"_alias:_origin\""
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
         "deprecated": false,
@@ -899,7 +846,7 @@
           "\nProject routing constants for cross-project search\nThese are stored as strings in saved objects to explicitly override parent values"
         ],
         "signature": [
-          "{ readonly ALL: \"ALL\"; readonly ORIGIN: \"_alias:_origin\"; }"
+          "{ readonly ALL: \"_alias:*\"; readonly ORIGIN: \"_alias:_origin\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
         "deprecated": false,
