@@ -13,7 +13,7 @@ import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alert
 import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base/knowledge_base_retrieval_tool';
 import { KNOWLEDGE_BASE_WRITE_TOOL } from './knowledge_base/knowledge_base_write_tool';
 import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs_tool';
-import { ENTITY_RISK_SCORE_TOOL } from './entity_analytics/entity_risk_score';
+import { ENTITY_RISK_SCORE_TOOL } from './entity_risk_score/entity_risk_score';
 import { INTEGRATION_KNOWLEDGE_TOOL } from './integration_knowledge/integration_knowledge_tool';
 import { ASSET_MISCONFIGURATIONS_TOOL } from './asset_misconfigurations/asset_misconfigurations_tool';
 
