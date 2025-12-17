@@ -331,10 +331,7 @@ export function continueConversation({
       return of(
         createServerSideFunctionResponseError({
           name: functionCallName,
-          error: createToolNotFoundError({
-            name: functionCallName,
-            args: lastMessage.function_call!.arguments ?? '',
-          }),
+          error: createToolNotFoundError(functionCallName),
         })
       );
     }
