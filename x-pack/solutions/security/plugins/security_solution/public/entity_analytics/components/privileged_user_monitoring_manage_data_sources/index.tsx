@@ -9,6 +9,7 @@ import { EuiCallOut, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CsvUploadManageDataSource } from './csv_upload_manage_data_source';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -27,6 +28,9 @@ export const PrivilegedUserMonitoringManageDataSources = ({
 }) => {
   const spaceId = useSpaceId();
   const [addDataSourceResult, setAddDataSourceResult] = useState<AddDataSourceResult | undefined>();
+
+  const { application } = useKibana().services;
+  const fleetRead = application?.capabilities?.fleetv2?.read ?? false;
 
   return (
     <>
@@ -84,7 +88,18 @@ export const PrivilegedUserMonitoringManageDataSources = ({
         </>
       )}
 
-      <IntegrationsManageDataSource />
+      {!fleetRead && (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.integrations.noAccessMessage"
+              defaultMessage="Insufficient privileges to view or manage integrations data source. Please contact your administrator."
+            />
+          }
+          color="warning"
+        />
+      )}
+      {fleetRead && <IntegrationsManageDataSource />}
       <EuiSpacer size="xxl" />
       <IndexImportManageDataSource setAddDataSourceResult={setAddDataSourceResult} />
       <EuiSpacer size="xxl" />

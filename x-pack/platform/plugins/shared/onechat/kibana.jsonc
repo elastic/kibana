@@ -13,6 +13,8 @@
       "onechat"
     ],
     "requiredPlugins": [
+      "actions",
+      "aiAssistantManagementSelection",
       "data",
       "dataViews",
       "uiActions",
@@ -24,7 +26,11 @@
       "licensing",
       "management",
       "share",
-      "licensing"
+      "spaces",
+      "stackConnectors",
+      "licensing",
+      "triggersActionsUi",
+      "esUiShared"
     ],
     "requiredBundles": [
       "kibanaReact"
@@ -32,8 +38,9 @@
     "optionalPlugins": [
       "cloud",
       "licenseManagement",
-      "spaces",
-      "workflowsManagement"
+      "workflowsExtensions",
+      "workflowsManagement",
+      "usageCollection"
     ],
     "extraPublicDirs": []
   }

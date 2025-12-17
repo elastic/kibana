@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-
 import { createFleetAuthzMock } from '../../common/mocks';
 
 import { OutputClient } from './output_client';
@@ -23,20 +21,18 @@ describe('OutputClient', () => {
 
   describe('getDefaultDataOutputId()', () => {
     it('should call output service `getDefaultDataOutputId()` method', async () => {
-      const soClient = savedObjectsClientMock.create();
       const authz = createFleetAuthzMock();
-      const outputClient = new OutputClient(soClient, authz);
+      const outputClient = new OutputClient(authz);
       await outputClient.getDefaultDataOutputId();
 
-      expect(mockedOutputService.getDefaultDataOutputId).toHaveBeenCalledWith(soClient);
+      expect(mockedOutputService.getDefaultDataOutputId).toHaveBeenCalledWith();
     });
 
     it('should throw error when no `fleet.readSettings` and no `fleet.readAgentPolicies` privileges', async () => {
-      const soClient = savedObjectsClientMock.create();
       const authz = createFleetAuthzMock();
       authz.fleet.readSettings = false;
       authz.fleet.readAgentPolicies = false;
-      const outputClient = new OutputClient(soClient, authz);
+      const outputClient = new OutputClient(authz);
 
       await expect(outputClient.getDefaultDataOutputId()).rejects.toMatchInlineSnapshot(
         `[OutputUnauthorizedError]`
@@ -47,20 +43,18 @@ describe('OutputClient', () => {
 
   describe('get()', () => {
     it('should call output service `get()` method', async () => {
-      const soClient = savedObjectsClientMock.create();
       const authz = createFleetAuthzMock();
-      const outputClient = new OutputClient(soClient, authz);
+      const outputClient = new OutputClient(authz);
       await outputClient.get('default');
 
-      expect(mockedOutputService.get).toHaveBeenCalledWith(soClient, 'default');
+      expect(mockedOutputService.get).toHaveBeenCalledWith('default');
     });
 
     it('should throw error when no `fleet.readSettings` and no `fleet.readAgentPolicies` privileges', async () => {
-      const soClient = savedObjectsClientMock.create();
       const authz = createFleetAuthzMock();
       authz.fleet.readSettings = false;
       authz.fleet.readAgentPolicies = false;
-      const outputClient = new OutputClient(soClient, authz);
+      const outputClient = new OutputClient(authz);
 
       await expect(outputClient.get('default')).rejects.toMatchInlineSnapshot(
         `[OutputUnauthorizedError]`

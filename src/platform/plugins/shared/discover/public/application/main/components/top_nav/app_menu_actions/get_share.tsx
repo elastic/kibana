@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import type { AppMenuActionPrimary } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
@@ -30,14 +30,16 @@ export const getShareAppMenuItem = ({
   hasUnsavedChanges,
   currentTab,
   persistedDiscoverSession,
+  totalHitsState,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
   hasUnsavedChanges: boolean;
-  currentTab: TabState | undefined;
+  currentTab: TabState;
   persistedDiscoverSession: DiscoverSession | undefined;
+  totalHitsState: DataTotalHitsMsg;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -54,27 +56,26 @@ export const getShareAppMenuItem = ({
 
     const searchSourceSharingData = await getSharingData(
       stateContainer.savedSearchState.getState().searchSource,
-      stateContainer.appState.getState(),
+      currentTab.appState,
       services,
       isEsqlMode
     );
 
     const { locator, discoverFeatureFlags } = services;
-    const appState = stateContainer.appState.getState();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
     const refreshInterval = timefilter.getRefreshInterval();
     const filters = services.filterManager.getFilters();
 
     // Share -> Get links -> Snapshot
-    const params: DiscoverAppLocatorParams = {
-      ...omit(appState, 'dataSource'),
+    const params: DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } = {
+      ...omit(currentTab.appState, 'dataSource'),
       ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
       ...(dataView?.isPersisted()
         ? { dataViewId: dataView?.id }
         : { dataViewSpec: dataView?.toMinimalSpec() }),
       filters,
-      timeRange,
+      timeRange: timeRange ?? undefined,
       refreshInterval,
     };
 
@@ -132,24 +133,12 @@ export const getShareAppMenuItem = ({
           integration: {
             export: {
               csvReports: {
-                draftModeCallOut: (
-                  <EuiCallOut
-                    color="warning"
-                    iconType="warning"
-                    title={i18n.translate('discover.exports.csvReports.warning.title', {
-                      defaultMessage: 'Unsaved changes',
-                    })}
-                  >
-                    {i18n.translate(
-                      'discover.exports.csvReports.postURLWatcherMessage.unsavedChanges',
-                      {
-                        defaultMessage: 'URL may change if you upgrade Kibana.',
-                      }
-                    )}
-                  </EuiCallOut>
-                ),
+                draftModeCallOut: true,
               },
             },
+          },
+          link: {
+            draftModeCallOut: tabsEnabled,
           },
         },
       },
@@ -163,6 +152,7 @@ export const getShareAppMenuItem = ({
           i18n.translate('discover.localMenu.fallbackReportTitle', {
             defaultMessage: 'Untitled Discover session',
           }),
+        totalHits: totalHitsState.result || 0,
       },
       isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
       onClose: () => {

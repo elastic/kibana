@@ -349,10 +349,25 @@ export class ComboBoxService extends FtrService {
    */
   public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.closeOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
-    if (isOptionsListOpen) {
+
+    // wait for potential other animations to finish (e.g. due to closing on selection)
+    const isOptionListClosed = await this.retry.tryWithRetries(
+      'wait for possible ongoing closing of the combobox listbox',
+      async () => {
+        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
+          timeout: 50,
+        });
+
+        return !isOpen;
+      },
+      {
+        timeout: 5000,
+        initialDelay: 500,
+        retryCount: 3,
+      }
+    );
+
+    if (!isOptionListClosed) {
       const input = await comboBoxElement.findByTagName('input');
       await input.pressKeys(this.browser.keys.ESCAPE);
     }

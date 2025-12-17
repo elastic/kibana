@@ -8,8 +8,8 @@ paths:
       summary: Get action details
       operationId: EndpointGetActionsDetails
       description: Get the details of a response action using the action ID.
-      x-codegen-enabled: true
-      x-labels: [ess, serverless]
+      x-codegen-enabled: false
+      x-labels: [ ess, serverless ]
       parameters:
         - name: action_id
           in: path
@@ -24,38 +24,416 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetEndpointActionResponse'
+                $ref: '#/components/schemas/ActionDetailsResponse'
+
+
 components:
+  x-codegen-enabled: false
   schemas:
-    GetEndpointActionResponse:
+    ActionDetailsResponse:
+      oneOf:
+        - $ref: '#/components/schemas/KillProcess'
+        - $ref: '#/components/schemas/GetFile'
+        - $ref: '#/components/schemas/Execute'
+        - $ref: '#/components/schemas/Runscript'
+        - $ref: '#/components/schemas/Upload'
+        - $ref: '#/components/schemas/Scan'
+        - $ref: '#/components/schemas/Cancel'
+        - $ref: '#/components/schemas/Isolate'
+        - $ref: '#/components/schemas/Unisolate'
+        - $ref: '#/components/schemas/SuspendProcess'
+        - $ref: '#/components/schemas/RunningProcesses'
+      discriminator:
+        propertyName: command
+        mapping:
+          kill-process: '#/components/schemas/KillProcess'
+          get-file: '#/components/schemas/GetFile'
+          execute: '#/components/schemas/Execute'
+          runscript: '#/components/schemas/Runscript'
+          upload: '#/components/schemas/Upload'
+          scan: '#/components/schemas/Scan'
+          cancel: '#/components/schemas/Cancel'
+          isolate: '#/components/schemas/Isolate'
+          unisolate: '#/components/schemas/Unisolate'
+          suspend-process: '#/components/schemas/SuspendProcess'
+          running-processes: '#/components/schemas/RunningProcesses'
+
+    DownloadUri:
       type: object
-      properties: { }
-      example:
-        data:
-          id: "b3d6de74-36b0-4fa8-be46-c375bf1771bf"
-          agents:
-            - "afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0"
-          agentType: "endpoint"
-          command: "running-processes"
-          startedAt: "2022-08-08T15:24:57.402Z"
-          completedAt: "2022-08-08T09:50:47.672Z"
-          createdBy: "elastic"
-          isCompleted: true
-          wasSuccessful: true
-          isExpired: false
-          outputs:
-            afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0:
-              type: "json"
-              content:
-                entries:
-                  - pid: "822"
-                    entity_id: "fk2ym7bl3oiu3okjcik0xosc0i0m75x3eh49nu3uaqt4dqanjt"
-                    user: "Dexter"
-                    command: "/opt/cmd1"
-                  - pid: "984"
-                    entity_id: "pwvz91m48wpj9j7ov9gtw8fp7u2rat4eu5ipte37hnhdcbi2pt"
-                    user: "Jada"
-                    command: "/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3"
+      properties:
+        downloadUri:
+          type: string
+          format: uri-reference
+          description: |
+            The server relative URI to download the file associated with the output of the response action.
+            URI does **not** include the space prefix
+          example: '/api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download'
 
+    KillProcess:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      type: number
+                      description: The process ID (PID) of the process to terminate.
+                      minimum: 1
+                - type: object
+                  properties:
+                    entity_id:
+                      type: string
+                      description: The entity ID of the process to terminate.
+                      minLength: 1
+                - type: object
+                  properties:
+                    process_name:
+                      type: string
+                      description: The name of the process to terminate. Valid for SentinelOne agent type only.
 
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          process_name:
+                            type: string
+
+    GetFile:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/DownloadUri'
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          zip_size:
+                            type: number
+                          contents:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                path:
+                                  type: string
+                                sha256:
+                                  type: string
+                                size:
+                                  type: number
+                                file_name:
+                                  type: string
+                                type:
+                                  type: string
+
+    Execute:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                command:
+                  type: string
+                timeout:
+                  type: number
+
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/DownloadUri'
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          stdout:
+                            type: string
+                          stderr:
+                            type: string
+                          stdout_truncated:
+                            type: boolean
+                          stderr_truncated:
+                            type: boolean
+                          shell_code:
+                            type: number
+                          cwd:
+                            type: string
+                          output_file_id:
+                            type: string
+                          output_file_stdout_truncated:
+                            type: boolean
+                          output_file_stderr_truncated:
+                            type: boolean
+
+    RunscriptParamsCrowdStrike:
+      type: object
+      properties:
+        raw:
+          type: string
+        hostPath:
+          type: string
+        cloudFile:
+          type: string
+        commandLine:
+          type: string
+        timeout:
+          type: number
+
+    RunscriptParamsMicrosoft:
+      type: object
+      properties:
+        scriptName:
+          type: string
+        args:
+          type: string
+
+    RunscriptParamsSentinelOne:
+      type: object
+      properties:
+        scriptId:
+          type: string
+        scriptInput:
+          type: string
+
+    Runscript:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - $ref: '#/components/schemas/RunscriptParamsCrowdStrike'
+                - $ref: '#/components/schemas/RunscriptParamsMicrosoft'
+                - $ref: '#/components/schemas/RunscriptParamsSentinelOne'
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/DownloadUri'
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          stdout:
+                            type: string
+                          stderr:
+                            type: string
+
+    Upload:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              description: |
+                The parameters for upload returned on the details are derived via the API from the file that
+                was uploaded at the time that the response action was submitted
+              properties:
+                file_sha256:
+                  type: string
+                file_size:
+                  type: number
+                file_name:
+                  type: string
+                file_id:
+                  type: string
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      path:
+                        type: string
+                      disk_free_space:
+                        type: number
+
+    Scan:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+
+    Cancel:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+
+    Isolate:
+      $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+
+    Unisolate:
+      $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+
+    SuspendProcess:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      type: number
+                      description: The process ID (PID) of the process to terminate.
+                      minimum: 1
+                - type: object
+                  properties:
+                    entity_id:
+                      type: string
+                      description: The entity ID of the process to terminate.
+                      minLength: 1
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
+
+    RunningProcessesOutputEndpoint:
+      type: object
+      description: Processes output for `agentType` of `endpoint`
+      properties:
+        code:
+          type: string
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              command:
+                type: string
+              pid:
+                type: number
+              entity_id:
+                type: string
+              user:
+                type: string
+
+    RunningProcessesOutputSentinelOne:
+      allOf:
+        - $ref: '#/components/schemas/DownloadUri'
+        - type: object
+          description: Processes output for `agentType` of `sentinel_one`
+          properties:
+            code:
+              type: string
+
+    RunningProcesses:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    oneOf:
+                      - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
 

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 
 const SearchBarWrapper = styled(EuiFlexItem)`

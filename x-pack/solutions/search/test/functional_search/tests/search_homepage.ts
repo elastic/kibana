@@ -89,6 +89,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.existOrFail('endpointValueField');
           });
 
+          it('shows checkmark icon feedback when copy button is clicked', async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.click('copyEndpointButton');
+            // After clicking, the button should show copied state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton-copied');
+            });
+            // After 1 second, it should revert back to normal state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton');
+              await testSubjects.missingOrFail('copyEndpointButton-copied');
+            });
+          });
+
           it('renders API keys buttons and active badge correctly', async () => {
             await testSubjects.existOrFail('createApiKeyButton');
             await testSubjects.existOrFail('manageApiKeysButton');
@@ -144,7 +158,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             });
           });
         });
-
+        describe('Get started with API', function () {
+          it('clicking on search basics tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_search_basics');
+            await testSubjects.existOrFail('console_tutorials_search_basics_console_btn');
+            await testSubjects.click('console_tutorials_search_basics_console_btn');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          it('clicking on semantic search tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_semantic_search');
+            await testSubjects.existOrFail('console_tutorials_semantic_search_console_btn');
+            await testSubjects.click('console_tutorials_semantic_search_console_btn');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          it('clicking on esql tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_esql');
+            await testSubjects.existOrFail('console_tutorials_esql_console_btn');
+            await testSubjects.click('console_tutorials_esql_console_btn');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+          // it('clicking on tsds tutorial open console', async () => {
+          //   await testSubjects.existOrFail('console_tutorials_tsds');
+          //   await testSubjects.existOrFail('console_tutorials_tsds_console_btn');
+          //   await testSubjects.click('console_tutorials_tsds_console_btn');
+          //   await testSubjects.existOrFail('consoleEditorContainer');
+          // });
+        });
         describe('Alternate Solutions', function () {
           it('renders Observability content', async () => {
             await testSubjects.scrollIntoView('analyzeLogsBrowseIntegrations');

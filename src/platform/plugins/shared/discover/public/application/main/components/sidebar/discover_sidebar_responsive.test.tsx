@@ -202,10 +202,14 @@ function getStateContainer({
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.appState.set({
-    query: query ?? { query: '', language: 'lucene' },
-    filters: [],
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+      appState: {
+        query: query ?? { query: '', language: 'lucene' },
+        filters: [],
+      },
+    })
+  );
   if (fieldListUiState) {
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
@@ -241,7 +245,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.appState.getState());
+    .mockImplementation(() => stateContainer.getCurrentTab().appState);
 
   const component = (
     <DiscoverTestProvider
@@ -325,11 +329,15 @@ describe('discover responsive sidebar', function () {
     expect(compLoadingExistence.find(EuiProgress).exists()).toBe(true);
 
     await act(async () => {
-      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-      appStateContainer.set({
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      });
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+          appState: {
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+        })
+      );
       resolveFunction!({
         indexPatternTitle: 'test-loaded',
         existingFieldNames: Object.keys(mockfieldCounts),
@@ -738,6 +746,7 @@ describe('discover responsive sidebar', function () {
     const addFieldButton = findTestSubject(comp, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(1);
     addFieldButton.simulate('click');
+    await new Promise(process.nextTick);
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
@@ -752,6 +761,7 @@ describe('discover responsive sidebar', function () {
     const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(1);
     editFieldButton.simulate('click');
+    await new Promise(process.nextTick);
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 

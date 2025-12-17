@@ -12,9 +12,14 @@ import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { deleteRuleById } from '../../../../common/lib/rules';
-import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
-import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
+import { AlertUtils, getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
+import {
+  DefaultSpace,
+  Superuser,
+  SuperuserAtSpace1,
+  systemActionScenario,
+  UserAtSpaceScenarios,
+} from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
@@ -82,6 +87,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: true,
               look_back_window: 10,
               status_change_threshold: 10,
             },
@@ -151,6 +157,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 execution_status: response.body.execution_status,
                 revision: 1,
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -202,6 +209,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: true,
               look_back_window: 10,
               status_change_threshold: 10,
             },
@@ -263,6 +271,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 execution_status: response.body.execution_status,
                 revision: 1,
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -314,6 +323,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: true,
               look_back_window: 10,
               status_change_threshold: 10,
             },
@@ -375,6 +385,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 execution_status: response.body.execution_status,
                 revision: 1,
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -426,6 +437,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: true,
               look_back_window: 10,
               status_change_threshold: 10,
             },
@@ -479,6 +491,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 execution_status: response.body.execution_status,
                 revision: 1,
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -539,6 +552,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: true,
               look_back_window: 10,
               status_change_threshold: 10,
             },
@@ -592,6 +606,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 execution_status: response.body.execution_status,
                 revision: 1,
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -638,6 +653,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onActiveAlert',
             flapping: {
+              enabled: true,
               look_back_window: 10,
               status_change_threshold: 10,
             },
@@ -1497,6 +1513,12 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     describe('internally managed rule types', () => {
       const rulePayload = getAlwaysFiringInternalRule();
 
+      const alertUtils = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
+
       it('should throw 400 error when trying to update an internally managed rule type', async () => {
         const { body: createdRule } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
@@ -1510,7 +1532,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send({ name: 'test.internal-rule-type-update', schedule: { interval: '5m' } })
           .expect(400);
 
-        await deleteRuleById(es, createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });

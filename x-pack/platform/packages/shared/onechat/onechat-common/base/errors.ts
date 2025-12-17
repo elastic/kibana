@@ -6,6 +6,8 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
+import { AgentExecutionErrorCode } from '../agents/execution_errors';
+import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
 
 /**
  * Code to identify onechat errors
@@ -16,6 +18,7 @@ export enum OnechatErrorCode {
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
+  agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
 }
 
@@ -187,6 +190,45 @@ export const createRequestAbortedError = (
 };
 
 /**
+ * Represents an error related to agent execution
+ */
+export type OnechatAgentExecutionError<
+  ErrCode extends AgentExecutionErrorCode = AgentExecutionErrorCode
+> = OnechatError<
+  OnechatErrorCode.agentExecutionError,
+  { errCode: ErrCode } & ExecutionErrorMetaOf<ErrCode>
+>;
+
+/**
+ * Checks if the given error is a {@link OnechatInternalError}
+ */
+export const isAgentExecutionError = (err: unknown): err is OnechatAgentExecutionError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.agentExecutionError;
+};
+
+export const createAgentExecutionError = <ErrCode extends AgentExecutionErrorCode>(
+  message: string,
+  code: ErrCode,
+  meta: ExecutionErrorMetaOf<ErrCode>
+): OnechatAgentExecutionError<ErrCode> => {
+  return new OnechatError(OnechatErrorCode.agentExecutionError, message, {
+    ...meta,
+    errCode: code,
+  });
+};
+
+/**
+ * Checks if the given error is a context length exceeded error
+ */
+export const isContextLengthExceededAgentError = (
+  err: unknown
+): err is OnechatAgentExecutionError<AgentExecutionErrorCode.contextLengthExceeded> => {
+  return (
+    isAgentExecutionError(err) && err.meta.errCode === AgentExecutionErrorCode.contextLengthExceeded
+  );
+};
+
+/**
  * Global utility exposing all error utilities from a single export.
  */
 export const OnechatErrorUtils = {
@@ -195,8 +237,11 @@ export const OnechatErrorUtils = {
   isToolNotFoundError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isAgentExecutionError,
+  isContextLengthExceededAgentError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createAgentExecutionError,
 };

@@ -61,7 +61,7 @@ export const GoogleCloudShellGuide = (props: { commandText: string; hasProjectId
                   />
                 )}
                 <EuiSpacer size="m" />
-                <EuiCodeBlock language="bash" isCopyable contentEditable="true">
+                <EuiCodeBlock language="bash" isCopyable>
                   {props.commandText}
                 </EuiCodeBlock>
               </>

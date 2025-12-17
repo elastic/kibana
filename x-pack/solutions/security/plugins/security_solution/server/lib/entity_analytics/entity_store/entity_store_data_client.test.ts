@@ -78,7 +78,7 @@ const getDefaultIndexes = (type: string) => {
     ...(type === 'user' ? ['.entity_analytics.monitoring.users-default'] : []),
     '.asset-criticality.asset-criticality-default',
     'risk-score.risk-score-latest-default',
-    `.entities.v1.reset.security_${type}_default`,
+    `.entities.v1.reset.security_${type}_default*`,
     `.entities.v1.updates.security_${type}_default*`,
   ];
 };

@@ -61,7 +61,7 @@ const renderGraphPreview = (props: GraphProps) =>
 
 describe('<Graph />', () => {
   describe('basic rendering', () => {
-    it('should render empty graph', () => {
+    it('should render empty graph', async () => {
       const { container } = renderGraphPreview({
         nodes: [],
         edges: [],
@@ -69,11 +69,14 @@ describe('<Graph />', () => {
       });
 
       expect(container).not.toBeNull();
-      const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
-      expect(nodes).toHaveLength(0);
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(0);
+      });
     });
 
-    it('should render hexagon node', () => {
+    it('should render hexagon node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -87,12 +90,14 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const nodeEl = container.querySelector('[data-id="1"]');
-      expect(nodeEl).not.toBeNull();
-      expect(nodeEl).toHaveTextContent('Node 1');
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="1"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Node 1');
+      });
     });
 
-    it('should render label node', () => {
+    it('should render label node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -106,12 +111,14 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const nodeEl = container.querySelector('[data-id="2"]');
-      expect(nodeEl).not.toBeNull();
-      expect(nodeEl).toHaveTextContent('Node 2');
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="2"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Node 2');
+      });
     });
 
-    it('should render 2 nodes connected', () => {
+    it('should render 2 nodes connected', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -138,13 +145,15 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const srcNodeEl = container.querySelector('[data-id="1"]');
-      expect(srcNodeEl).not.toBeNull();
-      expect(srcNodeEl).toHaveTextContent('Node 1');
+      await waitFor(() => {
+        const srcNodeEl = container.querySelector('[data-id="1"]');
+        expect(srcNodeEl).not.toBeNull();
+        expect(srcNodeEl).toHaveTextContent('Node 1');
 
-      const targetNodeEl = container.querySelector('[data-id="2"]');
-      expect(targetNodeEl).not.toBeNull();
-      expect(targetNodeEl).toHaveTextContent('Node 2');
+        const targetNodeEl = container.querySelector('[data-id="2"]');
+        expect(targetNodeEl).not.toBeNull();
+        expect(targetNodeEl).toHaveTextContent('Node 2');
+      });
 
       // TODO: Fix this test (currently it is not rendered in xyflow version 12) https://github.com/xyflow/xyflow/issues/716#issuecomment-2414721074
       // const edgeEl = container.querySelector('[data-id="a(1)-b(2)"]');
@@ -616,6 +625,98 @@ describe('<Graph />', () => {
           ...fitViewOptions,
           nodes: [{ id: 'entity1' }],
         });
+      });
+    });
+  });
+
+  describe('interactiveBottomRightContent rendering', () => {
+    it('should not render content when interactiveBottomRightContent is null', async () => {
+      const { queryByTestId } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+        interactiveBottomRightContent: null,
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId('graph-callout')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not render content when interactiveBottomRightContent is undefined', async () => {
+      const { queryByTestId } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId('graph-callout')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should render content when interactiveBottomRightContent is provided', async () => {
+      const customContent = (
+        <div data-test-subj="custom-content">
+          <h3>{'Test Content Title'}</h3>
+          <p>{'Test content message'}</p>
+        </div>
+      );
+
+      const { getByText } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+        interactiveBottomRightContent: customContent,
+      });
+
+      await waitFor(() => {
+        expect(getByText('Test Content Title')).toBeInTheDocument();
+        expect(getByText('Test content message')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render content when interactive is false even if interactiveBottomRightContent is provided', async () => {
+      const customContent = (
+        <div data-test-subj="custom-content">
+          <h3>{'Test Content Title'}</h3>
+          <p>{'Test content message'}</p>
+        </div>
+      );
+
+      const { queryByText } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: false,
+        interactiveBottomRightContent: customContent,
+      });
+
+      await waitFor(() => {
+        expect(queryByText('Test Content Title')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should render both custom content and Controls in the bottom-right Panel', async () => {
+      const customContent = (
+        <div data-test-subj="custom-content">
+          <h3>{'Test Content Title'}</h3>
+          <p>{'Test content message'}</p>
+        </div>
+      );
+
+      const { getByText, getByTestId } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+        interactiveBottomRightContent: customContent,
+      });
+
+      await waitFor(() => {
+        // Verify custom content is rendered
+        expect(getByText('Test Content Title')).toBeInTheDocument();
+
+        // Verify Controls are still rendered (check for zoom in button as indicator)
+        expect(getByTestId('cloudSecurityGraphGraphInvestigationZoomIn')).toBeInTheDocument();
       });
     });
   });

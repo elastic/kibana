@@ -2,7 +2,7 @@
 
 exports[`OverwrittenSessionPage renders as expected 1`] = `
 <div
-  class="css-1mxql93-kbnFullScreenBgCss"
+  class="css-1snbdet-kbnFullScreenBgCss"
   data-test-subj="secAuthenticationStatePage"
 >
   <header
@@ -17,7 +17,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
         class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
       />
       <span
-        class="css-18y6396-AuthenticationStatePage"
+        class="css-333keb-AuthenticationStatePage"
         data-test-subj="secAuthenticationStatePageLogo"
       >
         <span

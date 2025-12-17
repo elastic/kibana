@@ -27,6 +27,9 @@ deploy() {
     security)
       PROJECT_TYPE_LABEL='Security'
     ;;
+    workplaceai)
+      PROJECT_TYPE_LABEL='Workplace AI'
+    ;;
   esac
 
   PRODUCT_TIER_JSON_ENTRY=""
@@ -187,6 +190,7 @@ is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
 is_pr_with_label "ci:project-deploy-ai4soc" && deploy "security" "ai_soc"
 is_pr_with_label "ci:project-deploy-log_essentials" && deploy "observability" "logs_essentials"
+is_pr_with_label "ci:project-deploy-workplace_ai" && deploy "workplaceai"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   # Only deploy observability if the PR is targeting main
   if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then

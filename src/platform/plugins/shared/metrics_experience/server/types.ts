@@ -9,7 +9,7 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 
-export type DataStreamFieldCapsMap = Map<
+export type IndexFieldCapsMap = Map<
   string,
   Record<string, Record<string, FieldCapsFieldCapability>>
 >;

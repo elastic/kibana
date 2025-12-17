@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { StreamDetailFailureStore } from './failure_store';
 import { StreamDetailGeneralData } from './general_data';
+import { useDataStreamStats } from './hooks/use_data_stream_stats';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export function StreamDetailLifecycle({
   definition,
@@ -18,11 +21,31 @@ export function StreamDetailLifecycle({
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const { timeState } = useTimefilter();
+  const data = useDataStreamStats({ definition, timeState });
+
+  const { onPageReady } = usePerformanceContext();
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !data.isLoading) {
+      onPageReady();
+    }
+  }, [definition, data.isLoading, onPageReady]);
+
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
-      <StreamDetailGeneralData definition={definition} refreshDefinition={refreshDefinition} />
+      <StreamDetailGeneralData
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+        data={data}
+      />
       <EuiSpacer size="m" />
-      <StreamDetailFailureStore definition={definition} />
+      <StreamDetailFailureStore
+        definition={definition}
+        data={data}
+        refreshDefinition={refreshDefinition}
+      />
     </EuiFlexGroup>
   );
 }

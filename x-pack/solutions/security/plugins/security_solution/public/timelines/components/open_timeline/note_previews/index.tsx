@@ -6,34 +6,34 @@
  */
 
 import { uniqBy } from 'lodash/fp';
+import type { EuiConfirmModalProps } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiButtonIcon,
   EuiCommentList,
+  EuiConfirmModal,
   EuiScreenReaderOnly,
   EuiText,
-  EuiConfirmModal,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { PageScope } from '../../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
-import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../store';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
@@ -55,12 +55,10 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.timeline);
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

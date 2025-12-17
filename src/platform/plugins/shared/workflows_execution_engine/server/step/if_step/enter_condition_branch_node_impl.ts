@@ -8,8 +8,8 @@
  */
 
 import type { EnterConditionBranchNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../node_implementation';
 
 export class EnterConditionBranchNodeImpl implements NodeImplementation {
   constructor(
@@ -17,7 +17,7 @@ export class EnterConditionBranchNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     if (this.node.type === 'enter-then-branch') {
       this.wfExecutionRuntimeManager.enterScope('true');
     } else {

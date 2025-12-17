@@ -108,6 +108,20 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.project_routing",
+            "type": "string",
+            "tags": [],
+            "label": "project_routing",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchParams.locale",
             "type": "string",
             "tags": [],
@@ -157,7 +171,7 @@
             "description": [],
             "signature": [
               "ScalarValue",
-              "[] | Record<string, string | number | Record<string, string | number> | undefined>[] | undefined"
+              "[] | Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
             "deprecated": false,

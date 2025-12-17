@@ -6,7 +6,7 @@
  */
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import type { EsqlToolFieldTypes } from '@kbn/onechat-common/tools';
 import { EsqlToolFieldType, ToolType } from '@kbn/onechat-common/tools';
@@ -65,7 +65,7 @@ export const esqlFormValidationSchema = z
       .min(1, { message: esqlI18nMessages.esql.requiredError })
       .refine(
         async (esql) => {
-          const result = await validateQuery(esql, { ignoreOnMissingCallbacks: true });
+          const result = await validateQuery(esql);
           return result.errors.length === 0;
         },
         { message: esqlI18nMessages.esql.esqlError }

@@ -51,7 +51,7 @@ const ArmTemplateSetup = ({
 }) => {
   if (!hasArmTemplateUrl) {
     return (
-      <EuiCallOut color="warning">
+      <EuiCallOut announceOnMount={false} color="warning">
         <FormattedMessage
           id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.armTemplateSetupStep.notSupported"
           defaultMessage="ARM Template is not supported on the current Integration version, please upgrade your integration to the latest version to use ARM Template"
@@ -206,6 +206,17 @@ export const AzureCredentialsForm = ({
   });
   const { azurePolicyType, azureEnabled, azureManualFieldsEnabled } = useCloudSetup();
 
+  // Ensure supports_cloud_connector is false for agent-based deployments
+  if (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      },
+    });
+  }
+
   if (!setupFormat) {
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
   }
@@ -225,7 +236,7 @@ export const AzureCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount={false} color="warning">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.azureNotSupportedMessage"
             defaultMessage="CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure"

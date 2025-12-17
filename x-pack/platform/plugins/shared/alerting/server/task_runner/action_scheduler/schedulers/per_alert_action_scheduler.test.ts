@@ -20,6 +20,7 @@ import { Alert } from '../../../alert';
 import type { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-state-types';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import { transformActionParams } from '../../transform_action_params';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -111,6 +112,10 @@ const getResult = (
   },
   actionToLog: { alertGroup: 'default', alertId, id: actionId, uuid: actionUuid, typeId: 'test' },
 });
+
+jest.mock('../../transform_action_params', () => ({
+  transformActionParams: jest.fn(),
+}));
 
 let clock: sinon.SinonFakeTimers;
 
@@ -211,8 +216,8 @@ describe('Per-Alert Action Scheduler', () => {
     >;
 
     beforeEach(() => {
-      newAlert1 = generateAlert({ id: 1 });
-      newAlert2 = generateAlert({ id: 2 });
+      newAlert1 = generateAlert({ id: 1, activeCount: 3 });
+      newAlert2 = generateAlert({ id: 2, activeCount: 5 });
       alerts = { ...newAlert1, ...newAlert2 };
     });
 
@@ -240,6 +245,16 @@ describe('Per-Alert Action Scheduler', () => {
         getResult('action-2', '1', '222-222'),
         getResult('action-2', '2', '222-222'),
       ]);
+
+      expect(transformActionParams).toHaveBeenCalledTimes(4);
+      expect(transformActionParams).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionId: 'action-1',
+          alertId: 'rule-id-1',
+          consecutiveMatches: 3,
+          alertUuid: expect.any(String),
+        })
+      );
     });
 
     test('test should create action to schedule with priority if specified for each alert and each action', async () => {
@@ -1199,6 +1214,58 @@ describe('Per-Alert Action Scheduler', () => {
         actions: { '222-222': { date: '1970-01-01T00:00:00.000Z' } },
       });
       expect(alert.hasScheduledActions()).toBe(false);
+    });
+
+    test('should clear lastScheduledActions', async () => {
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default'>('1', {
+        state: { test: true },
+        meta: {},
+      });
+
+      const spy = jest.spyOn(alert, 'clearThrottlingLastScheduledActions');
+
+      alert.scheduleActions('default');
+
+      const onThrottleIntervalAction1: SanitizedRuleAction = {
+        id: 'action-4',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '111-111',
+      };
+      const onThrottleIntervalAction2: SanitizedRuleAction = {
+        id: 'action-4',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '222-222',
+      };
+
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, actions: [onThrottleIntervalAction1, onThrottleIntervalAction2] },
+      });
+
+      await scheduler.getActionsToSchedule({
+        activeAlerts: { '1': alert },
+      });
+      expect(spy).toHaveBeenCalledTimes(2); // 2 actions
+      expect(spy).nthCalledWith(1, ['111-111', '222-222']);
+      expect(spy).nthCalledWith(2, ['111-111', '222-222']);
     });
   });
 });

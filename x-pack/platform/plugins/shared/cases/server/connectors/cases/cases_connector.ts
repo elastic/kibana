@@ -12,12 +12,13 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SAVED_OBJECT_TYPES } from '../../../common';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
-import { CasesConnectorRunParamsSchema } from './schema';
+import { ZCasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import {
   CasesConnectorError,
+  createTaskUserError,
   isCasesClientError,
   isCasesConnectorError,
 } from './cases_connector_error';
@@ -66,7 +67,7 @@ export class CasesConnector extends SubActionConnector<
     this.registerSubAction({
       name: CASES_CONNECTOR_SUB_ACTION.RUN,
       method: 'run',
-      schema: CasesConnectorRunParamsSchema,
+      schema: ZCasesConnectorRunParamsSchema,
     });
   }
 
@@ -148,8 +149,9 @@ export class CasesConnector extends SubActionConnector<
 
   private handleError(error: Error) {
     if (isCasesConnectorError(error)) {
-      this.logError(error);
-      throw error;
+      const userError = createTaskUserError(error);
+      this.logError(userError);
+      throw userError;
     }
 
     if (isCasesClientError(error)) {
@@ -158,8 +160,9 @@ export class CasesConnector extends SubActionConnector<
         error.boomify().output.statusCode
       );
 
-      this.logError(caseConnectorError);
-      throw caseConnectorError;
+      const userError = createTaskUserError(caseConnectorError);
+      this.logError(userError);
+      throw userError;
     }
 
     if (Boom.isBoom(error)) {
@@ -168,9 +171,10 @@ export class CasesConnector extends SubActionConnector<
         error.output.statusCode
       );
 
-      this.logError(caseConnectorError);
+      const userError = createTaskUserError(caseConnectorError);
+      this.logError(userError);
 
-      throw caseConnectorError;
+      throw userError;
     }
 
     const caseConnectorError = new CasesConnectorError(error.message, 500);

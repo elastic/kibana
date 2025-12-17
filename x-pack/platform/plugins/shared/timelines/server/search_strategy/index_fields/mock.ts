@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldDescriptor } from '@kbn/data-plugin/server';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 
 export const mockAuditbeatIndexField: FieldDescriptor[] = [
   {

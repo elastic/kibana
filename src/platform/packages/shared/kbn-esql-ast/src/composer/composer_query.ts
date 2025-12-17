@@ -8,12 +8,13 @@
  */
 
 import { printTree } from 'tree-dump';
-import * as synth from '../synth';
+import * as synth from './synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { composerQuerySymbol, processTemplateHoles, validateParamName } from './util';
-import { Builder } from '../builder';
+import { Builder } from '../ast/builder';
 import type {
   ESQLAstExpression,
+  ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLNamedParamLiteral,
@@ -28,9 +29,22 @@ import type {
   QueryCommandTag,
   QueryCommandTagParametrized,
 } from './types';
-import { Walker } from '../walker';
-import { isColumn, isFunctionExpression } from '../ast/is';
-import { replaceProperties } from '../walker/helpers';
+import { Walker } from '../ast/walker';
+import {
+  isBinaryExpression,
+  isBooleanLiteral,
+  isColumn,
+  isDoubleLiteral,
+  isFunctionExpression,
+  isHeaderCommand,
+  isIdentifier,
+  isIntegerLiteral,
+  isProperNode,
+  isStringLiteral,
+} from '../ast/is';
+import { replaceProperties } from '../ast/walker/helpers';
+import { resolveItem } from '../ast/visitor/utils';
+import { printAst } from '../shared/debug';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -54,14 +68,14 @@ export class ComposerQuery {
    * ```
    */
   private readonly _createCommandTag = (
-    synthCommandTag: synth.SynthMethod<ESQLCommand>
+    synthCommandTag: synth.SynthMethod<ESQLCommand | ESQLAstHeaderCommand>
   ): QueryCommandTag =>
     ((templateOrQueryOrParamValues, ...rest: unknown[]) => {
       const tagOrGeneratorWithParams =
         (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
         (templateOrQuery: any, ...holes: unknown[]) => {
           const params: Record<string, unknown> = { ...initialParamValues };
-          let command: ESQLCommand;
+          let command: ESQLCommand | ESQLAstHeaderCommand;
 
           if (typeof templateOrQuery === 'string') {
             const moreParamValues =
@@ -110,7 +124,12 @@ export class ComposerQuery {
             }
           }
 
-          this.ast.commands.push(command);
+          if (isHeaderCommand(command)) {
+            this.ast.header = this.ast.header || [];
+            this.ast.header.push(command);
+          } else {
+            this.ast.commands.push(command);
+          }
 
           return this;
         };
@@ -137,7 +156,70 @@ export class ComposerQuery {
       }
     }) as QueryCommandTag;
 
+  /**
+   * Appends a command to the query. This is the generic command appending method,
+   * which supports all ES|QL commands. Use it similar to `esql` template tag, but
+   * it adds one command at-a-time to the existing query. Use chainable calls to
+   * append multiple commands.
+   *
+   * Example:
+   *
+   * ```typescript
+   * // Start a new query with a source command:
+   * const query = esql `FROM index`;
+   *
+   * // Append commands using .pipe:
+   * query
+   *    .pipe `WHERE field > 10`
+   *    .pipe `LIMIT 100`;
+   * ```
+   *
+   * Safely inline dynamic values using template literal holes:
+   *
+   * ```typescript
+   * const threshold = 10;
+   * query.pipe `WHERE field > ${threshold}`;
+   * // WHERE field > 10
+   * ```
+   *
+   * Or insert named parameters using `${{param}}` syntax:
+   *
+   * ```typescript
+   * const limit = 100;
+   * query.pipe `WHERE field > ${{threshold}} | LIMIT ${{limit}}`;
+   * // WHERE field > ?threshold | LIMIT ?limit
+   * ```
+   *
+   * You can also insert parameters ahead of the template:
+   *
+   * ```typescript
+   * const limit = 100;
+   * const threshold = 10;
+   * query.pipe({ limit, threshold }) `WHERE field > ?threshold | LIMIT ?limit`;
+   * ```
+   *
+   * Or specify commands as strings, and provide parameters separately:
+   *
+   * ```typescript
+   * const limit = 100;
+   * const threshold = 10;
+   * query.pipe('WHERE field > ?threshold | LIMIT ?limit', { limit, threshold });
+   * ```
+   */
   public readonly pipe: QueryCommandTag = this._createCommandTag(synth.cmd);
+
+  /**
+   * Appends a header command to the query. This is used to add commands like `SET`
+   * to the query header. Use it exactly like {@linkcode pipe}, for example:
+   *
+   * ```typescript
+   * const query = esql `FROM index`;
+   * query.header `SET x = 10`;
+   *
+   * query.print(); // "SET x = 10; FROM index"
+   * ```
+   */
+  public readonly header: QueryCommandTag = this._createCommandTag(synth.hdr);
 
   /**
    * Appends a `CHANGE_POINT` command to detect change points in time series data.
@@ -195,10 +277,10 @@ export class ComposerQuery {
       as?: [type: ComposerColumnShorthand, pvalue: ComposerColumnShorthand];
     } = {}
   ): ComposerQuery => {
-    const val = Builder.expression.column(value);
-    const key = options.on ? Builder.expression.column(options.on) : void 0;
-    const type = options.as ? Builder.expression.column(options.as[0]) : void 0;
-    const pvalue = options.as ? Builder.expression.column(options.as[1]) : void 0;
+    const val = synth.col(value);
+    const key = options.on ? synth.col(options.on) : void 0;
+    const type = options.as ? synth.col(options.as[0]) : void 0;
+    const pvalue = options.as ? synth.col(options.as[1]) : void 0;
 
     if (type && pvalue && key) {
       return this.pipe`CHANGE_POINT ${val} ON ${key} AS ${type}, ${pvalue}`;
@@ -274,7 +356,7 @@ export class ComposerQuery {
       APPEND_SEPARATOR?: string;
     } = {}
   ): ComposerQuery => {
-    const inputColumn = Builder.expression.column(input);
+    const inputColumn = synth.col(input);
 
     if (options.APPEND_SEPARATOR) {
       return this
@@ -311,7 +393,7 @@ export class ComposerQuery {
    * @returns The updated ComposerQuery instance.
    */
   public readonly grok = (input: ComposerColumnShorthand, pattern: string): ComposerQuery => {
-    const inputColumn = Builder.expression.column(input);
+    const inputColumn = synth.col(input);
 
     return this.pipe`GROK ${inputColumn} ${pattern}`;
   };
@@ -373,7 +455,7 @@ export class ComposerQuery {
     } = {}
   ): ComposerQuery => {
     const index = Builder.expression.source.node({ sourceType: 'policy', index: policy });
-    const onArgs = options.on ? Builder.expression.column(options.on) : void 0;
+    const onArgs = options.on ? synth.col(options.on) : void 0;
     const withArgs = options.with
       ? Object.entries(options.with).reduce((acc, [key, value]) => {
           const expression = synth.exp`${synth.col(key)} = ${synth.col(value)}`;
@@ -469,7 +551,7 @@ export class ComposerQuery {
     ...columns: Array<ComposerColumnShorthand>
   ): ComposerQuery => {
     const nodes = [column, ...columns].map((name) => {
-      return Builder.expression.column(name);
+      return synth.col(name);
     });
 
     return this.pipe`KEEP ${nodes}`;
@@ -527,7 +609,7 @@ export class ComposerQuery {
    * @returns The updated ComposerQuery instance.
    */
   public readonly mv_expand = (column: ComposerColumnShorthand): ComposerQuery => {
-    const node = Builder.expression.column(column);
+    const node = synth.col(column);
 
     return this.pipe`MV_EXPAND ${node}`;
   };
@@ -610,7 +692,7 @@ export class ComposerQuery {
       const [column, order = '', nulls = ''] = Array.isArray(shorthand)
         ? shorthand
         : [shorthand, '', ''];
-      const columnNode = Builder.expression.column(column);
+      const columnNode = synth.col(column);
       const orderNode = Builder.expression.order(columnNode, { order, nulls });
 
       return orderNode;
@@ -639,9 +721,18 @@ export class ComposerQuery {
    * // Join using a nested column
    * query.lookup_join('other_index', ['user', 'id']);
    * // Result: ... | LOOKUP JOIN other_index ON user.id | ...
+   *
+   * // Join with an alias
+   * query.lookup_join({ index: 'other_index', alias: 'o' }, 'user_id');
+   * // Result: ... | LOOKUP JOIN other_index AS o ON user_id | ...
+   *
+   * // Join using a qualified column
+   * query.lookup_join('other_index', ['usersIndex', ['id']]);
+   * // Result: ... | LOOKUP JOIN other_index ON [usersIndex].[id] | ...
    * ```
    *
-   * @param lookupIndex The name of the index to join with.
+   * @param lookupIndex The name of the index to join with, or an object with
+   *     index and alias properties.
    * @param onFieldName The first field to join on. Can be a string column name
    *     or an array of column parts for nested columns (e.g., ['user', 'id']
    *     for 'user.id').
@@ -653,7 +744,16 @@ export class ComposerQuery {
     onFieldName: ComposerColumnShorthand,
     ...onFieldNames: Array<ComposerColumnShorthand>
   ): ComposerQuery => {
-    const lookupIndexNode = typeof lookupIndex === 'string' ? synth.src(lookupIndex) : lookupIndex;
+    let lookupIndexNode;
+
+    if (typeof lookupIndex === 'string') {
+      lookupIndexNode = synth.src(lookupIndex);
+    } else if ('index' in lookupIndex && 'alias' in lookupIndex) {
+      lookupIndexNode = synth.srcAs(lookupIndex.index, lookupIndex.alias);
+    } else {
+      lookupIndexNode = lookupIndex;
+    }
+
     const onFieldNameNodes = ([onFieldName, ...onFieldNames] as ComposerColumnShorthand[]).map(
       (shorthand) => {
         return synth.col(shorthand);
@@ -849,6 +949,162 @@ export class ComposerQuery {
   }
 
   /**
+   * Inserts a SET instruction into the query header.
+   *
+   * SET instructions are pseudo-commands that set configuration values for the query.
+   * They must appear before the main query and are separated by semicolons.
+   *
+   * ```typescript
+   * // Add a single SET instruction
+   * query.addSetCommand('a', 'foo');
+   * // Result: SET a = "foo"; <original query>
+   *
+   * // Add multiple SET instructions
+   * query.addSetCommand('b', 123);
+   * // Result: SET a = "foo"; SET b = 123; <original query>
+   * ```
+   *
+   * @param name The setting name (identifier) to set.
+   * @param value The value to assign to the setting (string, number, or boolean).
+   * @returns The updated ComposerQuery instance.
+   */
+  public addSetCommand(name: string, value: string | number | boolean): this {
+    this.header`SET ${synth.kwd(name)} = ${value}`;
+
+    return this;
+  }
+
+  /**
+   * Removes a SET instruction from the query header by setting name.
+   *
+   * ```typescript
+   * // Remove a specific SET instruction
+   * query.removeSetCommand('a');
+   * // Removes: SET a = "foo";
+   * ```
+   *
+   * @param name The setting name (identifier) to remove.
+   * @returns The updated ComposerQuery instance.
+   */
+  public removeSetCommand(name: string): this {
+    const ast = this.ast;
+    const header = ast.header;
+
+    if (!header) {
+      return this;
+    }
+
+    ast.header = header.filter((cmd) => {
+      if (!isHeaderCommand(cmd) || cmd.name !== 'set') {
+        return true;
+      }
+
+      const arg = cmd.args[0];
+
+      if (!isBinaryExpression(arg) || arg.name !== '=') {
+        return true;
+      }
+
+      const left = arg.args[0];
+
+      return !isIdentifier(left) || left.name !== name;
+    });
+
+    return this;
+  }
+
+  /**
+   * Gets all SET instructions from the query header.
+   *
+   * ```typescript
+   * const sets = query.getSetCommands();
+   * // Returns: [{ name: 'a', value: 'foo' }, { name: 'b', value: 123 }]
+   * ```
+   *
+   * @returns An array of objects containing the setting name and value pairs.
+   */
+  public getSetInstructions(): Array<[name: string, value: ESQLAstExpression]> {
+    const ast = this.ast;
+    const header = ast.header;
+    const sets: Array<[name: string, value: ESQLAstExpression]> = [];
+
+    if (!header) {
+      return sets;
+    }
+
+    for (const cmd of header) {
+      if (!isHeaderCommand(cmd) || cmd.name !== 'set') {
+        continue;
+      }
+
+      // We iterate over all instructions of a single SET command, as of this
+      // writing, ES|QL supports only one instruction per SET command, but
+      // used to support multiple in the past, and may likely do so again in
+      // the future.
+      for (const arg of cmd.args) {
+        if (isBinaryExpression(arg) && arg.name === '=') {
+          const left = arg.args[0];
+          const right = arg.args[1];
+
+          if (isIdentifier(left) && (isProperNode(right) || Array.isArray(right))) {
+            sets.push([left.name as string, resolveItem(right)]);
+          }
+        }
+      }
+    }
+
+    return sets;
+  }
+
+  /**
+   * Returns a flattened record of all SET instructions from the query header.
+   * Values are converted to their native types (string, number, boolean). If
+   * an instruction with the same name appears multiple times, the last one
+   * takes precedence. (Elasticsearch also uses the last value.)
+   *
+   * @returns A POJO of flattened set instructions.
+   */
+  public getSetInstructionRecord(): Record<string, string | number | boolean> {
+    const instructions = this.getSetInstructions();
+    const record: Record<string, string | number | boolean> = {};
+
+    for (const [name, value] of instructions) {
+      if (isStringLiteral(value)) {
+        record[name] = value.valueUnquoted;
+      } else if (isIntegerLiteral(value) || isDoubleLiteral(value)) {
+        record[name] = value.value;
+      } else if (isBooleanLiteral(value)) {
+        record[name] = value.value === 'TRUE';
+      }
+    }
+
+    return record;
+  }
+
+  /**
+   * Removes all SET instructions from the query header.
+   *
+   * ```typescript
+   * query.clearSetCommands();
+   * // Removes all: SET a = "foo"; SET b = 123;
+   * ```
+   *
+   * @returns The updated ComposerQuery instance.
+   */
+  public clearSetCommands(): this {
+    const ast = this.ast;
+    const header = ast.header;
+
+    if (header) {
+      // We use `.filter()` here to filter out only SET commands, preserving
+      // any other potential header commands in the future.
+      ast.header = header.filter((cmd) => !isHeaderCommand(cmd) || cmd.name !== 'set');
+    }
+
+    return this;
+  }
+
+  /**
    * Prints the query to a string in a specified format.
    *
    * @param format The format of the printed query. Can be 'wrapping' for a
@@ -903,6 +1159,12 @@ export class ComposerQuery {
    * ```
    */
   public toString(): string {
+    return this.dump({ ast: false });
+  }
+
+  public dump(options: ComposerQueryDumpOptions = {}): string {
+    const showAst = options.ast ?? true;
+
     return (
       'ComposerQuery' +
       printTree('', [
@@ -932,7 +1194,19 @@ export class ComposerQuery {
             )
           );
         },
+        showAst ? () => '' : null,
+        showAst
+          ? (tab) =>
+              'ast' + printTree(tab, [(tab2) => printAst(this.ast, { location: false }, tab2)])
+          : null,
       ])
     );
   }
+}
+
+export interface ComposerQueryDumpOptions {
+  /**
+   * Whether to include the AST dump in the output. Default is `true`.
+   */
+  ast?: boolean;
 }

@@ -15,7 +15,9 @@ export default function searchClassicNavigationTests({
   const searchSpace = getService('searchSpace');
   const testSubjects = getService('testSubjects');
 
-  describe('Search Classic Navigation', () => {
+  describe('Search Classic Navigation', function () {
+    this.tags('skipFIPS');
+
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -37,10 +39,12 @@ export default function searchClassicNavigationTests({
     it('renders expected navigation items', async () => {
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
+        { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search applications' },
+        { id: 'Agents', label: 'Agents' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
         { id: 'QueryRules', label: 'Query rules' },

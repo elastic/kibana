@@ -35,7 +35,7 @@ export class MonacoEditorService extends FtrService {
         () =>
           // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
           window
-            .MonacoEnvironment!.monaco!.editor.getModels()
+            .MonacoEnvironment!.monaco.editor.getModels()
             .map((model: any) => model.getValue()) as string[]
       );
     });
@@ -54,10 +54,10 @@ export class MonacoEditorService extends FtrService {
       await this.browser.execute(
         (editorIndex, codeEditorValue) => {
           // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-          const editor = window.MonacoEnvironment!.monaco!.editor;
+          const editor = window.MonacoEnvironment!.monaco.editor;
           const textModels = editor.getModels();
 
-          if (editorIndex) {
+          if (editorIndex !== undefined && textModels[editorIndex]) {
             textModels[editorIndex].setValue(codeEditorValue);
           } else {
             // when specific model instance is unknown, update all models returned

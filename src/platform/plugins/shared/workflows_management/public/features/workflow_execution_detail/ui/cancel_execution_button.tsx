@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
 
 interface CancelExecutionButtonProps {
   executionId: string;
@@ -48,6 +48,7 @@ export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({ ex
       data-test-subj="cancelExecutionButton"
       disabled={!canCancelWorkflow}
       size="s"
+      fullWidth
     >
       <FormattedMessage
         id="workflowsManagement.executionDetail.cancelButton"

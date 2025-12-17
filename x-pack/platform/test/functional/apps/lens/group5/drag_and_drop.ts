@@ -134,6 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Should duplicate and swap elements when dragging over secondary drop targets', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.switchToVisualization('bar');
         await lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
 
@@ -166,6 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should combine breakdown dimension with the horizontal one', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.dragFieldToWorkspace('clientip', xyChartContainer);
         await lens.dragFieldToWorkspace('@message.raw', xyChartContainer);
 
@@ -182,6 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should combine field to existing horizontal dimension', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.dragFieldToWorkspace('clientip', xyChartContainer);
 
         await lens.dragFieldToExtraDropType(
@@ -197,6 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should combine two multi terms dimensions', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.dragFieldToWorkspace('clientip', xyChartContainer);
 
         await lens.dragFieldToExtraDropType(
@@ -332,7 +336,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('dropping between layers', () => {
+    // not supported for layers as tabs
+    describe.skip('dropping between layers', () => {
       it('should move the column', async () => {
         await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');

@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigation to context cleans the session', async () => {
-      await timePicker.setCommonlyUsedTime('Last_15 minutes');
+      await timePicker.setCommonlyUsedTime('This_week');
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {

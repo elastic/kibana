@@ -9,7 +9,7 @@
 
 import { parse } from '../../parser';
 import type { ESQLMap } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
 import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
@@ -109,6 +109,16 @@ FROM aaaaaaaaaaaa
         ON
           dddddddddddddddddddddddddddddddddddddddd,
           eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`);
+    });
+
+    test('supports binary expressions', () => {
+      assertReprint(
+        `FROM employees
+  | LEFT JOIN asdf
+        ON
+          aaaaaaaaaaaaaaaaaaaaaaaaa > bbbbbbbbbbbbbbbbbbbbb AND
+            ccccccccccccccccccc == dddddddddddddddddddddddddddddddddddddddd`
+      );
     });
   });
 
@@ -1296,6 +1306,32 @@ describe('unary operator precedence and grouping', () => {
   -2 *
     (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa +
       bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+    );
+  });
+});
+
+describe('subqueries (parens)', () => {
+  test('can print complex subqueries with processing', () => {
+    const src =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS count(*)) | WHERE d > 10 | STATS max = max(*) BY e | SORT max DESC';
+
+    assertReprint(
+      src,
+      `FROM
+  index1,
+  (FROM index2
+    | WHERE a > 10
+    | EVAL b = a * 2
+    | STATS cnt = COUNT(*)
+          BY c
+    | SORT cnt DESC
+    | LIMIT 10),
+  index3,
+  (FROM index4 | STATS COUNT(*))
+  | WHERE d > 10
+  | STATS max = MAX(*)
+        BY e
+  | SORT max DESC`
     );
   });
 });

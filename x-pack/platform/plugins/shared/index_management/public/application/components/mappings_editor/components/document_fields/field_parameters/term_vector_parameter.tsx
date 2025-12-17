@@ -58,6 +58,7 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="warning"
                   title={i18n.translate(

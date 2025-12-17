@@ -6,19 +6,19 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
-import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
+import { EuiSkeletonText, EuiTreeView } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
-import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
+import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
 import { getField } from '../../shared/utils';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 
@@ -48,7 +48,7 @@ export const AnalyzerPreview: React.FC = () => {
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
   const documentId = isRulePreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
     useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
   const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();

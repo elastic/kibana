@@ -44,6 +44,15 @@ const getEsConversationMock = (): EsConversationSchema => {
               type: 'SecurityAlertsPage',
             },
           },
+          interrupt_value: {
+            type: 'INPUT_TEXT',
+            threadId: 'thread-1',
+            description: 'Ask user for text input',
+          },
+          interrupt_resume_value: {
+            type: 'INPUT_TEXT',
+            value: 'User provided string',
+          },
         },
         '@timestamp': '2025-08-19T10:49:57.398Z',
         role: 'assistant',
@@ -127,7 +136,15 @@ describe('transforms', () => {
             timestamp: '2025-08-19T10:49:57.398Z',
             content: 'You currently have 61 open alerts in your environment. {reference(oQ5xL)}',
             role: 'assistant',
-            metadata: { contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } } },
+            metadata: {
+              contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } },
+              interruptValue: {
+                type: 'INPUT_TEXT',
+                threadId: 'thread-1',
+                description: 'Ask user for text input',
+              },
+              interruptResumeValue: { type: 'INPUT_TEXT', value: 'User provided string' },
+            },
             traceData: {
               traceId: 'f44d01b6095d35dce15aa8137df76e29',
               transactionId: 'ee432e8be6ad3f9c',
@@ -167,6 +184,12 @@ describe('transforms', () => {
               role: 'assistant',
               metadata: {
                 contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } },
+                interruptValue: {
+                  type: 'INPUT_TEXT',
+                  threadId: 'thread-1',
+                  description: 'Ask user for text input',
+                },
+                interruptResumeValue: { type: 'INPUT_TEXT', value: 'User provided string' },
               },
               traceData: {
                 traceId: 'f44d01b6095d35dce15aa8137df76e29',
@@ -208,6 +231,12 @@ describe('transforms', () => {
               role: 'assistant',
               metadata: {
                 contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } },
+                interruptValue: {
+                  type: 'INPUT_TEXT',
+                  threadId: 'thread-1',
+                  description: 'Ask user for text input',
+                },
+                interruptResumeValue: { type: 'INPUT_TEXT', value: 'User provided string' },
               },
               traceData: {
                 traceId: 'f44d01b6095d35dce15aa8137df76e29',

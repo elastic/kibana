@@ -16,8 +16,8 @@ import type {
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import type { Version } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import { type ReindexOperation } from '../../../common';
 
 import { reindexActionsFactory } from './reindex_actions';
@@ -39,6 +39,7 @@ interface ReindexHandlerArgs {
   };
   security?: SecurityPluginStart;
   version: Version;
+  rollupsEnabled: boolean;
 }
 
 export const reindexHandler = async ({
@@ -53,10 +54,17 @@ export const reindexHandler = async ({
   reindexOptions,
   security,
   version,
+  rollupsEnabled,
 }: // accept index settings as params
 ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
-  const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log);
+  const reindexActions = reindexActionsFactory(
+    savedObjects,
+    callAsCurrentUser,
+    log,
+    getRollupJobByIndexName,
+    rollupsEnabled
+  );
   const reindexService = reindexServiceFactory(
     callAsCurrentUser,
     reindexActions,

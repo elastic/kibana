@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-ast';
 import type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParamValue } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -77,9 +77,7 @@ const validateDefaultValueType = (
 
 export const validateConfig = async (configuration: EsqlToolConfig) => {
   // Ensure query is proper ES|QL syntax
-  const validationResult = await validateQuery(configuration.query, {
-    ignoreOnMissingCallbacks: true,
-  });
+  const validationResult = await validateQuery(configuration.query);
 
   if (validationResult.errors.length > 0) {
     const message = `Validation error: \n${validationResult.errors

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '../parser';
+import { Parser } from '../core/parser';
 
 describe('SET instruction parsing', () => {
   describe('single SET instruction', () => {
@@ -395,6 +395,62 @@ describe('SET instruction parsing', () => {
       expect((setInstruction2.args[0] as any).args[1].valueUnquoted).toBe(
         'https://example.com/api/v1'
       );
+    });
+  });
+
+  describe('Incomplete SET instructions', () => {
+    test('SET without identifier', () => {
+      const query = 'SET ';
+      const { root, errors } = Parser.parse(query);
+
+      expect(errors).toHaveLength(1);
+      expect(root.header).toHaveLength(1);
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        args: [], // Should have empty args
+        incomplete: true,
+      });
+    });
+
+    test('SET without equals and value', () => {
+      const query = 'SET timezone ';
+      const { root, errors } = Parser.parse(query);
+
+      expect(errors).toHaveLength(1);
+      expect(root.header).toHaveLength(1);
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        args: [], // as no `=` is present, it's not enough to identify/build a binary expression
+        incomplete: true,
+      });
+    });
+
+    test('SET with identifier but missing value', () => {
+      const query = 'SET timezone = ';
+      const { root, errors } = Parser.parse(query);
+
+      expect(errors).toHaveLength(1);
+      expect(root.header).toHaveLength(1);
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        args: [
+          {
+            type: 'function',
+            subtype: 'binary-expression',
+            name: '=',
+            args: [
+              { type: 'identifier', name: 'timezone' },
+              // Missing value should be represented as an incomplete unknown node
+              { type: 'unknown', incomplete: true },
+            ],
+            incomplete: true,
+          },
+        ],
+        incomplete: true,
+      });
     });
   });
 });

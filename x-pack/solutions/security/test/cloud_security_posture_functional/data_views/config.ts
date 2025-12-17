@@ -7,6 +7,8 @@
 
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-common';
+
 import { pageObjects } from '../page_objects';
 import { services } from '../services';
 
@@ -39,6 +41,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   1. release a new package to EPR
          *   2. merge the updated version number change to kibana
          */
+        `--xpack.fleet.packages.0.name=cloud_security_posture`,
+        `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
       ],

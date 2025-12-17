@@ -63,7 +63,7 @@ function createRawEventLoopDelaysDailyDocs() {
     createRawObject(moment()),
     createRawObject(moment()),
     createRawObject(moment().subtract(1, 'days')),
-    createRawObject(moment().subtract(3, 'days')),
+    createRawObject(moment().subtract(2, 'days')),
   ];
 
   const outdatedRawEventLoopDelaysDaily = [
@@ -74,7 +74,8 @@ function createRawEventLoopDelaysDailyDocs() {
   return { rawEventLoopDelaysDaily, outdatedRawEventLoopDelaysDaily };
 }
 
-describe(`daily rollups integration test`, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/231367
+describe.skip(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;

@@ -7,8 +7,8 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import type { QueryClientProviderProps } from '@tanstack/react-query';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClientProviderProps } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 // FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';

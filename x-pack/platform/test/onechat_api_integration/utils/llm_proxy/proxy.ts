@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pTimeout from 'p-timeout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
@@ -160,7 +159,7 @@ export class LlmProxy {
       return responseMock;
     };
 
-    const waitForInterceptPromise = pTimeout(
+    const waitForInterceptPromise = withTimeout(
       new Promise<LlmSimulator>((outerResolve) => {
         this.requestInterceptors.push({
           name,
@@ -174,10 +173,8 @@ export class LlmProxy {
           },
         });
       }),
-      {
-        milliseconds: 30000,
-        message: `Interceptor "${name}" timed out after 30000ms`,
-      }
+      30000,
+      `Interceptor "${name}" timed out after 30000ms`
     );
 
     return {
@@ -240,4 +237,13 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
       reject(error);
     });
   });
+}
+
+function withTimeout<T>(promise: Promise<T>, timeout: number, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeout);
+    }),
+  ]);
 }

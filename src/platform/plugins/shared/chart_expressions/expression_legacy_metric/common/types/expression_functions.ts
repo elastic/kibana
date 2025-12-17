@@ -16,7 +16,7 @@ import type {
   ExpressionValueRender,
   Style,
 } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import type {
   VisParams,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CardinalityIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiUniqueCountMetricOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
@@ -15,7 +15,6 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 export const fromUniqueCountAPItoLensState = (
   options: LensApiUniqueCountMetricOperation
 ): CardinalityIndexPatternColumn => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { field, format, empty_as_null } = options;
   return {
     operationType: 'unique_count',

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isRetryableEsClientErrorMock } from './is_scripting_enabled.test.mocks';
 import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
@@ -98,10 +98,6 @@ describe('isInlineScriptingEnabled', () => {
   });
 
   describe('resiliency', () => {
-    beforeEach(() => {
-      isRetryableEsClientErrorMock.mockReset();
-    });
-
     const mockSuccessOnce = () => {
       client.cluster.getSettings.mockResolvedValueOnce({
         transient: {},
@@ -109,16 +105,22 @@ describe('isInlineScriptingEnabled', () => {
         defaults: {},
       });
     };
-    const mockErrorOnce = () => {
-      client.cluster.getSettings.mockResponseImplementationOnce(() => {
-        throw Error('ERR CON REFUSED');
-      });
+
+    const mockRetryableErrorOnce = () => {
+      client.cluster.getSettings.mockRejectedValueOnce(
+        new esErrors.ConnectionError(
+          'Connection failed',
+          elasticsearchClientMock.createApiResponse()
+        )
+      );
+    };
+
+    const mockNonRetryableErrorOnce = () => {
+      client.cluster.getSettings.mockRejectedValueOnce(new Error('Non-retryable error'));
     };
 
     it('retries the ES api call in case of retryable error', async () => {
-      isRetryableEsClientErrorMock.mockReturnValue(true);
-
-      mockErrorOnce();
+      mockRetryableErrorOnce();
       mockSuccessOnce();
 
       await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 1 })).resolves.toEqual(true);
@@ -126,27 +128,23 @@ describe('isInlineScriptingEnabled', () => {
     });
 
     it('throws in case of non-retryable error', async () => {
-      isRetryableEsClientErrorMock.mockReturnValue(false);
-
-      mockErrorOnce();
+      mockNonRetryableErrorOnce();
       mockSuccessOnce();
 
       await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 0.1 })).rejects.toThrowError(
-        'ERR CON REFUSED'
+        'Non-retryable error'
       );
     });
 
     it('retries up to `maxRetries` times', async () => {
-      isRetryableEsClientErrorMock.mockReturnValue(true);
-
-      mockErrorOnce();
-      mockErrorOnce();
-      mockErrorOnce();
+      mockRetryableErrorOnce();
+      mockRetryableErrorOnce();
+      mockRetryableErrorOnce();
       mockSuccessOnce();
 
       await expect(
         isInlineScriptingEnabled({ client, maxRetryDelay: 0.1, maxRetries: 2 })
-      ).rejects.toThrowError('ERR CON REFUSED');
+      ).rejects.toThrowError('Connection failed');
       expect(client.cluster.getSettings).toHaveBeenCalledTimes(3);
     });
   });

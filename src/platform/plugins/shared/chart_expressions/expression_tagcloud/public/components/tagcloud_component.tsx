@@ -27,7 +27,7 @@ import { getColorFactory } from '@kbn/coloring';
 import type { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
 import { useKbnPalettes } from '@kbn/palettes';
 import { css } from '@emotion/react';

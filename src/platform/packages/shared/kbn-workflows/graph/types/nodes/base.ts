@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
-  HttpStepSchema,
-  WaitStepSchema,
   ElasticsearchStepSchema,
+  HttpStepSchema,
   KibanaStepSchema,
+  WaitStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({

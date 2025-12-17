@@ -7,34 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { type ConnectorTypeInfo, isInternalConnector } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 import { getCachedAllConnectors } from './connectors_cache';
-import type { EnhancedConnectorDefinition } from '../../../../common/enhanced_es_connectors';
+
+export interface RequiredParamForConnector {
+  name: string;
+  example?: string;
+  defaultValue?: string;
+}
 
 /**
  * Get required parameters for a connector type from generated schemas
  */
 export function getRequiredParamsForConnector(
-  connectorType: string
-): Array<{ name: string; example?: string; defaultValue?: string }> {
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+): RequiredParamForConnector[] {
   // Get all connectors (both static and generated)
-  const allConnectors = getCachedAllConnectors();
+  const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
 
   // Find the connector by type
   const connector = allConnectors.find((c) => c.type === connectorType);
 
   if (connector && connector.paramsSchema) {
     try {
-      // Check if this connector has enhanced examples
-      const hasEnhancedExamples = (connector as EnhancedConnectorDefinition).examples?.params;
-
-      // Processing enhanced examples for connector
-
-      if (hasEnhancedExamples) {
+      if (isInternalConnector(connector) && connector.examples && connector.examples.params) {
         // Use examples directly from enhanced connector
-        const exampleParams = (connector as any).examples.params;
+        const exampleParams = connector.examples.params;
         // Using enhanced examples
-        const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
+        const result: RequiredParamForConnector[] = [];
 
         for (const [key, value] of Object.entries(exampleParams)) {
           // Include common important parameters for ES APIs
@@ -110,55 +114,6 @@ export function getRequiredParamsForConnector(
 }
 
 /**
- * Extract example for body parameter based on its schema
- */
-function extractBodyExample(bodySchema: z.ZodType): any {
-  try {
-    // Handle ZodOptional wrapper
-    let schema = bodySchema;
-    if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema._def.innerType;
-    }
-
-    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
-    if (schema instanceof z.ZodObject) {
-      const shape = schema._def.shape();
-      const example: any = {};
-
-      // Extract examples from each field
-      for (const [key, fieldSchema] of Object.entries(shape)) {
-        const field = fieldSchema as z.ZodType;
-        const description = (field as any)?._def?.description || '';
-
-        // Extract example from description if available
-        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
-        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
-
-        if (stringExampleMatch) {
-          example[key] = stringExampleMatch[1];
-        } else if (objectExampleMatch) {
-          try {
-            example[key] = JSON.parse(objectExampleMatch[1]);
-          } catch {
-            // If JSON parse fails, use as string
-            example[key] = objectExampleMatch[1];
-          }
-        }
-        // No fallback - only use examples explicitly defined in enhanced connectors
-      }
-
-      if (Object.keys(example).length > 0) {
-        return example; // Return object, not JSON string
-      }
-    }
-  } catch (error) {
-    // Fallback to empty object
-  }
-
-  return {};
-}
-
-/**
  * Extract required parameters from a Zod schema
  */
 function extractRequiredParamsFromSchema(
@@ -178,11 +133,12 @@ function extractRequiredParamsFromSchema(
 
       // Skip common non-parameter fields
       if (['pretty', 'human', 'error_trace', 'source', 'filter_path'].includes(key)) {
+        // eslint-disable-next-line no-continue
         continue;
       }
 
-      // Check if field is required (not optional)
-      const isOptional = zodField instanceof z.ZodOptional;
+      // Recommended way to check if field is required (not optional)
+      const isOptional = zodField.safeParse(undefined).success;
       const isRequired = !isOptional;
 
       // Extract description for examples
@@ -228,4 +184,53 @@ function extractRequiredParamsFromSchema(
   }
 
   return params;
+}
+
+/**
+ * Extract example for body parameter based on its schema
+ */
+function extractBodyExample(bodySchema: z.ZodType): any {
+  try {
+    // Handle ZodOptional wrapper
+    let schema = bodySchema;
+    if (bodySchema instanceof z.ZodOptional) {
+      schema = bodySchema.unwrap() as z.ZodType;
+    }
+
+    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
+    if (schema instanceof z.ZodObject) {
+      const shape = schema.shape;
+      const example: any = {};
+
+      // Extract examples from each field
+      for (const [key, fieldSchema] of Object.entries(shape)) {
+        const field = fieldSchema as z.ZodType;
+        const description = (field as any)?._def?.description || '';
+
+        // Extract example from description if available
+        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
+        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
+
+        if (stringExampleMatch) {
+          example[key] = stringExampleMatch[1];
+        } else if (objectExampleMatch) {
+          try {
+            example[key] = JSON.parse(objectExampleMatch[1]);
+          } catch {
+            // If JSON parse fails, use as string
+            example[key] = objectExampleMatch[1];
+          }
+        }
+        // No fallback - only use examples explicitly defined in enhanced connectors
+      }
+
+      if (Object.keys(example).length > 0) {
+        return example; // Return object, not JSON string
+      }
+    }
+  } catch (error) {
+    // Fallback to empty object
+  }
+
+  return {};
 }

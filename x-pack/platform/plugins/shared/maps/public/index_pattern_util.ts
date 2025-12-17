@@ -8,7 +8,7 @@
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { asyncMap } from '@kbn/std';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { getIndexPatternService } from './kibana_services';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
@@ -54,7 +54,7 @@ export function getTermsFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
     return (
       field.aggregatable &&
-      !indexPatterns.isNestedField(field) &&
+      !isNestedField(field) &&
       ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
     );
   });
@@ -62,7 +62,7 @@ export function getTermsFields(fields: DataViewField[]): DataViewField[] {
 
 export function getSortFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
-    return field.sortable && !indexPatterns.isNestedField(field);
+    return field.sortable && !isNestedField(field);
   });
 }
 
@@ -76,13 +76,13 @@ export function getAggregatableGeoFieldTypes(): string[] {
 
 export function getGeoFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
-    return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPES.includes(field.type);
+    return !isNestedField(field) && ES_GEO_FIELD_TYPES.includes(field.type);
   });
 }
 
 export function getGeoPointFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
-    return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
+    return !isNestedField(field) && ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
   });
 }
 
@@ -94,7 +94,7 @@ export function supportsGeoTileAgg(field?: DataViewField): boolean {
   return (
     !!field &&
     !!field.aggregatable &&
-    !indexPatterns.isNestedField(field) &&
+    !isNestedField(field) &&
     getAggregatableGeoFieldTypes().includes(field.type)
   );
 }

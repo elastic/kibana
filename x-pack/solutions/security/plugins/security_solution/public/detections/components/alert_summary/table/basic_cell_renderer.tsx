@@ -28,7 +28,7 @@ export interface BasicCellRendererProps {
 
 /**
  * Renders all the basic table cell values.
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  */
 export const BasicCellRenderer = memo(({ alert, field }: BasicCellRendererProps) => {
   const displayValue: string | null = useMemo(

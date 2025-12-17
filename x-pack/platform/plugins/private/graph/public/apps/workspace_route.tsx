@@ -39,7 +39,7 @@ export const WorkspaceRoute = ({
     addBasePath,
     setHeaderActionMenu,
     spaces,
-    indexPatterns: getIndexPatternProvider,
+    dataViews,
     inspect,
     savedObjectsManagement,
     contentManagement,
@@ -60,8 +60,8 @@ export const WorkspaceRoute = ({
   const history = useHistory();
 
   const indexPatternProvider = useMemo(
-    () => createCachedIndexPatternProvider(getIndexPatternProvider.get),
-    [getIndexPatternProvider.get]
+    () => createCachedIndexPatternProvider(dataViews.get),
+    [dataViews.get]
   );
 
   const services = useMemo(

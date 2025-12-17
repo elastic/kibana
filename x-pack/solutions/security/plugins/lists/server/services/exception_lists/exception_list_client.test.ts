@@ -140,6 +140,7 @@ describe('exception_list_client', () => {
             extensionPointCallback.mockImplementation(async (args) => {
               const {
                 data: { entries, ...rest },
+                // @ts-expect-error upgrade typescript v5.9.3
               } = args as { data: ExtensionPointCallbackDataArgument };
 
               expect(entries).toBeTruthy(); // Test entries to exist since we exclude it.

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NodeImplementation } from '../../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../../node_implementation';
 
 export class ExitTryBlockNodeImpl implements NodeImplementation {
   constructor(
@@ -23,12 +23,12 @@ export class ExitTryBlockNodeImpl implements NodeImplementation {
     if (stepState.error) {
       // if error is in state, that means failure path was executed
       // and we have to throw error
-      await this.stepExecutionRuntime.failStep(stepState.error);
+      this.stepExecutionRuntime.failStep(stepState.error);
       this.wfExecutionRuntimeManager.setWorkflowError(stepState.error);
       return;
     }
 
-    await this.stepExecutionRuntime.finishStep();
+    this.stepExecutionRuntime.finishStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

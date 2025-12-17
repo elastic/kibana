@@ -52,6 +52,7 @@ export default function updateConnectorTests({ getService }: FtrProviderContext)
           is_preconfigured: false,
           is_system_action: false,
           is_deprecated: false,
+          is_connector_type_deprecated: false,
           connector_type_id: 'test.index-record',
           is_missing_secrets: false,
           name: 'My connector updated',
@@ -178,7 +179,7 @@ export default function updateConnectorTests({ getService }: FtrProviderContext)
       } = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/licensing/feature_usage`);
       expect(features).to.be.an(Array);
       const noopFeature = features.find(
-        (feature: { name: string }) => feature.name === 'Connector: Test: Noop'
+        (feature: { id: string }) => feature.id === 'Connector: Test: Noop'
       );
       expect(noopFeature).to.be.ok();
       expect(noopFeature.last_used).to.be.a('string');

@@ -12,13 +12,11 @@
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],
-      "stored_fields": [],
       "version": "",
       "version_type": [
         "internal",
         "external",
-        "external_gte",
-        "force"
+        "external_gte"
       ]
     },
     "methods": [

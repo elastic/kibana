@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { mockGlobalState } from '../../../common/mock';
 import { validateParsedContent, validateFile } from './validations';
 
 const formatBytes = (bytes: number) => bytes.toString();
 
-const experimentalFeatures = mockGlobalState.app.enableExperimental;
-
 describe('validateParsedContent', () => {
   it('should return empty arrays when data is empty', () => {
-    const result = validateParsedContent([], experimentalFeatures);
+    const result = validateParsedContent([]);
 
     expect(result).toEqual({
       valid: [],
@@ -30,7 +27,7 @@ describe('validateParsedContent', () => {
       ['host', 'host-1', 'low_impact'], // valid
     ];
 
-    const result = validateParsedContent(data, experimentalFeatures);
+    const result = validateParsedContent(data);
 
     expect(result).toEqual({
       valid: [data[2]],

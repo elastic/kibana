@@ -21,6 +21,7 @@ import {
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+  ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -37,6 +38,7 @@ import {
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
+import type { OnLlmResponse } from '../lib/langchain/executors/types';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -81,12 +83,18 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
-        let onLlmResponse;
+        let onLlmResponse: OnLlmResponse | undefined;
 
         const coreContext = await context.core;
         const inferenceChatModelDisabled =
           (await coreContext?.featureFlags?.getBooleanValue(
             INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+            false
+          )) ?? false;
+
+        const assistantInterruptsEnabled =
+          (await coreContext?.featureFlags?.getBooleanValue(
+            ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
             false
           )) ?? false;
 
@@ -135,7 +143,9 @@ export const postActionsConnectorExecuteRoute = (
           const isOssModel = isOpenSourceModel(connector);
 
           const conversationsDataClient =
-            await assistantContext.getAIAssistantConversationsDataClient();
+            await assistantContext.getAIAssistantConversationsDataClient({
+              assistantInterruptsEnabled,
+            });
           if (conversationId) {
             const conversation = await conversationsDataClient?.getConversation({
               id: conversationId,
@@ -159,11 +169,12 @@ export const postActionsConnectorExecuteRoute = (
             disabled: request.query.content_references_disabled,
           });
 
-          onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
-          ): Promise<void> => {
+          onLlmResponse = async ({
+            content,
+            traceData,
+            isError,
+            interruptValue,
+          }): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
                 content,
@@ -178,6 +189,7 @@ export const postActionsConnectorExecuteRoute = (
                 isError,
                 traceData,
                 contentReferences: prunedContentReferencesStore,
+                interruptValue,
               });
             }
           };
@@ -246,7 +258,11 @@ export const postActionsConnectorExecuteRoute = (
           logger.error(err);
           const error = transformError(err);
           if (onLlmResponse) {
-            await onLlmResponse(error.message, {}, true);
+            await onLlmResponse({
+              content: error.message,
+              traceData: {},
+              isError: true,
+            });
           }
 
           const kbDataClient =

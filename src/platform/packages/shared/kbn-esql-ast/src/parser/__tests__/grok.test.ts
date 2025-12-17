@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
-import { Walker } from '../../walker';
+import { EsqlQuery } from '../../composer/query';
+import { Walker } from '../../ast/walker';
 
 describe('GROK', () => {
   describe('correctly formatted', () => {
@@ -26,6 +26,26 @@ describe('GROK', () => {
         name: 'grok',
         args: [{}, {}],
       });
+    });
+  });
+
+  it('parses command with multiple patterns', () => {
+    const src = `
+FROM logs
+| GROK message "%{IP:client_ip}", "%{WORD:method}", "%{NUMBER:status}"`;
+    const { ast, errors } = EsqlQuery.fromSrc(src);
+    const grok = Walker.match(ast, { type: 'command', name: 'grok' });
+
+    expect(errors.length).toBe(0);
+    expect(grok).toMatchObject({
+      type: 'command',
+      name: 'grok',
+      args: [
+        { type: 'column', name: 'message' },
+        { type: 'literal', literalType: 'keyword' },
+        { type: 'literal', literalType: 'keyword' },
+        { type: 'literal', literalType: 'keyword' },
+      ],
     });
   });
 });

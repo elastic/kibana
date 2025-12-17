@@ -110,6 +110,12 @@ describe('useCasesColumnsConfiguration ', () => {
           "isCheckedDefault": true,
           "name": "Comments",
         },
+        "totalEvents": Object {
+          "canDisplay": true,
+          "field": "totalEvents",
+          "isCheckedDefault": true,
+          "name": "Events",
+        },
         "updatedAt": Object {
           "canDisplay": true,
           "field": "updatedAt",

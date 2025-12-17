@@ -31,10 +31,11 @@ import { useExpandSection } from '../hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -105,17 +106,16 @@ describe('<VisualizationsSection />', () => {
   beforeEach(() => {
     mockUseUiSetting.mockImplementation(() => [false]);
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
-    (useEnableExperimental as jest.Mock).mockReturnValue({
-      newDataViewPickerEnabled: true,
-    });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
       alertIds: undefined,
       statsNodes: undefined,
     });
+    // Default mock: graph visualization not available (UI setting is false by default)
     mockUseGraphPreview.mockReturnValue({
-      hasGraphRepresentation: true,
+      shouldShowGraph: false,
       eventIds: [],
     });
     mockUseFetchGraphData.mockReturnValue({
@@ -177,6 +177,12 @@ describe('<VisualizationsSection />', () => {
       }
 
       return useUiSetting$Mock(key, defaultValue);
+    });
+
+    // Mock useGraphPreview to reflect that graph is available when UI setting is enabled
+    mockUseGraphPreview.mockReturnValue({
+      shouldShowGraph: true,
+      eventIds: [],
     });
 
     const { getByTestId } = renderVisualizationsSection();

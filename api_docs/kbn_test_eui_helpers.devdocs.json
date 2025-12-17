@@ -25,7 +25,7 @@
         "tags": [],
         "label": "EuiButtonGroupTestHarness",
         "description": [],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "tags": [],
             "label": "#testId",
             "description": [],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,7 +52,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -66,7 +66,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -80,7 +80,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -97,7 +97,7 @@
             "description": [
               "\nReturns `data-test-subj` of button group"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -113,7 +113,7 @@
             "signature": [
               "HTMLElement | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -129,7 +129,7 @@
             "signature": [
               "HTMLElement[]"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,7 +145,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,7 +161,7 @@
             "signature": [
               "(optionName: string | RegExp) => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -175,7 +175,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,7 +193,7 @@
         "tags": [],
         "label": "EuiSelectTestHarness",
         "description": [],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,7 +204,7 @@
             "tags": [],
             "label": "#testId",
             "description": [],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -220,7 +220,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -234,7 +234,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -248,7 +248,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -265,7 +265,7 @@
             "description": [
               "\nReturns `data-test-subj` of select"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -281,7 +281,7 @@
             "signature": [
               "HTMLElement | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -297,7 +297,7 @@
             "signature": [
               "HTMLOptionElement[]"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -310,7 +310,7 @@
             "description": [
               "\nReturns selected option"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,7 +326,7 @@
             "signature": [
               "(optionName: string | RegExp) => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -340,7 +340,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -358,7 +358,7 @@
         "tags": [],
         "label": "EuiSuperDatePickerTestHarness",
         "description": [],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -371,7 +371,7 @@
             "description": [
               "\nThis method returns the currently selected commonly-used range as a string\n\nThe empty string is returned if a commonly-used range is not currently selected"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,7 +387,7 @@
             "signature": [
               "{ from: string | null; to: string | null; }"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -403,7 +403,7 @@
             "signature": [
               "(range: { from: number; to: number; }, expect: jest.Expect) => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -414,7 +414,7 @@
                 "tags": [],
                 "label": "range",
                 "description": [],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -425,7 +425,7 @@
                     "tags": [],
                     "label": "from",
                     "description": [],
-                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -436,7 +436,7 @@
                     "tags": [],
                     "label": "to",
                     "description": [],
-                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -452,7 +452,7 @@
                 "signature": [
                   "jest.Expect"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -472,7 +472,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -490,7 +490,7 @@
             "signature": [
               "(label: string) => Promise<void>"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -504,7 +504,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -524,10 +524,404 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiSwitchTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiSwitchTestHarness",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSwitchTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSwitchTestHarness.switchEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#switchEl",
+            "description": [
+              "\nReturns switch element or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSwitchTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSwitchTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSwitchTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of switch"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSwitchTestHarness.self",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "self",
+            "description": [
+              "\nReturns switch if found, otherwise `null`"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSwitchTestHarness.toggle",
+            "type": "Function",
+            "tags": [],
+            "label": "toggle",
+            "description": [
+              "\nToggle the switch"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_switch_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiTableTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiTableTestHarness",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.tableEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#tableEl",
+            "description": [
+              "\nReturns table element or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiTableTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of table"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.self",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "self",
+            "description": [
+              "\nReturns table if found, otherwise `null`"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.body",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "HTMLTableSectionElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.rows",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [
+              "\nGet table row elements for direct interaction with cells.\nUseful when you need to click buttons, checkboxes, or other interactive elements within rows.\n"
+            ],
+            "signature": [
+              "HTMLElement[]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.cellValues",
+            "type": "Array",
+            "tags": [],
+            "label": "cellValues",
+            "description": [
+              "\nGet table cell values as a 2D array.\nUseful for asserting table data in a structured way.\n"
+            ],
+            "signature": [
+              "string[][]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.FormErrorTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "FormErrorTestHarness",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.FormErrorTestHarness.scope",
+            "type": "string",
+            "tags": [],
+            "label": "#scope",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.FormErrorTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.FormErrorTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.FormErrorTestHarness.scope",
+            "type": "string",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "\nReturns `data-test-subj` scope if provided"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.FormErrorTestHarness.messages",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [
+              "\nGet all error messages currently visible in the form.\nSearches for EUI form error text elements within the scope."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.FormErrorTestHarness.expectMessages",
+            "type": "Function",
+            "tags": [],
+            "label": "expectMessages",
+            "description": [
+              "\nAssert that specific error messages are displayed."
+            ],
+            "signature": [
+              "(expectedMessages: string[]) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.FormErrorTestHarness.expectMessages.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "expectedMessages",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/form_error_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -541,11 +935,13 @@
         "type": "Function",
         "tags": [],
         "label": "getSelectedButtonInGroup",
-        "description": [],
+        "description": [
+          "\nHelper function to get the selected button in a button group"
+        ],
         "signature": [
           "(testId: string, container?: any) => () => HTMLElement"
         ],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/util/get_selected_button_in_group.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -559,7 +955,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/util/get_selected_button_in_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -574,7 +970,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/util/get_selected_button_in_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

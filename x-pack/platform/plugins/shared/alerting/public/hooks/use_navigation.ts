@@ -8,12 +8,12 @@
 import { useCallback } from 'react';
 import { generatePath } from 'react-router-dom';
 import type { NavigateToAppOptions } from '@kbn/core/public';
-import { useKibana } from '../utils/kibana_react';
 import {
   MAINTENANCE_WINDOW_PATHS,
   MANAGEMENT_APP_ID,
   MAINTENANCE_WINDOWS_APP_ID,
-} from '../../common';
+} from '@kbn/maintenance-windows-plugin/common';
+import { useKibana } from '../utils/kibana_react';
 
 export const useNavigation = (appId: string) => {
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
@@ -37,7 +37,7 @@ export const useCreateMaintenanceWindowNavigation = () => {
   return {
     navigateToCreateMaintenanceWindow: () =>
       navigateTo({
-        path: MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate,
+        path: MAINTENANCE_WINDOW_PATHS.maintenanceWindowsCreate,
         deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
       }),
   };
@@ -66,14 +66,14 @@ export const useEditMaintenanceWindowsNavigation = () => {
   return {
     navigateToEditMaintenanceWindows: (maintenanceWindowId: string) =>
       navigateTo({
-        path: generatePath(MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsEdit, {
+        path: generatePath(MAINTENANCE_WINDOW_PATHS.maintenanceWindowsEdit, {
           maintenanceWindowId,
         }),
         deepLinkId,
       }),
     getEditMaintenanceWindowsUrl: (maintenanceWindowId: string, absolute?: boolean) =>
       getAppUrl({
-        path: generatePath(MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsEdit, {
+        path: generatePath(MAINTENANCE_WINDOW_PATHS.maintenanceWindowsEdit, {
           maintenanceWindowId,
         }),
         deepLinkId,

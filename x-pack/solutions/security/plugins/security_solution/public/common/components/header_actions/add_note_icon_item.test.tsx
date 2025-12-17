@@ -13,14 +13,12 @@ import { TestProviders } from '../../mock';
 import { getEndpointPrivilegesInitialStateMock } from '../user_privileges/endpoint/mocks';
 
 import { AddEventNoteAction } from './add_note_icon_item';
-import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
+import { NotesButton } from '../../../timelines/components/timeline/notes/notes_button';
 import { useUserPrivileges } from '../user_privileges';
 
-jest.mock('../../../timelines/components/timeline/properties/helpers', () => {
-  return {
-    NotesButton: jest.fn(),
-  };
-});
+jest.mock('../../../timelines/components/timeline/notes/notes_button', () => ({
+  NotesButton: jest.fn(),
+}));
 
 jest.mock('../user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;

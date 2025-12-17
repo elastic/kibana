@@ -9,7 +9,7 @@ import type { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/c
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
+import { getCapabilitiesForRollupIndices } from '@kbn/data-views-plugin/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
 import type { Dependencies } from './types';
 import { registerApiRoutes } from './routes';

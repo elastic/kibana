@@ -25,9 +25,10 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { DeepPartial } from '@kbn/utility-types';
+import type { VisParams } from '@kbn/visualizations-common';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
-import type { Vis, VisParams, VisSavedObject } from '../types';
+import type { Vis, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
 
 export type ExtraSavedObjectProperties = Pick<

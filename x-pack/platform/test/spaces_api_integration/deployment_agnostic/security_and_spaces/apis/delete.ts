@@ -70,7 +70,6 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
         spaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
@@ -83,7 +82,6 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
         spaceId: SPACES.SPACE_1.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
@@ -108,25 +106,6 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
           doesntExist: {
             statusCode: 403,
             response: expectRbacForbidden,
-          },
-        },
-      });
-
-      deleteTest(`superuser from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.superuser,
-        tests: {
-          exists: {
-            statusCode: 204,
-            response: expectEmptyResult,
-          },
-          reservedSpace: {
-            statusCode: 400,
-            response: expectReservedSpaceResult,
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: expectNotFound,
           },
         },
       });

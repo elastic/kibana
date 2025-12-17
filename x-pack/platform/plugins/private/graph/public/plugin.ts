@@ -125,7 +125,7 @@ export class GraphPlugin
           capabilities: coreStart.application.capabilities,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
-          indexPatterns: pluginsStart.data!.indexPatterns,
+          dataViews: pluginsStart.data.dataViews,
           overlays: coreStart.overlays,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,

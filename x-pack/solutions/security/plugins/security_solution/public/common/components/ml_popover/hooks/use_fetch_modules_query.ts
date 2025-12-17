@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import { getModules } from '../api';
 import type { GetModulesProps, Module } from '../types';

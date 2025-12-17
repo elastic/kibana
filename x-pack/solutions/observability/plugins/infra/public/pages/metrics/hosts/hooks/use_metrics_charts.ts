@@ -12,10 +12,10 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
 export const useMetricsCharts = ({
-  dataViewId,
+  indexPattern,
   schema,
 }: {
-  dataViewId?: string;
+  indexPattern?: string;
   schema?: DataSchemaFormat | null;
 }) => {
   const { value: charts = [] } = useAsync(async () => {
@@ -50,13 +50,13 @@ export const useMetricsCharts = ({
             }
           : layer
       ),
-      ...(dataViewId && {
+      ...(indexPattern && {
         dataset: {
-          index: dataViewId,
+          index: indexPattern,
         },
       }),
     }));
-  }, [schema, dataViewId]);
+  }, [schema, indexPattern]);
 
   return charts;
 };
