@@ -11,12 +11,13 @@ import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
-import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { TraceAgentMark, TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
 import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import type { AgentMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
 export interface TraceWaterfallContextProps {
   duration: number;
@@ -42,6 +43,7 @@ export interface TraceWaterfallContextProps {
   serviceName?: string;
   message?: string;
   errorMarks: ErrorMark[];
+  agentMarks: AgentMark[];
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -62,6 +64,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   showLegend: false,
   serviceName: '',
   errorMarks: [],
+  agentMarks: [],
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -86,6 +89,7 @@ interface Props {
   serviceName?: string;
   isFiltered?: boolean;
   errors?: Error[];
+  agentMarks?: TraceAgentMark[];
 }
 
 export function TraceWaterfallContextProvider({
@@ -102,6 +106,7 @@ export function TraceWaterfallContextProvider({
   serviceName,
   isFiltered,
   errors,
+  agentMarks,
 }: Props) {
   const {
     duration,
@@ -182,10 +187,22 @@ export function TraceWaterfallContextProvider({
         serviceName,
         message,
         errorMarks,
+        agentMarks: getWaterfallAgentMarks(agentMarks),
       }}
     >
       {children}
     </TraceWaterfallContext.Provider>
+  );
+}
+
+function getWaterfallAgentMarks(agentMarks?: TraceAgentMark[]): AgentMark[] {
+  return (
+    agentMarks?.map((agentMark) => ({
+      type: 'agentMark',
+      id: agentMark.name,
+      offset: agentMark.position,
+      verticalLine: true,
+    })) ?? []
   );
 }
 

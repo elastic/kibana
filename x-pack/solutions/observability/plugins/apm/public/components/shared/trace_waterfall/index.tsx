@@ -14,7 +14,7 @@ import { VariableSizeList as List, areEqual } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
-import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { TraceAgentMark, TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
@@ -37,6 +37,7 @@ export interface Props {
   showLegend?: boolean;
   serviceName?: string;
   isFiltered?: boolean;
+  agentMarks?: TraceAgentMark[];
 }
 
 export function TraceWaterfall({
@@ -52,6 +53,7 @@ export function TraceWaterfall({
   showLegend = false,
   serviceName,
   isFiltered,
+  agentMarks,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -67,6 +69,7 @@ export function TraceWaterfall({
       serviceName={serviceName}
       isFiltered={isFiltered}
       errors={errors}
+      agentMarks={agentMarks}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -89,6 +92,7 @@ function TraceWaterfallComponent() {
     showAccordion,
     isAccordionOpen,
     toggleAllAccordions,
+    agentMarks,
   } = useTraceWaterfallContext();
 
   return (
@@ -122,7 +126,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
-              marks={errorMarks}
+              marks={[...errorMarks, ...agentMarks]}
             />
           </div>
           <VerticalLinesContainer
@@ -133,7 +137,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
-            marks={errorMarks}
+            marks={[...errorMarks, ...agentMarks]}
           />
           <div
             css={css`

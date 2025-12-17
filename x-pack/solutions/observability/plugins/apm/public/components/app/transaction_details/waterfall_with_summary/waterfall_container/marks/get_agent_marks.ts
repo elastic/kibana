@@ -14,6 +14,7 @@ export interface AgentMark extends Mark {
   type: 'agentMark';
 }
 
+// @deprecated Remove it once we remove the apm waterfall
 export function getAgentMarks(transaction?: Transaction): AgentMark[] {
   const agent = transaction?.transaction.marks?.agent;
   if (!agent) {

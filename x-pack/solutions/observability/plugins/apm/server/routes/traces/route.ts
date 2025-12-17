@@ -9,7 +9,7 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { TraceAgentMark, TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -149,6 +149,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
   ): Promise<{
     traceItems: TraceItem[];
     errors: Error[];
+    agentMarks: TraceAgentMark[];
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
@@ -159,7 +160,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     const { traceId } = params.path;
     const { start, end, serviceName } = params.query;
 
-    const { traceItems, unifiedTraceErrors } = await getUnifiedTraceItems({
+    const { traceItems, agentMarks, unifiedTraceErrors } = await getUnifiedTraceItems({
       apmEventClient,
       logsClient,
       traceId,
@@ -174,6 +175,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
       traceItems,
       // For now we, we only return apm errors to show as marks in the waterfall
       errors: unifiedTraceErrors.apmErrors,
+      agentMarks,
     };
   },
 });

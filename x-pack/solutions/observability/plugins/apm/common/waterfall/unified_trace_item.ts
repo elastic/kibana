@@ -28,3 +28,8 @@ export interface TraceItem {
     outgoing: number;
   };
 }
+
+export interface TraceAgentMark {
+  name: string;
+  position: number;
+}
