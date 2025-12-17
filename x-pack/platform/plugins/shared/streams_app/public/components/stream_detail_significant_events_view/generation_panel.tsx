@@ -17,12 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Feature } from '@kbn/streams-schema';
 import type { FeatureSelectorProps } from './feature_selector';
 import { FeaturesSelector } from './feature_selector';
 import { AssetImage } from '../asset_image';
 import { ConnectorListButton } from '../connector_list_button/connector_list_button';
-import { Flow } from './add_significant_event_flyout/types';
+import type { Flow } from './add_significant_event_flyout/types';
 
 export function SignificantEventsGenerationPanel({
   features,
