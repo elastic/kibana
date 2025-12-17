@@ -68,7 +68,7 @@ export const GithubConnector: ConnectorSpec = {
           if (typedInput.query) {
             searchQuery += ` ${typedInput.query}`;
           }
-          console.log(searchQuery);
+
           const response = await ctx.client.get('https://api.github.com/search/issues', {
             params: {
               q: searchQuery,
@@ -77,7 +77,6 @@ export const GithubConnector: ConnectorSpec = {
               Accept: 'application/vnd.github.v3+json'
             }
           });
-          console.log(response.data);
           return response.data
         } catch (error: any) {
           if (error?.response?.status === 422) {
