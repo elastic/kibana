@@ -14,6 +14,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { type ChatEvent, oneChatDefaultAgentId, isRoundCompleteEvent } from '@kbn/onechat-common';
+import { getConnectorProvider } from '@kbn/inference-common';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -149,12 +150,15 @@ class ChatServiceImpl implements ChatService {
           // Merge all event streams
           const effectiveConversationId =
             context.conversation.operation === 'CREATE' ? context.conversation.id : conversationId;
-
+          const modelProvider = getConnectorProvider(context.chatModel.getConnector());
           return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
             handleCancellation(abortSignal),
             convertErrors({
+              agentId,
               logger: this.dependencies.logger,
+              analyticsService,
               trackingService,
+              modelProvider,
               conversationId: effectiveConversationId,
             }),
             tap((event) => {
@@ -167,12 +171,12 @@ class ChatServiceImpl implements ChatService {
                     trackingService?.trackConversationRound(conversationId, currentRoundCount);
                   }
 
-                  analyticsService?.reportMessageReceived({
+                  analyticsService?.reportRoundComplete({
                     conversationId: effectiveConversationId,
                     roundCount: currentRoundCount,
                     agentId,
                     round: event.data.round,
-                    connector: context.chatModel.getConnector(),
+                    modelProvider,
                   });
                 }
               } catch (error) {

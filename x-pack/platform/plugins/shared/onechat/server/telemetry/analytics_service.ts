@@ -13,8 +13,8 @@ import {
   type ConversationRound,
   ConversationRoundStepType,
 } from '@kbn/onechat-common';
-import type { InferenceConnector } from '@kbn/inference-common';
-import { getConnectorProvider } from '@kbn/inference-common';
+import type { ModelProvider } from '@kbn/inference-common';
+import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
 import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from './utils';
 
 /**
@@ -35,18 +35,18 @@ export class AnalyticsService {
     });
   }
 
-  reportMessageReceived({
-    round,
-    connector,
-    conversationId,
-    roundCount,
+  reportRoundComplete({
     agentId,
+    conversationId,
+    modelProvider,
+    round,
+    roundCount,
   }: {
-    round: ConversationRound;
-    roundCount: number;
-    connector: InferenceConnector;
     agentId: string;
     conversationId?: string;
+    modelProvider: ModelProvider;
+    round: ConversationRound;
+    roundCount: number;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -68,7 +68,7 @@ export class AnalyticsService {
         llm_calls: round.model_usage.llm_calls,
         message_length: round.input.message.length,
         model: round.model_usage.model,
-        model_provider: getConnectorProvider(connector),
+        model_provider: modelProvider,
         output_tokens: round.model_usage.output_tokens,
         response_length: round.response.message.length,
         round_number: roundCount,
@@ -80,6 +80,34 @@ export class AnalyticsService {
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report MessageReceived telemetry event', { error });
+    }
+  }
+
+  reportRoundError({
+    agentId,
+    conversationId,
+    error,
+    modelProvider,
+  }: {
+    agentId: string;
+    conversationId?: string;
+    error: unknown;
+    modelProvider: ModelProvider;
+  }): void {
+    try {
+      const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
+      const errorType = sanitizeForCounterName(normalizeErrorType(error));
+      const errorMessage = (error instanceof Error ? error.message : String(error)).slice(0, 500);
+      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.RoundError, {
+        agent_id: normalizedAgentId,
+        conversation_id: conversationId,
+        model_provider: modelProvider,
+        error_message: errorMessage,
+        error_type: errorType,
+      });
+    } catch (err) {
+      // Do not fail the request if telemetry fails
+      this.logger.debug('Failed to report MessageReceived telemetry event', { error: err });
     }
   }
 }

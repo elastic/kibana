@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
@@ -45,43 +44,29 @@ export const useAgentBuilderAttachment = ({
   const { onechat, telemetry } = useKibana().services;
 
   const openAgentBuilderFlyout = useCallback(() => {
-    try {
-      if (!onechat?.openConversationFlyout) {
-        telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
-          error_type: 'invocation_error',
-          error_message: 'onechat service or openConversationFlyout not available',
-          agent_id: THREAT_HUNTING_AGENT_ID,
-        });
-        return;
-      }
-
-      // Create a unique ID for the attachment
-      const attachmentId = `${attachmentType}-${Date.now()}`;
-
-      // Create the UiAttachment object
-      const attachment: AttachmentInput = {
-        id: attachmentId,
-        type: attachmentType,
-        data: attachmentData,
-      };
-
-      // Open the conversation flyout with attachment and prefilled message
-      onechat.openConversationFlyout({
-        autoSendInitialMessage: false,
-        newConversation: true,
-        initialMessage: attachmentPrompt,
-        attachments: [attachment],
-        sessionTag: 'security',
-        agentId: THREAT_HUNTING_AGENT_ID,
-      });
-    } catch (error) {
-      telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
-        error_type: 'invocation_error',
-        error_message: error instanceof Error ? error.message : String(error),
-        error_stack: error instanceof Error ? error.stack : undefined,
-        agent_id: THREAT_HUNTING_AGENT_ID,
-      });
+    if (!onechat?.openConversationFlyout) {
+      return;
     }
+
+    // Create a unique ID for the attachment
+    const attachmentId = `${attachmentType}-${Date.now()}`;
+
+    // Create the UiAttachment object
+    const attachment: AttachmentInput = {
+      id: attachmentId,
+      type: attachmentType,
+      data: attachmentData,
+    };
+
+    // Open the conversation flyout with attachment and prefilled message
+    onechat.openConversationFlyout({
+      autoSendInitialMessage: false,
+      newConversation: true,
+      initialMessage: attachmentPrompt,
+      attachments: [attachment],
+      sessionTag: 'security',
+      agentId: THREAT_HUNTING_AGENT_ID,
+    });
   }, [attachmentType, attachmentData, attachmentPrompt, onechat, telemetry]);
 
   return {

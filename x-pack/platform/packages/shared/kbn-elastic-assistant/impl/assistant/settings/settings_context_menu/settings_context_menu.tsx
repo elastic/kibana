@@ -107,10 +107,9 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             title: i18n.AI_AGENT_SWITCH_ERROR,
           });
         }
-        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentBuilderError, {
-          error_type: 'opt_in_error',
-          error_message: error instanceof Error ? error.message : String(error),
-          error_stack: error instanceof Error ? error.stack : undefined,
+        analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+          action: 'error',
+          source: telemetrySource,
         });
       }
     }, [settings.client, analytics, telemetrySource, toasts]);
@@ -217,6 +216,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         knowledgeBase.latestAlerts,
         assistantAvailability.isAiAgentsEnabled,
         assistantAvailability.hasAgentBuilderManagePrivilege,
+        analytics,
         handleOpenAIAgentModal,
       ]
     );

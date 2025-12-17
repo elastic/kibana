@@ -15,11 +15,7 @@ import {
   oneChatDefaultAgentId,
   type ConversationRound,
 } from '@kbn/onechat-common';
-import {
-  InferenceConnectorType,
-  ModelProvider,
-  type InferenceConnector,
-} from '@kbn/inference-common';
+import { ModelProvider } from '@kbn/inference-common';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
@@ -52,15 +48,8 @@ describe('AnalyticsService', () => {
     });
   });
 
-  describe('reportMessageReceived', () => {
-    const connector: InferenceConnector = {
-      type: InferenceConnectorType.OpenAI,
-      name: 'connector-name',
-      connectorId: 'connector-id',
-      config: {},
-      capabilities: {},
-    };
-
+  describe('reportRoundComplete', () => {
+    const modelProvider = ModelProvider.OpenAI;
     const round: ConversationRound = {
       id: 'round-1',
       input: { message: 'hi' },
@@ -88,12 +77,12 @@ describe('AnalyticsService', () => {
     };
 
     it('reports the RoundComplete event', () => {
-      service.reportMessageReceived({
+      service.reportRoundComplete({
         agentId: oneChatDefaultAgentId,
         conversationId: 'conversation-1',
         round,
         roundCount: 2,
-        connector,
+        modelProvider,
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
@@ -120,12 +109,12 @@ describe('AnalyticsService', () => {
       });
 
       expect(() =>
-        service.reportMessageReceived({
+        service.reportRoundComplete({
           agentId: oneChatDefaultAgentId,
           conversationId: 'conversation-1',
           round,
           roundCount: 2,
-          connector,
+          modelProvider,
         })
       ).not.toThrow();
     });
@@ -135,15 +124,40 @@ describe('AnalyticsService', () => {
         throw new Error('boom');
       });
 
-      service.reportMessageReceived({
+      service.reportRoundComplete({
         agentId: oneChatDefaultAgentId,
         conversationId: 'conversation-1',
         round,
         roundCount: 2,
-        connector,
+        modelProvider,
       });
 
       expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
+  describe('reportRoundError', () => {
+    const defaultArgs = {
+      agentId: oneChatDefaultAgentId,
+      conversationId: 'conversation-1',
+      error: new Error('boom'),
+      modelProvider: ModelProvider.OpenAI,
+    };
+
+    it('reports the RoundError event with a truncated error_message', () => {
+      const longMessage = 'a'.repeat(2000);
+
+      service.reportRoundError({
+        ...defaultArgs,
+        error: new Error(longMessage),
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({
+          error_message: `${'a'.repeat(500)}`,
+        })
+      );
     });
   });
 });

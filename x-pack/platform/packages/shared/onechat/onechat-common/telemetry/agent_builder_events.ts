@@ -16,21 +16,16 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   OptOut: `${TELEMETRY_PREFIX}_opt_out`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
   RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
-  AgentBuilderError: `${TELEMETRY_PREFIX}_error`,
-  /**
-   * Legacy onechat event name for errors during conversation.
-   *
-   * NOTE:
-   * - This event name is intentionally NOT prefixed with "Agent Builder" / "agent_builder".
-   * - It remains for backwards compatibility with existing onechat telemetry.
-   * - Solutions should use `AgentBuilderError` instead so all solution event IDs
-   *   stay under the agent_builder prefix.
-   */
-  ONECHAT_CONVERSE_ERROR: 'onechat_converse_error',
+  RoundError: `${TELEMETRY_PREFIX}_error`,
 } as const;
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
-export type OptInAction = 'step_reached' | 'confirmation_shown' | 'confirmed' | 'canceled';
+export type OptInAction =
+  | 'step_reached'
+  | 'confirmation_shown'
+  | 'confirmed'
+  | 'canceled'
+  | 'error';
 
 export interface ReportOptInActionParams {
   action: OptInAction;
@@ -47,7 +42,7 @@ export interface ReportAddToChatClickedParams {
 }
 
 export interface ReportRoundCompleteParams {
-  agent_id?: string;
+  agent_id: string;
   attachments?: string[];
   conversation_id?: string;
   has_attachments: boolean;
@@ -65,40 +60,20 @@ export interface ReportRoundCompleteParams {
   tools_invoked: string[];
 }
 
-export interface ReportConverseErrorParams {
+export interface ReportRoundErrorParams {
   error_type: string;
   error_message: string;
-  error_stack?: string;
+  model_provider?: string;
   conversation_id?: string;
-  agent_id?: string;
-  connector_id?: string;
+  agent_id: string;
 }
-
-/**
- * Event used by Security Solution for Agent Builder-related errors.
- *
- * NOTE:
- * This intentionally shares a schema with the legacy onechat `ONECHAT_CONVERSE_ERROR` event so
- * solutions can optionally provide richer context (conversation_id/agent_id) when
- * available, while keeping the event ID under the agent_builder prefix.
- */
-export type ReportAgentBuilderErrorParams = ReportConverseErrorParams;
-
-/**
- * Legacy onechat conversation error event payload.
- *
- * This event captures full context for errors surfaced during conversation:
- * error details (type, message, stack) plus conversation/agent/connector IDs.
- */
-export type ReportOnechatConverseErrorParams = ReportConverseErrorParams;
 
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
-  [AGENT_BUILDER_EVENT_TYPES.AgentBuilderError]: ReportAgentBuilderErrorParams;
-  [AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR]: ReportOnechatConverseErrorParams;
+  [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -106,17 +81,14 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptOutParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportRoundCompleteParams>
-  | EventTypeOpts<ReportAgentBuilderErrorParams>
-  | EventTypeOpts<ReportOnechatConverseErrorParams>;
-
+  | EventTypeOpts<ReportRoundErrorParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
-  | typeof AGENT_BUILDER_EVENT_TYPES.AgentBuilderError
-  | typeof AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR;
+  | typeof AGENT_BUILDER_EVENT_TYPES.RoundError;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -187,7 +159,7 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'ID of the agent',
-        optional: true,
+        optional: false,
       },
     },
     attachments: {
@@ -255,7 +227,7 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
     model_provider: {
       type: 'keyword',
       _meta: {
-        description: 'Connector provider (OpenAI|Google|Anthropic|Elastic)',
+        description: 'LLM model provider (OpenAI|Google|Anthropic|Elastic)',
         optional: true,
       },
     },
@@ -312,7 +284,7 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
-const CONVERSE_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
+const ROUND_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
   error_type: {
     type: 'keyword',
     _meta: {
@@ -327,10 +299,10 @@ const CONVERSE_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
       optional: false,
     },
   },
-  error_stack: {
-    type: 'text',
+  model_provider: {
+    type: 'keyword',
     _meta: {
-      description: 'The error stack trace if available',
+      description: 'LLM model provider (OpenAI|Google|Anthropic|Elastic)',
       optional: true,
     },
   },
@@ -345,34 +317,21 @@ const CONVERSE_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
     type: 'keyword',
     _meta: {
       description: 'The ID of the agent involved in the conversation',
-      optional: true,
-    },
-  },
-  connector_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The ID of the connector used for the conversation',
-      optional: true,
+      optional: false,
     },
   },
 };
 
-const AGENT_BUILDER_ERROR_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.AgentBuilderError,
-  schema: CONVERSE_ERROR_SCHEMA,
-};
-
-const ONECHAT_CONVERSE_ERROR_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.ONECHAT_CONVERSE_ERROR,
-  schema: CONVERSE_ERROR_SCHEMA,
+const ROUND_ERROR_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.RoundError,
+  schema: ROUND_ERROR_SCHEMA,
 };
 
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
-  AGENT_BUILDER_ERROR_EVENT,
-  ONECHAT_CONVERSE_ERROR_EVENT,
+  ROUND_ERROR_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
