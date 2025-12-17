@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'sampleLongRunningRecurringTask',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -59,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Sender',
         'IndicesMetadata:IndicesMetadataTask',
         'ML:saved-objects-sync',
+        'ProductDocBase:EnsureSecurityLabsUpToDate',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
         'ProductDocBase:UninstallAll',

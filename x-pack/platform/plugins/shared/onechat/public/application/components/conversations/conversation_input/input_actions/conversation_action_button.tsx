@@ -43,7 +43,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
       aria-label={labels.cancel}
       data-test-subj="agentBuilderConversationInputCancelButton"
       iconType="stopFilled"
-      size="m"
+      size="s"
       color="text"
       css={cancelButtonStyles}
       onClick={() => {
@@ -59,7 +59,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
       data-test-subj="agentBuilderConversationInputSubmitButton"
       iconType="sortUp"
       display="fill"
-      size="m"
+      size="s"
       disabled={isSubmitDisabled}
       onClick={onSubmit}
     />

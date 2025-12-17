@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { type FeatureSelectorProps } from '../feature_selector';
+import { SignificantEventsGenerationPanel } from '../generation_panel';
+
+export function EmptyState({
+  onFeatureIdentificationClick,
+  onManualEntryClick,
+  onGenerateSuggestionsClick,
+  features,
+  selectedFeatures,
+  onFeaturesChange,
+}: FeatureSelectorProps & {
+  onFeatureIdentificationClick: () => void;
+  onManualEntryClick: () => void;
+  onGenerateSuggestionsClick: () => void;
+}) {
+  return (
+    <EuiEmptyPrompt
+      titleSize="xs"
+      title={
+        <h2>
+          {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
+            defaultMessage: 'Generate significant events',
+          })}
+        </h2>
+      }
+      body={
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexItem>
+            <EuiText size="s" textAlign="center" color="subdued">
+              {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
+                defaultMessage:
+                  "A Significant Event is a single, ‘interesting’ log event identified by an automated rule as being important for understanding a system's behaviour.",
+              })}
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <SignificantEventsGenerationPanel
+              features={features}
+              selectedFeatures={selectedFeatures}
+              onFeaturesChange={onFeaturesChange}
+              onGenerateSuggestionsClick={onGenerateSuggestionsClick}
+              onFeatureIdentificationClick={onFeatureIdentificationClick}
+              onManualEntryClick={onManualEntryClick}
+              isLoadingGeneration={false}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
+  );
+}
