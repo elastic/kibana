@@ -13,6 +13,7 @@ import type {
   BrowserAuthFixture,
 } from '@kbn/scout-oblt';
 import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
+import { AlertsTab } from './page_objects/alerts_tab';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 import { StorageExplorerPage } from './page_objects/storage_explorer';
@@ -36,6 +37,7 @@ export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
+    alertsTab: AlertsTab;
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
     storageExplorerPage: StorageExplorerPage;
@@ -68,6 +70,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
+      alertsTab: createLazyPageObject(AlertsTab, page, kbnUrl),
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
       storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),
