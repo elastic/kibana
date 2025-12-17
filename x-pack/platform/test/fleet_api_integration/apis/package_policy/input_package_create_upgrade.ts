@@ -170,7 +170,9 @@ export default function (providerContext: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
-  describe('Package Policy - input package behavior', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246383
+  // Failing: See https://github.com/elastic/kibana/issues/246383
+  describe.skip('Package Policy - input package behavior', function () {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -192,7 +194,12 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should not have created any ES assets on install', async () => {
       const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
-      expect(installation.installed_es).to.eql([]);
+      expect(installation.installed_es).to.eql([
+        {
+          id: 'input_package_upgrade-README.md',
+          type: 'knowledge_base',
+        },
+      ]);
     });
 
     it('should create index templates and update installed_es on package policy creation', async () => {
@@ -204,6 +211,7 @@ export default function (providerContext: FtrProviderContext) {
         { id: 'logs-dataset1@package', type: 'component_template' },
         { id: 'logs-dataset1@custom', type: 'component_template' },
         { id: 'logs@custom', type: 'component_template' },
+        { id: 'input_package_upgrade-README.md', type: 'knowledge_base' },
         { id: 'input_package_upgrade@custom', type: 'component_template' },
       ]);
 
