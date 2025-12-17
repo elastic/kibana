@@ -40,6 +40,7 @@ import {
   PAGINATION_LIMIT_DESCRIPTION,
 } from './translations';
 import {
+  ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
 } from '../packs/pack_queries_status_table';
