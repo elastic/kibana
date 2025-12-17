@@ -41,7 +41,7 @@ export const useAgentBuilderAttachment = ({
   attachmentData,
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
-  const { onechat, telemetry } = useKibana().services;
+  const { onechat } = useKibana().services;
 
   const openAgentBuilderFlyout = useCallback(() => {
     if (!onechat?.openConversationFlyout) {
@@ -67,7 +67,7 @@ export const useAgentBuilderAttachment = ({
       sessionTag: 'security',
       agentId: THREAT_HUNTING_AGENT_ID,
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, onechat, telemetry]);
+  }, [attachmentType, attachmentData, attachmentPrompt, onechat]);
 
   return {
     openAgentBuilderFlyout,
