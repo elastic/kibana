@@ -65,7 +65,8 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                 logger: taskContext.logger,
               });
 
-              const { featurePromptOverride } = await promptsConfigService.getPrompt();
+              const { featurePromptOverride, descriptionPromptOverride } =
+                await promptsConfigService.getPrompt();
 
               const results = await featureRegistry.identifyFeatures({
                 start,
@@ -77,6 +78,7 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                 features: hits,
                 signal,
                 featurePromptOverride,
+                descriptionPromptOverride,
               });
 
               // I think I have to send the telemetry here
