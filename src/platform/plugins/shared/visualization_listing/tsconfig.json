@@ -15,7 +15,8 @@
     "@kbn/content-management-content-editor",
     "@kbn/content-management-utils",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/visualization-listing-components"
   ],
   "exclude": ["target/**/*"]
 }
