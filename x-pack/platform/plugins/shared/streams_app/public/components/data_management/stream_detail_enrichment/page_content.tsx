@@ -159,7 +159,11 @@ export function StreamDetailEnrichmentContentImpl() {
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (isReady && definition) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
         customMetrics: {
           key1: 'schemaEditorFields',
           value1: schemaEditorFields.length,

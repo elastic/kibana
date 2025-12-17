@@ -20,6 +20,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export function StreamDetailReferencesView({
   definition,
@@ -60,8 +61,12 @@ export function StreamDetailReferencesView({
         ).length;
 
       const isGroupStream = Streams.GroupStream.Definition.is(definition.stream);
+      const streamType = getStreamTypeFromDefinition(definition.stream);
 
       onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
         customMetrics: {
           key1: 'total_streams_count',
           value1: streams.length,

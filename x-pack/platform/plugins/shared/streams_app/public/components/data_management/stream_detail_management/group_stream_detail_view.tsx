@@ -24,6 +24,9 @@ export const GroupStreamDetailView = ({ stream }: { stream: Streams.GroupStream.
   useEffect(() => {
     if (stream) {
       onPageReady({
+        meta: {
+          description: '[ttfmp_streams] streamType: group',
+        },
         customMetrics: {
           key1: 'member_count',
           value1: stream.stream.group.members.length,
