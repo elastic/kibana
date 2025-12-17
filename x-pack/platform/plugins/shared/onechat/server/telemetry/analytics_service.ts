@@ -79,7 +79,7 @@ export class AnalyticsService {
       });
     } catch (error) {
       // Do not fail the request if telemetry fails
-      this.logger.debug('Failed to report MessageReceived telemetry event', { error });
+      this.logger.debug('Failed to report RoundComplete telemetry event', { error });
     }
   }
 
@@ -107,7 +107,7 @@ export class AnalyticsService {
       });
     } catch (err) {
       // Do not fail the request if telemetry fails
-      this.logger.debug('Failed to report MessageReceived telemetry event', { error: err });
+      this.logger.debug('Failed to report RoundError telemetry event', { error: err });
     }
   }
 }

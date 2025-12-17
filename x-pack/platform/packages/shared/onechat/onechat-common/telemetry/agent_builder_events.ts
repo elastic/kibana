@@ -16,7 +16,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   OptOut: `${TELEMETRY_PREFIX}_opt_out`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
   RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
-  RoundError: `${TELEMETRY_PREFIX}_error`,
+  RoundError: `${TELEMETRY_PREFIX}_round_error`,
 } as const;
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
@@ -45,7 +45,6 @@ export interface ReportRoundCompleteParams {
   agent_id: string;
   attachments?: string[];
   conversation_id?: string;
-  has_attachments: boolean;
   input_tokens: number;
   llm_calls: number;
   message_length: number;
@@ -181,13 +180,6 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description: 'Conversation ID',
         optional: true,
-      },
-    },
-    has_attachments: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the message has attachments',
-        optional: false,
       },
     },
     input_tokens: {
@@ -332,9 +324,9 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
-  ROUND_ERROR_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   ROUND_COMPLETE_EVENT,
+  ROUND_ERROR_EVENT,
 ];
