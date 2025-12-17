@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiButtonIcon, EuiSwitch } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
-import type { ParsedGroupingAggregation } from '@kbn/grouping/src';
+import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
@@ -165,6 +165,28 @@ export const TableSection = React.memo(
       return dataView.toSpec(true);
     }, [dataView]);
 
+    const openAttackDetailsFlyout = useCallback((selectedGroup: string) => {
+      // TODO: open attack details flyout logic
+    }, []);
+
+    const getAdditionalActionButtons = useCallback(
+      (selectedGroup: string, fieldBucket: RawBucket<AlertsGroupingAggregation>) => {
+        return !isGroupingBucket(fieldBucket) || fieldBucket.isNullGroup
+          ? []
+          : [
+              <EuiButtonIcon
+                aria-label={'expand button'}
+                data-test-subj="expand-attack-button"
+                iconType="expand"
+                onClick={() => openAttackDetailsFlyout(selectedGroup)}
+                size="s"
+                color="text"
+              />,
+            ];
+      },
+      []
+    );
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -186,6 +208,7 @@ export const TableSection = React.memo(
           additionalToolbarControls={[showAnonymizedSwitch]}
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
+          getAdditionalActionButtons={getAdditionalActionButtons}
         />
       </div>
     );
