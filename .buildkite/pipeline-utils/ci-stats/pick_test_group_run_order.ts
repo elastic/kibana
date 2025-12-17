@@ -407,14 +407,14 @@ export async function pickTestGroupRunOrder() {
                     ...ftrExtraArgs,
                     ...envFromlabels,
                   },
-                  // retry: {
-                  //   automatic: [
-                  //     { exit_status: '-1', limit: 3 },
-                  //     ...(FTR_CONFIGS_RETRY_COUNT > 0
-                  //       ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                  //       : []),
-                  //   ],
-                  // },
+                  retry: {
+                    automatic: [
+                      { exit_status: '-1', limit: 3 },
+                      // ...(FTR_CONFIGS_RETRY_COUNT > 0
+                      //   ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                      //   : []),
+                    ],
+                  },
                 })
               ),
           }
