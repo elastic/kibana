@@ -259,6 +259,10 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor .suggest-details .scrollbar {
+      display: none !important;
+    }
+
     .monaco-hover {
       display: block !important;
       background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
