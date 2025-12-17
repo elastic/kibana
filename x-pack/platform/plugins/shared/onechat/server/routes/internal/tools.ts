@@ -8,6 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolType, validateToolId } from '@kbn/onechat-common';
+import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
+import type { ListToolsResponse } from '@kbn/mcp-client';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { isMcpTool, type McpToolDefinition } from '@kbn/onechat-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -21,11 +25,20 @@ import type {
   ListToolHealthResponse,
   BulkCreateMcpToolsResponse,
   BulkCreateMcpToolResult,
+  ListConnectorsResponse,
+  ConnectorItem,
+  ListMcpToolsResponse,
+  GetConnectorResponse,
+  ListMcpToolsHealthResponse,
+  McpToolHealthState,
+  McpToolHealthStatus,
+  ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
 import { validateConnector } from '../../services/tools/tool_types/mcp/validate_configuration';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 import { getToolTypeInfo } from '../../services/tools/utils';
+import { toConnectorItem } from '../utils';
 
 export function registerInternalToolsRoutes({
   router,
@@ -213,6 +226,53 @@ export function registerInternalToolsRoutes({
         body: {
           results,
           summary,
+        },
+      });
+    })
+  );
+
+  // validate namespace for MCP tool import (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_validate_namespace`,
+      validate: {
+        query: schema.object({
+          namespace: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { namespace } = request.query;
+      const { tools: toolService } = getInternalServices();
+      const registry = await toolService.getRegistry({ request });
+
+      const allTools = await registry.list({});
+
+      // Extract namespaces from tool IDs
+      // A tool ID like "mcp.github.tool_name" has namespace "mcp.github"
+      // A tool ID like "mcp.tool_name" has namespace "mcp"
+      // A tool ID like "tool_name" has no namespace
+      const existingNamespaces = new Set<string>();
+      allTools.forEach((tool) => {
+        const lastDotIndex = tool.id.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+          const toolNamespace = tool.id.substring(0, lastDotIndex);
+          existingNamespaces.add(toolNamespace);
+        }
+      });
+
+      const conflictingNamespaces = Array.from(existingNamespaces).filter(
+        (existingNamespace) => existingNamespace === namespace
+      );
+
+      return response.ok<ValidateNamespaceResponse>({
+        body: {
+          isValid: conflictingNamespaces.length === 0,
+          conflictingNamespaces,
         },
       });
     })
@@ -421,6 +481,247 @@ export function registerInternalToolsRoutes({
 
       return response.ok<GetToolHealthResponse>({
         body: { health },
+      });
+    })
+  );
+
+  // list connectors (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_list_connectors`,
+      validate: {
+        query: schema.object({
+          type: schema.maybe(schema.string()),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+      const allConnectors = await actionsClient.getAll();
+
+      const { type } = request.query;
+
+      const connectors: ConnectorItem[] = allConnectors
+        .filter((connector) => (type ? connector.actionTypeId === type : true))
+        .map(toConnectorItem);
+
+      return response.ok<ListConnectorsResponse>({
+        body: {
+          connectors,
+        },
+      });
+    })
+  );
+
+  // get connector by ID (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_get_connector/{connectorId}`,
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+      const { connectorId } = request.params;
+
+      const connector = await actionsClient.get({ id: connectorId });
+
+      return response.ok<GetConnectorResponse>({
+        body: {
+          connector: toConnectorItem(connector),
+        },
+      });
+    })
+  );
+
+  // list MCP tools (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_list_mcp_tools`,
+      validate: {
+        query: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+
+      const { connectorId } = request.query;
+
+      const connector = await actionsClient.get({ id: connectorId });
+
+      if (connector.actionTypeId !== MCP_CONNECTOR_ID) {
+        response.badRequest({
+          body: {
+            message: `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_ID}', got '${connector.actionTypeId}'`,
+          },
+        });
+      }
+
+      const executeResult = (await actionsClient.execute({
+        actionId: request.query.connectorId,
+        params: {
+          subAction: 'listTools',
+        },
+      })) as ActionTypeExecutorResult<ListToolsResponse>;
+
+      if (executeResult.status === 'error') {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to list MCP tools for connector '${connectorId}': ${executeResult.message}`,
+          },
+        });
+      }
+
+      const mcpTools = executeResult.data?.tools ?? [];
+
+      return response.ok<ListMcpToolsResponse>({
+        body: {
+          mcpTools,
+        },
+      });
+    })
+  );
+
+  // list health status for all MCP tools (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_mcp_health`,
+      validate: false,
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+      const { tools: toolService } = getInternalServices();
+
+      const registry = await toolService.getRegistry({ request });
+      const healthClient = toolService.getHealthClient({ request });
+
+      const allTools = await registry.list({});
+      const mcpTools: McpToolDefinition[] = allTools.filter((tool) => isMcpTool(tool));
+
+      if (mcpTools.length === 0) {
+        return response.ok<ListMcpToolsHealthResponse>({
+          body: { results: [] },
+        });
+      }
+
+      const healthStates = await healthClient.listBySpace();
+      const healthByToolId = new Map(
+        healthStates.map((healthState) => [healthState.toolId, healthState])
+      );
+
+      const connectorIds = [...new Set(mcpTools.map((tool) => tool.configuration.connector_id))];
+
+      const connectorResults = await Promise.allSettled(
+        connectorIds.map(async (connectorId) => {
+          const connector = await actionsClient.get({ id: connectorId });
+          const executeResult = (await actionsClient.execute({
+            actionId: connectorId,
+            params: { subAction: 'listTools' },
+          })) as ActionTypeExecutorResult<ListToolsResponse>;
+
+          return {
+            connectorId,
+            connector,
+            mcpServerTools: executeResult.status === 'ok' ? executeResult.data?.tools ?? [] : [],
+            listToolsError: executeResult.status === 'error' ? executeResult.message : undefined,
+          };
+        })
+      );
+
+      const connectorDataMap = new Map<
+        string,
+        {
+          exists: boolean;
+          mcpServerTools: string[];
+          listToolsError?: string;
+        }
+      >();
+
+      for (let i = 0; i < connectorIds.length; i++) {
+        const connectorId = connectorIds[i];
+        const result = connectorResults[i];
+
+        if (result.status === 'fulfilled') {
+          connectorDataMap.set(connectorId, {
+            exists: true,
+            mcpServerTools: result.value.mcpServerTools.map((mcpServerTool) => mcpServerTool.name),
+            listToolsError: result.value.listToolsError,
+          });
+        } else {
+          connectorDataMap.set(connectorId, {
+            exists: false,
+            mcpServerTools: [],
+          });
+        }
+      }
+
+      const results: McpToolHealthState[] = mcpTools.map((tool) => {
+        const toolConnectorId = tool.configuration.connector_id;
+        const mcpToolName = tool.configuration.tool_name;
+        const connectorData = connectorDataMap.get(toolConnectorId);
+        const toolHealth = healthByToolId.get(tool.id);
+
+        let status: McpToolHealthStatus = 'healthy';
+        let errorMessage: string | undefined;
+
+        // Check connector exists
+        if (!connectorData?.exists) {
+          status = 'connector_not_found';
+          errorMessage = `Connector '${toolConnectorId}' not found`;
+        }
+        // Check if listing MCP tools failed
+        else if (connectorData.listToolsError) {
+          status = 'list_tools_failed';
+          errorMessage = connectorData.listToolsError;
+        }
+        // Check if the specific MCP tool exists on the server
+        else if (!connectorData.mcpServerTools.includes(mcpToolName)) {
+          status = 'tool_not_found';
+          errorMessage = `Tool '${mcpToolName}' not found on MCP server`;
+        }
+        // Check if the tool has failed health checks
+        else if (toolHealth && toolHealth.status !== 'healthy') {
+          status = 'tool_unhealthy';
+          errorMessage = toolHealth.errorMessage;
+        }
+
+        return {
+          toolId: tool.id,
+          connectorId: toolConnectorId,
+          mcpToolName,
+          status,
+          errorMessage,
+        };
+      });
+
+      return response.ok<ListMcpToolsHealthResponse>({
+        body: { results },
       });
     })
   );
