@@ -2445,7 +2445,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
       });
 
-      it('should allow transfer ownership of write-restricted objects by owner even if RBAC privileges are revoked', async () => {
+      it('should throw when transferring ownership of write-restricted objects if owner RBAC privileges are revoked', async () => {
         const { cookie: testUserCookie, profileUid: testUserProfileUid } =
           await loginAsNotObjectOwner('test_user', 'changeme');
 
@@ -2479,7 +2479,7 @@ export default function ({ getService }: FtrProviderContext) {
             objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
             newOwnerProfileUid: testUserProfileUid,
           })
-          .expect(200);
+          .expect(403);
 
         const getResponse = await supertestWithoutAuth
           .get(`/access_control_objects/${objectId}`)
@@ -2487,7 +2487,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', testUserCookie.cookieString())
           .expect(200);
         expect(getResponse.body).to.have.property('accessControl');
-        expect(getResponse.body.accessControl).to.have.property('owner', testUserProfileUid);
+        expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
       });
 
       describe('partial bulk change ownership', () => {
@@ -2631,7 +2631,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should throw when trying to change access mode on locked objects when not owner', async () => {
+      it('should throw when trying to change access mode on write restrited objects when not owner', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -2748,7 +2748,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
       });
 
-      it('should allow owner to change access mode even if RBAC privileges are revoked', async () => {
+      it('should throw when trying to change access mode if owner RBAC privileges are revoked', async () => {
         const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
 
         await createSimpleUser(['kibana_savedobjects_editor']);
@@ -2785,7 +2785,7 @@ export default function ({ getService }: FtrProviderContext) {
             objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
             newAccessMode: 'default',
           })
-          .expect(200);
+          .expect(403);
 
         const getResponse = await supertestWithoutAuth
           .get(`/access_control_objects/${objectId}`)
@@ -2793,7 +2793,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', testUserCookie.cookieString())
           .expect(200);
         expect(getResponse.body).to.have.property('accessControl');
-        expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
       });
 
       describe('partial bulk change access mode', () => {
