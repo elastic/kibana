@@ -12,8 +12,9 @@ const SERVERLESS_ONLY = [
   '@svlSecurityEssentials',
   '@svlSecurityEase',
   '@svlOblt',
+  '@svlLogsEssentials',
   '@svlSearch',
-  '@svlChat',
+  '@svlWorkplaceAI',
 ];
 const ESS_ONLY = ['@ess'];
 // svlChat is truly serverless only and doesn't have a stateful counterpart
@@ -23,6 +24,7 @@ const DEPLOYMENT_AGNOSTIC = [
   '@svlSecurityEssentials',
   '@svlSecurityEase',
   '@svlOblt',
+  '@svlLogsEssentials',
   '@svlSearch',
 ];
 const PERFORMANCE = ['@perf'];
@@ -40,6 +42,7 @@ export const tagsByMode = {
     chat: '@svlChat',
     es: '@svlSearch',
     oblt: '@svlOblt',
+    'oblt-logs-essentials': '@svlLogsEssentials',
     security: '@svlSecurity',
     'security-essentials': '@svlSecurityEssentials',
     'security-ease': '@svlSecurityEase',
