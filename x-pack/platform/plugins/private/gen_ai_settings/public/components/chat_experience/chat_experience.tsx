@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback,useMemo, useEffect, useRef } from 'react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -55,8 +55,8 @@ export const ChatExperience: React.FC = () => {
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
-
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
+  const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
   const savedValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
   const hasTrackedInitialStep = useRef(false);
 
@@ -122,32 +122,61 @@ export const ChatExperience: React.FC = () => {
     handleFieldChange(AI_CHAT_EXPERIENCE_TYPE, undefined);
   }, [handleFieldChange, analytics]);
 
-  // Don't render if AI Agents feature is disabled
-  if (!isAiAgentsEnabled) {
+  const description = useMemo(
+    () => (
+      <FormattedMessage
+        id="aiAssistantManagementSelection.preferredChatExperienceSettingDescription"
+        defaultMessage="Choose which chat experience to use for everyone in this space. {learnMoreLink}"
+        values={{
+          learnMoreLink: (
+            <EuiLink
+              href={docLinks.links.agentBuilder.learnMore}
+              target="_blank"
+              data-test-subj="aiAgentBuilderLearnMoreLink"
+            >
+              <FormattedMessage
+                id="aiAssistantManagementSelection.preferredChatExperienceSettingDescription.learnMoreLink"
+                defaultMessage="Learn more"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+    [docLinks.links.agentBuilder.learnMore]
+  );
+
+  if (!isAiAgentsEnabled || !field) {
     return null;
   }
 
-  if (!field) return null;
-
-  const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
+  const fieldWithDescription = {
+    ...field,
+    description,
+  };
 
   return (
     <>
+      <EuiSpacer size="l" />
       <FieldRowProvider
         links={docLinks.links.management}
         showDanger={(message: string) => notifications.toasts.addDanger(message)}
         validateChange={(key: string, value: any) => settings.client.validateValue(key, value)}
       >
         <FieldRow
-          field={field}
-          isSavingEnabled={!!canEditAdvancedSettings}
+          field={fieldWithDescription}
+          isSavingEnabled={canEditAdvancedSettings}
           onFieldChange={wrappedHandleFieldChange}
           unsavedChange={unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]}
         />
       </FieldRowProvider>
 
       {isConfirmModalOpen && (
-        <AIAgentConfirmationModal onConfirm={handleConfirmAgent} onCancel={handleCancelAgent} />
+        <AIAgentConfirmationModal
+          onConfirm={handleConfirmAgent}
+          onCancel={handleCancelAgent}
+          docLinks={docLinks.links}
+        />
       )}
     </>
   );
