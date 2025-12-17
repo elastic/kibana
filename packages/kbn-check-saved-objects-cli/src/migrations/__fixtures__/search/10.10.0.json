@@ -96,8 +96,7 @@
         "searchSourceJSON": "{\"query\":{\"language\":\"esql\",\"query\":\"from logs-* | limit 10\"},\"filter\":[]}"
       },
       "isTextBasedQuery": true,
-      "timeRestore": false,
-      "chartInterval": "1h"
+      "timeRestore": false
     }
   ]
 }
