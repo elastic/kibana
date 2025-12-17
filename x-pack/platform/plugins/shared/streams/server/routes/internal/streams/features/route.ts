@@ -19,8 +19,9 @@ import type {
 } from '@kbn/storage-adapter';
 import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
-import { from, map } from 'rxjs';
+import { catchError, from, map } from 'rxjs';
 import { BooleanFromString } from '@kbn/zod-helpers';
+import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import type { IdentifyFeaturesResult } from '../../../../lib/streams/feature/feature_type_registry';
 import type { FeatureIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/feature_identification';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
@@ -31,6 +32,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import type { StreamDescriptionEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -424,10 +426,16 @@ export const describeStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Observable<StreamDescriptionEvent>> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+      streamsClient,
+      inferenceClient,
+      soClient,
+    } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -444,7 +452,17 @@ export const describeStreamRoute = createServerRoute({
       );
     }
 
+    // Get connector info for error enrichment
+    const connector = await inferenceClient.getConnectorById(connectorId);
+
     const stream = await streamsClient.getStream(name);
+
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
 
     return from(
       generateStreamDescription({
@@ -455,11 +473,12 @@ export const describeStreamRoute = createServerRoute({
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
         logger: logger.get('stream_description'),
+        systemPromptOverride: descriptionPromptOverride,
       })
     ).pipe(
       map((result) => {
         return {
-          type: 'stream_description',
+          type: 'stream_description' as const,
           description: result.description,
           tokensUsed: sumTokens(
             {
@@ -471,6 +490,9 @@ export const describeStreamRoute = createServerRoute({
             result.tokensUsed
           ),
         };
+      }),
+      catchError((error: Error) => {
+        throw createConnectorSSEError(error, connector);
       })
     );
   },

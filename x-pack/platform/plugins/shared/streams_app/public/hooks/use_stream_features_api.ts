@@ -14,12 +14,7 @@ import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_defini
 
 interface StreamFeaturesApi {
   upsertFeature: (feature: Feature) => Promise<void>;
-  identifyFeatures: (
-    connectorId: string,
-    to: string,
-    from: string,
-    force: boolean
-  ) => Promise<IdentifyFeaturesResult>;
+  identifyFeatures: (connectorId: string) => Promise<IdentifyFeaturesResult>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (
     features: Pick<Feature, 'type' | 'name'>[]
@@ -40,12 +35,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    identifyFeatures: async (
-      connectorId: string,
-      to: string,
-      from: string,
-      forceInitialCall: boolean
-    ) => {
+    identifyFeatures: async (connectorId: string) => {
       // Timeout after 5 minutes
       const pollInterval = 5_000;
       const maxAttempts = 60;
@@ -57,6 +47,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           throw new Error('Request aborted');
         }
 
+        const now = Date.now();
         const taskResult = await streamsRepositoryClient.fetch(
           'POST /internal/streams/{name}/features/_identify',
           {
@@ -65,9 +56,9 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
               path: { name: definition.name },
               query: {
                 connectorId,
-                to,
-                from,
-                force: attempts === 0 ? forceInitialCall : false,
+                to: new Date(now).toISOString(),
+                from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+                force: attempts === 0 ? true : false,
               },
             },
           }
