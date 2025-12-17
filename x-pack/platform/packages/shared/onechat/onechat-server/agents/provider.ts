@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
-  RawRoundInput,
+  ConverseInput,
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
@@ -115,7 +115,7 @@ export interface AgentParams {
   /**
    * The input triggering this round.
    */
-  nextInput: RawRoundInput;
+  nextInput: ConverseInput;
   /**
    * Agent capabilities to enable.
    */

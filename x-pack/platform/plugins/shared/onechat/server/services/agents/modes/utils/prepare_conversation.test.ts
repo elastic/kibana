@@ -6,8 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { ConversationRound, RawRoundInput } from '@kbn/onechat-common';
-import { ConversationRoundStepType, ToolResultType, ToolType } from '@kbn/onechat-common';
+import type { ConversationRound, ConverseInput } from '@kbn/onechat-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+  ToolType,
+} from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import type {
@@ -77,6 +82,7 @@ describe('prepareConversation', () => {
   const createRound = (parts: Partial<ConversationRound> = {}): ConversationRound => {
     return {
       id: 'round-1',
+      status: ConversationRoundStatus.completed,
       input: {
         message: '',
       },
@@ -99,7 +105,7 @@ describe('prepareConversation', () => {
 
   describe('with no attachments', () => {
     it('should process a simple nextInput with no attachments', async () => {
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
       };
 
@@ -123,7 +129,7 @@ describe('prepareConversation', () => {
     });
 
     it('should handle empty attachments array', async () => {
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [],
       };
@@ -175,7 +181,7 @@ describe('prepareConversation', () => {
         throw new Error(`Unexpected attachment type: ${id}`);
       });
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment1, attachment2],
       };
@@ -215,7 +221,7 @@ describe('prepareConversation', () => {
 
       mockAttachmentsService.getTypeDefinition.mockReturnValue(textDefinition);
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment],
       };
@@ -242,7 +248,7 @@ describe('prepareConversation', () => {
         attachmentDefinition({ id: 'text', repr: mockRepresentation })
       );
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment],
       };
@@ -273,7 +279,7 @@ describe('prepareConversation', () => {
         attachmentDefinition({ id: 'text', repr: mockRepresentation })
       );
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment],
       };
@@ -330,7 +336,7 @@ describe('prepareConversation', () => {
 
       mockAttachmentsService.getTypeDefinition.mockReturnValue(definition);
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment1, attachment2, attachment3],
       };
@@ -374,7 +380,7 @@ describe('prepareConversation', () => {
         attachmentDefinition({ id: 'text', repr: mockRepresentation })
       );
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment],
       };

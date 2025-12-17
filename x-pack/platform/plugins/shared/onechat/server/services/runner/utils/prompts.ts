@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation, RawRoundInput } from '@kbn/onechat-common';
+import type { Conversation, ConverseInput } from '@kbn/onechat-common';
 import type { PromptManager, ToolPromptManager } from '@kbn/onechat-server/runner';
 import type { ConfirmationPromptWithResponse } from '@kbn/onechat-server/agents/prompts';
 import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
@@ -55,7 +55,7 @@ export const initPromptManager = ({
   conversation,
 }: {
   promptManager: PromptManager;
-  input: RawRoundInput;
+  input: ConverseInput;
   conversation?: Conversation;
 }) => {
   // TODO: fix that logic

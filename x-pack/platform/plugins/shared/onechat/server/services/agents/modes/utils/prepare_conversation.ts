@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-common';
+import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/onechat-common';
 import { createInternalError } from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
@@ -48,7 +48,7 @@ export const prepareConversation = async ({
   attachmentsService,
 }: {
   previousRounds: ConversationRound[];
-  nextInput: RawRoundInput;
+  nextInput: ConverseInput;
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedConversation> => {
   const processedNextInput = await prepareRoundInput({ input: nextInput, attachmentsService });
@@ -103,7 +103,7 @@ const prepareRoundInput = async ({
   input,
   attachmentsService,
 }: {
-  input: RoundInput | RawRoundInput;
+  input: RoundInput | ConverseInput;
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedRoundInput> => {
   let attachments: ProcessedAttachment[] = [];

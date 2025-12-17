@@ -6,6 +6,7 @@
  */
 
 import type { Conversation } from '@kbn/onechat-common';
+import { ConversationRoundStatus } from '@kbn/onechat-common';
 import { isToolCallStep, ConversationRoundStepType, ToolResultType } from '@kbn/onechat-common';
 import { getToolResultId } from '@kbn/onechat-server/tools/utils';
 
@@ -38,6 +39,7 @@ describe('conversation model converters', () => {
           conversation_rounds: [
             {
               id: 'round-1',
+              status: ConversationRoundStatus.completed,
               input: {
                 message: 'some message',
               },
@@ -108,6 +110,7 @@ describe('conversation model converters', () => {
       serialized._source!.rounds = [
         {
           id: 'round-legacy',
+          status: ConversationRoundStatus.completed,
           input: {
             message: 'legacy message',
           },
@@ -248,6 +251,7 @@ describe('conversation model converters', () => {
         rounds: [
           {
             id: 'round-1',
+            status: ConversationRoundStatus.completed,
             input: {
               message: 'some message',
             },

@@ -15,6 +15,7 @@ import {
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { WritableToolResultStore } from '@kbn/onechat-server';
+import type { ConversationStateManager, PromptManager } from '@kbn/onechat-server/runner';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
@@ -26,6 +27,8 @@ import { createAgentsServiceStartMock } from './agents';
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
 export type AttachmentsServiceMock = jest.Mocked<AttachmentServiceStart>;
+export type PromptManagerMock = jest.Mocked<PromptManager>;
+export type StateManagerMock = jest.Mocked<ConversationStateManager>;
 
 export const createToolResultStoreMock = (): ToolResultStoreMock => {
   return {
@@ -41,6 +44,20 @@ export const createAttachmentsServiceMock = (): AttachmentsServiceMock => {
   return {
     validate: jest.fn(),
     getTypeDefinition: jest.fn(),
+  };
+};
+
+export const createPromptManagerMock = (): PromptManagerMock => {
+  return {
+    set: jest.fn(),
+    clear: jest.fn(),
+    forTool: jest.fn(),
+  };
+};
+
+export const createStateManagerMock = (): StateManagerMock => {
+  return {
+    getToolStateManager: jest.fn(),
   };
 };
 
@@ -75,6 +92,8 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
     attachmentsService: createAttachmentsServiceMock(),
+    promptManager: createPromptManagerMock(),
+    stateManager: createStateManagerMock(),
   };
 };
 

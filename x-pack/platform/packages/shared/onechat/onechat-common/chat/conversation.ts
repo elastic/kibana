@@ -12,27 +12,23 @@ import type { PromptRequest } from '../agents/prompts';
 import type { RoundState } from './round_state';
 
 /**
- * Represents a user input that initiated a conversation round.
+ * Represents the input that initiated a conversation round.
  */
 export interface RoundInput {
   /**
    * A text message from the user.
    */
-  message?: string;
+  message: string;
   /**
    * Optional attachments to provide to the agent.
    */
   attachments?: Attachment[];
-  /**
-   * Response from the user to a prompt request.
-   */
-  prompt_response?: Record<string, unknown>;
 }
 
 /**
- * Raw version of RoundInput, as accepted as input by the converse and agent APIs.
+ * Represents the input used to interact with an agent (new round, resume round)
  */
-export interface RawRoundInput {
+export interface ConverseInput {
   /**
    * A text message from the user.
    */

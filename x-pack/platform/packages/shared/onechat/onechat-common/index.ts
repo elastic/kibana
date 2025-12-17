@@ -94,7 +94,7 @@ export {
 } from './agents';
 export {
   type RoundInput,
-  type RawRoundInput,
+  type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,
   type ConversationRound,

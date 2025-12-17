@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType, type ErrorResult } from '@kbn/onechat-common';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
+import type { ToolHandlerContext, ToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import {
@@ -202,13 +202,13 @@ describe('securityLabsSearchTool', () => {
       const error = new Error('Search tool error');
       (runSearchTool as jest.Mock).mockRejectedValue(error);
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { query: 'test query' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
           events: mockEvents as ToolHandlerContext['events'],
         })
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       const errorResult = result.results[0] as ErrorResult;

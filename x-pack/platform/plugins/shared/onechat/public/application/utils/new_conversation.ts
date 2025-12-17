@@ -6,8 +6,8 @@
  */
 
 import type { Conversation, ConversationRound } from '@kbn/onechat-common';
+import { ConversationRoundStatus, oneChatDefaultAgentId } from '@kbn/onechat-common';
 import type { Attachment } from '@kbn/onechat-common/attachments';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 
 export const newConversationId = 'new';
 export const createNewConversation = (): Conversation => {
@@ -36,6 +36,7 @@ export const createNewRound = ({
 }): ConversationRound => {
   return {
     id: roundId,
+    status: ConversationRoundStatus.inProgress,
     input: { message: userMessage, attachments },
     response: { message: '' },
     steps: [],

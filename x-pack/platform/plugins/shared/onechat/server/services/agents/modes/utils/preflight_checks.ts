@@ -6,14 +6,14 @@
  */
 
 import { createBadRequestError } from '@kbn/onechat-common/base/errors';
-import type { Conversation, RawRoundInput } from '@kbn/onechat-common';
+import type { Conversation, ConverseInput } from '@kbn/onechat-common';
 import { ConversationRoundStatus } from '@kbn/onechat-common';
 
 export const ensureValidInput = ({
   input,
   conversation,
 }: {
-  input: RawRoundInput;
+  input: ConverseInput;
   conversation?: Conversation;
 }) => {
   const lastRoundStatus = conversation?.rounds.length
@@ -38,10 +38,10 @@ export const ensureValidInput = ({
   }
 };
 
-const hasStandardInput = (input: RawRoundInput): boolean => {
+const hasStandardInput = (input: ConverseInput): boolean => {
   return input.message !== undefined || (input.attachments?.length ?? 0) > 0;
 };
 
-const hasPromptResponse = (input: RawRoundInput): boolean => {
+const hasPromptResponse = (input: ConverseInput): boolean => {
   return input.prompt_response !== undefined && Object.keys(input.prompt_response).length > 0;
 };
