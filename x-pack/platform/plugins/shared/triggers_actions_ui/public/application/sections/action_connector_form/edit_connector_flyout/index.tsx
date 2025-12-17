@@ -78,7 +78,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
-  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -98,7 +97,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
     Record<string, unknown>
-  >(actionTypeModel.defaultActionParams ?? {});
+  >({});
+
+  const onEditAction = useCallback(
+    (field: string, value: unknown) =>
+      setTestExecutionActionParams((oldParams) => ({ ...oldParams, [field]: value })),
+    []
+  );
 
   const [testExecutionResult, setTestExecutionResult] =
     useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
@@ -121,6 +126,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
+  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
   const disabled = !isFormModified || hasErrors || isSaving;
 
@@ -295,7 +301,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         connector={connector}
         executeEnabled={!isFormModified}
         actionParams={testExecutionActionParams}
-        setActionParams={setTestExecutionActionParams}
+        onEditAction={onEditAction}
         onExecutionAction={onExecutionAction}
         isExecutingAction={isExecutingConnector}
         executionResult={testExecutionResult}
@@ -304,12 +310,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
-    actionTypeRegistry,
-    isExecutingConnector,
     isFormModified,
     testExecutionActionParams,
-    testExecutionResult,
+    onEditAction,
     onExecutionAction,
+    isExecutingConnector,
+    testExecutionResult,
+    actionTypeRegistry,
   ]);
 
   const renderConnectorRulesList = useCallback(() => {

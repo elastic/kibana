@@ -222,7 +222,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               description: 'a description',
               alias: 'an alias',
               priority: 'P5',
-              tags: ['{{rule.tags}}', 'a tag'],
+              tags: ['a tag'],
             });
           });
 
