@@ -64,6 +64,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     chatExperienceField?.defaultValue ??
     AIChatExperience.Classic;
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
+  const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
   const hasConnectorsAllPrivilege =
     application.capabilities.actions?.show === true &&
@@ -112,10 +113,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features.
-              By default, Elastic uses its Elastic Managed LLM connector ({additionalCostsIncur}) when no custom connectors are available.
-              When available, Elastic uses the last used custom connector. Set up your own connectors or disable the AI Assistant from the AI feature visibility setting below.
-              Select a default AI connector to enforce the choice for your space. {manageConnectors}`}
+            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector. 
+              When you set a default AI connector, it is pre-selected for all of these features in this space. 
+              If you haven't set a default, the most recently used connector is selected automatically. {manageConnectors}`}
             values={{
               manageConnectors: (
                 <EuiLink
@@ -132,12 +132,14 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   />
                 </EuiLink>
               ),
-              additionalCostsIncur: (
-                // TODO: Update link when documentation is ready
-                <EuiLink href="#" target="_blank">
+              atAdditionalCost: (
+                <EuiLink
+                  href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                  target="_blank"
+                >
                   <FormattedMessage
-                    id="genAiSettings.additionalCostsLink"
-                    defaultMessage="additional costs incur"
+                    id="genAiSettings.additionalCostLink"
+                    defaultMessage="at additional cost"
                   />
                 </EuiLink>
               ),
@@ -330,7 +332,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                       ) : (
                         <FormattedMessage
                           id="genAiSettings.showAIAssistantDescriptionLabel"
-                          defaultMessage="Enable or disable AI-powered features in {space} settings."
+                          defaultMessage="You can enable or disable AI-powered features from the {space} settings page."
                           values={{
                             space: (
                               <strong>
@@ -367,7 +369,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 
-          {isAgentExperience && showChatExperienceSetting && (
+          {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>
               <EuiSpacer size="l" />
 
