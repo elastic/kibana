@@ -14,13 +14,30 @@ import type {
   CoreStart,
   HttpSetup,
 } from '@kbn/core/public';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH';
 
-const request = (http: HttpSetup) => (method: HttpMethod, path: string, body: string) =>
-  http.fetch(`/api/es_proxy/${path}`, { method, body });
+const request =
+  (http: HttpSetup) =>
+  <T>({ method, path, body }: { method: HttpMethod; path: string; body?: string }) =>
+    http.fetch<T>(`/api/es_proxy/${path}`, { method, body });
 
-export class EsProxyPlugin implements Plugin<{}, {}, {}, {}> {
+export interface EsProxyPluginSetup {
+  request: <T>({
+    method,
+    path,
+    body,
+  }: {
+    method: HttpMethod;
+    path: string;
+    body: string;
+  }) => Promise<T>;
+}
+
+export type EsProxyPluginStart = EsProxyPluginSetup;
+
+export class EsProxyPlugin implements Plugin<EsProxyPluginSetup, EsProxyPluginStart, {}, {}> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup({ http }: CoreSetup) {
@@ -30,6 +47,12 @@ export class EsProxyPlugin implements Plugin<{}, {}, {}, {}> {
   }
 
   public start({ http }: CoreStart) {
+    // Example usage of the es_proxy request function
+    request(http)<InfoResponse>({ method: 'GET', path: '' }).then((response) => {
+      console.log('Get cluster info:');
+      console.log(response);
+    });
+
     return {
       request: request(http),
     };
