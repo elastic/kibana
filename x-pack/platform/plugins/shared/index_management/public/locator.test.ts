@@ -46,6 +46,13 @@ describe('Index Management URL locator', () => {
     );
   });
 
+  test('locator returns the correct url for create template', async () => {
+    const { path } = await locator.getLocation({
+      page: 'create_template',
+    });
+    expect(path).toBe('/data/index_management/create_template');
+  });
+
   test('locator returns the correct url for component_template', async () => {
     const componentTemplateName = 'log@custom';
     const { path } = await locator.getLocation({
