@@ -184,6 +184,18 @@ export const streamEnrichmentMachine = setup({
       const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
       const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
 
+      /**
+       * YAML mode does not yet support filtering by condition,
+       * so all state related to filtering should be reset prior to
+       * switching.
+       */
+      context.interactiveModeRef?.send({
+        type: 'step.clearConditionFilter',
+      });
+      context.simulatorRef.send({
+        type: 'simulation.clearConditionFilter',
+      });
+
       return {
         yamlModeRef: spawn('yamlModeMachine', {
           id: 'yamlMode',
