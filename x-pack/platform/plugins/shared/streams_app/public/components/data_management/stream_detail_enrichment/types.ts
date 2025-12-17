@@ -13,9 +13,10 @@ import type {
   DropDocumentProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   ReplaceProcessor,
   SetProcessor,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -36,6 +37,7 @@ export type ConvertFormState = ConvertProcessor;
 export type ReplaceFormState = ReplaceProcessor;
 
 export type SetFormState = SetProcessor;
+export type MathFormState = MathProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -45,10 +47,11 @@ export type SpecialisedFormState =
   | ManualIngestPipelineFormState
   | ConvertFormState
   | ReplaceFormState
-  | SetFormState;
+  | SetFormState
+  | MathFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
-export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
+export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>

@@ -110,9 +110,14 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
       editModeProps={{
         inputProps: {
           inputRef: inputRefCallback,
+          'data-test-subj': 'renameConversationInputField',
         },
         saveButtonProps: {
           isDisabled: !isFormDirty || newTitle.trim() === '',
+          'data-test-subj': 'renameConversationSaveButton',
+        },
+        cancelButtonProps: {
+          'data-test-subj': 'renameConversationCancelButton',
         },
       }}
       data-test-subj="renameConversationInput"

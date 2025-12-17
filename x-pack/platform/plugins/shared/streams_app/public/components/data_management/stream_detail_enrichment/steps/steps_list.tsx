@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useSelector } from '@xstate5/react';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { isWhereBlock } from '@kbn/streamlang';
-import { ActionBlock } from './blocks/action';
-import type { StreamEnrichmentContextType } from '../state_management/stream_enrichment_state_machine';
-import { WhereBlock } from './blocks/where';
+import { isConditionBlock } from '@kbn/streamlang';
+import { useSelector } from '@xstate5/react';
+import React from 'react';
+import type { StepsProcessingSummaryMap } from '../hooks/use_steps_processing_summary';
+import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 import type { RootLevelMap } from '../state_management/stream_enrichment_state_machine/utils';
-import type { StepsProcessingSummaryMap } from '../state_management/use_steps_processing_summary';
+import { ActionBlock } from './blocks/action';
+import { WhereBlock } from './blocks/where';
 
 export interface StepConfigurationProps {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
+  stepRef: InteractiveModeContext['stepRefs'][number];
   level: number;
   rootLevelMap: RootLevelMap;
   stepUnderEdit?: StreamlangStepWithUIAttributes;
@@ -28,5 +28,5 @@ export interface StepConfigurationProps {
 
 export const StepsListItem = (props: StepConfigurationProps) => {
   const step = useSelector(props.stepRef, (snapshot) => snapshot.context.step);
-  return <>{isWhereBlock(step) ? <WhereBlock {...props} /> : <ActionBlock {...props} />}</>;
+  return <>{isConditionBlock(step) ? <WhereBlock {...props} /> : <ActionBlock {...props} />}</>;
 };

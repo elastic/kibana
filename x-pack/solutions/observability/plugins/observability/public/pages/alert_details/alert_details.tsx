@@ -58,7 +58,6 @@ import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import type { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
-import { AlertAiInsight } from './alert_ai_insight';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
@@ -98,7 +97,10 @@ export function AlertDetails() {
     onechat,
     uiSettings,
     serverless,
+    observabilityAgentBuilder,
   } = services;
+
+  const AlertAiInsight = observabilityAgentBuilder?.getAlertAIInsight();
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
@@ -300,7 +302,9 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
-          <AlertAiInsight alert={alertDetail} />
+          {AlertAiInsight && (
+            <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+          )}
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -326,8 +330,9 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
-        <EuiSpacer size="s" />
-        <AlertAiInsight alert={alertDetail} />
+        {AlertAiInsight && (
+          <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+        )}
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
