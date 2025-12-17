@@ -117,6 +117,9 @@ export function AlertDetails() {
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
 
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
+  const alertTitle = alertDetail
+    ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+    : undefined;
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
   });
@@ -211,9 +214,7 @@ export function AlertDetails() {
         deepLinkId: 'observability-overview:alerts',
       },
       {
-        text: alertDetail
-          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
-          : defaultBreadcrumb,
+        text: alertTitle ?? defaultBreadcrumb,
       },
     ],
     { serverless }
@@ -303,7 +304,10 @@ export function AlertDetails() {
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
           {AlertAiInsight && (
-            <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+            <AlertAiInsight
+              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+              alertTitle={alertTitle}
+            />
           )}
           {rule && alertDetail.formatted && (
             <>
@@ -331,7 +335,10 @@ export function AlertDetails() {
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         {AlertAiInsight && (
-          <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+          <AlertAiInsight
+            alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+            alertTitle={alertTitle}
+          />
         )}
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
@@ -444,7 +451,7 @@ export function AlertDetails() {
       pageHeader={{
         pageTitle: alertDetail?.formatted ? (
           <>
-            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
+            {alertTitle}
             <EuiSpacer size="xs" />
             <AlertSubtitle alert={alertDetail.formatted} />
           </>
