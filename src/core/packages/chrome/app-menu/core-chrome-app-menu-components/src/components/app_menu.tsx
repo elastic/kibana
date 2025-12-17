@@ -23,7 +23,7 @@ export interface AppMenuItemsProps {
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
 
-export const AppMenu = ({ config, visible = true }: AppMenuItemsProps) => {
+export const AppMenuComponent = ({ config, visible = true }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);

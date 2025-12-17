@@ -36,6 +36,7 @@ import type {
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { HeaderAppMenu } from './header_app_menu';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -210,7 +211,11 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderActionMenu mounter={headerActionMenuMounter} config={observables.appMenu$} />
+                {observables.appMenu$ ? (
+                  <HeaderAppMenu config={observables.appMenu$} />
+                ) : (
+                  <HeaderActionMenu mounter={headerActionMenuMounter} />
+                )}
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

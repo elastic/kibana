@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { AppMenu } from './app_menu';
+import { AppMenuComponent } from './app_menu';
 import type { AppMenuConfig } from '../types';
 
 // Mock useIsWithinBreakpoints to control responsive behavior
@@ -43,31 +43,31 @@ describe('AppMenu', () => {
 
   describe('rendering', () => {
     it('should return null when config is undefined', () => {
-      const { container } = render(<AppMenu config={undefined} />);
+      const { container } = render(<AppMenuComponent config={undefined} />);
 
       expect(container).toBeEmptyDOMElement();
     });
 
     it('should return null when config has no items', () => {
-      const { container } = render(<AppMenu config={{}} />);
+      const { container } = render(<AppMenuComponent config={{}} />);
 
       expect(container).toBeEmptyDOMElement();
     });
 
     it('should return null when visible is false', () => {
-      const { container } = render(<AppMenu config={defaultConfig} visible={false} />);
+      const { container } = render(<AppMenuComponent config={defaultConfig} visible={false} />);
 
       expect(container).toBeEmptyDOMElement();
     });
 
     it('should render the top nav menu when config has items', () => {
-      render(<AppMenu config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId('top-nav')).toBeInTheDocument();
     });
 
     it('should render menu items at xl breakpoint', () => {
-      render(<AppMenu config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
@@ -85,7 +85,7 @@ describe('AppMenu', () => {
         },
       };
 
-      render(<AppMenu config={configWithPrimary} />);
+      render(<AppMenuComponent config={configWithPrimary} />);
 
       expect(screen.getByText('Save')).toBeInTheDocument();
     });
@@ -100,7 +100,7 @@ describe('AppMenu', () => {
         },
       };
 
-      render(<AppMenu config={configWithSecondary} />);
+      render(<AppMenuComponent config={configWithSecondary} />);
 
       expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
@@ -121,7 +121,7 @@ describe('AppMenu', () => {
         },
       };
 
-      render(<AppMenu config={configWithBoth} />);
+      render(<AppMenuComponent config={configWithBoth} />);
 
       expect(screen.getByText('Save')).toBeInTheDocument();
       expect(screen.getByText('Cancel')).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('AppMenu', () => {
         return false;
       });
 
-      render(<AppMenu config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
     });
@@ -143,7 +143,7 @@ describe('AppMenu', () => {
     it('should render overflow button with all items at small breakpoint', () => {
       mockUseIsWithinBreakpoints.mockReturnValue(false);
 
-      render(<AppMenu config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
     });
@@ -154,7 +154,7 @@ describe('AppMenu', () => {
         return false;
       });
 
-      render(<AppMenu config={defaultConfig} />);
+      render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();

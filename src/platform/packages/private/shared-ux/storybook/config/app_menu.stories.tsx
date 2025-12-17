@@ -15,10 +15,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeader, EuiPageTemplate, useEuiTheme } fr
 import { UnifiedTabs, useNewTabProps, type TabItem } from '@kbn/unified-tabs';
 import { TabStatus, type TabPreviewData } from '@kbn/unified-tabs';
 import { css } from '@emotion/react';
-import { AppMenu } from '@kbn/core-chrome-app-menu-components';
+import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
-interface AppMenuWrapperProps extends ComponentProps<typeof AppMenu> {
+interface AppMenuWrapperProps extends ComponentProps<typeof AppMenuComponent> {
   showTabs?: boolean;
 }
 
@@ -119,11 +119,11 @@ const AppMenuWrapper = ({ showTabs = false, ...props }: AppMenuWrapperProps) => 
           flex-shrink: 0;
         `}
       >
-        <AppMenu {...props} />
+        <AppMenuComponent {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <AppMenu {...props} />
+    <AppMenuComponent {...props} />
   );
 
   return (

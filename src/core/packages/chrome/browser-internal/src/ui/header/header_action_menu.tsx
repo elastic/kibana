@@ -8,19 +8,12 @@
  */
 
 import type { FC } from 'react';
-import React, { useRef, useLayoutEffect, useState, lazy, Suspense } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-
-const AppMenu = lazy(async () => {
-  const { AppMenu: AppMenuComponent } = await import('@kbn/core-chrome-app-menu-components');
-  return { default: AppMenuComponent };
-});
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };
-  config?: Observable<AppMenuConfig | undefined> | null;
 }
 
 export const useHeaderActionMenuMounter = (
@@ -43,10 +36,9 @@ export const useHeaderActionMenuMounter = (
   return mounter;
 };
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter, config }) => {
+export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
-  const [menuConfig, setMenuConfig] = useState<AppMenuConfig | undefined>(undefined);
 
   useLayoutEffect(() => {
     if (mounter.mount && elementRef.current) {
@@ -65,23 +57,6 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter, config })
       }
     };
   }, [mounter]);
-
-  useLayoutEffect(() => {
-    if (config) {
-      const subscription = config.subscribe((value) => {
-        setMenuConfig(value);
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [config]);
-
-  if (menuConfig) {
-    return (
-      <Suspense>
-        <AppMenu config={menuConfig} />
-      </Suspense>
-    );
-  }
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;
 };

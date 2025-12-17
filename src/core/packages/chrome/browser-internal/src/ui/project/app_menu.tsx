@@ -13,6 +13,7 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo, useLayoutEffect, useState } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { HeaderAppMenu } from '../header/header_app_menu';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
@@ -81,7 +82,11 @@ export const AppMenuBar = ({ appMenuActions$, appMenu$, isFixed = true }: AppMen
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={[styles.root, isFixed ? styles.fixed : styles.static]}
     >
-      <HeaderActionMenu mounter={headerActionMenuMounter} config={appMenu$} />
+      {hasBetaConfig ? (
+        <HeaderAppMenu config={appMenu$} />
+      ) : (
+        <HeaderActionMenu mounter={headerActionMenuMounter} />
+      )}
     </div>
   );
 };
