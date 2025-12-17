@@ -77,7 +77,10 @@ export interface VisualizationResult {
   };
 }
 
-export type OtherResult = ToolResultMixin<ToolResultType.other, Record<string, unknown>>;
+export type OtherResult<T extends Object = Record<string, unknown>> = ToolResultMixin<
+  ToolResultType.other,
+  T
+>;
 
 export type ErrorResult = ToolResultMixin<
   ToolResultType.error,
@@ -88,13 +91,13 @@ export type ErrorResult = ToolResultMixin<
   }
 >;
 
-export type ToolResult =
+export type ToolResult<T extends Object = Record<string, unknown>> =
   | ResourceResult
   | TabularDataResult
   | QueryResult
   | VisualizationResult
   | DashboardResult
-  | OtherResult
+  | OtherResult<T>
   | ErrorResult;
 
 export const isResourceResult = (result: ToolResult): result is ResourceResult => {
