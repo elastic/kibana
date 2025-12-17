@@ -31,7 +31,7 @@ export const journey = new Journey({
   })
   .step('Navigate to Transactions tabs', async ({ page }) => {
     await page.click(subj('transactionsTab'));
-    await page.waitForSelector(subj('apmTransactionDetailLinkLink'));
+    await page.waitForSelector(subj('^transactionNameLink-'));
   })
   .step('Wait for Trace Waterfall on the page to load', async ({ page }) => {
     await page.click(subj('apmTransactionDetailLinkLink'));
