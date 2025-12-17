@@ -20,7 +20,7 @@ const OKTA_PACKAGE_NAME = 'entityanalytics_okta';
 describe(
   'Privileged User Monitoring - Integrations onboarding',
   {
-    tags: ['@ess'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     before(() => {
