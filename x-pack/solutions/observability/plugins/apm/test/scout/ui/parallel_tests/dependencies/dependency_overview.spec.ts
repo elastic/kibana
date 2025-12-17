@@ -6,16 +6,9 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, testData } from '../../fixtures';
+import { test } from '../../fixtures';
 
 const SERVICE_NAME = 'opbeans-java';
-const DEPENDENCY_NAME = 'postgresql';
-
-const gotoParams = {
-  dependencyName: DEPENDENCY_NAME,
-  start: testData.OPBEANS_START_DATE,
-  end: testData.OPBEANS_END_DATE,
-};
 
 test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -27,7 +20,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on dependency details page', async () => {
-      await dependencyDetailsPage.gotoPage(gotoParams);
+      await dependencyDetailsPage.gotoPage();
     });
 
     await test.step('Verify overview tab is selected', async () => {
@@ -43,7 +36,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   // eslint-disable-next-line playwright/expect-expect
   test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
     await test.step('Land on overview tab', async () => {
-      await dependencyDetailsPage.gotoOverviewTab(gotoParams);
+      await dependencyDetailsPage.gotoOverviewTab();
     });
 
     await test.step('Renders overview content', async () => {
@@ -60,7 +53,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on overview tab', async () => {
-      await dependencyDetailsPage.gotoOverviewTab(gotoParams);
+      await dependencyDetailsPage.gotoOverviewTab();
     });
 
     await test.step('Click on a service in upstream services table', async () => {
@@ -78,7 +71,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on dependencies tab', async () => {
-      await dependencyDetailsPage.gotoOverviewTab(gotoParams);
+      await dependencyDetailsPage.gotoOverviewTab();
     });
 
     await test.step('Check a11y', async () => {

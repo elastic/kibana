@@ -6,17 +6,14 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, testData } from '../../fixtures';
+import { test } from '../../fixtures';
 
 const DEPENDENCY_NAME = 'postgresql';
 
 test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.dependenciesInventoryPage.gotoPage({
-      start: testData.OPBEANS_START_DATE,
-      end: testData.OPBEANS_END_DATE,
-    });
+    await pageObjects.dependenciesInventoryPage.gotoPage();
   });
 
   // Assertions are done within the page object

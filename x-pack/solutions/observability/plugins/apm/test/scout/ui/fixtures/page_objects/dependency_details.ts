@@ -9,39 +9,38 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { capitalize } from 'lodash';
 import { expect } from '@kbn/scout-oblt';
 import { waitForChartToLoad, waitForTableToLoad } from './utils';
+import { testData } from '..';
 
 type DependencyDetailsPageTabName = 'overview' | 'operations';
 
 export class DependencyDetailsPage {
+  readonly DEPENDENCY_NAME = 'postgresql';
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
-  async gotoPage(params: { dependencyName: string; start: string; end: string }) {
-    const { dependencyName, start, end } = params;
-
+  async gotoPage(overrides?: { dependencyName?: string; rangeFrom?: string; rangeTo?: string }) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies?${new URLSearchParams({
-        dependencyName,
-        rangeFrom: start,
-        rangeTo: end,
+        dependencyName: this.DEPENDENCY_NAME,
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+        ...overrides,
       })}`
     );
     await this.page.getByRole('tablist').waitFor();
   }
 
   // #region Go to Tabs
-  private async gotoTab(params: {
-    dependencyName: string;
-    tabName: DependencyDetailsPageTabName;
-    start: string;
-    end: string;
-  }) {
-    const { dependencyName, tabName, start, end } = params;
-
+  private async gotoTab(
+    tabName: DependencyDetailsPageTabName,
+    overrides?: { dependencyName?: string; rangeFrom?: string; rangeTo?: string }
+  ) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies/${tabName}?${new URLSearchParams({
-        dependencyName,
-        rangeFrom: start,
-        rangeTo: end,
+        dependencyName: this.DEPENDENCY_NAME,
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+        ...overrides,
       })}`
     );
   }
@@ -55,8 +54,12 @@ export class DependencyDetailsPage {
     ]);
   }
 
-  async gotoOverviewTab(params: { dependencyName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'overview' });
+  async gotoOverviewTab(overrides?: {
+    dependencyName?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+  }) {
+    await this.gotoTab('overview', overrides);
     await this.waitForOverviewTabToLoad();
   }
 
@@ -64,8 +67,12 @@ export class DependencyDetailsPage {
     await waitForTableToLoad(this.page, 'apmDependencyDetailOperationsListTable');
   }
 
-  async gotoOperationsTab(params: { dependencyName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'operations' });
+  async gotoOperationsTab(overrides?: {
+    dependencyName?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+  }) {
+    await this.gotoTab('operations', overrides);
     await this.waitForOperationsTabToLoad();
   }
   // #endregion

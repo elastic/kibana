@@ -8,6 +8,7 @@
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
 import { waitForChartToLoad, waitForTableToLoad } from './utils';
+import { testData } from '..';
 
 type ServiceDetailsPageTabName =
   | 'overview'
@@ -22,49 +23,51 @@ type ServiceDetailsPageTabName =
   | 'dashboards';
 
 export class ServiceDetailsPage {
+  readonly SERVICE_NAME = 'opbeans-java';
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
-  async gotoPage(params: { serviceName: string; start: string; end: string }) {
-    const { serviceName, start, end } = params;
-
-    const urlServiceName = encodeURIComponent(serviceName);
+  async gotoPage(overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}) {
+    const urlServiceName = encodeURIComponent(overrides.serviceName ?? this.SERVICE_NAME);
 
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services/${urlServiceName}?${new URLSearchParams({
-        rangeFrom: start,
-        rangeTo: end,
+        rangeFrom: overrides.rangeFrom ?? testData.OPBEANS_START_DATE,
+        rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
       })}`
     );
     await this.page.getByRole('tablist').waitFor();
   }
 
   // #region Go to Tabs
-  private async gotoTab(params: {
-    serviceName: string;
-    tabName: ServiceDetailsPageTabName;
-    start: string;
-    end: string;
-  }) {
-    const { serviceName, tabName, start, end } = params;
-
-    const urlServiceName = encodeURIComponent(serviceName);
+  private async gotoTab(
+    tabName: ServiceDetailsPageTabName,
+    overrides: {
+      serviceName?: string;
+      rangeFrom?: string;
+      rangeTo?: string;
+    } = {}
+  ) {
+    const urlServiceName = encodeURIComponent(overrides.serviceName ?? this.SERVICE_NAME);
 
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services/${urlServiceName}/${tabName}?${new URLSearchParams({
-        rangeFrom: start,
-        rangeTo: end,
+        rangeFrom: overrides.rangeFrom ?? testData.OPBEANS_START_DATE,
+        rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
       })}`
     );
   }
 
-  // TODO: Add waitForXTabToLoad to all tabs
-
-  async gotoOverviewTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'overview' });
+  async gotoOverviewTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('overview', overrides);
   }
 
-  async gotoTransactionsTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'transactions' });
+  async gotoTransactionsTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('transactions', overrides);
   }
 
   private async waitForDependenciesTabToLoad() {
@@ -74,37 +77,53 @@ export class ServiceDetailsPage {
     ]);
   }
 
-  async gotoDependenciesTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'dependencies' });
+  async gotoDependenciesTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('dependencies', overrides);
     await this.waitForDependenciesTabToLoad();
   }
 
-  async gotoErrorsTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'errors' });
+  async gotoErrorsTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('errors', overrides);
   }
 
-  async gotoMetricsTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'metrics' });
+  async gotoMetricsTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('metrics', overrides);
   }
 
-  async gotoInfrastructureTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'infrastructure' });
+  async gotoInfrastructureTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('infrastructure', overrides);
   }
 
-  async gotoServiceMapTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'service-map' });
+  async gotoServiceMapTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('service-map', overrides);
   }
 
-  async gotoLogsTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'logs' });
+  async gotoLogsTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('logs', overrides);
   }
 
-  async gotoAlertsTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'alerts' });
+  async gotoAlertsTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('alerts', overrides);
   }
 
-  async gotoDashboardsTab(params: { serviceName: string; start: string; end: string }) {
-    await this.gotoTab({ ...params, tabName: 'dashboards' });
+  async gotoDashboardsTab(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
+    await this.gotoTab('dashboards', overrides);
   }
   // #endregion
 

@@ -7,17 +7,17 @@
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
 import { waitForTableToLoad } from './utils';
+import { testData } from '..';
 
 export class DependenciesInventoryPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
-  async gotoPage(params: { start: string; end: string }) {
-    const { start, end } = params;
-
+  async gotoPage(overrides?: { rangeFrom?: string; rangeTo?: string }) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies/inventory?${new URLSearchParams({
-        rangeFrom: start,
-        rangeTo: end,
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+        ...overrides,
       })}`
     );
     await this.waitForDependenciesToLoad();
