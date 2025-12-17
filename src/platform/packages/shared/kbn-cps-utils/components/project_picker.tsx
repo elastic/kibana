@@ -34,7 +34,6 @@ export interface ProjectPickerProps {
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
-  readonlyCustomTitle?: string;
 }
 
 export const ProjectPicker = ({
@@ -42,7 +41,6 @@ export const ProjectPicker = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
-  readonlyCustomTitle,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -120,7 +118,6 @@ export const ProjectPicker = ({
           onProjectRoutingChange={onProjectRoutingChange}
           fetchProjects={fetchProjects}
           isReadonly={isReadonly}
-          readonlyCustomTitle={readonlyCustomTitle}
         />
       </EuiPopover>
     </EuiTourStep>

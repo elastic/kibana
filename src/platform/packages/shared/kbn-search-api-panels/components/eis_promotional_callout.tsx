@@ -20,10 +20,10 @@ import {
 } from '@elastic/eui';
 import searchRocketIcon from '../assets/search-rocket.svg';
 import {
-  EIS_PROMO_CALLOUT_CTA,
+  EIS_CALLOUT_DOCUMENTATION_BTN,
   EIS_PROMO_CALLOUT_DESCRIPTION,
-  EIS_PROMO_CALLOUT_ICON_ALT,
-  EIS_PROMO_CALLOUT_TITLE,
+  EIS_CALLOUT_DISMISS_ARIA,
+  EIS_CALLOUT_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 
@@ -40,14 +40,13 @@ export const EisPromotionalCallout = ({
   isCloudEnabled,
   direction,
 }: EisPromotionalCalloutProps) => {
-  const { isPromoVisible, onSkipTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}Callout`,
-    isCloudEnabled,
   });
 
   const dataId = `${promoId}-eis-promo-callout`;
 
-  if (!isPromoVisible) {
+  if (!isPromoVisible || !isCloudEnabled) {
     return null;
   }
 
@@ -65,13 +64,19 @@ export const EisPromotionalCallout = ({
       color="subdued"
     >
       <div style={{ position: 'absolute', top: 8, right: 8 }}>
-        <EuiButtonIcon iconType="cross" aria-label="Dismiss" onClick={onSkipTour} size="s" />
+        <EuiButtonIcon
+          data-test-subj="eisPromoCalloutDismissBtn"
+          iconType="cross"
+          aria-label={EIS_CALLOUT_DISMISS_ARIA}
+          onClick={onDismissTour}
+          size="s"
+        />
       </div>
       <EuiFlexGroup direction={direction} alignItems="flexStart">
-        <EuiImage src={searchRocketIcon} alt={EIS_PROMO_CALLOUT_ICON_ALT} size="original" />
+        <EuiImage src={searchRocketIcon} alt="" size="original" />
         <div>
           <EuiTitle size="xxs">
-            <h2>{EIS_PROMO_CALLOUT_TITLE}</h2>
+            <h2>{EIS_CALLOUT_TITLE}</h2>
           </EuiTitle>
           <EuiSpacer size="xs" />
           <EuiText color="subdued" size="s">
@@ -88,7 +93,7 @@ export const EisPromotionalCallout = ({
             iconSide="right"
             iconType="popout"
           >
-            {EIS_PROMO_CALLOUT_CTA}
+            {EIS_CALLOUT_DOCUMENTATION_BTN}
           </EuiButton>
         </div>
       </EuiFlexGroup>

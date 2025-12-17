@@ -30,6 +30,7 @@ export const QradarResourceType = z.enum([
   'ariel_regex_property',
   'reference_data',
   'offense_type',
+  'lookup',
 ]);
 export type QradarResourceTypeEnum = typeof QradarResourceType.enum;
 export const QradarResourceTypeEnum = QradarResourceType.enum;

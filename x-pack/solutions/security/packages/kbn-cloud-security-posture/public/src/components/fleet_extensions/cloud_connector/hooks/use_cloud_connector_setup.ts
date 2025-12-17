@@ -17,6 +17,7 @@ import {
   isAzureCloudConnectorVars,
   updateInputVarsWithCredentials,
   updatePolicyInputs,
+  isCloudConnectorNameValid,
 } from '../utils';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
@@ -107,10 +108,8 @@ export const useCloudConnectorSetup = (
       const updatedPolicy = { ...newPolicy };
       const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
-      // Determine if name is valid (format only) mimicking the API schema validation
-      // Check for trimmed name to prevent whitespace-only strings
-      const isNameValid =
-        credentials.name && credentials.name.trim().length > 0 && credentials.name.length <= 255;
+      // Use shared validation utility for name validation
+      const isNameValid = isCloudConnectorNameValid(credentials.name);
 
       // Set cloud_connector_name directly on the policy object (not in input vars)
       updatedPolicy.cloud_connector_name = credentials.name;

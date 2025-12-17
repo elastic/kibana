@@ -93,8 +93,8 @@
     "@kbn/streams-schema",
     "@kbn/data-quality",
     "@kbn/onechat-common",
-    "@kbn/observability-agent-plugin",
     "@kbn/onechat-plugin",
-    "@kbn/aiops-log-rate-analysis"
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/observability-agent-builder-plugin"
   ]
 }

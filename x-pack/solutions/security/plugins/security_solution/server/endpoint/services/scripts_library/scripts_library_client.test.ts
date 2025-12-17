@@ -16,6 +16,8 @@ import { ScriptsLibraryMock } from './mocks';
 import { Readable, Transform } from 'stream';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
+import { createHapiReadableStreamMock } from '../actions/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 jest.mock('@kbn/files-plugin/server', () => {
   const actual = jest.requireActual('@kbn/files-plugin/server');
@@ -65,12 +67,15 @@ describe('scripts library client', () => {
 
     it('should create a file record and upload file content to it', async () => {
       await scriptsClient.create(createBodyMock);
+      const scriptSoId = (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create as jest.Mock
+      ).mock.calls[0][2].id;
 
       expect(filesPluginClient.create).toHaveBeenCalledWith({
-        id: expect.any(String),
         metadata: {
           mime: 'application/text',
           name: 'foo.txt',
+          meta: { scriptId: scriptSoId },
         },
       });
 
@@ -79,28 +84,34 @@ describe('scripts library client', () => {
       });
     });
 
-    it('should create a new script entry in the library using same id as File storage', async () => {
+    it('should create a script entry (SO) with expected content', async () => {
       await scriptsClient.create(createBodyMock);
-      const scriptId = filesPluginClient.create.mock.calls[0][0].id;
+      const soClientMock = endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient();
+      const scriptSoId = (soClientMock.create as jest.Mock).mock.calls[0][2].id;
 
       expect(
         endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
       ).toHaveBeenCalledWith(
         SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
         {
-          created_by: 'elastic',
           description: 'does some stuff',
           example: 'bash -c script_one.sh',
-          executable: undefined,
-          hash: 'e5441eb2bb',
-          id: scriptId,
+          path_to_executable: undefined,
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          id: scriptSoId,
           instructions: 'just execute it',
           name: 'script one',
           platform: ['linux', 'macos'],
           requires_input: false,
+          created_by: 'elastic',
+          created_at: expect.any(String),
           updated_by: 'elastic',
+          updated_at: expect.any(String),
         },
-        { id: scriptId }
+        { id: scriptSoId }
       );
     });
 
@@ -129,6 +140,285 @@ describe('scripts library client', () => {
         downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
         id: '1-2-3',
         name: 'my script',
+        fileHash: 'e5441eb2bb',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
+        platform: ['macos', 'linux'],
+        requiresInput: false,
+        updatedAt: '2025-11-24T16:04:17.471Z',
+        updatedBy: 'elastic',
+        version: 'WzgsMV0=',
+      });
+    });
+  });
+
+  describe('#list()', () => {
+    it('should use defaults when called with no options', async () => {
+      await scriptsClient.list();
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
+      ).toHaveBeenCalledWith({
+        filter: undefined,
+        page: 1,
+        perPage: 10,
+        sortField: 'name',
+        sortOrder: 'asc',
+        type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should search for scripts using options provided on input', async () => {
+      await scriptsClient.list({
+        page: 101,
+        pageSize: 500,
+        sortField: 'createdAt',
+        sortDirection: 'desc',
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
+      ).toHaveBeenCalledWith({
+        filter: undefined,
+        page: 101,
+        perPage: 500,
+        sortField: 'created_at', // << Important: uses internal SO field name
+        sortOrder: 'desc',
+        type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should use a kuery with field names prefixed with SO type', async () => {
+      await scriptsClient.list({
+        kuery: 'name:script_one AND platform: (linux OR macos)',
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // The `kuery` passed to soClient.find() is converted to `KueryNode` (AST) and field names
+          // prepended with the SO type
+          filter: {
+            arguments: [
+              {
+                arguments: [
+                  {
+                    isQuoted: false,
+                    type: 'literal',
+                    value: 'security:endpoint-scripts-library.attributes.name',
+                  },
+                  { isQuoted: false, type: 'literal', value: 'script_one' },
+                ],
+                function: 'is',
+                type: 'function',
+              },
+              {
+                arguments: [
+                  {
+                    arguments: [
+                      {
+                        isQuoted: false,
+                        type: 'literal',
+                        value: 'security:endpoint-scripts-library.attributes.platform',
+                      },
+                      { isQuoted: false, type: 'literal', value: 'linux' },
+                    ],
+                    function: 'is',
+                    type: 'function',
+                  },
+                  {
+                    arguments: [
+                      {
+                        isQuoted: false,
+                        type: 'literal',
+                        value: 'security:endpoint-scripts-library.attributes.platform',
+                      },
+                      { isQuoted: false, type: 'literal', value: 'macos' },
+                    ],
+                    function: 'is',
+                    type: 'function',
+                  },
+                ],
+                function: 'or',
+                type: 'function',
+              },
+            ],
+            function: 'and',
+            type: 'function',
+          },
+        })
+      );
+    });
+
+    it('should return expected response', async () => {
+      await expect(scriptsClient.list()).resolves.toEqual({
+        data: [
+          {
+            createdAt: '2025-11-24T16:04:17.471Z',
+            createdBy: 'elastic',
+            description: undefined,
+            downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
+            example: undefined,
+            id: '1-2-3',
+            instructions: undefined,
+            name: 'my script',
+            fileHash: 'e5441eb2bb',
+            fileName: 'my_script.sh',
+            fileSize: 12098,
+            pathToExecutable: undefined,
+            platform: ['macos', 'linux'],
+            requiresInput: false,
+            updatedAt: '2025-11-24T16:04:17.471Z',
+            updatedBy: 'elastic',
+            version: 'WzgsMV0=',
+          },
+        ],
+        page: 1,
+        pageSize: 10,
+        sortDirection: 'asc',
+        sortField: 'name',
+        total: 0,
+      });
+    });
+  });
+
+  describe('#update()', () => {
+    beforeEach(() => {
+      ScriptsLibraryMock.applyMocksToSoClient(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      );
+    });
+
+    it('should update script entry only when no file content is provided', async () => {
+      await scriptsClient.update({
+        id: '1-2-3',
+        name: 'updated name',
+        description: 'updated description',
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        {
+          name: 'updated name',
+          description: 'updated description',
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { version: undefined }
+      );
+
+      expect(fileMock.uploadContent).not.toHaveBeenCalled();
+    });
+
+    it('should upload file content, update script with new file info and delete old file', async () => {
+      const fileContent = createHapiReadableStreamMock();
+      await scriptsClient.update({
+        id: '1-2-3',
+        file: fileContent,
+      });
+
+      expect(fileMock.uploadContent).toHaveBeenCalledWith(fileContent, undefined, {
+        transforms: [expect.any(Transform)],
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        {
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { version: undefined }
+      );
+
+      expect(filesPluginClient.delete).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+    });
+
+    it('should throw error when script does not exist', async () => {
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(
+        scriptsClient.update({
+          id: 'non-existent',
+          name: 'test',
+        })
+      ).rejects.toThrow('Script with id non-existent not found');
+    });
+
+    it('should throw error when uploading new file with `version` that is no longer valid', async () => {
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          file: createHapiReadableStreamMock(),
+          version: 'foo',
+        })
+      ).rejects.toThrow(
+        'Script with id 1-2-3 has a different version than the one provided in the request. Current version: WzgsMV0=, provided version: foo'
+      );
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).not.toHaveBeenCalled();
+      expect(fileMock.uploadContent).not.toHaveBeenCalled();
+    });
+
+    it('should not update script entry if file upload fails', async () => {
+      fileMock.uploadContent.mockRejectedValue(new Error('upload failed'));
+
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          name: 'new name',
+          file: createHapiReadableStreamMock(),
+        })
+      ).rejects.toThrow('upload failed');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should delete new uploaded file when update to script data fails', async () => {
+      (
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
+      ).update.mockRejectedValue(new Error('Failed to update script record'));
+
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          file: createHapiReadableStreamMock(),
+        })
+      ).rejects.toThrow('Failed to update script record');
+
+      expect(fileMock.delete).toHaveBeenCalled();
+    });
+
+    it('should return script record on successful update', async () => {
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          name: 'updated script',
+        })
+      ).resolves.toEqual({
+        createdAt: '2025-11-24T16:04:17.471Z',
+        createdBy: 'elastic',
+        downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
+        id: '1-2-3',
+        name: 'my script',
+        fileHash: 'e5441eb2bb',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
         platform: ['macos', 'linux'],
         requiresInput: false,
         updatedAt: '2025-11-24T16:04:17.471Z',

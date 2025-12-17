@@ -22,7 +22,6 @@ export interface FlyoutWrapperProps {
   isInlineFlyoutVisible: boolean;
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
-  language?: string;
   isNewPanel?: boolean;
   isSaveable?: boolean;
   onCancel?: () => void;

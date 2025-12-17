@@ -67,7 +67,6 @@ export const SomeThings: StoryFn<{}> = () => {
       }}
       items={[
         {
-          title: 'High error rate',
           query: {
             id: 'match_everything',
             title: 'Match everything',
@@ -76,6 +75,7 @@ export const SomeThings: StoryFn<{}> = () => {
             },
             feature: {
               name: 'Feature',
+              type: 'system',
               filter: {
                 always: {},
               },

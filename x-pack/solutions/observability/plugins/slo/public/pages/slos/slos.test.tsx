@@ -38,6 +38,7 @@ import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 
 const mockHistoryReplace = jest.fn();
+const mockHistoryPush = jest.fn();
 const mockUseHistory = jest.fn();
 
 jest.mock('react-router-dom', () => ({
@@ -58,6 +59,7 @@ jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_create_data_view');
+jest.mock('./components/slo_list_search_bar');
 jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
@@ -172,8 +174,10 @@ describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHistoryReplace.mockClear();
+    mockHistoryPush.mockClear();
     mockUseHistory.mockReturnValue({
       replace: mockHistoryReplace,
+      push: mockHistoryPush,
       createHref: (location: any) => {
         if (typeof location === 'string') return location;
         return location.pathname || '/';
