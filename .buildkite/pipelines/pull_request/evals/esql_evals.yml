@@ -15,9 +15,8 @@ steps:
           # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
           source .buildkite/scripts/steps/functional/common.sh
 
-          # Configure Kibana tracing in the distributable config (Scout is run with --kibana-install-dir)
-          cat >> "$KIBANA_BUILD_LOCATION/config/kibana.yml" <<'EOF'
-
+          # Write kibana.dev.yml with env var placeholders for Phoenix tracing
+          cat > config/kibana.dev.yml <<'EOF'
           telemetry:
             enabled: true
             tracing:
@@ -31,7 +30,7 @@ steps:
           EOF
 
           # Start Scout server in background
-          node scripts/scout start-server --stateful --kibana-install-dir "$KIBANA_BUILD_LOCATION" &
+          node scripts/scout start-server --stateful &
           SCOUT_PID=$!
 
           # Wait for server to be ready
