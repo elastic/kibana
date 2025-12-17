@@ -33,6 +33,7 @@ export enum ROLES {
   timeline_none = 'timeline_none',
   notes_none = 'notes_none',
   rules_read_exceptions_all = 'rules_read_exceptions_all',
+  rules_read_exceptions_read = 'rules_read_exceptions_read',
 }
 
 /**

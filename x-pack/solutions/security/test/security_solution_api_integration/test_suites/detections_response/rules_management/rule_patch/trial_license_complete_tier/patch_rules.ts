@@ -274,7 +274,7 @@ export default ({ getService }: FtrProviderContext) => {
           { id: '2', list_id: '123', namespace_type: 'single', type: 'detection' },
         ]);
       });
-      describe('@skipInServerless rules_read_exceptions_all', () => {
+      describe('@skipInServerless with rules_read_exceptions_all user role', () => {
         const role = ROLES.rules_read_exceptions_all;
 
         beforeEach(async () => {
@@ -323,6 +323,93 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.exceptions_list).to.eql([
             { id: '2', list_id: '123', namespace_type: 'single', type: 'detection' },
           ]);
+        });
+        it('should throw error when patching exception list and non-valid read authz field "query"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                query: 'this should fail in the patch route',
+                exceptions_list: [
+                  {
+                    id: '1',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            })
+            .expect(403);
+          expect(body.message).to.eql('Unauthorized by "siem" to update "siem.queryRule" rule');
+        });
+        it('should throw error when patching one non-valid read authz field "query"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                query: 'this should fail in the patch route',
+              },
+            })
+            .expect(403);
+          expect(body.message).to.eql('Unauthorized by "siem" to update "siem.queryRule" rule');
+        });
+        it('should throw error when patching multiple non-valid read authz field "query" and "description" and "author"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          const { body } = await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                query: 'this query patch should fail in the patch route',
+                description: 'this description patch should fail in the patch route',
+                author: ['myfakeauthor'],
+              },
+            })
+            .expect(403);
+          expect(body.message).to.eql('Unauthorized by "siem" to update "siem.queryRule" rule');
+        });
+      });
+      describe('@skipInServerless with rules_read_exceptions_read user role', () => {
+        const role = ROLES.rules_read_exceptions_read;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+        it('should return unauthorized when patching exception list value', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
+
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+          await restrictedApis
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                exceptions_list: [
+                  {
+                    id: '1',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            })
+            .expect(401);
         });
       });
 
