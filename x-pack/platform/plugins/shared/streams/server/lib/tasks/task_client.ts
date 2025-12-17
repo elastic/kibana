@@ -64,7 +64,7 @@ export class TaskClient<TaskType extends string> {
     task,
     params,
     request,
-  }: TaskRequest<TaskType, TParams>): Promise<PersistedTask> {
+  }: TaskRequest<TaskType, TParams>) {
     const taskDoc: PersistedTask<TParams> = {
       ...task,
       task: {
@@ -103,13 +103,11 @@ export class TaskClient<TaskType extends string> {
         throw error;
       }
     }
-
-    return taskDoc;
   }
 
   public async update<TParams extends {} = {}, TPayload extends {} = {}>(
     task: PersistedTask<TParams, TPayload>
-  ): Promise<PersistedTask<TParams, TPayload>> {
+  ) {
     this.logger.debug(`Updating task ${task.id}`);
 
     await this.storageClient.index({
@@ -118,7 +116,5 @@ export class TaskClient<TaskType extends string> {
       // This might cause issues if there are many updates in a short time from multiple tasks running concurrently
       refresh: true,
     });
-
-    return task;
   }
 }
