@@ -17,10 +17,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Feature } from '@kbn/streams-schema';
 import type { FeatureSelectorProps } from './feature_selector';
 import { FeaturesSelector } from './feature_selector';
 import { AssetImage } from '../asset_image';
 import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { Flow } from './add_significant_event_flyout/types';
 
 export function SignificantEventsGenerationPanel({
   features,
@@ -31,12 +33,14 @@ export function SignificantEventsGenerationPanel({
   onManualEntryClick,
   isGeneratingQueries,
   isSavingManualEntry,
+  selectedFlow,
 }: FeatureSelectorProps & {
   onFeatureIdentificationClick: () => void;
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
+  selectedFlow?: Flow;
 }) {
   const [generatingFrom, setGeneratingFrom] = useState<'all_data' | 'features'>(
     selectedFeatures.length === 0 ? 'all_data' : 'features'
@@ -106,6 +110,7 @@ export function SignificantEventsGenerationPanel({
                 iconType: 'sparkles',
                 onClick: () => {
                   setGeneratingFrom('all_data');
+                  onFeaturesChange([]);
                   onGenerateSuggestionsClick();
                 },
                 isDisabled: isGeneratingQueries || isSavingManualEntry,
@@ -127,7 +132,7 @@ export function SignificantEventsGenerationPanel({
               fill={false}
               data-test-subj="significant_events_manual_entry_button"
               onClick={onManualEntryClick}
-              isDisabled={isGeneratingQueries}
+              isDisabled={isGeneratingQueries || selectedFlow === 'manual'}
               iconType="plusInCircle"
             >
               {i18n.translate(
@@ -209,8 +214,8 @@ function GenerationContext({
           buttonProps={{
             iconType: 'sparkles',
             isLoading: isGeneratingQueries && generatingFrom === 'features',
-            isDisabled: selectedFeatures.length === 0 || isSavingManualEntry,
-            onClick: () => onGenerateSuggestionsClick(),
+            isDisabled: isGeneratingQueries || selectedFeatures.length === 0 || isSavingManualEntry,
+            onClick: onGenerateSuggestionsClick,
             'data-test-subj': 'significant_events_generate_suggestions_button',
             children: i18n.translate(
               'xpack.streams.significantEvents.significantEventsGenerationPanel.generateSuggestionsButtonLabel',

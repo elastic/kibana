@@ -302,6 +302,7 @@ export function AddSignificantEventFlyout({
                   onFeatureIdentificationClick={onFeatureIdentificationClick}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
+                  selectedFlow={selectedFlow}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -315,7 +316,7 @@ export function AddSignificantEventFlyout({
             >
               <EuiFlexItem grow={1} css={{ overflow: 'scroll' }}>
                 <EuiPanel hasShadow={false} paddingSize="l">
-                  {selectedFlow === 'manual' && (
+                  {flowRef.current === 'manual' && (
                     <>
                       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                         <EuiFlexItem grow={false}>
@@ -347,7 +348,7 @@ export function AddSignificantEventFlyout({
                     </>
                   )}
 
-                  {selectedFlow === 'ai' && (
+                  {flowRef.current === 'ai' && (
                     <GeneratedFlowForm
                       isSubmitting={isSubmitting}
                       isGenerating={isGenerating}
