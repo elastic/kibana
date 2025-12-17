@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable no-continue */
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -70,12 +69,14 @@ export const listEntitiesRoute = (
             sortOrder,
           });
 
+          // just override the entity field with the normalized fields
           records.forEach((record) => {
-            return lowercaseEntityKeysForProperties(record, [
+            const result = buildNormalizedFields(record.entity, [
               'behaviors',
               'lifecycle',
               'attributes',
             ]);
+            record.entity = { ...record.entity, ...result };
           });
 
           telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
@@ -106,29 +107,18 @@ export const listEntitiesRoute = (
     );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function lowercaseEntityKeysForProperties<T extends Record<string, any>>(
-  obj: T,
-  properties: string[]
-): void {
-  for (const prop of properties) {
-    if (!(prop in obj.entity)) {
-      continue;
-    }
-    const sub = obj.entity[prop];
+function buildNormalizedFields(obj: Record<string, unknown>, properties: string[]) {
+  // only use properties whose val is an object, skip them if undefined or some other type
+  const hasObjVal = (p: string) =>
+    obj[p] !== null && typeof obj[p] === 'object' && !Array.isArray(obj[p]);
+  const entries = properties
+    .filter(hasObjVal)
+    .map((p) => [p, toLowercaseKeys(obj[p] as Record<string, unknown>)]);
+  return Object.fromEntries(entries);
+}
 
-    if (!sub || typeof sub !== 'object' || Array.isArray(sub)) {
-      continue;
-    }
-
-    const keys = Object.keys(sub);
-    for (const k of keys) {
-      const newKey = k.toLowerCase();
-      if (newKey in sub) {
-        continue;
-      }
-      sub[newKey] = sub[k];
-      delete sub[k];
-    }
-  }
+function toLowercaseKeys(obj: Record<string, unknown>): Record<string, unknown> {
+  // iterate to rebuild the sub object with the lowercase keys.
+  // No need for checking if it appears in the old sub or to `delete`
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
 }
