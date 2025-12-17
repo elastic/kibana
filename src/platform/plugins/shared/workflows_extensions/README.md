@@ -153,6 +153,8 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
 
+import { StepMenuCatalog } from '@kbn/workflows-extensions/public';
+
 export const myStepDefinition: PublicStepDefinition = {
   ...myStepCommonDefinition,
   icon: React.lazy(() =>
@@ -178,6 +180,7 @@ export const myStepDefinition: PublicStepDefinition = {
 \`\`\``,
     ],
   },
+  actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
 };
 ```
 
@@ -334,6 +337,7 @@ The public definition must include:
 - `icon`: (Optional) React component (can be imported from EUI assets, not a direct string), preferably lazy loaded using `React.lazy`.
 - `description`: (Optional) user-facing description
 - `documentation`: (Optional) documentation with details and examples
+- `actionsMenuCatalog`: (Optional) The catalog under which the step is displayed in the actions menu. Must be one of `StepMenuCatalog.elasticsearch`, `StepMenuCatalog.external`, `StepMenuCatalog.ai`, or `StepMenuCatalog.kibana`. Defaults to `StepMenuCatalog.kibana` if not provided.
 
 ## Dependencies
 

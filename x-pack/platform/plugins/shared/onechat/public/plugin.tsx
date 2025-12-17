@@ -30,7 +30,7 @@ import {
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
-import { registerStepDefinitions } from './step_types';
+import { registerWorkflowSteps } from './step_types';
 import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
@@ -89,9 +89,7 @@ export class OnechatPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    if (deps.workflowsExtensions) {
-      registerStepDefinitions(deps.workflowsExtensions);
-    }
+    registerWorkflowSteps(deps.workflowsExtensions);
 
     return {};
   }
