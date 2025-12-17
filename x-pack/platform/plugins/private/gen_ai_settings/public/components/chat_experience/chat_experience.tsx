@@ -24,6 +24,20 @@ export const ChatExperience: React.FC = () => {
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
+
+  // Add debug logging to see what's happening:
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[Chat Experience] Feature Flag Debug:', {
+      'featureFlags service exists': !!featureFlags,
+      'getBooleanValue exists': typeof featureFlags?.getBooleanValue === 'function',
+      AI_AGENTS_FEATURE_FLAG: 'aiAssistant.aiAgents.enabled',
+      AI_AGENTS_FEATURE_FLAG_DEFAULT: false,
+      'isAiAgentsEnabled result': isAiAgentsEnabled,
+      'direct call result': featureFlags?.getBooleanValue?.('aiAssistant.aiAgents.enabled', false),
+    });
+  }, [featureFlags, isAiAgentsEnabled]);
+
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
 

@@ -147,3 +147,9 @@ xpack.actions.preconfigured:
       inferenceId: ".openai-gpt-oss-120b-chat_completion"
       providerConfig:
         model_id: "openai-gpt-oss-120b"
+
+
+coreApp.allowDynamicConfigOverrides: true
+
+feature_flags.overrides:
+  aiAssistant.aiAgents.enabled: true
