@@ -16,6 +16,7 @@ import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
+  refreshDefinition,
   queryToEdit,
   definition,
   isEditFlyoutOpen,
@@ -26,7 +27,10 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   features,
   refresh,
+  generateAutomatically,
+  onFeatureIdentificationClick,
 }: {
+  refreshDefinition: () => void;
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
@@ -37,6 +41,8 @@ export const EditSignificantEventFlyout = ({
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  generateAutomatically: boolean;
+  onFeatureIdentificationClick: () => void;
 }) => {
   const {
     core: { notifications },
@@ -54,7 +60,10 @@ export const EditSignificantEventFlyout = ({
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
-      definition={definition.stream}
+      refreshDefinition={refreshDefinition}
+      generateAutomatically={generateAutomatically}
+      onFeatureIdentificationClick={onFeatureIdentificationClick}
+      definition={definition}
       query={queryToEdit}
       onSave={async (data: SaveData) => {
         const streamType = getStreamTypeFromDefinition(definition.stream);

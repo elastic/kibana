@@ -24,6 +24,7 @@ import { useDefaultConnector } from '../../../../../hooks/chat/use_default_conne
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
+import { ConnectorIcon } from './connector_icon';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
@@ -46,20 +47,32 @@ const ConnectorPopoverButton: React.FC<{
   isPopoverOpen: boolean;
   onClick: () => void;
   disabled: boolean;
-}> = ({ isPopoverOpen, onClick, disabled }) => {
+  selectedConnectorName?: string;
+  isUsingNonDefaultConnector: boolean;
+}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName, isUsingNonDefaultConnector }) => {
+  const showCustomConnector = isUsingNonDefaultConnector && selectedConnectorName;
+
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
-      iconType="compute"
+      iconType={
+        showCustomConnector
+          ? () => <ConnectorIcon connectorName={selectedConnectorName} />
+          : 'compute'
+      }
       onClick={onClick}
       aria-labelledby={connectorSelectId}
       data-test-subj="agentBuilderConnectorSelectorButton"
     >
-      <FormattedMessage
-        id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
-        defaultMessage="LLM"
-      />
+      {showCustomConnector ? (
+        selectedConnectorName
+      ) : (
+        <FormattedMessage
+          id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
+          defaultMessage="LLM"
+        />
+      )}
     </InputPopoverButton>
   );
 };
@@ -69,11 +82,21 @@ const ConnectorOption: React.FC<{
   connectorName: string;
   searchValue: string;
 }> = ({ connectorId, connectorName, searchValue }) => {
+  const { euiTheme } = useEuiTheme();
   if (!connectorId) {
     return null;
   }
+
+  const fontWeightStyles = css`
+    h4 {
+      font-weight: ${euiTheme.font.weight.regular};
+    }
+    .euiSelectableListItem-isFocused & h4 {
+      font-weight: ${euiTheme.font.weight.semiBold};
+    }
+  `;
   return (
-    <EuiText size="s">
+    <EuiText size="s" css={fontWeightStyles}>
       <h4>
         <EuiHighlight search={searchValue}>{connectorName}</EuiHighlight>
       </h4>
@@ -130,6 +153,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
         key: connector.id,
         label: connector.name,
         checked,
+        prepend: <ConnectorIcon connectorName={connector.name} />,
         append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
       };
       return option;
@@ -163,6 +187,9 @@ export const ConnectorSelector: React.FC<{}> = () => {
   // Calculate height based on item count, capped at max rows
   const listHeight = Math.min(listItemsHeight, getMaxListHeight({ withHeader: false }));
 
+  const isUsingNonDefaultConnector =
+    selectedConnectorId !== defaultConnectorId && selectedConnectorId !== undefined;
+
   return (
     <EuiPopover
       panelProps={{ css: panelStyles }}
@@ -171,6 +198,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
           isPopoverOpen={isPopoverOpen}
           onClick={togglePopover}
           disabled={isLoading || connectors.length === 0}
+          selectedConnectorName={selectedConnector?.name}
+          isUsingNonDefaultConnector={isUsingNonDefaultConnector}
         />
       }
       isOpen={isPopoverOpen}
@@ -208,6 +237,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
           id: connectorListId,
           css: selectorListStyles,
           rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
+          onFocusBadge: false,
         }}
       >
         {(list) => <div>{list}</div>}

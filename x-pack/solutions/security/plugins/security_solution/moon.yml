@@ -270,6 +270,7 @@ dependsOn:
   - '@kbn/onechat-browser'
   - '@kbn/content-management-tabbed-table-list-view'
   - '@kbn/ai-assistant-common'
+  - '@kbn/product-doc-common'
 tags:
   - plugin
   - prod
