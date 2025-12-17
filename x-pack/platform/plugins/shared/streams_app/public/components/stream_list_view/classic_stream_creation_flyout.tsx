@@ -30,12 +30,15 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       start: {
         share,
         indexManagement,
+        indexLifecycleManagement,
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
 
   const router = useStreamsAppRouter();
+
+  const isIlmAvailable = !!indexLifecycleManagement;
 
   const templatesListFetch = useStreamsAppFetch(async () => {
     const response = await indexManagement.apiService.getIndexTemplates({ signal });
@@ -49,6 +52,18 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       return hasDataStream && hasWildcardPattern;
     });
   }, [indexManagement.apiService, signal]);
+
+  const getIlmPolicy = useCallback(
+    async (policyName: string) => {
+      try {
+        const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
+        return policies.find((policy) => policy.name === policyName) ?? null;
+      } catch (error) {
+        return null;
+      }
+    },
+    [indexLifecycleManagement.apiService, signal]
+  );
 
   const handleCreate = useCallback(
     async (streamName: string) => {
@@ -163,7 +178,8 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       hasErrorLoadingTemplates={!!templatesListFetch.error}
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}
-      showDataRetention={false}
+      getIlmPolicy={getIlmPolicy}
+      showDataRetention={isIlmAvailable}
     />
   );
 }
