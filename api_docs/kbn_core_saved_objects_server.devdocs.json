@@ -6546,7 +6546,7 @@
               "\nThe namespace type of the savedObject type this migration is registered for"
             ],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
             "deprecated": false,
@@ -7912,6 +7912,10 @@
           {
             "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/model_versions/settings_v1.ts"
+          },
+          {
+            "plugin": "productDocBase",
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts"
           },
           {
             "plugin": "productDocBase",
@@ -9879,7 +9883,7 @@
               "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
             ],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "deprecated": false,
