@@ -1020,6 +1020,8 @@
       "@kbn/eso-model-version-example/*": ["examples/eso_model_version_example/*"],
       "@kbn/eso-plugin": ["x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin"],
       "@kbn/eso-plugin/*": ["x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
+      "@kbn/kql": ["src/platform/plugins/shared/kql"],
+      "@kbn/kql/*": ["src/platform/plugins/shared/kql/*"],
       "@kbn/esql": ["src/platform/plugins/shared/esql"],
       "@kbn/esql/*": ["src/platform/plugins/shared/esql/*"],
       "@kbn/esql-ast": ["src/platform/packages/shared/kbn-esql-ast"],

@@ -1,11 +1,11 @@
 {
   "type": "plugin",
-  "id": "@kbn/esql",
-  "owner": "@elastic/kibana-esql",
+  "id": "@kbn/kql",
+  "owner": "@elastic/kibana-presentation",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "esql",
+    "id": "kql",
     "server": true,
     "browser": true,
     "optionalPlugins": [
@@ -24,7 +24,8 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "unifiedSearch"
     ]
   }
 }
