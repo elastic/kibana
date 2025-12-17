@@ -55,9 +55,9 @@ if [ "$ELASTIC_CONTAINER" = "true" ] && ! echo "$ALL_NODE_OPTIONS" | grep -q -- 
   cgroup_memory_limit_bytes=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null)
   mem_available_kb=$(grep -E '^MemAvailable:' /proc/meminfo 2>/dev/null | grep -Eo '[0-9]+')
   if echo "$cgroup_memory_limit_bytes" | grep -qE '^[0-9]+$'; then
-    heap_mb=$(( cgroup_memory_limit_bytes * max_old_space_percentage / 100 / 1024 / 1024 ))
+    heap_mb=$(( (cgroup_memory_limit_bytes / 1024 / 1024) * max_old_space_percentage / 100 ))
   elif echo "$mem_available_kb" | grep -qE '^[0-9]+$'; then
-    heap_mb=$(( mem_available_kb * max_old_space_percentage / 100 / 1024 ))
+    heap_mb=$(( (mem_available_kb / 1024) * max_old_space_percentage / 100 ))
   fi
   [ "$heap_mb" -gt 4096 ] 2>/dev/null && heap_mb=4096
   [ "$heap_mb" -gt 0 ] 2>/dev/null && ALL_NODE_OPTIONS="$ALL_NODE_OPTIONS --max-old-space-size=$heap_mb"
