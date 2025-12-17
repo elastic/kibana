@@ -143,6 +143,10 @@
     "@kbn/onechat-plugin",    
     "@kbn/synthtrace",
     "@kbn/ai-insights"
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
+    "@kbn/onechat-plugin",
+    "@kbn/observability-agent-builder-plugin",
   ],
   "exclude": ["target/**/*"]
 }
