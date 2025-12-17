@@ -495,7 +495,7 @@ describe('registerRoutes', () => {
   });
 
   describe('DELETE /api/data_connectors', () => {
-    it('should delete all data connectors and related resources', async () => {
+    it('should fully delete all data connectors when all resources succeed', async () => {
       const mockConnectors = [
         {
           id: 'connector-1',
@@ -550,21 +550,256 @@ describe('registerRoutes', () => {
       });
       expect(mockActionsClient.delete).toHaveBeenCalledTimes(2);
       expect(mockToolRegistry.delete).toHaveBeenCalledTimes(2);
-      expect(mockWorkflowManagement.management.deleteWorkflows).toHaveBeenCalledWith(
-        ['workflow-1', 'workflow-2'],
-        'default',
-        mockRequest
-      );
+      expect(mockWorkflowManagement.management.deleteWorkflows).toHaveBeenCalledTimes(2);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           success: true,
           deletedCount: 2,
+          fullyDeletedCount: 2,
+          partiallyDeletedCount: 0,
         },
       });
     });
 
-    it('should handle errors when deleting all connectors fails', async () => {
+    it('should partially delete connectors when some resources fail', async () => {
+      const mockConnectors = [
+        {
+          id: 'connector-1',
+          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: 'Connector 1',
+            type: 'notion',
+            workflowIds: ['workflow-1'],
+            toolIds: ['tool-1'],
+            kscIds: ['ksc-1'],
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+          },
+          references: [],
+          score: 1,
+        },
+      ];
+
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: mockConnectors,
+        total: 1,
+        per_page: 1000,
+        page: 1,
+      });
+
+      // Simulate partial failure: KSC fails, but tool and workflow succeed
+      mockActionsClient.delete.mockRejectedValue(new Error('KSC deletion failed'));
+      mockToolRegistry.delete.mockResolvedValue(undefined);
+      mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue(undefined);
+      mockSavedObjectsClient.update.mockResolvedValue({} as any);
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.delete.mock.calls[0][1];
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      // Should update SO with remaining resources, not delete it
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        'connector-1',
+        expect.objectContaining({
+          kscIds: ['ksc-1'],
+          toolIds: [],
+          workflowIds: [],
+        })
+      );
+      expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          success: true,
+          deletedCount: 1,
+          fullyDeletedCount: 0,
+          partiallyDeletedCount: 1,
+        },
+      });
+    });
+
+    it('should handle mixed results with some fully deleted and some partially deleted', async () => {
+      const mockConnectors = [
+        {
+          id: 'connector-1',
+          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: 'Connector 1',
+            type: 'notion',
+            workflowIds: ['workflow-1'],
+            toolIds: ['tool-1'],
+            kscIds: ['ksc-1'],
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+          },
+          references: [],
+          score: 1,
+        },
+        {
+          id: 'connector-2',
+          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: 'Connector 2',
+            type: 'notion',
+            workflowIds: ['workflow-2'],
+            toolIds: ['tool-2'],
+            kscIds: ['ksc-2'],
+            createdAt: '2024-01-02T00:00:00.000Z',
+            updatedAt: '2024-01-02T00:00:00.000Z',
+          },
+          references: [],
+          score: 1,
+        },
+      ];
+
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: mockConnectors,
+        total: 2,
+        per_page: 1000,
+        page: 1,
+      });
+
+      // First connector: all succeed
+      // Second connector: KSC fails
+      let deleteCount = 0;
+      mockActionsClient.delete.mockImplementation(() => {
+        deleteCount++;
+        if (deleteCount === 2) {
+          return Promise.reject(new Error('KSC deletion failed'));
+        }
+        return Promise.resolve(undefined);
+      });
+      mockToolRegistry.delete.mockResolvedValue(undefined);
+      mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue(undefined);
+      mockSavedObjectsClient.delete.mockResolvedValue({});
+      mockSavedObjectsClient.update.mockResolvedValue({} as any);
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.delete.mock.calls[0][1];
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      // First connector should be fully deleted
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        'connector-1'
+      );
+
+      // Second connector should be partially deleted (updated)
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        'connector-2',
+        expect.objectContaining({
+          kscIds: ['ksc-2'],
+          toolIds: [],
+          workflowIds: [],
+        })
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          success: true,
+          deletedCount: 2,
+          fullyDeletedCount: 1,
+          partiallyDeletedCount: 1,
+        },
+      });
+    });
+
+    it('should handle idempotency when resources are already deleted (404 errors)', async () => {
+      const mockConnectors = [
+        {
+          id: 'connector-1',
+          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: 'Connector 1',
+            type: 'notion',
+            workflowIds: ['workflow-1'],
+            toolIds: ['tool-1'],
+            kscIds: ['ksc-1'],
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+          },
+          references: [],
+          score: 1,
+        },
+      ];
+
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: mockConnectors,
+        total: 1,
+        per_page: 1000,
+        page: 1,
+      });
+
+      // Simulate resources already deleted (404 errors should be treated as success)
+      mockActionsClient.delete.mockRejectedValue(new Error('404 Not Found'));
+      mockToolRegistry.delete.mockRejectedValue(new Error('Tool not found'));
+      mockWorkflowManagement.management.deleteWorkflows.mockRejectedValue(
+        new Error('Workflow does not exist')
+      );
+      mockSavedObjectsClient.delete.mockResolvedValue({});
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.delete.mock.calls[0][1];
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      // All "not found" errors should be treated as success, so connector should be fully deleted
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        'connector-1'
+      );
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          success: true,
+          deletedCount: 1,
+          fullyDeletedCount: 1,
+          partiallyDeletedCount: 0,
+        },
+      });
+    });
+
+    it('should handle empty connector list', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 1000,
+        page: 1,
+      });
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.delete.mock.calls[0][1];
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          success: true,
+          deletedCount: 0,
+          fullyDeletedCount: 0,
+          partiallyDeletedCount: 0,
+        },
+      });
+    });
+
+    it('should handle errors when finding connectors fails', async () => {
       mockSavedObjectsClient.find.mockRejectedValue(new Error('Find failed'));
 
       registerRoutes(dependencies);
@@ -599,6 +834,7 @@ describe('registerRoutes', () => {
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
         },
+        references: [],
       };
 
       mockSavedObjectsClient.get.mockResolvedValue(mockConnector);

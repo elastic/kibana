@@ -149,10 +149,56 @@ interface DeleteRelatedResourcesParams {
   >;
 }
 
+interface DeleteRelatedResourcesResult {
+  deletedKscIds: string[];
+  deletedToolIds: string[];
+  deletedWorkflowIds: string[];
+  failedKscIds: string[];
+  failedToolIds: string[];
+  failedWorkflowIds: string[];
+  allSucceeded: boolean;
+}
+
+/**
+ * Deletes a single resource and handles errors gracefully
+ */
+async function deleteSingleResource<T>(
+  deleteFunc: () => Promise<T>,
+  resourceId: string,
+  resourceType: string,
+  logger: Logger
+): Promise<{ success: boolean; id: string }> {
+  try {
+    await deleteFunc();
+    return { success: true, id: resourceId };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    // Check if it's a 404 or "not found" error - these are OK for idempotency
+    const isNotFoundError =
+      errorMessage.includes('404') ||
+      errorMessage.includes('Not Found') ||
+      errorMessage.includes('not found') ||
+      errorMessage.includes('does not exist');
+
+    if (isNotFoundError) {
+      logger.debug(
+        `${resourceType} ${resourceId} already deleted or does not exist, treating as success`
+      );
+      return { success: true, id: resourceId };
+    }
+
+    logger.warn(`Failed to delete ${resourceType} ${resourceId}: ${errorMessage}`);
+    return { success: false, id: resourceId };
+  }
+}
+
 /**
  * Deletes all related resources for a data connector (stack connectors, tools, workflows)
+ * This function is idempotent and handles partial failures gracefully
  */
-async function deleteRelatedResources(params: DeleteRelatedResourcesParams): Promise<void> {
+async function deleteRelatedResources(
+  params: DeleteRelatedResourcesParams
+): Promise<DeleteRelatedResourcesResult> {
   const {
     kscIds,
     toolIds,
@@ -165,25 +211,118 @@ async function deleteRelatedResources(params: DeleteRelatedResourcesParams): Pro
     toolRegistry,
   } = params;
 
-  // Delete stack connectors
+  const result: DeleteRelatedResourcesResult = {
+    deletedKscIds: [],
+    deletedToolIds: [],
+    deletedWorkflowIds: [],
+    failedKscIds: [],
+    failedToolIds: [],
+    failedWorkflowIds: [],
+    allSucceeded: true,
+  };
+
+  // Delete stack connectors (idempotent)
   if (kscIds.length > 0) {
-    const deleteKscPromises = kscIds.map((kscId) => actionsClient.delete({ id: kscId }));
-    await Promise.all(deleteKscPromises);
-    logger.info(`Deleted ${kscIds.length} stack connector(s): ${kscIds.join(', ')}`);
+    logger.info(`Attempting to delete ${kscIds.length} stack connector(s)`);
+    const kscResults = await Promise.all(
+      kscIds.map((kscId) =>
+        deleteSingleResource(
+          () => actionsClient.delete({ id: kscId }),
+          kscId,
+          'stack connector',
+          logger
+        )
+      )
+    );
+
+    kscResults.forEach((res) => {
+      if (res.success) {
+        result.deletedKscIds.push(res.id);
+      } else {
+        result.failedKscIds.push(res.id);
+        result.allSucceeded = false;
+      }
+    });
+
+    if (result.deletedKscIds.length > 0) {
+      logger.info(`Deleted ${result.deletedKscIds.length} stack connector(s)`);
+    }
+    if (result.failedKscIds.length > 0) {
+      logger.warn(
+        `Failed to delete ${
+          result.failedKscIds.length
+        } stack connector(s): ${result.failedKscIds.join(', ')}`
+      );
+    }
   }
 
-  // Delete tools
+  // Delete tools (idempotent)
   if (toolIds.length > 0) {
-    const deleteToolPromises = toolIds.map((toolId) => toolRegistry.delete(toolId));
-    await Promise.all(deleteToolPromises);
-    logger.info(`Deleted ${toolIds.length} tool(s): ${toolIds.join(', ')}`);
+    logger.info(`Attempting to delete ${toolIds.length} tool(s)`);
+    const toolResults = await Promise.all(
+      toolIds.map((toolId) =>
+        deleteSingleResource(() => toolRegistry.delete(toolId), toolId, 'tool', logger)
+      )
+    );
+
+    toolResults.forEach((res) => {
+      if (res.success) {
+        result.deletedToolIds.push(res.id);
+      } else {
+        result.failedToolIds.push(res.id);
+        result.allSucceeded = false;
+      }
+    });
+
+    if (result.deletedToolIds.length > 0) {
+      logger.info(`Deleted ${result.deletedToolIds.length} tool(s)`);
+    }
+    if (result.failedToolIds.length > 0) {
+      logger.warn(
+        `Failed to delete ${result.failedToolIds.length} tool(s): ${result.failedToolIds.join(
+          ', '
+        )}`
+      );
+    }
   }
 
-  // Delete workflows
+  // Delete workflows (idempotent)
   if (workflowIds.length > 0) {
-    await workflowManagement.management.deleteWorkflows(workflowIds, spaceId, request);
-    logger.info(`Deleted ${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`);
+    logger.info(`Attempting to delete ${workflowIds.length} workflow(s)`);
+    // Delete workflows individually for better error handling
+    const workflowResults = await Promise.all(
+      workflowIds.map((workflowId) =>
+        deleteSingleResource(
+          () => workflowManagement.management.deleteWorkflows([workflowId], spaceId, request),
+          workflowId,
+          'workflow',
+          logger
+        )
+      )
+    );
+
+    workflowResults.forEach((res) => {
+      if (res.success) {
+        result.deletedWorkflowIds.push(res.id);
+      } else {
+        result.failedWorkflowIds.push(res.id);
+        result.allSucceeded = false;
+      }
+    });
+
+    if (result.deletedWorkflowIds.length > 0) {
+      logger.info(`Deleted ${result.deletedWorkflowIds.length} workflow(s)`);
+    }
+    if (result.failedWorkflowIds.length > 0) {
+      logger.warn(
+        `Failed to delete ${
+          result.failedWorkflowIds.length
+        } workflow(s): ${result.failedWorkflowIds.join(', ')}`
+      );
+    }
   }
+
+  return result;
 }
 
 /**
@@ -414,40 +553,75 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
         logger.info(`Found ${connectors.length} data connector(s) to delete`);
 
-        // Get all resource IDs to delete
-        const kscIds = connectors.flatMap((connector) => connector.attributes.kscIds);
-        const toolIds = connectors.flatMap((connector) => connector.attributes.toolIds);
-        const workflowIds = connectors.flatMap((connector) => connector.attributes.workflowIds);
+        if (connectors.length === 0) {
+          return response.ok({
+            body: {
+              success: true,
+              deletedCount: 0,
+              fullyDeletedCount: 0,
+              partiallyDeletedCount: 0,
+            },
+          });
+        }
 
-        // Delete all related resources
+        // Delete all related resources and saved objects for each connector
         const [, { actions, onechat }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await onechat.tools.getRegistry({ request });
         const spaceId = getSpaceId(savedObjectsClient);
 
-        await deleteRelatedResources({
-          kscIds,
-          toolIds,
-          workflowIds,
-          spaceId,
-          request,
-          logger,
-          workflowManagement,
-          actionsClient,
-          toolRegistry,
-        });
+        let fullyDeletedCount = 0;
+        let partiallyDeletedCount = 0;
 
-        // Delete the saved objects
-        const deletePromises = connectors.map((connector) =>
-          savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
-        );
-        await Promise.all(deletePromises);
-        logger.info(`Deleted ${connectors.length} data connector(s)`);
+        // Process each connector individually to handle partial failures
+        for (const connector of connectors) {
+          const { kscIds, toolIds, workflowIds } = connector.attributes;
+
+          const deletionResult = await deleteRelatedResources({
+            kscIds,
+            toolIds,
+            workflowIds,
+            spaceId,
+            request,
+            logger,
+            workflowManagement,
+            actionsClient,
+            toolRegistry,
+          });
+
+          // Option 2: Check if all deletions succeeded for this connector
+          if (deletionResult.allSucceeded) {
+            // All resources deleted successfully - delete the saved object
+            await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id);
+            fullyDeletedCount++;
+            logger.info(`Fully deleted data connector ${connector.id}`);
+          } else {
+            // Some resources failed to delete - update SO with remaining resources
+            const remainingResources = {
+              kscIds: deletionResult.failedKscIds,
+              toolIds: deletionResult.failedToolIds,
+              workflowIds: deletionResult.failedWorkflowIds,
+              updatedAt: new Date().toISOString(),
+            };
+
+            await savedObjectsClient.update(
+              DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+              connector.id,
+              remainingResources
+            );
+            partiallyDeletedCount++;
+            logger.warn(
+              `Partially deleted data connector ${connector.id}. Remaining resources: ${deletionResult.failedKscIds.length} KSCs, ${deletionResult.failedToolIds.length} tools, ${deletionResult.failedWorkflowIds.length} workflows`
+            );
+          }
+        }
 
         return response.ok({
           body: {
             success: true,
             deletedCount: connectors.length,
+            fullyDeletedCount,
+            partiallyDeletedCount,
           },
         });
       } catch (error) {
@@ -488,7 +662,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const toolRegistry = await onechat.tools.getRegistry({ request });
         const spaceId = getSpaceId(savedObjectsClient);
 
-        await deleteRelatedResources({
+        const deletionResult = await deleteRelatedResources({
           kscIds,
           toolIds,
           workflowIds,
@@ -500,15 +674,49 @@ export function registerRoutes(dependencies: RouteDependencies) {
           toolRegistry,
         });
 
-        // Delete the saved object
-        await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
-        logger.info(`Deleted data connector ${savedObject.id}`);
+        // Option 2: Check if all deletions succeeded
+        if (deletionResult.allSucceeded) {
+          // All resources deleted successfully - delete the saved object
+          await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
+          logger.info(`Fully deleted data connector ${savedObject.id}`);
 
-        return response.ok({
-          body: {
-            success: true,
-          },
-        });
+          return response.ok({
+            body: {
+              success: true,
+              fullyDeleted: true,
+            },
+          });
+        } else {
+          // Some resources failed to delete - update SO with only the remaining (failed) resources
+          const remainingResources = {
+            kscIds: deletionResult.failedKscIds,
+            toolIds: deletionResult.failedToolIds,
+            workflowIds: deletionResult.failedWorkflowIds,
+            updatedAt: new Date().toISOString(),
+          };
+
+          await savedObjectsClient.update(
+            DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+            savedObject.id,
+            remainingResources
+          );
+
+          logger.warn(
+            `Partially deleted data connector ${savedObject.id}. Remaining resources: ${deletionResult.failedKscIds.length} KSCs, ${deletionResult.failedToolIds.length} tools, ${deletionResult.failedWorkflowIds.length} workflows`
+          );
+
+          return response.ok({
+            body: {
+              success: true,
+              fullyDeleted: false,
+              remaining: {
+                kscIds: deletionResult.failedKscIds,
+                toolIds: deletionResult.failedToolIds,
+                workflowIds: deletionResult.failedWorkflowIds,
+              },
+            },
+          });
+        }
       } catch (error) {
         logger.error(`Failed to delete connector: ${(error as Error).message}`);
         return createErrorResponse(response, 'Failed to delete connector', error as Error);
