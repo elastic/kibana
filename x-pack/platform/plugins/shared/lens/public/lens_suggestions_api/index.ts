@@ -58,6 +58,7 @@ export const suggestionsApi = ({
   preferredVisAttributes,
 }: SuggestionsApiProps) => {
   const initialContext = context;
+  console.log(initialContext);
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
     formBased: {
