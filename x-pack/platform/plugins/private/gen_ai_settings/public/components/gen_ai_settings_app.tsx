@@ -75,6 +75,28 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   const connectors = useGenAiConnectors();
   const hasElasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
 
+  // Debug logging for Chat Experience visibility
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[GenAI Settings App] Chat Experience Visibility Check:', {
+      showChatExperienceSetting,
+      isAgentExperience,
+      currentChatExperience,
+      'agentBuilder.manageAgents': application.capabilities.agentBuilder?.manageAgents,
+      'agentBuilder.show': application.capabilities.agentBuilder?.show,
+      hasAgentBuilderPrivileges,
+      willShowChatExperience: showChatExperienceSetting,
+      willShowDocumentation:
+        isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges),
+    });
+  }, [
+    showChatExperienceSetting,
+    isAgentExperience,
+    currentChatExperience,
+    hasAgentBuilderPrivileges,
+    application.capabilities.agentBuilder,
+  ]);
+
   useEffect(() => {
     const breadcrumbs = [
       ...(showAiBreadcrumb
@@ -358,8 +380,23 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               )}
               {showChatExperienceSetting && (
                 <EuiFlexItem>
-                  <ChatExperience />
+                  {(() => {
+                    // eslint-disable-next-line no-console
+                    console.log('[GenAI Settings App] Rendering Chat Experience component');
+                    return <ChatExperience />;
+                  })()}
                 </EuiFlexItem>
+              )}
+              {!showChatExperienceSetting && (
+                <>
+                  {(() => {
+                    // eslint-disable-next-line no-console
+                    console.log(
+                      '[GenAI Settings App] NOT rendering Chat Experience - showChatExperienceSetting is false'
+                    );
+                    return null;
+                  })()}
+                </>
               )}
               {showAiAssistantsVisibilitySetting && (
                 <EuiFlexItem>
@@ -371,6 +408,15 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
           {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>
+              {(() => {
+                // eslint-disable-next-line no-console
+                console.log('[GenAI Settings App] Rendering Documentation Section', {
+                  isAgentExperience,
+                  showChatExperienceSetting,
+                  hasAgentBuilderPrivileges,
+                });
+                return null;
+              })()}
               <EuiSpacer size="l" />
 
               <DocumentationSection productDocBase={productDocBase} />

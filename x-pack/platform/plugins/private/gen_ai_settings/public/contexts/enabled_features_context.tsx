@@ -65,6 +65,21 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     const showChatExperienceSetting =
       config.showChatExperienceSetting === false ? false : hasAgentAndAnyAssistant;
 
+    // Debug logging
+    // eslint-disable-next-line no-console
+    console.log('[GenAI Settings] Enabled Features Context:', {
+      'activeSpace.solution': activeSpace?.solution,
+      isSolutionView,
+      'config.showChatExperienceSetting': config.showChatExperienceSetting,
+      hasObservabilityAssistant,
+      hasSecurityAssistant,
+      'agentBuilder.show': capabilities.agentBuilder?.show,
+      'agentBuilder.manageAgents': capabilities.agentBuilder?.manageAgents,
+      hasAgent,
+      hasAgentAndAnyAssistant,
+      showChatExperienceSetting,
+    });
+
     return {
       showSpacesIntegration: config.showSpacesIntegration,
       showAiBreadcrumb: config.showAiBreadcrumb,

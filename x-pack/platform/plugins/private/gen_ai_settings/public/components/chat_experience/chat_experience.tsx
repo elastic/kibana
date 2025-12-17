@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
@@ -26,6 +26,17 @@ export const ChatExperience: React.FC = () => {
   const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
+
+  // Debug logging
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[Chat Experience Component] Render check:', {
+      isAiAgentsEnabled,
+      hasField: !!field,
+      canEditAdvancedSettings,
+      'field exists': !!field,
+    });
+  }, [isAiAgentsEnabled, field, canEditAdvancedSettings]);
 
   const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
     (id, change) => {
@@ -72,8 +83,18 @@ export const ChatExperience: React.FC = () => {
   );
 
   if (!isAiAgentsEnabled || !field) {
+    // eslint-disable-next-line no-console
+    console.log(
+      '[Chat Experience Component] Returning null - isAiAgentsEnabled:',
+      isAiAgentsEnabled,
+      'field:',
+      !!field
+    );
     return null;
   }
+
+  // eslint-disable-next-line no-console
+  console.log('[Chat Experience Component] Rendering Chat Experience field');
 
   const fieldWithDescription = {
     ...field,
