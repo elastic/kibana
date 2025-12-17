@@ -37,10 +37,6 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'bd3e22adbb7a0ddaf0822f9acd96bd2f5c5f0b6e4381f7363feb1680a0825298',
   },
   {
-    id: 'data.set',
-    handlerHash: '4a34418a8e34ad366570cfc3c60b67375c684feacb2c7bfa3cb48b239cc2f99e',
-  },
-  {
     id: 'onechat.runAgent',
     handlerHash: '4f61ed4415041b7423c43fb4a2ef0d19032360092cef14b99587c2003ba7667e',
   },

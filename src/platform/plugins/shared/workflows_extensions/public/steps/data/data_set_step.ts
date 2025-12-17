@@ -9,11 +9,15 @@
 
 import { icon as tableOfContentsIcon } from '@elastic/eui/es/components/icon/assets/tableOfContents';
 import { i18n } from '@kbn/i18n';
-import { dataSetStepCommonDefinition, DataSetStepTypeId } from '../../../common/steps/data';
+import { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from '../../step_registry/types';
 
+export const DataSetStepTypeId = 'data.set';
+
 export const dataSetStepDefinition: PublicStepDefinition = {
-  ...dataSetStepCommonDefinition,
+  id: DataSetStepTypeId,
+  inputSchema: z.record(z.string(), z.unknown()),
+  outputSchema: z.record(z.string(), z.unknown()),
   icon: tableOfContentsIcon,
   label: i18n.translate('workflowsExtensions.dataSetStep.label', {
     defaultMessage: 'Set Variables',

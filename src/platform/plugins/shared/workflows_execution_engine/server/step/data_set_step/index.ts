@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  dataDedupeStepCommonDefinition,
-  DataDedupeStepTypeId,
-  type DataDedupeStepInputSchema,
-  type DataDedupeStepOutputSchema,
-} from './data_dedupe_step';
-export {
-  dataMapStepCommonDefinition,
-  DataMapStepTypeId,
-  type DataMapStepInputSchema,
-  type DataMapStepOutputSchema,
-} from './data_map_step';
+export { DataSetStepImpl } from './data_set_step_impl';

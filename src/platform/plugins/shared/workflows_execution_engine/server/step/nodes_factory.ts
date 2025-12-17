@@ -31,6 +31,7 @@ import {
 } from '@kbn/workflows/graph';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
+import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
@@ -105,6 +106,20 @@ export class NodesFactory {
       return new KibanaActionStepImpl(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         node as any,
+        stepExecutionRuntime,
+        this.workflowRuntime,
+        this.workflowLogger
+      );
+    }
+
+    // Handle data.set internal step
+    if (node.stepType === 'data.set') {
+      this.workflowLogger.logDebug('Creating data.set step', {
+        event: { action: 'internal-step-creation', outcome: 'success' },
+        tags: ['step-factory', 'data-set', 'internal-step'],
+      });
+      return new DataSetStepImpl(
+        node as AtomicGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger

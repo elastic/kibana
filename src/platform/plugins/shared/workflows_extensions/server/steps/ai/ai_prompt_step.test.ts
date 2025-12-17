@@ -73,7 +73,6 @@ describe('aiPromptStepDefinition', () => {
       getContext: jest.fn(),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn(),
-      setVariables: jest.fn(),
     };
 
     // Mock step handler context

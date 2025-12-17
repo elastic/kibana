@@ -32,7 +32,6 @@ describe('dataDedupeStepDefinition', () => {
       getFakeRequest: jest.fn(),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn((val) => val),
-      setVariables: jest.fn(),
     },
     logger: {
       debug: jest.fn(),

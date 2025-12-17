@@ -164,13 +164,6 @@ export interface ContextManager {
    * Returns the fake request
    */
   getFakeRequest(): KibanaRequest;
-
-  /**
-   * Set variables that will be available in the context.variables namespace
-   * for downstream steps. This allows steps to expose outputs in a simplified
-   * global namespace (e.g., {{ variables.foo }} instead of {{ steps.stepName.output.foo }})
-   */
-  setVariables(variables: Record<string, unknown>): void;
 }
 
 /**
