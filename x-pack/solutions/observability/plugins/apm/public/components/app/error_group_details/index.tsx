@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/common';
+import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -29,7 +29,6 @@ import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { getIsObservabilityAgentEnabled } from '../../../../common/agent_builder/get_is_obs_agent_enabled';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -86,8 +85,7 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
   const { onPageReady } = usePerformanceContext();
-  const { observabilityAIAssistant, onechat, core } = useApmPluginContext();
-  const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
+  const { observabilityAIAssistant, onechat } = useApmPluginContext();
 
   const {
     path: { groupId },
@@ -203,7 +201,7 @@ export function ErrorGroupDetails() {
 
   // Configure agent builder global flyout with the error attachment
   useEffect(() => {
-    if (!onechat || !errorId || !isObservabilityAgentEnabled) {
+    if (!onechat || !errorId) {
       return;
     }
 
@@ -226,7 +224,7 @@ export function ErrorGroupDetails() {
     return () => {
       onechat.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, errorId, serviceName, environment, start, end, isObservabilityAgentEnabled]);
+  }, [onechat, errorId, serviceName, environment, start, end]);
 
   return (
     <>
