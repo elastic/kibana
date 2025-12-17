@@ -117,7 +117,7 @@ export const getLiveQueryResultsRoute = (
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                kuery: request.query.kuery,
+                // Note: kuery is intentionally NOT passed here - it should only filter results, not action details
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },

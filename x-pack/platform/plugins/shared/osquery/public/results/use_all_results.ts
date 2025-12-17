@@ -46,7 +46,7 @@ export const useAllResults = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
-    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort }],
+    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort, kuery }],
     () =>
       http.get<{ data: ResultsStrategyResponse }>(
         `/api/osquery/live_queries/${liveQueryActionId}/results/${actionId}`,

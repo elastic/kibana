@@ -84,6 +84,11 @@
     "@kbn/core-http-server",
     "@kbn/setup-node-env",
     "@kbn/core-http-server",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/unified-data-table",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/discover-utils",
+    "@kbn/cell-actions",
+    "@kbn/ui-actions-plugin"
   ]
 }
