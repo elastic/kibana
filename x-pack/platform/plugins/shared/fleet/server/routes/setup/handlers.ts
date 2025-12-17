@@ -7,7 +7,6 @@
 
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common/types';
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import type { FleetRequestHandler } from '../../types';
@@ -84,17 +83,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
 export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const spaceId = (await context.fleet).spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
-
-  const setupStatus = await setupFleet(soClient, esClient, {
-    requestContext: {
-      authorizationHeader,
-      spaceId,
-    },
-    useLock: false,
-  });
+  const setupStatus = await setupFleet(soClient, esClient);
   const body: PostFleetSetupResponse = {
     ...setupStatus,
     nonFatalErrors: formatNonFatalErrors(setupStatus.nonFatalErrors),
