@@ -12,6 +12,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { isOnechatError, createInternalError } from '@kbn/onechat-common';
+import type { Conversation, ConverseInput } from '@kbn/onechat-common';
 import type {
   ScopedRunner,
   ScopedRunnerRunAgentParams,
@@ -142,66 +143,58 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
   const { modelProviderFactory, ...runnerDeps } = deps;
+
+  const createScopedRunnerWithDeps = ({
+    request,
+    defaultConnectorId,
+    conversation,
+    nextInput,
+  }: {
+    request: KibanaRequest;
+    defaultConnectorId?: string;
+    conversation?: Conversation;
+    nextInput?: ConverseInput;
+  }): ScopedRunner => {
+    const resultStore = createResultStore(conversation?.rounds);
+    const stateManager = createConversationStateManager(conversation);
+    const promptManager = createPromptManager();
+
+    if (nextInput !== undefined) {
+      initPromptManager({ promptManager, conversation, input: nextInput });
+    }
+
+    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+    const allDeps = {
+      ...runnerDeps,
+      modelProvider,
+      request,
+      defaultConnectorId,
+      resultStore,
+      stateManager,
+      promptManager,
+    };
+    return createScopedRunner(allDeps);
+  };
+
   return {
     runTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const resultStore = createResultStore();
-      const promptManager = createPromptManager();
-      const stateManager = createConversationStateManager();
-      const modelProvider = modelProviderFactory({ request, defaultConnectorId });
-      const allDeps = {
-        ...runnerDeps,
-        modelProvider,
-        request,
-        defaultConnectorId,
-        resultStore,
-        stateManager,
-        promptManager,
-      };
-      const runner = createScopedRunner(allDeps);
+      const runner = createScopedRunnerWithDeps({ request, defaultConnectorId });
       return runner.runTool(otherParams);
     },
     runInternalTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const resultStore = createResultStore();
-      const promptManager = createPromptManager();
-      const stateManager = createConversationStateManager();
-      const modelProvider = modelProviderFactory({ request, defaultConnectorId });
-      const allDeps = {
-        ...runnerDeps,
-        modelProvider,
-        request,
-        defaultConnectorId,
-        resultStore,
-        stateManager,
-        promptManager,
-      };
-      const runner = createScopedRunner(allDeps);
+      const runner = createScopedRunnerWithDeps({ request, defaultConnectorId });
       return runner.runInternalTool(otherParams);
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
-      const resultStore = createResultStore(params.agentParams.conversation?.rounds);
-
-      const stateManager = createConversationStateManager(params.agentParams.conversation);
-      const promptManager = createPromptManager();
-      initPromptManager({
-        promptManager,
-        conversation: params.agentParams.conversation,
-        input: params.agentParams.nextInput,
-      });
-
-      const modelProvider = modelProviderFactory({ request, defaultConnectorId });
-      const allDeps = {
-        ...runnerDeps,
-        modelProvider,
+      const runner = createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
-        resultStore,
-        stateManager,
-        promptManager,
-      };
-      const runner = createScopedRunner(allDeps);
+        conversation: params.agentParams.conversation,
+        nextInput: params.agentParams.nextInput,
+      });
       return runner.runAgent(otherParams);
     },
   };
