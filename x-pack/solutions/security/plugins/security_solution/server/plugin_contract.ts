@@ -61,7 +61,6 @@ export interface SecuritySolutionPluginSetupDependencies {
   features: FeaturesPluginSetup;
   lists?: ListPluginSetup;
   ml?: MlPluginSetup;
-  onechat: OnechatPluginSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;

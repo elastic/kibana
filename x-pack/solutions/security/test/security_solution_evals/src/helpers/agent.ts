@@ -6,7 +6,7 @@
  */
 
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
-import { ENTITY_ANALYTICS_TOOL_INTERNAL_ID } from '@kbn/security-solution-plugin/server/assistant/tools/entity_analytics/entity_analytics';
+import { ENTITY_ANALYTICS_TOOL_INTERNAL_ID } from '@kbn/security-solution-plugin/server/agent_builder/tools/entity_analytics/entity_analytics';
 import type SuperTest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 
