@@ -12,7 +12,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { expectTextsInDocument, renderWithTheme } from '../../../../../utils/test_helpers';
 import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
-import { ErrorMarker } from './error_marker';
+import { ErrorMarkerWithLink } from './error_marker_with_link';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -26,7 +26,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
   );
 }
 
-describe('ErrorMarker', () => {
+describe('ErrorMarkerWithLink', () => {
   const mark = {
     id: 'agent',
     offset: 10000,
@@ -48,7 +48,7 @@ describe('ErrorMarker', () => {
   } as unknown as ErrorMark;
 
   function openPopover(errorMark: ErrorMark) {
-    const component = renderWithTheme(<ErrorMarker mark={errorMark} />, {
+    const component = renderWithTheme(<ErrorMarkerWithLink mark={errorMark} />, {
       wrapper: Wrapper,
     });
     act(() => {
