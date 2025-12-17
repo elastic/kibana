@@ -12,7 +12,7 @@ import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
-import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/common';
+import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
