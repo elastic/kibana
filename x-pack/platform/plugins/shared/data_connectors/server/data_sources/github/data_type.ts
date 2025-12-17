@@ -37,7 +37,10 @@ export const githubDataSource: DataTypeDefinition = {
     return [
       { content: generateGithubSearchIssuesWorkflow(stackConnectorId), shouldGenerateABTool: true },
       { content: generateGithubGetDocsWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateGithubListRepositoriesWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      {
+        content: generateGithubListRepositoriesWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
     ];
   },
 };

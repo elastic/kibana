@@ -66,7 +66,9 @@ describe('GithubConnector', () => {
         GithubConnector.actions.listRepos.handler(mockContext, {
           owner: 'nonexistent-owner',
         })
-      ).rejects.toThrow("User or organization 'nonexistent-owner' not found. Please verify the owner name is correct.");
+      ).rejects.toThrow(
+        "User or organization 'nonexistent-owner' not found. Please verify the owner name is correct."
+      );
     });
 
     it('should rethrow non-404 errors', async () => {
@@ -153,7 +155,9 @@ describe('GithubConnector', () => {
           repo: 'repo',
           query: 'invalid query syntax',
         })
-      ).rejects.toThrow('Invalid GitHub search query: Invalid query syntax. Please check your query syntax');
+      ).rejects.toThrow(
+        'Invalid GitHub search query: Invalid query syntax. Please check your query syntax'
+      );
     });
 
     it('should handle 422 error without message', async () => {
@@ -169,7 +173,9 @@ describe('GithubConnector', () => {
           owner: 'owner',
           repo: 'repo',
         })
-      ).rejects.toThrow('Invalid GitHub search query: Invalid search query. Please check your query syntax');
+      ).rejects.toThrow(
+        'Invalid GitHub search query: Invalid search query. Please check your query syntax'
+      );
     });
 
     it('should rethrow non-422 errors', async () => {
@@ -358,9 +364,7 @@ describe('GithubConnector', () => {
         },
       };
 
-      mockClient.get
-        .mockResolvedValueOnce(commitResponse)
-        .mockResolvedValueOnce(treeResponse);
+      mockClient.get.mockResolvedValueOnce(commitResponse).mockResolvedValueOnce(treeResponse);
 
       await expect(
         GithubConnector.actions.getDocs.handler(mockContext, {

@@ -23,7 +23,7 @@ export const GithubConnector: ConnectorSpec = {
   auth: {
     types: ['bearer'],
     headers: {
-      'Accept': 'application/vnd.github+json',
+      Accept: 'application/vnd.github+json',
     },
   },
 
@@ -38,7 +38,9 @@ export const GithubConnector: ConnectorSpec = {
           owner: string;
         };
         try {
-          const response = await ctx.client.get(`https://api.github.com/users/${typedInput.owner}/repos`);
+          const response = await ctx.client.get(
+            `https://api.github.com/users/${typedInput.owner}/repos`
+          );
           return response.data.map((repo: { name: string }) => repo.name);
         } catch (error: any) {
           if (error?.response?.status === 404) {
@@ -74,10 +76,10 @@ export const GithubConnector: ConnectorSpec = {
               q: searchQuery,
             },
             headers: {
-              Accept: 'application/vnd.github.v3+json'
-            }
+              Accept: 'application/vnd.github.v3+json',
+            },
           });
-          return response.data
+          return response.data;
         } catch (error: any) {
           if (error?.response?.status === 422) {
             const errorMessage = error?.response?.data?.message || 'Invalid search query';
@@ -129,11 +131,14 @@ export const GithubConnector: ConnectorSpec = {
 
         // Filter the tree for markdown files
         const markdownFiles = treeResponse.data.tree.filter(
-          (file: { type: string; path: string }) => file.type === 'blob' && file.path.toLowerCase().endsWith('.md')
+          (file: { type: string; path: string }) =>
+            file.type === 'blob' && file.path.toLowerCase().endsWith('.md')
         );
 
         if (markdownFiles.length === 0) {
-          throw new Error(`No .md files found in repository ${typedInput.owner}/${typedInput.repo}`);
+          throw new Error(
+            `No .md files found in repository ${typedInput.owner}/${typedInput.repo}`
+          );
         }
 
         // Get the content of the markdown files
