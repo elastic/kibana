@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -22,9 +22,11 @@ import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { load as parseYaml } from 'js-yaml';
+import { Controller, FormProvider, useForm, useFormContext } from 'react-hook-form';
+import { noop } from 'lodash';
 import { CASES_INTERNAL_URL } from '../../../common/constants';
-import type { Template } from '../../../common/templates';
-import type { FormState } from '../configure_cases/flyout';
+import type { CreateTemplateInput, Template } from '../../../common/templates';
+import { CommonFlyout, CommonFlyoutFooter } from '../configure_cases/flyout';
 import { TitleExperimentalBadge } from '../header_page/title';
 import { KibanaServices } from '../../common/lib/kibana';
 
@@ -45,9 +47,9 @@ const fetchTemplate = async (templateId: string) => {
   return KibanaServices.get().http.fetch<Template>(`${CASES_INTERNAL_URL}/templates/${templateId}`);
 };
 
-const createTemplate = async (template: Omit<Template, 'id'>) => {
+const createTemplate = async (templateInput: CreateTemplateInput) => {
   return KibanaServices.get().http.post<Template>(`${CASES_INTERNAL_URL}/templates`, {
-    body: JSON.stringify(template),
+    body: JSON.stringify(templateInput),
   });
 };
 
@@ -179,11 +181,6 @@ export const TemplatesSection = ({ onAddTemplate }: TemplatesSectionProps) => {
 
 TemplatesSection.displayName = 'TemplateList';
 
-export interface TemplateForm {
-  onChange: (formData: FormState<FormData, FormData>) => void;
-  initialValue: FormData | null;
-}
-
 const styles = {
   editorContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -205,39 +202,90 @@ fields:
       - critical
 `;
 
-console.log('parsed', parseYaml(sample));
-
 // on save, persist version timestamp as well
 // store each template as separate SO's with the same template_id (for reference)
 // so that we can do audit and rollbacks
-export const TemplateForm = ({ onChange, initialValue }: TemplateForm) => {
+export const TemplateFormFields = () => {
+  const { control } = useFormContext<{ name: string; definition: string }>();
+
   const euiTheme = useEuiTheme();
 
-  const [code, setCode] = useState(sample);
-  const [name, setName] = useState('');
+  useEffect(() => {
+    console.log('parsed', parseYaml(sample));
+  }, []);
 
   return (
     <div css={{ width: '100%', height: '100%', overflowY: 'scroll' }}>
       <EuiFormRow fullWidth>
-        <EuiFieldText
-          placeholder="Template display name"
-          value={name}
-          onChange={(e) => setName(e.currentTarget.value)}
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => {
+            return (
+              <EuiFieldText
+                placeholder="Template display name"
+                value={field.value}
+                onChange={(e) => field.onChange(e.currentTarget.value)}
+              />
+            );
+          }}
         />
       </EuiFormRow>
       <EuiSpacer size="xs" />
       <div css={styles.editorContainer(euiTheme)}>
-        <CodeEditor
-          onChange={setCode}
-          fullWidth
-          height={'100%'}
-          transparentBackground
-          languageId="yaml"
-          value={code}
+        <Controller
+          control={control}
+          name="definition"
+          render={({ field }) => {
+            return (
+              <CodeEditor
+                fullWidth
+                height={'100%'}
+                transparentBackground
+                languageId="yaml"
+                value={field.value}
+                onChange={(code) => field.onChange(code)}
+              />
+            );
+          }}
         />
       </div>
     </div>
   );
 };
 
-TemplateForm.displayName = 'TemplateForm ';
+TemplateFormFields.displayName = 'TemplateFormFields';
+
+export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
+  const form = useForm<{ name: string; definition: string }>({
+    defaultValues: {
+      definition: sample,
+      name: 'sample template name',
+    },
+  });
+
+  return (
+    <FormProvider {...form}>
+      <CommonFlyout<FormData>
+        isLoading={false}
+        disabled={false}
+        onCloseFlyout={onClose}
+        onSaveField={noop}
+        renderHeader={() => <span>{'Create template'}</span>}
+        footer={
+          <CommonFlyoutFooter
+            isLoading={false}
+            disabled={false}
+            onCancel={onClose}
+            onSave={form.handleSubmit((payload) => {
+              console.log('payload', payload);
+            })}
+          />
+        }
+      >
+        {() => <TemplateFormFields initialValue={null} />}
+      </CommonFlyout>
+    </FormProvider>
+  );
+};
+TemplateFlyout.displayName = 'TemplateFlyout';

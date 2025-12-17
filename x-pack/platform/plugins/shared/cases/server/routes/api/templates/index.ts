@@ -6,8 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ISavedObjectsSerializer, SavedObjectsClientContract } from '@kbn/core/server';
-import type { Template } from '../../../../common/templates';
+import type {
+  ISavedObjectsSerializer,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { v4 } from 'uuid';
+import type { CreateTemplateInput, Template } from '../../../../common/templates';
 import { CASE_TEMPLATE_SAVED_OBJECT, CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -31,11 +36,26 @@ export class TemplatesService {
     });
     // eslint-disable-next-line no-console
     console.log('world', findResult.saved_objects);
+
+    return findResult.saved_objects;
   }
 
-  async getTemplate() {}
+  async getTemplate(templateId: string) {}
 
-  async createTemplate() {}
+  async createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>> {
+    const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      {
+        createdAt: new Date(),
+        deletedAt: null,
+        definition: input.definition,
+        name: input.name,
+        templateId: v4(),
+      } as Template
+    );
+
+    return templateSavedObject;
+  }
 
   async updateTemplate() {}
 
@@ -63,6 +83,8 @@ export const postTemplateRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
+      await casesClient.templates.createTemplate(request.body as CreateTemplateInput);
+
       return response.ok({
         body: {},
       });
@@ -83,16 +105,14 @@ export const getTemplatesRoute = createCasesRoute({
     access: 'public',
   },
   handler: async ({ context, request, response }) => {
-    const templates: Template[] = [{ name: 'Template 1', definition: `` }];
-
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      casesClient.templates.getAllTemplates();
+      const templatesResult = await casesClient.templates.getAllTemplates();
 
       return response.ok({
-        body: templates,
+        body: templatesResult,
       });
     } catch (error) {
       throw createCaseError({

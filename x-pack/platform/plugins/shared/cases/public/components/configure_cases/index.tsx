@@ -13,7 +13,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButton,
   EuiCallOut,
   EuiFlexItem,
   EuiLink,
@@ -55,7 +54,7 @@ import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
-import { TemplateForm as TemplateFormV2, TemplatesSection } from '../templates_v2';
+import { TemplateFlyout, TemplatesSection } from '../templates_v2';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
@@ -638,17 +637,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const TemplatesV2Flyout =
     flyOutVisibility?.type === 'templatesV2' && flyOutVisibility?.visible ? (
-      <CommonFlyout<FormData>
-        isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
-        onCloseFlyout={onCloseTemplatesV2Flyout}
-        onSaveField={() => {}}
-        renderHeader={() => (
-          <span>{observableTypeToEdit ? i18n.EDIT_TEMPLATE : i18n.CREATE_TEMPLATE}</span>
-        )}
-      >
-        {({ onChange }) => <TemplateFormV2 onChange={onChange} initialValue={null} />}
-      </CommonFlyout>
+      <TemplateFlyout onClose={onCloseTemplatesV2Flyout} />
     ) : null;
 
   return (

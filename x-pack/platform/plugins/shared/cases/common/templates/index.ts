@@ -9,7 +9,7 @@ export interface Template {
   /*
    * Template identifier, can be shared across multiple SO's as we are storing all the changes made to the template
    */
-  template_id: string;
+  templateId: string;
 
   /**
    * Display name
@@ -24,10 +24,12 @@ export interface Template {
   /**
    * Creation date, effectively a version of the template
    */
-  created_at: Date;
+  createdAt: Date;
 
   /**
    * Deletion date, used to indicate soft-deletion
    */
-  deleted_at: Date | null;
+  deletedAt: Date | null;
 }
+
+export type CreateTemplateInput = Omit<Template, 'id' | 'templateId' | 'createdAt' | 'deletedAt'>;
