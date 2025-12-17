@@ -24,10 +24,10 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { isLoading, isInitialLoading, data } = useFetchSloDefinitions({ name: searchValue });
+  const { isLoading, isInitialLoading, data, hasLoadedOnlyOnce } = useFetchSloDefinitions({
+    name: searchValue,
+  });
   const hasError = errors !== undefined && errors.length > 0;
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const [hasSearchedOnce, setHasSearchedOnce] = useState(false);
 
   useEffect(() => {
     setSelectedOptions(initialSlo ? [{ value: initialSlo.id, label: initialSlo.name }] : []);
@@ -41,16 +41,6 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
     setOptions(opts);
   }, [isLoading, data]);
 
-  useEffect(() => {
-    if (!isInitialLoading) {
-      setHasLoadedOnce(true);
-    }
-
-    if (searchValue) {
-      setHasSearchedOnce(true);
-    }
-  }, [isInitialLoading, searchValue]);
-
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedOptions(opts);
     const selectedSlo =
@@ -60,11 +50,11 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
 
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
 
-  if (isInitialLoading && !hasLoadedOnce) {
+  if (isInitialLoading) {
     return <EuiLoadingSpinner size="m" data-test-subj="sloSelectorLoadingSpinner" />;
   }
 
-  if (!isInitialLoading && hasLoadedOnce && data?.results.length === 0 && !hasSearchedOnce) {
+  if (hasLoadedOnlyOnce && data?.results.length === 0) {
     return <SloSelectorEmptyState />;
   }
 
