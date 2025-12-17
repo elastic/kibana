@@ -40,6 +40,10 @@ export interface BuiltinToolFormData extends BaseToolFormData {
   type: ToolType.builtin;
 }
 
+export interface McpToolFormData extends BaseToolFormData {
+  type: ToolType.mcp;
+}
+
 export interface IndexSearchToolFormData extends BaseToolFormData {
   type: ToolType.index_search;
   pattern: string;
@@ -53,8 +57,15 @@ export interface WorkflowToolFormData extends BaseToolFormData {
   wait_for_completion: boolean;
 }
 
+export interface McpToolFormData extends BaseToolFormData {
+  type: ToolType.mcp;
+  connectorId: string;
+  mcpToolName: string;
+}
+
 export type ToolFormData =
   | EsqlToolFormData
   | BuiltinToolFormData
   | IndexSearchToolFormData
-  | WorkflowToolFormData;
+  | WorkflowToolFormData
+  | McpToolFormData;
