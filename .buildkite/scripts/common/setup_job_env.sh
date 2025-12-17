@@ -148,6 +148,30 @@ EOF
   fi
 }
 
+# Set up Kibana Evals secrets
+{
+  if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
+    echo "KBN_EVALS was set - exposing LLM connectors, Phoenix config, and ES cluster URLs"
+
+    # Read Security's GenAI config (contains connectors, phoenixKey, esURL)
+    SECURITY_GENAI_CONFIG="$(vault_get security-gen-ai config)"
+
+    # Extract connectors object for @kbn/evals
+    export KIBANA_TESTING_AI_CONNECTORS="$(echo "$SECURITY_GENAI_CONFIG" | jq -r '.connectors')"
+
+    # Phoenix config
+    export PHOENIX_BASE_URL="https://oblt-apps.elastic.dev/phoenix-ai/"
+    export PHOENIX_PUBLIC_URL="https://oblt-apps.elastic.dev/phoenix-ai/"
+    export PHOENIX_PROJECT_NAME="kbn-evals-ci-pipeline"
+    export PHOENIX_API_KEY="$(echo "$SECURITY_GENAI_CONFIG" | jq -r '.phoenixKey // empty')"
+
+    # Elasticsearch cluster URL for trace-based evaluators and evaluation results
+    ES_URL="$(echo "$SECURITY_GENAI_CONFIG" | jq -r '.esURL // empty')"
+    export TRACING_ES_URL="$ES_URL"
+    export EVALUATIONS_ES_URL="$ES_URL"
+  fi
+}
+
 # Set up GCS Service Account for CDN
 {
   GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"

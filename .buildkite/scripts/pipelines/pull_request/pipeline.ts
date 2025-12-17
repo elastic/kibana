@@ -477,6 +477,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:kbn-evals-esql')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/evals/esql_evals.yml'));
+    }
+
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,

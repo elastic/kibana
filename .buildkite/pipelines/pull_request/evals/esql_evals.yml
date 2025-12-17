@@ -1,0 +1,59 @@
+steps:
+  - group: ES|QL Evaluations
+    key: esql-evaluations
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    steps:
+      - label: 'ES|QL Generation Evaluations'
+        command: |
+          # Write kibana.dev.yml with env var placeholders for Phoenix tracing
+          cat > config/kibana.dev.yml <<'EOF'
+          telemetry:
+            enabled: true
+            tracing:
+              enabled: true
+              exporters:
+                - phoenix:
+                    base_url: '$${PHOENIX_BASE_URL}'
+                    public_url: '$${PHOENIX_PUBLIC_URL}'
+                    project_name: '$${PHOENIX_PROJECT_NAME}'
+                    api_key: '$${PHOENIX_API_KEY}'
+          EOF
+
+          # Start Scout server in background
+          node scripts/scout start-server --stateful &
+          SCOUT_PID=$!
+
+          # Wait for server to be ready
+          sleep 120
+
+          # Run ES|QL evaluations
+          EVALUATION_REPETITIONS=1 \
+          EVALUATION_CONNECTOR_ID="gemini-2-5-pro" \
+          TRACING_ES_URL="${TRACING_ES_URL}" \
+          EVALUATIONS_ES_URL="${EVALUATIONS_ES_URL}" \
+          node scripts/playwright test \
+            --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts \
+            evals/esql/esql.spec.ts
+
+          # Cleanup
+          kill $SCOUT_PID 2>/dev/null || true
+        env:
+          KBN_EVALS: '1'
+        key: esql-evals
+        timeout_in_minutes: 60
+        agents:
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+            - exit_status: '*'
+              limit: 1
