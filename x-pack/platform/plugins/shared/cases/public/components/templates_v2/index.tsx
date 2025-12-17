@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -283,7 +283,7 @@ export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
           />
         }
       >
-        {() => <TemplateFormFields initialValue={null} />}
+        {TemplateFormFields}
       </CommonFlyout>
     </FormProvider>
   );
