@@ -15,7 +15,13 @@ import type { ComponentType } from 'react';
  * Button configuration for a sidebar app
  */
 export interface SidebarAppButton {
+  /**
+   * Type of icon to display on the sidebar button (e.g., 'search', 'settings', etc.)
+   */
   iconType: string;
+  /**
+   * Optional title for the sidebar button (used for accessibility and tooltips), defaults to app title if not provided
+   */
   title?: string;
 }
 
@@ -23,24 +29,36 @@ export interface SidebarAppButton {
  * Content configuration for a sidebar app panel
  */
 export interface SidebarAppContent {
+  /**
+   * Title displayed at the top of the sidebar panel
+   */
   title: string;
+  /**
+   * Asynchronously loads the main component for the sidebar app
+   */
   loadComponent: () => Promise<ComponentType<{}>>;
-  order?: number;
+  /**
+   * Function to get the initial state for the sidebar app, accessible via SidebarAppStateService or useSidebarAppState hook
+   */
+  getInitialState: () => unknown;
 }
-
-/**
- * Size options for sidebar
- */
-export type SidebarSize = 'regular' | 'wide';
 
 /**
  * Complete app definition for sidebar registration
  */
 export interface SidebarApp {
+  /**
+   * Unique identifier for the sidebar app
+   */
   appId: string;
+  /**
+   * Button configuration for the sidebar app
+   */
   button: SidebarAppButton;
+  /**
+   * Content configuration for the sidebar app panel
+   */
   app: SidebarAppContent;
-  size?: SidebarSize;
 }
 
 export interface SidebarRegistryServiceApi {

@@ -8,37 +8,30 @@
  */
 
 import React from 'react';
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiSpacer,
-  EuiButtonGroup,
-  EuiText,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow } from '@elastic/eui';
 import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 
-interface TabSelectionState {
+export interface TabSelectionState {
   selectedTab: string;
 }
-
-export const useTabSelectionSideBarApp = () => {
-  const { open } = useSidebar();
-  const { updateState } = useTabSelectionAppState();
-  return {
-    open: () => open(tabSelectionAppId),
-    reset: () => updateState({ selectedTab: 'overview' }),
-  };
-};
 
 const useTabSelectionAppState = () => {
   return useSidebarAppState<TabSelectionState>(tabSelectionAppId);
 };
 
+export const useTabSelectionSideBarApp = () => {
+  const { open } = useSidebar();
+  const [, { reset }] = useTabSelectionAppState();
+  return {
+    open: () => open(tabSelectionAppId),
+    reset: () => reset(),
+  };
+};
+
 export function TabSelectionApp() {
-  const { state, updateState } = useTabSelectionAppState();
+  const [state, { update }] = useTabSelectionAppState();
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -66,8 +59,8 @@ export function TabSelectionApp() {
             id: tab.id,
             label: tab.label,
           }))}
-          idSelected={state?.selectedTab || 'overview'}
-          onChange={(id) => updateState({ selectedTab: id })}
+          idSelected={state.selectedTab}
+          onChange={(id) => update({ selectedTab: id })}
         />
       </EuiFormRow>
 

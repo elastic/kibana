@@ -41,7 +41,7 @@ export class SidebarService {
   constructor() {
     this.registry = new SidebarRegistryService();
     this.state = new SidebarStateService(this.registry);
-    this.appState = new SidebarAppStateService();
+    this.appState = new SidebarAppStateService(this.registry);
   }
 
   setup(): SidebarServiceSetup {

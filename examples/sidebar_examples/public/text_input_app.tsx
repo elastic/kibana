@@ -13,16 +13,16 @@ import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
 
 export const textInputAppId = 'sidebarExampleText';
 
-interface TextInputState {
+export interface TextInputState {
   userName: string;
 }
 
 export const useTextInputSideBarApp = () => {
   const { open } = useSidebar();
-  const { updateState } = useTextInputAppState();
+  const [, { reset }] = useTextInputAppState();
   return {
     open: () => open(textInputAppId),
-    reset: () => updateState({ userName: '' }),
+    reset: () => reset(),
   };
 };
 
@@ -31,7 +31,7 @@ const useTextInputAppState = () => {
 };
 
 export function TextInputApp() {
-  const { state, updateState } = useTextInputAppState();
+  const [state, { update }] = useTextInputAppState();
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
@@ -49,8 +49,8 @@ export function TextInputApp() {
       <EuiFormRow label="User Name">
         <EuiFieldText
           placeholder="Enter your name"
-          value={state?.userName || ''}
-          onChange={(e) => updateState({ userName: e.target.value })}
+          value={state.userName}
+          onChange={(e) => update({ userName: e.target.value })}
         />
       </EuiFormRow>
 

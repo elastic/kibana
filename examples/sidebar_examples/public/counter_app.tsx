@@ -23,25 +23,25 @@ import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
 
 export const counterAppId = 'sidebarExampleCounter';
 
-interface CounterState {
+export interface CounterState {
   counter: number;
 }
-
-export const useCounterSideBarApp = () => {
-  const { open } = useSidebar();
-  const { updateState } = useCounterAppState();
-  return {
-    open: () => open(counterAppId),
-    reset: () => updateState({ counter: 0 }),
-  };
-};
 
 const useCounterAppState = () => {
   return useSidebarAppState<CounterState>(counterAppId);
 };
 
+export const useCounterSideBarApp = () => {
+  const { open } = useSidebar();
+  const [, { reset }] = useCounterAppState();
+  return {
+    open: () => open(counterAppId),
+    reset: () => reset(),
+  };
+};
+
 export function CounterApp() {
-  const { state, updateState } = useCounterAppState();
+  const [state, { update }] = useCounterAppState();
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
@@ -59,7 +59,7 @@ export function CounterApp() {
       <EuiFormRow label="Counter">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => updateState({ counter: (state?.counter || 0) - 1 })}>
+            <EuiButton size="s" onClick={() => update({ counter: state.counter - 1 })}>
               -
             </EuiButton>
           </EuiFlexItem>
@@ -67,7 +67,7 @@ export function CounterApp() {
             <EuiBadge color="primary">{state?.counter || 0}</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => updateState({ counter: (state?.counter || 0) + 1 })}>
+            <EuiButton size="s" onClick={() => update({ counter: state.counter + 1 })}>
               +
             </EuiButton>
           </EuiFlexItem>

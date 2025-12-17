@@ -9,13 +9,14 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
 export interface SidebarAppStateServiceApi {
   /** Get observable stream of app state */
-  getAppState$<T>(appId: string): Observable<T | undefined>;
+  getAppState$<T>(appId: string): Observable<T>;
 
   /** Get current app state synchronously */
-  getAppState<T>(appId: string): T | undefined;
+  getAppState<T>(appId: string): T;
 
   /** Set complete app state (replaces existing) */
   setAppState<T>(appId: string, state: T): void;
@@ -23,8 +24,8 @@ export interface SidebarAppStateServiceApi {
   /** Update app state partially (shallow merge) */
   updateAppState<T extends Record<string, any>>(appId: string, partial: Partial<T>): void;
 
-  /** Clear app state */
-  clearAppState(appId: string): void;
+  /** Reset app state */
+  resetAppState(appId: string): void;
 }
 
 /**
@@ -36,21 +37,22 @@ export interface SidebarAppStateServiceApi {
 export class SidebarAppStateService implements SidebarAppStateServiceApi {
   private readonly appStates = new Map<string, BehaviorSubject<any>>();
 
-  constructor() {}
+  constructor(private readonly registry: SidebarRegistryServiceApi) {}
 
-  private getOrCreateSubject<T>(appId: string, defaultValue?: T): BehaviorSubject<T | undefined> {
+  private getOrCreateSubject<T>(appId: string): BehaviorSubject<T> {
     if (!this.appStates.has(appId)) {
-      this.appStates.set(appId, new BehaviorSubject<T | undefined>(defaultValue));
+      const initialState = this.registry.getApp(appId)?.app?.getInitialState() as T;
+      this.appStates.set(appId, new BehaviorSubject<T>(initialState));
     }
     return this.appStates.get(appId)!;
   }
 
-  getAppState$<T>(appId: string): Observable<T | undefined> {
+  getAppState$<T>(appId: string): Observable<T> {
     return this.getOrCreateSubject<T>(appId).asObservable();
   }
 
-  getAppState<T>(appId: string): T | undefined {
-    return this.appStates.get(appId)?.getValue();
+  getAppState<T>(appId: string): T {
+    return this.getOrCreateSubject<T>(appId).getValue();
   }
 
   setAppState<T>(appId: string, state: T): void {
@@ -62,7 +64,8 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
     this.setAppState(appId, { ...current, ...partial });
   }
 
-  clearAppState(appId: string): void {
-    this.appStates.get(appId)?.next(undefined);
+  resetAppState(appId: string): void {
+    const initialState = this.registry.getApp(appId)?.app?.getInitialState();
+    this.setAppState(appId, initialState);
   }
 }

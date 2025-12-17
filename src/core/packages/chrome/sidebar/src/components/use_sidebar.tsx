@@ -48,42 +48,15 @@ export function useSidebar(): UseSidebarHook {
 /**
  * Return type for useSidebarAppState hook
  */
-export interface UseSidebarAppStateReturn<T> {
-  state: T | undefined;
-  setState: (state: T) => void;
-  updateState: (partial: Partial<T>) => void;
-}
+export type UseSidebarAppStateReturn<T> = readonly [
+  state: T,
+  actions: {
+    set: (state: T) => void;
+    update: (partial: Partial<T>) => void;
+    reset: () => void;
+  }
+];
 
-/**
- * Hook to access and update app-specific state for the sidebar
- *
- * @param appId The sidebar app ID
- * @returns Object containing state, setState, and updateState
- *
- * @example
- * ```tsx
- * interface MyAppState {
- *   selectedTab: string;
- *   filters: string[];
- * }
- *
- * function MySidebarApp() {
- *   const { state, setState, updateState } = useSidebarAppState<MyAppState>('my-app');
- *
- *   // Set complete state
- *   const handleReset = () => {
- *     setState({ selectedTab: 'overview', filters: [] });
- *   };
- *
- *   // Update partial state
- *   const handleTabChange = (tab: string) => {
- *     updateState({ selectedTab: tab });
- *   };
- *
- *   return <div>{state?.selectedTab}</div>;
- * }
- * ```
- */
 export function useSidebarAppState<T>(appId: string): UseSidebarAppStateReturn<T> {
   const service = useSidebarService();
   const state = useObservable(
@@ -101,5 +74,7 @@ export function useSidebarAppState<T>(appId: string): UseSidebarAppStateReturn<T
     [appId, service]
   );
 
-  return { state, setState, updateState };
+  const resetState = useCallback(() => service.appState.resetAppState(appId), [appId, service]);
+
+  return [state, { set: setState, update: updateState, reset: resetState }];
 }
