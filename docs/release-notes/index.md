@@ -40,7 +40,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Fixes [kibana-9.2.3-fixes]
 
 **Alerting**:
-* Fixes an issue that caused the Security alerts table not to update columns correctly when switching view modes [#245253]({{kib-pull}}245253).
+* Fixes an issue that caused the Security alerts table to not update columns correctly when switching view modes [#245253]({{kib-pull}}245253).
 * Adds `consecutiveMatches` to action context [#244997]({{kib-pull}}244997).
 
 **Discover**:
@@ -57,7 +57,7 @@ For the Elastic Security 9.2.3 release information, refer to [Elastic Security S
 * Fixes "now" and mixed-format date handling in the **Share** menu [#245539]({{kib-pull}}245539).
 * Fixes an issue with authentication when multiple OIDC providers are configured [#243869]({{kib-pull}}243869).
 * Fixes an ECS incompatibility with the `kibana_started.elasticsearch.waitTime` value in logs [#245706]({{kib-pull}}245706).
-* Fixes the serialization of `meta.error` in JSON layouts: if the error is an `Error` instance, only `message`, `name`, and `stack` are included. Other fields are no longer returned in the logs [#244364]({{kib-pull}}244364).
+* Fixes the serialization of `meta.error` in JSON layouts. If it is an `Error` instance, only `message`, `name`, and `stack` are included. Other fields are no longer returned in the logs [#244364]({{kib-pull}}244364).
 * Fixes JVM metric conflicts with explicit cast [#244151]({{kib-pull}}244151).
 
 
