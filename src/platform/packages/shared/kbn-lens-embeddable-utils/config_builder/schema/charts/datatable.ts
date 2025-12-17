@@ -105,7 +105,13 @@ const datatableStateSharedOptionsSchema = {
    */
   paging: schema.maybe(
     schema.oneOf(
-      [schema.literal(10), schema.literal(20), schema.literal(50), schema.literal(100)],
+      [
+        schema.literal(10),
+        schema.literal(20),
+        schema.literal(30),
+        schema.literal(50),
+        schema.literal(100),
+      ],
       {
         meta: {
           description: 'Enables pagination and sets the number of rows to display per page',
