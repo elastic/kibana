@@ -24,7 +24,6 @@ import type {
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
-  StreamsFeatureIdentificationIdentifiedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
@@ -49,7 +48,6 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
-  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
@@ -153,10 +151,6 @@ export class StreamsTelemetryClient {
 
   public trackSignificantEventsCreated(params: StreamsSignificantEventsCreatedProps) {
     this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE, params);
-  }
-
-  public trackFeaturesIdentified(params: StreamsFeatureIdentificationIdentifiedProps) {
-    this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
   }
 
   public trackFeaturesSaved(params: StreamsFeatureIdentificationSavedProps) {

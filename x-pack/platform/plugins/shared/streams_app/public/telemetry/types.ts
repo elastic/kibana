@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { FeatureType } from '@kbn/streams-schema';
+import type { FeatureType, StreamType } from '@kbn/streams-schema';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
-
-type StreamType = 'wired' | 'classic' | 'unknown';
 
 type StreamsAttachmentCountProps = {
   name: string;
@@ -120,15 +118,6 @@ interface StreamsSignificantEventsCreatedProps {
   stream_type: StreamType;
 }
 
-interface StreamsFeatureIdentificationIdentifiedProps {
-  count: number;
-  count_by_type: CountByFeatureType;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
   count_by_type: CountByFeatureType;
@@ -198,7 +187,6 @@ export {
   type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
-  type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,

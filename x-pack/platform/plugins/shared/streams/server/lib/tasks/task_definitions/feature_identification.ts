@@ -7,6 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
+import { getStreamTypeFromDefinition, type FeatureType } from '@kbn/streams-schema';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -81,7 +82,22 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                   descriptionPromptOverride,
                 });
 
-                // I think I have to send the telemetry here
+                taskContext.telemetry.trackFeaturesIdentified({
+                  count: results.features.length,
+                  count_by_type: results.features.reduce<Record<FeatureType, number>>(
+                    (acc, feature) => {
+                      acc[feature.type] = (acc[feature.type] || 0) + 1;
+                      return acc;
+                    },
+                    {
+                      system: 0,
+                    }
+                  ),
+                  stream_name: stream.name,
+                  stream_type: getStreamTypeFromDefinition(stream),
+                  input_tokens_used: results.tokensUsed.prompt,
+                  output_tokens_used: results.tokensUsed.completion,
+                });
 
                 await taskClient.update<FeatureIdentificationTaskParams, IdentifyFeaturesResult>({
                   ..._task,
