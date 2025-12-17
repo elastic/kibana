@@ -9,7 +9,6 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import parser from '@kbn/datemath';
 import { isNumber, isString } from 'lodash';
-import ms from 'ms';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import type { Config, ParsedSchedule, Schedule } from '../types';
@@ -20,16 +19,17 @@ const parseSchedule =
   (now: Moment) =>
   (schedule: Schedule): ParsedSchedule => {
     if (schedule.duration) {
-      const duration = ms(schedule.duration);
+      const duration = parseDuration(schedule.duration);
       if (duration == null) {
         throw new Error(`Unable to parse ${schedule.duration}`);
       }
-      return { ...schedule, duration };
+      const { start, end, duration: _, ...rest } = schedule;
+      return { ...rest, duration: Number(duration) } as ParsedSchedule;
     }
 
     const startTs = isNumber(schedule.start)
       ? schedule.start
-      : parser.parse(schedule.start, { forceNow: now.toDate(), roundUp: false })?.valueOf();
+      : parser.parse(schedule.start || '0', { forceNow: now.toDate(), roundUp: false })?.valueOf();
     const endTs = isNumber(schedule.end)
       ? schedule.end
       : isString(schedule.end)
@@ -38,7 +38,8 @@ const parseSchedule =
     if (startTs == null || endTs == null) {
       throw new Error(`Unable to parse schedule: ${JSON.stringify(schedule)}`);
     }
-    return { ...schedule, start: startTs, end: endTs };
+    const { duration: _, ...rest } = schedule;
+    return { ...rest, start: startTs, end: endTs };
   };
 
 async function indexDurationSchedule(config: Config, client: Client, logger: ToolingLog) {
@@ -85,7 +86,7 @@ async function indexStartEndSchedule(config: Config, client: Client, logger: Too
         : moment(schedule.start);
       const end =
         schedule.end === false && startTs.isAfter(now)
-          ? moment(schedule.start + interval)
+          ? moment((schedule.start || 0) + interval)
           : isNumber(schedule.end)
           ? moment(schedule.end)
           : false;
@@ -132,3 +133,41 @@ export async function indexSchedule(config: Config, client: Client, logger: Tool
   }
   return indexStartEndSchedule(config, client, logger);
 }
+
+const SECONDS_REGEX = /^[1-9][0-9]*s$/;
+const MINUTES_REGEX = /^[1-9][0-9]*m$/;
+const HOURS_REGEX = /^[1-9][0-9]*h$/;
+const DAYS_REGEX = /^[1-9][0-9]*d$/;
+
+const isSeconds = (duration: string) => {
+  return SECONDS_REGEX.test(duration);
+};
+
+const isMinutes = (duration: string) => {
+  return MINUTES_REGEX.test(duration);
+};
+
+const isHours = (duration: string) => {
+  return HOURS_REGEX.test(duration);
+};
+
+const isDays = (duration: string) => {
+  return DAYS_REGEX.test(duration);
+};
+
+// parse an interval string '{digit*}{s|m|h|d}' into milliseconds
+export const parseDuration = (duration: string): number => {
+  const parsed = parseInt(duration, 10);
+  if (isSeconds(duration)) {
+    return parsed * 1000;
+  } else if (isMinutes(duration)) {
+    return parsed * 60 * 1000;
+  } else if (isHours(duration)) {
+    return parsed * 60 * 60 * 1000;
+  } else if (isDays(duration)) {
+    return parsed * 24 * 60 * 60 * 1000;
+  }
+  throw new Error(
+    `Invalid duration "${duration}". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"`
+  );
+};

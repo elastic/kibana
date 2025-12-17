@@ -22,7 +22,11 @@ export function computeTotalEvents(
   startTimestamp: number
 ): number {
   const eventsPerCycle = schedule.eventsPerCycle ?? config.indexing.eventsPerCycle;
-  if (EventsPerCycleTransitionDefRT.is(eventsPerCycle) && isNumber(schedule.end)) {
+  if (
+    EventsPerCycleTransitionDefRT.is(eventsPerCycle) &&
+    isNumber(schedule.end) &&
+    isNumber(schedule.start)
+  ) {
     const startPoint = { x: schedule.start, y: eventsPerCycle.start };
     const endPoint = { x: schedule.end, y: eventsPerCycle.end };
     if (eventsPerCycle.method === 'exp') {
