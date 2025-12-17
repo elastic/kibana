@@ -37,9 +37,6 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
     schema: listIndicesSchema,
     handler: async ({ pattern }, { esClient, logger, prompts, stateManager }) => {
       const { status: confirmStatus } = prompts.checkConfirmationStatus('list_indices');
-
-      console.log('***** IN LIST INDICES TOOL *****', confirmStatus, stateManager.getState());
-
       if (confirmStatus === ConfirmationStatus.unprompted) {
         stateManager.setState({
           hello: 'world',
