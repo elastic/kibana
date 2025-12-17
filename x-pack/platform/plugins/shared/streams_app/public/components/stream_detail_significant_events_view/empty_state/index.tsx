@@ -53,6 +53,7 @@ export function EmptyState({
               onFeatureIdentificationClick={onFeatureIdentificationClick}
               onManualEntryClick={onManualEntryClick}
               isGeneratingQueries={false}
+              isSavingManualEntry={false}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

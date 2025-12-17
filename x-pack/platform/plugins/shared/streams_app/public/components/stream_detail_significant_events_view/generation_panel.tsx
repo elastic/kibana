@@ -30,11 +30,13 @@ export function SignificantEventsGenerationPanel({
   onFeatureIdentificationClick,
   onManualEntryClick,
   isGeneratingQueries,
+  isSavingManualEntry,
 }: FeatureSelectorProps & {
   onFeatureIdentificationClick: () => void;
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
   isGeneratingQueries: boolean;
+  isSavingManualEntry: boolean;
 }) {
   const [generatingFrom, setGeneratingFrom] = useState<'all_data' | 'features'>(
     selectedFeatures.length === 0 ? 'all_data' : 'features'
@@ -48,6 +50,7 @@ export function SignificantEventsGenerationPanel({
             <IdentifyFeatures
               identifyFeatures={onFeatureIdentificationClick}
               isGeneratingQueries={isGeneratingQueries}
+              isSavingManualEntry={isSavingManualEntry}
             />
           ) : (
             <GenerationContext
@@ -60,6 +63,7 @@ export function SignificantEventsGenerationPanel({
                 onGenerateSuggestionsClick();
               }}
               generatingFrom={generatingFrom}
+              isSavingManualEntry={isSavingManualEntry}
             />
           )}
         </EuiPanel>
@@ -89,7 +93,13 @@ export function SignificantEventsGenerationPanel({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="s">
+        <EuiFlexGroup
+          alignItems="center"
+          direction="row"
+          justifyContent="spaceEvenly"
+          gutterSize="s"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <ConnectorListButton
               buttonProps={{
@@ -98,7 +108,7 @@ export function SignificantEventsGenerationPanel({
                   setGeneratingFrom('all_data');
                   onGenerateSuggestionsClick();
                 },
-                isDisabled: isGeneratingQueries,
+                isDisabled: isGeneratingQueries || isSavingManualEntry,
                 isLoading: isGeneratingQueries && generatingFrom === 'all_data',
                 'data-test-subj': 'significant_events_all_data_button',
                 children: i18n.translate(
@@ -141,10 +151,12 @@ function GenerationContext({
   isGeneratingQueries,
   onGenerateSuggestionsClick,
   generatingFrom,
+  isSavingManualEntry,
 }: FeatureSelectorProps & {
   isGeneratingQueries: boolean;
   onGenerateSuggestionsClick: () => void;
   generatingFrom: 'all_data' | 'features';
+  isSavingManualEntry: boolean;
 }) {
   return (
     <>
@@ -183,7 +195,7 @@ function GenerationContext({
 
       <EuiFlexItem>
         <FeaturesSelector
-          isDisabled={isGeneratingQueries}
+          isDisabled={isGeneratingQueries || isSavingManualEntry}
           features={features}
           selectedFeatures={selectedFeatures}
           onFeaturesChange={onFeaturesChange}
@@ -197,7 +209,7 @@ function GenerationContext({
           buttonProps={{
             iconType: 'sparkles',
             isLoading: isGeneratingQueries && generatingFrom === 'features',
-            isDisabled: selectedFeatures.length === 0,
+            isDisabled: selectedFeatures.length === 0 || isSavingManualEntry,
             onClick: () => onGenerateSuggestionsClick(),
             'data-test-subj': 'significant_events_generate_suggestions_button',
             children: i18n.translate(
@@ -216,9 +228,11 @@ function GenerationContext({
 function IdentifyFeatures({
   identifyFeatures,
   isGeneratingQueries,
+  isSavingManualEntry,
 }: {
   identifyFeatures: () => void;
   isGeneratingQueries: boolean;
+  isSavingManualEntry: boolean;
 }) {
   return (
     <>
@@ -261,7 +275,7 @@ function IdentifyFeatures({
             iconType: 'sparkles',
             onClick: () => identifyFeatures(),
             'data-test-subj': 'significant_events_identify_features_button',
-            isDisabled: isGeneratingQueries,
+            isDisabled: isGeneratingQueries || isSavingManualEntry,
             children: i18n.translate(
               'xpack.streams.significantEvents.significantEventsGenerationPanel.identifyFeaturesButtonLabel',
               {

@@ -254,7 +254,7 @@ export function AddSignificantEventFlyout({
     <EuiFlyout
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
-      size={isEditMode ? 's' : 'l'}
+      size={isEditMode ? 'm' : 'l'}
       type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
@@ -301,6 +301,7 @@ export function AddSignificantEventFlyout({
                   onGenerateSuggestionsClick={generateQueries}
                   onFeatureIdentificationClick={onFeatureIdentificationClick}
                   isGeneratingQueries={isGenerating}
+                  isSavingManualEntry={isSubmitting}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -348,6 +349,7 @@ export function AddSignificantEventFlyout({
 
                   {selectedFlow === 'ai' && (
                     <GeneratedFlowForm
+                      isSubmitting={isSubmitting}
                       isGenerating={isGenerating}
                       generatedQueries={generatedQueries}
                       onEditQuery={(editedQuery) => {
@@ -356,7 +358,6 @@ export function AddSignificantEventFlyout({
                         );
                       }}
                       stopGeneration={stopGeneration}
-                      isSubmitting={isSubmitting}
                       definition={definition.stream}
                       setQueries={(next: StreamQueryKql[]) => {
                         setQueries(next);
