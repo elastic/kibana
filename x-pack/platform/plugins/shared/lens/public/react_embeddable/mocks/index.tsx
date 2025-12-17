@@ -112,6 +112,7 @@ function getDefaultLensApiMock() {
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
     resetUnsavedChanges: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
+    updateAbortController: jest.fn(),
   };
   return LensApiMock;
 }
