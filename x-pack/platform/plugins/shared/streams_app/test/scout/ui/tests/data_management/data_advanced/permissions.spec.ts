@@ -12,83 +12,85 @@ import { generateLogsData } from '../../../fixtures/generators';
 const WIRED_STREAM = 'logs';
 const CLASSIC_STREAM = 'logs-classic-permissions-test';
 
-test.describe('Advanced tab permissions - Wired streams', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ pageObjects }) => {
-    // Navigate to the wired stream's retention tab (a tab that's always visible)
-    await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
+test.describe('Advanced tab permissions', { tag: ['@ess', '@svlOblt'] }, () => {
+  test.describe('Wired streams', () => {
+    test.beforeEach(async ({ pageObjects }) => {
+      // Navigate to the wired stream's retention tab (a tab that's always visible)
+      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
+    });
+
+    test('should NOT show Advanced tab for viewer role', async ({ browserAuth, page }) => {
+      await browserAuth.loginAsViewer();
+      await page.reload();
+
+      // Verify the Advanced tab is not visible for viewer
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
+    });
+
+    test('should NOT show Advanced tab for editor role', async ({ browserAuth, page }) => {
+      await browserAuth.loginAs('editor');
+      await page.reload();
+
+      // Verify the Advanced tab is not visible for editor
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
+    });
+
+    test('should show Advanced tab for admin role', async ({ browserAuth, page }) => {
+      await browserAuth.loginAsAdmin();
+      await page.reload();
+
+      // Verify the Advanced tab is visible for admin
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
+    });
   });
 
-  test('should NOT show Advanced tab for viewer role', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsViewer();
-    await page.reload();
+  test.describe('Classic streams', () => {
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+      // Generate logs to create a classic stream
+      await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM });
+    });
 
-    // Verify the Advanced tab is not visible for viewer
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
-  });
+    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      await apiServices.streams.deleteStream(CLASSIC_STREAM);
+      await logsSynthtraceEsClient.clean();
+    });
 
-  test('should NOT show Advanced tab for editor role', async ({ browserAuth, page }) => {
-    await browserAuth.loginAs('editor');
-    await page.reload();
+    test('should NOT show Advanced tab for viewer role on classic stream', async ({
+      browserAuth,
+      pageObjects,
+      page,
+    }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
-    // Verify the Advanced tab is not visible for editor
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
-  });
+      // Verify the Advanced tab is not visible for viewer
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
+    });
 
-  test('should show Advanced tab for admin role', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.reload();
+    test('should NOT show Advanced tab for editor role on classic stream', async ({
+      browserAuth,
+      pageObjects,
+      page,
+    }) => {
+      await browserAuth.loginAs('editor');
+      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
-    // Verify the Advanced tab is visible for admin
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
-  });
-});
+      // Verify the Advanced tab is not visible for editor
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
+    });
 
-test.describe('Advanced tab permissions - Classic streams', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
-    // Generate logs to create a classic stream
-    await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM });
-  });
+    test('should show Advanced tab for admin role on classic stream', async ({
+      browserAuth,
+      pageObjects,
+      page,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoAdvancedTab(CLASSIC_STREAM);
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.deleteStream(CLASSIC_STREAM);
-    await logsSynthtraceEsClient.clean();
-  });
-
-  test('should NOT show Advanced tab for viewer role on classic stream', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    await browserAuth.loginAsViewer();
-    await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
-
-    // Verify the Advanced tab is not visible for viewer
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
-  });
-
-  test('should NOT show Advanced tab for editor role on classic stream', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    await browserAuth.loginAs('editor');
-    await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
-
-    // Verify the Advanced tab is not visible for editor
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
-  });
-
-  test('should show Advanced tab for admin role on classic stream', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoAdvancedTab(CLASSIC_STREAM);
-
-    // Verify the Advanced tab is visible for admin
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
-    // Verify we're on the classic stream by checking the classic badge
-    await pageObjects.streams.verifyClassicBadge();
+      // Verify the Advanced tab is visible for admin
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
+      // Verify we're on the classic stream by checking the classic badge
+      await pageObjects.streams.verifyClassicBadge();
+    });
   });
 });
