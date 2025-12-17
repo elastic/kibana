@@ -453,4 +453,18 @@ export class EndpointAppContextService {
       this.createLogger('ReferenceDataClient')
     );
   }
+
+  public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(
+    key: TKey
+  ): ConfigType[TKey] {
+    if (!this.startDependencies?.config) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(this.startDependencies.config, key)) {
+      throw new EndpointError(`Missing config value for key: ${key}`);
+    }
+
+    return this.startDependencies.config[key];
+  }
 }
