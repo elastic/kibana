@@ -56,5 +56,7 @@
     "@kbn/ai-agent-confirmation-modal",
     "@kbn/ai-assistant-common",
     "@kbn/onechat-common",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core-analytics-browser",
   ]
 }
