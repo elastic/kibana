@@ -5,44 +5,38 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { z } from '@kbn/zod';
-
+import { ToolType } from '@kbn/onechat-common';
+import { isMcpTool } from '@kbn/onechat-common/tools';
+import {
+  transformMcpFormDataForCreate,
+  transformMcpFormDataForUpdate,
+  transformMcpToolToFormData,
+} from '../../../../../utils/transform_mcp_form_data';
 import { zodResolver } from '../../../../../utils/zod_resolver';
-import type { ToolTypeRegistryEntry } from '../common';
+import { i18nMessages } from '../../i18n';
+import { McpConfiguration } from '../../sections/configuration_fields/mcp_configuration_fields';
 import type { McpToolFormData } from '../../types/tool_form_types';
+import { mcpToolFormValidationSchema } from '../../validation/mcp_tool_form_validation';
+import type { ToolTypeRegistryEntry } from '../common';
 import { commonToolFormDefaultValues } from '../common';
-import { labels } from '../../../../../utils/i18n';
 
-/**
- * Transforms an MCP tool definition into its UI form representation.
- */
-const transformMcpToolToFormData = (tool: ToolDefinitionWithSchema): McpToolFormData => {
-  return {
-    toolId: tool.id,
-    description: tool.description,
-    labels: tool.tags,
-    type: ToolType.mcp,
-  };
-};
-
-// MCP tools are created via bulk import from MCP connectors, not via the form
 export const mcpToolRegistryEntry: ToolTypeRegistryEntry<McpToolFormData> = {
-  label: labels.tools.mcpLabel,
-  getConfigurationComponent: () => {
-    throw new Error("MCP tools don't have a configuration component");
-  },
+  label: i18nMessages.configuration.form.type.mcpOption,
+  getConfigurationComponent: () => McpConfiguration,
   defaultValues: {
     ...commonToolFormDefaultValues,
     type: ToolType.mcp,
+    connectorId: '',
+    mcpToolName: '',
   },
-  toolToFormData: transformMcpToolToFormData,
-  formDataToCreatePayload: () => {
-    throw new Error('MCP tools cannot be created via the form');
+  toolToFormData: (tool: ToolDefinitionWithSchema) => {
+    if (!isMcpTool(tool)) {
+      throw new Error('Expected MCP tool');
+    }
+    return transformMcpToolToFormData(tool);
   },
-  formDataToUpdatePayload: () => {
-    throw new Error('MCP tools cannot be updated via the form');
-  },
-  getValidationResolver: () => zodResolver(z.any({})),
+  formDataToCreatePayload: transformMcpFormDataForCreate,
+  formDataToUpdatePayload: transformMcpFormDataForUpdate,
+  getValidationResolver: () => zodResolver(mcpToolFormValidationSchema),
 };

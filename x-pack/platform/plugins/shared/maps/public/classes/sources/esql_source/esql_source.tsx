@@ -21,7 +21,7 @@ import {
   getStartEndParams,
   hasStartEndParams,
 } from '@kbn/esql-utils';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, sanitizeProjectRoutingForES } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
@@ -263,6 +263,10 @@ export class ESQLSource
     }
 
     params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
+
+    if (requestMeta.projectRouting) {
+      params.project_routing = sanitizeProjectRoutingForES(requestMeta.projectRouting);
+    }
 
     const requestResponder = inspectorAdapters.requests!.start(
       getLayerFeaturesRequestName(layerName),
