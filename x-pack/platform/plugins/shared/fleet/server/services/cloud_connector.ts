@@ -228,12 +228,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       logger.info('Successfully created cloud connector');
 
-      // packagePolicyCount is computed dynamically - new connectors start with 1
-      // since they're created alongside a package policy
       return {
         id: savedObject.id,
         ...savedObject.attributes,
-        packagePolicyCount: 1,
       };
     } catch (error) {
       logger.error(
