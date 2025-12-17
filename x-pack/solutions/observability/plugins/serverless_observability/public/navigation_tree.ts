@@ -27,8 +27,8 @@ const LazyIconProductCloudInfra = lazy(() =>
   }))
 );
 const LazyAgentBuilderIcon = lazy(() =>
-  import('@kbn/ai-insights/src/icons/robot_icon').then(({ RobotIcon }) => ({
-    default: RobotIcon,
+  import('@kbn/observability-nav-icons').then(({ iconRobot }) => ({
+    default: iconRobot,
   }))
 );
 
