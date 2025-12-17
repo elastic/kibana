@@ -155,8 +155,10 @@ EOF
 
     # Extract connectors object for @kbn/evals
     # The vault value is base64-encoded JSON (see x-pack/solutions/security/test/security_solution_api_integration/scripts/genai/vault/manage_secrets.ts)
+    #
+    # NOTE: `@kbn/gen-ai-functional-testing` expects `KIBANA_TESTING_AI_CONNECTORS` to be base64-encoded JSON.
     export KIBANA_TESTING_AI_CONNECTORS="$(
-      vault_get security-gen-ai config | base64 -d | jq -c '.connectors'
+      vault_get security-gen-ai config | base64 -d | jq -r '(.connectors | @json | @base64)'
     )"
 
     # Phoenix config
