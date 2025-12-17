@@ -18,7 +18,7 @@ import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_a
 
 interface AppMenuBarProps {
   // TODO: get rid of observable
-  appMenuActions$: Observable<MountPoint | undefined>;
+  appMenuActions$?: Observable<MountPoint | undefined> | null;
   appMenu$?: Observable<AppMenuConfig | undefined> | null;
 
   /**
@@ -59,7 +59,7 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   }, [euiTheme]);
 
 export const AppMenuBar = ({ appMenuActions$, appMenu$, isFixed = true }: AppMenuBarProps) => {
-  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$);
+  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$!);
   const { euiTheme } = useEuiTheme();
   const [hasBetaConfig, setHasBetaConfig] = useState(false);
 

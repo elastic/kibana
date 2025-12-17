@@ -104,28 +104,26 @@ export interface ChromeStart {
 
   /**
    * Set the app menu configuration for the current application.
-   * This allows applications to define action buttons and menus that appear in the chrome header.
-   *
-   * @param config - The app menu configuration object, or undefined to clear the menu
    *
    * @example
-   * ```ts
-   * // Set a simple app menu with action buttons
-   * core.chrome.setAppMenu({
-   *   items: [
-   *     {
-   *       id: 'save',
-   *       label: 'Save',
-   *       iconType: 'save',
-   *       order: 1,
-   *       run: () => handleSave(),
-   *     },
-   *   ],
-   * });
+   *```tsx
+   * import React, { useEffect } from 'react';
+   * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+   * import { useKibana } from '@kbn/kibana-react-plugin/public';
    *
-   * // Clear the app menu
-   * core.chrome.setAppMenu();
-   * ```
+   * interface Props {
+   *  config: AppMenuConfig;
+   *}
+   *
+   * const Example = ({ config }: Props) => {
+   *  const { chrome } = useKibana().services;
+   *
+   *  useEffect(() => {
+   *    chrome.setAppMenu(config);
+   *  }, [chrome.setAppMenu, config]);
+   *
+   *  return <div>Hello world!</div>;
+   * };
    */
   setAppMenu(config?: AppMenuConfig): void;
 

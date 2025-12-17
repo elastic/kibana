@@ -6,34 +6,48 @@
 
 - Declarative (preferred):
 
-```typescript
-import { AppMenu } from '@kbn/core-chrome-app-menu'
+```tsx
+import React, { useEffect } from 'react';
+import { AppMenu } from '@kbn/core-chrome-app-menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-const MyComponent = (config: AppMenuConfig) => {
-  const { chrome } = useKibana().services
-
-  return <AppMenu config={config} setAppMenu={chrome.setAppMenu} />
+interface Props {
+  config: AppMenuConfig;
 }
+
+const Example = ({ config }: Props) => {
+  const { chrome } = useKibana().services;
+
+  return <AppMenu config={config} setAppMenu={chrome.setAppMenu} />;
+};
 ```
 
 - Imperative:
 
-```typescript
-const MyComponent = (config: AppMenuConfig) => {
-  const { chrome } = useKibana().services
+```tsx
+import React, { useEffect } from 'react';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
+interface Props {
+  config: AppMenuConfig;
+}
+
+const Example = ({ config }: Props) => {
+  const { chrome } = useKibana().services;
 
   useEffect(() => {
-   chrome.setAppMenu(config)
+    chrome.setAppMenu(config);
+  }, [chrome.setAppMenu, config]);
 
-  }, [chrome.setAppMenu, config])
-
-  return <>Hello world!</>
-}
+  return <div>Hello world!</div>;
+};
 ```
 
 ## API changes
 
-`AppMenu` offers a more restricted API than `TopNavMenu`
+`AppMenu` offers a more restricted API than `TopNavMenu`.
 
 1. Decoupling from `UnifiedSearch` - top nav menu will no longer be bundled with unified search. You will need to directly import unified search and render it.
 

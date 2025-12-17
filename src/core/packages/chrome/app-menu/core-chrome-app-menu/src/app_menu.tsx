@@ -13,7 +13,6 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 export interface AppMenuProps {
   /**
    * The setAppMenu function from ChromeStart.
-   * Typically accessed via `core.chrome.setAppMenu` or `coreStart.chrome.setAppMenu`.
    */
   setAppMenu: (config?: AppMenuConfig) => void;
   /**
@@ -26,32 +25,23 @@ export interface AppMenuProps {
 /**
  * A declarative React component for managing the application menu in Kibana's chrome header.
  *
- * This component automatically:
- * - Calls `setAppMenu(config)` when mounted or when config changes
- * - Clears the menu with `setAppMenu()` when unmounted
- *
  * @example
  * ```tsx
+ * import React, { useEffect } from 'react';
  * import { AppMenu } from '@kbn/core-chrome-app-menu';
+ * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+ * import { useKibana } from '@kbn/kibana-react-plugin/public';
  *
- * function MyApp({ core }) {
- *   return (
- *       <AppMenu
- *         setAppMenu={core.chrome.setAppMenu}
- *         config={{
- *           items: [
- *             {
- *               id: 'save',
- *               label: 'Save',
- *               iconType: 'save',
- *               run: () => handleSave(),
- *             },
- *           ],
- *         }}
- *       />
- *   );
- * }
- * ```
+ *interface Props {
+ *  config: AppMenuConfig;
+ *}
+ *
+ *const Example = ({ config }: Props) => {
+ *  const { chrome } = useKibana().services;
+ *
+ *  return <AppMenu config={config} setAppMenu={chrome.setAppMenu} />;
+ *};
+ *```
  */
 export const AppMenu = ({ setAppMenu, config }: AppMenuProps) => {
   useEffect(() => {

@@ -4,13 +4,15 @@
 
 ## Usage
 
-- Direct import:
+```tsx
+import React, { useEffect } from 'react';
+import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
-```typescript
-import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components'
-
-const MyComponent = (config: AppMenuConfig) => {
-
-  return <AppMenu config={config} />
+interface Props {
+  config: AppMenuConfig;
 }
+
+const Example = ({ config }: Props) => {
+  return <AppMenuComponent config={config} />;
+};
 ```

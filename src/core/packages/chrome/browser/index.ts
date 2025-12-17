@@ -51,10 +51,3 @@ export type {
   RenderAs,
   SolutionId,
 } from './src';
-export type {
-  AppMenuConfig,
-  AppMenuItemType,
-  AppMenuPopoverItem,
-  AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
-} from '@kbn/core-chrome-app-menu-components';

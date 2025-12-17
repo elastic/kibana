@@ -315,7 +315,6 @@ export const ProjectHeader = ({
 
       {(observables.actionMenu$ || observables.appMenu$) && (
         <AppMenuBar
-          // @ts-expect-error
           appMenuActions$={observables.actionMenu$}
           appMenu$={observables.appMenu$}
           isFixed={true}
