@@ -120,7 +120,7 @@ describe('registerRoutes', () => {
       ];
 
       mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: mockConnectors,
+        saved_objects: mockConnectors as any,
         total: 2,
         per_page: 100,
         page: 1,
@@ -368,7 +368,7 @@ describe('registerRoutes', () => {
       ];
 
       mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: mockConnectors,
+        saved_objects: mockConnectors as any,
         total: 2,
         per_page: 1000,
         page: 1,

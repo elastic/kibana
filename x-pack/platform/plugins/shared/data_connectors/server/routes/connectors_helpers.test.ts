@@ -204,7 +204,7 @@ describe('createConnectorAndRelatedResources', () => {
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
     mockToolRegistry.create.mockResolvedValue(mockTool);
-    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject);
+    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as any);
 
     const result = await createConnectorAndRelatedResources({
       name: 'My Test Connector',
@@ -278,7 +278,7 @@ describe('createConnectorAndRelatedResources', () => {
 
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
-    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject);
+    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as any);
 
     await createConnectorAndRelatedResources({
       name: 'Test',
