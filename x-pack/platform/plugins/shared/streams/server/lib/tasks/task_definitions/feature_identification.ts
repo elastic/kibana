@@ -19,8 +19,6 @@ export interface FeatureIdentificationTaskParams {
   end: number;
 }
 
-const abortControllers: Map<string, AbortController> = new Map();
-
 export function createStreamsFeatureIdentificationTask(taskContext: TaskContext) {
   return {
     streams_feature_identification: {
@@ -67,9 +65,6 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
               const { featurePromptOverride, descriptionPromptOverride } =
                 await promptsConfigService.getPrompt();
 
-              const abortController = new AbortController();
-              abortControllers.set(runContext.taskInstance.id, abortController);
-
               const results = await featureRegistry.identifyFeatures({
                 start,
                 end,
@@ -78,7 +73,7 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                 logger: taskContext.logger.get('feature_identification'),
                 stream,
                 features: hits,
-                signal: abortController.signal,
+                signal: runContext.abortController.signal,
                 featurePromptOverride,
                 descriptionPromptOverride,
               });
@@ -114,13 +109,6 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                   error: errorMessage,
                 },
               });
-            }
-          },
-          cancel: async () => {
-            if (abortControllers.has(runContext.taskInstance.id)) {
-              const abortController = abortControllers.get(runContext.taskInstance.id)!;
-              abortController.abort();
-              abortControllers.delete(runContext.taskInstance.id);
             }
           },
         };
