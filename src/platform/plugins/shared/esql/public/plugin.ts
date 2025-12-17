@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
 import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
@@ -123,6 +124,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
+      getQueryStringInputComponent: async () => QueryStringInput,
     };
 
     setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
