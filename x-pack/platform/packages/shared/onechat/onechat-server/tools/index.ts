@@ -21,7 +21,6 @@ export type {
   ToolHandlerReturn,
   ToolHandlerContext,
   ToolHandlerResult,
-  OtherResultReturn,
 } from './handler';
 export { getToolResultId, createErrorResult, isToolResultId } from './utils';
 export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';
