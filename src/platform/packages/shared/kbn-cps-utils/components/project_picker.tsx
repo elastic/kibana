@@ -13,11 +13,10 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiPopover,
   EuiToolTip,
-  EuiHeaderSectionItemButton,
-  EuiIcon,
   EuiTourStep,
   EuiButton,
   EuiButtonIcon,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -27,7 +26,7 @@ import { ProjectPickerContent } from './project_picker_content';
 import { useFetchProjects } from './use_fetch_projects';
 import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
-import { CPSIcon, CPSIconDisabled } from './cps_icon';
+import { CPSIconDisabled } from './cps_icon';
 
 export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
@@ -53,26 +52,27 @@ export const ProjectPicker = ({
     return null;
   }
 
+  const totalProjects = linkedProjects.length + 1;
+  const activeProjectsCount = projectRouting === PROJECT_ROUTING.ALL ? totalProjects : 1;
+
   const button = (
     <EuiToolTip
       delay="long"
-      content={strings.getProjectPickerButtonLabel(
-        projectRouting === PROJECT_ROUTING.ORIGIN ? 1 : linkedProjects.length + 1,
-        linkedProjects.length + 1
-      )}
+      content={strings.getProjectPickerButtonLabel(activeProjectsCount, totalProjects)}
       disableScreenReaderOutput
     >
-      <EuiHeaderSectionItemButton
+      <EuiButtonEmpty
         aria-label={strings.getProjectPickerButtonAriaLabel()}
         data-test-subj="project-picker-button"
-        onClick={() => setShowPopover(!showPopover)}
         size="s"
-        notification={projectRouting !== PROJECT_ROUTING.ALL ? 1 : undefined}
-        notificationColor="success"
-        css={styles.button}
+        iconType="crossProjectSearch"
+        onClick={() => setShowPopover(!showPopover)}
+        color="text"
       >
-        <EuiIcon type={CPSIcon} />
-      </EuiHeaderSectionItemButton>
+        {activeProjectsCount === totalProjects
+          ? strings.allButtonLabel()
+          : `${activeProjectsCount}/${totalProjects}`}
+      </EuiButtonEmpty>
     </EuiToolTip>
   );
 
@@ -149,14 +149,5 @@ const projectPickerStyles = {
   disabledButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: euiTheme.size.s,
-    }),
-  button: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      svg: {
-        verticalAlign: 'middle',
-      },
-      '.euiNotificationBadge': {
-        insetInlineEnd: `-${euiTheme.size.s}`,
-      },
     }),
 };
