@@ -426,7 +426,6 @@ describe('registerRoutes', () => {
         body: {
           message: 'Data connector created successfully!',
           dataConnectorId: 'connector-1',
-          stackConnectorId: 'ksc-1',
         },
       });
     });
