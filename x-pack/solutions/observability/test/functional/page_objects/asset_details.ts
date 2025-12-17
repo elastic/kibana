@@ -118,7 +118,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async getOverviewTabDockerMetricCharts(metric: string) {
@@ -136,7 +138,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async getOverviewTabKubernetesMetricCharts() {
       const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
       const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     // Collapsable sections
@@ -248,13 +252,17 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async getMetricsTabKubernetesCharts() {
       const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
       const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async getMetricsTabDockerCharts(metric: string) {
@@ -262,7 +270,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsDockerChartsSection${metric}`
       );
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async quickAccessItemExists(metric: string) {
