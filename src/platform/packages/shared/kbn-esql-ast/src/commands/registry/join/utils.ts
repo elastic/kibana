@@ -274,12 +274,7 @@ export const createEnrichedGetByType = async (
       lookupSuggestions
     );
 
-    const categorizedLookupSuggestions = uniqueLookupSuggestions.map((suggestion) => ({
-      ...suggestion,
-      category: SuggestionCategory.LOOKUP_INDEX_FIELD,
-    }));
-
-    return [...markedSourceSuggestions, ...categorizedLookupSuggestions];
+    return [...markedSourceSuggestions, ...uniqueLookupSuggestions];
   };
 };
 

@@ -15,7 +15,6 @@ export enum SuggestionCategory {
   TIME_PARAM = 'time_param',
   RECOMMENDED_FIELD = 'recommended_field',
   LOOKUP_COMMON_FIELD = 'lookup_common_field',
-  LOOKUP_INDEX_FIELD = 'lookup_index_field',
   ECS_FIELD = 'ecs_field',
   TIME_FIELD = 'time_field',
   FIELD = 'field',

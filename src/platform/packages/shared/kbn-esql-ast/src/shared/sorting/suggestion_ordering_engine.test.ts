@@ -85,10 +85,10 @@ describe('SuggestionOrderingEngine', () => {
     expect(statsResult[2].label).toBe('abs');
   });
 
-  it('should sort LOOKUP_COMMON_FIELD first, then LOOKUP_INDEX_FIELD and FIELD alphabetically', () => {
+  it('should sort LOOKUP_COMMON_FIELD first, then FIELD alphabetically', () => {
     const suggestions = [
       createSuggestion('sourceField', SuggestionCategory.FIELD),
-      createSuggestion('lookupOnlyField', SuggestionCategory.LOOKUP_INDEX_FIELD),
+      createSuggestion('lookupOnlyField', SuggestionCategory.FIELD),
       createSuggestion('commonField', SuggestionCategory.LOOKUP_COMMON_FIELD),
       createSuggestion('anotherSourceField', SuggestionCategory.FIELD),
     ];
