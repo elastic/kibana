@@ -104,16 +104,16 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-const handleFinalContent = (args: {
-  finalResponse: string;
-  refusal?: string;
-  isError: boolean;
-  interruptValue?: InterruptValue;
-}) => {
+  const handleFinalContent = (args: {
+    finalResponse: string;
+    refusal?: string;
+    isError: boolean;
+    interruptValue?: InterruptValue;
+  }) => {
     if (onLlmResponse) {
       onLlmResponse({
         content: args.finalResponse,
-      refusal: args.refusal,
+        refusal: args.refusal,
         interruptValue: args.interruptValue,
         traceData: {
           transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
