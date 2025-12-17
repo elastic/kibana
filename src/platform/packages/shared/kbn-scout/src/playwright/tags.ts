@@ -14,7 +14,6 @@ const SERVERLESS_ONLY = [
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
-  '@svlChat',
   '@svlWorkplaceAI',
 ];
 const ESS_ONLY = ['@ess'];
